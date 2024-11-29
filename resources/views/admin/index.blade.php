@@ -59,8 +59,25 @@
                 </div>
             </div>
         </div>
+        @if (Auth::check() && Auth::user()->user_class === \App\Models\UserClass::OWNER)
+        <div class="row">
+
+        <div class="col-md-6 mt-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>System Info</h5>
+                    </div>
+                    <div class="card-body">
+                    <a href="{{ route('admin.systemInfo.index') }}" class="btn btn-primary">View System Info</a>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @endif
 
 
-        <!--  -->
+
     </div>
 @endsection

@@ -581,12 +581,36 @@ class TorrentController extends Controller
         });
     }
 
+     // Fetch similar torrents based on category or TMDB ID
+     $similarTorrents = collect(); // Default to an empty collection
+
+     if ($torrent->tmdbid !== null) {
+         $similarTorrents = Torrent::where('id', '!=', $torrent->id)
+             ->where('tmdbid', $torrent->tmdbid)
+             ->limit(4) // Limit to 5 similar torrents
+             ->get();
+     }
+
+
+     $recommendedTorrents = Torrent::where('category_id', $torrent->category_id) // Match the same category
+     ->where('id', '!=', $torrent->id) // Exclude the current torrent
+     ->whereHas('genres', function ($query) use ($torrent) {
+         // Match torrents that have at least one genre in common with the current torrent
+         $query->whereIn('genres.id', $torrent->genres->pluck('id'));
+     })
+     ->select('id', 'slug', 'name', 'size', 'seeders', 'leechers', 'times_completed', 'poster')
+     ->inRandomOrder() // Randomize the results
+     ->limit(5) // Limit to 5 results
+     ->get();
+
+
+   // dd($recommendedTorrents);
 
 
 
 
         // Return the data to the view
-        return view('torrents.show', compact('torrent', 'comments', 'tmdbData', 'omdbData', 'mediainfo', 'steamData', 'snatched'));
+        return view('torrents.show', compact('torrent', 'comments', 'tmdbData', 'omdbData', 'mediainfo', 'steamData', 'snatched', 'similarTorrents', 'recommendedTorrents'));
     }
 
 
@@ -663,14 +687,7 @@ class TorrentController extends Controller
                     $tmdbData = $tmdbService->fetchTMDBData($tmdbId, $tmdbType);
 
                     if ($tmdbData) {
-                        // Set poster and background from TMDB
-                        $poster = $tmdbData['poster_path']
-                            ? 'https://image.tmdb.org/t/p/w600_and_h900_bestv2' . $tmdbData['poster_path']
-                            : null;
 
-                        $background = $tmdbData['backdrop_path']
-                            ? 'https://image.tmdb.org/t/p/original' . $tmdbData['backdrop_path']
-                            : null;
 
                         // Set genres from TMDB data
                         $genres = $tmdbData['genres'] ?? [];
@@ -685,20 +702,23 @@ class TorrentController extends Controller
                 }
             }
 
-            // Handle manually entered genres
-            $manualGenres = $request->input('genre', ''); // Get manually entered genres as a comma-separated string
-            if (!empty($manualGenres)) {
-                $manualGenresArray = explode(',', $manualGenres); // Split the string into an array
 
-                // Loop through each genre, create it if necessary, and collect the genre IDs
-                foreach ($manualGenresArray as $genreName) {
-                    $genreName = trim($genreName); // Clean up any extra spaces
-                    if (!empty($genreName)) {
-                        $genreRecord = Genre::firstOrCreate(['name' => $genreName]);
-                        $genreIds[] = $genreRecord->id;
-                    }
-                }
-            }
+           // Handle manually entered genres
+           $manualGenres = $request->input('genre', ''); // Get manually entered genres as a string
+           if (!empty($manualGenres)) {
+               // Split the string by both ',' and '/'
+               $manualGenresArray = preg_split('/[\/,]/', $manualGenres); // Split by either ',' or '/'
+
+               // Loop through each genre, clean it, create if necessary, and collect the genre IDs
+               foreach ($manualGenresArray as $genreName) {
+                   $genreName = trim($genreName); // Clean up any extra spaces
+                   if (!empty($genreName)) {
+                       // Save the genre to the database or retrieve it if it already exists
+                       $genreRecord = Genre::firstOrCreate(['name' => $genreName]);
+                       $genreIds[] = $genreRecord->id;
+                   }
+               }
+           }
 
             // Update the torrent's details, including genres and TMDB data
             $torrent->update([
@@ -706,7 +726,7 @@ class TorrentController extends Controller
                 'description' => $request->description,
                 'category_id' => $request->category_id,
                 'poster' => $poster ?? $request->poster,
-                'background' => $background ?? $request->background,
+                'background' => $request->background,
                 'genre' => $request->genre, // Save the manual genres string
                 'steamid' => $request->steamid,
                 'imdb_url' => $imdbUrl,
@@ -722,10 +742,7 @@ class TorrentController extends Controller
                 'seedbox' => $request->has('seedbox') ? 1 : 0,
             ]);
 
-            // Clear cache if necessary
-            if ($torrent->wasChanged(['sticky', 'free', 'double', 'recommended'])) {
-                $this->clearTorrentCacheForAttributes();
-            }
+
 
             // Clear all cache to ensure fresh data is loaded
             Cache::flush();
@@ -799,13 +816,4 @@ public function getPeers($torrentId)
 }
 
 
-protected function clearTorrentCacheForAttributes()
-{
-    $cacheKeys = Cache::get('cache_keys', []);
-    foreach ($cacheKeys as $key) {
-        if (str_contains($key, 'cached_torrents_page')) {
-            Cache::forget($key);
-        }
-    }
-}
 }

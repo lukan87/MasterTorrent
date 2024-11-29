@@ -10,14 +10,68 @@
                              style="border-radius: 12px;
                                     box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
                                     width:100%;">
+
+<div style="margin-top: 10px;">
+    <!-- TMDB Link -->
+    @if($torrent->tmdbid)
+        <a href="https://www.themoviedb.org/movie/{{ $torrent->tmdbid }}" target="_blank" class="btn btn-dark btn-sm">View on TMDB</a>
+    @endif
+
+    <!-- IMDb Link -->
+    @if($torrent->imdbid)
+        <a href="https://www.imdb.com/title/{{ $torrent->imdbid }}" target="_blank" class="btn btn-dark btn-sm">View on IMDb</a>
+    @endif
+</div>
                     </div>
 
                     <div class="col-sm-9 col-xxl-10 order-1 order-sm-0 order-xxl-1">
 
                     <dd class="col-lg-12">
-                    <p><h3>{{ $tmdbData['title'] }}  @if(isset($tmdbData['release_date']))
-         ({{ \Carbon\Carbon::parse($tmdbData['release_date'])->format('F j, Y') }})
-    @endif</h3></p>
+
+                    @if(isset($omdbData['Rated']) && $omdbData['Rated'] != 'N/A')
+    @php
+        $rating = $omdbData['Rated'];
+        $PG = '';
+
+        switch ($rating) {
+            case 'G':
+                $PG = "<i class='bi bi-stars' aria-hidden='true' data-bs-toggle='tooltip' title='General Audiences: G - All ages admitted. Nothing that would offend parents for viewing by children'><b>$rating</b></i>";
+                break;
+            case 'PG':
+                $PG = "<i class='bi bi-stars' aria-hidden='true' data-bs-toggle='tooltip' title='Parental Guidance Suggested: PG - Some material may not be suitable for children. Parents urged to give parental guidance. May contain some material parents might not like for their young children.'><b>$rating</b></i>";
+                break;
+            case 'PG-13':
+                $PG = "<i class='bi bi-stars select' aria-hidden='true' data-bs-toggle='tooltip' title='Parental Strongly Cautioned: PG-13 - Some material may be inappropriate for children under 13. Parents are urged to be cautious. Some material may not be appropriate for pre-teenagers.'><b>$rating</b></i>";
+                break;
+            case 'R':
+                $PG = "<i class='bi bi-stars' aria-hidden='true' data-bs-toggle='tooltip' title='Restricted: R - Under 17 requires accompanying parent or adult guardian. Contains some adult material. Parents are urged to learn more about the film before taking their young children with them.'><b>$rating</b></i>";
+                break;
+            case 'TV-PG':
+                $PG = "<i class='bi bi-stars' aria-hidden='true' data-bs-toggle='tooltip' title='Parental Guidance Suggested: This program contains material that parents may find unsuitable for younger children. Many parents may want to watch it with their younger children.'><b>$rating</b></i>";
+                break;
+            case 'NC-17':
+                $PG = "<i class='bi bi-stars' aria-hidden='true' data-bs-toggle='tooltip' title='Adults Only: NC-17 - No one 17 and under admitted.'><b>$rating</b></i>";
+                break;
+            default:
+                $PG = "<i class='bi bi-stars' aria-hidden='true' data-bs-toggle='tooltip' title='Rated: $rating'><b>$rating</b></i>";
+                break;
+        }
+        @endphp
+    @else
+    @php
+    $PG = "";
+    @endphp
+@endif
+
+
+                    <p>
+                        <h3>{{ $tmdbData['title'] }}
+                                 @if(isset($tmdbData['release_date']))
+                                      ({{ \Carbon\Carbon::parse($tmdbData['release_date'])->format('F j, Y') }})
+                                 @endif
+                                 {!! $PG !!}
+                        </h3>
+                    </p>
                     </dd>
 
 <dd class="col-lg-12">
@@ -56,41 +110,6 @@
 
 @if(isset($omdbData))
     <!-- Rated (OMDB) -->
-    @if(isset($omdbData['Rated']) && $omdbData['Rated'] != 'N/A')
-    @php
-        $rating = $omdbData['Rated'];
-        $PG = '';
-
-        switch ($rating) {
-            case 'G':
-                $PG = "<i class='bi bi-stars' aria-hidden='true' data-bs-toggle='tooltip' title='General Audiences: G - All ages admitted. Nothing that would offend parents for viewing by children'><b>$rating</b></i>";
-                break;
-            case 'PG':
-                $PG = "<i class='bi bi-stars' aria-hidden='true' data-bs-toggle='tooltip' title='Parental Guidance Suggested: PG - Some material may not be suitable for children. Parents urged to give parental guidance. May contain some material parents might not like for their young children.'><b>$rating</b></i>";
-                break;
-            case 'PG-13':
-                $PG = "<i class='bi bi-stars' aria-hidden='true' data-bs-toggle='tooltip' title='Parental Strongly Cautioned: PG-13 - Some material may be inappropriate for children under 13. Parents are urged to be cautious. Some material may not be appropriate for pre-teenagers.'><b>$rating</b></i>";
-                break;
-            case 'R':
-                $PG = "<i class='bi bi-stars' aria-hidden='true' data-bs-toggle='tooltip' title='Restricted: R - Under 17 requires accompanying parent or adult guardian. Contains some adult material. Parents are urged to learn more about the film before taking their young children with them.'><b>$rating</b></i>";
-                break;
-            case 'TV-PG':
-                $PG = "<i class='bi bi-stars' aria-hidden='true' data-bs-toggle='tooltip' title='Parental Guidance Suggested: This program contains material that parents may find unsuitable for younger children. Many parents may want to watch it with their younger children.'><b>$rating</b></i>";
-                break;
-            case 'NC-17':
-                $PG = "<i class='bi bi-stars' aria-hidden='true' data-bs-toggle='tooltip' title='Adults Only: NC-17 - No one 17 and under admitted.'><b>$rating</b></i>";
-                break;
-            default:
-                $PG = "<i class='bi bi-stars' aria-hidden='true' data-bs-toggle='tooltip' title='Rated: $rating'><b>$rating</b></i>";
-                break;
-        }
-    @endphp
-
-    <dd class="col-sm-12">
-        <p><strong>Rated:</strong> {!! $PG !!}</p>
-    </dd>
-@endif
-
 
     @if(isset($omdbData['Rated']))
         <dd class="col-sm-12">

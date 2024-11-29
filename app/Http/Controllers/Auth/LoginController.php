@@ -7,6 +7,7 @@ use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
+use App\Models\User;
 
 class LoginController extends Controller
 {
@@ -53,7 +54,21 @@ class LoginController extends Controller
         ]);
 
         // Retrieve the user by username (name)
-        $user = \App\Models\User::where('name', $request->name)->first();
+        $user = User::where('name', $request->name)->first();
+
+        // If the user doesn't exist
+    if (!$user) {
+        return redirect()->back()->withErrors([
+            'Invalid credentials. Please check your username and password.',
+        ]);
+    }
+
+          // Check if the account is disabled
+    if ($user->enabled === 'no') {
+        return redirect()->back()->withErrors([
+            'Your account has been disabled.',
+        ]);
+    }
 
 
 

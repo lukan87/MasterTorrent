@@ -57,6 +57,7 @@
 </div>
 
 
+
 <!-- Bootstrap Tabs -->
 <div class="card card-blur">
     <div class="card-header">
@@ -196,6 +197,8 @@
     </div>
 </div>
 
+@include('torrents.partials.similar')
+@include('torrents.partials.recommended')
 
 
 
