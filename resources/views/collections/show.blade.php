@@ -40,18 +40,16 @@
 
     body::before {
         content: '';
-        position: absolute;
-        top: 0;
+        position: fixed;
+        top: 55px;
         right: 0;
         bottom: 0;
         left: 0;
-        background-image: url('https://www.themoviedb.org/t/p/original{{ $CollectionDetails["backdrop_path"] }}');
+        background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 1)), url('https://www.themoviedb.org/t/p/original{{ $CollectionDetails["backdrop_path"] }}');
+        background-position-x: center top;
         background-size: cover;
-        background-attachment: fixed;
         background-repeat: no-repeat;
-        background-position: center;
-        opacity: 0.2;
-        z-index: -1;
+        opacity: 0.7;
     }
 
     /* Hover effect on card */

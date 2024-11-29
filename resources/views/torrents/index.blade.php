@@ -121,7 +121,8 @@
                                 <a href="{{ route('torrents.show', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}" class="torrent-name" data-bs-toggle="tooltip" data-bs-html="true" data-bs-title="<div class='card' style='width: 200px;'>
                                     <img src='{{ $torrent->poster }}' class='img-fluid rounded' alt='Poster Image' style='width: 150px; height: auto;' />
                                   </div>">
-                                    {{ $torrent->name }}
+                                  {{ \Illuminate\Support\Str::limit($torrent->name, 75, ' ...') }}
+
                                 </a>
                                 @include('torrents.partials.tags')
                                 <!-- Display Genres allocated to this torrent with search link -->

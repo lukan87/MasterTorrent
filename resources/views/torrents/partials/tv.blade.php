@@ -170,7 +170,7 @@
         content: '';
         position: fixed;
         /* position: absolute; */
-        top: 0;
+        top: 55px;
         right: 0;
         bottom: 0;
         left: 0;

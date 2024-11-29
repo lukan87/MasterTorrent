@@ -22,7 +22,7 @@
         </div>
     @endif
 
-    <form action="{{ route('torrents.update', $torrent->slug) }}" method="POST">
+    <form action="{{ route('torrents.update', $torrent->slug) }}" method="POST" onsubmit="return confirm('Are you sure you want to update this torrent?');">
         @csrf
         @method('PUT')
 
@@ -218,7 +218,65 @@ function fetchIMDBInfo() {
         <!-- Back Button -->
         <a href="{{ route('torrents.index') }}" class="btn btn-secondary">Back to List</a>
     </form>
+
+    <!-- Delete Button -->
+
+    <div class="card mt-5 shadow-lg">
+    <div class="card-header bg-danger text-white">
+        <h5 class="card-title mb-0">Delete Torrent</h5>
+    </div>
+    <div class="card-body">
+        <form action="{{ route('torrents.destroy', $torrent->slug) }}" method="POST" class="d-inline-block" onsubmit="return confirmDelete()">
+            @csrf
+            @method('DELETE')
+
+            <!-- Reason for Deletion -->
+            <div class="form-group mb-4">
+                <label class="form-label">Reason for Deletion:</label>
+
+                <!-- Radio buttons for predefined reasons -->
+                <div class="form-check">
+                    <input type="radio" name="deletion_reason" id="dead" value="dead" class="form-check-input" onchange="toggleCustomReason(this)" required>
+                    <label class="form-check-label" for="dead">Torrent has 0 seeders and 0 leechers</label>
+                </div>
+
+                <div class="form-check">
+                    <input type="radio" name="deletion_reason" id="custom" value="custom" class="form-check-input" onchange="toggleCustomReason(this)">
+                    <label class="form-check-label" for="custom">Custom Reason</label>
+                </div>
+
+                <!-- Custom Reason Text Area (will show when "Custom Reason" is selected) -->
+                <div class="form-group mb-4" id="custom_reason_div" style="display:none;">
+                    <textarea name="custom_reason" id="custom_reason" class="form-control" placeholder="Enter a valid reason for deleting the torrent." rows="4" cols="200"></textarea>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <button type="submit" class="btn btn-danger px-4 py-2">Delete Torrent</button>
+                <a href="{{ route('torrents.index') }}" class="btn btn-secondary px-4 py-2">Cancel</a>
+            </div>
+        </form>
+    </div>
 </div>
+</div>
+
+
+
+<script>
+    function confirmDelete() {
+        return confirm("Are you sure you want to delete this torrent?");
+    }
+
+     // Show or hide the custom reason text area based on the dropdown selection
+     function toggleCustomReason(selectElement) {
+        const customReasonDiv = document.getElementById('custom_reason_div');
+        if (selectElement.value === 'custom') {
+            customReasonDiv.style.display = 'block';
+        } else {
+            customReasonDiv.style.display = 'none';
+        }
+    }
+</script>
 
 <script>
 

@@ -185,12 +185,12 @@
         content: '';
         position: fixed;
 /* position: absolute; */
-top: 0;
+top: 55px;
 right: 0;
 bottom: 0;
 left: 0;
 background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 1)), url('{{$torrent->background}}');
-background-position-x: center;
+background-position-x: center top;
 background-size: cover;
 background-repeat: no-repeat;
 opacity: 0.7;

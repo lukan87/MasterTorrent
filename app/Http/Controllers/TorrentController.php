@@ -13,7 +13,7 @@ use App\Helpers\MediaInfo;
 use Illuminate\Support\Str;
 use App\Models\TorrentFiles;
 use Illuminate\Http\Request;
-use App\Helpers\FormatHelper;
+use App\Models\Message;
 use App\Helpers\Bencode;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -582,18 +582,21 @@ class TorrentController extends Controller
     }
 
      // Fetch similar torrents based on category or TMDB ID
-     $similarTorrents = collect(); // Default to an empty collection
+$similarTorrents = collect(); // Default to an empty collection
 
-     if ($torrent->tmdbid !== null) {
-         $similarTorrents = Torrent::where('id', '!=', $torrent->id)
-             ->where('tmdbid', $torrent->tmdbid)
-             ->limit(4) // Limit to 5 similar torrents
-             ->get();
-     }
+if ($torrent->tmdbid !== null) {
+    $similarTorrents = Torrent::where('id', '!=', $torrent->id)
+        ->where('tmdbid', $torrent->tmdbid)
+        ->where('seeders', '>', 0) // Only include torrents with seeders > 0
+        ->limit(5) // Limit to 4 similar torrents
+        ->get();
+}
+
 
 
      $recommendedTorrents = Torrent::where('category_id', $torrent->category_id) // Match the same category
      ->where('id', '!=', $torrent->id) // Exclude the current torrent
+     ->where('seeders', '>', 0) // Only include torrents with seeders > 0
      ->whereHas('genres', function ($query) use ($torrent) {
          // Match torrents that have at least one genre in common with the current torrent
          $query->whereIn('genres.id', $torrent->genres->pluck('id'));
@@ -759,16 +762,38 @@ class TorrentController extends Controller
 
 
     // Delete a torrent
-    public function destroy($slug)
+    public function destroy(Request $request, $slug)
     {
         // Find the torrent using the slug
         $torrent = Torrent::where('slug', $slug)->firstOrFail();
+
+        // Get the owner of the torrent
+        $owner = $torrent->owner; // Assuming the owner is a User model related to the Torrent model
+
+
+
+        // Get the deletion reason (from the request, either predefined or custom)
+         $deletionReason = $request->input('deletion_reason');
+         if ($deletionReason === 'custom') {
+            $deletionReason = $request->input('custom_reason');
+         }
+
+         // Send a message to the owner about the deletion
+    Message::create([
+        'receiver_id' => $owner,  // The owner receives the message
+        'sender_id' => 2,  // The user deleting the torrent (usually admin or system)
+        'body' => 'Your torrent " ' . $torrent->name . ' " has been deleted. Reason: ' . $deletionReason,
+        'is_read' => false,  // Mark as unread initially
+    ]);
 
         // Delete associated peers
         Peer::where('torrent_id', $torrent->id)->delete();
 
         // Delete associated history records using the correct column name
-        History::where('torrent_id', $torrent->id)->delete(); // Change 'correct_column_name' to the actual column name
+        History::where('torrent_id', $torrent->id)->delete();
+
+        // Delete associated comments
+        Peer::where('torrent_id', $torrent->id)->delete();
 
         // Detach associated genres
         $torrent->genres()->detach();
