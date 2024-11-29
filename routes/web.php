@@ -170,8 +170,6 @@ Route::get('/torrents/{id}/{slug?}', [TorrentController::class, 'show'])->name('
 Route::get('/torrents/download/{id}/{slug}', [TorrentController::class, 'download'])->name('torrents.download')->middleware('auth');
 Route::get('/torrent/{torrent}/peers', [TorrentController::class, 'peers'])->name('torrent.peers');
 
-Route::get('torrents/{id}/similar', [TorrentController::class, 'showSimilar'])->name('torrents.similar');
-
 
 
 
