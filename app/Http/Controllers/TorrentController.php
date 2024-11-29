@@ -604,9 +604,6 @@ class TorrentController extends Controller
      ->get();
 
 
-   // dd($recommendedTorrents);
-
-
 
 
         // Return the data to the view
