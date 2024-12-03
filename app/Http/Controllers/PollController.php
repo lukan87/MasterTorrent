@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Poll;
 use App\Models\PollVote;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class PollController extends Controller
 {
@@ -61,6 +62,9 @@ class PollController extends Controller
             'option_id' => $request->option_id,
             'user_id' => $user->id,
         ]);
+		
+		// Clear all cache to ensure fresh data is loaded
+            Cache::flush();
 
         return redirect()->back()->with('success', 'Your vote has been counted!');
     }
@@ -83,6 +87,8 @@ public function store(Request $request)
     foreach ($request->options as $optionText) {
         $poll->options()->create(['option_text' => $optionText]);
     }
+	
+	
 
     return redirect()->route('polls.index');
 }
@@ -130,6 +136,9 @@ public function update(Request $request, $id)
             }
         }
     }
+	
+// Clear all cache to ensure fresh data is loaded
+            Cache::flush();
 
     return redirect()->route('polls.index')->with('success', 'Poll updated successfully');
 }
@@ -146,6 +155,9 @@ public function destroy(Request $request, $id)
     }
 
     $poll->delete();
+	
+	// Clear all cache to ensure fresh data is loaded
+            Cache::flush();
 
     return redirect()->route('polls.index')->with('success', 'Poll deleted successfully');
 }

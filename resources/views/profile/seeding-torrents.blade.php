@@ -26,7 +26,7 @@
                 @foreach ($result as $item)
                     <tr>
                         <td>
-                            <a href="{{ route('torrents.show', $item['torrent']->slug ?? '#') }}" class="text-decoration-none text-info">
+                            <a href="{{ route('torrents.show', ['id' => $item['torrent']->id, 'slug' => $item['torrent']->slug] ?? '#') }}" class="text-decoration-none text-info">
                                 {{ $item['torrent']->name ?? 'Unknown' }}
                             </a>
                         </td>

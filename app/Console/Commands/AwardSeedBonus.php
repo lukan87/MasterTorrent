@@ -54,7 +54,7 @@ class AwardSeedBonus extends Command
                  // Initialize points for this user-torrent pair if not already set
                  $userPoints[$key] = [
                      'user_id' => $userId,
-                     'points' => 0.25 // Points to award for seeding
+                     'points' => 0.15 // Points to award for seeding
                  ];
              }
 

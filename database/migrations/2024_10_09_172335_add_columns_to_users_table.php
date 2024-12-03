@@ -18,7 +18,7 @@ return new class extends Migration
             $table->enum('uploadpos', ['yes', 'no'])->default('no');
             $table->enum('downloadpos', ['yes', 'no'])->default('no');
             $table->enum('gender', ['male', 'female'])->nullable();
-            $table->decimal('seedbonus', 5, 1)->default(0.0);
+            $table->decimal('seedbonus', 10, 2)->default(0.0);
         });
     }
 

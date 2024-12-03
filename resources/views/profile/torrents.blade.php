@@ -28,7 +28,7 @@
                             <tbody>
                                 @foreach($torrents as $torrent)
                                     <tr>
-                                        <td><a href="{{ route('torrents.show', $torrent->slug) }}">{{ $torrent->name }}</a></td>
+                                        <td><a href="{{ route('torrents.show', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}">{{ $torrent->name }}</a></td>
                                         <td>{{ $torrent->seeders }}</td>
                                         <td>{{ $torrent->leechers }}</td>
                                         <td>{{ $torrent->times_completed }}</td>

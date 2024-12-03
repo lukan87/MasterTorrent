@@ -448,6 +448,9 @@ class TorrentController extends Controller
 
         // Add 5 seed bonus points to the user
         $user->increment('seedbonus', 5);
+		
+		// Clear all cache to ensure fresh data is loaded
+            Cache::flush();
 
         // Redirect to the torrent details page using the slug
         return redirect()->route('torrents.show', ['id' => $torrent->id, 'slug' => $slug])->with('success', 'Your torrent has been uploaded successfully.');
