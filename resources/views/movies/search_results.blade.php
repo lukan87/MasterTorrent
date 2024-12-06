@@ -31,7 +31,8 @@
                             </div>
                             <div class="list-group-item col-md-11">
                                 <h5>{{ $movie['title'] }}</h5>
-                                <p>{{ $movie['release_date'] }}</p>
+                                <p>{{ isset($movie['release_date']) && $movie['release_date'] ? $movie['release_date'] : 'No release date yet' }}</p>
+
                                 <p>{{ $movie['overview'] }}</p>
 
                                 @if($existingMovie)

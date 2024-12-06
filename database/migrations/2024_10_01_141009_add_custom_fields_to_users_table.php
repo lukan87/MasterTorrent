@@ -19,6 +19,8 @@ return new class extends Migration
             $table->enum('donor', ['yes', 'no'])->default('no'); // Default is 'no'
             $table->text('info')->nullable(); // Text field, nullable
             $table->ipAddress('IP')->nullable(); // IP address field, nullable
+            $table->string('rsskey')->nullable(); // Add rsskey column
+
         });
     }
 

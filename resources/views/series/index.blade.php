@@ -43,7 +43,7 @@
     @forelse ($series as $serie)
         <div class="col-md-6 col-lg-2 mb-4">
             <div class="card h-100">
-                <a href="{{ route('series.show', $serie->slug) }}">
+                <a href="{{ route('series.show', ['id' => $serie->id, 'slug' => $serie->slug]) }}">
                     <img src="https://www.themoviedb.org/t/p/w600_and_h900_bestv2{{ $serie->poster_path }}" class="card-img-top" alt="{{ $serie->name }}">
                 </a>
                 <div class="card-body">

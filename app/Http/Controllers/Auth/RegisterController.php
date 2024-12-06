@@ -60,6 +60,7 @@ class RegisterController extends Controller
     protected function create(array $data, string $ip) // Accept IP here
     {
         $passkey = bin2hex(random_bytes(16)); // Generate 32-char unique passkey
+        $rsskey = bin2hex(random_bytes(16)); // Generate 32-char unique RSS key
 
         return User::create([
             'name' => $data['name'],
@@ -74,6 +75,7 @@ class RegisterController extends Controller
             'donor' => 'no', // Set default value
             'info' => '', // Set default value
             'passkey' => $passkey, // Set the generated passkey
+            'rsskey' => $rsskey,   // Set the generated RSS key
         ]);
     }
 

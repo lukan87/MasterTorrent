@@ -13,6 +13,7 @@
         "laravel/tinker": "^2.9",
         "laravel/ui": "^4.5",
         "predis/predis": "^2.2",
+        "spatie/laravel-backup": "^9.1",
         "theodorejb/polycast": "^1.0"
     },
     "require-dev": {

@@ -48,10 +48,10 @@
         @forelse ($movies as $movie)
             <div class="col-md-6 col-lg-2 mb-4">
                 <div class="card h-100">
-                <a href="{{ route('movies.show', $movie->slug) }}">
+                <a href="{{ route('movies.show', ['id' => $movie->id, 'slug' => $movie->slug]) }}">
+    <img src="https://www.themoviedb.org/t/p/w600_and_h900_bestv2{{ $movie->poster_path }}" class="card-img-top" alt="{{ $movie->name }}">
+</a>
 
-                        <img src="https://www.themoviedb.org/t/p/w600_and_h900_bestv2{{ $movie->poster_path }}" class="card-img-top" alt="{{ $movie->name }}">
-                    </a>
                     <div class="card-body">
                         <h5 class="card-title">{{ $movie->name }}</h5>
                     </div>

@@ -52,6 +52,12 @@
                                 <p>Requests</p>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a href="{{ route('rss.index') }}" class="nav-link">
+                                 <i class="bi bi-rss"></i>
+                                <p>Rss Feed</p>
+                            </a>
+                        </li>
                     </ul>
                 </li>
                 <hr>

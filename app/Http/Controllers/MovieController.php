@@ -79,15 +79,26 @@ class MovieController extends Controller
         return redirect()->route('movies.show', $data['id'])->with('status', 'Movie added successfully!');
     }
 
-    public function show($slug)
+    public function show($id, $slug = null)
     {
+        // Fetch the movie by ID
+        $movie = Movie::findOrFail($id);
 
-        $movie = Movie::where('slug', $slug)->firstOrFail();
+        // If the slug is not provided, redirect to the URL with the slug
+        if ($slug === null) {
+            return redirect()->route('movies.show', ['id' => $id, 'slug' => $movie->slug]);
+        }
+
+        // If slug is provided, make sure the slug matches the one in the database
+        if ($slug !== $movie->slug) {
+            return redirect()->route('movies.show', ['id' => $id, 'slug' => $movie->slug]);
+        }
+
         // Cache key based on movie TMDB ID
         $cacheKey = 'movie_' . $movie->tmdb_id . '_details';
 
-
         $comments = $movie->comments()->with('user')->get(); // Eager load users
+
         // Check if movie details are cached
         $movieDetails = cache()->remember($cacheKey, now()->addWeek(), function () use ($movie) {
             return Http::get("https://api.themoviedb.org/3/movie/{$movie->tmdb_id}", [
@@ -96,8 +107,6 @@ class MovieController extends Controller
                 'append_to_response' => 'credits,videos,images,external_ids'
             ])->json();
         });
-
-
 
         // Cache OMDB data
         $omdbCacheKey = 'movie_' . $movie->imdb_id . '_omdb';
@@ -109,8 +118,11 @@ class MovieController extends Controller
             ])->json();
         });
 
+        // Return the view with the movie data
         return view('movies.show', compact('movieDetails', 'movieOm', 'movie', 'comments'));
     }
+
+
 
     public function create()
     {
@@ -216,37 +228,65 @@ public function bulkSelect(Request $request)
 
     // Private method to create a movie entry
     private function createMovie(array $data)
-    {
-        return Movie::create([
-            'name' => $data['title'],
-            'tmdb_id' => $data['id'],
-            'imdb_id' => $data['imdb_id'] ?? null,
-            'poster_path' => $data['poster_path'] ?? null,
-            'collection_id' => $data['belongs_to_collection']['id'] ?? null,
-            'collection_name' => $data['belongs_to_collection']['name'] ?? null,
-            'overview' => $data['overview'] ?? null,
-            'backdrop_path' => $data['backdrop_path'] ?? null,
-            'slug' => $this->generateUniqueSlug($data['title']),
-        ]);
+{
+    $uniqueName = $this->generateUniqueName($data['title'], $data['release_date']);
+
+    return Movie::create([
+        'name' => $uniqueName,
+        'tmdb_id' => $data['id'],
+        'imdb_id' => $data['imdb_id'] ?? null,
+        'poster_path' => $data['poster_path'] ?? null,
+        'collection_id' => $data['belongs_to_collection']['id'] ?? null,
+        'collection_name' => $data['belongs_to_collection']['name'] ?? null,
+        'overview' => $data['overview'] ?? null,
+        'backdrop_path' => $data['backdrop_path'] ?? null,
+        'slug' => $this->generateUniqueSlug($uniqueName, $data['release_date']),
+    ]);
+}
+
+private function generateUniqueName($title, $releaseDate)
+{
+    // Parse the release date and extract the year
+    $year = \Carbon\Carbon::parse($releaseDate)->format('Y');
+
+    // Check if a movie with the same name exists
+    if (Movie::where('name', $title)->exists()) {
+        // If it exists, append the year to the name
+        return $title . ' (' . $year . ')';
     }
 
-    private function generateUniqueSlug($title)
-    {
-        // Generate an initial slug
-        $slug = Str::slug($title);
+    // If no conflict, return the original name
+    return $title;
+}
 
-        // Check if the slug already exists and increment a counter until it is unique
-        $originalSlug = $slug;
-        $counter = 1;
+private function generateUniqueSlug($title, $releaseDate)
+{
+    // Parse the release date and extract the year
+    $year = \Carbon\Carbon::parse($releaseDate)->format('Y');
 
-        // Use a while loop to make sure the slug is unique
-        while (Movie::where('slug', $slug)->exists()) {
-            $slug = $originalSlug . '-' . $counter++;  // Increment the counter and try again
+    // Generate the base slug
+    $slug = Str::slug($title);
+    $originalSlug = $slug;
+    $counter = 1;
+
+    // Check for slug uniqueness
+    while (Movie::where('slug', $slug)->exists()) {
+        if ($counter === 1) {
+            // Append the year to the title on the first conflict
+            $slug = Str::slug($title . ' ' . $year);
+            $originalSlug = $slug; // Update the original slug base
+        } else {
+            // Add a counter for further conflicts
+            $slug = $originalSlug . '-' . $counter;
         }
-
-
-        return $slug;
+        $counter++;
     }
+
+    return $slug;
+}
+
+
+
 
 
 

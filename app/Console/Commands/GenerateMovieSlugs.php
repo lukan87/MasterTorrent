@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Models\Series;
 use App\Models\Torrent;
 use Illuminate\Support\Str;
 

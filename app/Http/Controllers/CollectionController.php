@@ -12,7 +12,7 @@ class CollectionController extends Controller
     public function index()
 {
     // Cache the paginated collections for 10 minutes
-    $collections = cache()->remember('collections_paginated', 600, function () {
+    $collections = cache()->remember('collections_paginated', 2, function () {
         return DB::table('movies')
             ->select('collection_id', DB::raw('count(*) as total'), 'collection_name')
             ->whereNotNull('collection_id')
@@ -30,7 +30,7 @@ class CollectionController extends Controller
     foreach ($collections as $collection) {
         if (!empty($collection->collection_id)) {
             // Cache the collection details for each collection_id for 10 minutes
-            $collectionDetailsList[$collection->collection_id] = cache()->remember("collection_details_{$collection->collection_id}", 600, function () use ($apiKey, $collection) {
+            $collectionDetailsList[$collection->collection_id] = cache()->remember("collection_details_{$collection->collection_id}", 2, function () use ($apiKey, $collection) {
                 // Make the API request to get collection details from TMDb
                 $collectionDetailsResponse = Http::get("https://api.themoviedb.org/3/collection/{$collection->collection_id}?api_key={$apiKey}&language=en-US");
 

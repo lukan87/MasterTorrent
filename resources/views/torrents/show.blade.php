@@ -184,7 +184,11 @@
             / Seedtime: {{ \App\Helpers\FormatHelper::formatTime($history->seedtime) }}
         </strong>
         <br>
-        <small>Snatched on: {{ $history->created_at->diffForHumans() }}</small>
+        <small>Snatched on: {{ $history->created_at->diffForHumans() }} / Seeder:
+            <span class="{{ $history->seeder ? 'text-success' : 'text-danger' }}">
+    {{ $history->seeder ? 'Yes' : 'No' }}
+            </span>
+        </small>
     </li>
 @endforeach
 

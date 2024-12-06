@@ -62,7 +62,13 @@
         <button type="submit" class="btn btn-primary btn-sm">Clear Routes</button>
     </form>
 
-    <!-- Show Routes Button -->
+
+<form action="{{ route('admin.systemInfo.backup') }}" method="POST" class="mb-3 mr-2">
+    @csrf
+    <button type="submit" class="btn btn-success btn-sm">Backup All Data</button>
+</form>
+
+
     <a href="{{ route('admin.systemInfo.showRoutes') }}" class="btn btn-info btn-sm mb-3 mr-2">Show Routes</a>
 </div>
 
@@ -72,5 +78,13 @@
 
             </div>
         </div>
+        <div class="card mt-5">
+    <div class="card-header">
+        <h4>Scheduled Tasks</h4>
+    </div>
+    <div class="card-body">
+        <p><strong>Database Backup:</strong> {{ $backupSchedule }}</p>
+    </div>
+</div>
     </div>
 @endsection

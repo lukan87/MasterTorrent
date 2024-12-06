@@ -20,6 +20,7 @@ use App\Http\Controllers\PollController;
 use App\Http\Controllers\ResetPassword\ResetPasswordController;
 use App\Http\Controllers\TorrentRequestController;
 use App\Http\Controllers\Admin\SystemInfoController;
+use App\Http\Controllers\RssFeedController;
 
 
 
@@ -62,7 +63,7 @@ Route::resource('movies', MovieController::class)->middleware('auth');
 // Additional custom routes that do not conflict with resource routes
 Route::post('/movies/search', [MovieController::class, 'search'])->name('movies.search')->middleware('auth');
 Route::get('/movies/select/{tmdb_id}', [MovieController::class, 'selectMovie'])->name('movies.select')->middleware('auth');
-// Route::get('/movies/{id}', [MovieController::class, 'show'])->name('movies.show')->middleware('auth');
+Route::get('/movies/{id}/{slug?}', [MovieController::class, 'show'])->name('movies.show')->middleware('auth');
 Route::post('/movies/bulk-select', [MovieController::class, 'bulkSelect'])->name('movies.bulkSelect')->middleware('auth');
 Route::post('/movies/search-movie', [MovieController::class, 'searchmovie'])->name('movies.search-movie')->middleware('auth');
 
@@ -74,7 +75,7 @@ Route::get('/series', [SeriesController::class, 'index'])->name('series.index')-
 Route::get('/series/create', [SeriesController::class, 'create'])->name('series.create')->middleware('auth');
 Route::post('/series/search', [SeriesController::class, 'search'])->name('series.search')->middleware('auth');
 Route::get('/series/select/{tmdb_id}', [SeriesController::class, 'selectSeries'])->name('series.select')->middleware('auth');
-//Route::get('/series/{id}', [SeriesController::class, 'show'])->name('series.show')->middleware('auth');
+Route::get('series/{id}/{slug?}', [SeriesController::class, 'show'])->name('series.show')->middleware('auth');
 Route::post('/series/bulk-select', [SeriesController::class, 'bulkSelect'])->name('series.bulkSelect')->middleware('auth');
 Route::post('/series/search-movie', [SeriesController::class, 'searchSeries'])->name('series.search-series')->middleware('auth');
 
@@ -143,17 +144,25 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
             Route::post('/clear-views', [SystemInfoController::class, 'clearViews'])->name('systemInfo.clearViews');
             Route::post('/clear-routes', [SystemInfoController::class, 'clearRoutes'])->name('systemInfo.clearRoutes');
             Route::get('/show-routes', [SystemInfoController::class, 'showRoutes'])->name('systemInfo.showRoutes');
+
+            Route::post('/backup/database', [SystemInfoController::class, 'backupDatabase'])->name('systemInfo.backupDatabase');
+            Route::post('/backup/web-directory', [SystemInfoController::class, 'backupWebDirectory'])->name('systemInfo.backupWebDirectory');
+            Route::post('/system/backup', [SystemInfoController::class, 'backup'])->name('systemInfo.backup');
+        });
         });
 
 
     });
-});
+
 
 
 
 //Torrents
 // Announce
 Route::any('/announce/{passkey}', [AnnounceController::class, 'announce'])->name('announce');
+
+
+
 // Group the routes under authentication middleware
 Route::middleware('auth')->group(function () {
     Route::get('torrents', [TorrentController::class, 'index'])->name('torrents.index');        // Show all torrents
@@ -167,10 +176,21 @@ Route::middleware('auth')->group(function () {
 
 });
 Route::get('/torrents/{id}/{slug?}', [TorrentController::class, 'show'])->name('torrents.show')->middleware('auth');
-Route::get('/torrents/download/{id}/{slug}', [TorrentController::class, 'download'])->name('torrents.download')->middleware('auth');
+Route::get('/torrents/download/{id}/{slug}', [TorrentController::class, 'download'])->name('torrents.download');
 Route::get('/torrent/{torrent}/peers', [TorrentController::class, 'peers'])->name('torrent.peers');
 
 
+
+//RSS//
+
+Route::get('/rss', [RssFeedController::class, 'index'])->name('rss.index')->middleware('auth'); // Show the form
+Route::get('/rss/feed', [RssFeedController::class, 'generateFeed'])->name('rss.feed'); // Generate the RSS feed
+Route::get('/rss/download/{fileName}/{passkey}', [RssFeedController::class, 'downloadrss'])->name('rss.download');
+
+
+
+
+//RSS//
 
 
 //Bonus page//

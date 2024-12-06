@@ -34,7 +34,8 @@ class User extends Authenticatable
         'info',
         'IP',
         'passkey', // Add passkey here
-        'seedbonus'
+        'seedbonus',
+        'rsskey'
     ];
 
     /**
@@ -136,7 +137,7 @@ public function getSeedbonusPerHourAttribute()
     ->count('torrent'); // Count based on the unique 'torrent' field
 
     // Define how many points per torrent per hour (example value)
-    $pointsPerTorrent = 0.25; // Change this to your actual earning rate per torrent
+    $pointsPerTorrent = 0.15; // Change this to your actual earning rate per torrent
 
     // Calculate the total earning rate
     return $seedingCount * $pointsPerTorrent; // Total points earned per hour

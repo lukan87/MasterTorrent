@@ -72,8 +72,14 @@ class SeriesController extends Controller
     }
 
 
-    public function show($slug)
+    public function show($id, $slug = null)
     {
+        // If slug is not provided, get the series by id and redirect to the full URL with id and slug
+        if (!$slug) {
+            $series = Series::findOrFail($id);
+            return redirect()->route('series.show', ['id' => $series->id, 'slug' => $series->slug]);
+        }
+
         $apiKey = '325f0b42fccd356be82ede4d2be6312c';
         $series = Series::where('slug', $slug)->firstOrFail();
         $comments = $series->comments()->with('user')->get(); // Eager load users
@@ -123,6 +129,7 @@ class SeriesController extends Controller
         // Return the view with the cached data
         return view('series.show', compact('seriesDetails', 'seriesOm', 'series', 'TvMaze', 'tvMazeSeasons', 'tvMazeEpisodes', 'comments'));
     }
+
 
     public function create()
     {

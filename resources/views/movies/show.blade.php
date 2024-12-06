@@ -159,7 +159,7 @@
 @endif
 
 
-<dd>
+<!-- <dd>
     <ul>
 <h3>Trailers</h3>
 @foreach (array_slice($movieDetails['videos']['results'], 0, 3) as $video)
@@ -185,7 +185,7 @@
 
 @endforeach
     </ul>
-</dd>
+</dd> -->
 
 <dd class="col-sm-12">
        <span class="text-bright text-bold" style="font-size: 20px;">
@@ -382,9 +382,7 @@ body::before {
     backdrop-filter:brightness(130%) blur(10px);
     -webkit-backdrop-filter: brightness(130%) blur(10px);
 
-    @supports (not (backdrop-filter: brightness(2) blur(10px))) and (not (-webkit-backdrop-filter: brightness(2) blur(10px))) {
-        background: rgba(255,255,255,0.4);
-    }
+
 }
 
     iframe {
