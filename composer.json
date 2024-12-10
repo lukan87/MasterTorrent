@@ -12,6 +12,7 @@
         "laravel/framework": "^11.9",
         "laravel/tinker": "^2.9",
         "laravel/ui": "^4.5",
+        "monicahq/laravel-cloudflare": "^3.7",
         "predis/predis": "^2.2",
         "spatie/laravel-backup": "^9.1",
         "theodorejb/polycast": "^1.0"

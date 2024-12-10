@@ -21,6 +21,7 @@ use App\Http\Controllers\ResetPassword\ResetPasswordController;
 use App\Http\Controllers\TorrentRequestController;
 use App\Http\Controllers\Admin\SystemInfoController;
 use App\Http\Controllers\RssFeedController;
+use App\Http\Controllers\TorrentHistoryController;
 
 
 
@@ -30,7 +31,9 @@ Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('ho
 Route::get('/recover-password', [App\Http\Controllers\Auth\ResetPasswordController::class, 'showRecoveryForm'])->name('password.recover');
 Route::post('/password/reset', [App\Http\Controllers\Auth\ResetPasswordController::class, 'updatePassword'])->name('password.update');
 
-
+Route::get('/test-ip', function () {
+    return request()->ip();
+});
 
 // Custom password recovery routes
 Route::get('/custom-password/recover', [ResetPasswordController::class, 'showRecoveryForm'])->name('custom.password.recover');
@@ -39,7 +42,7 @@ Route::post('/custom-password/reset', [ResetPasswordController::class, 'updatePa
 
 
 // Show user profile by ID and name
-Route::get('/profile/{id}/{name}', [ProfileController::class, 'show'])->name('profile.show')->middleware('auth');
+Route::get('/profile/{id}/{name?}', [ProfileController::class, 'show'])->name('profile.show')->middleware('auth');
 
 // Edit user profile by ID and name
 Route::get('/profile/{id}/{name}/edit', [ProfileController::class, 'edit'])->name('profile.edit')->middleware('auth');
@@ -144,9 +147,6 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
             Route::post('/clear-views', [SystemInfoController::class, 'clearViews'])->name('systemInfo.clearViews');
             Route::post('/clear-routes', [SystemInfoController::class, 'clearRoutes'])->name('systemInfo.clearRoutes');
             Route::get('/show-routes', [SystemInfoController::class, 'showRoutes'])->name('systemInfo.showRoutes');
-
-            Route::post('/backup/database', [SystemInfoController::class, 'backupDatabase'])->name('systemInfo.backupDatabase');
-            Route::post('/backup/web-directory', [SystemInfoController::class, 'backupWebDirectory'])->name('systemInfo.backupWebDirectory');
             Route::post('/system/backup', [SystemInfoController::class, 'backup'])->name('systemInfo.backup');
         });
         });
@@ -166,7 +166,7 @@ Route::any('/announce/{passkey}', [AnnounceController::class, 'announce'])->name
 // Group the routes under authentication middleware
 Route::middleware('auth')->group(function () {
     Route::get('torrents', [TorrentController::class, 'index'])->name('torrents.index');        // Show all torrents
-    Route::get('torrents/create', [TorrentController::class, 'create'])->name('torrents.create') ->middleware(['auth', \App\Http\Middleware\CheckPermission::class . ':can_upload']);// Show form to create a new torrent
+    Route::get('torrents/create', [TorrentController::class, 'create'])->name('torrents.create');// Show form to create a new torrent
     Route::post('torrents', [TorrentController::class, 'store'])->name('torrents.store');        // Store a new torrent
     // Route::get('torrents/{torrent}', [TorrentController::class, 'show'])->name('torrents.show');  // Show a specific torrent
     Route::get('torrents/{id}/{slug}/edit', [TorrentController::class, 'edit'])->name('torrents.edit'); // Show form to edit a torrent
@@ -177,7 +177,8 @@ Route::middleware('auth')->group(function () {
 });
 Route::get('/torrents/{id}/{slug?}', [TorrentController::class, 'show'])->name('torrents.show')->middleware('auth');
 Route::get('/torrents/download/{id}/{slug}', [TorrentController::class, 'download'])->name('torrents.download');
-Route::get('/torrent/{torrent}/peers', [TorrentController::class, 'peers'])->name('torrent.peers');
+Route::get('/torrent/{torrent}/peers', [TorrentController::class, 'peers'])->name('torrent.peers')->middleware('auth');
+Route::get('/torrents/{id}/{slug}/history', [TorrentHistoryController::class, 'index'])->name('torrent.history')->middleware('auth');
 
 
 
@@ -213,6 +214,12 @@ Route::match(['get', 'post'], '/donate', function (Illuminate\Http\Request $requ
     return view('donate');
 })->name('donate');
 
+//Rules Page Beta
+Route::get('/rules', function () {
+    return view('rules');
+})->middleware('auth')->name('rules');
+
+
 Route::prefix('forum')->group(function () {
     // Forum Category Routes
     Route::get('/categories', [ForumCategoryController::class, 'index'])->name('forum.categories.index')->middleware('permission:view_categories');
@@ -230,7 +237,7 @@ Route::prefix('forum')->group(function () {
     Route::get('/', [ForumController::class, 'index'])->name('forum.index')->middleware('permission:view_topics');
     Route::get('/create', [ForumController::class, 'create'])->name('forum.create')->middleware('permission:create_topics');
     // Route::post('/', [ForumController::class, 'store'])->name('forum.store')->middleware('permission:create_topics');
-    Route::get('/{topic}', [ForumController::class, 'show'])->name('forum.show');
+    Route::get('/{topic}', [ForumController::class, 'show'])->name('forum.show')->middleware('auth');
     Route::get('/{topic}/edit', [ForumController::class, 'edit'])->name('topics.edit')->middleware('permission:edit_posts');
     Route::delete('/{topic}', [ForumController::class, 'destroy'])->name('forum.destroy')->middleware('permission:delete_topics');
     Route::get('/{categoryId}/create', [ForumController::class, 'create'])->name('forum.create');
@@ -238,9 +245,14 @@ Route::prefix('forum')->group(function () {
 
     // Post Routes
     Route::post('/{topic}/posts', [PostController::class, 'store'])->name('posts.store')->middleware('permission:reply');
-    Route::get('/posts/{post}/edit', [PostController::class, 'edit'])->name('posts.edit')->middleware('permission:edit_posts');
-    Route::put('/posts/{post}', [PostController::class, 'update'])->name('posts.update')->middleware('permission:edit_posts');
+    Route::get('/posts/{post}/edit', [PostController::class, 'edit'])->name('posts.edit')->middleware('auth');
+    Route::put('/posts/{post}', [PostController::class, 'update'])->name('posts.update')->middleware('auth');
     Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy')->middleware('permission:delete_posts');
+    Route::get('posts/{post}/reply', [PostController::class, 'reply'])->name('posts.reply');
+    Route::post('/posts/{post}/reply', [PostController::class, 'storeReply'])->middleware('auth')->name('posts.storeReply');
+    Route::delete('/replies/{reply}', [PostController::class, 'destroyReply'])->name('posts.destroyReply');
+
+
     Route::put('/{topic}', [ForumController::class, 'update'])->name('forum.update')->middleware('permission:edit_posts');
     Route::get('/topics/{id}', [ForumController::class, 'show'])->name('topics.show');
 });
@@ -252,13 +264,13 @@ Route::prefix('forum')->group(function () {
 
 
 
-Route::get('/shoutbox', [ShoutboxController::class, 'index'])->name('shoutbox.index');
-Route::post('/shoutbox', [ShoutboxController::class, 'store'])->name('shoutbox.store');
-Route::get('/shoutbox/{id}/edit', [ShoutboxController::class, 'edit'])->name('shoutbox.edit');
-Route::put('/shoutbox/{id}', [ShoutboxController::class, 'update'])->name('shoutbox.update');
-Route::delete('/shoutbox/{id}', [ShoutboxController::class, 'destroy'])->name('shoutbox.destroy');
-Route::get('/shoutbox/{id}/reply', [ShoutboxController::class, 'showReplyForm'])->name('shoutbox.showReplyForm');
-Route::post('/shoutbox/{id}/reply', [ShoutboxController::class, 'reply'])->name('shoutbox.reply');
+Route::get('/shoutbox', [ShoutboxController::class, 'index'])->name('shoutbox.index')->middleware('auth');
+Route::post('/shoutbox', [ShoutboxController::class, 'store'])->name('shoutbox.store')->middleware('auth');
+Route::get('/shoutbox/{id}/edit', [ShoutboxController::class, 'edit'])->name('shoutbox.edit')->middleware('auth');
+Route::put('/shoutbox/{id}', [ShoutboxController::class, 'update'])->name('shoutbox.update')->middleware('auth');
+Route::delete('/shoutbox/{id}', [ShoutboxController::class, 'destroy'])->name('shoutbox.destroy')->middleware('auth');
+Route::get('/shoutbox/{id}/reply', [ShoutboxController::class, 'showReplyForm'])->name('shoutbox.showReplyForm')->middleware('auth');
+Route::post('/shoutbox/{id}/reply', [ShoutboxController::class, 'reply'])->name('shoutbox.reply')->middleware('auth');
 
 
 
@@ -270,6 +282,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('messages/{message}', [MessageController::class, 'show'])->name('messages.show');
     Route::delete('messages/{message}', [MessageController::class, 'destroy'])->name('messages.destroy');
     Route::get('messages', [MessageController::class, 'index'])->name('messages.index');
+    Route::get('/messages/{message}/reply', [MessageController::class, 'reply'])->name('messages.reply');
+    Route::post('/messages/{message}/reply', [MessageController::class, 'storeReply'])->name('messages.storeReply');
 
 });
 

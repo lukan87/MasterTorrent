@@ -22,37 +22,40 @@ class HomeController extends Controller
     {
         $cacheDuration = 3600; // Cache duration in seconds (1 hour)
 
+        $recommendedTorrents = $this->getRecommendedTorrents();
+
         // Cache online users
         $onlineUsers = Cache::remember('online_users', $cacheDuration, function () {
             return $this->getOnlineUsers();
         });
 
-        // Define time intervals for filtering
-        $now = now();
+       // Define time intervals for filtering
+$now = now();
 
-        // Cache torrents from the last day
-        $topLastDay = Cache::remember('top_last_day', $cacheDuration, function () use ($now) {
-            return Torrent::where('created_at', '>=', $now->copy()->subDay())
-                          ->orderBy('created_at', 'desc')
-                          ->limit(5)
-                          ->get();
-        });
+// Cache torrents from the last day
+$topLastDay = Cache::remember('top_last_day', $cacheDuration, function () use ($now) {
+    return Torrent::where('created_at', '>=', $now->copy()->subDay())
+                  ->orderByDesc('seeders')  // Order by seeders (descending)
+                  ->limit(5)
+                  ->get();
+});
 
-        // Cache torrents from the last week
-        $topLastWeek = Cache::remember('top_last_week', $cacheDuration, function () use ($now) {
-            return Torrent::where('created_at', '>=', $now->copy()->subWeek())
-                          ->orderBy('created_at', 'desc')
-                          ->limit(5)
-                          ->get();
-        });
+// Cache torrents from the last week
+$topLastWeek = Cache::remember('top_last_week', $cacheDuration, function () use ($now) {
+    return Torrent::where('created_at', '>=', $now->copy()->subWeek())
+                  ->orderByDesc('seeders')  // Order by seeders (descending)
+                  ->limit(5)
+                  ->get();
+});
 
-        // Cache torrents from the last month
-        $topLastMonth = Cache::remember('top_last_month', $cacheDuration, function () use ($now) {
-            return Torrent::where('created_at', '>=', $now->copy()->subMonth())
-                          ->orderBy('created_at', 'desc')
-                          ->limit(5)
-                          ->get();
-        });
+// Cache torrents from the last month
+$topLastMonth = Cache::remember('top_last_month', $cacheDuration, function () use ($now) {
+    return Torrent::where('created_at', '>=', $now->copy()->subMonth())
+                  ->orderByDesc('seeders')  // Order by seeders (descending)
+                  ->limit(5)
+                  ->get();
+});
+
 
         // Cache latest news
         $latestNews = Cache::remember('latest_news', $cacheDuration, function () {
@@ -89,7 +92,9 @@ class HomeController extends Controller
             'polls',
             'torrentCount',
             'userCount',
-            'forumTopicCount'
+            'forumTopicCount',
+            'recommendedTorrents'
+            
         ));
     }
 
@@ -98,4 +103,21 @@ class HomeController extends Controller
         // Assuming you store online users in the database with a 'last_activity' column
         return User::where('last_activity', '>=', now()->subMinutes(5))->get();
     }
+
+    public function getRecommendedTorrents()
+{
+    $cacheDuration = 3600; // Cache duration in seconds (1 hour)
+
+    // Cache the latest 10 recommended torrents
+    $recommendedTorrents = Cache::remember('recommended_torrents', $cacheDuration, function () {
+        return Torrent::where('recommended', true)
+                      ->where('category_id', '!=', 27) 
+                      ->latest('created_at')
+                      ->limit(10)
+                      ->get();
+    });
+
+    return $recommendedTorrents;
+}
+
 }

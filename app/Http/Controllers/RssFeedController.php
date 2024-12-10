@@ -50,7 +50,7 @@ class RssFeedController extends Controller
 
     // Get the most recent 20 torrents
     // $torrents = $query->orderBy('created_at', 'desc')->limit(20)->get();
-    $torrents = $query->with('category')->orderBy('created_at', 'desc')->limit(20)->get();
+    $torrents = $query->with('category')->orderBy('created_at', 'desc')->limit(15)->get();
 
     // Debugging: Uncomment to check the selected categories and torrents fetched
     // dd([

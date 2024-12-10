@@ -5,6 +5,8 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Auth;
+use Monicahq\Cloudflare\LaravelCloudflare;
+use Monicahq\Cloudflare\Facades\CloudflareProxies;
 use App\Models\Message;
 
 
@@ -49,6 +51,8 @@ class AppServiceProvider extends ServiceProvider
 
             $view->with(compact('seedingCount', 'leechingCount', 'messages', 'unreadMessagesCount'));
         });
+
+        LaravelCloudflare::getProxiesUsing(fn() => CloudflareProxies::load());
     }
 }
 

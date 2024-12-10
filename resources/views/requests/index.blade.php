@@ -4,6 +4,10 @@
 <div class="container mt-4">
     <h1 class="mb-4">Torrent Requests</h1>
 
+    <div class="alert alert-warning mb-4" role="alert">
+    Cererile completate incorect vor fi șterse. Completați toate câmpurile!
+</div>
+
     <div class="mb-3">
         <a href="{{ route('requests.create') }}" class="btn btn-primary">
             <i class="bi bi-plus-circle"></i> Create New Request
@@ -27,8 +31,8 @@
                     <tbody>
                         @foreach ($requests as $request)
                             <tr>
-                                <td>{{ $request->category->name }}</td>
-                                <td>{{ $request->name }}</td>
+                                <td>{{ $request->category->name ?? 'No Category'}}</td>
+                                <td><a href="{{ route('requests.show', $request->id) }}" data-bs-toggle="tooltip" title="View Request">{{ $request->name }}</a></td>
                                 <td>{{ $request->requester->name ?? 'Unknown' }} on {{ $request->created_at ?? 'Unknown' }}</td>
 
                                 <td>
@@ -46,20 +50,24 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <a href="{{ route('requests.show', $request->id) }}" class="btn btn-info btn-sm" data-bs-toggle="tooltip" title="View Request">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
-                                    <a href="{{ route('requests.edit', $request->id) }}" class="btn btn-warning btn-sm" data-bs-toggle="tooltip" title="Edit Request">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <form action="{{ route('requests.destroy', $request->id) }}" method="POST" style="display:inline;">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this request?')">
-                                            <i class="bi bi-trash"  data-bs-toggle="tooltip" title="Delete Request"></i>
-                                        </button>
-                                    </form>
-                                </td>
+    @if (Auth::check() && (Auth::user()->user_class >= \App\Models\UserClass::MODERATOR || Auth::user()->name === $request->requester->name))
+    <div class="d-flex justify-content-start gap-2">
+        <a href="{{ route('requests.edit', $request->id) }}" class="btn btn-warning btn-sm" data-bs-toggle="tooltip" title="Edit Request">
+            <i class="bi bi-pencil"></i>
+        </a>
+    @endif
+    @if (Auth::check() && (Auth::user()->user_class >= \App\Models\UserClass::MODERATOR))
+        <form action="{{ route('requests.destroy', $request->id) }}" method="POST" style="display:inline;">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this request?')">
+                <i class="bi bi-trash" data-bs-toggle="tooltip" title="Delete Request"></i>
+            </button>
+        </form>
+    </div>
+    @endif
+</td>
+
                             </tr>
                         @endforeach
                     </tbody>

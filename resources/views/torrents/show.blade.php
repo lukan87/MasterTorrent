@@ -47,7 +47,19 @@
 </a>
 
     <p class="mb-0 mx-2"><strong><i class="bi bi-cloud-arrow-down-fill" data-bs-toggle="tooltip" title="Leechers"></i></strong> {{ $torrent->leechers }}</p>
+    @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
+    <p class="mb-0 mx-2">
+    <strong>
+        <i class="bi bi-download" data-bs-toggle="tooltip" title="Times Completed"></i>
+    </strong>
+    <a href="{{ route('torrent.history', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}" class="text-decoration-none">
+        {{ $torrent->times_completed }}
+    </a>
+</p>
+
+    @else
     <p class="mb-0 mx-2"><strong><i class="bi bi-download" data-bs-toggle="tooltip" title="Times Completed"></i></strong> {{ $torrent->times_completed }}</p>
+    @endif
     <p class="mb-0 mx-2"><strong><i class="bi bi-pie-chart-fill" data-bs-toggle="tooltip" title="Size"></i></strong> {{ \App\Helpers\FormatHelper::formatSize($torrent->size) }}</p>
 </div>
 
@@ -85,9 +97,11 @@
             </li>
 
             <!-- Snatched Tab -->
+            @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
             <li class="nav-item">
                 <a class="nav-link" id="snatched-tab" data-bs-toggle="tab" href="#snatched" role="tab" aria-controls="snatched" aria-selected="false">Snatched</a>
             </li>
+            @endif
         </ul>
     </div>
 
@@ -163,6 +177,7 @@
             </div>
 
             <!-- Snatched Tab -->
+            @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
             <div class="tab-pane fade" id="snatched" role="tabpanel" aria-labelledby="snatched-tab">
                 <div class="card mt-4">
                     <div class="card-header bg-info text-white">
@@ -197,6 +212,7 @@
                     </div>
                 </div>
             </div>
+            @endif
         </div>
     </div>
 </div>

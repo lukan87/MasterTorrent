@@ -105,13 +105,12 @@
                 </div>
             @endif
 
-
             <form method="POST" action="{{ route('login') }}">
                 @csrf
 
                 <div class="mb-3">
                     <label for="name" class="form-label">{{ __('Username') }}</label>
-                    <input id="name" type="name" class="form-control @error('name') is-invalid @enderror" name="name" palceholder="Enter Username" required autocomplete="name" autofocus>
+                    <input id="name" type="name" class="form-control @error('name') is-invalid @enderror" name="name" placeholder="Enter Username" required autocomplete="name" autofocus>
                     @error('name')
                         <span class="invalid-feedback" role="alert">
                             <strong>{{ $message }}</strong>
@@ -135,6 +134,13 @@
                         {{ __('Remember Me') }}
                     </label>
                 </div>
+
+                <!-- Secțiunea pentru suport Facebook -->
+<div class="support-facebook mb-3 d-flex align-items-center">
+    <i class="fab fa-facebook-f fa-2x text-primary me-2"></i>
+    <a href="https://www.facebook.com/Lastfiles" target="_blank" style="font-size: 1.2rem; text-decoration: none; color: #007bff;">Support on Facebook</a>
+</div>
+
 
                 <div class="d-flex justify-content-between">
                     <button type="submit" class="btn btn-primary btn-sm">{{ __('Login') }}</button>

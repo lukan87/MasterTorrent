@@ -5,6 +5,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Console\Scheduling\Schedule;
 use Symfony\Component\HttpFoundation\Response;
+use Monicahq\Cloudflare\Middleware\TrustProxies; // Import the middleware
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -20,6 +21,11 @@ return Application::configure(basePath: dirname(__DIR__))
         'admin' => \App\Http\Middleware\AdminMiddleware::class,
         'permission' => \App\Http\Middleware\CheckPermission::class,
        ]);
+
+       $middleware->replace(
+        \Illuminate\Http\Middleware\TrustProxies::class,
+        \Monicahq\Cloudflare\Http\Middleware\TrustProxies::class
+    );
 
 
     })

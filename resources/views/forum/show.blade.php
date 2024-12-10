@@ -23,7 +23,9 @@
         <p class="card-text">{!! convertCustomTagsToHtml($topic->content) !!}</p>
         <div class="d-flex justify-content-end">
             <!-- <a href="{{ route('forum.show', $topic->id) }}" class="btn btn-info btn-sm me-2">View</a> -->
-            <a href="{{ route('topics.edit', $topic->id) }}" class="btn btn-warning btn-sm me-2">Edit</a>
+                       @if (Auth::check() && (Auth::user()->user_class >= \App\Models\UserClass::MODERATOR || Auth::user()->id === $topic->user_id))
+                                <a href="{{ route('topics.edit', $topic->id) }}" class="btn btn-warning btn-sm me-2">Edit</a>
+                        @endif
             <form action="{{ route('forum.destroy', $topic->id) }}" method="POST" style="display:inline;">
                 @csrf
                 @method('DELETE')
@@ -37,36 +39,98 @@
     <hr>
 
     <h3>Posts:</h3>
-    @foreach($topic->posts as $post)
+@foreach($topic->posts as $post)
+    <!-- Check if this is a main post or a reply -->
+    @if(is_null($post->parent_id)) 
+        <!-- Main post (not a reply) -->
         <div class="card mb-3">
             <div class="card-header">
-                <strong>{{ $post->user->name }} ( {{ $post->user->role_name }} )</strong> - {{ $post->created_at->diffForHumans() }}
+                <strong>
+                    <a href="{{ route('profile.show', ['id' => $post->user->id, 'name' => $post->user->name]) }}">
+                        {{ $post->user->name }}
+                    </a>
+                    ( {{ $post->user->role_name }} )
+                </strong> - {{ $post->created_at->diffForHumans() }}
             </div>
             <div class="card-body">
                 <div class="row">
-<div class="col-md-2">
-<p class="card-title"><img src="{{ $post->user->profile_image ?? asset('images/default_avatar/default-avatar.jpg') }}" alt="User Avatar" style="width:100%"></p>
-</div>
-<div class="col-md-10">
-<p class="card-text">{!! convertCustomTagsToHtml($post->content) !!}</p>
-</div>
-<div class="d-flex justify-content-end">
-                    @if(auth()->user() && (auth()->id() === $post->user_id || auth()->user()->userHasPermission('edit_posts')))
-                        <a href="{{ route('posts.edit', $post->id) }}" class="btn btn-warning btn-sm me-2">Edit</a>
-                    @endif
-                    @if(auth()->user() && auth()->user()->userHasPermission('delete_posts'))
-                        <form action="{{ route('posts.destroy', $post->id) }}" method="POST" style="display:inline;">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                        </form>
-                    @endif
-                </div>
+                    <div class="col-md-1">
+                        <p class="card-title">
+                            <img src="{{ $post->user->profile_image ?? asset('images/default_avatar/default-avatar.jpg') }}" alt="User Avatar" style="width:100%">
+                        </p>
+                    </div>
+                    <div class="col-md-11">
+                        <p class="card-text">{!! convertCustomTagsToHtml($post->content) !!}</p>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        @if (Auth::check() && (Auth::user()->user_class >= \App\Models\UserClass::MODERATOR || Auth::user()->id === $post->user_id))
+                            <a href="{{ route('posts.edit', $post->id) }}" class="btn btn-warning btn-sm me-2">Edit</a>
+                        @endif
 
+                        @if(auth()->user() && auth()->user()->userHasPermission('delete_posts'))
+                            <form action="{{ route('posts.destroy', $post->id) }}" method="POST" style="display:inline;">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                            </form>
+                        @endif
+
+                        <!-- Reply Button -->
+                        @if(Auth::check())
+                            <a href="{{ route('posts.reply', $post->id) }}" class="btn btn-primary btn-sm ms-2">Reply</a>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
-    @endforeach
+
+     <!-- Display replies -->
+@foreach($post->replies as $reply)
+    <div class="card mt-3 mb-3 ms-5 shadow-sm border-0 rounded"> <!-- Indented replies -->
+        <div class="card-header">
+            <strong><a href="{{ route('profile.show', ['id' => $reply->user->id, 'name' => $reply->user->name]) }}">{{ $reply->user->name }}</a></strong> - {{ $reply->created_at->diffForHumans() }}
+
+            <!-- Check if this reply is to the owner's post -->
+            @if($reply->parent_id === $post->id)
+                <span class="badge bg-info text-dark ms-3">Replied to {{ $post->user->name }}'s post</span>
+            @endif
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-1">
+                    <p class="card-title">
+                        <img src="{{ $reply->user->profile_image ?? asset('images/default_avatar/default-avatar.jpg') }}" alt="User Avatar" style="width:50px; height:50px; border-radius:50%; object-fit:cover;">
+                    </p>
+                </div>
+                <div class="col-md-11">
+                    <p>{!! convertCustomTagsToHtml($reply->content) !!}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete reply button for the owner or moderator -->
+        <div class="d-flex justify-content-end">
+            @if(Auth::check() && (Auth::user()->id === $reply->user_id || Auth::user()->user_class >= \App\Models\UserClass::MODERATOR))
+                <div class="me-3"> <!-- margin-start (left) -->
+                    <form action="{{ route('posts.destroyReply', $reply->id) }}" method="POST" style="display:inline;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-outline-danger btn-sm mb-1">Delete Reply</button>
+                    </form>
+                </div>
+            @endif
+        </div>
+    </div>
+@endforeach
+
+
+
+    @endif
+@endforeach
+
+
+
+
 
 {{-- Form to add a new post --}}
 @if(auth()->check())

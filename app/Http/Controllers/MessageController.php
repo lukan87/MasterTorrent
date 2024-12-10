@@ -74,6 +74,34 @@ class MessageController extends Controller
         abort(403);
     }
 
+    public function reply(Message $message)
+{
+    // Ensure the user is replying to a message they received
+    if ($message->receiver_id !== Auth::id()) {
+        abort(403); // Only allow replies to messages received by the logged-in user
+    }
+
+    // Return the reply form with the original message and sender
+    return view('messages.reply', compact('message'));
+}
+
+public function storeReply(Request $request, Message $message)
+{
+    $request->validate([
+        'body' => 'required|string',
+    ]);
+
+    // Create a new message where the sender is the receiver of the original message, and the receiver is the sender of the original message
+    Message::create([
+        'sender_id' => Auth::id(),
+        'receiver_id' => $message->sender_id,
+        'subject' => 'Re: ' . $message->subject,
+        'body' => $request->body,
+    ]);
+
+    return redirect()->route('messages.outbox')->with('success', 'Reply sent successfully.');
+}
+
     public function destroy(Message $message)
 {
     if ($message->sender_id === Auth::id() || $message->receiver_id === Auth::id()) {

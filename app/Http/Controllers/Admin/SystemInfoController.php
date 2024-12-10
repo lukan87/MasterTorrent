@@ -6,10 +6,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\View;
-use Illuminate\Support\Facades\File;
-use Symfony\Component\Process\Exception\ProcessFailedException;
-use Symfony\Component\Process\Process;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -23,12 +19,42 @@ class SystemInfoController extends Controller
         $os = php_uname();
         $storage = disk_free_space("/");
         $diskTotal = disk_total_space("/");
+        Cache::put('status', 'Cache is working::Using Redis Server', now()->addMinutes(10));
         $cacheStatus = Cache::get('status', 'Cache is not set');
- // Set backup time information
- $backupSchedule = 'Daily at 02:00 AM';
+        // Set backup time information
+        $backupSchedule = 'Daily at 02:00 AM';
 
+        // Get CPU load (1, 5, 15 minute averages)
+        $cpuLoad = sys_getloadavg();  // Returns an array: [1 minute, 5 minute, 15 minute load]
 
-        return view('admin.system_info', compact('phpVersion', 'os', 'storage', 'diskTotal', 'cacheStatus', 'backupSchedule'));
+        // Get RAM usage (Linux-based command using shell_exec)
+        $ramUsage = $this->getRAMUsage();
+
+        return view('admin.system_info', compact('phpVersion', 'os', 'storage', 'diskTotal', 'cacheStatus', 'backupSchedule', 'cpuLoad', 'ramUsage'));
+    }
+
+    // Method to get RAM usage on Linux systems
+    private function getRAMUsage()
+    {
+        // Execute the `free` command to get memory usage details
+        $freeCommandOutput = shell_exec('free -m');
+        $lines = explode("\n", $freeCommandOutput);
+
+        // The second line of the `free` output contains memory info
+        $memoryLine = isset($lines[1]) ? $lines[1] : '';
+        $memoryData = preg_split('/\s+/', $memoryLine);
+
+        // $memoryData contains values like: total, used, free, shared, buff/cache, available
+        $totalMemory = isset($memoryData[1]) ? $memoryData[1] : 0;
+        $usedMemory = isset($memoryData[2]) ? $memoryData[2] : 0;
+        $freeMemory = isset($memoryData[3]) ? $memoryData[3] : 0;
+
+        // You can return a formatted response or raw data as needed
+        return [
+            'total' => $totalMemory,
+            'used' => $usedMemory,
+            'free' => $freeMemory
+        ];
     }
 
     // Clear Cache
@@ -60,77 +86,7 @@ class SystemInfoController extends Controller
     }
 
     // Backup Database
-    public function backupDatabase()
-    {
-        // Define the backup path
-        $backupPath = storage_path('app/backups');
-        if (!File::exists($backupPath)) {
-            File::makeDirectory($backupPath, 0755, true);
-        }
 
-        // Get the database credentials from the .env file
-        $dbHost = env('DB_HOST', '127.0.0.1');
-        $dbName = env('DB_DATABASE');
-        $dbUser = env('DB_USERNAME');
-        $dbPassword = env('DB_PASSWORD');
-
-        // Set the backup filename
-        $filename = $dbName . '_backup_' . now()->format('Y_m_d_H_i_s') . '.sql';
-        $backupFile = $backupPath . '/' . $filename;
-
-        // Full path to the mysqldump command
-        $mysqldumpPath = '/usr/bin/mysqldump';
-
-        // Ensure the command is executed correctly with the password
-        $command = "$mysqldumpPath -h $dbHost -u $dbUser -p$dbPassword $dbName > $backupFile";
-
-        // Use the Process class to run the command
-        try {
-            $process = new Process([$command]);
-            // Set the proper environment variables to ensure the path is found
-            $process->setEnv([
-                'PATH' => '/usr/bin:/bin:/usr/sbin:/sbin',
-            ]);
-            $process->mustRun();
-            return redirect()->route('admin.systemInfo.index')->with('success', 'Database backup completed successfully.');
-        } catch (ProcessFailedException $exception) {
-            Log::error('Database backup failed: ' . $exception->getMessage());
-            return redirect()->route('admin.systemInfo.index')->with('error', 'Database backup failed. Please check the logs for more details.');
-        }
-    }
-
-
-
-
-
-    // Backup Web Directory
-    public function backupWebDirectory()
-    {
-        // Define the backup path
-        $backupPath = storage_path('app/backups');
-        if (!File::exists($backupPath)) {
-            File::makeDirectory($backupPath, 0755, true);
-        }
-
-        // Specify the source directory
-        $sourceDirectory = '/var/www/html/';
-
-        // Set the backup filename with current timestamp
-        $backupFilename = 'html_backup_' . now()->format('Y_m_d_H_i_s') . '.tar.gz';
-        $backupFilePath = $backupPath . '/' . $backupFilename;
-
-        // Create a tar.gz archive of the /var/www/html directory
-        $command = "tar -czf $backupFilePath $sourceDirectory";
-
-        // Run the backup command
-        $process = new Process([$command]);
-        try {
-            $process->mustRun();
-            return redirect()->route('admin.systemInfo.index')->with('success', 'Web directory backup completed successfully.');
-        } catch (ProcessFailedException $exception) {
-            return redirect()->route('admin.systemInfo.index')->with('error', 'Web directory backup failed.');
-        }
-    }
 
     public function backup(Request $request)
     {

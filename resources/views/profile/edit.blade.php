@@ -16,16 +16,22 @@
 
 
                             <div class="row mb-3">
-                                <label for="name" class="col-md-4 col-form-label text-md-end">{{ __('Name') }}</label>
-                                <div class="col-md-6">
-                                    <input id="name" type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name', $user->name) }}" required>
-                                    @error('name')
-                                        <span class="invalid-feedback" role="alert">
-                                            <strong>{{ $message }}</strong>
-                                        </span>
-                                    @enderror
-                                </div>
-                            </div>
+    <label for="name" class="col-md-4 col-form-label text-md-end">{{ __('Name') }}</label>
+    <div class="col-md-6">
+        @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
+            <input id="name" type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name', $user->name) }}" required>
+        @else
+            <input id="name" type="text" class="form-control" name="name" value="{{ $user->name }}" readonly>
+        @endif
+        @error('name')
+            <span class="invalid-feedback" role="alert">
+                <strong>{{ $message }}</strong>
+            </span>
+        @enderror
+    </div>
+</div>
+
+
 
 
                             <div class="row mb-3">
@@ -39,6 +45,22 @@
                                     @enderror
                                 </div>
                             </div>
+
+                            @if (auth()->user()->user_class >= \App\Models\UserClass::MODERATOR && auth()->id() !== $user->id)
+<div class="row mb-3">
+    <label for="user_class" class="col-md-4 col-form-label text-md-end">{{ __('User Role') }}</label>
+    <div class="col-md-6">
+        <select name="user_class" id="user_class" class="form-control">
+            @foreach (App\Models\UserClass::getClasses() as $classValue => $className)
+                <option value="{{ $classValue }}" {{ $user->user_class == $classValue ? 'selected' : '' }}>
+                    {{ $className }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+</div>
+@endif
+
 
 
                             <div class="row mb-3">
@@ -99,7 +121,7 @@
 
             </div>
 
-
+            @if (Auth::check() && Auth::user()->user_class > \App\Models\UserClass::MODERATOR && Auth::user()->id !== $user->id)
             <div class="col-md-3 order-md-2">
 
             <div class="card">
@@ -139,7 +161,7 @@
     <label for="uploadpos" class="col-md-4 col-form-label text-md-end">{{ __('Uploader') }}</label>
     <div class="col-md-6">
         <div class="form-check">
-            <input type="checkbox" id="uploadpos" class="form-check-input @error('uploadpos') is-invalid @enderror" name="uploadpos" value="yes" {{ old('uploadpos', $user->donor) === 'yes' ? 'checked' : '' }}>
+            <input type="checkbox" id="uploadpos" class="form-check-input @error('uploadpos') is-invalid @enderror" name="uploadpos" value="yes" {{ old('uploadpos', $user->uploadpos) === 'yes' ? 'checked' : '' }}>
             <label class="form-check-label" for="uploadpos">{{$user->uploadpos}}</label>
         </div>
 
@@ -154,7 +176,7 @@
     <label for="downloadpos" class="col-md-4 col-form-label text-md-end">{{ __('Downloader') }}</label>
     <div class="col-md-6">
         <div class="form-check">
-            <input type="checkbox" id="downloadpos" class="form-check-input @error('downloadpos') is-invalid @enderror" name="downloadpos" value="yes" {{ old('downloadpos', $user->donor) === 'yes' ? 'checked' : '' }}>
+            <input type="checkbox" id="downloadpos" class="form-check-input @error('downloadpos') is-invalid @enderror" name="downloadpos" value="yes" {{ old('downloadpos', $user->downloadpos) === 'yes' ? 'checked' : '' }}>
             <label class="form-check-label" for="downloadpos">{{$user->downloadpos}}</label>
         </div>
 
@@ -173,6 +195,7 @@
                 </div>
 
             </div>
+            @endif
         </div>
         <div class="row mt-5">
                                 <div class="col-md-12 text-center">

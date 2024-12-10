@@ -70,13 +70,20 @@ class TorrentController extends Controller
             $query->whereNotIn('category_id', [27, 34]);
 
             // Apply keyword filter if present
-            if ($request->filled('keyword')) {
-                $keyword = $request->keyword;
-                $query->where(function ($q) use ($keyword) {
-                    $q->where('name', 'like', '%' . $keyword . '%')
-                      ->orWhere('imdb_url', 'like', '%' . $keyword . '%');
-                });
-            }
+if ($request->filled('keyword')) {
+    $keyword = $request->keyword;
+
+    // Normalize the keyword: Remove periods, spaces, and other common delimiters
+    $normalizedKeyword = preg_replace('/[^a-zA-Z0-9]/', '', $keyword);
+
+    $query->where(function ($q) use ($normalizedKeyword) {
+        // Normalize only the 'name' field in the database
+        $q->whereRaw('REPLACE(REPLACE(name, ".", ""), " ", "") LIKE ?', ['%' . $normalizedKeyword . '%'])
+          // Keep the imdb_url as it is, no changes to this field
+          ->orWhere('imdb_url', 'like', '%' . $normalizedKeyword . '%');
+    });
+}
+
 
             // Apply category filter if a category is selected
             if ($request->filled('category')) {
@@ -416,7 +423,7 @@ class TorrentController extends Controller
             'poster' => $poster,
             'imdbid' => $imdbId,
             'tmdbid' => $tmdbId,
-            'background' => $background,
+            'background' => $background ?? $request->background,
             'tmdb_type' => $tmdbtype,
             'trailer' => $request->input('trailer'),
             'mediainfo' => $request->mediainfo,
@@ -486,11 +493,17 @@ class TorrentController extends Controller
         $dict = Bencode::bdecode(file_get_contents($path));
 
         // Modify the announce URL and add a comment
-        $dict['announce'] = route('announce', ['passkey' => $user->passkey]);
+        $dict['announce'] = route('announce', ['passkey' => $user->passkey], false);
         $dict['comment'] = 'Using this torrent binds you to MyTorrents Confidentiality Agreement';
 
         // Remove other announce URLs
-        unset($dict['announce-list']);
+        // unset($dict['announce-list']);
+
+        // Add the announce-list for multiple trackers
+    $dict['announce-list'] = [
+        // [route('announce', ['passkey' => $user->passkey])],
+        ['http://last-torrents.org/announce/' . $user->passkey] // Secondary announce URL
+    ];
 
         // Re-encode the torrent file
         $fileToDownload = Bencode::bencode($dict);
@@ -498,6 +511,9 @@ class TorrentController extends Controller
         // Generate a custom filename
         $prefix = 'Last-Torrents_';
         $fileName = $prefix . preg_replace('/[^a-zA-Z0-9-_]/', '_', $torrent->name) . '.torrent';
+
+        // Clear all cache to ensure fresh data is loaded
+        Cache::flush();
 
         // Return the torrent file as a download
         return response($fileToDownload)
@@ -696,6 +712,7 @@ class TorrentController extends Controller
                 if ($tmdbDetails) {
                     $tmdbId = $tmdbDetails['tmdb_id'];
                     $tmdbType = $tmdbDetails['type'];
+                    //$background = $tmdbDetails['backdrop_path'];
                     $tmdbData = $tmdbService->fetchTMDBData($tmdbId, $tmdbType);
 
                     if ($tmdbData) {
@@ -738,7 +755,7 @@ class TorrentController extends Controller
                 'description' => $request->description,
                 'category_id' => $request->category_id,
                 'poster' => $poster ?? $request->poster,
-                'background' => $request->background,
+                'background' => $background ?? $request->background,
                 'genre' => $request->genre, // Save the manual genres string
                 'steamid' => $request->steamid,
                 'imdb_url' => $imdbUrl,
@@ -797,6 +814,7 @@ if (empty($deletionReason)) {
          // Send a message to the owner about the deletion
     Message::create([
         'receiver_id' => $owner,  // The owner receives the message
+        'subject' => 'Torrent Deletion',
         'sender_id' => 2,  // The user deleting the torrent (usually admin or system)
         'body' => 'Your torrent " ' . $torrent->name . ' " has been deleted. Reason: ' . $deletionReason,
         'is_read' => false,  // Mark as unread initially

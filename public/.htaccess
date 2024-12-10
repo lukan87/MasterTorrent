@@ -22,4 +22,4 @@
     # Ensure .xsl files are served as text/xsl
     AddType text/xsl .xsl
     AddCharset UTF-8 .xsl
-</IfModule>
+</IfModule> 

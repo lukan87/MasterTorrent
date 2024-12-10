@@ -3,13 +3,18 @@
 @section('content')
 
 <div class="row">
+
     <!-- Movies Section -->
     <div class="col-lg-9 col-md-8 col-sm-6">
+
 @include('partials.news')
+
+
 </div>
 <div class="col-lg-3 col-md-4 col-sm-6">
 @include('partials.poll')
 </div>
+
 
 
 <div class="row">
@@ -20,8 +25,13 @@
 
 <div class="col-md-6">
 @include('partials.onlineusers')
+<iframe src="https://stream.clever-host.ro/cp/widgets/player/single/?p=8036" height="110" width="100%" scrolling="no" style="border:none;"></iframe>
 </div>
 </div>
+
+
+
+
 
 
 @include('partials.stats')

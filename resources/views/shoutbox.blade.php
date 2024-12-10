@@ -8,7 +8,9 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
+
 <div class="container mt-5">
+
     <h3>Shoutbox</h3>
     <ul id="messages" class="list-group mb-3"></ul>
     <form id="shoutbox-form">

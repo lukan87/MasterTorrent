@@ -10,6 +10,7 @@
                         <h3>System Information</h3>
                     </div>
                     <div class="card-body">
+
                         <!-- Table for displaying system info -->
                         <table class="table table-striped">
                             <tbody>
@@ -28,6 +29,18 @@
                                 <tr>
                                     <th>Cache Status</th>
                                     <td><p>{{ $cacheStatus }}</p></td>
+                                </tr>
+                                <tr>
+                                    <th>CPU Load (1 min / 5 min / 15 min)</th>
+                                    <td><p>{{ implode(' / ', $cpuLoad) }}</p></td>
+                                </tr>
+                                <tr>
+                                    <th>Ram Usage</th>
+                                    <td><p>{{ $ramUsage['total'] }} MB, Used: {{ $ramUsage['used'] }} MB, Free: {{ $ramUsage['free'] }} MB</p></td>
+                                </tr>
+                                <tr>
+                                    <th>Backup scheduled</th>
+                                    <td><p>{{ $backupSchedule }}</p></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -63,10 +76,10 @@
     </form>
 
 
-<form action="{{ route('admin.systemInfo.backup') }}" method="POST" class="mb-3 mr-2">
+<!-- <form action="{{ route('admin.systemInfo.backup') }}" method="POST" class="mb-3 mr-2">
     @csrf
     <button type="submit" class="btn btn-success btn-sm">Backup All Data</button>
-</form>
+</form> -->
 
 
     <a href="{{ route('admin.systemInfo.showRoutes') }}" class="btn btn-info btn-sm mb-3 mr-2">Show Routes</a>
@@ -78,13 +91,13 @@
 
             </div>
         </div>
-        <div class="card mt-5">
+        <!-- <div class="card mt-5">
     <div class="card-header">
         <h4>Scheduled Tasks</h4>
     </div>
     <div class="card-body">
         <p><strong>Database Backup:</strong> {{ $backupSchedule }}</p>
     </div>
-</div>
+</div> -->
     </div>
 @endsection

@@ -3,11 +3,16 @@
 @section('title',  'Upload' )
 
 @section('content')
+
+@if (Auth::check() && (Auth::user()->user_class >= \App\Models\UserClass::UPLOADER || Auth::user()->uploadpos === 'yes'))
+
+
 <div class="container">
     <h1>Upload a New Torrent</h1>
 
     <div class="alert alert-info">
-        <h2 class="mt-10"><strong>Announce URL:</strong> {{ route('announce', ['passkey' => $user->passkey]) }}</h2>
+        <!-- <h2 class="mt-10"><strong>Announce URL:</strong> {{ route('announce', ['passkey' => $user->passkey]) }}</h2> -->
+        <h2 class="mt-10"><strong>Announce URL:</strong> {{ url('announce', ['passkey' => $user->passkey], false) }}</h2>
         <p>Please use the announce URL above when creating a new torrent !</p>
     </div>
 
@@ -252,4 +257,10 @@ function insertBBCode(tag, option = null) {
         min-height: 150px; /* Minimum height for the textarea */
     }
 </style>
+
+
+
+@else
+<div class="alert alert-danger mt-5"> <h1>You are not authorized to upload torrents! Speak with a staff member !</h1> </div>
+@endif
 @endsection

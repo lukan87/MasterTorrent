@@ -176,5 +176,9 @@ public function userHasPermission($permission)
      return $this->hasMany(Message::class, 'receiver_id');
  }
 
+ public function histories()
+    {
+        return $this->hasMany(History::class, 'user_id');
+    }
 
 }

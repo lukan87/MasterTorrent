@@ -3,7 +3,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="donate-container mt-3">
+<!-- <div class="donate-container mt-3">
     <div class="donate-header">
         <h1>Support Our Mission</h1>
         <p>Your contributions make a difference. Help us continue providing valuable content.</p>
@@ -45,7 +45,7 @@
         <p>Thank you for supporting our mission!</p>
         <p>All donations are secure and greatly appreciated.</p>
     </div>
-</div>
+</div> -->
 <style>
 
 /* Donate Page Styles */

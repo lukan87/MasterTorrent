@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\History;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 use Carbon\Carbon;
 use App\Services\Bencode;
@@ -93,7 +94,7 @@ if (!$user) {
 
  $times_completed = $torrent ? $torrent->times_completed : 0; // Default to 0 if not found
 
- $peers = Peer::where('hash', '=', $hash)->take(100)->get()->toArray();
+ $peers = Peer::where('hash', '=', $hash)->take(100000)->get()->toArray();
         $seeders = 0;
         $leechers = 0;
 
@@ -216,6 +217,11 @@ if ($event == 'started') {
     //End Peer update
 
     $client->save();
+
+     // Clear all cache to ensure fresh data is loaded
+     Cache::flush();
+
+
 } elseif ($event == 'completed') {
     // Set the torrent data
     $history->agent = $agent;
@@ -268,6 +274,9 @@ if ($event == 'started') {
     $diff = $new_update - $old_update;
     $history->seedtime += $diff;
     $history->save();
+
+     // Clear all cache to ensure fresh data is loaded
+     Cache::flush();
 } elseif ($event == 'stopped') {
     // Set the torrent data
     $history->agent = $agent;
@@ -318,6 +327,9 @@ if ($event == 'started') {
     }
 
     $client->delete();
+
+    // Clear all cache to ensure fresh data is loaded
+    Cache::flush();
 } else {
 
      // Set the torrent data

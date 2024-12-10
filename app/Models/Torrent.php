@@ -114,6 +114,11 @@ class Torrent extends Model
         return $this->hasMany(History::class, 'torrent_id')->whereNotNull('completed_at');
     }
 
+    public function histories()
+    {
+        return $this->hasMany(History::class, 'torrent_id');
+    }
+
     public function getCompletionCountAttribute()
     {
         return $this->completions()->count();

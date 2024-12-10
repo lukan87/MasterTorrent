@@ -20,12 +20,15 @@ class UpdateTorrentsWithIMDbUrl extends Command
 
     public function handle(TMDBService $tmdbService)
     {
-        // Fetch all torrents with an imdb_url
-        $torrents = Torrent::whereNull('background')->get();
+        // Fetch torrents with an IMDb URL, no TMDB ID, no background, and seeders > 0
+        $torrents = Torrent::whereNull('tmdbid')
+            ->whereNotNull('imdb_url')
+            ->where('seeders', '>', 0)
+            ->get();
 
         foreach ($torrents as $torrent) {
             $imdbUrl = $torrent->imdb_url;
-            $tmdbId = $imdbId = $tmdbType = null;
+            $imdbId = $tmdbId = $tmdbType = null;
 
             // Check if imdb_url matches the IMDb format
             if (preg_match('/^https?:\/\/(?:www\.)?imdb\.com\/title\/(tt\d{7,8})/', $imdbUrl, $matches)) {
@@ -67,9 +70,19 @@ class UpdateTorrentsWithIMDbUrl extends Command
                             'background' => $background ?? $torrent->background,
                         ]);
 
-                        $this->info("Updated torrent: {$torrent->name}");
+                        // Display a detailed message for each updated torrent
+                        $this->info("Updated Torrent: {$torrent->name}");
+                        $this->info("  - IMDb ID: {$imdbId}");
+                        $this->info("  - TMDB ID: {$tmdbId}");
+                        $this->info("  - TMDB Type: {$tmdbType}");
+                        $this->info("  - Poster: " . ($poster ? 'Updated' : 'No Change'));
+                        $this->info("  - Background: " . ($background ? 'Updated' : 'No Change'));
+                        $this->info("  - Genres: " . implode(', ', array_column($genres, 'name')));
+                        $this->info("  - Seeders: {$torrent->seeders}");
                     }
                 }
+            } else {
+                $this->warn("Invalid IMDb URL for torrent: {$torrent->name}");
             }
         }
 

@@ -27,8 +27,9 @@ public function user()
 
 public function posts()
 {
-    return $this->hasMany(Post::class);
+    return $this->hasMany(Post::class)->orderBy('created_at', 'desc');
 }
+
 
 public function category()
 {

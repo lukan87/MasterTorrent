@@ -20,32 +20,30 @@
             <a href="{{ route('messages.show', $message) }}" class="dropdown-item">
                 <!-- Begin::Message -->
                 <div class="d-flex">
-                    <div class="flex-shrink-0">
-                        @if($message->sender && $message->sender->profile_image)
-                            <img src="{{ $message->sender->profile_image }}" alt="User Avatar" class="img-fluid rounded-circle me-3" style="width: 50px; height: 50px; object-fit: cover;">
-                        @else
-                            <img src="{{ asset('images/default_avatar/default-avatar.jpg') }}" alt="Default Avatar" class="img-fluid rounded-circle me-3" style="width: 50px; height: 50px; object-fit: cover;">
-                        @endif
-                    </div>
-                    <div class="flex-grow-1">
-                        <h3 class="dropdown-item-title">
-                            {{ $message->sender->name ?? 'Unknown' }}
-                            <span class="float-end fs-7 text-danger">
-                                <i class="bi bi-star-fill"></i>
-                            </span>
-                        </h3>
-                        <p class="fs-7">{{ Str::limit($message->body, 50) }}</p>
-                        <p class="fs-7 text-secondary">
-                            <i class="bi bi-clock-fill me-1"></i> {{ $message->created_at->diffForHumans() }}
-                        </p>
-                    </div>
-                </div>
+    <div class="flex-shrink-0">
+        @if($message->sender && $message->sender->profile_image)
+            <img src="{{ $message->sender->profile_image }}" alt="User Avatar" class="img-fluid rounded-circle me-3" style="width: 50px; height: 50px; object-fit: cover;">
+        @else
+            <img src="{{ asset('images/default_avatar/default-avatar.jpg') }}" alt="Default Avatar" class="img-fluid rounded-circle me-3" style="width: 50px; height: 50px; object-fit: cover;">
+        @endif
+    </div>
+    <div class="flex-grow-1" style="max-width: calc(100% - 60px);"> <!-- 100% - width of the image (50px) + margin (10px) -->
+        <h3 class="dropdown-item-title">
+            {{ $message->sender->name ?? 'Unknown' }}
+            <span class="float-end fs-7 {{ $message->is_read == 0 ? 'text-danger' : 'text-success' }}"><i class="bi bi-star-fill"></i></span>
+        </h3>
+        <p class="fs-7">{{ Str::limit($message->body, 50) }}</p>
+        <p class="fs-7 text-secondary">
+            <i class="bi bi-clock-fill me-1"></i> {{ $message->created_at->diffForHumans() }}
+        </p>
+    </div>
+</div>
                 <!-- End::Message -->
             </a>
             <div class="dropdown-divider"></div>
         @endforeach
 
-        <a href="/messages" class="dropdown-item dropdown-footer">See All Messages</a>
+        <a href="/messages/inbox" class="dropdown-item dropdown-footer">See All Messages</a>
     </div>
 </li>
 

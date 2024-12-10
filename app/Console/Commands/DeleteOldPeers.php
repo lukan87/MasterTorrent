@@ -38,8 +38,11 @@ class DeleteOldPeers extends Command
             if ($history) {
                 $history->active = false;
                 $history->save();
+                $this->comment("History updated for peer with ID: {$peer->id} and Hash: {$peer->hash}");
             }
+
             $peer->delete();
+            $this->comment("Peer with ID: {$peer->id} and Hash: {$peer->hash} has been deleted. Last updated at {$peer->client_updated_at}");
         }
 
         $this->comment('Automated Flush Old Peers Command Complete');

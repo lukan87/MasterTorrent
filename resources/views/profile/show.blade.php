@@ -59,6 +59,26 @@
                         </div>
                     </div>
 
+                    <!-- Upload -->
+                    <div class="row mb-3">
+                        <label for="created_at" class="col-md-2 col-form-label text-md-end">
+                            <i class="bi bi-arrow-up-circle-fill" data-bs-toggle="tooltip" data-bs-title="Uploaded"></i>
+                        </label>
+                        <div class="col-md-10">
+                            <p class="form-control-static">{{ formatBytes($user->uploaded) }}</p> <!-- Format as needed -->
+                        </div>
+                    </div>
+                    <!-- Download -->
+                    <div class="row mb-3">
+                        <label for="created_at" class="col-md-2 col-form-label text-md-end">
+                            <i class="bi bi-arrow-down-circle-fill" data-bs-toggle="tooltip" data-bs-title="Downloaded"></i>
+                        </label>
+                        <div class="col-md-10">
+                            <p class="form-control-static">{{ formatBytes($user->downloaded) }}</p> <!-- Format as needed -->
+                        </div>
+                    </div>
+
+
                     <!-- Additional Info -->
                     <div class="row mb-3">
                         <label for="info" class="col-md-2 col-form-label text-md-end">

@@ -72,7 +72,7 @@
     }
 
     .shoutbox-container {
-        max-height: 600px;
+        max-height: 800px;
         overflow-y: auto; /* Add vertical scrolling */
     }
 </style>
@@ -106,9 +106,10 @@
                             {{-- Message Header --}}
                             <div class="d-flex justify-content-between">
                             <span class="header">
-    <a href="{{ route('messages.create', ['receiver_id' => $message->user->id]) }}" class="text-light">
-        {{ $message->user->name }}
-    </a>
+                            <a href="{{ route('profile.show', ['id' => $message->user->id]) }}" class="text-light">
+    {{ $message->user->name }}
+</a>
+
 </span>
 
                                 <span class="timestamp">{{ $message->created_at->format('Y-m-d H:i') }}

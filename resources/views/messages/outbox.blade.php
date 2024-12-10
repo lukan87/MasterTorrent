@@ -9,15 +9,23 @@
             No messages have been sent yet.
         </div>
     @else
-        <div class="list-group">
+        <div class="row">
             @foreach($messages as $message)
-                <a href="{{ route('messages.show', $message) }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                    <div>
-                        <strong>{{ $message->subject ?? '(No Subject)' }}</strong><br>
-                        <small>Sent to: {{ $message->receiver->name }}</small>
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <strong>{{ $message->subject ?? '(No Subject)' }}</strong>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted">Sent to: {{ $message->receiver->name }}</p>
+                            <p class="card-text">{{ Str::limit($message->body, 100) }}</p>
+                        </div>
+                        <div class="card-footer text-end">
+                            <span class="badge bg-secondary">{{ $message->created_at->diffForHumans() }}</span>
+                            <a href="{{ route('messages.show', $message) }}" class="btn btn-primary btn-sm ms-2">Read More</a>
+                        </div>
                     </div>
-                    <span class="badge badge-secondary">{{ $message->created_at->diffForHumans() }}</span>
-                </a>
+                </div>
             @endforeach
         </div>
     @endif

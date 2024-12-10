@@ -38,7 +38,7 @@
                                 <p>XXX</p>
                             </a>
                         </li>
-                        @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::UPLOADER)
+                        @if (Auth::check() && (Auth::user()->user_class >= \App\Models\UserClass::UPLOADER || Auth::user()->uploadpos === 'yes'))
                             <li class="nav-item">
                                 <a href="{{ route('torrents.create') }}" class="nav-link">
                                     <i class="bi bi-upload"></i>
@@ -46,6 +46,8 @@
                                 </a>
                             </li>
                         @endif
+                       
+                        
                         <li class="nav-item">
                             <a href="{{ route('requests.index') }}" class="nav-link">
                                 <i class="bi bi-journal-plus"></i>
@@ -83,6 +85,12 @@
                     <a href="{{ route('donate') }}" class="nav-link">
                         <i class="bi bi-cash-coin"></i>
                         <p>Donate</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('rules') }}" class="nav-link">
+                    <i class="bi bi-info-square-fill"></i>
+                        <p>Rules</p>
                     </a>
                 </li>
                 <hr>

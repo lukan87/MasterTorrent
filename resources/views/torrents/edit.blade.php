@@ -151,7 +151,7 @@
         <!-- Background URL -->
         <div class="form-group">
             <label for="background">Background URL:</label>
-            <input type="text" name="background" id="background" class="form-control" value="{{ old('background', $torrent->background) }}">
+            <input type="url" name="background" id="background" class="form-control" value="{{ old('background', $torrent->background) }}">
             @if ($torrent->background)
                 <div>
                     <img src="{{ $torrent->background }}" alt="Background" class="img-thumbnail" style="max-width: 150px;">

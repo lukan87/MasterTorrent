@@ -29,9 +29,9 @@
                 <tr>
                     <th>Torrents Downloaded</th>
                     <td>
-                        @foreach($torrentsDownloaded as $torrent)
-                            <p>{{ $torrent->torrent->name }} (ID: {{ $torrent->id }})</p>
-                        @endforeach
+                    @foreach($torrentsDownloaded as $torrent)
+    <p>{{ $torrent->torrent->name ?? 'Unknown name' }} (ID: {{ $torrent->id }})</p>
+@endforeach
                         <div class="mt-2">
                             {{ $torrentsDownloaded->links('pagination::bootstrap-5') }}
                         </div>

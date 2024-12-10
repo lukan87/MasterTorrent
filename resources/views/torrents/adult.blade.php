@@ -70,6 +70,7 @@
                         <th>Category</th>
                         <th>Name</th>
                         <th></th>
+                        <th><i class="bi bi-stopwatch"></i></th>
                         <th>
                             <a href="{{ route('torrents.index', array_merge(request()->all(), ['sort' => 'size', 'direction' => request('direction') == 'asc' ? 'desc' : 'asc'])) }}">
                             <i class="bi bi-pie-chart-fill"></i>
@@ -102,6 +103,9 @@
                                 @endif
                             </a>
                         </th>
+                        @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::VIP)
+                            <th>Uploader</th>
+                        @endif
                         @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
                             <th>Actions</th>
                         @endif
@@ -131,10 +135,14 @@
                                   <i class="bi bi-file-earmark-arrow-down-fill" data-bs-toggle="tooltip" title="Download torrent"></i>
                                 </a>
                             </td>
+                            <td>{{ \Carbon\Carbon::parse($torrent->created_at)->format('d-M-Y') }}</td>
                             <td>{{ App\Helpers\FormatHelper::formatSize($torrent->size) }}</td>
                             <td>{{ $torrent->seeders }}</td>
                             <td>{{ $torrent->leechers }}</td>
                             <td>{{ $torrent->times_completed }}</td>
+                            @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::VIP)
+                            <th>{{$torrent->uploader->name ?? 'Unknown'}}</th>
+                        @endif
 
                             @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
                                 <td>

@@ -20,6 +20,10 @@ class History extends Model
         'info_hash',
     ];
 
+    protected $casts = [
+        'completed_at' => 'datetime',
+    ];
+
     // Define relationships
     public function torrent()
     {

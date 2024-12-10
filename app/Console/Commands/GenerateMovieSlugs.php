@@ -16,23 +16,20 @@ class GenerateMovieSlugs extends Command
         $movies = Torrent::all();
 
         foreach ($movies as $movie) {
-            // Check if slug already exists, to avoid overwriting
-            if ($movie->slug) {
-                $slug = Str::slug($movie->name);
+            $expectedSlug = Str::slug(str_replace('.', '-', $movie->name), '-'); // Generate the expected slug from the name
 
-        $name = str_replace('.', '-', $movie->name); // Replace dots with hyphens
-        $slug = Str::slug($name, '-'); // Generate the slug
+            // Check if the slug is null or doesn't match the expected slug
+            if (!$movie->slug || $movie->slug !== $expectedSlug) {
+                // Ensure the slug is unique by appending a number if it already exists
+                $originalSlug = $expectedSlug;
+                $count = 1;
+                while (Torrent::where('slug', $expectedSlug)->exists()) {
+                    $expectedSlug = $originalSlug . '-' . $count++;
+                }
 
-        // Ensure the slug is unique by appending a number if it already exists
-        $originalSlug = $slug;
-        $count = 1;
-        while (Torrent::where('slug', $slug)->exists()) {
-            $slug = $originalSlug . '-' . $count++;
-        }
-
-                // Set the slug and save the movie
-                $movie->slug = $slug;
-                $movie->save(); // Save changes to the database
+                // Set the new slug and save the movie
+                $movie->slug = $expectedSlug;
+                $movie->save();
 
                 $this->info("Slug generated for movie: {$movie->name}");
             }
