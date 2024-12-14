@@ -1,145 +1,80 @@
-<!-- resources/views/donate.blade.php -->
-
 @extends('layouts.app')
 
 @section('content')
-<!-- <div class="donate-container mt-3">
-    <div class="donate-header">
-        <h1>Support Our Mission</h1>
-        <p>Your contributions make a difference. Help us continue providing valuable content.</p>
-    </div>
+<div class="container">
+    <div class="tt_block rounded">
+        <div class="tt_blockhead text-right">
+            <div class="card">
+                <h5 class="card-header">
+                    <i class="fa-solid fa-circle-dollar-to-slot"></i> Donation Page
+                </h5>
+                <div class="card-body">
+                    <div class="contain">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="alert alert-info text-center">
+                                    <h3>
+                                        <i class="fa-solid fa-circle-dollar-to-slot"></i> Donate to keep us alive!
+                                        <i class="fa-solid fa-circle-dollar-to-slot"></i>
+                                    </h3>
+                                    <p>
+                                        <b>Using LastFiles is free, but server costs are not! Donate to keep the site alive!</b><br>
+                                        If you wish to donate, send a message
+                                        <a href="/userdetails/1067">
+                                            <button class="btn btn-success btn-sm">HERE</button>
+                                        </a>
+                                        with the donated amount to receive the selected benefits!<br>
+                                        Currently, we only accept donations through
+                                        <img src="https://s3.cointelegraph.com/storage/uploads/view/3278bdc14c74dd4e85732b776d0e5b1d.png" style="width:70px;">
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card mt-4">
+                            <div class="card-header text-center">
+                                <h4><i class="fa-solid fa-hand-holding-dollar"></i> Available Donation Options</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    @php
+                                        $donations = [
+                                            ['amount' => 5, 'vip' => '4 weeks', 'upload' => '50G', 'bonus' => '500'],
+                                            ['amount' => 7, 'vip' => '6 weeks', 'upload' => '150G', 'bonus' => '1500'],
+                                            ['amount' => 10, 'vip' => '2 months', 'upload' => '300G', 'bonus' => '2500'],
+                                            ['amount' => 15, 'vip' => '10 weeks', 'upload' => '500G', 'bonus' => '5000'],
+                                            ['amount' => 20, 'vip' => '3 months', 'upload' => '750G', 'bonus' => '7500'],
+                                            ['amount' => 30, 'vip' => 'Unlimited', 'upload' => '1000G', 'bonus' => '10000'],
+                                        ];
+                                        $totalDonation = array_sum(array_column($donations, 'amount'));
+                                    @endphp
 
-    @if(session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
+                                    @foreach ($donations as $donation)
+                                        <div class="col-md-4 mb-3">
+                                            <div class="card">
+                                                <div class="card-body text-center">
+                                                    <h5 class="card-title">{{ $donation['amount'] }}€ Donation</h5><br>
+                                                    <p><strong>VIP:</strong> {{ $donation['vip'] }}</p>
+                                                    <p><strong>Upload:</strong> {{ $donation['upload'] }}</p>
+                                                    <p><strong>Bonus:</strong> {{ $donation['bonus'] }} points</p>
+                                                    <form action="https://www.paypal.com/paypalme/Donatelast" method="POST">
+                                                        <button class="btn btn-success">
+                                                            Donate {{ $donation['amount'] }}€
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                            <div class="card-footer text-center">
+                                <h4>Total Donation Options: <b>{{ $totalDonation }}€</b></h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    @endif
-
-    <form action="{{ route('donate') }}" method="POST">
-        @csrf
-        <div class="donation-options">
-            <div class="donation-card">
-                <h2>$10</h2>
-                <p>Helps cover basic site maintenance costs.</p>
-                <button type="submit" name="amount" value="10" class="donate-btn">Donate $10</button>
-            </div>
-            <div class="donation-card">
-                <h2>$25</h2>
-                <p>Supports content creation and improvement.</p>
-                <button type="submit" name="amount" value="25" class="donate-btn">Donate $25</button>
-            </div>
-            <div class="donation-card">
-                <h2>$50</h2>
-                <p>Contributes to major upgrades and new features.</p>
-                <button type="submit" name="amount" value="50" class="donate-btn">Donate $50</button>
-            </div>
-            <div class="donation-card">
-                <h2>Custom</h2>
-                <input type="number" min="1" placeholder="Enter amount" name="amount" class="custom-amount">
-                <button type="submit" class="donate-btn">Donate Custom</button>
-            </div>
-        </div>
-    </form>
-
-    <div class="donate-footer">
-        <p>Thank you for supporting our mission!</p>
-        <p>All donations are secure and greatly appreciated.</p>
     </div>
-</div> -->
-<style>
-
-/* Donate Page Styles */
-.donate-container {
-    max-width: 800px;
-    margin: auto;
-    padding: 20px;
-    background: #ffffff;
-    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-    text-align: center;
-}
-
-.donate-header h1 {
-    font-size: 2em;
-    color: #333;
-    margin-bottom: 0.5em;
-}
-
-.donate-header p {
-    font-size: 1.1em;
-    color: #777;
-    margin-bottom: 1.5em;
-}
-
-.alert-success {
-    color: #155724;
-    background-color: #d4edda;
-    border-color: #c3e6cb;
-    padding: 10px;
-    margin-bottom: 15px;
-    border-radius: 5px;
-}
-
-.donation-options {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    justify-content: center;
-    margin-bottom: 1.5em;
-}
-
-.donation-card {
-    flex: 1 1 200px;
-    background: #f9f9f9;
-    border: 1px solid #eeeeee;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.donation-card h2 {
-    font-size: 1.5em;
-    color: #333;
-    margin-bottom: 0.5em;
-}
-
-.donation-card p {
-    font-size: 1em;
-    color: #555;
-    margin-bottom: 1em;
-}
-
-.custom-amount {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 1em;
-    border-radius: 5px;
-    border: 1px solid #cccccc;
-}
-
-.donate-btn {
-    padding: 10px 20px;
-    color: #ffffff;
-    background-color: #007bff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1em;
-    transition: background-color 0.3s ease;
-}
-
-.donate-btn:hover {
-    background-color: #0056b3;
-}
-
-.donate-footer {
-    font-size: 0.9em;
-    color: #777;
-    margin-top: 1.5em;
-}
-
-
-</style>
+</div>
 @endsection
-

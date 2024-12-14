@@ -76,8 +76,10 @@ class ForumController extends Controller
         // Fetch the topic along with its posts and user data
         $topic = Topic::with(['posts.user', 'user'])->findOrFail($id);
 
+        $posts = $topic->posts()->paginate(10);
+
         // Return the view with topic data
-        return view('forum.show', compact('topic'));
+        return view('forum.show', compact('topic', 'posts'));
     }
     public function edit($id)
     {

@@ -8,7 +8,7 @@
     <!-- News Content -->
     <div class="card shadow-sm mb-4">
         <div class="card-body">
-            <p class="lead">{!! convertCustomTagsToHtml($news->content ) !!}</p>
+            <p>{!! convertCustomTagsToHtml($news->content ) !!}</p>
         </div>
     </div>
 
@@ -21,8 +21,13 @@
     </p>
 
     <!-- Back to News Button -->
+    @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::ADMIN)
     <a href="{{ route('news.index') }}" class="btn btn-primary mt-4">
         <i class="bi bi-arrow-left-circle"></i> Back to News
+    </a>
+    @endif
+    <a href="{{ route('news.index') }}" class="btn btn-secondary mt-4">
+        <i class="bi bi-arrow-left-circle"></i> Home
     </a>
 </div>
 @endsection

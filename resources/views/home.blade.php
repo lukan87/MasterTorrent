@@ -4,7 +4,7 @@
 
 <div class="row">
 
-    <!-- Movies Section -->
+
     <div class="col-lg-9 col-md-8 col-sm-6">
 
 @include('partials.news')
@@ -15,26 +15,35 @@
 @include('partials.poll')
 </div>
 
+<iframe src="https://stream.clever-host.ro/cp/widgets/player/single/?p=8036" height="110" width="100%" scrolling="no" style="border:none;"></iframe>
 
 
+    @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::ADMIN)
 <div class="row">
-    <!-- Movies Section -->
+
     <div class="col-md-6">
 @include('partials.toptorrents')
 </div>
 
 <div class="col-md-6">
 @include('partials.onlineusers')
-<iframe src="https://stream.clever-host.ro/cp/widgets/player/single/?p=8036" height="110" width="100%" scrolling="no" style="border:none;"></iframe>
-</div>
-</div>
-
-
-
-
-
 
 @include('partials.stats')
+</div>
+</div>
+
+
+
+@endif
+
+@if (Auth::check() && Auth::user()->id === 3)
+
+
+
+@endif
+
+
+
 
 
 

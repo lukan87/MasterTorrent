@@ -26,12 +26,17 @@
             </div>
             <!-- Card Body with Content -->
             <div class="card-body">
-                <p class="card-text text-muted">{!! convertCustomTagsToHtml($news->content ) !!}</p>
+            <p class="card-text text-muted">
+    {!! nl2br(e(Str::words(strip_tags(convertCustomTagsToHtml($news->content)), 150, '...'))) !!}
+    <a href="{{ route('news.show', $news->id) }}" class="btn btn-outline-secondary btn-sm">Read More</a>
+</p>
+
+
                 <div class="d-flex justify-content-between align-items-center mt-3">
                     <p class="card-text small text-muted">Posted by {{ $news->user->name }}
                         <i> on {{ $news->created_at->format('F j, Y') }} </i>
                     </p>
-                    <a href="{{ route('news.show', $news) }}" class="btn btn-outline-primary btn-sm">Read More</a>
+                    <!-- <a href="{{ route('news.show', $news) }}" class="btn btn-outline-primary btn-sm">Read More</a> -->
                 </div>
             </div>
         </div>

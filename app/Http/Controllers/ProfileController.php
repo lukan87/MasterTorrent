@@ -10,6 +10,7 @@ use App\Models\Peer;
 use App\Models\History;
 use App\Models\Torrent;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
 
 class ProfileController extends Controller
 {
@@ -100,13 +101,48 @@ public function update(Request $request, $id, $name)
         }
     }
 
-    $user->enabled = $request->has('enabled') && $request->enabled === 'yes' ? 'yes' : 'no';
+    // Check if VIP duration is selected
+    if ($request->filled('vip_until')) {
+        // Get the selected duration
+        $vipDuration = $request->input('vip_until');
+
+        // Calculate the VIP expiration date based on the selected duration
+        switch ($vipDuration) {
+            case '4 weeks':
+                $user->vip_until = Carbon::now()->addWeeks(4);
+                break;
+            case '6 weeks':
+                $user->vip_until = Carbon::now()->addWeeks(6);
+                break;
+            case '8 weeks':
+                $user->vip_until = Carbon::now()->addWeeks(8);
+                break;
+            case '10 weeks':
+                $user->vip_until = Carbon::now()->addWeeks(10);
+                break;
+            case '12 weeks':
+                $user->vip_until = Carbon::now()->addWeeks(12);
+                break;
+            default:
+                $user->vip_until = null; // If nothing selected, clear VIP
+        }
+
+        // Set the user class to VIP (assuming class 3 represents VIP)
+    $user->user_class = 3;
+
+    } else {
+        $user->vip_until = null; // Reset VIP if no duration is selected
+    }
+
+    $user->enabled = $request->boolean('enabled') ? 'yes' : 'no';
     $user->donor = $request->has('donor') && $request->donor === 'yes' ? 'yes' : 'no';
     $user->uploadpos = $request->has('uploadpos') && $request->uploadpos === 'yes' ? 'yes' : 'no';
     $user->downloadpos = $request->has('downloadpos') && $request->downloadpos === 'yes' ? 'yes' : 'no';
 
     $user->info = $request->info;
-    $user->IP = $request->ip();
+    $user->seedbonus = filter_var($request->seedbonus, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+
+
     $user->save();
 
     return redirect()->route('profile.show', ['id' => $user->id, 'name' => $user->name])

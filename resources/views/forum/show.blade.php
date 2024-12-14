@@ -39,9 +39,9 @@
     <hr>
 
     <h3>Posts:</h3>
-@foreach($topic->posts as $post)
+@foreach($posts as $post)
     <!-- Check if this is a main post or a reply -->
-    @if(is_null($post->parent_id)) 
+    @if(is_null($post->parent_id))
         <!-- Main post (not a reply) -->
         <div class="card mb-3">
             <div class="card-header">
@@ -128,7 +128,7 @@
     @endif
 @endforeach
 
-
+{{ $posts->links('pagination::bootstrap-5') }}
 
 
 

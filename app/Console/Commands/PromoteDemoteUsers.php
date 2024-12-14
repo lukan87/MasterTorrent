@@ -23,7 +23,7 @@ class PromoteDemoteUsers extends Command
         $now = Carbon::now();
 
         // Retrieve users with id 1 and 2
-        $users = User::whereIn('id', [1, 2])->get();  // Fetch users with ids 1 and 2
+        $users = User::whereIn('user_class', [1, 2])->get();  // Fetch users with ids 1 and 2
 
         foreach ($users as $user) {
             // Clone $now so we don't modify it
@@ -63,7 +63,7 @@ class PromoteDemoteUsers extends Command
                 'sender_id' => 2,
                 'receiver_id' => $user->id,
                 'subject' => "Class Demotion",
-                'body' => "Congratulations, {$user->name}! You have been demoted to User as your ratio dropped bellow 1 \n
+                'body' => "Hello, {$user->name}! You have been demoted to User as your ratio dropped bellow 1 \n
                            Ensure you seed your torrents until ratio is 1 or higher! \n Thank you. \n LastFiles Team"
     ]);
 

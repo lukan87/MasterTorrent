@@ -91,7 +91,7 @@
                 <form action="{{ route('requests.fill', $request->id) }}" method="POST">
                     @csrf
                     <div class="mb-3">
-                        <label for="link" class="form-label">Enter the Link to Fill the Request</label>
+                        <label for="link" class="form-label">Enter the torrent link to  fill the request</label>
                         <input type="text" class="form-control" name="link" id="link" required>
                     </div>
                     <button type="submit" class="btn btn-success">Fill Request</button>

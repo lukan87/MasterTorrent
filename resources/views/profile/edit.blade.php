@@ -18,7 +18,7 @@
                             <div class="row mb-3">
     <label for="name" class="col-md-4 col-form-label text-md-end">{{ __('Name') }}</label>
     <div class="col-md-6">
-        @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
+        @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::ADMIN)
             <input id="name" type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name', $user->name) }}" required>
         @else
             <input id="name" type="text" class="form-control" name="name" value="{{ $user->name }}" readonly>
@@ -63,6 +63,34 @@
 
 
 
+@if ($user->vip_until != NULL)
+<div class="row mb-3">
+    <label for="vip_until" class="col-md-4 col-form-label text-md-end">Vip Until</label>
+    <div class="col-md-6">
+    {{$user->vip_until}}
+    </div>
+</div>
+
+@else
+@endif
+
+@if (auth()->user()->user_class === \App\Models\UserClass::OWNER && $user->user_class <= \App\Models\UserClass::VIP)
+
+<div class="row mb-3">
+    <label for="vip_until" class="col-md-4 col-form-label text-md-end">Set VIP Duration</label>
+    <div class="col-md-6">
+    <select id="vip_until" name="vip_until" class="form-control">
+        <option value="">-- Select Duration --</option>
+        <option value="4 weeks" {{ old('vip_until') == '4 weeks' ? 'selected' : '' }}>4 Weeks</option>
+        <option value="6 weeks" {{ old('vip_until') == '6 weeks' ? 'selected' : '' }}>6 Weeks</option>
+        <option value="8 weeks" {{ old('vip_until') == '8 weeks' ? 'selected' : '' }}>8 Weeks</option>
+        <option value="10 weeks" {{ old('vip_until') == '10 weeks' ? 'selected' : '' }}>10 Weeks</option>
+        <option value="12 weeks" {{ old('vip_until') == '12 weeks' ? 'selected' : '' }}>12 Weeks </option>
+    </select>
+    </div>
+</div>
+@endif
+
                             <div class="row mb-3">
                                 <label for="info" class="col-md-4 col-form-label text-md-end">{{ __('Info') }}</label>
                                 <div class="col-md-6">
@@ -74,6 +102,21 @@
                                     @enderror
                                 </div>
                             </div>
+
+                           @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::ADMIN && Auth::user()->id != $user->id)
+    <div class="row mb-3">
+        <label for="seedbonus" class="col-md-4 col-form-label text-md-end">{{ __('Seedbonus') }}</label>
+        <div class="col-md-6">
+            <input id="seedbonus" type="text" class="form-control @error('seedbonus') is-invalid @enderror" name="seedbonus" value="{{ old('seedbonus', $user->seedbonus) }}">
+            @error('seedbonus')
+                <span class="invalid-feedback" role="alert">
+                    <strong>{{ $message }}</strong>
+                </span>
+            @enderror
+        </div>
+    </div>
+@endif
+
 
 
                             <div class="row mb-3">

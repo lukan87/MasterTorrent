@@ -22,8 +22,10 @@ use App\Http\Controllers\TorrentRequestController;
 use App\Http\Controllers\Admin\SystemInfoController;
 use App\Http\Controllers\RssFeedController;
 use App\Http\Controllers\TorrentHistoryController;
+use App\Http\Controllers\DonationController;
 
 
+Route::post('/admin/users/sendMassMessage', [App\Http\Controllers\Admin\UserController::class, 'sendMassMessage'])->name('admin.users.sendMassMessage');
 
 
 Auth::routes();
@@ -205,14 +207,7 @@ Route::post('/shop', [BonusController::class, 'buyUpload'])->name('shop.upload')
 
 
 // Donate page beta //
-Route::match(['get', 'post'], '/donate', function (Illuminate\Http\Request $request) {
-    if ($request->isMethod('post')) {
-        $amount = $request->input('amount');
-        return back()->with('success', "Thank you for donating \${$amount}!");
-    }
-
-    return view('donate');
-})->name('donate');
+Route::get('/donate', [DonationController::class, 'index'])->name('donate');
 
 //Rules Page Beta
 Route::get('/rules', function () {

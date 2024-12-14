@@ -2,7 +2,7 @@
     <!--begin::Sidebar Brand-->
     <div class="sidebar-brand">
         <i class="bi bi-globe brand-image opacity-75 shadow"></i>
-        <span class="brand-text fw-light">Torrents</span>
+        <span class="brand-text fw-light">LastFiles</span>
     </div>
     <!--end::Sidebar Brand-->
 
@@ -46,8 +46,8 @@
                                 </a>
                             </li>
                         @endif
-                       
-                        
+
+
                         <li class="nav-item">
                             <a href="{{ route('requests.index') }}" class="nav-link">
                                 <i class="bi bi-journal-plus"></i>

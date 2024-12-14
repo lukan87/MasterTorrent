@@ -85,10 +85,10 @@ if ($request->filled('keyword')) {
 }
 
 
-            // Apply category filter if a category is selected
-            if ($request->filled('category')) {
-                $query->where('category_id', $request->category);
-            }
+            // Apply multiple category filters if categories are selected
+if ($request->has('categories') && is_array($request->categories)) {
+    $query->whereIn('category_id', $request->categories);
+}
 
             // Apply genre filter if genre is selected
             if ($request->filled('genre')) {
@@ -857,19 +857,33 @@ public function getPeers($torrentId)
 }
 
 
- public function peers($torrentId)
+public function peers($torrentId)
 {
     // Fetch the torrent by ID
     $torrent = Torrent::findOrFail($torrentId);
 
-    // Fetch the seeders and leechers from the 'peers' table
-    $seeders = Peer::where('torrent_id', $torrentId)->where('seeder', 1)->paginate(25);
-    $leechers = Peer::where('torrent_id', $torrentId)->where('seeder', 0)->paginate(25);
+    // Check if 'seeders' or 'leechers' is present in the query string
+    $seeders = null;
+    $leechers = null;
 
+    // Fetch seeders if the query string contains 'seeders'
+    if (request()->has('seeders')) {
+        $seeders = Peer::where('torrent_id', $torrentId)->where('seeder', 1)->paginate(25);
+        // Append 'seeders' query parameter to pagination links
+        $seeders->withPath(url()->current())->appends(['seeders' => '1']);
+    }
 
-    // Return the view with the seeders and leechers
+    // Fetch leechers if the query string contains 'leechers'
+    if (request()->has('leechers')) {
+        $leechers = Peer::where('torrent_id', $torrentId)->where('seeder', 0)->paginate(25);
+        // Append 'leechers' query parameter to pagination links
+        $leechers->withPath(url()->current())->appends(['leechers' => '1']);
+    }
+
+    // Return the view with the seeders or leechers based on the query parameters
     return view('torrents.peers', compact('torrent', 'seeders', 'leechers'));
 }
+
 
 
 }

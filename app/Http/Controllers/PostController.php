@@ -13,10 +13,15 @@ class PostController extends Controller
 {
 
     public function show($id)
-{
-    $topic = Topic::with('posts.replies')->findOrFail($id); // Eager load posts and replies
-    return view('topics.show', compact('topic'));
-}
+    {
+        $topic = Topic::findOrFail($id);
+
+        // Paginate posts with their replies
+        $posts = $topic->posts()->with('replies')->paginate(10);
+
+        return view('topics.show', compact('topic', 'posts'));
+    }
+
 
     // Store a new reply to a topic
     public function store(Request $request, $topicId)
@@ -115,7 +120,7 @@ public function storeReply(Request $request, Post $post)
 public function destroyReply($replyId)
 {
     $reply = Post::findOrFail($replyId);
-    
+
     // Ensure that the user is either the owner or a moderator
     if (auth()->user()->id === $reply->user_id || auth()->user()->user_class >= \App\Models\UserClass::MODERATOR) {
         $reply->delete();  // Delete the reply

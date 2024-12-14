@@ -39,14 +39,36 @@
 
 <!-- Right: Seeders, Leechers, and Times Completed -->
 <div class="d-flex ms-auto">
-<a href="{{ route('torrent.peers', ['torrent' => $torrent->id]) }}">
+
+@if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
+<a href="{{ route('torrent.peers', ['torrent' => $torrent->id]) }}?seeders">
     <p class="mb-0 mx-2">
         <strong><i class="bi bi-cloud-arrow-up-fill" data-bs-toggle="tooltip" title="Seeders"></i></strong>
         {{ $torrent->seeders }}
     </p>
 </a>
+@else
+    <p class="mb-0 mx-2">
+        <strong><i class="bi bi-cloud-arrow-up-fill" data-bs-toggle="tooltip" title="Seeders"></i></strong>
+        {{ $torrent->seeders }}
+    </p>
+@endif
 
-    <p class="mb-0 mx-2"><strong><i class="bi bi-cloud-arrow-down-fill" data-bs-toggle="tooltip" title="Leechers"></i></strong> {{ $torrent->leechers }}</p>
+@if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
+<a href="{{ route('torrent.peers', ['torrent' => $torrent->id]) }}?leechers">
+    <p class="mb-0 mx-2"> <strong><i class="bi bi-cloud-arrow-down-fill" data-bs-toggle="tooltip" title="Leechers"></i></strong>
+        {{ $torrent->leechers }}
+    </p>
+</a>
+@else
+<p class="mb-0 mx-2">
+    <strong><i class="bi bi-cloud-arrow-down-fill" data-bs-toggle="tooltip" title="Leechers"></i></strong>
+     {{ $torrent->leechers }}</p>
+@endif
+
+
+
+
     @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
     <p class="mb-0 mx-2">
     <strong>
@@ -225,11 +247,39 @@
 <!-- Scrollable Content Style -->
 <style>
 .scrollable-content {
-    max-height: 450px;
+    max-height: 650px;
     overflow-y: auto;
 }
+
+
 </style>
 
+<script>
+
+function toggleSpoiler(button) {
+    const spoilerContent = button.nextElementSibling;
+
+    if (!spoilerContent) {
+        console.error("Spoiler content not found!");
+        return;
+    }
+
+    // Log the content and its current state
+    console.log("Spoiler content:", spoilerContent);
+    console.log("Current display:", window.getComputedStyle(spoilerContent).display);
+
+    // Toggle display property
+    if (window.getComputedStyle(spoilerContent).display === "none") {
+        spoilerContent.style.display = "block";
+        button.textContent = "Hide";
+    } else {
+        spoilerContent.style.display = "none";
+        button.textContent = "Show";
+    }
+}
+
+
+</script>
 
 
     <a href="{{ route('torrents.index') }}" class="btn btn-secondary mt-3">Back to Torrents</a>

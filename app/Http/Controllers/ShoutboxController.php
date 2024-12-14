@@ -11,14 +11,17 @@ class ShoutboxController extends Controller
 {
 
     public function index()
-{
-    // Fetch all shoutbox messages and eager load user information
-    $messages = Shoutbox::with('user', 'replies.user')->whereNull('parent_id')->latest()->get();
+    {
+        // Fetch the latest 20 shoutbox messages and eager load user information
+        $messages = Shoutbox::with('user', 'replies.user')
+            ->whereNull('parent_id')
+            ->latest()
+            ->take(20) // Limit to the latest 20 messages
+            ->get();
 
+        return view('shoutbox.index', ['messages' => $messages]);
+    }
 
-     return view('shoutbox.index', ['messages' => $messages]);
-    // return redirect()->route('home.index', ['messages' => $messages]);
-}
 public function iframe()
 {
     $messages = Shoutbox::with('user', 'replies.user')->whereNull('parent_id')->latest()->get();

@@ -24,6 +24,10 @@ class HomeController extends Controller
 
         $recommendedTorrents = $this->getRecommendedTorrents();
 
+        // Get top uploaders and top downloaders
+        $topUploaders = User::orderBy('uploaded', 'desc')->take(10)->get();
+        $topDownloaders = User::orderBy('downloaded', 'desc')->take(10)->get();
+
         // Cache online users
         $onlineUsers = Cache::remember('online_users', $cacheDuration, function () {
             return $this->getOnlineUsers();
@@ -93,7 +97,7 @@ $topLastMonth = Cache::remember('top_last_month', $cacheDuration, function () us
             'torrentCount',
             'userCount',
             'forumTopicCount',
-            'recommendedTorrents'
+            'recommendedTorrents','topUploaders','topDownloaders'
             
         ));
     }

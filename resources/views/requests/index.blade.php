@@ -25,7 +25,7 @@
                             <th>Requested by</th>
                             <th>IMDB URL</th>
                             <th>Filled</th>
-                            <th>Actions</th>
+
                         </tr>
                     </thead>
                     <tbody>
@@ -49,8 +49,9 @@
                                         <i class="bi bi-x-circle text-danger"></i> Not Filled
                                     @endif
                                 </td>
-                                <td>
+
     @if (Auth::check() && (Auth::user()->user_class >= \App\Models\UserClass::MODERATOR || Auth::user()->name === $request->requester->name))
+    <td>
     <div class="d-flex justify-content-start gap-2">
         <a href="{{ route('requests.edit', $request->id) }}" class="btn btn-warning btn-sm" data-bs-toggle="tooltip" title="Edit Request">
             <i class="bi bi-pencil"></i>
@@ -65,8 +66,9 @@
             </button>
         </form>
     </div>
+    </td>
     @endif
-</td>
+
 
                             </tr>
                         @endforeach

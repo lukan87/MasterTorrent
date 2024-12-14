@@ -7,60 +7,70 @@
     <h1 class="page-title">Torrent List</h1>
 
 
-    <!-- Search Form -->
-    <form action="{{ route('torrents.index') }}" method="GET" class="search-form mb-4">
-        <div class="row g-3">
-            <!-- Search Keyword with Autocomplete -->
-            <div class="col-md-4 col-12">
-                <label for="keyword" class="form-label">Keyword</label>
-                <input type="text" name="keyword" id="keyword" class="form-control" placeholder="Search Torrent by name, imdb url, tmdbid..." value="{{ request('keyword') }}">
-            </div>
+   <!-- Search Form -->
+<form action="{{ route('torrents.index') }}" method="GET" class="search-form mb-4">
+    <div class="row g-3 align-items-end">
+        <!-- Search Keyword with Autocomplete -->
+        <div class="col-md-3 col-sm-6">
+            <label for="keyword" class="form-label">Keyword</label>
+            <input type="text" name="keyword" id="keyword" class="form-control" placeholder="Search Torrent by name, IMDb URL, TMDb ID..." value="{{ request('keyword') }}">
+        </div>
 
-            <!-- Category Filter -->
-            <div class="col-md-3 col-12">
-                <label for="category" class="form-label">Category</label>
-                <select name="category" id="category" class="form-select">
-                    <option value="">All Categories</option>
-                    @foreach($categories as $category)
-                        <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
+        <!-- Category Filter -->
+        <div class="col-md-3 col-sm-6">
+            <label for="categoriesDropdown" class="form-label">Categories</label>
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle w-100" type="button" id="categoriesDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    Select Categories
+                </button>
+                <ul class="dropdown-menu w-100" aria-labelledby="categoriesDropdown">
+                    @foreach ($categories as $category)
+                    @if (!in_array($category->id, [27, 34, 60]))
+                    <li>
+                        <label class="dropdown-item">
+                            <input type="checkbox" name="categories[]" value="{{ $category->id }}" 
+                            {{ in_array($category->id, request('categories', [])) ? 'checked' : '' }}>
                             {{ $category->name }}
-                        </option>
+                        </label>
+                    </li>
+                @endif
                     @endforeach
-                </select>
-            </div>
-
-            <!-- Genre Filter -->
-            <div class="col-md-2 col-12">
-                <label for="genre" class="form-label">Genre</label>
-                <select name="genre" id="genre" class="form-select">
-                    <option value="">All Genres</option>
-                    @foreach($allGenres as $genre)
-                        <option value="{{ $genre->id }}" {{ request('genre') == $genre->id ? 'selected' : '' }}>
-                            {{ $genre->name }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="col-md-2 col-12">
-    <label for="torrent_status" class="form-label">Torrent Status</label>
-    <select name="torrent_status" id="torrent_status" class="form-control">
-
-        <option value="active" {{ request('torrent_status') == 'active' ? 'selected' : '' }}>Active</option>
-        <option value="dead" {{ request('torrent_status') == 'dead' ? 'selected' : '' }}>Dead (Seeders = 0)</option>
-        <option value="free" {{ request('torrent_status') == 'free' ? 'selected' : '' }}>Free</option>
-        <option value="double" {{ request('torrent_status') == 'double' ? 'selected' : '' }}>Double</option>
-        <option value="seedbox" {{ request('torrent_status') == 'seedbox' ? 'selected' : '' }}>Seedbox</option>
-    </select>
-</div>
-
-
-            <!-- Submit Button -->
-            <div class="col-md-1 col-12 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary w-100">Search</button>
+                </ul>
             </div>
         </div>
-    </form>
+
+        <!-- Genre Filter -->
+        <div class="col-md-2 col-sm-4">
+            <label for="genre" class="form-label">Genre</label>
+            <select name="genre" id="genre" class="form-select">
+                <option value="">All Genres</option>
+                @foreach($allGenres as $genre)
+                    <option value="{{ $genre->id }}" {{ request('genre') == $genre->id ? 'selected' : '' }}>
+                        {{ $genre->name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        <!-- Torrent Status Filter -->
+        <div class="col-md-2 col-sm-4">
+            <label for="torrent_status" class="form-label">Status</label>
+            <select name="torrent_status" id="torrent_status" class="form-select">
+                <option value="active" {{ request('torrent_status') == 'active' ? 'selected' : '' }}>Active</option>
+                <option value="dead" {{ request('torrent_status') == 'dead' ? 'selected' : '' }}>Dead</option>
+                <option value="free" {{ request('torrent_status') == 'free' ? 'selected' : '' }}>Free</option>
+                <option value="double" {{ request('torrent_status') == 'double' ? 'selected' : '' }}>Double</option>
+                <option value="seedbox" {{ request('torrent_status') == 'seedbox' ? 'selected' : '' }}>Seedbox</option>
+            </select>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="col-md-2 col-sm-4">
+            <button type="submit" class="btn btn-primary w-100">Search</button>
+        </div>
+    </div>
+</form>
+
 
     <!-- Torrent Table -->
     <div class="torrent-table-container">
@@ -146,7 +156,18 @@
                             <td>{{ $torrent->times_completed }}</td>
 
                             @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::VIP)
-                            <th>{{$torrent->uploader->name ?? 'Unknown'}}</th>
+                            <th>
+    @if(isset($torrent->uploader->id))
+        <a href="{{ route('profile.show', ['id' => $torrent->uploader->id, 'name' => $torrent->uploader->name ?? 'Unknown']) }}"
+           style="color: {{ \App\Models\UserClass::getClassColor($torrent->uploader->user_class ?? '') }}">
+            {{ $torrent->uploader->name ?? 'Unknown' }}
+        </a>
+    @else
+        <span>Unknown</span>
+    @endif
+</th>
+
+
                         @endif
 
                             @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)

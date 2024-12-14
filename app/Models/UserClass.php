@@ -27,6 +27,22 @@ class UserClass
         ];
     }
 
+    public static function getClassColor($class)
+    {
+        $colors = [
+            self::USER => 'gray',
+            self::ELITE_USER => 'cyan',
+            self::VIP => 'green',
+            self::SUPERUSER => 'purple',
+            self::UPLOADER => 'orange',
+            self::MODERATOR => 'yellow',
+            self::ADMIN => 'red',
+            self::OWNER => 'gold',
+        ];
+
+        return $colors[$class] ?? 'gray'; // default to gray if class not found
+    }
+
 
 
 

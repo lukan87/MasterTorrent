@@ -62,7 +62,13 @@
                         </div>
                     </li> end::Notifications Dropdown Menu begin::Fullscreen Toggle -->
 
-                    <li class="nav-item dropdown user-menu"> <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"> <img src="{{ Auth::user()->profile_image ?? asset('images/default_avatar/default-avatar.jpg') }}" class="user-image rounded-circle shadow" alt="User Avatar"><span class="d-none d-md-inline">{{ Auth::user()->name }}</span> </a>
+                    <li class="nav-item dropdown user-menu"> <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"> <img src="{{ Auth::user()->profile_image ?? asset('images/default_avatar/default-avatar.jpg') }}" class="user-image rounded-circle shadow" alt="User Avatar"><span class="d-none d-md-inline">
+                        
+                         <span style="color: {{ \App\Models\UserClass::getClassColor(Auth::user()->user_class) }}">
+                                            {{ Auth::user()->name }}
+                         </span>
+
+                    </span> </a>
                         <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end"> <!--begin::User Image-->
                             <li class="user-header text-bg-secondary"> <img src="{{ Auth::user()->profile_image ?? asset('images/default_avatar/default-avatar.jpg') }}" class="user-image rounded-circle shadow" alt="User Avatar">
                                 <p>
@@ -73,8 +79,8 @@
                             </li> <!--end::User Image--> <!--begin::Menu Body-->
                             <li class="user-body"> <!--begin::Row-->
                                 <div class="row">
-                                    <div class="col-4 text-center"> <small><a href="#"><i class="bi bi-file-arrow-up" data-bs-toggle="tooltip" title="Uploaded"></i> {{ formatBytes(Auth::user()->uploaded) }}</a></small> </div>
-                                    <div class="col-4 text-center"> <small><a href="#"><i class="bi bi-file-arrow-down" data-bs-toggle="tooltip" title="Downloaded"></i> {{ formatBytes(Auth::user()->downloaded) }}</a></small> </div>
+                                    <div class="col-4 text-center"> <small><a href="#"><i class="bi bi-file-arrow-up" data-bs-toggle="tooltip" title="Uploaded"></i> {{ \App\Helpers\FormatHelper::formatSize(Auth::user()->uploaded) }}</a></small> </div>
+                                    <div class="col-4 text-center"> <small><a href="#"><i class="bi bi-file-arrow-down" data-bs-toggle="tooltip" title="Downloaded"></i> {{ \App\Helpers\FormatHelper::formatSize(Auth::user()->downloaded) }}</a></small> </div>
                                     <div class="col-4 text-center">
                                         <small>
                                             <a href="/shop">

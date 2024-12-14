@@ -26,21 +26,26 @@ if (!function_exists('convertCustomTagsToHtml')) {
         // Convert [i]...[/i] to <em>...</em> (allowing spaces in text)
         $content = preg_replace('/\[i\](.*?)\[\/i\]/s', '<em>$1</em>', $content);
 
-        // Convert [quote]...[/quote] to <blockquote>...</blockquote>
-        $content = preg_replace('/\[quote\](.*?)\[\/quote\]/s', '<blockquote>$1</blockquote>', $content);
+        $content = preg_replace_callback('/\[quote\](.*?)\[\/quote\]/s', function ($matches) {
+            return '<blockquote class="quote">' . trim($matches[1]) . '</blockquote>';
+        }, $content);
 
-        // Convert [spoiler]...[/spoiler] to a div with show/hide functionality
+
+
+
+
         $content = preg_replace_callback('/\[spoiler\](.*?)\[\/spoiler\]/s', function ($matches) {
-            $spoilerContent = htmlspecialchars($matches[1], ENT_QUOTES, 'UTF-8'); // Sanitize content
             return '
                 <div class="spoiler-container">
-                    <button onclick="toggleSpoiler(this)">Show</button>
-                    <div class="spoiler-content" style="display: none; background-color: #f0f0f0; padding: 5px; border: 1px solid #ccc; margin-top: 5px;">
-                        ' . $spoilerContent . '
+                    <button type="button" class="spoiler-button" onclick="toggleSpoiler(this)">Show</button>
+                    <div class="spoiler-content" style="display: none;">
+                        ' . htmlspecialchars($matches[1], ENT_QUOTES, 'UTF-8') . '
                     </div>
                 </div>
             ';
         }, $content);
+
+
 
         // Convert [youtube]...[/youtube] to an embedded YouTube iframe
         $content = preg_replace_callback(
@@ -75,17 +80,4 @@ if (!function_exists('convertCustomTagsToHtml')) {
 
 
 
-    if (!function_exists('formatBytes')) {
-        function formatBytes($bytes, $precision = 2) {
-            $units = ['B', 'KB', 'MB', 'GB', 'TB'];
-
-            $bytes = max($bytes, 0);
-            $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
-            $pow = min($pow, count($units) - 1);
-
-            $bytes /= pow(1024, $pow);
-
-            return round($bytes, $precision) . ' ' . $units[$pow];
-        }
-    }
 }

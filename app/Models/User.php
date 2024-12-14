@@ -35,6 +35,7 @@ class User extends Authenticatable
         'IP',
         'passkey', // Add passkey here
         'seedbonus',
+        'vip_until',
         'rsskey'
     ];
 
@@ -60,6 +61,8 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'banned_until' => 'datetime',
+            'last_activity' => 'datetime',
+            'vip_until',
         ];
     }
 

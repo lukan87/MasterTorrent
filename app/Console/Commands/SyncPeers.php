@@ -9,6 +9,7 @@ use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class SyncPeers extends Command
@@ -34,14 +35,16 @@ class SyncPeers extends Command
      */
     final public function handle(): void
     {
+        $syncedTorrents = 0;
+
         // Delete peers where active = 0
         DB::transaction(function (): void {
             Peer::where('active', 0)->delete();
         }, 5);
 
         // Sync Seeders and Leechers count
-        DB::transaction(function (): void {
-            Torrent::where('approved', 1) // Retrieve only torrents where approved = 1
+        $syncedTorrents += DB::transaction(function (): int {
+            return Torrent::where('approved', 1) // Retrieve only torrents where approved = 1
                 ->leftJoinSub(
                     Peer::query()
                         ->select('torrent_id')
@@ -63,8 +66,8 @@ class SyncPeers extends Command
         }, 5);
 
         // Sync Times Completed count
-        DB::transaction(function (): void {
-            Torrent::where('approved', 1) // Retrieve only torrents where approved = 1
+        $syncedTorrents += DB::transaction(function (): int {
+            return Torrent::where('approved', 1) // Retrieve only torrents where approved = 1
                 ->leftJoinSub(
                     History::query()
                         ->select('torrent_id')
@@ -79,10 +82,16 @@ class SyncPeers extends Command
                 ]);
         }, 5);
 
-         // Clear all cache to ensure fresh data is loaded
-     Cache::flush();
+        // Clear all cache to ensure fresh data is loaded
+        Cache::flush();
 
-        $this->info('Torrent Seeders/Leechers/Times Completed Count Synced Successfully, and inactive peers deleted!');
+        $message = "Torrent Seeders/Leechers/Times Completed Count Synced Successfully, and inactive peers deleted!";
+        $message .= " Total torrents synced: {$syncedTorrents}.";
+
+        // Log the result
+        Log::info($message);
+
+        // Output to console
+        $this->info($message);
     }
-
 }

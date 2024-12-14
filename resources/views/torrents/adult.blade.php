@@ -126,7 +126,7 @@
                                 <!-- Display Genres allocated to this torrent with search link -->
         <div class="torrent-genres">
             @foreach($torrent->genres as $genre)
-                <a href="{{ route('torrents.index', ['genre' => $genre->id]) }}" class="badge bg-secondary" title="Search for {{ $genre->name }} torrents">{{ $genre->name }}</a>
+                <a href="{{ route('torrents.adult', ['genre' => $genre->id]) }}" class="badge bg-secondary" title="Search for {{ $genre->name }} torrents">{{ $genre->name }}</a>
             @endforeach
         </div>
                             </td>
@@ -141,7 +141,16 @@
                             <td>{{ $torrent->leechers }}</td>
                             <td>{{ $torrent->times_completed }}</td>
                             @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::VIP)
-                            <th>{{$torrent->uploader->name ?? 'Unknown'}}</th>
+                            <th>
+    @if(isset($torrent->uploader->id))
+        <a href="{{ route('profile.show', ['id' => $torrent->uploader->id, 'name' => $torrent->uploader->name ?? 'Unknown']) }}"
+           style="color: {{ \App\Models\UserClass::getClassColor($torrent->uploader->user_class ?? '') }}">
+            {{ $torrent->uploader->name ?? 'Unknown' }}
+        </a>
+    @else
+        <span>Unknown</span>
+    @endif
+</th>
                         @endif
 
                             @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)

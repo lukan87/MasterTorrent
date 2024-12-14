@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Monicahq\Cloudflare\LaravelCloudflare;
 use Monicahq\Cloudflare\Facades\CloudflareProxies;
 use App\Models\Message;
+use App\Models\User;
 
 
 class AppServiceProvider extends ServiceProvider
@@ -25,6 +26,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+
+        // Add your custom middleware here globally
+        app('router')->pushMiddlewareToGroup('web', \App\Http\Middleware\CheckUserEnabled::class);
+
         View::composer('layouts.app', function ($view) {
             $user = Auth::user();
             // Initialize variables
@@ -32,7 +37,7 @@ class AppServiceProvider extends ServiceProvider
             $leechingCount = 0;
             $messages = collect();
             $unreadMessagesCount = 0; // Initialize to 0 in case there is no authenticated user
-
+            $user = User::findOrFail($user->id);
 
             if ($user) {
                 // If the user is authenticated, fetch seeding and leeching counts
@@ -45,7 +50,7 @@ class AppServiceProvider extends ServiceProvider
                 // Fetch the last 3 messages for the authenticated user
                 $messages = Message::where('receiver_id', $user->id)
                     ->latest()
-                    ->take(3)
+                    ->take(5)
                     ->get();
             }
 

@@ -2,46 +2,64 @@
 
 
 
-      /*Content table*/
-      .content-table{
-        border-collapse: collapse;
-        margin: 25px 0;
-        font-size: 1em;
-        min-width: 400px;
-        overflow:hidden;
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
-        border-radius: 15px 15px 0 0;
-      }
+    /* Content table styling */
+.content-table {
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 1em;
+    min-width: 600px; /* Increased the width for better spacing */
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+    border-radius: 15px 15px 0 0;
+}
 
-      .content-table thead tr {
-        background-color: rgb(40,40,40,60);
-        color: #ffffff;
-        text-align: left;
-        font-weight: bold;
-      }
-      .content-table th,
-      .content-table td {
-        vertical-align: top;
-        padding: 12px 15px;
-      }
-      .content-table tbody tr {
-        border-bottom: 0.1px solid #dddddd;
-      }
+.content-table thead tr {
+    background-color: rgb(40, 40, 40);
+    color: #ffffff;
+    text-align: left;
+    font-weight: bold;
+}
 
-      .content-table tbody tr:nth-of-type(even) {
-        background-color: #f3f3f3;
-      }
+.content-table th,
+.content-table td {
+    vertical-align: middle;
+    padding: 12px 15px;
+}
 
-      .content-table tbody tr:last-of-type {
-        border-bottom: 1px solid #2F4F4F;
-      }
-      .content-table tbody tr.active-row {
-        font-weight: bold;
-        color: #009879;
-      }
-      .content-table tbody:nth-child(odd) {
-        background-color: rgb(40,40,40);
-      }
+.content-table tbody tr {
+    border-bottom: 0.1px solid #dddddd;
+}
+
+.content-table tbody tr:nth-of-type(even) {
+    background-color: #2e2c2c;
+}
+
+.content-table tbody tr:last-of-type {
+    border-bottom: 1px solid #2F4F4F;
+}
+
+.content-table tbody tr.active-row {
+    font-weight: bold;
+    color: #009879;
+}
+
+.content-table tbody:nth-child(odd) {
+    background-color: rgb(40, 40, 40);
+}
+
+/* Poster image styling */
+.poster-image {
+    width: 100px; /* Fixed width for poster */
+    height: 150px; /* Fixed height for poster */
+    object-fit: cover; /* Ensures the image scales properly */
+    border-radius: 5px; /* No rounding of the image */
+}
+
+/* Center the text in the table cells */
+.text-center {
+    text-align: center;
+}
+
 
       .text {
         transition: all .2s ease-in-out;
@@ -541,3 +559,49 @@
                         word-wrap: break-word;
                     }
                 }
+
+
+
+blockquote.quote {
+    background-color: #797878;
+    border-left: 5px solid #ccc;
+    padding: 10px 15px;
+    margin: 10px 0;
+    font-style: italic;
+    font-weight: bold;
+    font-size: 1em;
+    color: #dad8d8;
+}
+
+blockquote.quote p {
+    margin: 0;
+}
+.spoiler-container {
+    position: relative;
+    margin-top: 10px;
+}
+
+.spoiler-container button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.spoiler-container button:hover {
+    background-color: #0056b3;
+}
+
+.spoiler-content {
+    display: none; /* Hidden by default */
+    background-color: #3a3939;
+    padding: 10px;
+    border: 1px solid #ccc;
+    margin-top: 5px;
+    border-radius: 5px;
+    color: white;
+}
+
+

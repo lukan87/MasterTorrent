@@ -2,93 +2,11 @@
 
 @section('content')
 
-<style>
-    .shoutbox-message {
-        list-style: none;
-        margin-bottom: 20px;
-    }
-
-    .avatar-container img {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        margin-right: 10px;
-    }
-
-    .content-container {
-        background-color: #333333;
-        color: #ffffff;
-        padding: 15px;
-        border-radius: 10px;
-        position: relative;
-
-    }
-    .arrow {
-    width: 0;
-    height: 0;
-    border-left: 10px solid transparent;
-    border-right: 10px solid transparent;
-    border-top: 10px solid #333333; /* Match the bubble color */
-    position: absolute;
-    left: -10px; /* Position the arrow to the left of the bubble */
-    top: 10px; /* Adjust to align with the bubble */
-}
-
-    .header {
-        font-weight: bold;
-        font-size: 18px;
-    }
-
-    .timestamp {
-        font-size: 0.9rem;
-        color: #aaa;
-    }
-
-    .message-content {
-        font-size: 1rem;
-        font-weight: bold;
-        margin-top: 5px;
-    }
-
-    .actions {
-        display: flex;
-        gap: 10px;
-        margin-top: 10px;
-    }
-
-    .replies {
-    margin-top: 15px;
-    padding-left: 20px;
-    border-left: 2px solid #888;
-    background-color: #444; /* Change this to your desired color */
-    padding: 10px; /* Optional: Add some padding for better appearance */
-    border-radius: 5px; /* Optional: Rounded corners */
-}
 
 
-    body {
-        background-image: linear-gradient(to bottom right, #333333, #000000);
-        background-attachment: fixed;
-    }
-
-    .shoutbox-container {
-        max-height: 800px;
-        overflow-y: auto; /* Add vertical scrolling */
-    }
-</style>
-
-
-
-    {{-- Success or Error Messages --}}
-    @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
-    @if(session('error'))
-        <div class="alert alert-danger">{{ session('error') }}</div>
-    @endif
 
     {{-- Shoutbox Card --}}
-    <div class="card shoutbox-container mt-1">
+    <div class="card shoutbox-container mt-5">
         <div class="card-body">
             {{-- Display Messages and Replies --}}
             <div class="shoutbox-messages">
@@ -242,4 +160,79 @@
 
 
 </script>
+
+<style>
+    .shoutbox-message {
+        list-style: none;
+        margin-bottom: 20px;
+    }
+
+    .avatar-container img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin-right: 10px;
+    }
+
+    .content-container {
+        background-color: #333333;
+        color: #ffffff;
+        padding: 15px;
+        border-radius: 10px;
+        position: relative;
+
+    }
+    .arrow {
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 10px solid #333333; /* Match the bubble color */
+    position: absolute;
+    left: -10px; /* Position the arrow to the left of the bubble */
+    top: 10px; /* Adjust to align with the bubble */
+}
+
+    .header {
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    .timestamp {
+        font-size: 0.9rem;
+        color: #aaa;
+    }
+
+    .message-content {
+        font-size: 1rem;
+        font-weight: bold;
+        margin-top: 5px;
+    }
+
+    .actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .replies {
+    margin-top: 15px;
+    padding-left: 20px;
+    border-left: 2px solid #888;
+    background-color: #444; /* Change this to your desired color */
+    padding: 10px; /* Optional: Add some padding for better appearance */
+    border-radius: 5px; /* Optional: Rounded corners */
+}
+
+
+    body {
+        background-image: linear-gradient(to bottom right, #333333, #000000);
+        background-attachment: fixed;
+    }
+
+    .shoutbox-container {
+        max-height: 800px;
+        overflow-y: auto; /* Add vertical scrolling */
+    }
+</style>
 @endsection
