@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\News;
 use App\Models\User;
+use App\Models\UserClass;
 use App\Models\Torrent;
 use App\Models\Poll;
 use App\Models\Topic;
@@ -27,9 +28,12 @@ class HomeController extends Controller
         $topDownloaders = User::orderBy('downloaded', 'desc')->take(10)->get();
 
         // Cache online users
-        $onlineUsers = Cache::remember('online_users', $cacheDuration, function () {
+        $onlineUsersData = Cache::remember('online_users', $cacheDuration, function () {
             return $this->getOnlineUsers();
         });
+
+        $onlineUsers = $onlineUsersData['users'];
+        $onlineUserCount = $onlineUsersData['count'];
 
        // Define time intervals for filtering
 $now = now();
@@ -102,15 +106,22 @@ $topLastMonth = Cache::remember('top_last_month', $cacheDuration, function () us
             'recommendedTorrents',
             'topUploaders',
             'topDownloaders',
-            'torrentActive'
+            'torrentActive',
+            'onlineUserCount'
 
         ));
     }
 
     public function getOnlineUsers()
     {
-        // Assuming you store online users in the database with a 'last_activity' column
-        return User::where('last_activity', '>=', now()->subMinutes(5))->get();
+        // Query online users and order by user class (highest to lowest)
+        $onlineUsers = User::where('updated_at', '>=', now()->subMinutes(5))
+            ->orderBy('user_class', 'desc') // 'user_class' is the integer column representing class
+            ->get();
+
+        $onlineUserCount = $onlineUsers->count();
+
+        return ['users' => $onlineUsers, 'count' => $onlineUserCount];
     }
 
     public function getRecommendedTorrents()

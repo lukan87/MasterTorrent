@@ -79,7 +79,7 @@
                             <i class="bi bi-calendar2-heart" data-bs-toggle="tooltip" data-bs-title="Last Seen"></i>
                         </label>
                         <div class="col-md-10">
-                            <p class="form-control-static"> {{ $user->last_activity ? $user->last_activity->format('d-M-Y H:i') : 'Never Active' }}</p>
+                            <p class="form-control-static"> {{ $user->updated_at ? $user->updated_at->format('d-M-Y H:i') : 'Never Active' }}</p>
                         </div>
                     </div>
 

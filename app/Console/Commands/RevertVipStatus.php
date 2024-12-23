@@ -31,6 +31,7 @@ class RevertVipStatus extends Command
                 // Revert the user class back to regular (1)
                 $user->user_class = 1;
                 $user->is_immune = 0;
+                $user->is_freeleech = 0;
                 $user->vip_until = null;  // Clear VIP expiration date
                 $user->save();
 

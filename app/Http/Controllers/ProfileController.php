@@ -86,70 +86,9 @@ public function update(Request $request, $id, $name)
         $user->recovery_code = Hash::make($request->recovery_code);
     }
 
-    
+
         $user->profile_image = $request->profile_image_url;
-    
 
-
-  
-//         // Update the fields only if the user is authorized
-//         if ($request->has('enabled')) {
-//             $user->enabled = $request->enabled ? 'yes' : 'no';
-//         }
-        
-//         if ($request->has('donor')) {
-//             $user->donor = $request->donor ? 'yes' : 'no';
-//         }
-        
-//         if ($request->has('uploadpos')) {
-//             $user->uploadpos = $request->uploadpos ? 'yes' : 'no';
-//         }
-        
-//         if ($request->has('downloadpos')) {
-//             $user->downloadpos = $request->downloadpos ? 'yes' : 'no';
-//         }
-        
-
-//         // Check if the 'enabled' status has changed
-//         $user->enabled = $request->has('enabled') && $request->enabled ? 'yes' : 'no';
-// if ($user->isDirty('enabled')) {
-//     // Log the change in the UserTimeline
-//     UserTimeline::create([
-//         'user_id' => $user->id,
-//         'staff_id' => Auth::id(),
-//         'comment' => 'User enabled status changed to <strong>' . strtoupper($user->enabled) . '</strong> by ' . Auth::user()->name,
-//     ]);
-// }
-
-// $user->donor = $request->has('donor') && $request->donor ? 'yes' : 'no';
-// if ($user->isDirty('donor')) {
-//     UserTimeline::create([
-//         'user_id' => $user->id,
-//         'staff_id' => Auth::id(),
-//         'comment' => 'User donor status changed to <strong>' . strtoupper($user->donor) . '</strong> by ' . Auth::user()->name,
-//     ]);
-// }
-
-// $user->uploadpos = $request->has('uploadpos') && $request->uploadpos ? 'yes' : 'no';
-// if ($user->isDirty('uploadpos')) {
-//     UserTimeline::create([
-//         'user_id' => $user->id,
-//         'staff_id' => Auth::id(),
-//         'comment' => 'User upload position status changed to <strong>' . strtoupper($user->uploadpos) . '</strong> by ' . Auth::user()->name,
-//     ]);
-// }
-
-// $user->downloadpos = $request->has('downloadpos') && $request->downloadpos ? 'yes' : 'no';
-// if ($user->isDirty('downloadpos')) {
-//     UserTimeline::create([
-//         'user_id' => $user->id,
-//         'staff_id' => Auth::id(),
-//         'comment' => 'User download position status changed to <strong>' . strtoupper($user->downloadpos) . '</strong> by ' . Auth::user()->name,
-//     ]);
-// }
-
-   
-   
 
 
 

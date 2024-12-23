@@ -34,7 +34,7 @@ class UserController extends Controller
                          ->orWhere('email', 'LIKE', "%{$searchTerm}%")
                          ->orWhere('ip', 'LIKE', "%{$searchTerm}%"); // Adaugă căutare după IP
         })
-        ->paginate(15); 
+        ->paginate(15);
 
 
         $now = now();
@@ -78,12 +78,71 @@ class UserController extends Controller
         $user->info = $request->info;
 
         // Actualizează câmpurile booleene cu 'yes' sau 'no'
-        $user->enabled = $request->enabled;
-        $user->downloadpos = $request->downloadpos;
-        $user->uploadpos = $request->uploadpos;
-        $user->donor = $request->donor;
-        $user->is_immune = $request->is_immune;
-        $user->is_freeleech = $request->is_freeleech;
+        $changer = Auth::user();
+
+        // Track changes for multiple fields
+        $changes = [];
+
+        // Check if `enabled` has changed (yes/no)
+        if ($request->has('enabled') && $user->enabled != $request->enabled) {
+            $changes[] = "enabled";
+            $user->enabled = $request->enabled;
+        }
+
+        // Check if `downloadpos` has changed (yes/no)
+        if ($request->has('downloadpos') && $user->downloadpos != $request->downloadpos) {
+            $changes[] = "downloadpos";
+            $user->downloadpos = $request->downloadpos;
+        }
+
+        // Check if `uploadpos` has changed (yes/no)
+        if ($request->has('uploadpos') && $user->uploadpos != $request->uploadpos) {
+            $changes[] = "uploadpos";
+            $user->uploadpos = $request->uploadpos;
+        }
+
+        // Check if `donor` has changed (yes/no)
+        if ($request->has('donor') && $user->donor != $request->donor) {
+            $changes[] = "donor";
+            $user->donor = $request->donor;
+        }
+
+        // Check if `is_immune` has changed (1/0)
+        if ($request->has('is_immune') && $user->is_immune != $request->is_immune) {
+            $changes[] = "is_immune";
+            $user->is_immune = $request->is_immune;
+        }
+
+        // Check if `is_freeleech` has changed (1/0)
+        if ($request->has('is_freeleech') && $user->is_freeleech != $request->is_freeleech) {
+            $changes[] = "is_freeleech";
+            $user->is_freeleech = $request->is_freeleech;
+        }
+
+        // If there are changes, log them
+        if (!empty($changes)) {
+            // Build the comment based on changed fields
+            $changedFields = implode(', ', $changes);
+            $userChange = implode(', ', array_map(function($field) use ($request) {
+                $value = $request->input($field);
+
+                // Format the values (Yes/No for 'enabled', 'downloadpos', 'uploadpos', 'donor'; 1/0 for 'is_immune', 'is_freeleech')
+                if (in_array($field, ['enabled', 'downloadpos', 'uploadpos', 'donor'])) {
+                    $value = $value ? 'Yes' : 'No';
+                } else {
+                    $value = $value ? '1' : '0';
+                }
+
+                return "$field changed to $value";
+            }, $changes));
+
+            // Log the changes in UserTimeline
+            UserTimeline::create([
+                'user_id' => $user->id,
+                'staff_id' => $changer->id, // ID of the user making the change
+                'comment' => "Updated the following fields for user: $userChange by {$changer->name}.",
+            ]);
+        }
 
         // Actualizează imaginea de profil dacă este furnizată
         if ($request->filled('profile_image')) {
@@ -185,21 +244,45 @@ class UserController extends Controller
         }
 
 
-        // Update uploaded and downloaded values
-    if ($request->has('uploaded')) {
-        // Convert from GB to bytes
-        $user->uploaded = $request->input('uploaded') * (1024 ** 3);
+// Get the current authenticated user making the change
+$changer = Auth::user();
+
+// Update uploaded value only if it has changed
+if ($request->has('uploaded')) {
+    $newUploaded = $request->input('uploaded') * (1024 ** 3); // Convert from GB to bytes
+
+    if ($user->uploaded != $newUploaded) { // Only update if the value has changed
+        $oldUploaded = $user->uploaded;
+        $user->uploaded = $newUploaded;
+
+        // Log the change in UserTimeline
+        UserTimeline::create([
+            'user_id' => $user->id,
+            'staff_id' => $changer->id, // ID of the user making the change
+            'comment' => "Updated uploaded amount from " . ($oldUploaded / (1024 ** 3)) . " GB to " . ($newUploaded / (1024 ** 3)) . " GB by " . $changer->name . ".",
+        ]);
     }
+}
 
-    if ($request->has('downloaded')) {
-        // Convert from GB to bytes
-        $user->downloaded = $request->input('downloaded') * (1024 ** 3);
+// Update downloaded value only if it has changed
+if ($request->has('downloaded')) {
+    $newDownloaded = $request->input('downloaded') * (1024 ** 3); // Convert from GB to bytes
+
+    if ($user->downloaded != $newDownloaded) { // Only update if the value has changed
+        $oldDownloaded = $user->downloaded;
+        $user->downloaded = $newDownloaded;
+
+        // Log the change in UserTimeline
+        UserTimeline::create([
+            'user_id' => $user->id,
+            'staff_id' => $changer->id, // ID of the user making the change
+            'comment' => "Updated downloaded amount from " . ($oldDownloaded / (1024 ** 3)) . " GB to " . ($newDownloaded / (1024 ** 3)) . " GB by " . $changer->name . ".",
+        ]);
     }
+}
 
+$user->save();
 
-    
-        // Salvează schimbările
-        $user->save();
 
         return redirect()->route('admin.users.index')->with('success', 'Utilizatorul a fost actualizat cu succes!');
     }
@@ -238,7 +321,7 @@ class UserController extends Controller
 
 public function sendMassMessage(Request $request)
 {
-   
+
     $request->validate([
         'message' => 'required|string',
         'user_ids' => 'nullable|array',
@@ -247,7 +330,7 @@ public function sendMassMessage(Request $request)
         'user_class.*' => 'in:' . implode(',', array_keys(UserClass::getClasses())), // Validate each user_class is a valid class
     ]);
 
- 
+
     // Verifică dacă user_class este gol (neselectat)
  if (!$request->filled('user_class')) {
     return redirect()->back()->with('error', 'Please select at least one user class to send the message.');
@@ -256,7 +339,7 @@ public function sendMassMessage(Request $request)
   // Obține utilizatorii cărora să le trimitem mesajul, filtrat opțional de clasele de utilizatori sau de ID-urile specifice ale utilizatorilor
     $query = User::query();
 
-   
+
     if ($request->filled('user_class')) {
         $query->whereIn('user_class', $request->user_class);
     }

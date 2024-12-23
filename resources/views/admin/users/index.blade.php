@@ -8,7 +8,7 @@
         <!-- Left Column: Users Table -->
         <div class="col-md-8 col-lg-9 mb-4">
 
-          
+
 
             <!-- Search Form -->
             <form method="GET" action="{{ route('admin.users.index') }}" class="mb-3">
@@ -30,6 +30,7 @@
                                 <th>Email</th>
                                 <th>IP</th>
                                 <th>Role</th>
+                                <th>Last Seen</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -41,6 +42,7 @@
                                     <td>{{ $user->email }}</td>
                                     <td>{{ $user->IP }}</td>
                                     <td>{{ $user->role_name }}</td> <!-- Assuming there's a role column or method -->
+                                    <td>{{ $user->updated_at }}</td>
                                     <td>
                                         <!-- Show Button -->
                                         <a href="{{ route('admin.users.show', $user->name) }}" class="btn btn-sm btn-info">Show</a>
