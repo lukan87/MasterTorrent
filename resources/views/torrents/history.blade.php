@@ -49,7 +49,7 @@
                         </td>
                         <td>{{ App\Helpers\FormatHelper::formatSize($history->uploaded) }}</td>
                         <td>{{ App\Helpers\FormatHelper::formatSize($history->downloaded) }}</td>
-                        <td>{{ $history->created_at->format('Y-m-d H:i:s') }}</td></td>
+                        <td>{{ $history->created_at->format('Y-m-d H:i:s') }}</td>
                         <td>{{ $history->completed_at ? $history->completed_at->format('Y-m-d H:i:s') : 'Incomplete' }}</td>
                         <td>
                                 @if ($history->completed_at)

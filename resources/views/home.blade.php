@@ -21,11 +21,11 @@
     @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::ADMIN)
 <div class="row">
 
-    <div class="col-md-6">
-@include('partials.toptorrents')
-</div>
+    <!-- <div class="col-md-6">
 
-<div class="col-md-6">
+</div> -->
+
+<div class="col-md-12">
 @include('partials.onlineusers')
 
 @include('partials.stats')
@@ -35,6 +35,7 @@
 
 
 @endif
+@include('partials.toptorrents')
 
 @if (Auth::check() && Auth::user()->id === 3)
 

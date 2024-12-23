@@ -24,4 +24,10 @@ class Category extends Model
         });
     }
 
+     // Define the relationship with Torrent
+     public function torrents()
+     {
+         return $this->hasMany(Torrent::class);
+     }
+
 }

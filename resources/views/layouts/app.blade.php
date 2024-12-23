@@ -132,33 +132,6 @@
     });
 </script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
-<script>
-    $(document).ready(function () {
-        $('#recommended-slider').slick({
-            infinite: true,
-            slidesToShow: 5, // Number of visible slides
-            slidesToScroll: 1, // Scroll one slide at a time
-            autoplay: true,
-            autoplaySpeed: 3000, // 3 seconds
-            dots: true,
-            arrows: true,
-            prevArrow: '<button class="slick-prev btn btn-primary"><i class="fas fa-chevron-left"></i></button>',
-            nextArrow: '<button class="slick-next btn btn-primary"><i class="fas fa-chevron-right"></i></button>',
-            responsive: [
-                {
-                    breakpoint: 768, // Below 768px
-                    settings: {
-                        slidesToShow: 1, // Show 1 slide on smaller screens
-                    }
-                }
-            ]
-        });
-    });
-</script>
-
-
 </body><!--end::Body-->
 
 </html>

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mt-4">
+<div class="mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="text-primary">Seeding Torrents for <span class="font-weight-bold">{{ $user->name }}</span></h2>
         <a href="{{ route('profile.show', ['id' => $user->id, 'name' => $user->name]) }}" class="btn btn-outline-primary btn-sm">

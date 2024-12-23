@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
 use App\Models\UserClass;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Carbon;
 
 
 class User extends Authenticatable
@@ -31,6 +32,8 @@ class User extends Authenticatable
         'title',
         'enabled',
         'donor',
+        'uploadpos',
+        'downloadpos',
         'info',
         'IP',
         'passkey', // Add passkey here
@@ -38,6 +41,10 @@ class User extends Authenticatable
         'vip_until',
         'rsskey'
     ];
+
+
+
+    protected $guarded = [];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -183,5 +190,46 @@ public function userHasPermission($permission)
     {
         return $this->hasMany(History::class, 'user_id');
     }
+
+     /**
+     * Check if the user is currently banned.
+     */
+    public function isBanned()
+    {
+        return $this->banned_until && Carbon::parse($this->banned_until)->isFuture();
+    }
+
+    /**
+     * Reset failed login attempts and remove ban.
+     */
+    public function resetFailedAttempts()
+    {
+        $this->failed_attempts = 0;
+        $this->banned_until = null;
+        $this->save();
+    }
+
+    /**
+     * Increment failed login attempts and apply ban if necessary.
+     */
+    public function incrementFailedAttempts($maxAttempts, $banDurationHours)
+    {
+        $this->failed_attempts++;
+        if ($this->failed_attempts >= $maxAttempts) {
+            $this->banned_until = Carbon::now()->addHours($banDurationHours);
+        }
+        $this->save();
+    }
+
+
+    public function timeline()
+{
+    return $this->hasMany(\App\Models\UserTimeline::class);
+}
+
+public function warnings()
+{
+    return $this->hasMany(Warning::class, 'user_id');
+}
 
 }

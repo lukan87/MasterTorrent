@@ -4,7 +4,7 @@
     <div class="col-md-12">
         <!-- Removed card card-custom card-blur classes -->
         <div class="content-overlay mb-3">
-            <div class="card-body">
+            <div class="card-body"><div class="tagss">TV-Series</div>
                 <div class="row">
                     <div class="col-12 col-sm-3 col-xxl-2 order-0 order-sm-1 order-xxl-0 text-center">
                         <img src="{{$torrent->poster}}"
@@ -12,6 +12,18 @@
                                     box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
                                     width:100%;
                                     margin-top: -50px;">
+
+<div style="margin-top: 10px;">
+    <!-- TMDB Link -->
+    @if($torrent->tmdbid)
+        <a href="https://www.themoviedb.org/tv/{{ $torrent->tmdbid }}" target="_blank" class="btn btn-dark btn-sm">View on TMDB</a>
+    @endif
+
+    <!-- IMDb Link -->
+    @if($torrent->imdbid)
+        <a href="https://www.imdb.com/title/{{ $torrent->imdbid }}" target="_blank" class="btn btn-dark btn-sm">View on IMDb</a>
+    @endif
+</div>
                     </div>
 
                     <div class="col-sm-9 col-xxl-10 order-1 order-sm-0 order-xxl-1">

@@ -18,10 +18,18 @@ class History extends Model
         'action',
         'torrent_id',
         'info_hash',
+        'immune',
+        'hitrun',
+        'prewarn',
+        'prewarned_at',
     ];
 
     protected $casts = [
         'completed_at' => 'datetime',
+        'prewarned_at' => 'datetime', // Ensure `prewarned_at` is cast as a datetime
+        'immune' => 'boolean',
+        'hitrun' => 'boolean',
+        'prewarn' => 'boolean',
     ];
 
     // Define relationships
@@ -34,17 +42,16 @@ class History extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
-// Define the relationship to peers
- // Define the relationship to peers (if a History record corresponds to one Peer)
- public function peer()
- {
-     return $this->belongsTo(Peer::class, 'torrent_id');
- }
 
- // Define the existing relationship to peers
- public function peers()
- {
-     return $this->hasMany(Peer::class, 'torrent_id');
- }
+    // Define the relationship to peers (if a History record corresponds to one Peer)
+    public function peer()
+    {
+        return $this->belongsTo(Peer::class, 'torrent_id');
+    }
 
+    // Define the existing relationship to peers
+    public function peers()
+    {
+        return $this->hasMany(Peer::class, 'torrent_id');
+    }
 }

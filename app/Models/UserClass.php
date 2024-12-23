@@ -20,12 +20,19 @@ class UserClass
             self::ELITE_USER => 'Elite User',
             self::UPLOADER => 'Uploader',
             self::VIP => 'VIP',
-            self::SUPERUSER => 'SuperUser',
+            self::SUPERUSER => 'SpecialUser',
             self::MODERATOR => 'Moderator',
             self::ADMIN => 'Admin',
             self::OWNER => 'Owner',
         ];
     }
+
+    public static function getClassName($class)
+{
+    $classes = self::getClasses();
+    return $classes[$class] ?? 'Unknown';
+}
+
 
     public static function getClassColor($class)
     {
@@ -33,11 +40,11 @@ class UserClass
             self::USER => 'gray',
             self::ELITE_USER => 'cyan',
             self::VIP => 'green',
-            self::SUPERUSER => 'purple',
+            self::SUPERUSER => 'gold',
             self::UPLOADER => 'orange',
             self::MODERATOR => 'yellow',
             self::ADMIN => 'red',
-            self::OWNER => 'gold',
+            self::OWNER => 'purple',
         ];
 
         return $colors[$class] ?? 'gray'; // default to gray if class not found

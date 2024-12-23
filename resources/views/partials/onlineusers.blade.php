@@ -8,7 +8,7 @@
 @else
     <p>
     @foreach ($onlineUsers as $user)
-    <a href="{{ route('profile.show', ['id' => $user->id, 'name' => $user->name]) }}" 
+    <a href="{{ route('profile.show', ['id' => $user->id, 'name' => $user->name]) }}"
        style="color: {{ \App\Models\UserClass::getClassColor($user->user_class) }}">
         {{ $user->name }}
     </a>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\TorrentRequest;
 use App\Models\Category;
+use App\Models\Message;
 use Illuminate\Support\Facades\Auth;
 
 
@@ -122,6 +123,18 @@ class TorrentRequestController extends Controller
 
         // Save the changes
         $torrentRequest->save();
+
+         // Send a message to the requester
+       $messageContent = "Your torrent request for '{$torrentRequest->name}' has been filled. You can download it here: {$validated['link']}.";
+       $subject = "Torrent Request";
+
+       Message::create([
+        'sender_id' => '2', // System
+        'receiver_id' => $torrentRequest->requested_by, // Requester ID
+        'subject' => $subject,
+        'body' => $messageContent,
+    ]);
+
 
         // Redirect back with success message
         return redirect()->route('requests.show', $id)->with('success', 'Request has been filled successfully.');

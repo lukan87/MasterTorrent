@@ -3,7 +3,7 @@
     <div class="col-md-12 col-lg-12">
         <!-- Removed card card-custom card-blur classes -->
         <div class="content-overlay mb-3">
-            <div class="card-body">
+            <div class="card-body"><div class="tagss">Movies</div>
                 <div class="row">
                     <div class="col-12 col-sm-3 col-xxl-2 order-0 order-sm-1 order-xxl-0 text-center">
                         <img src="{{$torrent->poster}}"

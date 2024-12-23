@@ -494,7 +494,9 @@ if ($request->has('categories') && is_array($request->categories)) {
 
         // Modify the announce URL and add a comment
         $dict['announce'] = route('announce', ['passkey' => $user->passkey], false);
-        $dict['comment'] = 'Using this torrent binds you to MyTorrents Confidentiality Agreement';
+        $dict['comment'] = 'Using this torrent binds you to LastTorrents Confidentiality Agreement';
+         // Add the label to the torrent's metadata
+        $dict['label'] = 'LastFiles';
 
         // Remove other announce URLs
         // unset($dict['announce-list']);
@@ -502,7 +504,7 @@ if ($request->has('categories') && is_array($request->categories)) {
         // Add the announce-list for multiple trackers
     $dict['announce-list'] = [
         // [route('announce', ['passkey' => $user->passkey])],
-        ['http://last-torrents.org/announce/' . $user->passkey] // Secondary announce URL
+        ["http://last-torrents.org/announce/{$user->passkey}"] // Secondary announce URL
     ];
 
         // Re-encode the torrent file
@@ -615,22 +617,22 @@ if ($request->has('categories') && is_array($request->categories)) {
             if ($torrent->tmdbid !== null) {
                 $similarTorrents = Torrent::where('id', '!=', $torrent->id)
                     ->where('tmdbid', $torrent->tmdbid)
-                    ->where('seeders', '>', 0) // Only include torrents with seeders > 0
-                    ->limit(5) // Limit to 4 similar torrents
+                    ->where('seeders', '>', 0)
+                    ->limit(5)
                     ->get();
             }
 
-            $recommendedTorrents = Torrent::where('category_id', $torrent->category_id) // Match the same category
-                ->where('id', '!=', $torrent->id) // Exclude the current torrent
-                ->where('seeders', '>', 0) // Only include torrents with seeders > 0
-                ->whereHas('genres', function ($query) use ($torrent) {
-                    // Match torrents that have at least one genre in common with the current torrent
-                    $query->whereIn('genres.id', $torrent->genres->pluck('id'));
-                })
-                ->select('id', 'slug', 'name', 'size', 'seeders', 'leechers', 'times_completed', 'poster')
-                ->inRandomOrder() // Randomize the results
-                ->limit(5) // Limit to 5 results
-                ->get();
+            $recommendedTorrents = Torrent::where('category_id', $torrent->category_id)
+            ->where('seeders', '>', 0)
+            ->whereHas('genres', function ($query) use ($torrent) {
+                // Match torrents that have at least one genre in common with the current torrent
+                $query->whereIn('genres.id', $torrent->genres->pluck('id'));
+            })
+            ->orWhere('name', 'like', '%' . preg_replace('/[^\w]+/', '', $torrent->name) . '%')
+            ->select('id', 'slug', 'name', 'size', 'seeders', 'leechers', 'times_completed', 'poster')
+            ->inRandomOrder()
+            ->limit(5)
+            ->get();
 
             // Return the data to the view
             return view('torrents.show', compact('torrent', 'comments', 'tmdbData', 'omdbData', 'mediainfo', 'steamData', 'snatched', 'similarTorrents', 'recommendedTorrents'));

@@ -20,7 +20,7 @@
                                     <p>
                                         <b>Using LastFiles is free, but server costs are not! Donate to keep the site alive!</b><br>
                                         If you wish to donate, send a message
-                                        <a href="/userdetails/1067">
+                                        <a href="/profile/1067">
                                             <button class="btn btn-success btn-sm">HERE</button>
                                         </a>
                                         with the donated amount to receive the selected benefits!<br>
@@ -56,11 +56,20 @@
                                                     <p><strong>VIP:</strong> {{ $donation['vip'] }}</p>
                                                     <p><strong>Upload:</strong> {{ $donation['upload'] }}</p>
                                                     <p><strong>Bonus:</strong> {{ $donation['bonus'] }} points</p>
-                                                    <form action="https://www.paypal.com/paypalme/Donatelast" method="POST">
-                                                        <button class="btn btn-success">
-                                                            Donate {{ $donation['amount'] }}€
-                                                        </button>
-                                                    </form>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="POST">
+    <!-- Indică faptul că este o achiziție pentru donație -->
+    <input type="hidden" name="cmd" value="_donations">
+    <!-- ID-ul sau email-ul contului PayPal unde vor fi trimise donațiile -->
+    <input type="hidden" name="business" value="cristipnc@hotmail.com">
+    <!-- Moneda -->
+    <input type="hidden" name="currency_code" value="EUR">
+    <!-- Descrierea donației -->
+    <input type="hidden" name="item_name" value="Donation">
+    <!-- Suma donației -->
+    <input type="hidden" name="amount" value="{{ $donation['amount'] }}">
+    <button class="btn btn-success">Donate {{ $donation['amount'] }}€</button>
+</form>
+
                                                 </div>
                                             </div>
                                         </div>

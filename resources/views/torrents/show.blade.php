@@ -40,6 +40,12 @@
 <!-- Right: Seeders, Leechers, and Times Completed -->
 <div class="d-flex ms-auto">
 
+
+<p class="mb-0 mx-2">
+        <strong><i class="bi bi-tags" data-bs-toggle="tooltip" title="Category"></i></strong>
+        {{ $torrent->category->name }}
+    </p>
+
 @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
 <a href="{{ route('torrent.peers', ['torrent' => $torrent->id]) }}?seeders">
     <p class="mb-0 mx-2">
@@ -247,42 +253,14 @@
 <!-- Scrollable Content Style -->
 <style>
 .scrollable-content {
-    max-height: 650px;
+    max-height: 750px;
     overflow-y: auto;
 }
 
 
 </style>
 
-<script>
 
-function toggleSpoiler(button) {
-    const spoilerContent = button.nextElementSibling;
-
-    if (!spoilerContent) {
-        console.error("Spoiler content not found!");
-        return;
-    }
-
-    // Log the content and its current state
-    console.log("Spoiler content:", spoilerContent);
-    console.log("Current display:", window.getComputedStyle(spoilerContent).display);
-
-    // Toggle display property
-    if (window.getComputedStyle(spoilerContent).display === "none") {
-        spoilerContent.style.display = "block";
-        button.textContent = "Hide";
-    } else {
-        spoilerContent.style.display = "none";
-        button.textContent = "Show";
-    }
-}
-
-
-</script>
-
-
-    <a href="{{ route('torrents.index') }}" class="btn btn-secondary mt-3">Back to Torrents</a>
 </div>
 
 

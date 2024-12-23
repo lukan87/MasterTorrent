@@ -5,7 +5,7 @@
     <h1 class="mb-4">Torrent Requests</h1>
 
     <div class="alert alert-warning mb-4" role="alert">
-    Cererile completate incorect vor fi șterse. Completați toate câmpurile!
+    Cererile completate incorect vor fi șterse. Completați toate câmpurile corect, cu informatiile cerute!
 </div>
 
     <div class="mb-3">

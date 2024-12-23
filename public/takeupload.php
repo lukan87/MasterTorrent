@@ -1,4 +1,69 @@
 <?php
+// Setare fișier log
+$log_file = '/var/log/error_takeupload.log';
+
+// Configurare pentru logurile PHP
+ini_set('log_errors', 1);
+ini_set('error_log', $log_file);
+
+// Funcție personalizată pentru logare
+function log_error($message) {
+    global $log_file;
+    $client_ip = $_SERVER['REMOTE_ADDR'] ?? 'Unknown IP';
+    $date = date('Y-m-d H:i:s');
+    $formatted_message = "[$date] [IP: $client_ip] $message\n";
+    file_put_contents($log_file, $formatted_message, FILE_APPEND);
+}
+
+// Funcție pentru descărcare fișier torrent cu gestionarea caracterelor speciale
+function download_torrent_file($file_name) {
+    $base_url = 'http://213.202.230.226/rss/download/';
+    $unique_id = '579814008ff95c33722c015994f3d7ec';
+
+    // Codifică numele fișierului pentru caractere speciale
+    $encoded_file_name = rawurlencode($file_name);
+
+    $download_url = $base_url . $encoded_file_name . "/" . $unique_id;
+
+    $options = [
+        'http' => [
+            'method' => 'GET',
+            'header' => "User-Agent: Mozilla/5.0\r\n"
+        ]
+    ];
+
+    $context = stream_context_create($options);
+    $torrent_content = file_get_contents($download_url, false, $context);
+
+    if ($torrent_content === false) {
+        log_error("Eroare la descărcarea fișierului de la: $download_url");
+        throw new Exception("Eroare la descărcarea fișierului de la: $download_url");
+    }
+
+    return $torrent_content;
+}
+
+// Exemplu log inițial
+log_error("Scriptul takeupload.php a fost accesat.");
+
+
+// Restricționează accesul doar pentru IP-ul permis
+$allowed_ip = '62.210.38.52';
+
+// Încearcă să obțină IP-ul real al clientului, ținând cont de proxie sau alte anteturi
+$client_ip = $_SERVER['REMOTE_ADDR']; // IP-ul detectat de server direct
+if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+    $client_ip = trim(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0]);
+} elseif (isset($_SERVER['HTTP_CLIENT_IP'])) {
+    $client_ip = $_SERVER['HTTP_CLIENT_IP'];
+}
+
+// Compară IP-ul clientului cu cel permis
+#if ($client_ip !== $allowed_ip) {
+ #   http_response_code(403); // Răspuns 403 Forbidden
+  #  die('Acces interzis. Această acțiune este permisă doar pentru IP-ul autorizat.');
+#}
+
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -12,24 +77,59 @@ $database = 'lastfiles';
 $conn = new mysqli($host, $user, $password, $database);
 
 if ($conn->connect_error) {
-    die("Conexiunea la baza de date a eșuat: " . $conn->connect_error);
+    log_error("Conexiunea la baza de date a eșuat: " . $conn->connect_error);
+    die("Conexiunea la baza de date a eșuat.");
 }
 
 // Funcție pentru generarea info_hash din fișierul .torrent
+function bencode($data) {
+    if (is_int($data)) {
+        return 'i' . $data . 'e';
+    } elseif (is_string($data)) {
+        return strlen($data) . ':' . $data;
+    } elseif (is_array($data)) {
+        // Verificăm dacă e listă sau dicționar
+        $isList = array_keys($data) === range(0, count($data)-1);
+
+        if ($isList) {
+            // listă
+            $result = 'l';
+            foreach ($data as $value) {
+                $result .= bencode($value);
+            }
+            $result .= 'e';
+            return $result;
+        } else {
+            // dicționar - sortăm cheile lexicografic
+            $result = 'd';
+            $keys = array_keys($data);
+            sort($keys, SORT_STRING);
+            foreach ($keys as $key) {
+                $result .= bencode($key) . bencode($data[$key]);
+            }
+            $result .= 'e';
+            return $result;
+        }
+    }
+
+    return '';
+}
+
 function generate_info_hash($torrent_path) {
     $content = file_get_contents($torrent_path);
-    $start = strpos($content, "4:info");
-    if ($start === false) {
+    $decoded = bdecode($content);
+
+    if (!$decoded || !isset($decoded['info'])) {
         return null;
     }
-    $info = substr($content, $start + 6);
-    $info_end = strrpos($info, "e");
-    if ($info_end === false) {
-        return null;
-    }
-    $info = substr($info, 0, $info_end + 1);
-    return sha1($info);
+
+    // Bencodăm înapoi doar secțiunea info
+    $bencoded_info = bencode($decoded['info']);
+
+    // Aplicăm sha1 pe conținutul bencode al "info"
+    return sha1($bencoded_info);
 }
+
 
 // Funcție pentru calcularea dimensiunii totale a fișierelor din fișierul .torrent
 function calculate_total_size($torrent_path) {
@@ -119,33 +219,102 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $file_tmp = $_FILES['file']['tmp_name'];
-    $file_path = $upload_dir . basename($file_name);
-    if (!move_uploaded_file($file_tmp, $file_path)) {
-        die("Eroare la salvarea fișierului uploadat.");
-    }
+    $file_path = $upload_dir . basename($file_name); // Definește $file_path corect aici
+if (!move_uploaded_file($file_tmp, $file_path)) {
+    log_error("Eroare la salvarea fișierului uploadat: $file_name");
+    die("Eroare la salvarea fișierului uploadat.");
+}
+
 
     // Generăm info_hash
     $info_hash = generate_info_hash($file_path);
-    if (!$info_hash) {
-        die("Eroare la generarea info_hash din fișierul torrent.");
-    }
+if (!$info_hash) {
+    log_error("Eroare la generarea info_hash din fișierul torrent: $file_name");
+    die("Eroare la generarea info_hash din fișierul torrent.");
+}
+
 
     // Calculăm dimensiunea totală
     $total_size = calculate_total_size($file_path);
-    if ($total_size === 0) {
-        die("Eroare: nu s-a putut calcula dimensiunea fișierelor din torrent.");
-    }
+if ($total_size === 0) {
+    log_error("Eroare: nu s-a putut calcula dimensiunea fișierelor din torrent: $file_name");
+    die("Eroare: nu s-a putut calcula dimensiunea fișierelor din torrent.");
+}
+
+
+    // Setăm coloana free dacă dimensiunea > 4GB
+    $free = ($total_size > (4 * 1024 * 1024 * 1024)) ? 1 : 0;
 
     // Pregătirea interogării SQL
-    $stmt = $conn->prepare("INSERT INTO torrents (name, poster, description, imdb_url, mediainfo, file_name, category_id, slug, info_hash, size, owner, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, NOW())");
-    if (!$stmt) {
-        die("Eroare la pregătirea interogării: " . $conn->error);
-    }
+    $stmt = $conn->prepare("INSERT INTO torrents (name, poster, description, imdb_url, mediainfo, file_name, category_id, slug, info_hash, size, owner, created_at, free) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, NOW(), ?)");
+if (!$stmt) {
+    log_error("Eroare la pregătirea interogării SQL: " . $conn->error);
+    die("Eroare la pregătirea interogării SQL.");
+}
 
-    $stmt->bind_param('ssssssissi', $name, $poster, $descr, $imdb_url, $mediainfo, $file_name, $category_id, $slug, $info_hash, $total_size);
 
+    $stmt->bind_param('ssssssissii', $name, $poster, $descr, $imdb_url, $mediainfo, $file_name, $category_id, $slug, $info_hash, $total_size, $free);
+
+    // După ce fișierul a fost uploadat cu succes:
     if ($stmt->execute()) {
-        echo "Torrentul a fost încărcat cu succes! Dimensiunea totală: " . round($total_size / (1024 ** 3), 2) . " GB.";
+      
+        // Obține ID-ul torrentului inserat
+        $torrent_id = $conn->insert_id;
+
+        // Rulăm comanda php artisan pentru update IMDB
+try {
+    $artisan_path = '/var/www/html/lastfiles/artisan';
+    $command = "php $artisan_path torrents:update-imdb --id=" . escapeshellarg($torrent_id);
+    $output = [];
+    $return_var = 0;
+
+    // Executăm comanda
+    exec($command, $output, $return_var);
+
+    if ($return_var === 0) {
+        log_error("Comanda Artisan a fost executată cu succes pentru torrentul cu ID-ul: $torrent_id.");
+    } else {
+        $error_message = "Eroare la actualizarea IMDB pentru torrentul cu ID-ul: $torrent_id. Output: " . implode("\n", $output);
+        log_error($error_message);
+        echo "Eroare la actualizarea IMDB pentru torrentul cu ID-ul: $torrent_id.<br>";
+    }
+} catch (Exception $e) {
+    $error_message = "Eroare la rularea comenzii Artisan pentru torrentul cu ID-ul: $torrent_id. Mesaj: " . $e->getMessage();
+    log_error($error_message);
+    echo "Eroare la rularea comenzii Artisan.<br>";
+}
+
+
+        // Descarcă fișierul torrent
+        try {
+            $torrent_content = download_torrent_file($file_name);
+
+            // Salvează fișierul local
+            $save_path = $_SERVER['DOCUMENT_ROOT'] . '/files/torrents_downloaded/';
+            if (!is_dir($save_path)) {
+                mkdir($save_path, 0777, true);
+            }
+
+            $save_file = $save_path . $file_name;
+            file_put_contents($save_file, $torrent_content);
+
+            // Setează anteturile pentru descărcare directă
+            header('Content-Description: File Transfer');
+            header('Content-Type: application/x-bittorrent');
+            header('Content-Disposition: attachment; filename="' . basename($file_name) . '"');
+            header('Expires: 0');
+            header('Cache-Control: must-revalidate');
+            header('Pragma: public');
+            header('Content-Length: ' . strlen($torrent_content));
+
+            // Trimiterea conținutului fișierului către client
+           log_error("Fișierul $file_name a fost încărcat și procesat cu succes.");
+
+            exit;
+        } catch (Exception $e) {
+            echo "Eroare: " . $e->getMessage() . "<br>";
+        }
     } else {
         echo "Eroare la încărcarea torrentului: " . $stmt->error;
     }
@@ -183,7 +352,7 @@ $conn->close();
         <label for="file">Fișier torrent:</label>
         <input type="file" name="file" id="file" required><br><br>
 
-        <button type="submit">Încarcă</button>
+        <button type="submit">Incarca</button>
     </form>
 </body>
 </html>

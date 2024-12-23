@@ -13,7 +13,7 @@
 
             <!-- Message Body with Styling -->
             <div class="message-body bg-light p-3 rounded border">
-                <p class="font-italic text-dark">{{ $message->body }}</p>
+                <p class="font-italic text-dark">{!! convertCustomTagsToHtml( $message->body ) !!}</p>
             </div>
         </div>
     </div>

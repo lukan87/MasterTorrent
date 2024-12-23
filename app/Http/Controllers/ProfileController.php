@@ -11,6 +11,7 @@ use App\Models\History;
 use App\Models\Torrent;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
+use App\Models\UserTimeline;
 
 class ProfileController extends Controller
 {
@@ -18,7 +19,7 @@ class ProfileController extends Controller
     // Show the profile page by user name
     public function show($id, $name = null)
     {
-        $user = User::findOrFail($id); // Fetch user by id
+        $user = User::with('timeline.staff')->findOrFail($id);
 
         // If the name is missing or doesn't match, redirect to the correct URL with the user's name
         if ($name === null || $name !== $user->name) {
@@ -60,7 +61,7 @@ public function edit($id, $name)
 public function update(Request $request, $id, $name)
 {
     $user = User::findOrFail($id); // Fetch user by id
-    $currentUser = auth()->user();
+    $currentUser = Auth::user();
     if ($user->name !== $name) {
         abort(404); // Optionally handle the case where the name doesn't match
     }
@@ -71,6 +72,10 @@ public function update(Request $request, $id, $name)
         'profile_image_url' => 'nullable|url|max:2048',
         'info' => 'nullable|string',
         'user_class' => 'sometimes|integer',
+        'enabled' => 'nullable|in:yes,no',
+        'donor' => 'nullable|in:yes,no',
+        'uploadpos' => 'nullable|in:yes,no',
+        'downloadpos' => 'nullable|in:yes,no',
     ]);
 
     // Update the user fields
@@ -81,66 +86,79 @@ public function update(Request $request, $id, $name)
         $user->recovery_code = Hash::make($request->recovery_code);
     }
 
-    if ($request->filled('profile_image_url')) {
+    
         $user->profile_image = $request->profile_image_url;
-    }
+    
 
-    // Check and update user class only for moderators and above
-    if ($currentUser->user_class >= \App\Models\UserClass::MODERATOR && $request->filled('user_class')) {
-        if ($request->user_class !== $user->user_class) {
-            // Prevent unauthorized promotions
-            if (
-                $request->user_class >= $currentUser->user_class || // New class is equal or higher than the current user's class
-                $id === $currentUser->id // Prevent self-promotion
-            ) {
-                return redirect()->back()->withErrors('You don\'t have the permission to do this.');
-            }
 
-            // Update user class if checks pass
-            $user->user_class = $request->user_class;
-        }
-    }
+  
+//         // Update the fields only if the user is authorized
+//         if ($request->has('enabled')) {
+//             $user->enabled = $request->enabled ? 'yes' : 'no';
+//         }
+        
+//         if ($request->has('donor')) {
+//             $user->donor = $request->donor ? 'yes' : 'no';
+//         }
+        
+//         if ($request->has('uploadpos')) {
+//             $user->uploadpos = $request->uploadpos ? 'yes' : 'no';
+//         }
+        
+//         if ($request->has('downloadpos')) {
+//             $user->downloadpos = $request->downloadpos ? 'yes' : 'no';
+//         }
+        
 
-    // Check if VIP duration is selected
-    if ($request->filled('vip_until')) {
-        // Get the selected duration
-        $vipDuration = $request->input('vip_until');
+//         // Check if the 'enabled' status has changed
+//         $user->enabled = $request->has('enabled') && $request->enabled ? 'yes' : 'no';
+// if ($user->isDirty('enabled')) {
+//     // Log the change in the UserTimeline
+//     UserTimeline::create([
+//         'user_id' => $user->id,
+//         'staff_id' => Auth::id(),
+//         'comment' => 'User enabled status changed to <strong>' . strtoupper($user->enabled) . '</strong> by ' . Auth::user()->name,
+//     ]);
+// }
 
-        // Calculate the VIP expiration date based on the selected duration
-        switch ($vipDuration) {
-            case '4 weeks':
-                $user->vip_until = Carbon::now()->addWeeks(4);
-                break;
-            case '6 weeks':
-                $user->vip_until = Carbon::now()->addWeeks(6);
-                break;
-            case '8 weeks':
-                $user->vip_until = Carbon::now()->addWeeks(8);
-                break;
-            case '10 weeks':
-                $user->vip_until = Carbon::now()->addWeeks(10);
-                break;
-            case '12 weeks':
-                $user->vip_until = Carbon::now()->addWeeks(12);
-                break;
-            default:
-                $user->vip_until = null; // If nothing selected, clear VIP
-        }
+// $user->donor = $request->has('donor') && $request->donor ? 'yes' : 'no';
+// if ($user->isDirty('donor')) {
+//     UserTimeline::create([
+//         'user_id' => $user->id,
+//         'staff_id' => Auth::id(),
+//         'comment' => 'User donor status changed to <strong>' . strtoupper($user->donor) . '</strong> by ' . Auth::user()->name,
+//     ]);
+// }
 
-        // Set the user class to VIP (assuming class 3 represents VIP)
-    $user->user_class = 3;
+// $user->uploadpos = $request->has('uploadpos') && $request->uploadpos ? 'yes' : 'no';
+// if ($user->isDirty('uploadpos')) {
+//     UserTimeline::create([
+//         'user_id' => $user->id,
+//         'staff_id' => Auth::id(),
+//         'comment' => 'User upload position status changed to <strong>' . strtoupper($user->uploadpos) . '</strong> by ' . Auth::user()->name,
+//     ]);
+// }
 
-    } else {
-        $user->vip_until = null; // Reset VIP if no duration is selected
-    }
+// $user->downloadpos = $request->has('downloadpos') && $request->downloadpos ? 'yes' : 'no';
+// if ($user->isDirty('downloadpos')) {
+//     UserTimeline::create([
+//         'user_id' => $user->id,
+//         'staff_id' => Auth::id(),
+//         'comment' => 'User download position status changed to <strong>' . strtoupper($user->downloadpos) . '</strong> by ' . Auth::user()->name,
+//     ]);
+// }
 
-    $user->enabled = $request->boolean('enabled') ? 'yes' : 'no';
-    $user->donor = $request->has('donor') && $request->donor === 'yes' ? 'yes' : 'no';
-    $user->uploadpos = $request->has('uploadpos') && $request->uploadpos === 'yes' ? 'yes' : 'no';
-    $user->downloadpos = $request->has('downloadpos') && $request->downloadpos === 'yes' ? 'yes' : 'no';
+   
+   
+
+
 
     $user->info = $request->info;
-    $user->seedbonus = filter_var($request->seedbonus, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+  // Only update seedbonus if it's explicitly set in the request
+if ($request->has('seedbonus')) {
+    $user->seedbonus = is_numeric($request->seedbonus) ? (float) $request->seedbonus : $user->seedbonus;
+}
+
 
 
     $user->save();

@@ -29,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
 
         // Add your custom middleware here globally
         app('router')->pushMiddlewareToGroup('web', \App\Http\Middleware\CheckUserEnabled::class);
+        app('router')->pushMiddlewareToGroup('web', \App\Http\Middleware\CheckUserBanned::class);
 
         View::composer('layouts.app', function ($view) {
             $user = Auth::user();
@@ -37,7 +38,8 @@ class AppServiceProvider extends ServiceProvider
             $leechingCount = 0;
             $messages = collect();
             $unreadMessagesCount = 0; // Initialize to 0 in case there is no authenticated user
-            $user = User::findOrFail($user->id);
+          //  $user = User::findOrFail($user->id);
+          
 
             if ($user) {
                 // If the user is authenticated, fetch seeding and leeching counts

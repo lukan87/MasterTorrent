@@ -93,6 +93,19 @@
                         </div>
                     </div>
 
+                     <!-- Need to seed -->
+                     @if (auth()->id() === $user->id)
+    <div class="row mb-3">
+        <label for="seedbonus" class="col-md-2 col-form-label text-md-end">
+            <i class="bi bi-person-workspace" data-bs-toggle="tooltip" data-bs-title="Need to Seed"></i>
+        </label>
+        <div class="col-md-10">
+            <p class="form-control-static"><a href="/hitandrun">Need to Seed</a></p>
+        </div>
+    </div>
+@endif
+
+
                     <!-- Upload -->
                     <div class="row mb-3">
                         <label for="created_at" class="col-md-2 col-form-label text-md-end">
@@ -162,6 +175,35 @@
                     </div>
 
                     @endif
+
+
+            @if (Auth::check() && (Auth::user()->user_class >= \App\Models\UserClass::ADMIN || Auth::user()->name === $user->name))
+    <div class="row mb-3">
+        <label for="seeded_torrents" class="col-md-2 col-form-label text-md-end">
+            <i class="bi bi-calendar-week-fill" data-bs-toggle="tooltip" data-bs-title="User's Timeline"></i>
+        </label>
+        <div class="col-md-10">
+            <div class="form-control-static">
+                @if ($user->timeline->isEmpty())
+                    <p>No timeline entries for this user.</p>
+                @else
+                    <ul class="list-group">
+                        @foreach ($user->timeline as $entry)
+                            <li class="list-group-item">
+                                <strong>{{ $entry->created_at->format('Y-m-d H:i:s') }}:</strong>
+                                {!! convertCustomTagsToHtml($entry->comment) !!}
+                                <!-- @if ($entry->staff)
+                                    <em>by {{ $entry->staff->name }}</em>
+                                @endif -->
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
+            </div>
+        </div>
+    </div>
+@endif
+
 
 
                     <!-- Additional fields can be added here as needed -->

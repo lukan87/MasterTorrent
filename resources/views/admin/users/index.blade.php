@@ -2,12 +2,13 @@
 
 @section('content')
 <div class="mt-4">
+<h1>Manage Users</h1>
     <div class="row">
 
         <!-- Left Column: Users Table -->
         <div class="col-md-8 col-lg-9 mb-4">
 
-            <h1>Manage Users</h1>
+          
 
             <!-- Search Form -->
             <form method="GET" action="{{ route('admin.users.index') }}" class="mb-3">
@@ -27,6 +28,7 @@
                                 <th>ID</th>
                                 <th>Name</th>
                                 <th>Email</th>
+                                <th>IP</th>
                                 <th>Role</th>
                                 <th>Actions</th>
                             </tr>
@@ -37,6 +39,7 @@
                                     <td>{{ $user->id }}</td>
                                     <td><a href="{{ route('profile.show', ['id' => $user->id, 'name' => $user->name]) }}">{{ $user->name }}</a></td>
                                     <td>{{ $user->email }}</td>
+                                    <td>{{ $user->IP }}</td>
                                     <td>{{ $user->role_name }}</td> <!-- Assuming there's a role column or method -->
                                     <td>
                                         <!-- Show Button -->

@@ -101,7 +101,7 @@ class UpdateTorrentsWithIMDbUrl extends Command
                 }
             }
         } else {
-            $this->warn("Invalid IMDb URL for torrent: {$torrent->name}");
+
         }
     }
 }

@@ -32,18 +32,31 @@ if (!function_exists('convertCustomTagsToHtml')) {
 
 
 
-
-
         $content = preg_replace_callback('/\[spoiler\](.*?)\[\/spoiler\]/s', function ($matches) {
+            // Process the content within the spoiler tags to convert BBCode
+            $spoilerContent = convertCustomTagsToHtml($matches[1]); // Reuse the function for nested BBCode
+
+            // Generate a unique ID for each spoiler
+            $uniqueId = uniqid('spoiler_');
+
             return '
-                <div class="spoiler-container">
-                    <button type="button" class="spoiler-button" onclick="toggleSpoiler(this)">Show</button>
-                    <div class="spoiler-content" style="display: none;">
-                        ' . htmlspecialchars($matches[1], ENT_QUOTES, 'UTF-8') . '
+                <span class="text-decoration-underline" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#' . $uniqueId . '" aria-expanded="false" aria-controls="' . $uniqueId . '">
+                    Show Spoiler
+                </span>
+                <div id="' . $uniqueId . '" class="collapse">
+                    <div class="spoiler-content p-3 border rounded">
+                        ' . $spoilerContent . '
                     </div>
                 </div>
             ';
         }, $content);
+
+
+
+
+
+
+
 
 
 
@@ -54,7 +67,7 @@ if (!function_exists('convertCustomTagsToHtml')) {
                 $url = $matches[1];
                 preg_match('/(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)|youtu\.be\/([a-zA-Z0-9_-]+)/', $url, $videoIdMatch);
                 $videoId = $videoIdMatch[1] ?? $videoIdMatch[2] ?? null;
-                return $videoId ? '<div class="videoWrapper"><iframe src="https://www.youtube.com/embed/' . $videoId . '" frameborder="0" allowfullscreen></iframe></div>' : $url;
+                return $videoId ? '<div class="videoWrapper"><iframe src="https://www.youtube.com/embed/' . $videoId . '" frameborder="0" allowfullscreen ></iframe></div>' : $url;
             },
             $content
         );

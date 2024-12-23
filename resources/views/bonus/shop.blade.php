@@ -11,6 +11,7 @@
     </div>
 
     <div class="row">
+        <!-- 10 GB Upload -->
         <div class="col-md-4">
             <div class="card">
                 <div class="card-header">
@@ -29,6 +30,7 @@
             </div>
         </div>
 
+        <!-- 25 GB Upload -->
         <div class="col-md-4">
             <div class="card">
                 <div class="card-header">
@@ -47,6 +49,7 @@
             </div>
         </div>
 
+        <!-- 100 GB Upload -->
         <div class="col-md-4">
             <div class="card">
                 <div class="card-header">
@@ -64,27 +67,34 @@
                 </div>
             </div>
         </div>
+
+        <!-- VIP Promotion -->
+        <div class="col-md-4 mt-4">
+    <div class="card">
+    <div class="card-header">
+    @if (Auth::user()->user_class >= 3 && Auth::user()->vip_until)
+        VIP Status: Expires on {{ \Carbon\Carbon::parse(Auth::user()->vip_until)->format('F j, Y') }}
+    @else
+        VIP Promotion (1 Year)
+    @endif
+</div>
+
+        <div class="card-body">
+            <p>Cost: 100,000 Points</p>
+            <form action="{{ route('bonus.buyVip') }}" method="POST">
+                @csrf
+                <button type="submit" 
+                        class="btn btn-warning {{ Auth::user()->seedbonus < 100000 || Auth::user()->user_class >= 3 ? 'disabled' : '' }}">
+                    Buy VIP
+                </button>
+            </form>
+            @if (Auth::user()->user_class >= 3)
+                <p class="text-danger mt-2">You are already VIP or higher!</p>
+            @endif
+        </div>
     </div>
 </div>
 
-<!-- Include SweetAlert -->
-<script>
-    @if(session('success'))
-        swal({
-            title: "Success!",
-            text: "{{ session('success') }}",
-            type: "success",
-            timer: 3000,
-            showConfirmButton: true
-        });
-    @elseif(session('error'))
-        swal({
-            title: "Error!",
-            text: "{{ session('error') }}",
-            type: "error",
-            timer: 3000,
-            showConfirmButton: true
-        });
-    @endif
-</script>
+    </div>
+</div>
 @endsection

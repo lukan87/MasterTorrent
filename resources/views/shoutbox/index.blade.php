@@ -47,7 +47,7 @@
                             </div>
 
                             {{-- Message Text --}}
-                            <div class="message-content">{{ $message->message }}</div>
+                            <div class="message-content"> {!! convertCustomTagsToHtml( $message->message ) !!}</div>
 
                             {{-- Reply Form --}}
                             <form id="reply-form-{{ $message->id }}" action="{{ route('shoutbox.reply', $message->id) }}" method="POST" style="display: none;" class="mt-2">

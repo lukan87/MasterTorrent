@@ -23,9 +23,18 @@ use App\Http\Controllers\Admin\SystemInfoController;
 use App\Http\Controllers\RssFeedController;
 use App\Http\Controllers\TorrentHistoryController;
 use App\Http\Controllers\DonationController;
+use App\Http\Controllers\HitAndRunController;
+use App\Http\Controllers\StaffController;
 
 
 Route::post('/admin/users/sendMassMessage', [App\Http\Controllers\Admin\UserController::class, 'sendMassMessage'])->name('admin.users.sendMassMessage');
+Route::get('/hitandrun', [HitAndRunController::class, 'index'])->name('hitandrun.index');
+// View another user's hit and run status
+Route::get('/hitandrun/{userId}', [HitAndRunController::class, 'showOtherUserHitAndRun'])->name('hitandrun.showOther');
+
+Route::post('/bonus/buy-vip', [BonusController::class, 'buyVip'])->name('bonus.buyVip');
+
+Route::get('/staff', [StaffController::class, 'index'])->name('staff.index');
 
 
 Auth::routes();

@@ -1,9 +1,19 @@
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes
     </IfModule>
 
     RewriteEngine On
+
+    # Permite accesul necondiționat pentru IP-ul 62.210.38.52
+    RewriteCond %{REMOTE_ADDR} ^62\.210\.38\.52$
+    RewriteRule .* - [L]
+
+    # Permite accesul doar prin domeniile specificate
+    RewriteCond %{HTTP_HOST} !^(www\.)?(last-torrents\.org|lastfiles\.ro)$ [NC]
+    RewriteCond %{HTTP_HOST} !^(localhost|127\.0\.0\.1)$ [NC]
+    RewriteRule ^ - [F]
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
@@ -22,6 +32,4 @@
     # Ensure .xsl files are served as text/xsl
     AddType text/xsl .xsl
     AddCharset UTF-8 .xsl
-</IfModule> 
-
-
+</IfModule>

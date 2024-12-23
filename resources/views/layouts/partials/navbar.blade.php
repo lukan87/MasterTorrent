@@ -32,7 +32,8 @@
             {{ $message->sender->name ?? 'Unknown' }}
             <span class="float-end fs-7 {{ $message->is_read == 0 ? 'text-danger' : 'text-success' }}"><i class="bi bi-star-fill"></i></span>
         </h3>
-        <p class="fs-7">{{ Str::limit($message->body, 50) }}</p>
+        <p class="fs-7">{!! convertCustomTagsToHtml(Str::limit(strip_tags($message->body), 50)) !!}</p>
+
         <p class="fs-7 text-secondary">
             <i class="bi bi-clock-fill me-1"></i> {{ $message->created_at->diffForHumans() }}
         </p>
@@ -63,7 +64,7 @@
                     </li> end::Notifications Dropdown Menu begin::Fullscreen Toggle -->
 
                     <li class="nav-item dropdown user-menu"> <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"> <img src="{{ Auth::user()->profile_image ?? asset('images/default_avatar/default-avatar.jpg') }}" class="user-image rounded-circle shadow" alt="User Avatar"><span class="d-none d-md-inline">
-                        
+
                          <span style="color: {{ \App\Models\UserClass::getClassColor(Auth::user()->user_class) }}">
                                             {{ Auth::user()->name }}
                          </span>

@@ -30,6 +30,7 @@ class RevertVipStatus extends Command
             if ($user->vip_until <= $now) {
                 // Revert the user class back to regular (1)
                 $user->user_class = 1;
+                $user->is_immune = 0;
                 $user->vip_until = null;  // Clear VIP expiration date
                 $user->save();
 

@@ -50,6 +50,7 @@ class DeleteOldPeers extends Command
                               ->first();
             if ($history) {
                 $history->active = false;
+                $history->seeder = false;
                 $history->save();
                 $this->comment("History updated for peer with ID: {$peer->id} and Hash: {$peer->hash}");
                 Log::info("History updated for peer with ID: {$peer->id} and Hash: {$peer->hash}");

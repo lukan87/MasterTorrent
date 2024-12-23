@@ -39,15 +39,26 @@ class AutoCorrectHistory extends Command
      */
     public function handle()
     {
-        $current = new Carbon();
-        $history = History::select(['id', 'active', 'updated_at'])->where('active', '=', 1)->where('updated_at', '<', $current->copy()->subHours(2)->toDateTimeString())->get();
+        $current = Carbon::now();
+        $history = History::select(['id', 'active', 'updated_at'])
+            ->where('active', '=', 1)
+            ->where('updated_at', '<', $current->copy()->subHours(1)->toDateTimeString())
+            ->get();
+
+        if ($history->isEmpty()) {
+            $this->info('No history records required correction.');
+            return;
+        }
 
         foreach ($history as $h) {
             $h->active = false;
             $h->seeder = false;
             $h->save();
-        }
-        $this->info('History corrected');
-    }
 
+            // Log detailed info about the corrected record
+            $this->info("Corrected History Record ID: {$h->id}, Updated At: {$h->updated_at}");
+        }
+
+        $this->info('All applicable history records have been corrected.');
+    }
 }

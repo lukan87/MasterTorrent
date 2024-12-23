@@ -11,13 +11,13 @@ class FormatHelper
         if ($bytes < 0) {
             return 'Invalid size';
         }
-    
+
         $units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']; // Added 'PB' for Petabytes
         $power = $bytes > 0 ? floor(log($bytes, 1024)) : 0;
-    
+
         // Ensure that we don't exceed the available units
         $power = min($power, count($units) - 1);
-    
+
         return round($bytes / pow(1024, $power), 2) . ' ' . $units[$power];
     }
 

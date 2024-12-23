@@ -3,6 +3,8 @@
 @section('content')
 <div class="container">
     <h1 class="my-4">Inbox</h1>
+    <a href="{{ route('messages.outbox') }}" class="btn btn-primary">Go to Outbox</a>
+
 
     @if($messages->isEmpty())
         <div class="alert alert-info">

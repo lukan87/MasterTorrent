@@ -9,133 +9,236 @@ use App\Models\Comment;
 use App\Models\Message;
 use App\Models\History;
 use App\Models\UserClass;
+use App\Models\UserTimeline;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Carbon;
 
 class UserController extends Controller
 {
-    // Show all users with search functionality
+    // Afișează toți utilizatorii cu funcționalitate de căutare
     public function index(Request $request)
     {
 
-         // Get the user classes to display in the form
-         $userClasses = UserClass::getClasses();  // This will return the array of user classes
+         // Obține clasele de utilizatori pentru a le afișa în formular
+         $userClasses = UserClass::getClasses();  // Aceasta va returna un array de clase de utilizatori
 
         //  dd($userClasses);
 
-        // Search users by name or email
+        // Căutare utilizatori după nume sau email
         $searchTerm = $request->input('search');
         $users = User::query()
-            ->when($searchTerm, function ($query, $searchTerm) {
-                return $query->where('name', 'LIKE', "%{$searchTerm}%")
-                             ->orWhere('email', 'LIKE', "%{$searchTerm}%");
-            })
-            ->paginate(10); // Paginate results
+        ->when($searchTerm, function ($query, $searchTerm) {
+            return $query->where('name', 'LIKE', "%{$searchTerm}%")
+                         ->orWhere('email', 'LIKE', "%{$searchTerm}%")
+                         ->orWhere('ip', 'LIKE', "%{$searchTerm}%"); // Adaugă căutare după IP
+        })
+        ->paginate(15); 
 
 
-            // Get the current time
-    $now = now();
+        $now = now();
 
-    // Calculate the number of users created in the last 24 hours, one week, and one month
-    $last24Hours = User::where('created_at', '>=', $now->subDay())->count();
-    $lastWeek = User::where('created_at', '>=', $now->copy()->subWeek())->count();
-    $lastMonth = User::where('created_at', '>=', $now->copy()->subMonth())->count();
+        // Numără utilizatorii înregistrați în ultimele 24 de ore
+        $last24Hours = User::where('created_at', '>=', $now->subDay())->count();
+        // Numără utilizatorii înregistrați în ultima săptămână
+        $lastWeek = User::where('created_at', '>=', $now->copy()->subWeek())->count();
+        // Numără utilizatorii înregistrați în ultima lună
+        $lastMonth = User::where('created_at', '>=', $now->copy()->subMonth())->count();
 
         return view('admin.users.index', compact('users', 'searchTerm', 'last24Hours', 'lastWeek', 'lastMonth', 'userClasses'));
     }
 
-// Edit a user
-public function edit($id)
-{
-    $user = User::findOrFail($id);
-    return view('admin.users.edit', compact('user'));
-}
 
-
-
-public function update(Request $request, $id)
-{
-    $user = User::findOrFail($id);
-    $currentUser = auth()->user();
-
-    // Validate basic user fields
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'email' => 'required|email|unique:users,email,' . $id,
-        'user_class' => 'nullable|integer',
-    ]);
-
-    // Update basic user fields
-    $user->name = $request->name;
-    $user->email = $request->email;
-    $user->info = $request->info;
-
-    // Update profile image if provided
-    if ($request->filled('profile_image')) {
-        $user->profile_image = $request->profile_image;
+    // Afișează formularul de editare pentru utilizator
+    public function edit($id)
+    {
+        $user = User::findOrFail($id);
+        return view('admin.users.edit', compact('user'));
     }
 
-    // Check and update user class
-    if ($request->filled('user_class') && $request->user_class !== $user->user_class) {
-        // Prevent self-promotion and promote only if it's to a lower class
-        if (
-            $request->user_class >= $currentUser->user_class || // New class is equal or higher than the current user's class
-            $id === $currentUser->id // Prevent self-promotion
-        ) {
-            return redirect()->back()->withErrors('You don\'t have the permission to do this.');
+
+
+    // Actualizează informațiile utilizatorului
+    public function update(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+        $currentUser = auth()->user();
+
+        // Validează câmpurile de bază ale utilizatorului
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $id,
+            'user_class' => 'nullable|integer',
+        ]);
+
+        // Actualizează câmpurile de bază ale utilizatorului
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->info = $request->info;
+
+        // Actualizează câmpurile booleene cu 'yes' sau 'no'
+        $user->enabled = $request->enabled;
+        $user->downloadpos = $request->downloadpos;
+        $user->uploadpos = $request->uploadpos;
+        $user->donor = $request->donor;
+        $user->is_immune = $request->is_immune;
+        $user->is_freeleech = $request->is_freeleech;
+
+        // Actualizează imaginea de profil dacă este furnizată
+        if ($request->filled('profile_image')) {
+            $user->profile_image = $request->profile_image;
         }
 
-        // If all checks pass, update the user class
-        $user->user_class = $request->user_class;
+        // Verifică și actualizează clasa utilizatorului doar pentru moderatori și utilizatori de nivel superior
+        if ($currentUser->user_class >= \App\Models\UserClass::MODERATOR && $request->filled('user_class')) {
+            // Verifică dacă clasa solicitată este diferită de clasa curentă
+            if ((int) $request->user_class !== (int) $user->user_class) { // Asigură o comparație strictă
+                // Previne promovările neautorizate
+                if (
+                    $request->user_class >= $currentUser->user_class || // Noua clasă este egală sau mai mare decât clasa utilizatorului curent
+                    $id === $currentUser->id // Previne auto-promovarea
+                ) {
+                    return redirect()->back()->withErrors('Nu ai permisiunea de a face acest lucru.');
+                }
+
+                // Actualizează clasa utilizatorului și înregistrează schimbarea în timeline-ul utilizatorului
+                $user->user_class = $request->user_class;
+                $user->save(); // Salvează clasa actualizată în baza de date
+
+                // Înregistrează schimbarea în UserTimeline
+                UserTimeline::create([
+                    'user_id' => $user->id,
+                    'staff_id' => Auth::id(),
+                    'comment' => 'Clasa schimbată în ' . \App\Models\UserClass::getClassName($request->user_class) . ' de ' . $currentUser->name,
+                ]);
+            } else {
+                // Opțional: Adaugă loguri pentru scopuri de depanare
+
+            }
+        }
+
+        // Verifică dacă durata VIP este selectată
+        if ($request->filled('vip_until')) {
+            // Obține durata selectată
+            $vipDuration = $request->input('vip_until');
+            $newVipUntil = null;
+
+            // Verifică dacă utilizatorul a selectat să elimine statutul VIP
+            if ($vipDuration === 'remove') {
+                // Îndepărtează VIP doar dacă "Remove VIP" este selectat
+                if ($user->vip_until !== null) {
+                    $user->vip_until = null;
+                    $user->user_class = 1;
+                    $user->is_immune = 0;
+                    $user->is_freeleech = 0;
+                    $user->save();
+
+                    // Înregistrează schimbarea în UserTimeline
+                    UserTimeline::create([
+                        'user_id' => $user->id,
+                        'staff_id' => Auth::id(),
+                        'comment' => 'Statutul VIP eliminat de ' . $currentUser->name,
+                    ]);
+                }
+            } else {
+                // Calculează data de expirare a VIP-ului în funcție de durata selectată
+                switch ($vipDuration) {
+                    case '4 weeks':
+                        $newVipUntil = Carbon::now()->addWeeks(4);
+                        break;
+                    case '6 weeks':
+                        $newVipUntil = Carbon::now()->addWeeks(6);
+                        break;
+                    case '8 weeks':
+                        $newVipUntil = Carbon::now()->addWeeks(8);
+                        break;
+                    case '10 weeks':
+                        $newVipUntil = Carbon::now()->addWeeks(10);
+                        break;
+                    case '12 weeks':
+                        $newVipUntil = Carbon::now()->addWeeks(12);
+                        break;
+                    default:
+                        $newVipUntil = null; // Dacă nu este selectat nimic, șterge VIP
+                }
+
+                // Actualizează doar dacă data de expirare a VIP-ului s-a schimbat
+                if ($newVipUntil !== $user->vip_until) {
+                    // Setează data de expirare a VIP-ului
+                    $user->vip_until = $newVipUntil;
+
+                    // Setează clasa utilizatorului la VIP (presupunând că clasa 3 reprezintă VIP)
+                    $user->user_class = 3;
+                    $user->is_immune = 1;
+                    $user->is_freeleech = 1;
+                    $user->save();
+
+                    // Înregistrează schimbarea în UserTimeline
+                    UserTimeline::create([
+                        'user_id' => $user->id,
+                        'staff_id' => Auth::id(),
+                        'comment' => 'Statutul VIP setat până la ' . $user->vip_until->toDateString() . ' de ' . $currentUser->name,
+                    ]);
+                }
+            }
+        }
+
+
+        // Update uploaded and downloaded values
+    if ($request->has('uploaded')) {
+        // Convert from GB to bytes
+        $user->uploaded = $request->input('uploaded') * (1024 ** 3);
     }
 
-    // Save the changes
-    $user->save();
+    if ($request->has('downloaded')) {
+        // Convert from GB to bytes
+        $user->downloaded = $request->input('downloaded') * (1024 ** 3);
+    }
 
-    return redirect()->route('admin.users.index')->with('status', 'User updated successfully!');
-}
+
+    
+        // Salvează schimbările
+        $user->save();
+
+        return redirect()->route('admin.users.index')->with('success', 'Utilizatorul a fost actualizat cu succes!');
+    }
 
 
-public function show($name)
-{
-    // Find the user by username (or use the ID)
-    $user = User::where('name', $name)->firstOrFail();
+    // Afișează informațiile detaliate ale utilizatorului
+    public function show($name)
+    {
+        // Găsește utilizatorul după nume (sau folosește ID-ul)
+        $user = User::where('name', $name)->firstOrFail();
 
-    // Get the list of torrents uploaded by the user
-    $torrentsUploaded = Torrent::where('owner', $user->id)->paginate(50);
+        // Obține lista de torente încărcate de utilizator
+        $torrentsUploaded = Torrent::where('owner', $user->id)->paginate(50);
 
-    // Get the list of torrents downloaded by the user
-    $torrentsDownloaded = History::where('user_id', $user->id)->paginate(50);
+        // Obține lista de torente descărcate de utilizator
+        $torrentsDownloaded = History::where('user_id', $user->id)->paginate(50);
 
-    // Get the list of torrents the user is seeding
-    $seedingTorrents = Peer::where('user_id', $user->id)->where('seeder', 1)->paginate(50);
+        // Obține lista de torente pe care utilizatorul le semnalează
+        $seedingTorrents = Peer::where('user_id', $user->id)->where('seeder', 1)->paginate(50);
 
-    // Get the list of torrents the user is leeching
-    $leechingTorrents = Peer::where('user_id', $user->id)->where('seeder', 0)->paginate(50);
+        // Obține lista de torente pe care utilizatorul le descarcă
+        $leechingTorrents = Peer::where('user_id', $user->id)->where('seeder', 0)->paginate(50);
 
-    // Get the list of comments made by the user
-    $comments = Comment::where('user_id', $user->id)->paginate(50);
+        // Obține lista de comentarii făcute de utilizator
+        $comments = Comment::where('user_id', $user->id)->paginate(50);
 
-    // Get the list of messages sent by the user
-    $messages = Message::where('sender_id', $user->id)->paginate(50);
+        // Obține lista de mesaje trimise de utilizator
+        $messages = Message::where('sender_id', $user->id)->paginate(50);
 
-    // Pass all data to the view
-    return view('admin.users.show', compact(
-        'user',
-        'torrentsUploaded',
-        'torrentsDownloaded',
-        'seedingTorrents',
-        'leechingTorrents',
-        'comments',
-        'messages'
-    ));
-}
+        return view('admin.users.show', compact('user', 'torrentsUploaded', 'torrentsDownloaded', 'seedingTorrents', 'leechingTorrents', 'comments', 'messages'));
+    }
+
+
 
 
 
 public function sendMassMessage(Request $request)
 {
-    // Validate the input
+   
     $request->validate([
         'message' => 'required|string',
         'user_ids' => 'nullable|array',
@@ -144,20 +247,25 @@ public function sendMassMessage(Request $request)
         'user_class.*' => 'in:' . implode(',', array_keys(UserClass::getClasses())), // Validate each user_class is a valid class
     ]);
 
-    // Get the users to send the message to, optionally filtered by user class or specific user IDs
+ 
+    // Verifică dacă user_class este gol (neselectat)
+ if (!$request->filled('user_class')) {
+    return redirect()->back()->with('error', 'Please select at least one user class to send the message.');
+}
+
+  // Obține utilizatorii cărora să le trimitem mesajul, filtrat opțional de clasele de utilizatori sau de ID-urile specifice ale utilizatorilor
     $query = User::query();
 
-
-
-    // If user classes are selected, filter by those
+   
     if ($request->filled('user_class')) {
         $query->whereIn('user_class', $request->user_class);
     }
 
-    // Retrieve the users
+
     $users = $query->get();
 
-    // Send a message to each selected user
+    $sentCount = 0;
+    // Trimite un mesaj fiecărui utilizator selectat
     foreach ($users as $user) {
         Message::create([
             'sender_id' => 2, // Assuming the admin is sending the message
@@ -166,12 +274,13 @@ public function sendMassMessage(Request $request)
             'body' => $request->message,
             'is_read' => false, // You can customize the status as needed
         ]);
+
+        // Increment the sent count
+        $sentCount++;
     }
 
-    return redirect()->route('admin.users.index')->with('success', 'Messages sent successfully!');
+    return redirect()->route('admin.users.index')->with('success', "$sentCount messages sent successfully!");
 }
-
-
 
 
 

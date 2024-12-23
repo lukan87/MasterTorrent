@@ -93,6 +93,12 @@
                         <p>Rules</p>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a href="/staff" class="nav-link">
+                    <i class="bi bi-people-fill"></i>
+                        <p>Staff</p>
+                    </a>
+                </li>
                 <hr>
                 <li class="nav-item">
                     <a href="#" class="nav-link">

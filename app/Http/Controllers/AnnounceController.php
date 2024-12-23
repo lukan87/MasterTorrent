@@ -165,8 +165,9 @@ $client_updated_at = Carbon::now();  // Set client updated timestamp
 // Check if double attribute is set to 1
      $mod_uploaded = ($torrent->double === 1) ? $uploaded * 2 : $uploaded;
 
-  //VIP DOWNLOAD
-$mod_downloaded = ($user->user_class === 3) ? 0 : $downloaded;
+  //VIP&SUPERUSER FREE DOWNLOAD
+  $mod_downloaded = ($user->user_class === 3 || $user->user_class === 4) ? 0 : $downloaded;
+
 
         switch ($event) {
             case 'started':
@@ -211,8 +212,8 @@ $mod_downloaded = ($user->user_class === 3) ? 0 : $downloaded;
             case 'completed':
                 $history->agent = $agent;
                 $history->active = true;
-                // $history->seeder = ($left == 0) ? true : false;
-                $history->seeder = true;
+                $history->seeder = ($left == 0) ? true : false;
+                //$history->seeder = true;
                 $history->uploaded += $mod_uploaded;
                 $history->actual_uploaded += $uploaded;
                 $history->client_uploaded = $real_uploaded;

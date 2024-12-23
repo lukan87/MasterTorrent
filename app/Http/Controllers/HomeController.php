@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\News;
 use App\Models\User;
-use App\Models\Movie;
-use App\Models\Series;
 use App\Models\Torrent;
 use App\Models\Poll;
 use App\Models\Topic;
@@ -79,6 +77,10 @@ $topLastMonth = Cache::remember('top_last_month', $cacheDuration, function () us
             return Torrent::count();
         });
 
+        $torrentActive = Cache::remember('torrent_active_count', $cacheDuration, function () {
+            return Torrent::where('seeders', '>', 0)->count();
+        });
+
         $userCount = Cache::remember('user_count', $cacheDuration, function () {
             return User::count();
         });
@@ -97,8 +99,11 @@ $topLastMonth = Cache::remember('top_last_month', $cacheDuration, function () us
             'torrentCount',
             'userCount',
             'forumTopicCount',
-            'recommendedTorrents','topUploaders','topDownloaders'
-            
+            'recommendedTorrents',
+            'topUploaders',
+            'topDownloaders',
+            'torrentActive'
+
         ));
     }
 
@@ -115,7 +120,7 @@ $topLastMonth = Cache::remember('top_last_month', $cacheDuration, function () us
     // Cache the latest 10 recommended torrents
     $recommendedTorrents = Cache::remember('recommended_torrents', $cacheDuration, function () {
         return Torrent::where('recommended', true)
-                      ->where('category_id', '!=', 27) 
+                      ->where('category_id', '!=', 27)
                       ->latest('created_at')
                       ->limit(10)
                       ->get();
