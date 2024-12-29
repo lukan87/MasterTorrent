@@ -367,6 +367,19 @@ public function sendMassMessage(Request $request)
 
 
 
+ // Method to show all comments, paginated by 50, in descending order
+ public function comments()
+{
+    // Retrieve all comments, eager load 'user' and 'torrent' relationships
+    $comments = Comment::with(['user', 'torrent']) // Eager load both 'user' and 'torrent'
+                        ->orderBy('created_at', 'desc')
+                        ->paginate(50);
+
+    // Return the view with the comments data
+    return view('admin.users.comments', compact('comments'));
+}
+
+
 // Delete a user
 public function destroy($id)
 {

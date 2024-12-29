@@ -19,9 +19,9 @@
 
 
 <!-- SweetAlert CSS -->
-<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.0/dist/sweetalert2.min.css" rel="stylesheet">
+<link rel="stylesheet" href="{{ secure_asset('css/sweet/sweet.css') }}">
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="{{ secure_asset('js/sweet/sweet.js') }}"></script>
 
 
 <style>

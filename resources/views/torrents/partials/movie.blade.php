@@ -71,6 +71,10 @@
                                  @endif
                                  {!! $PG !!}
                         </h3>
+                        @if(isset($tmdbData['tagline']))
+                        <i>{{ $tmdbData['tagline'] }}</i>
+                        @endif
+
                     </p>
                     </dd>
 

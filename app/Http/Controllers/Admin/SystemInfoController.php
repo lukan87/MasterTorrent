@@ -30,9 +30,22 @@ class SystemInfoController extends Controller
         // Get RAM usage (Linux-based command using shell_exec)
         $ramUsage = $this->getRAMUsage();
 
-        return view('admin.system_info', compact('phpVersion', 'os', 'storage', 'diskTotal', 'cacheStatus', 'backupSchedule', 'cpuLoad', 'ramUsage'));
+        // Get System Uptime
+        $uptime = $this->getUptime();
+
+        return view('admin.system_info', compact('phpVersion', 'os', 'storage', 'diskTotal', 'cacheStatus', 'backupSchedule', 'cpuLoad', 'ramUsage', 'uptime'));
     }
 
+     // Method to get system uptime
+     private function getUptime()
+     {
+         // Execute the `uptime` command to get system uptime
+         $uptimeCommandOutput = shell_exec('uptime -p');
+
+         // The command outputs in a format like: "up 10 days, 3 hours, 12 minutes"
+         // We'll return the raw output
+         return $uptimeCommandOutput;
+     }
     // Method to get RAM usage on Linux systems
     private function getRAMUsage()
     {

@@ -148,4 +148,15 @@ class Torrent extends Model
     {
         return $this->hasMany(TorrentFiles::class);
     }
+
+    public function thanks()
+{
+    return $this->hasMany(TorrentThank::class, 'torrent_id');
+}
+
+// Add a method to get the count of thanks
+public function thanksCount()
+{
+    return $this->thanks()->count();
+}
 }

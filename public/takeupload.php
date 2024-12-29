@@ -15,6 +15,21 @@ function log_error($message) {
     file_put_contents($log_file, $formatted_message, FILE_APPEND);
 }
 
+// Lista de cuvinte pentru verificare
+$keywords = ["Tatutu", "Chefi", "Romania", "Iubire", "Vocea", "Sef", "Fierbinti", "Sariti", "iUmor", "Scara"];
+
+// Funcție pentru verificarea existenței cuvintelor-cheie în conținutul fișierului
+function contains_keywords($file_path, $keywords) {
+    $content = file_get_contents($file_path); // Citește conținutul fișierului
+    foreach ($keywords as $keyword) {
+        if (stripos($content, $keyword) !== false) { // Verifică dacă există oricare cuvânt
+            return true;
+        }
+    }
+    return false;
+}
+
+
 // Funcție pentru descărcare fișier torrent cu gestionarea caracterelor speciale
 function download_torrent_file($file_name) {
     $base_url = 'http://213.202.230.226/rss/download/';
@@ -225,6 +240,10 @@ if (!move_uploaded_file($file_tmp, $file_path)) {
     die("Eroare la salvarea fișierului uploadat.");
 }
 
+// Verifică dacă fișierul conține cuvintele-cheie
+if (contains_keywords($file_path, $keywords)) {
+    $category_id = 22; // Setează categoria la 22 dacă cuvintele-cheie sunt găsite
+}
 
     // Generăm info_hash
     $info_hash = generate_info_hash($file_path);

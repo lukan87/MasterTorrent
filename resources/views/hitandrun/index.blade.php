@@ -17,7 +17,7 @@
                     <th>Prewarned</th>
                     <th>Remaining Seeding Time</th>
                     <th>Seeding Status</th>
-                    <th>Actions</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -60,7 +60,7 @@
     <form action="{{ route('bonus.buySeedtime') }}" method="POST">
         @csrf
         <input type="hidden" name="torrent_id" value="{{ $torrent->torrent_id }}" hidden>
-        <button type="submit" class="btn btn-primary">Buy Seedtime with 5000 points</button>
+        <button type="submit" class="btn btn-primary btn-sm" data-bs-toggle="tooltip" title="5000 seedbonus points">Buy Seedtime</button>
     </form>
 @endif
                         </td>

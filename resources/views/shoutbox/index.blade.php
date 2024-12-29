@@ -6,7 +6,7 @@
 
 
     {{-- Shoutbox Card --}}
-    <div class="card shoutbox-container mt-5">
+    <div class="card shoutbox-container mt-2">
         <div class="card-body">
             {{-- Display Messages and Replies --}}
             <div class="shoutbox-messages">
@@ -107,14 +107,78 @@
         </div>
     </div>
 
+
+
+    @include('shoutbox.partials.emoji')
     {{-- Form to Post New Message --}}
-    <form id="shoutbox-form" action="{{ route('shoutbox.store') }}" method="POST" class="mb-4 mt-5">
+    <form id="shoutbox-form" action="{{ route('shoutbox.store') }}" method="POST" class="mb-4 mt-3">
     @csrf
     <div class="form-group">
-        <textarea name="content" class="form-control" placeholder="Type your message here..." required onkeydown="submitOnEnter(event)"></textarea>
+        <textarea name="content" id="content" class="form-control" placeholder="Type your message here..." required onkeydown="submitOnEnter(event)"></textarea>
     </div>
     <!-- <button type="submit" class="btn btn-primary mt-2">Post Message</button> -->
 </form>
+
+
+<script>
+    function insertBBCode(tag) {
+        // Get the textarea element
+        var textarea = document.getElementById('content');
+
+        // Get the selected text (if any)
+        var selectedText = textarea.value.substring(textarea.selectionStart, textarea.selectionEnd);
+
+        // Determine the cursor position for inserting BBCode
+        var cursorPos;
+        if (selectedText.length > 0) {
+            // If there is selected text, insert the BBCode around it
+            cursorPos = textarea.selectionEnd + tag.length;
+        } else {
+            // If no text is selected, insert the BBCode with the cursor after the closing square bracket
+            cursorPos = textarea.selectionStart + tag.length + 2;
+        }
+
+        // Insert the BBCode into the textarea
+        var currentContent = textarea.value;
+        var newContent = currentContent.substring(0, textarea.selectionStart) +
+            '[' + tag + ']' + selectedText + '[/' + tag + ']' +
+            currentContent.substring(textarea.selectionEnd);
+        textarea.value = newContent;
+
+        // Set the cursor position
+        textarea.setSelectionRange(cursorPos, cursorPos);
+        textarea.focus();
+    }
+
+    function insertEmoji(emojiCode) {
+    var textarea = document.getElementById('content');
+    var cursorPos;
+
+    // Fetch the emoji from the server using AJAX
+    fetch(`/get-emoji/${emojiCode}`)
+        .then(response => response.json())
+        .then(data => {
+            var emoji = data.emoji;
+            var selectedText = textarea.value.substring(textarea.selectionStart, textarea.selectionEnd);
+
+            if (selectedText.length > 0) {
+                cursorPos = textarea.selectionEnd + emoji.length;
+                textarea.value = textarea.value.substring(0, textarea.selectionStart) +
+                    emoji + selectedText + emoji +
+                    textarea.value.substring(textarea.selectionEnd);
+            } else {
+                cursorPos = textarea.selectionStart + emoji.length;
+                textarea.value = textarea.value.substring(0, textarea.selectionStart) +
+                    emoji + textarea.value.substring(textarea.selectionEnd);
+            }
+
+            textarea.setSelectionRange(cursorPos, cursorPos);
+            textarea.focus();
+        })
+        .catch(error => console.error('Error fetching emoji:', error));
+}
+
+</script>
 
 <script>
     function submitOnEnter(event) {

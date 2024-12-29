@@ -6,7 +6,7 @@
     /* Full-screen background with gradient overlay */
     body {
         background: linear-gradient(rgba(20, 20, 20, 0.5), rgba(20, 20, 20, 0.9)),
-                    url('https://c88f1126c4.mjedge.net/wtl-content/uploads/2024/01/2023-Watchlist-1200x764.jpg') no-repeat center center fixed;
+                   
         background-size: cover;
         color: #ccc; /* Softer text color */
         overflow: hidden; /* Prevents scrollbar */
@@ -136,10 +136,7 @@
                 </div>
 
                 <!-- Secțiunea pentru suport Facebook -->
-<div class="support-facebook mb-3 d-flex align-items-center">
-    <i class="fab fa-facebook-f fa-2x text-primary me-2"></i>
-    <a href="https://www.facebook.com/Lastfiles" target="_blank" style="font-size: 1.2rem; text-decoration: none; color: #007bff;">Support on Facebook</a>
-</div>
+
 
 
                 <div class="d-flex justify-content-between">

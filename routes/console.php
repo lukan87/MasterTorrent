@@ -13,7 +13,7 @@ Schedule::command('auto:sync_peers')->everyThirtyMinutes();
 
 Schedule::command('auto:seedbonus_award')->hourly();
 
-Schedule::command('auto:correct_history')->everyTwoHours();
+Schedule::command('auto:correct_history')->hourly();
 
 Schedule::command('users:promote-demote')->daily();
 

@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
 use App\Helpers\TorrentTools;
 use App\Services\TMDBService;
+use App\Models\TorrentThank;
 use Illuminate\Support\Facades\Response;
 
 
@@ -427,7 +428,7 @@ if ($request->has('categories') && is_array($request->categories)) {
             'tmdb_type' => $tmdbtype,
             'trailer' => $request->input('trailer'),
             'mediainfo' => $request->mediainfo,
-            'free' => $request->has('free') ? 1 : 0,
+            'free' => $request->has('free') || $meta['size'] > 5368709120 ? 1 : 0,
             'double' => $request->has('double') ? 1 : 0,
             'sticky' => $request->has('sticky') ? 1 : 0,
             'recommended' => $request->has('recommended') ? 1 : 0,
@@ -561,54 +562,20 @@ if ($request->has('categories') && is_array($request->categories)) {
             $mediainfo = $torrent->mediainfo !== null ? (new MediaInfo())->parse($torrent->mediainfo) : null;
 
             // Fetch TMDB data if available
+            $tmdbService = new TMDBService(); // Or inject this in the constructor.
+
             if ($torrent->tmdbid) {
-                // Define a unique cache key for this torrent's TMDB data
-                $cacheKey = "tmdb_{$torrent->tmdb_type}_{$torrent->tmdbid}";
-
-                // Attempt to get TMDB data from cache
-                $tmdbData = Cache::remember($cacheKey, now()->addDays(30), function () use ($torrent) {
-                    $tmdbResponse = Http::get("https://api.themoviedb.org/3/{$torrent->tmdb_type}/{$torrent->tmdbid}", [
-                        'api_key' => '325f0b42fccd356be82ede4d2be6312c',
-                        'language' => 'en-US',
-                        'append_to_response' => 'credits,videos,images,keywords'
-                    ]);
-
-                    return $tmdbResponse->successful() ? $tmdbResponse->json() : null;
-                });
+                $tmdbData = $tmdbService->fetchTMDBData($torrent->tmdbid, $torrent->tmdb_type);
             }
 
             // Fetch OMDB data if a valid IMDB ID is available
             if ($torrent->imdbid) {
-                // Define a unique cache key for this torrent's OMDB data
-                $omdbCacheKey = "omdb_{$torrent->imdbid}";
-
-                // Attempt to get OMDB data from cache
-                $omdbData = Cache::remember($omdbCacheKey, now()->addDays(30), function () use ($torrent) {
-                    $omdbResponse = Http::get("http://www.omdbapi.com/", [
-                        'apikey' => 'd3eb5201',  // Replace with your OMDB API key
-                        'i' => $torrent->imdbid,
-                        'plot' => 'full', // or 'full' depending on your needs
-                        'r' => 'json'  // Ensure the response is in JSON format
-                    ]);
-
-                    return $omdbResponse->successful() ? $omdbResponse->json() : null;
-                });
+                $omdbData = $tmdbService->fetchOMDBData($torrent->imdbid);
             }
 
             // Fetch Steam data if a valid Steam ID is available
             if ($torrent->steamid) {
-                // Define a unique cache key for this torrent's Steam data
-                $steamCacheKey = "steam_{$torrent->steamid}";
-
-                // Attempt to get Steam data from cache
-                $steamData = Cache::remember($steamCacheKey, now()->addDays(30), function () use ($torrent) {
-                    $steamResponse = Http::get('https://store.steampowered.com/api/appdetails', [
-                        'appids' => $torrent->steamid,
-                        'lang' => 'en'
-                    ]);
-
-                    return $steamResponse->successful() ? $steamResponse->json() : null;
-                });
+                $steamData = $tmdbService->fetchSteamData($torrent->steamid);
             }
 
             // Fetch similar torrents based on category or TMDB ID
@@ -631,11 +598,20 @@ if ($request->has('categories') && is_array($request->categories)) {
             ->orWhere('name', 'like', '%' . preg_replace('/[^\w]+/', '', $torrent->name) . '%')
             ->select('id', 'slug', 'name', 'size', 'seeders', 'leechers', 'times_completed', 'poster')
             ->inRandomOrder()
-            ->limit(5)
+            ->limit(6)
             ->get();
 
+             // Check if the current user has already thanked this torrent
+        $hasThanked = TorrentThank::where('torrent_id', $torrent->id)
+        ->where('user_id', Auth::id())
+        ->exists();
+
+        $thanksUsers = TorrentThank::where('torrent_id', $torrent->id)->get();
+        $thankUserNames = $thanksUsers->pluck('user_id')->toArray(); // Get the list of user IDs who thanked the torrent
+        $thankUserNames = User::whereIn('id', $thankUserNames)->pluck('name')->toArray(); // Get the user names
+
             // Return the data to the view
-            return view('torrents.show', compact('torrent', 'comments', 'tmdbData', 'omdbData', 'mediainfo', 'steamData', 'snatched', 'similarTorrents', 'recommendedTorrents'));
+            return view('torrents.show', compact('torrent', 'comments', 'tmdbData', 'omdbData', 'mediainfo', 'steamData', 'snatched', 'similarTorrents', 'recommendedTorrents', 'hasThanked', 'thankUserNames'));
 
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             // Handle the case where the torrent is not found
@@ -643,6 +619,32 @@ if ($request->has('categories') && is_array($request->categories)) {
         }
     }
 
+    public function thank($id)
+    {
+        $torrent = Torrent::findOrFail($id);
+
+        // Check if the authenticated user is the owner of the torrent
+        if ($torrent->owner == Auth::id()) {
+            return redirect()->route('torrents.show', ['id' => $torrent->id, 'slug' => $torrent->slug])
+                ->with('error', 'You cannot thank your own torrent.');
+        }
+
+        // Check if the user has already thanked the torrent
+        if (TorrentThank::where('torrent_id', $torrent->id)->where('user_id', Auth::id())->exists()) {
+            return redirect()->route('torrents.show', ['id' => $torrent->id, 'slug' => $torrent->slug])
+                ->with('error', 'You have already thanked this torrent.');
+        }
+
+        // Create a new "thank" record
+        TorrentThank::create([
+            'torrent_id' => $torrent->id,
+            'user_id' => Auth::id(),
+        ]);
+
+        // Redirect back to the torrent page with a success message
+        return redirect()->route('torrents.show', ['id' => $torrent->id, 'slug' => $torrent->slug])
+            ->with('success', 'Thank you for thanking this torrent!');
+    }
 
 
 

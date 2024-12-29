@@ -45,6 +45,15 @@
                                     <p>Upload</p>
                                 </a>
                             </li>
+
+                            @else
+
+                            <li class="nav-item">
+                                <a href="{{ route('uploadapps.create') }}" class="nav-link">
+                                    <i class="bi bi-upload"></i>
+                                    <p>Uploader Application</p>
+                                </a>
+                            </li>
                         @endif
 
 

@@ -47,6 +47,8 @@ if ($user->enabled === 'no'){
     return response(Bencode::bencode(['failure reason' => 'Your account has been disabled. Please contact a member of staff !']), 200, ['Content-Type' => 'text/plain']);
 }
 
+
+
  // Standard Information Fields
  $event = $request->get('event');
  $hash = bin2hex($request->get('info_hash'));
@@ -68,6 +70,12 @@ if ($user->enabled === 'no'){
  $ipv6 = $request->has('ipv6') ? bin2hex($request->get('ipv6')) : null;
  $no_peer_id = ($request->has('no_peer_id') && $request->get('no_peer_id') == 1) ? true : false;
 
+  // If User Download Rights Are Disabled Return Error to Client
+  if ($user->downloadpos == 'no' && $left != 0) {
+    //info('A User With Revoked Download Privileges Attempted To Announce');
+    return response(Bencode::bencode(['failure reason' => 'Your download privileges are Revoked']))->withHeaders(['Content-Type' => 'text/plain']);
+}
+
  // If User Client Is Sending Negitive Values Return Error to Client
  if ($uploaded < 0 || $downloaded < 0 || $left < 0) {
     Log::notice('Client Attempted To Send Data With A Negitive Value');
@@ -81,6 +89,9 @@ if ($user->enabled === 'no'){
  if (!$torrent) {
     return response(Bencode::bencode(['failure reason' => 'Torrent not found']), 200, ['Content-Type' => 'text/plain']);
 }
+
+
+
 
  $times_completed = $torrent ? $torrent->times_completed : 0; // Default to 0 if not found
 
@@ -153,216 +164,198 @@ if (!$history) {
     $downloaded = ($real_downloaded >= $client->downloaded) ? ($real_downloaded - $client->downloaded) : 0;
 }
 
+
+
 $old_update = $client->updated_at ? $client->updated_at->timestamp : Carbon::now()->timestamp;
+
+if (config('settings.freeleech') == 1 || $torrent->free == 1) {
+    $mod_downloaded = 0;
+} else {
+    $mod_downloaded = $downloaded;
+}
+
+// Check if double attribute is set to 1
+if (config('settings.double') == 1 || $torrent->double == 1) {
+    $mod_uploaded = $uploaded * 2; // Double the uploaded value if doubleup is 1
+} else {
+    $mod_uploaded = $uploaded; // Keep the original uploaded value otherwise
+}
 
 // Ensure the client_updated_at timestamp is updated
 $client_updated_at = Carbon::now();  // Set client updated timestamp
 
 
-     //Free Torrent
-    $mod_downloaded = ($torrent->free === 1) ? 0 : $downloaded;
 
-// Check if double attribute is set to 1
-     $mod_uploaded = ($torrent->double === 1) ? $uploaded * 2 : $uploaded;
+if ($event === 'started') {
+    $history->agent = $agent;
+    $history->active = true;
+    $history->seeder = ($left == 0) ? true : false;
+    $history->uploaded += 0;
+    $history->actual_uploaded += 0;
+    $history->client_uploaded = $real_uploaded;
+    $history->downloaded += 0;
+    $history->actual_downloaded += 0;
+    $history->client_downloaded = $real_downloaded;
+    $history->left = $left;
+    $history->save();
 
-  //VIP&SUPERUSER FREE DOWNLOAD
-  $mod_downloaded = ($user->user_class === 3 || $user->user_class === 4) ? 0 : $downloaded;
+    // Never to push stats to user on start event
 
+    // Peer update
+    $client->peer_id = $peer_id;
+    $client->md5_peer_id = $md5_peer_id;
+    $client->hash = $hash;
+    $client->ip = $request->ip();
+    $client->port = $port;
+    $client->agent = $agent;
+    $client->uploaded = $real_uploaded;
+    $client->downloaded = $real_downloaded;
+    $client->seeder = ($left == 0) ? true : false;
+    $client->left = $left;
+    $client->torrent_id = $torrent->id;
+    $client->user_id = $user->id;
+    $client->active = true;
+    $client->client_updated_at = $client_updated_at; // Set the updated timestamp
 
-        switch ($event) {
-            case 'started':
-                $history->agent = $agent;
-                $history->active = true;
-                $history->seeder = ($left == 0) ? true : false;
-                $history->uploaded += 0;
-                $history->actual_uploaded += 0;
-                $history->client_uploaded = $real_uploaded;
-                $history->downloaded += 0;
-                $history->actual_downloaded += 0;
-                $history->client_downloaded = $real_downloaded;
-                $history->left = $left;
-                $history->save();
+    $client->save();
 
-                // Never to push stats to user on start event
+    // Clear all cache to ensure fresh data is loaded
+    Cache::flush();
+} elseif ($event === 'completed') {
+    $history->agent = $agent;
+    $history->active = true;
+    $history->seeder = ($left == 0) ? true : false;
+    $history->uploaded += $mod_uploaded;
+    $history->actual_uploaded += $uploaded;
+    $history->client_uploaded = $real_uploaded;
+    $history->downloaded += $mod_downloaded;
+    $history->actual_downloaded += $downloaded;
+    $history->client_downloaded = $real_downloaded;
+    $history->left = 0;
+    $history->completed_at = Carbon::now();
+    $history->save();
 
-                //Peer update
-                $client->peer_id = $peer_id;
-                $client->md5_peer_id = $md5_peer_id;
-                $client->hash = $hash;
-                $client->ip = $request->ip();
-                $client->port = $port;
-                $client->agent = $agent;
-                $client->uploaded = $real_uploaded;
-                $client->downloaded = $real_downloaded;
-                $client->seeder = ($left == 0) ? true : false;
-                $client->left = $left;
-                $client->torrent_id = $torrent->id;
-                $client->user_id = $user->id;
-                $client->active = true;
-                // Update client_updated_at each time
-                $client->client_updated_at = $client_updated_at;  // Set the updated timestamp
+    // User update
+    $user->uploaded += $mod_uploaded;
+    $user->downloaded += $mod_downloaded;
+    $user->save();
 
-                //End Peer update
+    // Peer update
+    $client->peer_id = $peer_id;
+    $client->md5_peer_id = $md5_peer_id;
+    $client->hash = $hash;
+    $client->ip = $request->ip();
+    $client->port = $port;
+    $client->agent = $agent;
+    $client->uploaded = $real_uploaded;
+    $client->downloaded = $real_downloaded;
+    $client->seeder = true;
+    $client->left = 0;
+    $client->torrent_id = $torrent->id;
+    $client->user_id = $user->id;
+    $client->active = true;
+    $client->client_updated_at = $client_updated_at; // Set the updated timestamp
 
-                $client->save();
+    $client->save();
 
-                // Clear all cache to ensure fresh data is loaded
-                Cache::flush();
-                break;
-            case 'completed':
-                $history->agent = $agent;
-                $history->active = true;
-                $history->seeder = ($left == 0) ? true : false;
-                //$history->seeder = true;
-                $history->uploaded += $mod_uploaded;
-                $history->actual_uploaded += $uploaded;
-                $history->client_uploaded = $real_uploaded;
-                $history->downloaded += $mod_downloaded;
-                $history->actual_downloaded += $downloaded;
-                $history->client_downloaded = $real_downloaded;
-                $history->left = 0;
-                $history->completed_at = Carbon::now();
-                $history->save();
+    // Torrent completed update
+    $torrent->times_completed++;
 
-                // user update
-                $user->uploaded += $mod_uploaded;
-                $user->downloaded += $mod_downloaded;
-                $user->save();
-                // End User update
+    // Seedtime allocation
+    $new_update = $client->updated_at->timestamp;
+    $diff = $new_update - $old_update;
+    $history->seedtime += $diff;
+    $history->save();
 
-                //Peer update
-                $client->peer_id = $peer_id;
-                $client->md5_peer_id = $md5_peer_id;
-                $client->hash = $hash;
-                $client->ip = $request->ip();
-                $client->port = $port;
-                $client->agent = $agent;
-                $client->uploaded = $real_uploaded;
-                $client->downloaded = $real_downloaded;
-                $client->seeder = true;
-                $client->left = 0;
-                $client->torrent_id = $torrent->id;
-                $client->user_id = $user->id;
-                $client->active = true;
-                // Update client_updated_at each time
-                $client->client_updated_at = $client_updated_at;  // Set the updated timestamp
+    // Clear all cache to ensure fresh data is loaded
+    Cache::flush();
+} elseif ($event === 'stopped') {
+    $history->agent = $agent;
+    $history->active = false;
+    $history->seeder = false;
+    $history->uploaded += $mod_uploaded;
+    $history->actual_uploaded += $uploaded;
+    $history->client_uploaded = 0;
+    $history->downloaded += $mod_downloaded;
+    $history->actual_downloaded += $downloaded;
+    $history->client_downloaded = 0;
+    $history->left = $left;
+    $history->save();
 
+    // User update
+    $user->uploaded += $mod_uploaded;
+    $user->downloaded += $mod_downloaded;
+    $user->save();
 
+    // Peer update
+    $client->peer_id = $peer_id;
+    $client->md5_peer_id = $md5_peer_id;
+    $client->hash = $hash;
+    $client->ip = $request->ip();
+    $client->port = $port;
+    $client->agent = $agent;
+    $client->uploaded = $real_uploaded;
+    $client->downloaded = $real_downloaded;
+    $client->seeder = false;
+    $client->left = $left;
+    $client->torrent_id = $torrent->id;
+    $client->user_id = $user->id;
+    $client->client_updated_at = $client_updated_at; // Set the updated timestamp
 
-                $client->save();
-                //End Peer update
+    if ($left == 0) {
+        $new_update = $client->updated_at->timestamp;
+        $diff = $new_update - $old_update;
+        $history->seedtime += $diff;
+        $history->save();
+    }
 
-                // Torrent completed update
-                $torrent->times_completed++;
+    $client->delete();
 
-                // Seedtime allocation
-                $new_update = $client->updated_at->timestamp;
-                $diff = $new_update - $old_update;
-                $history->seedtime += $diff;
-                $history->save();
+    // Clear all cache to ensure fresh data is loaded
+    Cache::flush();
+} else {
+    $history->agent = $agent;
+    $history->active = true;
+    $history->seeder = ($left == 0) ? true : false;
+    $history->uploaded += $mod_uploaded;
+    $history->actual_uploaded += $uploaded;
+    $history->client_uploaded = $real_uploaded;
+    $history->downloaded += $mod_downloaded;
+    $history->actual_downloaded += $downloaded;
+    $history->client_downloaded = $real_uploaded;
+    $history->save();
 
-                // Clear all cache to ensure fresh data is loaded
-                Cache::flush();
-                break;
-            case 'stopped':
-                $history->agent = $agent;
-                $history->active = false;
-                $history->seeder = false;
-                $history->uploaded += $mod_uploaded;
-                $history->actual_uploaded += $uploaded;
-                $history->client_uploaded = 0;
-                $history->downloaded += $mod_downloaded;
-                $history->actual_downloaded += $downloaded;
-                $history->client_downloaded = 0;
-                $history->left = $left;
-                $history->save();
+    // User update
+    $user->uploaded += $mod_uploaded;
+    $user->downloaded += $mod_downloaded;
+    $user->save();
 
-                // user update
-                $user->uploaded += $mod_uploaded;
-                $user->downloaded += $mod_downloaded;
-                $user->save();
-                // End User update
+    // Peer update
+    $client->peer_id = $peer_id;
+    $client->md5_peer_id = $md5_peer_id;
+    $client->hash = $hash;
+    $client->ip = $request->ip();
+    $client->port = $port;
+    $client->agent = $agent;
+    $client->uploaded = $real_uploaded;
+    $client->downloaded = $real_downloaded;
+    $client->seeder = ($left == 0) ? true : false;
+    $client->left = $left;
+    $client->torrent_id = $torrent->id;
+    $client->user_id = $user->id;
+    $client->client_updated_at = $client_updated_at; // Set the updated timestamp
 
-                //Peer update
-                $client->peer_id = $peer_id;
-                $client->md5_peer_id = $md5_peer_id;
-                $client->hash = $hash;
-                $client->ip = $request->ip();
-                $client->port = $port;
-                $client->agent = $agent;
-                $client->uploaded = $real_uploaded;
-                $client->downloaded = $real_downloaded;
-                $client->seeder = false;
-                $client->left = $left;
-                $client->torrent_id = $torrent->id;
-                $client->user_id = $user->id;
-                // Update client_updated_at each time
-                $client->client_updated_at = $client_updated_at;  // Set the updated timestamp
+    $client->save();
 
+    // Seedtime allocation
+    if ($left == 0) {
+        $new_update = $client->updated_at->timestamp;
+        $diff = $new_update - $old_update;
+        $history->seedtime += $diff;
+        $history->save();
+    }
+}
 
-                //End Peer update
-
-                $client->save();
-
-                // Seedtime allocation
-                if ($left == 0) {
-                    $new_update = $client->updated_at->timestamp;
-                    $diff = $new_update - $old_update;
-                    $history->seedtime += $diff;
-                    $history->save();
-                }
-
-                $client->delete();
-
-                // Clear all cache to ensure fresh data is loaded
-                Cache::flush();
-                break;
-            default:
-                $history->agent = $agent;
-                $history->active = true;
-                $history->seeder = ($left == 0) ? true : false;
-                $history->uploaded += $mod_uploaded;
-                $history->actual_uploaded += $uploaded;
-                $history->client_uploaded = $real_uploaded;
-                $history->downloaded += $mod_downloaded;
-                $history->actual_downloaded += $downloaded;
-                $history->client_downloaded = $real_uploaded;
-                $history->save();
-
-                // user update
-                $user->uploaded += $mod_uploaded;
-                $user->downloaded += $mod_downloaded;
-                $user->save();
-                // End User update
-
-                //Peer update
-                $client->peer_id = $peer_id;
-                $client->md5_peer_id = $md5_peer_id;
-                $client->hash = $hash;
-                $client->ip = $request->ip();
-                $client->port = $port;
-                $client->agent = $agent;
-                $client->uploaded = $real_uploaded;
-                $client->downloaded = $real_downloaded;
-                $client->seeder = ($left == 0) ? true : false;
-                $client->left = $left;
-                $client->torrent_id = $torrent->id;
-                $client->user_id = $user->id;
-                // Update client_updated_at timestamp
-                $client->client_updated_at = $client_updated_at; // Set the updated timestamp
-                //End Peer update
-
-                $client->save();
-
-                // Seedtime allocation
-                if ($left == 0) {
-                    $new_update = $client->updated_at->timestamp;
-                    $diff = $new_update - $old_update;
-                    $history->seedtime += $diff;
-                    $history->save();
-                }
-                break;
-        }
 
  $torrent->seeders = Peer::whereRaw('torrent_id = ? AND `left` = 0', [$torrent->id])->count();
  $torrent->leechers = Peer::whereRaw('torrent_id = ? AND `left` > 0', [$torrent->id])->count();
@@ -379,7 +372,8 @@ $res['min interval'] = 60 * 10; // Interval minim de 10 minute
  $res['peers'] = $this->givePeers($peers, $compact, $no_peer_id);
  $res['peers6'] = $this->givePeers6($peers, $compact, $no_peer_id);
 
-return response(Bencode::bencode($res), 200, ['Content-Type' => 'text/plain']);
+// return response(Bencode::bencode($res), 200, ['Content-Type' => 'text/plain']);
+return response(Bencode::bencode($res))->withHeaders(['Content-Type' => 'text/plain']);
 
     }
 

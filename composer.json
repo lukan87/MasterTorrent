@@ -33,7 +33,8 @@
         },
         "files": [
         "app/Helpers/bbcode.php",
-        "app/Helpers/FormatHelper.php"
+        "app/Helpers/FormatHelper.php",
+        "app/Helpers/EmojiHelper.php"
     ]
     },
     "autoload-dev": {

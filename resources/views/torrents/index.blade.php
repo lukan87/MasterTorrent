@@ -3,8 +3,19 @@
 @section('title',  'Browse Torrents' )
 
 @section('content')
+<div class="mt-3">
+    <a href="https://bytesized-hosting.com/" target="_blank" style="text-decoration: none; color: inherit;">
+    <div style="font-family: Arial, sans-serif; text-align: center; line-height: 1.6; background-color: #2c2f33; padding: 20px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);">
+        <h2 style="margin: 0; color: #ffffff; font-size: 20px;">The Unmetered SeedBox by : bytesized-hosting.com </h2>
+        <p style="margin: 10px 0; color: #d1d1d1; font-size: 14px;">Prices From €14 Per Month</p>
+        <p style="margin: 10px 0; color: #d1d1d1; font-size: 14px;">From 1TB HDD Storage</p>
+        <p style="margin: 20px 0; font-weight: bold; color: #1e90ff; font-size: 16px;">For more details, click here</p>
+    </div>
+</a>
+</div>
 
-    <h1 class="page-title">Torrent List</h1>
+
+    <h1 class="page-title">Torrents List</h1>
 
 
    <!-- Search Form -->
@@ -13,7 +24,7 @@
         <!-- Search Keyword with Autocomplete -->
         <div class="col-md-3 col-sm-6">
             <label for="keyword" class="form-label">Keyword</label>
-            <input type="text" name="keyword" id="keyword" class="form-control" placeholder="Search Torrent by name, IMDb URL, TMDb ID..." value="{{ request('keyword') }}">
+            <input type="text" name="keyword" id="keyword" class="form-control" placeholder="Search Torrent by name, IMDb URL..." value="{{ request('keyword') }}">
         </div>
 
 
@@ -132,12 +143,11 @@
             <tbody>
                 @forelse ($torrents as $torrent)
                     <tr>
-                        <td><img src="{{ $torrent->category->image }}" alt="Category Image" class="img-fluid" style="width: 87px; height: 47px;"></td>
+                        <td><img src="{{ $torrent->category->image }}" alt="Category Image" class="img-fluid" style="width: 87px; height: 47px; border-radius: 10px;"></td>
                         <td>
-                        <a href="{{ route('torrents.show', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}" 
-   class="torrent-name" 
-   data-bs-toggle="tooltip" 
-   data-bs-html="true" 
+                        <a href="{{ route('torrents.show', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}"
+   data-bs-toggle="tooltip"
+   data-bs-html="true"
    data-bs-title="<div class='card' style='width: 200px;'>
                     @if($torrent->poster)
                         <img src='{{ $torrent->poster }}' class='img-fluid rounded' alt='Poster Image' style='width: 150px; height: auto;'>

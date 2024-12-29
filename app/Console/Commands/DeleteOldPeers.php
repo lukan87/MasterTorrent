@@ -58,7 +58,7 @@ class DeleteOldPeers extends Command
 
             $peer->delete();
             $this->comment("Peer with ID: {$peer->id} and Hash: {$peer->hash} has been deleted. Last updated at {$peer->client_updated_at}");
-            Log::info("Peer with ID: {$peer->id} and Hash: {$peer->hash} has been deleted.");
+           // Log::info("Peer with ID: {$peer->id} and Hash: {$peer->hash} has been deleted.");
         }
 
         // Log completion of the command

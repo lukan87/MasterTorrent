@@ -72,7 +72,7 @@
                         <th></th>
                         <th><i class="bi bi-stopwatch"></i></th>
                         <th>
-                            <a href="{{ route('torrents.index', array_merge(request()->all(), ['sort' => 'size', 'direction' => request('direction') == 'asc' ? 'desc' : 'asc'])) }}">
+                            <a href="{{ route('torrents.adult', array_merge(request()->all(), ['sort' => 'size', 'direction' => request('direction') == 'asc' ? 'desc' : 'asc'])) }}">
                             <i class="bi bi-pie-chart-fill"></i>
                                 @if ($sortColumn == 'size')
                                     <i class="bi {{ $sortDirection == 'asc' ? 'bi-caret-down-fill' : 'bi-caret-up-fill' }}"></i>
@@ -80,7 +80,7 @@
                             </a>
                         </th>
                         <th>
-                            <a href="{{ route('torrents.index', array_merge(request()->all(), ['sort' => 'seeders', 'direction' => request('direction') == 'asc' ? 'desc' : 'asc'])) }}">
+                            <a href="{{ route('torrents.adult', array_merge(request()->all(), ['sort' => 'seeders', 'direction' => request('direction') == 'asc' ? 'desc' : 'asc'])) }}">
                             <i class="bi bi-cloud-arrow-up-fill" data-bs-toggle="tooltip" title="Seeders"></i>
                                 @if ($sortColumn == 'seeders')
                                     <i class="bi {{ $sortDirection == 'asc' ? 'bi-caret-down-fill' : 'bi-caret-up-fill' }}"></i>
@@ -88,7 +88,7 @@
                             </a>
                         </th>
                         <th>
-                            <a href="{{ route('torrents.index', array_merge(request()->all(), ['sort' => 'leechers', 'direction' => request('direction') == 'asc' ? 'desc' : 'asc'])) }}">
+                            <a href="{{ route('torrents.adult', array_merge(request()->all(), ['sort' => 'leechers', 'direction' => request('direction') == 'asc' ? 'desc' : 'asc'])) }}">
                             <i class="bi bi-cloud-arrow-down-fill" data-bs-toggle="tooltip" title="Leechers"></i>
                                 @if ($sortColumn == 'leechers')
                                     <i class="bi {{ $sortDirection == 'asc' ? 'bi-caret-down-fill' : 'bi-caret-up-fill' }}"></i>
@@ -96,7 +96,7 @@
                             </a>
                         </th>
                         <th>
-                            <a href="{{ route('torrents.index', array_merge(request()->all(), ['sort' => 'times_completed', 'direction' => request('direction') == 'asc' ? 'desc' : 'asc'])) }}">
+                            <a href="{{ route('torrents.adult', array_merge(request()->all(), ['sort' => 'times_completed', 'direction' => request('direction') == 'asc' ? 'desc' : 'asc'])) }}">
                             <i class="bi bi-download" data-bs-toggle="tooltip" title="Times Completed"></i>
                                 @if ($sortColumn == 'times_completed')
                                     <i class="bi {{ $sortDirection == 'asc' ? 'bi-caret-down-fill' : 'bi-caret-up-fill' }}"></i>
@@ -115,7 +115,7 @@
                 <tbody>
                     @forelse ($adult as $torrent)
                         <tr>
-                        <td><img src="{{ url('' . $torrent->category->image) }}" style="width: 87px; height: 47px; border-radius: 0;"></td>
+                        <td><img src="{{ url('' . $torrent->category->image) }}" style="width: 87px; height: 47px; border-radius: 10px;"></td>
                             <td>
                                 <a href="{{ route('torrents.show', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}" class="torrent-name" data-bs-toggle="tooltip" data-bs-html="true" data-bs-title="<div class='card' style='width: 200px;'>
                                     <img src='{{ $torrent->poster }}' class='img-fluid rounded' alt='Poster Image' style='width: 150px; height: auto;' />

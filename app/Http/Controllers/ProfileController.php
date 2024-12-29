@@ -89,9 +89,6 @@ public function update(Request $request, $id, $name)
 
         $user->profile_image = $request->profile_image_url;
 
-
-
-
     $user->info = $request->info;
   // Only update seedbonus if it's explicitly set in the request
 if ($request->has('seedbonus')) {
@@ -172,6 +169,54 @@ public function userTorrents($id, $name)
 
     return view('profile.torrents', compact('user', 'torrents'));
 }
+
+public function downloadHistory($id, $name)
+{
+    // Fetch user by id and name
+    $user = User::where('id', $id)->where('name', $name)->firstOrFail();
+
+    // Fetch the user's download history
+    $downloadHistory = History::select(
+            'torrent_id',
+            'user_id',
+            'downloaded',
+            'uploaded',
+            'seedtime',
+            'seeder',
+            'completed_at'
+        )
+        ->where('user_id', $user->id)
+        ->with('torrent') // Assuming the History model has a relationship with Torrent
+        ->orderBy('completed_at', 'desc')
+        ->paginate(25);
+
+    // Prepare the results to include torrent details
+    $result = [];
+    foreach ($downloadHistory as $history) {
+        if ($history->torrent) {
+            $result[] = [
+                'torrent' => $history->torrent,
+                'downloaded' => $history->downloaded,
+                'uploaded' => $history->uploaded,
+                'seedtime' => $history->seedtime,
+                'completed_at' => $history->completed_at,
+                'seeder' => $history->seeder,
+            ];
+        } else {
+            $result[] = [
+                'torrent' => null,
+                'downloaded' => $history->downloaded,
+                'uploaded' => $history->uploaded,
+                'seedtime' => $history->seedtime,
+                'completed_at' => $history->completed_at,
+                'seeder' => $history->seeder,
+            ];
+        }
+    }
+
+    return view('profile.download-history', compact('user', 'result', 'downloadHistory'));
+}
+
 
 
 }

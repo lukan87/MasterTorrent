@@ -8,8 +8,6 @@
         <!-- Left Column: Users Table -->
         <div class="col-md-8 col-lg-9 mb-4">
 
-
-
             <!-- Search Form -->
             <form method="GET" action="{{ route('admin.users.index') }}" class="mb-3">
                 <div class="input-group">
@@ -31,6 +29,7 @@
                                 <th>IP</th>
                                 <th>Role</th>
                                 <th>Last Seen</th>
+                                <th>HNR</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -43,18 +42,19 @@
                                     <td>{{ $user->IP }}</td>
                                     <td>{{ $user->role_name }}</td> <!-- Assuming there's a role column or method -->
                                     <td>{{ $user->updated_at }}</td>
+                                    <td><a href="{{ route('hitandrun.showOther', ['userId' => $user->id]) }}" class="btn btn-sm btn-info"><i class="bi bi-person-x" data-bs-toggle="tooltip" title="User's Hit And Run"></i></a></td>
                                     <td>
                                         <!-- Show Button -->
-                                        <a href="{{ route('admin.users.show', $user->name) }}" class="btn btn-sm btn-info">Show</a>
+                                        <a href="{{ route('admin.users.show', $user->name) }}" class="btn btn-sm btn-info"><i class="bi bi-binoculars-fill" data-bs-toggle="tooltip" title="View User's Actions"></i></a>
 
                                         <!-- Edit Button -->
-                                        <a href="{{ route('admin.users.edit', $user->id) }}" class="btn btn-sm btn-primary">Edit</a>
+                                        <a href="{{ route('admin.users.edit', $user->id) }}" class="btn btn-sm btn-primary"><i class="bi bi-pencil-square" data-bs-toggle="tooltip" title="Edit User"></i></a>
 
                                         <!-- Delete Button -->
                                         <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this user?')">Delete</button>
+                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this user?')"><i class="bi bi-trash3" data-bs-toggle="tooltip" title="Delete All Records For This User"></i></button>
                                         </form>
                                     </td>
                                 </tr>
@@ -125,6 +125,15 @@
                     </form>
                 </div>
             </div>
+
+             <!-- Link to View User Comments -->
+            <div class="mt-3 mb-3">
+                <a href="{{ route('admin.users.comments') }}" class="btn btn-secondary btn-sm">View User Comments</a>
+            </div>
+
+            <a href="{{ route('uploadapps.index') }}" class="btn btn-info btn-sm">
+                Uploader Applications
+            </a>
 
         </div>
 

@@ -4,7 +4,7 @@
             <h6 class="mb-0">Recommended Torrents</h6>
         </div>
         <div class="card-body p-2">
-            <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-3">
+            <div class="row row-cols-2 row-cols-sm-3 row-cols-md-3 row-cols-lg-6 g-3">
                 @foreach($recommendedTorrents as $recommended)
                     <div class="col">
                         <a href="{{ route('torrents.show', ['id' => $recommended->id, 'slug' => $recommended->slug]) }}"

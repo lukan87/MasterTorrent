@@ -106,6 +106,20 @@
 @endif
 
 
+
+@if (Auth::check() && (Auth::user()->user_class >= \App\Models\UserClass::ADMIN || Auth::user()->id === $user->id))
+<div class="row mb-3">
+        <label for="history" class="col-md-2 col-form-label text-md-end">
+            <i class="bi bi-person-workspace" data-bs-toggle="tooltip" data-bs-title="Download History"></i>
+        </label>
+        <div class="col-md-10">
+            <p class="form-control-static"><a href="{{ route('profile.download-history', ['id' => $user->id, 'name' => $user->name]) }}">View Download History</a></p>
+        </div>
+    </div>
+    @endif
+
+
+
                     <!-- Upload -->
                     <div class="row mb-3">
                         <label for="created_at" class="col-md-2 col-form-label text-md-end">

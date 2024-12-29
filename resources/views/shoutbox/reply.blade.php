@@ -1,6 +1,6 @@
 <!-- resources/views/shoutbox/reply.blade.php -->
 
-@extends('layout.default') {{-- Assuming you have a main layout file --}}
+@extends('layout.app') {{-- Assuming you have a main layout file --}}
 
 
 

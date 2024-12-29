@@ -34,13 +34,18 @@
                                     <th>CPU Load (1 min / 5 min / 15 min)</th>
                                     <td><p>{{ implode(' / ', $cpuLoad) }}</p></td>
                                 </tr>
+                                <!-- Display System Uptime -->
+                                 <tr>
+                                    <th>System Uptime:</th>
+                                    <th><p>{{ $uptime }}</p></th>
+                                 </tr>
                                 <tr>
                                     <th>Ram Usage</th>
                                     <td><p>{{ $ramUsage['total'] }} MB, Used: {{ $ramUsage['used'] }} MB, Free: {{ $ramUsage['free'] }} MB</p></td>
                                 </tr>
                                 <tr>
                                     <th>Backup scheduled</th>
-                                    <td><p>{{ $backupSchedule }}</p></td>
+                                    <td><p>On the 1st of each month</p></td>
                                 </tr>
                             </tbody>
                         </table>

@@ -27,53 +27,17 @@
                     </div>
 
                     <div class="col-sm-9 col-xxl-10 order-1 order-sm-0 order-xxl-1">
-                    <h2>{{ $tmdbData['name'] }}</h2>
-                    <h4><i>{{ $tmdbData['tagline'] }}</i></h4>
 
-<dd class="col-lg-12">
-@foreach($torrent->genres as $genre)
-                <a href="{{ route('torrents.index', ['genre' => $genre->id]) }}" class="badge bg-secondary" title="Search for {{ $genre->name }} torrents">{{ $genre->name }}</a>
-            @endforeach
-</dd>
 
-@if(isset($tmdbData['overview']))
-    <dd class="col-sm-12">
-        <b>
-            <font size="3">
-                <i class="bi bi-info-circle-fill" data-bs-toggle="tooltip" title="Overview"></i>&nbsp;&nbsp;{{ $tmdbData['overview'] }}
-            </font>
-        </b>
-    </dd>
-@endif
-
-<dd class="col-sm-12">
-    @if(isset($tmdbData['release_date']))
-        <p><strong>Release Date:</strong> {{ \Carbon\Carbon::parse($tmdbData['release_date'])->format('F j, Y') }}</p>
-    @endif
-</dd>
-
-@if(isset($tmdbData['runtime']))
-    @php
-        $hours = intdiv($tmdbData['runtime'], 60);  // Get the number of hours
-        $minutes = $tmdbData['runtime'] % 60;      // Get the remaining minutes
-    @endphp
-    <dd class="col-sm-12">
-        <p><strong>Runtime:</strong> {{ $hours }} hour{{ $hours != 1 ? 's' : '' }}
-        @if($minutes > 0)
-            and {{ $minutes }} minute{{ $minutes != 1 ? 's' : '' }}
-        @endif
-        </p>
-    </dd>
-@endif
-
-<!-- OMDB Data Section -->
-
-@if(isset($omdbData))
     <!-- Rated (OMDB) -->
+
+    @php
+    $PG = ''; // Initialize the variable
+    @endphp
     @if(isset($omdbData['Rated']) && $omdbData['Rated'] != 'N/A')
     @php
         $rating = $omdbData['Rated'];
-        $PG = '';
+
 
         switch ($rating) {
              // TV Ratings
@@ -102,13 +66,39 @@
         break;
         }
     @endphp
+@endif
+                    <h3>{{ $tmdbData['name'] }}
+                    @if(isset($tmdbData['first_air_date']))
+                    ( {{ \Carbon\Carbon::parse($tmdbData['first_air_date'])->format('F j, Y') }} )
+                    @endif
+    {!! $PG !!}</h3>
+                    @if(isset($tmdbData['tagline']))
+                    <h5><i>{{ $tmdbData['tagline'] }}</i></h5>
+                    @endif
 
+<dd class="col-lg-12">
+@foreach($torrent->genres as $genre)
+                <a href="{{ route('torrents.index', ['genre' => $genre->id]) }}" class="badge bg-secondary" title="Search for {{ $genre->name }} torrents">{{ $genre->name }}</a>
+            @endforeach
+</dd>
+
+@if(isset($tmdbData['overview']))
     <dd class="col-sm-12">
-        <p><strong>Rated:</strong> {!! $PG !!}</p>
+        <b>
+            <font size="3">
+                <i class="bi bi-info-circle-fill" data-bs-toggle="tooltip" title="Overview"></i>&nbsp;&nbsp;{{ $tmdbData['overview'] }}
+            </font>
+        </b>
     </dd>
 @endif
 
-    @if(isset($omdbData['Rated']))
+
+
+<!-- OMDB Data Section -->
+
+
+
+    @if(isset($omdbData['imdbVotes']))
         <dd class="col-sm-12">
             <p><strong>IMDB Votes: <i>{{ $omdbData['imdbVotes'] }}</i> </strong></p>
         </dd>
@@ -126,7 +116,15 @@
             </dd>
         @endif
 
-@endif
+
+
+@if(isset($tmdbData['number_of_seasons']))
+        <dd class="col-sm-12">
+            <p><strong>Seasons: <i>{{ $tmdbData['number_of_seasons'] }}</i> </strong> /
+            <strong>Episodes: <i>{{ $tmdbData['number_of_episodes'] }}</i> </strong>
+            </p>
+        </dd>
+    @endif
                     </div>
                 </div>
             </div>

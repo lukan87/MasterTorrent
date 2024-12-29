@@ -12,6 +12,31 @@ class ShoutboxController extends Controller
 
     public function index()
     {
+
+        // Define the list of emoji codes
+    $emojiCodes = [
+        ':smile:',
+        ':heart:',
+        ':thumbsup:',
+        ':wink:',
+        ':laugh:',
+        ':sad:',
+        ':love:',
+        ':cool:',
+        ':cry:',
+        ':angry:',
+        ':kiss:',
+        ':surprised:',
+        ':blush:',
+        ':grin:',
+        // Add more emoji codes as needed
+    ];
+
+    // Map emoji codes to actual emojis using the emoji() helper
+    $emojis = [];
+    foreach ($emojiCodes as $code) {
+        $emojis[$code] = emoji($code);
+    }
         // Fetch the latest 20 shoutbox messages and eager load user information
         $messages = Shoutbox::with('user', 'replies.user')
             ->whereNull('parent_id')
@@ -19,7 +44,10 @@ class ShoutboxController extends Controller
             ->take(20) // Limit to the latest 20 messages
             ->get();
 
-        return view('shoutbox.index', ['messages' => $messages]);
+            return view('shoutbox.index', [
+                'messages' => $messages,
+                'emojis' => $emojis, // Pass the emojis array to the view
+            ]);
     }
 
 public function iframe()
@@ -35,9 +63,6 @@ public function iframe()
         $request->validate([
             'content' => 'required|string|max:1000',
         ]);
-
-        // Add this line to check if validation is passing
-// dd('Validation passed');
 
         // Create a new shoutbox message
         $user = $request->user();

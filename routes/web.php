@@ -25,16 +25,34 @@ use App\Http\Controllers\TorrentHistoryController;
 use App\Http\Controllers\DonationController;
 use App\Http\Controllers\HitAndRunController;
 use App\Http\Controllers\StaffController;
+use App\Http\Controllers\UploadAppController;
+use App\Helpers\EmojiHelper;
+
+Route::get('/get-emoji/{emojiCode}', function ($emojiCode) {
+    return response()->json(['emoji' => emoji($emojiCode)]);
+});
 
 
-Route::post('/admin/users/sendMassMessage', [App\Http\Controllers\Admin\UserController::class, 'sendMassMessage'])->name('admin.users.sendMassMessage');
+Route::resource('uploadapps', UploadAppController::class);
+Route::get('/uploadapps/{id}', [UploadAppController::class, 'show'])->name('uploadapps.show');
+Route::delete('/uploadapps/{id}', [UploadAppController::class, 'destroy'])->name('uploadapps.destroy');
+Route::put('/uploadapps/{id}/update-status', [UploadAppController::class, 'updateStatus'])->name('uploadapps.updateStatus');
+
+
+
+
+
 Route::get('/hitandrun', [HitAndRunController::class, 'index'])->name('hitandrun.index');
 // View another user's hit and run status
 Route::get('/hitandrun/{userId}', [HitAndRunController::class, 'showOtherUserHitAndRun'])->name('hitandrun.showOther');
 
 Route::post('/bonus/buy-vip', [BonusController::class, 'buyVip'])->name('bonus.buyVip');
 
+Route::post('/bonus/buy-seedtime', [BonusController::class, 'buySeedtime'])->name('bonus.buySeedtime');
+
 Route::get('/staff', [StaffController::class, 'index'])->name('staff.index');
+
+
 
 
 Auth::routes();
@@ -62,10 +80,13 @@ Route::get('/profile/{id}/{name}/edit', [ProfileController::class, 'edit'])->nam
 Route::put('/profile/{id}/{name}', [ProfileController::class, 'update'])->name('profile.update')->middleware('auth');
 
 // User's Torrents
-Route::get('profile/{id}/{name}/torrents', [ProfileController::class, 'userTorrents'])->name('profile.torrents');
+Route::get('profile/{id}/{name}/torrents', [ProfileController::class, 'userTorrents'])->name('profile.torrents')->middleware('auth');
 
 // Seeding Torrents
-Route::get('/profile/{id}/{name}/seeding-torrents', [ProfileController::class, 'seedingTorrents'])->name('profile.seedingTorrents');
+Route::get('/profile/{id}/{name}/seeding-torrents', [ProfileController::class, 'seedingTorrents'])->name('profile.seedingTorrents')->middleware('auth');
+
+Route::get('/profile/{id}/{name}/download-history', [ProfileController::class, 'downloadHistory'])->name('profile.download-history')->middleware('auth');
+
 
 
 // Movies
@@ -114,10 +135,14 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
             Route::get('/', [App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
             Route::get('/create', [App\Http\Controllers\Admin\UserController::class, 'create'])->name('users.create');
             Route::post('/store', [App\Http\Controllers\Admin\UserController::class, 'store'])->name('users.store');
-            Route::get('/users/{name}', [App\Http\Controllers\Admin\UserController::class, 'show'])->name('users.show');
+            Route::get('/{name}', [App\Http\Controllers\Admin\UserController::class, 'show'])->name('users.show');
             Route::get('/{id}/edit', [App\Http\Controllers\Admin\UserController::class, 'edit'])->name('users.edit');
             Route::put('/{id}/update', [App\Http\Controllers\Admin\UserController::class, 'update'])->name('users.update');
             Route::delete('/{id}/destroy', [App\Http\Controllers\Admin\UserController::class, 'destroy'])->name('users.destroy');
+            Route::post('/admin/users/sendMassMessage', [App\Http\Controllers\Admin\UserController::class, 'sendMassMessage'])->name('users.sendMassMessage');
+            Route::get('/users/comments', [App\Http\Controllers\Admin\UserController::class, 'comments'])->name('users.comments');
+
+
         });
 
         // Movies Management
@@ -190,6 +215,8 @@ Route::get('/torrents/{id}/{slug?}', [TorrentController::class, 'show'])->name('
 Route::get('/torrents/download/{id}/{slug}', [TorrentController::class, 'download'])->name('torrents.download');
 Route::get('/torrent/{torrent}/peers', [TorrentController::class, 'peers'])->name('torrent.peers')->middleware('auth');
 Route::get('/torrents/{id}/{slug}/history', [TorrentHistoryController::class, 'index'])->name('torrent.history')->middleware('auth');
+
+Route::post('torrents/{id}/thank', [TorrentController::class, 'thank'])->name('torrents.thank')->middleware('auth');
 
 
 

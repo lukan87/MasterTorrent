@@ -39,7 +39,8 @@ class User extends Authenticatable
         'passkey', // Add passkey here
         'seedbonus',
         'vip_until',
-        'rsskey'
+        'rsskey',
+        'user_class'
     ];
 
 

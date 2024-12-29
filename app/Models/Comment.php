@@ -25,5 +25,11 @@ class Comment extends Model
     {
         return $this->hasMany(Comment::class, 'parent_id');
     }
+
+    // Polymorphic relationship
+    public function commentable()
+    {
+        return $this->morphTo();
+    }
 }
 
