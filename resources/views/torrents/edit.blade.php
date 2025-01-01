@@ -221,43 +221,51 @@ function fetchIMDBInfo() {
 
     <!-- Delete Button -->
 
+@php
+    $userClass = auth()->user()->user_class; // Default to USER if not logged in
+    $canDelete = auth()->user()->can_delete; // Get can_delete value for the current user
+@endphp
+
+@if ($canDelete == 1)
     <div class="card mt-5 shadow-lg">
-    <div class="card-header bg-danger text-white">
-        <h5 class="card-title mb-0">Delete Torrent</h5>
+        <div class="card-header bg-danger text-white">
+            <h5 class="card-title mb-0">Delete Torrent</h5>
+        </div>
+        <div class="card-body">
+            <form action="{{ route('torrents.destroy', $torrent->slug) }}" method="POST" class="d-inline-block" onsubmit="return confirmDelete()">
+                @csrf
+                @method('DELETE')
+
+                <!-- Reason for Deletion -->
+                <div class="form-group mb-4">
+                    <label class="form-label">Reason for Deletion:</label>
+
+                    <!-- Radio buttons for predefined reasons -->
+                    <div class="form-check">
+                        <input type="radio" name="deletion_reason" id="dead" value="dead" class="form-check-input" onchange="toggleCustomReason(this)" required>
+                        <label class="form-check-label" for="dead">Torrent has 0 seeders and 0 leechers</label>
+                    </div>
+
+                    <div class="form-check">
+                        <input type="radio" name="deletion_reason" id="custom" value="custom" class="form-check-input" onchange="toggleCustomReason(this)">
+                        <label class="form-check-label" for="custom">Custom Reason</label>
+                    </div>
+
+                    <!-- Custom Reason Text Area (will show when "Custom Reason" is selected) -->
+                    <div class="form-group mb-4" id="custom_reason_div" style="display:none;">
+                        <textarea name="custom_reason" id="custom_reason" class="form-control" placeholder="Enter a valid reason for deleting the torrent." rows="4" cols="200"></textarea>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <button type="submit" class="btn btn-danger px-4 py-2">Delete Torrent</button>
+                    <a href="{{ route('torrents.index') }}" class="btn btn-secondary px-4 py-2">Cancel</a>
+                </div>
+            </form>
+        </div>
     </div>
-    <div class="card-body">
-        <form action="{{ route('torrents.destroy', $torrent->slug) }}" method="POST" class="d-inline-block" onsubmit="return confirmDelete()">
-            @csrf
-            @method('DELETE')
+@endif
 
-            <!-- Reason for Deletion -->
-            <div class="form-group mb-4">
-                <label class="form-label">Reason for Deletion:</label>
-
-                <!-- Radio buttons for predefined reasons -->
-                <div class="form-check">
-                    <input type="radio" name="deletion_reason" id="dead" value="dead" class="form-check-input" onchange="toggleCustomReason(this)" required>
-                    <label class="form-check-label" for="dead">Torrent has 0 seeders and 0 leechers</label>
-                </div>
-
-                <div class="form-check">
-                    <input type="radio" name="deletion_reason" id="custom" value="custom" class="form-check-input" onchange="toggleCustomReason(this)">
-                    <label class="form-check-label" for="custom">Custom Reason</label>
-                </div>
-
-                <!-- Custom Reason Text Area (will show when "Custom Reason" is selected) -->
-                <div class="form-group mb-4" id="custom_reason_div" style="display:none;">
-                    <textarea name="custom_reason" id="custom_reason" class="form-control" placeholder="Enter a valid reason for deleting the torrent." rows="4" cols="200"></textarea>
-                </div>
-            </div>
-
-            <div class="d-flex justify-content-between">
-                <button type="submit" class="btn btn-danger px-4 py-2">Delete Torrent</button>
-                <a href="{{ route('torrents.index') }}" class="btn btn-secondary px-4 py-2">Cancel</a>
-            </div>
-        </form>
-    </div>
-</div>
 </div>
 
 

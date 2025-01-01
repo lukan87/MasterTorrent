@@ -262,7 +262,7 @@ if ($total_size === 0) {
 
 
     // Setăm coloana free dacă dimensiunea > 4GB
-    $free = ($total_size > (4 * 1024 * 1024 * 1024)) ? 1 : 0;
+    $free = ($total_size > (5 * 1024 * 1024 * 1024)) ? 1 : 0;
 
     // Pregătirea interogării SQL
     $stmt = $conn->prepare("INSERT INTO torrents (name, poster, description, imdb_url, mediainfo, file_name, category_id, slug, info_hash, size, owner, created_at, free) 

@@ -159,4 +159,9 @@ public function thanksCount()
 {
     return $this->thanks()->count();
 }
+
+public function images()
+{
+    return $this->hasMany(TorrentImage::class);
+}
 }

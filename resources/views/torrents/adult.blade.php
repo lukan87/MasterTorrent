@@ -153,16 +153,18 @@
 </th>
                         @endif
 
-                            @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
-                                <td>
-                                    <a href="{{ route('torrents.edit', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}" class="btn btn-warning btn-sm action-btn"><i class="bi bi-pencil-square"></i></a>
-                                    <form action="{{ route('torrents.destroy', $torrent->slug) }}" method="POST" style="display: inline-block;">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger btn-sm action-btn" onclick="return confirm('Are you sure you want to delete this torrent?');"><i class="bi bi-trash3-fill"></i></button>
-                                    </form>
-                                </td>
+                        @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
+                        <td>
+                            <a href="{{ route('torrents.edit', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}" class="btn btn-warning btn-sm action-btn"><i class="bi bi-pencil-square"></i></a>
+                            @if (Auth::check() && Auth::user()->can_delete == 1)
+                            <form action="{{ route('torrents.destroy', $torrent->slug) }}" method="POST" style="display: inline-block;">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-sm action-btn" onclick="return confirm('Are you sure you want to delete this torrent?');"><i class="bi bi-trash3-fill"></i></button>
+                            </form>
                             @endif
+                        </td>
+                        @endif
                         </tr>
                     @empty
                         <tr>

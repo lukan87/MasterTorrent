@@ -116,18 +116,19 @@
 
 
  <!-- User Role -->
- @if (auth()->user()->user_class >= \App\Models\UserClass::MODERATOR && auth()->id() !== $user->id)
-                <div class="mb-3">
-                    <label for="user_class" class="form-label">User Role</label>
-                    <select name="user_class" id="user_class" class="form-control">
-                        @foreach (App\Models\UserClass::getClasses() as $classValue => $className)
-                            <option value="{{ $classValue }}" {{ $user->user_class == $classValue ? 'selected' : '' }}>
-                                {{ $className }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-            @endif
+ @if (auth()->user()->user_class >= \App\Models\UserClass::MODERATOR && auth()->id() !== $user->id && auth()->user()->user_class > $user->user_class)
+    <div class="mb-3">
+        <label for="user_class" class="form-label">User Role</label>
+        <select name="user_class" id="user_class" class="form-control">
+            @foreach (App\Models\UserClass::getClasses() as $classValue => $className)
+                <option value="{{ $classValue }}" {{ $user->user_class == $classValue ? 'selected' : '' }}>
+                    {{ $className }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+@endif
+
 
 
 
@@ -140,7 +141,7 @@
                 </div>
             @endif
 
-            @if (auth()->user()->user_class === \App\Models\UserClass::OWNER && $user->user_class <= \App\Models\UserClass::VIP)
+            @if (auth()->user()->user_class === \App\Models\UserClass::OWNER)
                 <div class="mb-3">
                     <label for="vip_until" class="form-label">Set VIP Duration</label>
                     <select id="vip_until" name="vip_until" class="form-control">

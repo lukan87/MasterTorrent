@@ -6,7 +6,7 @@
     /* Full-screen background with gradient overlay */
     body {
         background: linear-gradient(rgba(20, 20, 20, 0.5), rgba(20, 20, 20, 0.9)),
-                   
+
         background-size: cover;
         color: #ccc; /* Softer text color */
         overflow: hidden; /* Prevents scrollbar */

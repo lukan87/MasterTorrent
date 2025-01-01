@@ -54,7 +54,7 @@
 
 
 <style>.custom-dropdown-width {
-    min-width: 600px; /* Adjust width as needed */
+    min-width: 450px; /* Adjust width as needed */
 }</style>
 
         <!-- Genre Filter -->
@@ -145,7 +145,7 @@
                     <tr>
                         <td><img src="{{ $torrent->category->image }}" alt="Category Image" class="img-fluid" style="width: 87px; height: 47px; border-radius: 10px;"></td>
                         <td>
-                        <a href="{{ route('torrents.show', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}"
+                        <a href="{{ route('torrents.show', ['id' => $torrent->id, 'slug' => urlencode($torrent->slug)]) }}"
    data-bs-toggle="tooltip"
    data-bs-html="true"
    data-bs-title="<div class='card' style='width: 200px;'>
@@ -188,14 +188,16 @@
                             </td>
                         @endif
                         @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
-                            <td>
-                                <a href="{{ route('torrents.edit', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}" class="btn btn-warning btn-sm action-btn"><i class="bi bi-pencil-square"></i></a>
-                                <form action="{{ route('torrents.destroy', $torrent->slug) }}" method="POST" style="display: inline-block;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm action-btn" onclick="return confirm('Are you sure you want to delete this torrent?');"><i class="bi bi-trash3-fill"></i></button>
-                                </form>
-                            </td>
+                        <td>
+                            <a href="{{ route('torrents.edit', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}" class="btn btn-warning btn-sm action-btn"><i class="bi bi-pencil-square"></i></a>
+                            @if (Auth::check() && Auth::user()->can_delete == 1)
+                            <form action="{{ route('torrents.destroy', $torrent->slug) }}" method="POST" style="display: inline-block;">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-sm action-btn" onclick="return confirm('Are you sure you want to delete this torrent?');"><i class="bi bi-trash3-fill"></i></button>
+                            </form>
+                            @endif
+                        </td>
                         @endif
                     </tr>
                 @empty
@@ -208,8 +210,8 @@
     </div>
 </div>
 
-        </div>
-    </div>
+
+
 
     <!-- Pagination -->
     <div class="pagination-container d-flex justify-content-center mt-4">

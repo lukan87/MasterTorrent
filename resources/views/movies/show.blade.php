@@ -214,10 +214,13 @@
        @endif
 
 <dd class="col-sm-12">
+@php
+    $userClass = auth()->user()->user_class;
+@endphp
 
-
-       <a href="#" id="embedLink" class="btn btn-primary btn-xl" data-lity>Watch Online</a>
-       <script>
+@if ($userClass >= \App\Models\UserClass::VIP)
+    <a href="#" id="embedLink" class="btn btn-primary btn-xl" data-lity>Watch Online</a>
+    <script>
     const embedLink = document.getElementById('embedLink');
     const imdbId = '{{ $movie->imdb_id }}';
 
@@ -229,6 +232,10 @@
         embedLink.href = '#';
     });
 </script>
+@else
+    <p class="text-danger">You need to be a VIP to watch the movie.</p>
+@endif
+
 
 
        </dd>

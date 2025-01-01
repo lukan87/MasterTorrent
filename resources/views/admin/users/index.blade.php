@@ -51,11 +51,13 @@
                                         <a href="{{ route('admin.users.edit', $user->id) }}" class="btn btn-sm btn-primary"><i class="bi bi-pencil-square" data-bs-toggle="tooltip" title="Edit User"></i></a>
 
                                         <!-- Delete Button -->
+                                        @if (Auth::check() && Auth::user()->can_delete == 1)
                                         <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this user?')"><i class="bi bi-trash3" data-bs-toggle="tooltip" title="Delete All Records For This User"></i></button>
                                         </form>
+                                        @endif
                                     </td>
                                 </tr>
                             @endforeach

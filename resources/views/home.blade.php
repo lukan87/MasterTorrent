@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title',  'LF::Welcome Home' )
+
 @section('content')
 
 <div class="row">

@@ -295,9 +295,17 @@
                                                         <p class="text-muted">{{ strip_tags($episode['summary']) }}</p>
                                                     </div>
                                                     <div class="col-sm-2">
+
+                                                    @php
+                                                    $userClass = auth()->user()->user_class;
+                                                    @endphp
+                                                    @if ($userClass >= \App\Models\UserClass::VIP)
                                                         <a onmouseover="this.href='https://v2.vidsrc.me/embed/{{$series['imdb_id']}}/{{ $seasonNumber }}-{{ $episode['number'] }}'" onmouseout="this.href='#'" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released On: {{ $episode['airdate'] }}" class="btn btn-info btn-sm" data-lity>
                                                             Watch Episode: {{ $episode['number'] }}
                                                         </a>
+                                                        @else
+                                                        <p class="text-danger">You need to be a VIP to watch the movie.</p>
+                                                        @endif
                                                     </div>
                                                 </div>
                                             </div>

@@ -1,6 +1,7 @@
 <div class="mt-3 d-flex justify-content-center flex-wrap">
     <button class="btn btn-dark" onclick="insertBBCode('i')" data-bs-toggle="tooltip" title="Italic"><i class="bi bi-type-italic"></i></button>
     <button class="btn btn-dark" onclick="insertBBCode('u')" data-bs-toggle="tooltip" title="Underline"><i class="bi bi-type-underline"></i></button>
+    <button class="btn btn-dark" onclick="insertBBCode('img')" data-bs-toggle="tooltip" title="Image"><i class="bi bi-card-image"></i></button>
      <!-- Smiley buttons -->
      <button class="btn btn-dark" onclick="insertEmoji(':smile:')" data-bs-toggle="tooltip" title="Smile">😊</button>
     <button class="btn btn-dark" onclick="insertEmoji(':heart:')" data-bs-toggle="tooltip" title="Heart">❤️</button>
