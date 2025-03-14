@@ -3,19 +3,9 @@
 @section('title',  'Browse Torrents' )
 
 @section('content')
-<div class="mt-3">
-    <a href="https://bytesized-hosting.com/" target="_blank" style="text-decoration: none; color: inherit;">
-    <div style="font-family: Arial, sans-serif; text-align: center; line-height: 1.6; background-color: #2c2f33; padding: 20px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);">
-        <h2 style="margin: 0; color: #ffffff; font-size: 20px;">The Unmetered SeedBox by : bytesized-hosting.com </h2>
-        <p style="margin: 10px 0; color: #d1d1d1; font-size: 14px;">Prices From €14 Per Month</p>
-        <p style="margin: 10px 0; color: #d1d1d1; font-size: 14px;">From 1TB HDD Storage</p>
-        <p style="margin: 20px 0; font-weight: bold; color: #1e90ff; font-size: 16px;">For more details, click here</p>
-    </div>
-</a>
-</div>
 
 
-    <h1 class="page-title">Torrents List</h1>
+    <h1 class="page-title mt-5">Torrents List</h1>
 
 
    <!-- Search Form -->

@@ -78,7 +78,6 @@
                                 </small>
                             </div>
                         </div>
-                        
 
                         <!-- Conditionally display the invite code field -->
                         @if(config('app.invite_only') == true)

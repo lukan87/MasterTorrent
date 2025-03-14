@@ -3,7 +3,7 @@
 
 <rss version="2.0">
     <channel>
-        <title>LastFiles RSS Feed</title>
+        <title>|MySite RSS Feed</title>
         <link>{{ url('/') }}</link>
         <description>A feed of the most recent torrents</description>
         @foreach ($torrents as $torrent)

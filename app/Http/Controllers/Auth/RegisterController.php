@@ -62,7 +62,7 @@ class RegisterController extends Controller
  
              // If the invite code is invalid, return an error
              if (!$invite) {
-                 return redirect()->back()->withErrors(['invite_code' => 'Invalid or expired invite code.']);
+                 return response()->redirectToRoute('register')->withErrors(['invite_code' => 'Invalid or expired invite code.']);
              }
  
              // Mark the invite as used
@@ -86,7 +86,7 @@ class RegisterController extends Controller
     $user = $this->create($request->all(), $request->ip(), $inviterId, $request->invite_code);
 
         // Log the user in after registration
-        auth()->login($user);
+        \Illuminate\Support\Facades\Auth::login($user);
 
         return redirect($this->redirectTo);
     }
