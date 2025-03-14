@@ -39,7 +39,9 @@ class SyncPeers extends Command
 
         // Delete peers where active = 0
         DB::transaction(function (): void {
-            Peer::where('active', 0)->delete();
+            Peer::where('active', 0)
+                ->where('seeder', 0)
+                ->delete();
         }, 5);
 
         // Sync Seeders and Leechers count

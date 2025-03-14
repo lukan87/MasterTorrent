@@ -24,20 +24,23 @@ class FormatHelper
     //Format the time
     public static function formatTime($seconds)
     {
+        // Ensure $seconds is an integer
+        $seconds = (int) $seconds;
+    
         // Constants for time calculations
         $minutesInHour = 60;
         $secondsInMinute = 60;
         $hoursInDay = 24;
         $daysInWeek = 7;
         $daysInMonth = 30;
-
+    
         // Calculate the total minutes, hours, days, weeks, and months
         $minutes = floor($seconds / $secondsInMinute);
         $hours = floor($minutes / $minutesInHour);
         $days = floor($hours / $hoursInDay);
         $weeks = floor($days / $daysInWeek);
         $months = floor($days / $daysInMonth);
-
+    
         // If more than 30 days, display in months, weeks, and days
         if ($days > 30) {
             $remainingDays = $days % $daysInMonth;
@@ -58,4 +61,5 @@ class FormatHelper
             return sprintf('%d days, %d hours, %d minutes', $days, $remainingHours, $remainingMinutes);
         }
     }
+    
 }

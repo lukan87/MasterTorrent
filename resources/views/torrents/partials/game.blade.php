@@ -75,7 +75,7 @@
             </div>
         </div>
     </div>
-</div>
+
                                   <div class="col-12 d-xxl-none">
                                          <h4>Images</h4>
                                     </div>

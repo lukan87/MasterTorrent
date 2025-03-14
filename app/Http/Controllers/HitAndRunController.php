@@ -35,6 +35,7 @@ class HitAndRunController extends Controller
                       ->where('seeders', '>', 0);  // Ensure there are seeders greater than 0
             })
             ->whereDoesntHave('user.warnings', fn ($query) => $query->withTrashed()->whereColumn('warnings.torrent', '=', 'history.torrent_id'))
+            ->whereRaw('uploaded / actual_downloaded < 1.00') // Add this condition for ratio < 1.00
             ->paginate(10);
 
         return view('hitandrun.index', compact('torrents'));
@@ -72,6 +73,7 @@ class HitAndRunController extends Controller
                       ->where('seeders', '>', 0);  // Ensure there are seeders greater than 0
             })
             ->whereDoesntHave('user.warnings', fn ($query) => $query->withTrashed()->whereColumn('warnings.torrent', '=', 'history.torrent_id'))
+            ->whereRaw('uploaded / actual_downloaded < 1.00') // Add this condition for ratio < 1.00
             ->orderBy('created_at', 'desc')
             ->paginate(25);
 

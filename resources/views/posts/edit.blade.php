@@ -46,20 +46,18 @@
 
             </div>
 
-    <form action="{{ route('posts.update', $post->id) }}" method="POST">
-        @csrf
-        @method('PUT')
-
-        <div class="mb-3">
-            <label for="content" class="form-label">Content</label>
-            <textarea name="content" id="content" class="form-control" rows="5" required>{{ old('content', $post->content) }}</textarea>
-        </div>
-
-        <div class="d-flex justify-content-between">
-            <button type="submit" class="btn btn-primary">Update Post</button>
-            <a href="{{ route('forum.show', $post->topic->id) }}" class="btn btn-secondary">Back to Topic</a>
-        </div>
-    </form>
+            <form action="{{ route('posts.update', $post->id) }}" method="POST">
+                @csrf
+                @method('PUT')
+        
+                <div class="form-group">
+                    <label for="content">Content</label>
+                    <textarea name="content" id="content" class="form-control" rows="4" required>{{ old('content', $post->content) }}</textarea>
+                </div>
+        
+                <button type="submit" class="btn btn-primary mt-3">Update Post</button>
+                <a href="{{ route('topics.show', [$post->topic->forum_id, $post->topic_id]) }}" class="btn btn-secondary mt-3">Cancel</a>
+            </form>
 </div>
 
 <script>

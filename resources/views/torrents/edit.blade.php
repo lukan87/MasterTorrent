@@ -221,12 +221,9 @@ function fetchIMDBInfo() {
 
     <!-- Delete Button -->
 
-@php
-    $userClass = auth()->user()->user_class; // Default to USER if not logged in
-    $canDelete = auth()->user()->can_delete; // Get can_delete value for the current user
-@endphp
 
-@if ($canDelete == 1)
+
+@if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
     <div class="card mt-5 shadow-lg">
         <div class="card-header bg-danger text-white">
             <h5 class="card-title mb-0">Delete Torrent</h5>

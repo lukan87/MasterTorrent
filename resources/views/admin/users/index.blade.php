@@ -29,7 +29,7 @@
                                 <th>IP</th>
                                 <th>Role</th>
                                 <th>Last Seen</th>
-                                <th>HNR</th>
+                                {{-- <th>HNR</th> --}}
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -42,8 +42,11 @@
                                     <td>{{ $user->IP }}</td>
                                     <td>{{ $user->role_name }}</td> <!-- Assuming there's a role column or method -->
                                     <td>{{ $user->updated_at }}</td>
-                                    <td><a href="{{ route('hitandrun.showOther', ['userId' => $user->id]) }}" class="btn btn-sm btn-info"><i class="bi bi-person-x" data-bs-toggle="tooltip" title="User's Hit And Run"></i></a></td>
+                                    {{-- <td><a href="{{ route('hitandrun.showOther', ['userId' => $user->id]) }}" class="btn btn-sm btn-info"><i class="bi bi-person-x" data-bs-toggle="tooltip" title="User's Hit And Run"></i></a></td> --}}
                                     <td>
+
+                                        <a href="{{ url('warnings/' . $user->id) }}" class="btn btn-info btn-sm"><i class="bi bi-exclamation-circle" data-bs-toggle="tooltip" title="User's Hit And Run Warnings"></i></a>
+
                                         <!-- Show Button -->
                                         <a href="{{ route('admin.users.show', $user->name) }}" class="btn btn-sm btn-info"><i class="bi bi-binoculars-fill" data-bs-toggle="tooltip" title="View User's Actions"></i></a>
 
@@ -132,10 +135,16 @@
             <div class="mt-3 mb-3">
                 <a href="{{ route('admin.users.comments') }}" class="btn btn-secondary btn-sm">View User Comments</a>
             </div>
-
+            <div class="mt-3 mb-3">
             <a href="{{ route('uploadapps.index') }}" class="btn btn-info btn-sm">
                 Uploader Applications
             </a>
+</div>
+            <div class="mt-3 mb-3">
+            <a href="{{ route('warnings.index') }}" class="btn btn-warning btn-sm">
+                User's Hit&run's
+            </a>
+</div>
 
         </div>
 

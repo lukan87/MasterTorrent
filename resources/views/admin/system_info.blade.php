@@ -73,6 +73,11 @@
         @csrf
         <button type="submit" class="btn btn-warning btn-sm">Clear Views</button>
     </form>
+    <!-- Clear Views Button -->
+    <form action="{{ route('admin.systemInfo.clearConfig') }}" method="POST" class="mb-3 mr-2">
+        @csrf
+        <button type="submit" class="btn btn-success btn-sm">Clear Config</button>
+    </form>
 
     <!-- Clear Routes Button -->
     <form action="{{ route('admin.systemInfo.clearRoutes') }}" method="POST" class="mb-3 mr-2">

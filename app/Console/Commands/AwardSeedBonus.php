@@ -3,8 +3,8 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Models\Peer; // Adjust the model if needed
-use App\Models\User; // Assuming you have a User model
+use App\Models\History; // Adjust the model if needed
+use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Exception;
 
@@ -22,7 +22,7 @@ class AwardSeedBonus extends Command
      *
      * @var string
      */
-    protected $description = 'Award 0.5 seedbonus points for each torrent being seeded every hour';
+    protected $description = 'Award 0.5 seedbonus points for each torrent being seeded every hour based on history';
 
     /**
      * Execute the console command.
@@ -35,19 +35,19 @@ class AwardSeedBonus extends Command
         try {
             $current_time = now();
 
-            // Process peers in batches to avoid memory issues
-            Peer::where('seeder', true)
+            // Process history records in batches
+            History::where('seeder', true)
                 ->where(function ($query) use ($current_time) {
                     $query->whereNull('last_awarded')
                           ->orWhere('last_awarded', '<=', $current_time->subHour());
                 })
-                ->chunk(100, function ($peers) use ($current_time) {
+                ->chunk(100, function ($historyRecords) use ($current_time) {
                     $userPoints = [];
                     $uniqueUsers = [];
 
-                    foreach ($peers as $peer) {
-                        $userId = $peer->user_id;
-                        $torrentId = $peer->torrent_id;
+                    foreach ($historyRecords as $record) {
+                        $userId = $record->user_id;
+                        $torrentId = $record->torrent_id;
 
                         $key = "{$userId}-{$torrentId}";
 
@@ -59,11 +59,11 @@ class AwardSeedBonus extends Command
                             $uniqueUsers[$userId] = true;
                         }
 
-                        // Update the last_awarded timestamp for this peer
-                        $peer->last_awarded = $current_time;
-                        $peer->save();
+                        // Update the last_awarded timestamp for this history record
+                        $record->last_awarded = $current_time;
+                        $record->save();
 
-                        $this->info("Processed peer with user ID {$userId} and torrent ID {$torrentId}.");
+                        $this->info("Processed history record for user ID {$userId} and torrent ID {$torrentId}.");
                     }
 
                     // Update user points in bulk

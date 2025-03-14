@@ -35,7 +35,7 @@
                     @if($userVote && $userVote->option_id == $option->id) disabled @endif
                     required>
                     <label class="form-check-label" for="option{{ $option->id }}"
-                    @if($userVote && $userVote->option_id == $option->id) style="color: green;" @endif>
+                    @if($userVote && $userVote->option_id == $option->id) style="color: green; font-size: 18px; font-weight: bold;" @endif>
                         {{ $option->option_text }}
                     </label>
                     <!-- Show percentage if user has voted -->

@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
 use App\Models\UserClass;
+use App\Models\Invite;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Carbon;
 
@@ -36,11 +37,16 @@ class User extends Authenticatable
         'downloadpos',
         'info',
         'IP',
-        'passkey', // Add passkey here
+        'passkey', 
         'seedbonus',
         'vip_until',
         'rsskey',
-        'user_class'
+        'user_class',
+        'warned',
+        'warned_until',
+        'invites',
+        'invited_by',
+        'invite_code',
     ];
 
 
@@ -70,7 +76,8 @@ class User extends Authenticatable
             'password' => 'hashed',
             'banned_until' => 'datetime',
             'last_activity' => 'datetime',
-            'vip_until',
+            'warned_until' => 'datetime',
+            'vip_until' => 'datetime',
         ];
     }
 
@@ -232,5 +239,24 @@ public function warnings()
 {
     return $this->hasMany(Warning::class, 'user_id');
 }
+
+public function invites()
+{
+    return $this->hasMany(Invite::class, 'inviter_id');  // 'inviter_id' is the foreign key
+}
+
+// Define the relationship for the invites a user has used
+public function invitesUsed()
+{
+    return $this->hasMany(Invite::class, 'user_id'); // assuming 'user_id' is the correct field
+}
+
+public function inviter()
+{
+    return $this->belongsTo(User::class, 'invited_by');
+}
+
+
+
 
 }

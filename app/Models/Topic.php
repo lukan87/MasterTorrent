@@ -2,40 +2,35 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Topic extends Model
 {
-    // Topic.php
-
-
     use HasFactory;
 
-    // Fillable properties
     protected $fillable = [
+        'forum_id',
         'title',
-        'content',
-        'user_id',  // Add user_id to the fillable array
-        'forum_category_id',
+        'user_id',
+        'body',
     ];
+    
 
-public function user()
+    public function forum()
+    {
+        return $this->belongsTo(Forum::class);
+    }
+
+// Define relationship to Post
+public function posts()
+{
+    return $this->hasMany(Post::class)->whereNull('parent_id');
+}
+
+
+    public function user()
 {
     return $this->belongsTo(User::class);
 }
-
-public function posts()
-{
-    return $this->hasMany(Post::class)->orderBy('created_at', 'desc');
-}
-
-
-public function category()
-{
-    return $this->belongsTo(ForumCategory::class, 'forum_category_id');
-}
-
-
-
 }

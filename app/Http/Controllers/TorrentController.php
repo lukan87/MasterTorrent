@@ -457,6 +457,9 @@ if ($request->has('categories') && is_array($request->categories)) {
         // Add 5 seed bonus points to the user
         $user->increment('seedbonus', 5);
 
+        // Update user's last upload timestamp
+        $user->update(['last_upload' => now()]);
+
 		// Clear all cache to ensure fresh data is loaded
             Cache::flush();
 
@@ -497,15 +500,15 @@ if ($request->has('categories') && is_array($request->categories)) {
         $dict['announce'] = route('announce', ['passkey' => $user->passkey], false);
         $dict['comment'] = 'Using this torrent binds you to LastTorrents Confidentiality Agreement';
          // Add the label to the torrent's metadata
-        $dict['label'] = 'LastFiles';
+        $dict['label'] = 'MySite';
 
         // Remove other announce URLs
         // unset($dict['announce-list']);
 
         // Add the announce-list for multiple trackers
     $dict['announce-list'] = [
-        // [route('announce', ['passkey' => $user->passkey])],
-        ["http://last-torrents.org/announce/{$user->passkey}"] // Secondary announce URL
+         [route('announce', ['passkey' => $user->passkey])]
+       // ["http://last-torrents.org/announce/{$user->passkey}"] // Secondary announce URL
     ];
 
         // Re-encode the torrent file
@@ -830,8 +833,11 @@ if (empty($deletionReason)) {
         // Delete associated history records using the correct column name
         History::where('torrent_id', $torrent->id)->delete();
 
-        // Delete associated comments
+        // Delete associated peers
         Peer::where('torrent_id', $torrent->id)->delete();
+
+          // Delete associated comments
+          Comment::where('torrent_id', $torrent->id)->delete();
 
         // Detach associated genres
         $torrent->genres()->detach();
@@ -853,13 +859,6 @@ if (empty($deletionReason)) {
 
 
 
-    // Example method in TorrentController to get peers for a specific torrent
-public function getPeers($torrentId)
-{
-    $peers = Peer::where('torrent', $torrentId)->get();
-    return response()->json($peers);
-}
-
 
 public function peers($torrentId)
 {
@@ -872,14 +871,14 @@ public function peers($torrentId)
 
     // Fetch seeders if the query string contains 'seeders'
     if (request()->has('seeders')) {
-        $seeders = Peer::where('torrent_id', $torrentId)->where('seeder', 1)->paginate(25);
+        $seeders = Peer::where('torrent_id', $torrentId)->where('seeder', 1)->paginate(50);
         // Append 'seeders' query parameter to pagination links
         $seeders->withPath(url()->current())->appends(['seeders' => '1']);
     }
 
     // Fetch leechers if the query string contains 'leechers'
     if (request()->has('leechers')) {
-        $leechers = Peer::where('torrent_id', $torrentId)->where('seeder', 0)->paginate(25);
+        $leechers = Peer::where('torrent_id', $torrentId)->where('seeder', 0)->where('active', 1)->paginate(25);
         // Append 'leechers' query parameter to pagination links
         $leechers->withPath(url()->current())->appends(['leechers' => '1']);
     }

@@ -10,9 +10,6 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\TorrentController;
 use App\Http\Controllers\AnnounceController;
 use App\Http\Controllers\BonusController;
-use App\Http\Controllers\PostController;
-use App\Http\Controllers\ForumController;
-use App\Http\Controllers\ForumCategoryController;
 use App\Http\Controllers\ShoutboxController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NewsController;
@@ -27,6 +24,58 @@ use App\Http\Controllers\HitAndRunController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\UploadAppController;
 use App\Helpers\EmojiHelper;
+
+
+use App\Http\Controllers\OverforumController;
+
+Route::get('/overforums', [OverforumController::class, 'index'])->name('overforums.index');
+Route::get('/overforums/create', [OverforumController::class, 'create'])->name('overforums.create');
+Route::post('/overforums', [OverforumController::class, 'store'])->name('overforums.store');
+Route::get('/overforums/{id}', [OverforumController::class, 'show'])->name('overforums.show');
+Route::delete('/overforums/{id}', [OverforumController::class, 'destroy'])->name('overforums.destroy');
+Route::get('overforums/{overforum}/edit', [OverforumController::class, 'edit'])->name('overforums.edit');
+Route::put('overforums/{overforum}', [OverforumController::class, 'update'])->name('overforums.update');
+
+
+
+use App\Http\Controllers\ForumController;
+
+Route::get('/overforums/{overforumId}/forums', [ForumController::class, 'index'])->name('forums.index');
+Route::get('/overforums/{overforumId}/forums/create', [ForumController::class, 'create'])->name('forums.create');
+Route::post('/overforums/{overforumId}/forums', [ForumController::class, 'store'])->name('forums.store');
+Route::get('/overforums/{overforumId}/forums/{forumId}', [ForumController::class, 'show'])->name('forums.show');
+
+
+use App\Http\Controllers\TopicController;
+
+Route::get('/forums/{forumId}/topics', [TopicController::class, 'index'])->name('topics.index');
+Route::get('/forums/{forumId}/topics/create', [TopicController::class, 'create'])->name('topics.create');
+Route::post('/forums/{forumId}/topics', [TopicController::class, 'store'])->name('topics.store');
+Route::get('/forums/{forumId}/topics/{topicId}', [TopicController::class, 'show'])->name('topics.show');
+
+
+use App\Http\Controllers\PostController;
+
+// Store a new post
+Route::post('/topics/{topicId}/posts', [PostController::class, 'store'])->name('posts.store');
+Route::get('/posts/{post}/edit', [PostController::class, 'edit'])->name('posts.edit');
+Route::put('/posts/{post}', [PostController::class, 'update'])->name('posts.update');
+Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
+Route::post('/posts/{post}/reply', [PostController::class, 'reply'])->name('posts.reply');
+Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
+
+
+
+use App\Http\Controllers\SnatchController;
+
+Route::prefix('snatch')->group(function () {
+    Route::get('/snatchlist/{userId?}', [SnatchController::class, 'snatchlist'])->name('snatch.snatchlist');
+    Route::get('/seeding/{userId?}', [SnatchController::class, 'seeding'])->name('snatch.seeding');
+    Route::get('/leeching/{userId?}', [SnatchController::class, 'leeching'])->name('snatch.leeching');
+    Route::get('/hit-and-run/{userId?}', [SnatchController::class, 'hitAndRun'])->name('snatch.hitAndRun');
+    Route::get('/need-to-seed/{userId?}', [SnatchController::class, 'needToSeed'])->name('snatch.needToSeed');
+});
+
 
 Route::get('/get-emoji/{emojiCode}', function ($emojiCode) {
     return response()->json(['emoji' => emoji($emojiCode)]);
@@ -182,6 +231,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
             Route::post('/clear-cache', [SystemInfoController::class, 'clearCache'])->name('systemInfo.clearCache');
             Route::post('/clear-views', [SystemInfoController::class, 'clearViews'])->name('systemInfo.clearViews');
             Route::post('/clear-routes', [SystemInfoController::class, 'clearRoutes'])->name('systemInfo.clearRoutes');
+            Route::post('/clear-config', [SystemInfoController::class, 'clearConfig'])->name('systemInfo.clearConfig');
             Route::get('/show-routes', [SystemInfoController::class, 'showRoutes'])->name('systemInfo.showRoutes');
             Route::post('/system/backup', [SystemInfoController::class, 'backup'])->name('systemInfo.backup');
         });
@@ -251,42 +301,7 @@ Route::get('/rules', function () {
 })->middleware('auth')->name('rules');
 
 
-Route::prefix('forum')->group(function () {
-    // Forum Category Routes
-    Route::get('/categories', [ForumCategoryController::class, 'index'])->name('forum.categories.index')->middleware('permission:view_categories');
-    Route::get('/categories/create', [ForumCategoryController::class, 'create'])->name('forum.categories.create')->middleware('permission:create_categories');
-    Route::post('/categories', [ForumCategoryController::class, 'store'])->name('forum.categories.store')->middleware('permission:create_categories');
-    Route::get('/categories/{category}', [ForumCategoryController::class, 'show'])->name('forum.categories.show');
-    Route::post('/{categoryId}/store', [ForumController::class, 'store'])->name('forum.store');
 
-
-    Route::get('/categories/{category}/edit', [ForumCategoryController::class, 'edit'])->name('forum.categories.edit')->middleware('permission:edit_categories');
-    Route::put('/categories/{category}', [ForumCategoryController::class, 'update'])->name('forum.categories.update')->middleware('permission:edit_categories');
-    Route::delete('/categories/{category}', [ForumCategoryController::class, 'destroy'])->name('forum.categories.destroy')->middleware('permission:delete_categories');
-
-    // Topic Routes
-    Route::get('/', [ForumController::class, 'index'])->name('forum.index')->middleware('permission:view_topics');
-    Route::get('/create', [ForumController::class, 'create'])->name('forum.create')->middleware('permission:create_topics');
-    // Route::post('/', [ForumController::class, 'store'])->name('forum.store')->middleware('permission:create_topics');
-    Route::get('/{topic}', [ForumController::class, 'show'])->name('forum.show')->middleware('auth');
-    Route::get('/{topic}/edit', [ForumController::class, 'edit'])->name('topics.edit')->middleware('permission:edit_posts');
-    Route::delete('/{topic}', [ForumController::class, 'destroy'])->name('forum.destroy')->middleware('permission:delete_topics');
-    Route::get('/{categoryId}/create', [ForumController::class, 'create'])->name('forum.create');
-
-
-    // Post Routes
-    Route::post('/{topic}/posts', [PostController::class, 'store'])->name('posts.store')->middleware('permission:reply');
-    Route::get('/posts/{post}/edit', [PostController::class, 'edit'])->name('posts.edit')->middleware('auth');
-    Route::put('/posts/{post}', [PostController::class, 'update'])->name('posts.update')->middleware('auth');
-    Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy')->middleware('permission:delete_posts');
-    Route::get('posts/{post}/reply', [PostController::class, 'reply'])->name('posts.reply');
-    Route::post('/posts/{post}/reply', [PostController::class, 'storeReply'])->middleware('auth')->name('posts.storeReply');
-    Route::delete('/replies/{reply}', [PostController::class, 'destroyReply'])->name('posts.destroyReply');
-
-
-    Route::put('/{topic}', [ForumController::class, 'update'])->name('forum.update')->middleware('permission:edit_posts');
-    Route::get('/topics/{id}', [ForumController::class, 'show'])->name('topics.show');
-});
 
 
 // Shoutbox//
@@ -384,3 +399,32 @@ Route::middleware('auth')->group(function () {
     Route::post('/requests/{id}/fill', [TorrentRequestController::class, 'fillRequest'])->name('requests.fill');
 
 });
+
+
+
+
+use App\Http\Controllers\WarningController;
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/warnings/{id}/{username?}', [WarningController::class, 'show'])->name('warnings.show');
+    Route::post('/warnings/deactivate/{id}', [WarningController::class, 'deactivate'])->name('warnings.deactivate');
+    Route::post('/warnings/deactivate-all/{id}/{username?}', [WarningController::class, 'deactivateAllWarnings'])->name('warnings.deactivateAll');
+    Route::post('/warnings/delete-all/{id}/{username?}', [WarningController::class, 'deleteAllWarnings'])->name('warnings.deleteAll');
+    
+    Route::post('/warnings/delete/{id}', [WarningController::class, 'deleteWarning'])->name('warnings.delete');
+   
+    Route::post('/warnings/restore/{id}', [WarningController::class, 'restoreWarning'])->name('warnings.restore');
+});
+
+use App\Http\Controllers\InviteController;
+
+Route::middleware('auth')->group(function () {
+  
+    Route::post('/invites/create', [InviteController::class, 'createInvite'])->name('invites.create'); // To create an invite
+    Route::post('/invite/use', [InviteController::class, 'useInvite'])->name('invite.use'); // To use an invite code
+    Route::get('/invites', [InviteController::class, 'showInvites'])->name('invites.index'); // To show all invites
+    Route::delete('/invites/{invite}', [InviteController::class, 'deleteInvite'])->name('invites.delete');
+
+});
+
+

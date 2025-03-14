@@ -134,6 +134,42 @@
         @endif
 
 @endif
+
+    <div class="col-12">
+        <h5><strong>Trailer</strong></h5>
+        
+            @if(!empty($torrent->trailer))
+                <!-- Display trailer from database -->
+                @php
+                    $dbTrailerUrl = htmlspecialchars($torrent->trailer);
+                    $embedUrl = str_replace("watch?v=", "embed/", $dbTrailerUrl);
+                @endphp
+                <a href="{{ $embedUrl }}?version=3&amp;autohide=3&amp;hl=ro_RO&amp;showinfo=0&amp;autoplay=1&amp;disablekb=0&amp;hd=1&amp;theme=dark" 
+                   data-lity>
+                    <img src="{{ asset('images/youtube-hover.png') }}" alt="Play Trailer" style="width: 30px; border-radius: 50%;" data-bs-toggle="tooltip" title="Play {{$tmdbData['title']}} Trailer">
+                </a>
+            @elseif(isset($tmdbData['videos']['results']) && count($tmdbData['videos']['results']) > 0)
+                <!-- Display trailer from TMDB -->
+                @php
+                    $tmdbTrailer = collect($tmdbData['videos']['results'])->firstWhere('type', 'Trailer');
+                @endphp
+                @if($tmdbTrailer)
+                    <a href="https://www.youtube.com/embed/{{ $tmdbTrailer['key'] }}?version=3&amp;autohide=3&amp;hl=ro_RO&amp;showinfo=0&amp;autoplay=1&amp;disablekb=0&amp;hd=1&amp;theme=dark" 
+                       data-lity>
+                        <img src="{{ asset('images/youtube-hover.png') }}" alt="Play Trailer" style="width: 30px; border-radius: 50%;" data-bs-toggle="tooltip" title="Play {{$tmdbData['title']}} Trailer">
+                    </a>
+                @else
+                    <p>No trailer available.</p>
+                @endif
+            @else
+                <p>No trailer available.</p>
+            @endif
+       
+    </div>
+
+
+
+
                     </div>
                 </div>
             </div>

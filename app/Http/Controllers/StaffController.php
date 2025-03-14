@@ -15,6 +15,7 @@ class StaffController extends Controller
             UserClass::OWNER,
             UserClass::ADMIN,
             UserClass::MODERATOR,
+            UserClass::UPLOADER,
         ])->whereNotNull('user_class')->get();
 
         // Return a view with the staff data

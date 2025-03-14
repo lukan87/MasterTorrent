@@ -64,6 +64,11 @@ class AutoWarning extends Command
                             continue;
                         }
 
+                        // Calculate new warning expiration date
+                    $additionalDays = config('hitrun.expire');
+                    $currentWarnedUntil = $hr->user->warned_until ? now()->parse($hr->user->warned_until) : now();
+                    $newWarnedUntil = $currentWarnedUntil->addDays($additionalDays);
+
                         // Create a warning
                         Warning::create([
                             'user_id' => $hr->user->id,
@@ -82,6 +87,12 @@ class AutoWarning extends Command
 
                         // Increment user's hit-and-run count
                         $hr->user->increment('hit_and_run_count');
+
+                        // Update user's warned status and extend warned_until
+                    $hr->user->update([
+                        'warned' => 1,
+                        'warned_until' => $newWarnedUntil,
+                    ]);
 
                         // Send a message to the user
                         $torrentLink = route('torrents.show', ['id' => $hr->torrent_id, 'slug' => $hr->torrent->slug ?? '']);

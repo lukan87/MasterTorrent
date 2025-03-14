@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -63,7 +64,7 @@ class UserController extends Controller
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
-        $currentUser = auth()->user();
+        $currentUser = Auth::user();
 
         // Validează câmpurile de bază ale utilizatorului
         $request->validate([
@@ -231,13 +232,41 @@ class UserController extends Controller
                     $user->user_class = 3;
                     $user->is_immune = 1;
                     $user->is_freeleech = 1;
+
+                    // Resetare avertisment și hit-and-run
+                    $user->warned = 0;
+                    $user->warned_until = null;
+                    $user->hit_and_run_count = 0;
                     $user->save();
+
+                    // Șterge toate avertismentele utilizatorului din tabela `warning`
+    DB::table('warnings')->where('user_id', $user->id)->delete();
+
+                     // Actualizează tabelul history pentru torentele utilizatorului
+    DB::table('history')
+    ->where('user_id', $user->id)
+    ->where('hitrun', 1)
+    ->update([
+        'hitrun' => 0,
+        'seedtime' => 86400,
+    ]);
 
                     // Înregistrează schimbarea în UserTimeline
                     UserTimeline::create([
                         'user_id' => $user->id,
                         'staff_id' => Auth::id(),
                         'comment' => 'Statutul VIP setat până la ' . $user->vip_until->toDateString() . ' de ' . $currentUser->name,
+                    ]);
+
+
+
+                     // Trimite mesaj utilizatorului despre VIP
+                     Message::create([
+                        'sender_id' => 2, // ID-ul adminului care trimite mesajul
+                        'receiver_id' => $user->id,
+                        'subject' => 'VIP Status',
+                        'body' => "Your VIP status has been set until {$user->vip_until->toDateString()} by {$currentUser->name}.",
+                        'is_read' => false, // Mesajul este marcat ca necitit
                     ]);
                 }
             }

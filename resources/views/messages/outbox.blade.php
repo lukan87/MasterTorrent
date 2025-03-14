@@ -11,7 +11,7 @@
     @else
         <div class="row">
             @foreach($messages as $message)
-                <div class="col-md-4 mb-4">
+                <div class="col-md-12 mb-4">
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <strong>{{ $message->subject ?? '(No Subject)' }}</strong>

@@ -57,14 +57,23 @@ class AutoDeactivateWarning extends Command
                         // Deactivate the warning
                         $warning->update(['active' => false]);
 
-                          // Send a message to the user
+                         
                            // Prepare user and torrent details
                           $user = $warning->warneduser;
                           $torrent = $warning->torrenttitle;
+
+                           // If user's last warning is expired, remove the warned flag
+                    $hasActiveWarnings = Warning::where('user_id', $user->id)->where('active', true)->exists();
+                    if (!$hasActiveWarnings && $user->warned_until && $user->warned_until <= now()) {
+                        $user->update(['warned' => 0, 'warned_until' => null]);
+                    }
+
+
                           $torrentLink = route('torrents.show', ['id' => $warning->torrenttitle->id, 'slug' => $warning->torrenttitle->slug ?? '']);
                           $body = "Your warning regarding the torrent <a href=\"$torrentLink\">{$warning->torrenttitle->name}</a> has expired!\n\n";
                           $body .= "Keep seeding until you reach the requested time, so you will not get any more warnings!  ";
 
+                           // Send a message to the user
                          Message::create([
                              'receiver_id' => $warning->warneduser->id,
                              'subject' => 'Warning Expired',

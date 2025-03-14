@@ -26,15 +26,15 @@
             </div>
             <!-- Card Body with Content -->
             <div class="card-body">
-            <p class="card-text text-muted">
-    <!-- {!! nl2br(e(Str::words(strip_tags(convertCustomTagsToHtml($news->content)), 150, '...'))) !!} -->
+            <p class="card-text">
+    <!-- {!! nl2br(e(Str::words(strip_tags(convertCustomTagsToHtml($news->content)), 250, '...'))) !!} -->
     @php
     $fullContent = convertCustomTagsToHtml($news->content);
-    $truncatedContent = Str::words($fullContent, 150, '...');
-    $isTruncated = str_word_count(strip_tags($fullContent)) > 150;
+    $truncatedContent = Str::words($fullContent, 250, '...');
+    $isTruncated = str_word_count(strip_tags($fullContent)) > 250;
 @endphp
 
-{!! nl2br($truncatedContent) !!}
+{!! $truncatedContent !!}
 @if($isTruncated)
     <a href="{{ route('news.show', $news->id) }}" class="btn btn-outline-secondary btn-sm">Read More</a>
 @endif

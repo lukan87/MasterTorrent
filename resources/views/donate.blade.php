@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
+<div class="container-fluid mt-5">
     <div class="tt_block rounded">
         <div class="tt_blockhead text-right">
             <div class="card">

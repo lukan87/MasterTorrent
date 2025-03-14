@@ -9,22 +9,20 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('forum_categories', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->text('description')->nullable();
-            $table->timestamps();
+        Schema::table('history', function (Blueprint $table) {
+            $table->timestamp('last_awarded')->nullable()->after('seeder');
         });
     }
-
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('forum_categories');
+        Schema::table('history', function (Blueprint $table) {
+            $table->dropColumn('last_awarded');
+        });
     }
 };

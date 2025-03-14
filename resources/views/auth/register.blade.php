@@ -62,24 +62,40 @@
                         </div>
 
                         <div class="row mb-3">
-    <label for="recovery_code" class="col-md-4 col-form-label text-md-end">{{ __('Recovery Code') }}</label>
+                            <label for="recovery_code" class="col-md-4 col-form-label text-md-end">{{ __('Recovery Code') }}</label>
 
-    <div class="col-md-6">
-        <input id="recovery_code" type="text" class="form-control @error('recovery_code') is-invalid @enderror" name="recovery_code" value="{{ old('recovery_code') }}" autocomplete="recovery_code" required>
+                            <div class="col-md-6">
+                                <input id="recovery_code" type="text" class="form-control @error('recovery_code') is-invalid @enderror" name="recovery_code" value="{{ old('recovery_code') }}" autocomplete="recovery_code" required>
 
-        @error('recovery_code')
-            <span class="invalid-feedback" role="alert">
-                <strong>{{ $message }}</strong>
-            </span>
-        @enderror
+                                @error('recovery_code')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
 
-        <small class="form-text text-muted">
-            Please enter a unique code. This code is used to recover your password. Make sure you write it down as you will need it to change your password if you forgot it!
-        </small>
-    </div>
-</div>
+                                <small class="form-text text-muted">
+                                    Please enter a unique code. This code is used to recover your password. Make sure you write it down as you will need it to change your password if you forgot it!
+                                </small>
+                            </div>
+                        </div>
+                        
 
+                        <!-- Conditionally display the invite code field -->
+                        @if(config('app.invite_only') == true)
+                        <div class="row mb-3">
+                            <label for="invite_code" class="col-md-4 col-form-label text-md-end">{{ __('Invite Code') }}</label>
 
+                            <div class="col-md-6">
+                                <input id="invite_code" type="text" class="form-control @error('invite_code') is-invalid @enderror" name="invite_code" value="{{ old('invite_code') }}" required>
+
+                                @error('invite_code')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                        </div>
+                        @endif
 
                         <div class="row mb-0">
                             <div class="col-md-6 offset-md-4">
@@ -90,7 +106,6 @@
                                     {{ __('Back To Login') }}
                                 </a>
                             </div>
-
                         </div>
                     </form>
                 </div>

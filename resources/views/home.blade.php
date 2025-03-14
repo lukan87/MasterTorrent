@@ -7,48 +7,34 @@
 <div class="row">
 
 
-    <div class="col-lg-9 col-md-8 col-sm-6">
+<div class="col-lg-9 col-md-8 col-sm-6">
 
 @include('partials.news')
 
-
 </div>
 <div class="col-lg-3 col-md-4 col-sm-6">
+
 @include('partials.poll')
+
 </div>
 
-<iframe src="https://stream.clever-host.ro/cp/widgets/player/single/?p=8036" height="110" width="100%" scrolling="no" style="border:none;"></iframe>
 
 
-    @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::ADMIN)
+
+
+@include('partials.slider')
+
+ @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::VIP)
 <div class="row">
 
-    <!-- <div class="col-md-6">
-
-</div> -->
-
-<div class="col-md-12">
 @include('partials.onlineusers')
-
 @include('partials.stats')
-</div>
-</div>
 
-
+</div>
 
 @endif
+
 @include('partials.toptorrents')
-
-@if (Auth::check() && Auth::user()->id === 3)
-
-
-
-@endif
-
-
-
-
-
 
 <div class="card mt-4">
     <div class="card-header">
@@ -60,6 +46,6 @@
         </p>
     </div>
 </div>
-
+</div>
 
 @endsection

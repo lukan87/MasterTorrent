@@ -25,7 +25,7 @@
                         <li class="list-group-item">
                             <div class="d-flex justify-content-between">
                                 <div>
-                                    <strong>{{ $seeder->user->name }}</strong> - 
+                                    <strong><a href="{{ route('profile.show', ['id' => $seeder->user->id, 'name' => $seeder->user->name ?? 'Unknown']) }}">{{ $seeder->user->name }}</a></strong> - 
                                     <span class="text-muted">{{ $seeder->agent }}</span>
                                 </div>
                                 <div class="text-end">
@@ -65,7 +65,7 @@
                             <li class="list-group-item">
                                 <div class="d-flex justify-content-between">
                                     <div>
-                                        <strong>{{ $leecher->user->name }}</strong> - 
+                                        <strong><a href="{{ route('profile.show', ['id' => $leecher->user->id, 'name' => $leecher->user->name ?? 'Unknown']) }}">{{ $leecher->user->name }}</a></strong> - 
                                         <span class="text-muted">{{ $leecher->agent }}</span>
                                     </div>
                                     <div class="text-end">

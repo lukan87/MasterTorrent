@@ -1,38 +1,46 @@
-{{-- resources/views/messages/reply.blade.php --}}
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <h1 class="my-4">Reply to: {{ $message->subject ?? '(No Subject)' }}</h1>
-
-    <div class="card">
-        <div class="card-header">
-            Reply to Message
+<div class="container-fluid mt-5">
+    <div class="card border-0 shadow rounded-4">
+        <!-- Card Header (Subject) -->
+        <div class="card-header border-bottom p-3">
+            <h5 class="fw-bold text-primary mb-0">Reply to: {{ $message->subject ?? '(No Subject)' }}</h5>
         </div>
-        <div class="card-body">
-            <p><strong>From:</strong> {{ $message->sender->name }}</p>
 
-            <div class="message-body bg-light p-3 rounded border">
-                <p class="font-italic text-dark">{{ $message->body }}</p>
+        <!-- Card Body (Original Message & Reply Form) -->
+        <div class="card-body">
+            <!-- Sender Info -->
+            <div class="d-flex align-items-center mb-3">
+                <img src="{{ $message->sender->profile_image ?? asset('default-avatar.png') }}" alt="Avatar" 
+                    class="rounded-circle border shadow-sm me-3" width="50" height="50">
+                <div>
+                    <h6 class="fw-bold mb-0">
+                        <a href="{{ route('profile.show', $message->sender->id) }}" class="text-decoration-none">
+                            {{ $message->sender->name }}
+                        </a>
+                    </h6>
+                    <small class="text-muted">Sent on {{ $message->created_at->format('d M Y, H:i') }}</small>
+                </div>
             </div>
 
-            <form action="{{ route('messages.storeReply', $message) }}" method="POST" class="mt-4">
+            <!-- Original Message -->
+            <div class="p-4 rounded-3 mb-4">
+                <p class="mb-0 fw-bold">{!! convertCustomTagsToHtml($message->body) !!}</p>
+            </div>
+
+            <!-- Reply Form -->
+            <form action="{{ route('messages.storeReply', $message) }}" method="POST">
                 @csrf
-                <div class="form-group">
-                    <label for="body">Your Reply:</label>
+                <div class="mb-3">
+                    <label for="body" class="form-label fw-bold">Your Reply:</label>
                     <textarea name="body" id="body" rows="4" class="form-control" required></textarea>
                 </div>
-                <button type="submit" class="btn btn-primary mt-2">Send Reply</button>
+                <button type="submit" class="btn btn-outline-primary fw-bold px-4">
+                    <i class="bi bi-send-fill"></i> Send Reply
+                </button>
             </form>
-        </div>
-    </div>
-
-    <div class="mt-4">
-        <form action="{{ route('messages.destroy', $message) }}" method="POST">
-            @csrf
-            @method('DELETE')
-            <button type="submit" class="btn btn-danger">Delete Message</button>
-        </form>
+        </div>       
     </div>
 </div>
 @endsection

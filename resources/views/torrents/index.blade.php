@@ -143,7 +143,12 @@
             <tbody>
                 @forelse ($torrents as $torrent)
                     <tr>
-                        <td><img src="{{ $torrent->category->image }}" alt="Category Image" class="img-fluid" style="width: 87px; height: 47px; border-radius: 10px;"></td>
+                        <td>
+                            <a href="https://lastfiles.ro/torrents?keyword=&categories[]={{ $torrent->category->id }}&genre=&torrent_status=active">
+                                <img src="{{ $torrent->category->image }}" alt="Category Image" class="img-fluid" style="width: 87px; height: 47px; border-radius: 10px;">
+                            </a>
+                        </td>
+                        
                         <td>
                         <a href="{{ route('torrents.show', ['id' => $torrent->id, 'slug' => urlencode($torrent->slug)]) }}"
    data-bs-toggle="tooltip"
@@ -190,13 +195,13 @@
                         @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
                         <td>
                             <a href="{{ route('torrents.edit', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}" class="btn btn-warning btn-sm action-btn"><i class="bi bi-pencil-square"></i></a>
-                            @if (Auth::check() && Auth::user()->can_delete == 1)
+                            
                             <form action="{{ route('torrents.destroy', $torrent->slug) }}" method="POST" style="display: inline-block;">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-danger btn-sm action-btn" onclick="return confirm('Are you sure you want to delete this torrent?');"><i class="bi bi-trash3-fill"></i></button>
                             </form>
-                            @endif
+                            
                         </td>
                         @endif
                     </tr>

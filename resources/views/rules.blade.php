@@ -28,7 +28,7 @@
                     <h4 class="text-primary">Partajarea fișierelor (seeding)</h4>
                     <ul>
                         <li>Fiecare utilizator este obligat să mențină un raport de <strong>cel puțin 1.0</strong> (raportul între upload și download).</li>
-                        <li>Torrentele trebuie să fie păstrate în seeding minim <strong>72 de ore</strong> sau până când se atinge un raport de 1.0.</li>
+                        <li>Torrentele trebuie să fie păstrate în seeding minim <strong>24 de ore</strong> sau până când se atinge un raport de 1.0.</li>
                     </ul>
 
                     <h4 class="text-primary">Fișiere permise</h4>
@@ -77,7 +77,7 @@
                     <h4 class="text-primary">File Sharing (Seeding)</h4>
                     <ul>
                         <li>Each user is required to maintain a ratio of <strong>at least 1.0</strong> (the ratio of upload to download).</li>
-                        <li>Torrents must be seeded for a minimum of <strong>72 hours</strong> or until a ratio of 1.0 is achieved.</li>
+                        <li>Torrents must be seeded for a minimum of <strong>24 hours</strong> or until a ratio of 1.0 is achieved.</li>
                     </ul>
 
                     <h4 class="text-primary">Allowed Files</h4>

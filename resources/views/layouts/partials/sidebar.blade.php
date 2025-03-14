@@ -1,8 +1,8 @@
 <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
     <!--begin::Sidebar Brand-->
     <div class="sidebar-brand">
-        <i class="bi bi-globe brand-image opacity-75 shadow"></i>
-        <span class="brand-text fw-light">LastFiles</span>
+        <i class="bi bi-globe-europe-africa opacity-75 shadow"></i>
+        <span class="brand-text fw-light">My Site</span>
     </div>
     <!--end::Sidebar Brand-->
 
@@ -79,7 +79,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{ route('forum.index') }}" class="nav-link">
+                    <a href="{{ route('overforums.index') }}" class="nav-link">
                         <i class="bi bi-book-half"></i>
                         <p>Forums</p>
                     </a>

@@ -8,10 +8,27 @@
         @else
             <p>
                 @foreach ($onlineUsers as $user)
-                    <a href="{{ route('profile.show', ['id' => $user->id, 'name' => $user->name]) }}"
-                       style="color: {{ \App\Models\UserClass::getClassColor($user->user_class) }}">
-                        {{ $user->name }}
-                    </a>{{ !$loop->last ? ',' : '' }}
+                <a href="{{ route('profile.show', ['id' => $user->id, 'name' => $user->name]) }}"
+                    style="color: {{ \App\Models\UserClass::getClassColor($user->user_class) }}" 
+                    data-bs-toggle="tooltip" 
+                    data-bs-html="true"
+                    data-bs-title='
+                         <div class="card p-2" style="width: 300px;">
+                             <div class="card-body text-center">
+                                 <h6 class="mb-1">{{ \App\Models\UserClass::getClassName($user->user_class) }}</h6>
+                                 <p class="mb-0"><strong>Up: {{ App\Helpers\FormatHelper::formatSize($user->uploaded) }} </strong></p>
+                                 <p class="mb-0"><strong>Down: {{ App\Helpers\FormatHelper::formatSize($user->downloaded) }} </strong></p>
+                             </div>
+                         </div>'>
+                     {{ $user->name }}
+                     @if($user->warned)
+                        <i class="bi bi-exclamation-triangle-fill text-danger"></i>
+                         @endif
+                         @if($user->donor == 'yes')
+                        <i class="bi bi-star-fill text-success"></i>
+                         @endif
+                 </a>{{ !$loop->last ? ',' : '' }}
+                 
                 @endforeach
             </p>
             <hr>

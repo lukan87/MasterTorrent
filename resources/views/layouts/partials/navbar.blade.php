@@ -7,6 +7,12 @@
                 </ul> <!--end::Start Navbar Links--> <!--begin::End Navbar Links-->
                 <ul class="navbar-nav ms-auto"> <!--begin::Navbar Search-->
                     <!-- <li class="nav-item"> <a class="nav-link" data-widget="navbar-search" href="#" role="button"> <i class="bi bi-search"></i> </a> </li> end::Navbar Search begin::Messages Dropdown Menu -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('invites.index') }}" role="button">
+                            <i class="fa fa-user-plus" aria-hidden="true" data-bs-toggle="tooltip" title="Invites"></i> {{ Auth::user()->invites }}
+                        </a>
+                    </li>
+                    
                     <li class="nav-item dropdown">
     <a class="nav-link" data-bs-toggle="dropdown" href="#">
         <i class="bi bi-chat-text"></i>
@@ -68,13 +74,25 @@
                          <span style="color: {{ \App\Models\UserClass::getClassColor(Auth::user()->user_class) }}">
                                             {{ Auth::user()->name }}
                          </span>
+                         @if(Auth::user()->warned)
+                        <i class="bi bi-exclamation-triangle-fill text-danger" data-bs-toggle="tooltip" title=" Warned Until: {{ Auth::user()->warned_until->format('Y-m-d H:i') }}"></i>
+                         @endif
+                         @if(Auth::user()->donor === 'yes')
+                        <i class="bi bi-star-fill text-success" data-bs-toggle="tooltip" title="Donor"></i>
+                         @endif
 
                     </span> </a>
-                        <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end"> <!--begin::User Image-->
+                        <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end" style="min-width: 400px;"> <!--begin::User Image-->
                             <li class="user-header text-bg-secondary"> <img src="{{ Auth::user()->profile_image ?? asset('images/default_avatar/default-avatar.jpg') }}" class="user-image rounded-circle shadow" alt="User Avatar">
                                 <p>
                                 {{ Auth::user()->name }} - {{ Auth::user()->role_name }}
                                     <small>Member since {{ Auth::user()->created_at }}</small>
+                                    @if(Auth::user()->warned_until)
+                                    <br>
+                                    <small class="text-info">
+                                        <i class="bi bi-exclamation-triangle-fill"></i> Warned Until: {{ Auth::user()->warned_until->format('Y-m-d H:i') }}
+                                    </small>
+                                @endif
 
                                 </p>
                             </li> <!--end::User Image--> <!--begin::Menu Body-->
@@ -103,18 +121,34 @@
                                      </small>
                                 </div>
                                 <div class="col-4 text-center">
+                                <a href="{{ route('snatch.seeding') }}">
                                 <i class="bi bi-cloud-arrow-up-fill" data-bs-toggle="tooltip" title="Seeding"></i>
                                      <small>
                                      {{ $seedingCount }}
                                      </small>
+                                </a>
                                 </div>
                                 <div class="col-4 text-center">
+                                <a href="{{ route('snatch.leeching') }}">
                                 <i class="bi bi-cloud-arrow-down-fill" data-bs-toggle="tooltip" title="Leeching"></i>
                                      <small>
                                      {{ $leechingCount }}
                                      </small>
+                                </a>
                                 </div>
                                 </div>
+                                <div class="row">
+                                    <div class="col-4 text-center"> <small><a href="{{ route('snatch.needToSeed') }}"><i class="bi bi-exclamation-triangle-fill" style="color: red;"></i> Need to Seed</a></small> </div>
+                                    <div class="col-4 text-center"> <small><a href="{{ route('snatch.snatchlist') }}"><i class="bi bi-file-arrow-down" data-bs-toggle="tooltip" title="My Downloads"></i> Snatch List</a></small> </div>
+                                    <div class="col-4 text-center">
+                                        <small>
+                                            <a href="{{ route('snatch.hitAndRun') }}">
+                                            <i class="bi bi-person-exclamation" style="color: red;" data-bs-toggle="tooltip" title="Hit&Run's"></i>
+                                             HNR's: {{ Auth::user()->hit_and_run_count }}
+                                            </a>
+                                        </small>
+                                    </div>
+                                </div> <!--end::Row-->
                             </li> <!--end::Menu Body--> <!--begin::Menu Footer-->
                             <li class="user-footer">
                             <a href="{{ route('profile.show', ['id' => Auth::user()->id, 'name' => Auth::user()->name]) }}" class="btn btn-default btn-flat">Profile</a>

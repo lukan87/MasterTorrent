@@ -84,6 +84,13 @@ class SystemInfoController extends Controller
         return redirect()->route('admin.systemInfo.index')->with('success', 'Views cleared successfully.');
     }
 
+    // Clear Views
+    public function clearConfig()
+    {
+        Artisan::call('config:clear');
+        return redirect()->route('admin.systemInfo.index')->with('success', 'Config cleared successfully.');
+    }
+
     // Clear Routes
     public function clearRoutes()
     {

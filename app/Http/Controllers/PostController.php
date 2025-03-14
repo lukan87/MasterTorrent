@@ -5,146 +5,122 @@ namespace App\Http\Controllers;
 use App\Models\Post;
 use App\Models\Topic;
 use App\Models\Message;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
-
 
 class PostController extends Controller
 {
-
-    public function show($id)
-    {
-        $topic = Topic::findOrFail($id);
-
-        // Paginate posts with their replies
-        $posts = $topic->posts()->with('replies')->paginate(10);
-
-        return view('topics.show', compact('topic', 'posts'));
-    }
-
-
-    // Store a new reply to a topic
     public function store(Request $request, $topicId)
     {
         $request->validate([
-            'content' => 'required|string|max:5000',
+            'content' => 'required|string',
         ]);
-
-        $topic = Topic::findOrFail($topicId);
-
-        // Check if user has permission to reply
-        if (!auth()->user()->userHasPermission('reply')) {
-            return redirect()->route('topics.show', $topicId)->with('error', 'You do not have permission to reply.');
-        }
-
-        $post = new Post();
-        $post->content = $request->input('content');
-        $post->user_id = auth()->id();
-        $post->topic_id = $topicId;
-        $post->save();
-
-        return redirect()->route('topics.show', $topicId)->with('success', 'Reply posted successfully.');
-    }
-
-    // Edit a post
-    public function edit($id)
-    {
-        $post = Post::findOrFail($id);
-
-        // Check if user has permission to edit this post
-        if (!auth()->user()->userHasPermission('edit_posts') && auth()->id() !== $post->user_id) {
-            return redirect()->route('topics.show', $post->topic_id)->with('error', 'You do not have permission to edit this post.');
-        }
-
-        return view('posts.edit', compact('post'));
-    }
-
-    // Update a post
-    public function update(Request $request, $id)
-    {
-        $request->validate([
-            'content' => 'required|string|max:5000',
+    
+        $topic = Topic::findOrFail($topicId); // Find the topic
+        $user = auth()->user(); // Get the currently authenticated user
+    
+        // Create a new post for the topic
+        Post::create([
+            'topic_id' => $topic->id,
+            'user_id' => $user->id,
+            'content' => $request->content,
         ]);
-
-        $post = Post::findOrFail($id);
-
-        // Check if user has permission to edit this post
-        if (!auth()->user()->userHasPermission('edit_posts') && auth()->id() !== $post->user_id) {
-            return redirect()->route('topics.show', $post->topic_id)->with('error', 'You do not have permission to update this post.');
-        }
-
-        $post->content = $request->input('content');
-        $post->save();
-
-        return redirect()->route('forum.show', $post->topic_id)->with('success', 'Post updated successfully.');
+    
+        // Redirect to the specific topic view, passing both forumId and topicId
+        return redirect()->route('topics.show', ['forumId' => $topic->forum->id, 'topicId' => $topic->id])
+                         ->with('success', 'Post created successfully!');
     }
 
-    public function reply(Post $post)
+    public function edit(Post $post)
 {
-    return view('posts.reply', compact('post'));
+    // Authorize that the user can edit the post
+    if (auth()->id() !== $post->user_id && auth()->user()->user_class < \App\Models\UserClass::MODERATOR) {
+        abort(403, 'Unauthorized action.');
+    }
+
+    return view('posts.edit', compact('post'));
 }
 
-public function storeReply(Request $request, Post $post)
+public function update(Request $request, Post $post)
 {
-    // Validate the reply content
+    // Authorize that the user can edit the post
+    if (auth()->id() !== $post->user_id && auth()->user()->user_class < \App\Models\UserClass::MODERATOR) {
+        abort(403, 'Unauthorized action.');
+    }
+
     $request->validate([
-        'content' => 'required|string|min:5', // Adjust validation as needed
+        'content' => 'required|string|max:1000',
     ]);
 
-    // Create a new reply post
-    $reply = new Post();
-    $reply->content = $request->content;
-    $reply->user_id = auth()->id();
-    $reply->parent_id = $post->id;
-    $reply->topic_id = $post->topic_id; // Assign the topic_id from the parent post
-    $reply->save();
+    $post->update([
+        'content' => $request->input('content'),
+    ]);
 
-    // Notify the post owner via message
-    if ($post->user_id !== auth()->id()) { // Avoid notifying the user replying to their own post
+    return redirect()->route('topics.show', [$post->topic->forum_id, $post->topic_id])
+        ->with('success', 'Post updated successfully.');
+}
+
+public function reply(Request $request, Post $post)
+{
+    $request->validate([
+        'content' => 'required|string|max:1000',
+    ]);
+
+    $reply = $post->replies()->create([
+        'user_id' => auth()->id(),
+        'content' => $request->content,
+        'topic_id' => $post->topic_id, // Ensure the topic_id matches the parent post
+        'parent_id' => $post->id,      // Set the parent_id to the post being replied to
+    ]);
+    // Send a message to the creator of the post
+    $creator = $post->user; // The creator of the post being replied to
+
+    if ($creator->id !== auth()->id()) { // Prevent sending a message to yourself
+        $replyAuthor = auth()->user(); // Get the user who made the reply
+        $postLink = route('topics.show', [
+            'forumId' => $post->topic->forum->id,
+            'topicId' => $post->topic->id,
+        ]); // Generate the link to the post
+    
         Message::create([
-            'sender_id' => auth()->id(),
-            'receiver_id' => $post->user_id,
-            'subject' => 'Reply to your forum post',
-            'body' => auth()->user()->name . ' replied to your post: "' . Str::limit($post->content, 50) . '".',
-            'is_read' => false,
+            'sender_id' => $replyAuthor->id, // The user who created the reply
+            'receiver_id' => $creator->id, // The user who created the original post
+            'subject' => 'You have a new reply to your post!',
+            'body' => "Hello {$creator->name},\n\n" .
+                      "Your post has received a new reply from {$replyAuthor->name}:\n\n" .
+                      "\"{$request->content}\"\n\n" .
+                      "Click [here]({$postLink}) to view the post and the reply.\n\n" .
+                      "Best regards,\nYour Forum Team",
+            'is_read' => false, // Mark the message as unread
         ]);
     }
+    
 
-    // Debugging step - check if redirect is correct
-    //dd('Redirecting to topic show with ID: '.$post->topic_id);
-
-    // Redirect to the topic page
-    return redirect()->route('topics.show', $post->topic_id)->with('success', 'Reply posted successfully!');
+    return redirect()->back()->with('success', 'Reply added successfully!');
 }
 
-public function destroyReply($replyId)
+
+
+public function destroy(Post $post)
 {
-    $reply = Post::findOrFail($replyId);
-
-    // Ensure that the user is either the owner or a moderator
-    if (auth()->user()->id === $reply->user_id || auth()->user()->user_class >= \App\Models\UserClass::MODERATOR) {
-        $reply->delete();  // Delete the reply
-        return redirect()->back()->with('success', 'Reply deleted successfully.');
+    // Ensure the user has permission to delete the post
+    if (auth()->id() !== $post->user_id && auth()->user()->user_class < \App\Models\UserClass::MODERATOR) {
+        abort(403, 'Unauthorized action.');
     }
 
-    return redirect()->back()->with('error', 'You do not have permission to delete this reply.');
+     // Delete the replies associated with the post
+     $post->replies()->delete();
+
+    // Delete the post
+    $post->delete();
+
+    // Redirect back with a success message
+    return redirect()->back()->with('success', 'Post deleted successfully.');
 }
 
 
 
 
-    // Delete a post
-    public function destroy($id)
-    {
-        $post = Post::findOrFail($id);
-
-        // Check if user has permission to delete this post
-        if (!auth()->user()->userHasPermission('delete_posts') && auth()->id() !== $post->user_id) {
-            return redirect()->route('topics.show', $post->topic_id)->with('error', 'You do not have permission to delete this post.');
-        }
-
-        $post->delete();
-
-        return redirect()->route('topics.show', $post->topic_id)->with('success', 'Post deleted successfully.');
-    }
+    
 }
+

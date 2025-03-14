@@ -38,6 +38,7 @@ class DeleteOldPeers extends Command
         // Get the peers that need to be deleted
         $peers = Peer::select(['id', 'hash', 'user_id', 'updated_at', 'client_updated_at'])
                      ->where('client_updated_at', '<', $carbon->copy()->subHours(1)->toDateTimeString())
+                    //  ->where('seeder', '=', 0)
                      ->get();
 
         // Log the number of peers found
@@ -53,7 +54,7 @@ class DeleteOldPeers extends Command
                 $history->seeder = false;
                 $history->save();
                 $this->comment("History updated for peer with ID: {$peer->id} and Hash: {$peer->hash}");
-                Log::info("History updated for peer with ID: {$peer->id} and Hash: {$peer->hash}");
+                //Log::info("History updated for peer with ID: {$peer->id} and Hash: {$peer->hash}");
             }
 
             $peer->delete();

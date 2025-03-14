@@ -12,16 +12,18 @@ return new class extends Migration
     public function up()
     {
         Schema::table('posts', function (Blueprint $table) {
-            $table->unsignedBigInteger('parent_id')->nullable()->after('id'); // Add parent_id column
-            $table->foreign('parent_id')->references('id')->on('posts')->onDelete('cascade'); // Set up foreign key to reference the posts table
+            $table->foreignId('parent_id')->nullable()->constrained('posts')->cascadeOnDelete();
         });
     }
     
-    public function down()
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
     {
         Schema::table('posts', function (Blueprint $table) {
-            $table->dropForeign(['parent_id']);
-            $table->dropColumn('parent_id');
+            //
         });
     }
 };

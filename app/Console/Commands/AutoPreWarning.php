@@ -63,6 +63,16 @@ class AutoPreWarning extends Command
                 ->whereDoesntHave('user.warnings', fn ($query) => $query->withTrashed()->whereColumn('warnings.torrent', '=', 'history.torrent_id'))
                 ->chunkById(100, function ($prewarns): void {
                     foreach ($prewarns as $pre) {
+
+                         // Calculate the ratio
+                         $uploaded = $pre->uploaded ?? 0;
+                         $downloaded = $pre->actual_downloaded ?? 0;
+                         $ratio = $downloaded > 0 ? $uploaded / $downloaded : 0;
+
+                         // Skip if the ratio is 1.00 or higher
+                         if ($ratio >= 1.00) {
+                             continue;
+                         }
                         // Update prewarned_at timestamp for each user meeting the pre-warning conditions
                         History::query()
                             ->where('torrent_id', '=', $pre->torrent_id)
@@ -77,6 +87,7 @@ class AutoPreWarning extends Command
                         // Build the message body with the torrent link
                         $body = "This is a pre-warning regarding your recent torrent activity. Please be aware of the hit-and-run policy.\n\n";
                         $body .= "Torrent: <a href=\"$torrentLink\">{$pre->torrent->name}</a>";
+                        $body .= "Your ratio for this torrent is: " . number_format($ratio, 2) . ".\n";
 
                         // Create a new message for the user
                         Message::create([

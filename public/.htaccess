@@ -1,19 +1,9 @@
-
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes
     </IfModule>
 
     RewriteEngine On
-
-    # Permite accesul necondiționat pentru IP-ul 62.210.38.52
-    RewriteCond %{REMOTE_ADDR} ^62\.210\.38\.52$
-    RewriteRule .* - [L]
-
-    # Permite accesul doar prin domeniile specificate
-    RewriteCond %{HTTP_HOST} !^(www\.)?(last-torrents\.org|lastfiles\.ro)$ [NC]
-    RewriteCond %{HTTP_HOST} !^(localhost|127\.0\.0\.1)$ [NC]
-    RewriteRule ^ - [F]
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
@@ -23,6 +13,10 @@
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_URI} (.+)/$
     RewriteRule ^ %1 [L,R=301]
+
+    # Allow direct access to images, CSS, JS, and fonts
+    RewriteCond %{REQUEST_URI} ^/(css|js|images|fonts|storage)/
+    RewriteRule . - [L]
 
     # Send Requests To Front Controller...
     RewriteCond %{REQUEST_FILENAME} !-d

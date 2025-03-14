@@ -11,6 +11,7 @@
             App\Models\UserClass::OWNER,
             App\Models\UserClass::ADMIN,
             App\Models\UserClass::MODERATOR,
+            App\Models\UserClass::UPLOADER,
         ];
 
         // Add the remaining roles not in customOrder
@@ -41,8 +42,13 @@
                             <div class="col-md-8">
                                 <div class="card-body d-flex flex-column">
                                     <h5 class="card-title" style="color: {{ App\Models\UserClass::getClassColor($member->user_class) }};">
-                                        {{ $member->name }}
+                                       
+                                        <a href="{{ route('profile.show', ['id' => $member->id, 'name' => $member->name ?? 'Unknown']) }}"
+                                            style="color: {{ \App\Models\UserClass::getClassColor($member->user_class ?? '') }}">
+                                            {{ $member->name }}
+                                         </a>
                                     </h5>
+                                    <hr>
 
                                     <a href="{{ route('messages.create', ['receiver_id' => $member->id]) }}" class="text-light">
                               <button class="btn btn-success btn-sm" data-bs-toggle="tooltip" title="Send message to {{$member->name}}">Send message</button>

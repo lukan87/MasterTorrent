@@ -11,6 +11,7 @@
                 <tr>
                     <th>Torrent Name</th>
                     <th>Seeding Duration (hours)</th>
+                    <th>Ratio</th>
                     <th>Created At</th>
                     <th>Completed At</th>
                     <th>Updated at</th>
@@ -27,6 +28,22 @@
                         Seeders: {{ $torrent->torrent->seeders }} / Leechers: {{ $torrent->torrent->leechers }}
                     </td>
                         <td>{{ \App\Helpers\FormatHelper::formatTime($torrent->seedtime) }}</td>
+                        <td>
+    @php
+        $uploaded = $torrent->uploaded ?? 0; // Ensure no null values
+        $downloaded = $torrent->downloaded ?? 0;
+
+        if ($downloaded > 0) {
+            $ratio = number_format($uploaded / $downloaded, 2); // Calculate and format the ratio
+        } elseif ($uploaded > 0) {
+            $ratio = '∞'; // Infinite ratio for non-downloaded torrents
+        } else {
+            $ratio = 'N/A'; // Not available when both are 0
+        }
+    @endphp
+
+    {{ $ratio }}
+</td>
                         <td>{{ $torrent->created_at->toDayDateTimeString() }}</td>
                         <td>{{ $torrent->completed_at ? $torrent->completed_at->toDayDateTimeString() : 'N/A' }}</td>
                         <!-- <td>{{ App\Helpers\FormatHelper::formatSize($torrent->left) }}</td> -->

@@ -42,6 +42,12 @@ class Warning extends Model
         return $this->belongsTo(User::class, 'warned_by');
     }
 
+     // Relationship with User (the user who deleted the warning)
+     public function deletedBy()
+     {
+         return $this->belongsTo(User::class, 'deleted_by');
+     }
+
     // Relationship with Torrent (related torrent)
     public function torrent()
     {
@@ -57,5 +63,12 @@ class Warning extends Model
 {
     return $this->belongsTo(User::class, 'user_id', 'id');
 }
+
+// Relationship with History (for seedtime and other data)
+public function history()
+{
+    return $this->hasMany(History::class, 'torrent_id', 'torrent_id');  // Assuming 'torrent_id' is the correct field
+}
+
 
 }

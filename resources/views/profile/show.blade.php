@@ -2,12 +2,18 @@
 
 @section('content')
 
-    <div class="row justify-content-center">
+    <div class="row justify-content-center mt-3">
         <!-- Profile Sidebar -->
         <div class="col-md-2">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <span>{{ $user->name }} - {{ $user->role_name }}</span>
+                    <span>{{ $user->name }} - {{ $user->role_name }}  
+                        @if($user->warned)
+                        <i class="bi bi-exclamation-triangle-fill text-danger"></i>
+                         @endif
+                         @if($user->donor == 'yes')
+                        <i class="bi bi-star-fill text-success" data-bs-toggle="tooltip" title="Donor"></i>
+                         @endif</span>
 
                     <!-- Edit Profile Icon for Admins or Profile Owner -->
                     @if (Auth::check() && (Auth::user()->user_class >= \App\Models\UserClass::ADMIN || Auth::user()->name === $user->name))
@@ -37,6 +43,17 @@
 
 @else
 @endif
+
+@if ($user->warned_until != NULL)
+<div class="row mb-3">
+    <label for="vip_until" class="col-md-4 col-form-label text-md-end">Warned Until</label>
+    <div class="col-md-6">
+    {{ \Carbon\Carbon::parse($user->warned_until)->format('d F Y, H:i') }}
+    </div>
+</div>
+
+@else
+@endif
                     <a href="{{ route('messages.create', ['receiver_id' => $user->id]) }}" class="text-light">
                               <button class="btn btn-success btn-sm" data-bs-toggle="tooltip" title="Send message to {{$user->name}}">Send message</button>
                        </a>
@@ -47,7 +64,10 @@
         <!-- Profile Details -->
         <div class="col-md-10">
             <div class="card">
-                <div class="card-header">{{ __('Profile Information') }}</div>
+                <div class="card-header">{{ __('Profile Information ') }}   
+                    @if (Auth::check() && (Auth::user()->user_class >= \App\Models\UserClass::ADMIN))
+                    <a href="{{ route('admin.users.edit', $user->id) }}" class="btn btn-info btn-sm"><i class="bi bi-pencil-square" data-bs-toggle="tooltip" title="Administration Edit"></i> Administration Edit</a>
+                    @endif</div>
 
                 <div class="card-body">
 
@@ -94,29 +114,78 @@
                     </div>
 
                      <!-- Need to seed -->
-                     @if (auth()->id() === $user->id)
+                     <!-- @if (auth()->id() === $user->id)
     <div class="row mb-3">
         <label for="seedbonus" class="col-md-2 col-form-label text-md-end">
             <i class="bi bi-person-workspace" data-bs-toggle="tooltip" data-bs-title="Need to Seed"></i>
         </label>
         <div class="col-md-10">
-            <p class="form-control-static"><a href="/hitandrun">Need to Seed</a></p>
+            <p class="form-control-static"><a href="{{ route('snatch.needToSeed') }}">Need to Seed</a></p>
         </div>
     </div>
-@endif
+@endif -->
 
 
-
-@if (Auth::check() && (Auth::user()->user_class >= \App\Models\UserClass::ADMIN || Auth::user()->id === $user->id))
-<div class="row mb-3">
-        <label for="history" class="col-md-2 col-form-label text-md-end">
-            <i class="bi bi-person-workspace" data-bs-toggle="tooltip" data-bs-title="Download History"></i>
+     <!-- Snatch Information -->
+     @if (Auth::check() && (Auth::user()->user_class >= \App\Models\UserClass::ADMIN))
+     <div class="row mb-3">
+        <label for="snatchlist" class="col-md-2 col-form-label text-md-end">
+            <i class="bi bi-file-earmark-earbuds" data-bs-toggle="tooltip" data-bs-title="Snatchlist"></i>
+            <i class="fa-solid fa-download"></i>
         </label>
         <div class="col-md-10">
-            <p class="form-control-static"><a href="{{ route('profile.download-history', ['id' => $user->id, 'name' => $user->name]) }}">View Download History</a></p>
+            <a href="{{ route('snatch.snatchlist', ['userId' => $user->id]) }}">View Snatchlist</a>
         </div>
     </div>
+
+    <div class="row mb-3">
+        <label for="seeding" class="col-md-2 col-form-label text-md-end">
+            <i class="bi bi-cloud-arrow-up" data-bs-toggle="tooltip" data-bs-title="Seeding"></i>
+        </label>
+        <div class="col-md-10">
+            <a href="{{ route('snatch.seeding', ['userId' => $user->id]) }}">View Seeding Torrents</a>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <label for="leeching" class="col-md-2 col-form-label text-md-end">
+            <i class="bi bi-arrow-down-circle-fill" data-bs-toggle="tooltip" data-bs-title="Leeching"></i>
+        </label>
+        <div class="col-md-10">
+            <a href="{{ route('snatch.leeching', ['userId' => $user->id]) }}">View Leeching Torrents</a>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <label for="hitAndRun" class="col-md-2 col-form-label text-md-end">
+            <i class="bi bi-person-dash" data-bs-toggle="tooltip" data-bs-title="Hit and Run"></i>
+        </label>
+        <div class="col-md-10">
+            <a href="{{ route('snatch.hitAndRun', ['userId' => $user->id]) }}">View Hit-and-Run Torrents</a>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <label for="needToSeed" class="col-md-2 col-form-label text-md-end">
+            <i class="bi bi-cloud-download" data-bs-toggle="tooltip" data-bs-title="Need to Seed"></i>
+        </label>
+        <div class="col-md-10">
+            <a href="{{ route('snatch.needToSeed', ['userId' => $user->id]) }}">View Need to Seed Torrents</a>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <label for="warnings" class="col-md-2 col-form-label text-md-end">
+            <i class="bi bi-cloud-download" data-bs-toggle="tooltip" data-bs-title="User's warnings"></i>
+        </label>
+        <div class="col-md-10">
+           <a href="{{ route('warnings.show', ['id' => $user->id, 'username' => $user->username]) }}">User's Warnings</a>
+        </div>
+    </div>
+
+   
     @endif
+  
 
 
 
@@ -176,51 +245,40 @@
                     </div>
 
 
-                     <!-- Display torrents seeded -->
-                     <div class="row mb-3">
-                        <label for="seeded_torrents" class="col-md-2 col-form-label text-md-end"><i class="bi bi-cloud-arrow-up" data-bs-toggle="tooltip" data-bs-title="Torrents Seeded"></i></label>
-                        <div class="col-md-10">
-                            <p class="form-control-static">
-                            <a href="{{ route('profile.seedingTorrents', ['id' => $user->id, 'name' => $user->name]) }}">
-                 Seeding Torrents
-            </a>
-                            </p>
-                        </div>
-                    </div>
 
                     @endif
 
 
             @if (Auth::check() && (Auth::user()->user_class >= \App\Models\UserClass::ADMIN || Auth::user()->name === $user->name))
-    <div class="row mb-3">
-        <label for="seeded_torrents" class="col-md-2 col-form-label text-md-end">
-            <i class="bi bi-calendar-week-fill" data-bs-toggle="tooltip" data-bs-title="User's Timeline"></i>
-        </label>
-        <div class="col-md-10">
-            <div class="form-control-static">
-                @if ($user->timeline->isEmpty())
-                    <p>No timeline entries for this user.</p>
-                @else
-                    <ul class="list-group">
-                        @foreach ($user->timeline as $entry)
-                            <li class="list-group-item">
-                                <strong>{{ $entry->created_at->format('Y-m-d H:i:s') }}:</strong>
-                                {!! convertCustomTagsToHtml($entry->comment) !!}
-                                <!-- @if ($entry->staff)
-                                    <em>by {{ $entry->staff->name }}</em>
-                                @endif -->
-                            </li>
-                        @endforeach
-                    </ul>
-                @endif
+            <div class="row mb-3">
+                <label for="seeded_torrents" class="col-md-2 col-form-label text-md-end">
+                    <i class="bi bi-calendar-week-fill" data-bs-toggle="tooltip" data-bs-title="User's Timeline"></i>
+                </label>
+                <div class="col-md-10">
+                    <div class="form-control-static">
+                        @if ($user->timeline->isEmpty())
+                            <p>No timeline entries for this user.</p>
+                        @else
+                            <div style="max-height: 400px; overflow-y: auto; padding: 5px; border-radius: 5px;">
+                                <ul class="list-group">
+                                    @foreach ($user->timeline->sortByDesc('created_at') as $entry)
+                                        <li class="list-group-item">
+                                            <strong>{{ $entry->created_at->format('Y-m-d H:i:s') }}:</strong>
+                                            {!! convertCustomTagsToHtml($entry->comment) !!}
+                                            <!-- @if ($entry->staff)
+                                                <em>by {{ $entry->staff->name }}</em>
+                                            @endif -->
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
+            
 @endif
 
-
-
-                    <!-- Additional fields can be added here as needed -->
                 </div>
             </div>
         </div>

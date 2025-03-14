@@ -10,23 +10,30 @@
 <div class="container">
     <h1>Upload a New Torrent</h1>
 
-    <div class="alert alert-info">
-        <!-- <h2 class="mt-10"><strong>Announce URL:</strong> {{ route('announce', ['passkey' => $user->passkey]) }}</h2> -->
-        <h2 class="mt-10"><strong>Announce URL:</strong> {{ url('announce', ['passkey' => $user->passkey], false) }}</h2>
-        <p>Please use the announce URL above when creating a new torrent !</p>
-    </div>
+<div class="alert alert-info">
+    <!-- URL-ul Announce -->
+    <h2 class="mt-10">
+        <strong>Announce URL:</strong>
+        <a href="javascript:void(0);" 
+           onclick="copyToClipboard('http://last-torrents.org/announce/{{ $user->passkey }}')" 
+           title="Click to copy this URL to your clipboard!">
+            http://last-torrents.org/announce/{{ $user->passkey }}
+        </a>
+    </h2>
+    <p>Click the announce URL above to copy it automatically when creating a new torrent!</p>
+</div>
 
-    @if (session('error'))
-        <div class="alert alert-danger">
-            {{ session('error') }}
-        </div>
-    @endif
+<script>
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Announce URL copied to clipboard!');
+        }).catch(err => {
+            console.error('Failed to copy text: ', err);
+        });
+    }
+</script>
 
-    @if (session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
-        </div>
-    @endif
+
 
     <form action="{{ route('torrents.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
