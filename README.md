@@ -37,6 +37,7 @@ Laravel is accessible, powerful, and provides tools required for large, robust a
 
 This project is a **torrent tracker** built using Laravel 11, offering a modern, efficient, and feature-rich platform for torrent management. Some of its key features include:
 
+- **PHP 8.4:** Using latest php.
 - **User Management:** Users are grouped into different classes with automatic promotion/demotion based on upload/download ratio, registration time, and activity.
 - **Torrent System:** Tracks multi-file and single-file torrents with detailed statistics such as seeders, leechers, and completion counts.
 - **Bonus System:** Users earn seed bonus points for seeding torrents, limited to a configurable number of torrents.
