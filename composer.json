@@ -8,6 +8,7 @@
         "php": "^8.4",
         "ezyang/htmlpurifier": "^4.17",
         "guzzlehttp/guzzle": "^7.9",
+        "illuminate/database": "*",
         "ksubileau/color-thief-php": "^2.0",
         "laravel/framework": "^12.2.0",
         "laravel/tinker": "^2.9",
