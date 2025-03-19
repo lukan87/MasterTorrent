@@ -22,7 +22,7 @@
 <div style="margin-top: 10px;">
     <!-- TMDB Link -->
     @if($series->tmdb_id)
-        <a href="https://www.themoviedb.org/movie/{{ $series->tmdb_id }}" target="_blank" class="btn btn-dark btn-sm">View on TMDB</a>
+        <a href="https://www.themoviedb.org/tv/{{ $series->tmdb_id }}" target="_blank" class="btn btn-dark btn-sm">View on TMDB</a>
     @endif
 
     <!-- IMDb Link -->

@@ -1,86 +1,83 @@
 @extends('layouts.app')
 
-@section('title',  'Browse Torrents' )
+@section('title',  'Browse Torrents')
 
 @section('content')
 
+<h1 class="page-title mb-4 mt-5">Torrents List</h1>
 
-    <h1 class="page-title mt-5">Torrents List</h1>
+<!-- Search Form in a Bootstrap Card -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Search Torrents</h5>
+    </div>
+    <div class="card-body">
+        <form action="{{ route('torrents.index') }}" method="GET" class="search-form mb-4">
+            <div class="row g-3 align-items-end">
+                <!-- Search Keyword with Autocomplete -->
+                <div class="col-md-3 col-sm-6">
+                    <label for="keyword" class="form-label">Keyword</label>
+                    <input type="text" name="keyword" id="keyword" class="form-control" placeholder="Search Torrent by name, IMDb URL..." value="{{ request('keyword') }}">
+                </div>
 
+                <!-- Category Filter (full-width on mobile) -->
+                <div class="col-md-3 col-sm-3">
+                    <label for="categoriesDropdown" class="form-label">Categories</label>
+                    <div class="dropdown w-100">
+                        <button class="btn btn-secondary dropdown-toggle w-100" type="button" id="categoriesDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                         Categories
+                        </button>
+                        <div class="dropdown-menu custom-dropdown-width" aria-labelledby="categoriesDropdown">
+                            <div class="d-flex flex-wrap gap-3">
+                                @foreach ($categories as $category)
+                                    @if (!in_array($category->id, [27, 34, 60]))
+                                        <label class="form-check-label">
+                                            <input type="checkbox" class="form-check-input me-1" name="categories[]" value="{{ $category->id }}"
+                                            {{ in_array($category->id, request('categories', [])) ? 'checked' : '' }}>
+                                            {{ $category->name }}
+                                        </label>
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-   <!-- Search Form -->
-<form action="{{ route('torrents.index') }}" method="GET" class="search-form mb-4">
-    <div class="row g-3 align-items-end">
-        <!-- Search Keyword with Autocomplete -->
-        <div class="col-md-3 col-sm-6">
-            <label for="keyword" class="form-label">Keyword</label>
-            <input type="text" name="keyword" id="keyword" class="form-control" placeholder="Search Torrent by name, IMDb URL..." value="{{ request('keyword') }}">
-        </div>
+                <!-- Genre Filter -->
+                <div class="col-md-2 col-sm-4">
+                    <label for="genre" class="form-label">Genre</label>
+                    <select name="genre" id="genre" class="form-select">
+                        <option value="">All Genres</option>
+                        @foreach($allGenres as $genre)
+                            <option value="{{ $genre->id }}" {{ request('genre') == $genre->id ? 'selected' : '' }}>
+                                {{ $genre->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
 
+                <!-- Torrent Status Filter -->
+                <div class="col-md-2 col-sm-4">
+                    <label for="torrent_status" class="form-label">Status</label>
+                    <select name="torrent_status" id="torrent_status" class="form-select">
+                        <option value="active" {{ request('torrent_status') == 'active' ? 'selected' : '' }}>Active</option>
+                        <option value="dead" {{ request('torrent_status') == 'dead' ? 'selected' : '' }}>Dead</option>
+                        <option value="free" {{ request('torrent_status') == 'free' ? 'selected' : '' }}>Free</option>
+                        <option value="double" {{ request('torrent_status') == 'double' ? 'selected' : '' }}>Double</option>
+                        <option value="seedbox" {{ request('torrent_status') == 'seedbox' ? 'selected' : '' }}>Seedbox</option>
+                    </select>
+                </div>
 
-
-<!-- Category Filter -->
-<div class="col-md-3 col-sm-6">
-    <label for="categoriesDropdown" class="form-label">Categories</label>
-    <div class="dropdown">
-        <button class="btn btn-secondary dropdown-toggle w-100" type="button" id="categoriesDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-            Select Categories
-        </button>
-        <div class="dropdown-menu custom-dropdown-width" aria-labelledby="categoriesDropdown">
-            <div class="d-flex flex-wrap gap-3">
-                @foreach ($categories as $category)
-                    @if (!in_array($category->id, [27, 34, 60]))
-                        <label class="form-check-label">
-                            <input type="checkbox" class="form-check-input me-1" name="categories[]" value="{{ $category->id }}"
-                            {{ in_array($category->id, request('categories', [])) ? 'checked' : '' }}>
-                            {{ $category->name }}
-                        </label>
-                    @endif
-                @endforeach
+                <!-- Submit Button -->
+                <div class="col-md-2 col-sm-4">
+                    <button type="submit" class="btn btn-primary w-100">Search</button>
+                </div>
             </div>
-        </div>
+        </form>
     </div>
 </div>
 
-
-<style>.custom-dropdown-width {
-    min-width: 450px; /* Adjust width as needed */
-}</style>
-
-        <!-- Genre Filter -->
-        <div class="col-md-2 col-sm-4">
-            <label for="genre" class="form-label">Genre</label>
-            <select name="genre" id="genre" class="form-select">
-                <option value="">All Genres</option>
-                @foreach($allGenres as $genre)
-                    <option value="{{ $genre->id }}" {{ request('genre') == $genre->id ? 'selected' : '' }}>
-                        {{ $genre->name }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-
-        <!-- Torrent Status Filter -->
-        <div class="col-md-2 col-sm-4">
-            <label for="torrent_status" class="form-label">Status</label>
-            <select name="torrent_status" id="torrent_status" class="form-select">
-                <option value="active" {{ request('torrent_status') == 'active' ? 'selected' : '' }}>Active</option>
-                <option value="dead" {{ request('torrent_status') == 'dead' ? 'selected' : '' }}>Dead</option>
-                <option value="free" {{ request('torrent_status') == 'free' ? 'selected' : '' }}>Free</option>
-                <option value="double" {{ request('torrent_status') == 'double' ? 'selected' : '' }}>Double</option>
-                <option value="seedbox" {{ request('torrent_status') == 'seedbox' ? 'selected' : '' }}>Seedbox</option>
-            </select>
-        </div>
-
-        <!-- Submit Button -->
-        <div class="col-md-2 col-sm-4">
-            <button type="submit" class="btn btn-primary w-100">Search</button>
-        </div>
-    </div>
-</form>
-
-
-    <!-- Torrent Table -->
+<!-- Torrent Table with Improved Design -->
 <div class="container-fluid p-0">
     <div class="table-responsive">
         <table class="table table-striped table-hover">
@@ -123,10 +120,10 @@
                         </a>
                     </th>
                     @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::VIP)
-                        <th>Uploader</th>
+                        <th class="d-none d-md-table-cell">Uploader</th>
                     @endif
                     @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
-                        <th>Actions</th>
+                        <th class="d-none d-md-table-cell">Actions</th>
                     @endif
                 </tr>
             </thead>
@@ -134,24 +131,23 @@
                 @forelse ($torrents as $torrent)
                     <tr>
                         <td>
-                            <a href="https://lastfiles.ro/torrents?keyword=&categories[]={{ $torrent->category->id }}&genre=&torrent_status=active">
+                            <a href="/torrents?keyword=&categories[]={{ $torrent->category->id }}&genre=&torrent_status=active">
                                 <img src="{{ $torrent->category->image }}" alt="Category Image" class="img-fluid" style="width: 87px; height: 47px; border-radius: 10px;">
                             </a>
                         </td>
-                        
                         <td>
-                        <a href="{{ route('torrents.show', ['id' => $torrent->id, 'slug' => urlencode($torrent->slug)]) }}"
-   data-bs-toggle="tooltip"
-   data-bs-html="true"
-   data-bs-title="<div class='card' style='width: 200px;'>
-                    @if($torrent->poster)
-                        <img src='{{ $torrent->poster }}' class='img-fluid rounded' alt='Poster Image' style='width: 150px; height: auto;'>
-                    @else
-                        <div style='padding: 10px; text-align: center;'>{{ $torrent->name }}</div>
-                    @endif
-                  </div>">
-    {{ \Illuminate\Support\Str::limit($torrent->name, 75, ' ...') }}
-</a>
+                            <a href="{{ route('torrents.show', ['id' => $torrent->id, 'slug' => urlencode($torrent->slug)]) }}"
+                               data-bs-toggle="tooltip"
+                               data-bs-html="true"
+                               data-bs-title="<div class='card' style='width: 200px;'>
+                                                @if($torrent->poster)
+                                                    <img src='{{ $torrent->poster }}' class='img-fluid rounded' alt='Poster Image' style='width: 150px; height: auto;'>
+                                                @else
+                                                    <div style='padding: 10px; text-align: center;'>{{ $torrent->name }}</div>
+                                                @endif
+                                              </div>">
+                                {{ \Illuminate\Support\Str::limit($torrent->name, 75, ' ...') }}
+                            </a>
 
                             @include('torrents.partials.tags')
                             <div class="torrent-genres">
@@ -161,8 +157,8 @@
                             </div>
                         </td>
                         <td>
-                            <a href="{{ route('torrents.download', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}">
-                                <i class="bi bi-file-earmark-arrow-down-fill" data-bs-toggle="tooltip" title="Download torrent"></i>
+                            <a href="{{ route('torrents.download', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}" class="btn btn-success btn-sm" data-bs-toggle="tooltip" title="Download torrent">
+                                <i class="bi bi-file-earmark-arrow-down-fill"></i>
                             </a>
                         </td>
                         <td><div data-bs-toggle="tooltip" title="{{ \Carbon\Carbon::parse($torrent->created_at)->diffForHumans() }}">{{ \Carbon\Carbon::parse($torrent->created_at)->format('d-M-Y') }}</div></td>
@@ -171,7 +167,7 @@
                         <td>{{ $torrent->leechers }}</td>
                         <td>{{ $torrent->times_completed }}</td>
                         @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::VIP)
-                            <td>
+                            <td class="d-none d-md-table-cell">
                                 @if(isset($torrent->uploader->id))
                                     <a href="{{ route('profile.show', ['id' => $torrent->uploader->id, 'name' => $torrent->uploader->name ?? 'Unknown']) }}"
                                        style="color: {{ \App\Models\UserClass::getClassColor($torrent->uploader->user_class ?? '') }}">
@@ -183,21 +179,20 @@
                             </td>
                         @endif
                         @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
-                        <td>
-                            <a href="{{ route('torrents.edit', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}" class="btn btn-warning btn-sm action-btn"><i class="bi bi-pencil-square"></i></a>
-                            
-                            <form action="{{ route('torrents.destroy', $torrent->slug) }}" method="POST" style="display: inline-block;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-danger btn-sm action-btn" onclick="return confirm('Are you sure you want to delete this torrent?');"><i class="bi bi-trash3-fill"></i></button>
-                            </form>
-                            
-                        </td>
+                            <td class="d-none d-md-table-cell">
+                                <a href="{{ route('torrents.edit', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}" class="btn btn-warning btn-sm action-btn"><i class="bi bi-pencil-square"></i></a>
+                                
+                                <form action="{{ route('torrents.destroy', $torrent->slug) }}" method="POST" style="display: inline-block;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger btn-sm action-btn"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </td>
                         @endif
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="text-center">No torrents found.</td>
+                        <td colspan="9" class="text-center">No torrents found</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -205,12 +200,7 @@
     </div>
 </div>
 
-
-
-
-    <!-- Pagination -->
-    <div class="pagination-container d-flex justify-content-center mt-4">
-        {{ $torrents->links('pagination::bootstrap-5') }}
-    </div>
+{{ $torrents->links('pagination::bootstrap-5') }}
 
 @endsection
+

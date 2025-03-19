@@ -5,11 +5,11 @@
     "keywords": ["laravel", "framework"],
     "license": "MIT",
     "require": {
-        "php": "^8.2",
+        "php": "^8.4",
         "ezyang/htmlpurifier": "^4.17",
         "guzzlehttp/guzzle": "^7.9",
         "ksubileau/color-thief-php": "^2.0",
-        "laravel/framework": "^11.9",
+        "laravel/framework": "^12.2.0",
         "laravel/tinker": "^2.9",
         "laravel/ui": "^4.5",
         "monicahq/laravel-cloudflare": "^3.7",

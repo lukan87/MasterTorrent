@@ -38,7 +38,11 @@ Schedule::command('users:revert-vip-status')->daily();
 
 //Uploaders demotion
 Schedule::command('warn:uploaders')->daily();
-//Schedule::command('users:demote-inactive-uploaders')->daily();
+Schedule::command('users:demote-inactive-uploaders')->daily();
+
+//Invites expire after two weeks of creation and not being used
+Schedule::command('invites:expire')->daily();
+
 
 
 

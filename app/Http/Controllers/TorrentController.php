@@ -21,7 +21,9 @@ use Illuminate\Support\Facades\Cache;
 use App\Helpers\TorrentTools;
 use App\Services\TMDBService;
 use App\Models\TorrentThank;
+use App\Models\UserSlot;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\DB;
 
 
 
@@ -304,7 +306,12 @@ if ($request->has('categories') && is_array($request->categories)) {
 
         // Decode the torrent content
         $torrentData = Bencode::bdecode($torrentContent);
-        $torrentData['info']['private'] = 1;
+        // Check if the torrent is external
+if ($request->has('external') && $request->external == 1) {
+    $torrentData['info']['private'] = 0; // Allow DHT for external torrents
+} else {
+    $torrentData['info']['private'] = 1; // Private mode for internal torrents
+}
         $infoHash = Bencode::get_infohash($torrentData);
         $meta = Bencode::get_meta($torrentData);
 
@@ -433,6 +440,7 @@ if ($request->has('categories') && is_array($request->categories)) {
             'sticky' => $request->has('sticky') ? 1 : 0,
             'recommended' => $request->has('recommended') ? 1 : 0,
             'seedbox' => $request->has('seedbox') ? 1 : 0,
+            'external' => $request->has('external') ? 1 : 0,
         ]);
 
         // Clear the torrents cache
@@ -470,66 +478,143 @@ if ($request->has('categories') && is_array($request->categories)) {
 
     public function download(Request $request, $id, $slug, $rsskey = null)
     {
+
+       
         // Find the torrent by ID and slug
         $torrent = Torrent::where('id', $id)->where('slug', $slug)->firstOrFail();
-
+    
         // Get the user from the request or the RSS key
         $user = $request->user();
         if (!$user && $rsskey) {
             $user = User::where('passkey', $rsskey)->first();
         }
-
+    
         // Ensure we have a valid user
         if (!$user) {
             return redirect('/login')->with('error', 'Authentication required.');
         }
+       
+        // Get the slot type (if any) from the query string
+        $slotType = $request->query('free') ? 'free' : ($request->query('double') ? 'double' : '');
+    
+        // Check if the user has available slots
+        // if ($user->slots <= 0) {
+        //     return redirect()->route('torrents.show', ['id' => $torrent->id, 'slug' => $torrent->slug])
+        //                      ->with('error', 'No available slots.');
+        // }
 
+
+        $existingSlot = UserSlot::where('user_id', $user->id)
+        ->where('torrent_id', $torrent->id)
+        ->where(function ($query) {
+            $query->where('free', 1)
+                  ->orWhere('double', 1);
+        })
+        ->first();
+
+// If the user has already downloaded the torrent as free or double, prevent further downloads of that type
+if ($existingSlot && ($slotType === 'free' || $slotType === 'double')) {
+    return redirect()->route('torrents.show', ['id' => $torrent->id, 'slug' => $torrent->slug])
+                     ->with('error', 'You have already downloaded this torrent as ' . ucfirst($existingSlot->free ? 'Free' : 'Double') . '. You cannot download it again as ' . ucfirst($slotType) . '.');
+}
+    
+        // Process slot type and apply logic
+        if ($slotType === 'free') {
+            // Handle free download logic
+            // Assign the slot (create the entry in user_slots table)
+            $userSlot = UserSlot::create([
+                'user_id' => $user->id,
+                'torrent_id' => $torrent->id,
+                'free' => 1,
+                'double' => 0,
+                'expires_at' => now()->addDays(28),
+            ]);
+          
+            // Decrease available slots in the user table
+            $user->decrement('slots');
+        } elseif ($slotType === 'double') {
+            // Handle double upload logic
+            // Assign the slot (create the entry in user_slots table)
+            $userSlot = UserSlot::create([
+                'user_id' => $user->id,
+                'torrent_id' => $torrent->id,
+                'free' => 0,
+                'double' => 1,
+                'expires_at' => now()->addDays(28),
+            ]);
+            // Decrease available slots in the user table
+            $user->decrement('slots');
+        }
+    
         // Get the path of the torrent file
         $path = public_path('files/torrents/' . $torrent->file_name);
-
+    
         // Check if the file exists
         if (!file_exists($path)) {
             return response('Torrent file not found', 404)
                 ->header('Content-Type', 'text/plain');
         }
-
+    
         // Decode the torrent file
         $dict = Bencode::bdecode(file_get_contents($path));
-
+    
         // Modify the announce URL and add a comment
         $dict['announce'] = route('announce', ['passkey' => $user->passkey], false);
-        $dict['comment'] = 'Using this torrent binds you to LastTorrents Confidentiality Agreement';
-         // Add the label to the torrent's metadata
+        $dict['comment'] = 'Using this torrent binds you to MySite Confidentiality Agreement';
+        // Add the label to the torrent's metadata
         $dict['label'] = 'MySite';
-
-        // Remove other announce URLs
-        // unset($dict['announce-list']);
-
+    
         // Add the announce-list for multiple trackers
-    $dict['announce-list'] = [
-         [route('announce', ['passkey' => $user->passkey])]
-       // ["http://last-torrents.org/announce/{$user->passkey}"] // Secondary announce URL
-    ];
-
+        $dict['announce-list'] = [
+            [route('announce', ['passkey' => $user->passkey])]
+        ];
+    
         // Re-encode the torrent file
         $fileToDownload = Bencode::bencode($dict);
-
+    
         // Generate a custom filename
-        $prefix = 'Last-Torrents_';
+        $prefix = 'MySite_';
         $fileName = $prefix . preg_replace('/[^a-zA-Z0-9-_]/', '_', $torrent->name) . '.torrent';
-
+    
         // Clear all cache to ensure fresh data is loaded
         Cache::flush();
-
+    
         // Return the torrent file as a download
         return response($fileToDownload)
             ->header('Content-Type', 'application/x-bittorrent')
             ->header('Content-Disposition', 'attachment; filename="' . $fileName . '"')
             ->header('Content-Length', strlen($fileToDownload));
     }
+    
+    
+// Renew Slot
+public function renewSlot($slotId)
+{
+    $slot = UserSlot::findOrFail($slotId);
 
+    // Extend the expiration date of the slot by 1 day
+    $slot->expires_at = now()->addDays(28);
+    $slot->save();
 
+    // Add one more slot back to the user
+    $user = $slot->user;
+    $user->decrement('slots');
 
+    return redirect()->back()->with('success', 'Slot renewed successfully.');
+}
+
+// Remove Slot
+public function removeSlot($slotId)
+{
+    $slot = UserSlot::findOrFail($slotId);
+
+    
+
+    // Delete the slot record from the database
+    $slot->delete();
+
+    return redirect()->back()->with('success', 'Slot removed successfully.');
+}
 
 
 

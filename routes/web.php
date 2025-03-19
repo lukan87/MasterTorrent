@@ -98,6 +98,7 @@ Route::get('/hitandrun/{userId}', [HitAndRunController::class, 'showOtherUserHit
 Route::post('/bonus/buy-vip', [BonusController::class, 'buyVip'])->name('bonus.buyVip');
 
 Route::post('/bonus/buy-seedtime', [BonusController::class, 'buySeedtime'])->name('bonus.buySeedtime');
+Route::post('/remove-hnr', [BonusController::class, 'removeHNR'])->name('bonus.removeHNR');
 
 Route::get('/staff', [StaffController::class, 'index'])->name('staff.index');
 
@@ -135,6 +136,10 @@ Route::get('profile/{id}/{name}/torrents', [ProfileController::class, 'userTorre
 Route::get('/profile/{id}/{name}/seeding-torrents', [ProfileController::class, 'seedingTorrents'])->name('profile.seedingTorrents')->middleware('auth');
 
 Route::get('/profile/{id}/{name}/download-history', [ProfileController::class, 'downloadHistory'])->name('profile.download-history')->middleware('auth');
+
+//Slots
+Route::get('/profile/{id}/{name}/slots', [ProfileController::class, 'activeSlots'])
+    ->name('profile.slots');
 
 
 
@@ -267,6 +272,12 @@ Route::get('/torrent/{torrent}/peers', [TorrentController::class, 'peers'])->nam
 Route::get('/torrents/{id}/{slug}/history', [TorrentHistoryController::class, 'index'])->name('torrent.history')->middleware('auth');
 
 Route::post('torrents/{id}/thank', [TorrentController::class, 'thank'])->name('torrents.thank')->middleware('auth');
+Route::post('/slots/renew/{slotId}', [TorrentController::class, 'renewSlot'])->name('slots.renew')->middleware('auth');
+Route::post('/slots/remove/{slotId}', [TorrentController::class, 'removeSlot'])->name('slots.remove')->middleware('auth');
+
+
+
+
 
 
 
@@ -374,13 +385,13 @@ Route::post('polls', [PollController::class, 'store'])->name('polls.store');
 Route::get('polls/{poll}', [PollController::class, 'show'])->name('polls.show');
 
 // Show the form for editing a specific poll
-Route::get('polls/{poll}/edit', [PollController::class, 'edit'])->name('polls.edit')->middleware('permission:edit_polls');
+Route::get('polls/{poll}/edit', [PollController::class, 'edit'])->name('polls.edit')->middleware('auth');
 
 // Update a specific poll in storage
 Route::put('polls/{poll}', [PollController::class, 'update'])->name('polls.update');
 
 // Delete a specific poll
-Route::delete('polls/{poll}', [PollController::class, 'destroy'])->name('polls.destroy')->middleware('permission:delete_polls');
+Route::delete('polls/{poll}', [PollController::class, 'destroy'])->name('polls.destroy')->middleware('auth');
 
 Route::post('polls/{poll}/vote', [PollController::class, 'vote'])->name('polls.vote');
 
@@ -406,6 +417,7 @@ Route::middleware('auth')->group(function () {
 use App\Http\Controllers\WarningController;
 
 Route::middleware(['auth'])->group(function () {
+    Route::get('/warnings', [WarningController::class, 'index'])->name('warnings.index');
     Route::get('/warnings/{id}/{username?}', [WarningController::class, 'show'])->name('warnings.show');
     Route::post('/warnings/deactivate/{id}', [WarningController::class, 'deactivate'])->name('warnings.deactivate');
     Route::post('/warnings/deactivate-all/{id}/{username?}', [WarningController::class, 'deactivateAllWarnings'])->name('warnings.deactivateAll');

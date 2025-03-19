@@ -8,19 +8,49 @@
                 <ul class="navbar-nav ms-auto"> <!--begin::Navbar Search-->
                     <!-- <li class="nav-item"> <a class="nav-link" data-widget="navbar-search" href="#" role="button"> <i class="bi bi-search"></i> </a> </li> end::Navbar Search begin::Messages Dropdown Menu -->
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('invites.index') }}" role="button">
-                            <i class="fa fa-user-plus" aria-hidden="true" data-bs-toggle="tooltip" title="Invites"></i> {{ Auth::user()->invites }}
-                        </a>
+                    <a class="nav-link" href="{{ route('invites.index') }}" role="button">
+    <span class="icon-circle">
+        <i class="fa fa-user-plus" aria-hidden="true" data-bs-toggle="tooltip" title="Invites"></i>
+        <span class="navbar-badge badge {{ Auth::user()->invites > 0 ? 'text-bg-success' : 'text-bg-danger' }}">
+            {{ Auth::user()->invites }}
+        </span>
+    </span>
+</a>
                     </li>
                     
                     <li class="nav-item dropdown">
-    <a class="nav-link" data-bs-toggle="dropdown" href="#">
-        <i class="bi bi-chat-text"></i>
-        <span class="navbar-badge badge {{ $unreadMessagesCount > 0 ? 'text-bg-danger' : 'text-bg-success' }}">
-    {{ $unreadMessagesCount }}
-</span>
+                    <style>
+    .icon-circle {
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background-color:rgb(57, 58, 58); /* Adjust background color as needed */
+        position: relative;
+    }
 
-    </a>
+    .navbar-badge {
+        position: absolute;
+        top: 0;
+        right: 0;
+        transform: translate(50%, -50%);
+        font-size: 0.65rem;
+        padding: 0.3em 0.6em;
+        border-radius: 50%;
+    }
+</style>
+
+<a class="nav-link" data-bs-toggle="dropdown" href="#">
+    <span class="icon-circle">
+    <i class="bi bi-envelope"></i>
+        <span class="navbar-badge badge {{ $unreadMessagesCount > 0 ? 'text-bg-danger' : 'text-bg-success' }}">
+            {{ $unreadMessagesCount }}
+        </span>
+    </span>
+</a>
+
     <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
         @foreach ($messages as $message)
             <a href="{{ route('messages.show', $message) }}" class="dropdown-item">
@@ -36,7 +66,7 @@
     <div class="flex-grow-1" style="max-width: calc(100% - 60px);"> <!-- 100% - width of the image (50px) + margin (10px) -->
         <h3 class="dropdown-item-title">
             {{ $message->sender->name ?? 'Unknown' }}
-            <span class="float-end fs-7 {{ $message->is_read == 0 ? 'text-danger' : 'text-success' }}"><i class="bi bi-star-fill"></i></span>
+            <span class="float-end fs-7 {{ $message->is_read == 0 ? 'text-danger' : 'text-success' }}"><i class="bi bi-check-circle"></i></span>
         </h3>
         <p class="fs-7">{!! convertCustomTagsToHtml(Str::limit(strip_tags($message->body), 50)) !!}</p>
 

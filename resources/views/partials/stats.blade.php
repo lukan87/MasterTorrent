@@ -1,85 +1,83 @@
-<div class="row mt-5">
-    <div class="col-12 col-sm-4 col-md-6">
-        <div class="info-box">
-            <span class="info-box-icon text-bg-primary shadow-sm">
-            <i class="bi bi-server"></i>
-            </span>
-            <div class="info-box-content">
-                <span class="info-box-text">Torrents</span>
-                <span class="info-box-number">
-                    {{ $torrentCount }} 
-                </span>
-            </div> 
-        </div> 
-    </div> 
+<div class="container mt-5">
+    <div class="row">
 
-
-    <div class="col-12 col-sm-4 col-md-6">
-        <div class="info-box">
-            <span class="info-box-icon text-bg-primary shadow-sm">
-                <i class="bi bi-gear-fill"></i>
-            </span>
-            <div class="info-box-content">
-                <span class="info-box-text">Active Torrents</span>
-                <span class="info-box-number">
-                    {{ $torrentActive }} 
+        <!-- Torrents Box -->
+        <div class="col-12 col-sm-4 col-md-6 col-lg-4 mb-4">
+            <div class="info-box shadow-md rounded-5">
+                <span class="info-box-icon bg-primary text-white rounded-circle">
+                    <i class="bi bi-server"></i>
                 </span>
-            </div> 
+                <div class="info-box-content">
+                    <span class="info-box-text text-uppercase fw-bold">Torrents</span>
+                    <span class="info-box-number fs-4">{{ $torrentCount }}</span>
+                </div>
+            </div>
         </div>
-    </div> 
 
-    <div class="col-12 col-sm-4 col-md-6">
-        <div class="info-box">
-            <span class="info-box-icon text-bg-danger shadow-sm">
-                <i class="bi bi-people-fill"></i>
-            </span>
-            <div class="info-box-content">
-                <span class="info-box-text">Users</span>
-                <span class="info-box-number">{{ $userCount }}</span> 
-            </div> 
-        </div> 
-    </div> 
-
-    <div class="col-12 col-sm-4 col-md-6">
-        <div class="info-box">
-            <span class="info-box-icon text-bg-success shadow-sm">
-                <i class="bi bi-cart-fill"></i>
-            </span>
-            <div class="info-box-content">
-                <span class="info-box-text">Forum Topics</span>
-                <span class="info-box-number">
-                    {{ $forumTopicCount }} 
+        <!-- Active Torrents Box -->
+        <div class="col-12 col-sm-4 col-md-6 col-lg-4 mb-4">
+            <div class="info-box shadow-md rounded-5">
+                <span class="info-box-icon bg-info text-white rounded-circle">
+                    <i class="bi bi-gear-fill"></i>
                 </span>
-            </div> 
+                <div class="info-box-content">
+                    <span class="info-box-text text-uppercase fw-bold">Active Torrents</span>
+                    <span class="info-box-number fs-4">{{ $torrentActive }}</span>
+                </div>
+            </div>
         </div>
-    </div> 
-    <div class="col-12 col-sm-4 col-md-6">
-        <div class="info-box">
-            <span class="info-box-icon text-bg-primary shadow-sm">
-            <i class="bi bi-cloud-upload-fill"></i>
-            </span>
-            <div class="info-box-content">
-                <span class="info-box-text">Active Seeders</span>
-                <span class="info-box-number">
-                    {{ $uniqueSeeders }} 
+
+        <!-- Users Box -->
+        <div class="col-12 col-sm-4 col-md-6 col-lg-4 mb-4">
+            <div class="info-box shadow-md rounded-5">
+                <span class="info-box-icon bg-danger text-white rounded-circle">
+                    <i class="bi bi-people-fill"></i>
                 </span>
-            </div> 
+                <div class="info-box-content">
+                    <span class="info-box-text text-uppercase fw-bold">Users</span>
+                    <span class="info-box-number fs-4">{{ $userCount }}</span>
+                </div>
+            </div>
         </div>
-    </div> 
 
-    <div class="col-12 col-sm-4 col-md-6 col-lg-6">
-        <div class="info-box">
-            <span class="info-box-icon text-bg-primary shadow-sm">
-            <i class="bi bi-cloud-download-fill"></i>
-            </span>
-            <div class="info-box-content">
-                <span class="info-box-text">Active Leechers</span>
-                <span class="info-box-number">
-                    {{ $uniqueLeechers }} 
+        <!-- Forum Topics Box -->
+        <div class="col-12 col-sm-4 col-md-6 col-lg-4 mb-4">
+            <div class="info-box shadow-md rounded-5">
+                <span class="info-box-icon bg-success text-white rounded-circle">
+                    <i class="bi bi-cart-fill"></i>
                 </span>
-            </div> 
+                <div class="info-box-content">
+                    <span class="info-box-text text-uppercase fw-bold">Forum Topics</span>
+                    <span class="info-box-number fs-4">{{ $forumTopicCount }}</span>
+                </div>
+            </div>
         </div>
-    </div> 
 
+        <!-- Active Seeders Box -->
+        <div class="col-12 col-sm-4 col-md-6 col-lg-4 mb-4">
+            <div class="info-box shadow-md rounded-5">
+                <span class="info-box-icon bg-warning text-white rounded-circle">
+                    <i class="bi bi-cloud-upload-fill"></i>
+                </span>
+                <div class="info-box-content">
+                    <span class="info-box-text text-uppercase fw-bold">Active Seeders</span>
+                    <span class="info-box-number fs-4">{{ $uniqueSeeders }}</span>
+                </div>
+            </div>
+        </div>
 
+        <!-- Active Leechers Box -->
+        <div class="col-12 col-sm-4 col-md-6 col-lg-4 mb-4">
+            <div class="info-box shadow-md rounded-5">
+                <span class="info-box-icon bg-secondary text-white rounded-circle">
+                    <i class="bi bi-cloud-download-fill"></i>
+                </span>
+                <div class="info-box-content">
+                    <span class="info-box-text text-uppercase fw-bold">Active Leechers</span>
+                    <span class="info-box-number fs-4">{{ $uniqueLeechers }}</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
 </div>

@@ -11,7 +11,6 @@
                     <a href="{{ route('snatch.snatchlist', ['userId' => $userId ?? Auth::id()]) }}" class="btn btn-danger">Snatch List</a>
                     <a href="{{ route('snatch.needToSeed', ['userId' => $userId ?? Auth::id()]) }}" class="btn btn-success">Need to Seed</a>
                 </div>
-                
             </nav>
         </div>
 
@@ -34,6 +33,17 @@
                             <strong>Ratio:</strong> {{ number_format(($history->uploaded / max($history->downloaded, 1)), 2) }}<br>
                             <strong>Status:</strong> <span class="text-danger">Hit-and-Run</span>
                         </div>
+
+                        <!-- Buy Seedtime Button and Remove HNR Button -->
+                        @if (auth()->id() === $history->user_id)  <!-- Make sure the user is the one who uploaded the torrent -->
+                            <form action="{{ route('bonus.removeHNR') }}" method="POST" class="mt-2">
+                                @csrf
+                                <input type="hidden" name="torrent_id" value="{{ $history->torrent_id }}">
+                                <button type="submit" class="btn btn-primary btn-sm" data-bs-toggle="tooltip" title="5000 seedbonus points">
+                                    Remove Hit-and-Run
+                                </button>
+                            </form>
+                        @endif
                     </li>
                 @endforeach
             </ul>

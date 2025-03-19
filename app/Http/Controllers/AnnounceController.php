@@ -9,6 +9,7 @@ use App\Models\History;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 use Carbon\Carbon;
 use App\Services\Bencode;
@@ -51,7 +52,7 @@ if ($user->enabled === 'no'){
  // Standard Information Fields
  $event = $request->get('event');
  $hash = bin2hex($request->get('info_hash'));
- $peer_id = bin2hex($request->get('peer_id'));
+ $peer_id =$request->get('peer_id');
  $md5_peer_id = md5($peer_id);
  //$ip = $request->ip();
  $port = (int)$request->get('port');
@@ -70,7 +71,7 @@ if ($user->enabled === 'no'){
  $no_peer_id = ($request->has('no_peer_id') && $request->get('no_peer_id') == 1) ? true : false;
 
   // If User Download Rights Are Disabled Return Error to Client
-  if ($user->downloadpos == 'no' && $left != 0) {
+  if ($user->downloadpos == 'no') {
     //info('A User With Revoked Download Privileges Attempted To Announce');
     return response(Bencode::bencode(['failure reason' => 'Your download privileges are Revoked']))->withHeaders(['Content-Type' => 'text/plain']);
 }
@@ -183,14 +184,41 @@ $client_updated_at = Carbon::now();  // Set client updated timestamp
 
 $old_update = $client->client_updated_at ? $client->client_updated_at->timestamp : Carbon::now()->timestamp;
 
-if (config('settings.freeleech') == 1 || $torrent->free == 1) {
+// Check if the user_id is in user_slots table
+$userSlot = DB::table('user_slots')
+->where('user_id', $user->id)
+->where('torrent_id', $torrent->id)
+->first();
+// Check if a matching user_slot exists
+$userSlotExists = $userSlot !== null;
+
+// Determine whether free or double should apply based on user_slots table
+$isFree = $userSlotExists ? $userSlot->free : false;
+$isDouble = $userSlotExists ? $userSlot->double : false;
+
+
+// Log the config and flags
+// \Log::info('Freeleech Config: ' . (config('settings.freeleech') ? 'Yes' : 'No'));
+// \Log::info('Double Config: ' . (config('settings.double') ? 'Yes' : 'No'));
+// \Log::info('Torrent Free: ' . $torrent->free);
+// \Log::info('Torrent Double: ' . $torrent->double);
+// // Log the values to verify
+// \Log::info('User Slot Exists: ' . ($userSlotExists ? 'Yes' : 'No'));
+// \Log::info('Is Free: ' . ($isFree ? 'Yes' : 'No'));
+// \Log::info('Is Double: ' . ($isDouble ? 'Yes' : 'No'));
+// \Log::info('user id: ' . $user->id);
+// \Log::info('torrent id: ' . $torrent->id);
+
+
+
+if (config('settings.freeleech') === true || $torrent->free === true || $isFree) {
     $mod_downloaded = 0;
 } else {
     $mod_downloaded = $downloaded;
 }
 
 // Check if double attribute is set to 1
-if (config('settings.double') == 1 || $torrent->double == 1) {
+if (config('settings.double') === true || $torrent->double === true || $isDouble) {
     $mod_uploaded = $uploaded * 2; // Double the uploaded value if doubleup is 1
 } else {
     $mod_uploaded = $uploaded; // Keep the original uploaded value otherwise
@@ -203,7 +231,6 @@ if (config('settings.double') == 1 || $torrent->double == 1) {
 if ($event === 'started') {
     // Never to push stats to user on start event
 
-  
     // Peer update
     $client->peer_id = $peer_id;
     $client->md5_peer_id = $md5_peer_id;
@@ -257,28 +284,12 @@ elseif (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
 } elseif ($event === 'completed') {
     
 
-    // User update
-    $user->uploaded += $mod_uploaded;
-    $user->downloaded += $mod_downloaded;
-    $user->save();
+    
 
     // Peer update
     $client->peer_id = $peer_id;
     $client->md5_peer_id = $md5_peer_id;
     $client->hash = $hash;
-    // $ip = $request->ip();
-    // if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-    //     $client->ip = $ip; // Set the IP if it's a valid IPv4 address
-    // } 
-    
-    // elseif (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
-    //     // If valid, store the IPv6 IP
-    //     // The model is automatically ready to save the IPv6 address
-    //     $client->ip = $ip;
-    // } else {
-    //     // Set IP to a default value if it's not a valid IPv4 address
-       
-    // }
     $client->port = $port;
     $client->agent = $agent;
     $client->uploaded = $real_uploaded;
@@ -334,23 +345,8 @@ elseif (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
 } elseif ($event === 'stopped') {
 
     // Peer update
-    // $client->peer_id = $peer_id;
-    // $client->md5_peer_id = $md5_peer_id;
-    // $client->hash = $hash;
-    // $ip = $request->ip();
-    // if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-    //     $client->ip = $ip; // Set the IP if it's a valid IPv4 address
-    // } 
-    
-    // elseif (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
-    //     // If valid, store the IPv6 IP
-    //     // The model is automatically ready to save the IPv6 address
-    //     $client->ip = $ip;
-    // } else {
-    //     // Set IP to a default value if it's not a valid IPv4 address
-       
-    // }
-    // $client->port = $port;
+   
+   
      $client->agent = $agent;
      $client->uploaded = $real_uploaded;
      $client->downloaded = $real_downloaded;
@@ -361,7 +357,7 @@ elseif (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
     $client->user_id = $user->id;
     $client->client_updated_at = $client_updated_at; // Set the updated timestamp
     $client->save();
-    $client->delete();
+   
     //End Peer Update
 
       // History Update
@@ -384,6 +380,10 @@ elseif (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
     }
     $history->save();
     // End History Update
+
+            // Peer Delete (Now that history is updated)
+            $client->delete();
+            // End Peer Delete
 
    
 
@@ -492,25 +492,34 @@ return response(Bencode::bencode($res))->withHeaders(['Content-Type' => 'text/pl
     }
 
 
+
+
 private function givePeers($peers, $compact, $no_peer_id)
 {
     if ($compact) {
         $pcomp = "";
         foreach ($peers as &$p) {
-            if (isset($p['ip']) && isset($p['port'])) {
-                $pcomp .= pack('Nn', ip2long($p['ip']), (int)$p['port']);
+            // Include all peers, regardless of whether the port is valid or not
+            if (isset($p['ip'])) {
+                // Ensure the port defaults to 0 if it's not set, and use IP-to-long for the IP
+                $port = isset($p['port']) ? (int) $p['port'] : 0;
+                // Packing IP and port as binary data (N - 4 bytes for IP, n - 2 bytes for port)
+                $pcomp .= pack('Nn', ip2long($p['ip']), $port);
             }
         }
         return $pcomp;
     } elseif ($no_peer_id) {
-        foreach ($peers as &$p) {
-            unset($p['peer_id']);
-        }
-        return $peers;
+        // Include all peers that have an IP address, filter out those without IP
+        return array_filter($peers, function ($p) {
+            return isset($p['ip']);
+        });
     } else {
-        return $peers;
+        // Include all peers that have an IP address (same behavior as $no_peer_id)
+        return array_filter($peers, function ($p) {
+            return isset($p['ip']);
+        });
     }
-    // return $peers;
+    
 }
 
 

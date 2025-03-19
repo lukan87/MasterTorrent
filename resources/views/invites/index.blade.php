@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container mt-4">
+    <div class="container-fluid mt-4">
         <div class="card shadow-sm">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h4 class="mb-0 flex-grow-1">Your Invites</h4>
@@ -30,7 +30,11 @@
                                     <th>Status</th>
                                     <th>Created At</th>
                                     <th>Used By</th>
-                                    <th>Actions</th>
+                                    <th>Is Expired</th>
+                                    @if($invites->contains(function($invite) { return !$invite->is_used && !$invite->is_expired; }))
+                                      <th>Actions</th> 
+                                    @else
+                                    @endif
                                 </tr>
                             </thead>
                             <tbody>
@@ -41,7 +45,7 @@
                                             @if($invite->is_used)
                                                 <span class="badge bg-success">Used</span>
                                             @else
-                                                <span class="badge bg-warning">Not Used</span>
+                                                <span class="badge bg-secondary">Not Used</span>
                                             @endif
                                         </td>
                                         <td>{{ $invite->created_at->format('Y-m-d H:i:s') }}</td>
@@ -55,17 +59,23 @@
                                             @endif
                                         </td>
                                         <td>
-                                            @if(!$invite->is_used) 
-                                                <form action="{{ route('invites.delete', $invite->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this invite?');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" title="Delete Invite">
-                                                        <i class="bi bi-trash3-fill"></i>
-                                                    </button>
-                                                </form>
+                                            @if($invite->is_expired)
+                                                <span class="badge bg-danger">Yes</span>
                                             @else
-                                                <span class="text-muted">—</span>
+                                                <span class="badge bg-success">No</span>
                                             @endif
+                                        </td>
+                                        <td>
+                                           @if(!$invite->is_used && !$invite->is_expired) 
+                                             <form action="{{ route('invites.delete', $invite->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this invite?');">
+                                              @csrf
+                                              @method('DELETE')
+                                               <button type="submit" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" title="Delete Invite">
+                                                 <i class="bi bi-trash3-fill"></i>
+                                               </button>
+                                             </form>
+                                           @else
+                                          @endif
                                         </td>
                                     </tr>
                                 @endforeach

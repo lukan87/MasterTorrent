@@ -58,8 +58,10 @@ class RssFeedController extends Controller
     //     'torrents_fetched' => $torrents->pluck('category_id')->toArray(),
     // ]);
 
-    // Generate RSS feed content
-    $content = view('rss.feed', compact('torrents', 'passkey'))->render();
+   // Add the XSLT reference to your feed content
+$content = '<?xml version="1.0" encoding="UTF-8" ?>' .
+'<?xml-stylesheet type="text/xsl" href="' . asset('rss-style.xsl') . '" ?>' .
+view('rss.feed', compact('torrents', 'passkey'))->render();
 
     // Return RSS feed with appropriate headers
     return response($content, 200)
@@ -92,7 +94,7 @@ public function downloadrss(Request $request, $fileName, $passkey)
 
     // Update the announce URL with the user's passkey
     $dict['announce'] = route('announce', ['passkey' => $user->passkey]);
-    $dict['comment'] = 'Using this torrent binds you to MyTorrents Confidentiality Agreement';
+    $dict['comment'] = 'Using this torrent binds you to MySite Confidentiality Agreement';
 
     // Remove additional announce lists
     unset($dict['announce-list']);
@@ -101,7 +103,7 @@ public function downloadrss(Request $request, $fileName, $passkey)
     $fileToDownload = Bencode::bencode($dict);
 
     // Generate the download filename
-    $downloadFileName = 'Last-Torrents_' . $torrent->name . '.torrent';
+    $downloadFileName = 'MySite_' . $torrent->name . '.torrent';
 
     return response($fileToDownload)
         ->header('Content-Type', 'application/x-bittorrent')

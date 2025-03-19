@@ -1,9 +1,8 @@
-
 <?php echo '<?xml version="1.0" encoding="UTF-8" ?>'; ?>
 
 <rss version="2.0">
     <channel>
-        <title>|MySite RSS Feed</title>
+        <title>|MySite-RSS-Feed|</title>
         <link>{{ url('/') }}</link>
         <description>A feed of the most recent torrents</description>
         @foreach ($torrents as $torrent)

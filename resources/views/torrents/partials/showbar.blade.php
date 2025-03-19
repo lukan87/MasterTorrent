@@ -6,9 +6,62 @@
 
 <!-- Left: Download and Edit Links -->
 <div class="d-flex align-items-center gap-1">
-    <a href="{{ route('torrents.download', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}" class="btn btn-primary btn-sm mr-2">
-        Download
-    </a>
+    <style>
+        /* Gradient Button Styles */
+.btn-gradient-primary {
+    background: linear-gradient(to right, #007bff, #0056b3);
+    border-color: #0056b3;
+}
+
+.btn-gradient-info {
+    background: linear-gradient(to right, #17a2b8, #138496);
+    border-color: #138496;
+}
+
+.btn-gradient-primary:hover, .btn-gradient-info:hover {
+    background: linear-gradient(to right, #0056b3, #003366);
+}
+</style>
+
+    @if (Auth::check() && Auth::user()->slots >= 1)
+    <div class="btn-group">
+        <!-- Download Button -->
+        <button type="button" class="btn btn-gradient-primary btn-sm d-flex align-items-center" aria-current="page" data-bs-toggle="tooltip" title="Download Torrent">
+            <a href="{{ route('torrents.download', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}" class="text-white text-decoration-none">
+                <i class="fa-solid fa-download d-sm-none me-2"></i> <!-- Hide on small screens and larger -->
+                <span class="d-none d-sm-inline"><i class="fa-solid fa-download me-2"></i> Download</span> <!-- Hide on extra small screens (mobile) -->
+            </a>
+        </button>
+
+        <!-- Dropdown Button -->
+        <button type="button" class="btn btn-gradient-primary btn-sm dropdown-toggle dropdown-toggle-split text-white" data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="visually-hidden">Toggle Dropdown</span>
+        </button>
+
+        <!-- Dropdown Menu -->
+        <ul class="dropdown-menu dropdown-menu-dark shadow-lg">
+            <li><a class="dropdown-item" href="{{ route('torrents.download', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}?free=1" data-bs-toggle="tooltip" title="Free Download">
+                <i class="fa-solid fa-arrow-down me-2"></i> Free Download
+            </a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="{{ route('torrents.download', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}?double=1" data-bs-toggle="tooltip" title="Double Upload">
+                <i class="fa-solid fa-arrow-up me-2"></i> Double Upload
+            </a></li>
+        </ul>
+    </div>
+@else
+    <button type="button" class="btn btn-gradient-info btn-sm d-flex align-items-center" aria-current="page" data-bs-toggle="tooltip" title="Download Torrent">
+        <a href="{{ route('torrents.download', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}" class="text-white text-decoration-none">
+            <i class="fa-solid fa-download d-sm-none me-2"></i> <!-- Hide on small screens and larger -->
+            <span class="d-none d-sm-inline"><i class="fa-solid fa-download me-2"></i> Download</span> <!-- Hide on extra small screens (mobile) -->
+        </a>
+    </button>
+@endif
+
+
+
+
+    
     @if (Auth::check() && (Auth::user()->user_class >= \App\Models\UserClass::MODERATOR || Auth::id() === $torrent->owner))
     <a href="{{ route('torrents.edit', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}" class="btn btn-secondary btn-sm mr-2">
         Edit

@@ -113,17 +113,17 @@
                         </div>
                     </div>
 
-                     <!-- Need to seed -->
-                     <!-- @if (auth()->id() === $user->id)
+                     <!-- Slots -->
+                      @if (auth()->id() === $user->id)
     <div class="row mb-3">
         <label for="seedbonus" class="col-md-2 col-form-label text-md-end">
-            <i class="bi bi-person-workspace" data-bs-toggle="tooltip" data-bs-title="Need to Seed"></i>
+            <i class="bi bi-list" data-bs-toggle="tooltip" data-bs-title="Slots"></i>
         </label>
         <div class="col-md-10">
-            <p class="form-control-static"><a href="{{ route('snatch.needToSeed') }}">Need to Seed</a></p>
+            <p class="form-control-static"><a href="{{ route('profile.slots', ['id' => $user->id, 'name' => $user->name]) }}">Slots available: {{$user->slots}}</a></p>
         </div>
     </div>
-@endif -->
+@endif 
 
 
      <!-- Snatch Information -->

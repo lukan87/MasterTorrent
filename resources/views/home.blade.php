@@ -7,12 +7,12 @@
 <div class="row">
 
 
-<div class="col-lg-9 col-md-8 col-sm-6">
+<div class="col-lg-8 col-md-8 col-sm-6">
 
 @include('partials.news')
 
 </div>
-<div class="col-lg-3 col-md-4 col-sm-6">
+<div class="col-lg-4 col-md-4 col-sm-6">
 
 @include('partials.poll')
 
@@ -24,17 +24,19 @@
 
 @include('partials.slider')
 
- @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::VIP)
-<div class="row">
+@include('partials.toptorrents')
+
+@if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::VIP)
+
 
 @include('partials.onlineusers')
 @include('partials.stats')
 
-</div>
+
 
 @endif
 
-@include('partials.toptorrents')
+
 
 <div class="card mt-4">
     <div class="card-header">

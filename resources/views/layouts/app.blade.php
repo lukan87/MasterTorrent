@@ -32,10 +32,11 @@
         </main> <!--end::App Main--> <!--begin::Footer-->
         @auth
         <footer class="app-footer"> <!--begin::To the end-->
-            <div class="float-end d-none d-sm-inline">Seed until you bleed</div> <!--end::To the end--> <!--begin::Copyright--> <strong>
-                Copyright &copy; 2024&nbsp;
-                <a href="/" class="text-decoration-none">Last Files V1</a>.
-            </strong>
+            <div class="float-end d-none d-sm-inline">Seed until you bleed</div> <!--end::To the end--> <!--begin::Copyright--> 
+            <strong>
+    Copyright &copy; <?php echo date('Y'); ?>&nbsp;
+    <a href="/" class="text-decoration-none">My Site</a>.
+</strong>
             All rights reserved.
             <!--end::Copyright-->
         </footer> <!--end::Footer-->

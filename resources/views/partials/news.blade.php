@@ -1,54 +1,54 @@
-@if($latestNews->isEmpty())
-    <div class="col-12 mb-4 mt-5">
+<div class="mt-5">
+    @if($latestNews->isEmpty())
         <div class="alert alert-info text-center">
-            <strong>No new news at the moment.</strong>
+            <strong>No news at the moment.</strong>
             @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::ADMIN)
-                <a href="{{ route('news.create') }}" class="btn btn-primary ms-3">Create News</a>
+                <a href="{{ route('news.create') }}" class="btn btn-primary btn-sm ms-2">Create News</a>
             @endif
         </div>
-    </div>
-@else
-    @foreach($latestNews as $news)
-    <div class="col-md-12 col-lg-12 mb-4 mt-5">
-        <div class="card h-100 shadow-sm rounded-3 border-light">
-            @if($news->image)
-                <img src="{{ asset('storage/' . $news->image) }}" class="card-img-top" alt="News Image" style="object-fit: cover; height: 200px;">
-            @endif
-            <!-- Card Header with Title -->
-            <div class="card-header font-weight-bold">
-                {{ $news->title }}
+    @else
+        @foreach($latestNews as $news)
+            <div class="card mb-4 shadow-sm rounded-3 border-light">
+                @if($news->image)
+                    <img src="{{ asset('storage/' . $news->image) }}" class="card-img-top" alt="News Image" style="object-fit: cover; height: 200px;">
+                @endif
+
+                <div class="card-header">
+                    <h5 class="mb-0">{{ $news->title }}</h5>
+                </div>
+
+                <div class="card-body">
+                    <p class="card-text">
+                        @php
+                            $fullContent = convertCustomTagsToHtml($news->content);
+                            $truncatedContent = Str::words(strip_tags($fullContent), 50, '...');
+                            $isTruncated = str_word_count(strip_tags($fullContent)) > 50;
+                        @endphp
+                        {!! $truncatedContent !!}
+                        @if($isTruncated)
+                            <a href="{{ route('news.show', $news->id) }}" class="btn btn-outline-primary btn-sm">Read More</a>
+                        @endif
+                    </p>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <p class="small text-muted mb-0">
+                            Posted by <strong>{{ $news->user->name }}</strong>
+                            <i>on {{ $news->created_at->format('F j, Y') }}</i>
+                        </p>
+                    </div>
+                </div>
+
                 @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::ADMIN)
-                <a href="{{ route('news.create') }}" class="btn btn-secondary btn-sm ms-3" data-bs-toggle="tooltip" title="Create news"><i class="bi bi-file-earmark-plus"></i></a>
-            @endif
-                @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::ADMIN)
-                    <a href="{{ route('news.edit', $news) }}" class="btn btn-info btn-sm ms-3" data-bs-toggle="tooltip" title="Edit news"><i class="bi bi-pencil-square"></i></a>
+                    <div class="card-footer text-end">
+                        <a href="{{ route('news.create') }}" class="btn btn-secondary btn-sm" data-bs-toggle="tooltip" title="Create News">
+                            <i class="bi bi-file-earmark-plus"></i> Create
+                        </a>
+                        <a href="{{ route('news.edit', $news) }}" class="btn btn-info btn-sm ms-2" data-bs-toggle="tooltip" title="Edit News">
+                            <i class="bi bi-pencil-square"></i> Edit
+                        </a>
+                    </div>
                 @endif
             </div>
-            <!-- Card Body with Content -->
-            <div class="card-body">
-            <p class="card-text">
-    <!-- {!! nl2br(e(Str::words(strip_tags(convertCustomTagsToHtml($news->content)), 250, '...'))) !!} -->
-    @php
-    $fullContent = convertCustomTagsToHtml($news->content);
-    $truncatedContent = Str::words($fullContent, 250, '...');
-    $isTruncated = str_word_count(strip_tags($fullContent)) > 250;
-@endphp
-
-{!! $truncatedContent !!}
-@if($isTruncated)
-    <a href="{{ route('news.show', $news->id) }}" class="btn btn-outline-secondary btn-sm">Read More</a>
-@endif
-</p>
-
-
-                <div class="d-flex justify-content-between align-items-center mt-3">
-                    <p class="card-text small text-muted">Posted by {{ $news->user->name }}
-                        <i> on {{ $news->created_at->format('F j, Y') }} </i>
-                    </p>
-                    <!-- <a href="{{ route('news.show', $news) }}" class="btn btn-outline-primary btn-sm">Read More</a> -->
-                </div>
-            </div>
-        </div>
-    </div>
-    @endforeach
-@endif
+        @endforeach
+    @endif
+</div>

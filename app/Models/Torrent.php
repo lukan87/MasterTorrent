@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Peer;
 use Illuminate\Support\Facades\Cache;
+use App\Models\UserSlot;
 
 class Torrent extends Model
 {
@@ -164,4 +165,10 @@ public function images()
 {
     return $this->hasMany(TorrentImage::class);
 }
+
+public function userSlots()
+{
+    return $this->hasMany(UserSlot::class);
+}
+
 }

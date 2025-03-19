@@ -11,6 +11,7 @@ use App\Models\UserClass;
 use App\Models\Invite;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Carbon;
+use App\Models\UserSlot;
 
 
 class User extends Authenticatable
@@ -47,6 +48,8 @@ class User extends Authenticatable
         'invites',
         'invited_by',
         'invite_code',
+        'slots',
+        'invites',
     ];
 
 
@@ -254,6 +257,19 @@ public function invitesUsed()
 public function inviter()
 {
     return $this->belongsTo(User::class, 'invited_by');
+}
+
+public function slots()
+{
+    return $this->hasMany(UserSlot::class);
+}
+public function hasAvailableSlot()
+{
+    return $this->slots > 0;
+}
+public function userSlots()
+{
+    return $this->hasMany(UserSlot::class);
 }
 
 

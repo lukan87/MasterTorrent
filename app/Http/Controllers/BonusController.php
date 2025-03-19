@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use App\Models\UserTimeline;
+use App\Models\Message;
+
 
 class BonusController extends Controller
 {
@@ -145,6 +148,73 @@ public function buySeedtime(Request $request)
 
     return redirect()->back()->with('success', 'You successfully updated the seedtime to the site required needs!');
 }
+
+public function removeHNR(Request $request)
+{
+    $user = Auth::user();
+
+    if (!$user) {
+        return redirect()->route('login')->with('error', 'You must be logged in to remove a hit&run.');
+    }
+
+    $torrentId = $request->input('torrent_id');
+    $seedtimeCost = 5000; // Cost in points for buying seedtime
+    if ($user->seedbonus < $seedtimeCost) {
+        return redirect()->back()->with('error', 'Not enough points.');
+    }
+    $additionalSeedtime = 86400; // 1 day in seconds
+
+    // Check if user has enough seedbonus points
+    if ($user->seedbonus < $seedtimeCost) {
+        return redirect()->back()->with('error', 'Not enough points to buy seedtime.');
+    }
+
+    // Find the torrent in history to update seedtime
+    $history = \DB::table('history')
+        ->where('user_id', $user->id)
+        ->where('torrent_id', $torrentId)
+        ->where('hitrun', true)
+        ->first();
+
+    if (!$history) {
+        return redirect()->back()->with('error', 'Torrent history record not found.');
+    }
+
+    // Deduct points and update seedtime
+    $user->seedbonus -= $seedtimeCost;
+    $user->hit_and_run_count = max(0, $user->hit_and_run_count - 1); // Ensure count does not go below 0
+    $user->save();
+
+    \DB::table('history')
+        ->where('id', $history->id)
+        ->update([
+            'prewarned_at' => NULL,
+            'seedtime' => $additionalSeedtime, // Update seedtime to 86400 seconds
+            'hitrun' => false, // Update seedtime to 86400 seconds
+            'updated_at' => now(),
+        ]);
+
+
+       
+
+        // Log the action in UserTimeline
+    UserTimeline::create([
+        'user_id' => $user->id,
+        'staff_id' => '2',
+        'comment' => "Removed HitAndRun for torrent ID: {$torrentId} at the cost of {$seedtimeCost} seedbonus points.",
+    ]);
+
+    Message::create([
+        'sender_id' => 2,
+        'receiver_id' => $user->id,
+        'subject' => 'Hit&Run removed',
+        'body' => "You have successfully removed the hitandrun!",
+    ]);
+
+    return redirect()->back()->with('success', 'You successfully removed the hit&run for torrent ID:' . $torrentId);
+}
+
+
 
 
 }

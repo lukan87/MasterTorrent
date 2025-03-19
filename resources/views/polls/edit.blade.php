@@ -24,20 +24,22 @@
         </div>
 
         <h5>Options:</h5>
-        <div class="mb-3">
+        <div class="mb-3" id="optionsContainer">
             @foreach($poll->options as $option)
-                <div class="input-group mb-2">
+                <div class="input-group mb-2 option-item" data-id="{{ $option->id }}">
                     <input type="text" class="form-control" name="options[{{ $option->id }}]" value="{{ old('options.' . $option->id, $option->option_text) }}" required>
-                    <button type="button" class="btn btn-danger" onclick="removeOption(this)">Remove</button>
+                    <button type="button" class="btn btn-danger remove-option" onclick="removeOption(this)">Remove</button>
                 </div>
             @endforeach
-            <button type="button" class="btn btn-primary" id="addOption">Add Option</button>
         </div>
+        
+        <!-- Add Option Button -->
+        <button type="button" class="btn btn-primary btn-sm" id="addOption">Add Option</button>
 
-        <button type="submit" class="btn btn-success">Update Poll</button>
+        <button type="submit" class="btn btn-success btn-sm">Update Poll</button>
     </form>
 
-    <a href="{{ route('polls.index') }}" class="btn btn-secondary mt-2">Back to Polls</a>
+    <a href="{{ route('polls.index') }}" class="btn btn-secondary btn-sm mt-2">Back to Polls</a>
 @endsection
 
 @push('scripts')
@@ -45,17 +47,17 @@
         // Add new option field dynamically
         document.getElementById('addOption').addEventListener('click', function() {
             const newOption = document.createElement('div');
-            newOption.classList.add('input-group', 'mb-2');
+            newOption.classList.add('input-group', 'mb-2', 'option-item');
             newOption.innerHTML = `
-                <input type="text" class="form-control" name="options[new]" required>
-                <button type="button" class="btn btn-danger" onclick="removeOption(this)">Remove</button>
+                <input type="text" class="form-control" name="options[new][]" required>
+                <button type="button" class="btn btn-danger remove-option" onclick="removeOption(this)">Remove</button>
             `;
-            document.querySelector('.mb-3').appendChild(newOption);
+            document.getElementById('optionsContainer').appendChild(newOption);
         });
 
         // Remove option field
         function removeOption(button) {
-            button.closest('.input-group').remove();
+            button.closest('.option-item').remove();
         }
     </script>
 @endpush

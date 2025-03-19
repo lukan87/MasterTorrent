@@ -122,6 +122,8 @@ public function update(Request $request, $id)
     $validated = $request->validate([
         'title' => 'required|string|max:255',
         'description' => 'required|string',
+        'options' => 'required|array|min:2', // Ensure at least two options are provided
+        'options.*' => 'required|string|max:255', // Each option is required and should be a string
     ]);
 
     // Update poll information
@@ -129,19 +131,37 @@ public function update(Request $request, $id)
 
     // Handle updating poll options
     if ($request->has('options')) {
+        // Remove options that were not included in the update (i.e., deleted)
+        foreach ($poll->options as $existingOption) {
+            if (!isset($request->options[$existingOption->id])) {
+                $existingOption->delete(); // Option removed
+            }
+        }
+
+        // Update or create new options
         foreach ($request->options as $optionId => $optionText) {
-            $option = $poll->options()->find($optionId);
-            if ($option) {
-                $option->update(['option_text' => $optionText]);
+            if ($optionId === 'new') {
+                // Handle new options that have the key 'new'
+                foreach ($optionText as $newOptionText) {
+                    $poll->options()->create(['option_text' => $newOptionText]);
+                }
+            } else {
+                // Update existing options
+                $option = $poll->options()->find($optionId);
+                if ($option) {
+                    $option->update(['option_text' => $optionText]);
+                }
             }
         }
     }
-	
-// Clear all cache to ensure fresh data is loaded
-            Cache::flush();
+
+    // Clear all cache to ensure fresh data is loaded
+    Cache::flush();
 
     return redirect()->route('polls.index')->with('success', 'Poll updated successfully');
 }
+
+
 
 
 public function destroy(Request $request, $id)

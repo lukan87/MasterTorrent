@@ -1,28 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-    <xsl:output method="html" indent="yes"/>
     <xsl:template match="/">
         <html>
             <head>
-                <title>Styled RSS Feed</title>
+                <title>MySite RSS Feed</title>
                 <style>
-                    body { font-family: Arial, sans-serif; line-height: 1.6; }
-                    h1 { color: #0066cc; }
-                    div.item { margin-bottom: 20px; padding: 10px; border: 1px solid #ccc; }
-                    a { text-decoration: none; color: #0066cc; }
-                    a:hover { text-decoration: underline; }
+                    body { font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px; }
+                    h2 { color: #333; }
+                    .rss-item { border-bottom: 1px solid #ccc; padding: 10px 0; }
+                    .rss-item a { text-decoration: none; font-weight: bold; color: #007bff; }
+                    .rss-item a:hover { text-decoration: underline; }
+                    .rss-category { font-size: 12px; color: #666; }
+                    .rss-description { margin-top: 5px; }
                 </style>
             </head>
             <body>
-                <h1>LastFiles RSS Feed</h1>
+                <h2>MySite RSS Feed</h2>
                 <xsl:for-each select="rss/channel/item">
-                    <div class="item">
-                        <h2>
-                            <a href="{link}"><xsl:value-of select="title"/></a>
-                        </h2>
-                        <p><xsl:value-of select="description"/></p>
-                        <p><strong>Category:</strong> <xsl:value-of select="category"/></p>
-                        <p><strong>Published:</strong> <xsl:value-of select="pubDate"/></p>
+                    <div class="rss-item">
+                        <a>
+                            <xsl:attribute name="href"><xsl:value-of select="link"/></xsl:attribute>
+                            <xsl:value-of select="title"/>
+                        </a>
+                        <div class="rss-category">Category: <xsl:value-of select="category"/></div>
+                        <div class="rss-description"><xsl:value-of select="description"/></div>
+                        <div class="rss-date"><small><xsl:value-of select="pubDate"/></small></div>
                     </div>
                 </xsl:for-each>
             </body>

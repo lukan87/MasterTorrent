@@ -218,5 +218,16 @@ public function downloadHistory($id, $name)
 }
 
 
+public function activeSlots($id, $name)
+{
+    $user = User::where('id', $id)->where('name', $name)->firstOrFail();
+
+    // Fetch active slots for the user, including the associated torrent
+    $slots = $user->slots()->with('torrent')->get();
+
+    return view('profile.active-slots', compact('user', 'slots'));
+}
+
+
 
 }
