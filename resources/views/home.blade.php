@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title',  'LF::Welcome Home' )
+@section('title',  'Mysite::Welcome Home' )
 
 @section('content')
 
