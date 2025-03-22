@@ -136,7 +136,7 @@ if ($user->hit_and_run_count > '10' ) {
 
  // Get The Current Peer
 
- $client = Peer::where('torrent_id', '=', $torrent->id)->where('md5_peer_id', $md5_peer_id)->where('user_id', '=', $user->id)->first();
+ $client = Peer::where('torrent_id', '=', $torrent->id)->where('peer_id', $peer_id)->where('user_id', '=', $user->id)->first();
 
  // Flag is tripped if new session is created but client reports up/down > 0
  $ghost = false;
