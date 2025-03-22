@@ -29,6 +29,7 @@ This project is a **torrent tracker** built using Laravel 11, offering a modern,
 - **User Management:** Users are grouped into different classes with automatic promotion/demotion based on upload/download ratio, registration time, and activity.
 - **Torrent System:** Tracks multi-file and single-file torrents with detailed statistics such as seeders, leechers, and completion counts.
 - **Bonus System:** Users earn seed bonus points for seeding torrents, limited to a configurable number of torrents.
+- **Invite System:** Fully functional invite system. This can be enable/disabled. 
 - **Snatch List:** Displays torrents a user has downloaded, is currently seeding, or needs to reseed.
 - **Forum:** A structured forum system with categories, topics, and user posts.
 - **Custom Announce System:** (In development) A dedicated announce system for tracking peers efficiently.
