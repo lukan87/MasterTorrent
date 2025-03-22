@@ -32,7 +32,7 @@ This project is a **torrent tracker** built using Laravel 11, offering a modern,
 - **Invite System:** Fully functional invite system. This can be enable/disabled. 
 - **Snatch List:** Displays torrents a user has downloaded, is currently seeding, or needs to reseed.
 - **Forum:** A structured forum system with categories, topics, and user posts.
-- **Custom Announce System:** (In development) A dedicated announce system for tracking peers efficiently.
+- **Custom Announce System:** A dedicated announce system for tracking peers efficiently - fully functional.
 
 This tracker is designed to be **fast, scalable, and secure**, utilizing Laravel's powerful framework to handle high traffic and large datasets.
 
