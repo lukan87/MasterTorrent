@@ -41,6 +41,13 @@ This tracker is designed to be **fast, scalable, and secure**, utilizing Laravel
 If you want to contribute, feel free. If you want to install this on your server, please contact me at luci_calapodescu@yahoo.com
 
 
+Screen 1
+![Image](https://github.com/user-attachments/assets/56d2f5c1-0d2e-4ea1-aedd-9ae97b954bdc)
+
+Screen 2 
+![Image](https://github.com/user-attachments/assets/cf0642d4-b110-49df-92bd-6942af5f31ba)
+
+
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
