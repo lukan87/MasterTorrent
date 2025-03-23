@@ -918,11 +918,8 @@ if (empty($deletionReason)) {
         // Delete associated history records using the correct column name
         History::where('torrent_id', $torrent->id)->delete();
 
-        // Delete associated peers
-        Peer::where('torrent_id', $torrent->id)->delete();
-
           // Delete associated comments
-          Comment::where('torrent_id', $torrent->id)->delete();
+        Comment::where('torrent_id', $torrent->id)->delete();
 
         // Detach associated genres
         $torrent->genres()->detach();

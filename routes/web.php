@@ -439,4 +439,34 @@ Route::middleware('auth')->group(function () {
 
 });
 
+use App\Http\Controllers\TicketController;
+use App\Http\Controllers\TicketResponseController;
+
+Route::prefix('tickets')->name('tickets.')->middleware('auth')->group(function () {
+    Route::get('create', [TicketController::class, 'create'])->name('create');
+    Route::post('store', [TicketController::class, 'store'])->name('store');
+    Route::get('{ticket}', [TicketController::class, 'show'])->name('show');
+    Route::get('/', [TicketController::class, 'index'])->name('index');
+    
+    
+    Route::post('{ticket}/response', [TicketResponseController::class, 'store'])->name('storeResponse');
+
+    
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::post('/tickets/{ticket}/status', [TicketController::class, 'updateStatus'])->name('tickets.updateStatus');
+    Route::post('/tickets/{ticket}/close', [TicketController::class, 'closeTicket'])->name('tickets.closeTicket');
+    Route::delete('/tickets/{ticketId}', [TicketController::class, 'destroy'])->name('tickets.destroy');
+});
+
+// Route to show the edit form
+Route::get('/tickets/{ticket}/responses/{response}/edit', [TicketController::class, 'editResponse'])->name('tickets.editResponse');
+
+// Route to update the response (via POST)
+Route::post('/tickets/{ticket}/responses/{response}', [TicketController::class, 'updateResponse'])->name('tickets.updateResponse');
+
+Route::delete('/tickets/{ticket}/responses/{response}/delete', [TicketController::class, 'deleteResponse'])->name('tickets.deleteResponse');
+
+
 

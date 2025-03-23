@@ -108,6 +108,12 @@
                         <p>Staff</p>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a href="{{ route('tickets.index') }}" class="nav-link">
+                        <i class="bi bi-ticket-detailed-fill"></i>
+                        <p>Tickets</p>
+                    </a>
+                </li>
                 <hr>
                 <li class="nav-item">
                     <a href="#" class="nav-link">
