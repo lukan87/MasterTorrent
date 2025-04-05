@@ -52,7 +52,7 @@ if ($user->enabled === 'no'){
  // Standard Information Fields
  $event = $request->get('event');
  $hash = bin2hex($request->get('info_hash'));
- $peer_id =$request->get('peer_id');
+ $peer_id = $request->get('peer_id');
  $md5_peer_id = md5($peer_id);
  //$ip = $request->ip();
  $port = (int)$request->get('port');
@@ -197,28 +197,17 @@ $isFree = $userSlotExists ? $userSlot->free : false;
 $isDouble = $userSlotExists ? $userSlot->double : false;
 
 
-// Log the config and flags
-// \Log::info('Freeleech Config: ' . (config('settings.freeleech') ? 'Yes' : 'No'));
-// \Log::info('Double Config: ' . (config('settings.double') ? 'Yes' : 'No'));
-// \Log::info('Torrent Free: ' . $torrent->free);
-// \Log::info('Torrent Double: ' . $torrent->double);
-// // Log the values to verify
-// \Log::info('User Slot Exists: ' . ($userSlotExists ? 'Yes' : 'No'));
-// \Log::info('Is Free: ' . ($isFree ? 'Yes' : 'No'));
-// \Log::info('Is Double: ' . ($isDouble ? 'Yes' : 'No'));
-// \Log::info('user id: ' . $user->id);
-// \Log::info('torrent id: ' . $torrent->id);
+// Check if the user is freeleech
+$userfree = $user->is_freeleech; // Assuming it's a boolean, no need for '== true'
 
-
-
-if (config('settings.freeleech') === true || $torrent->free === true || $isFree) {
+if (config('settings.freeleech') === true || $torrent->free || $isFree || $userfree) {
     $mod_downloaded = 0;
 } else {
     $mod_downloaded = $downloaded;
 }
 
 // Check if double attribute is set to 1
-if (config('settings.double') === true || $torrent->double === true || $isDouble) {
+if (config('settings.double') === true || $torrent->double || $isDouble) {
     $mod_uploaded = $uploaded * 2; // Double the uploaded value if doubleup is 1
 } else {
     $mod_uploaded = $uploaded; // Keep the original uploaded value otherwise
@@ -262,6 +251,17 @@ elseif (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
     $client->user_id = $user->id;
     $client->active = true;
     $client->client_updated_at = $client_updated_at; // Set the updated timestamp
+
+    
+//     DB::statement("
+//     INSERT INTO `peers` (`peer_id`, `md5_peer_id`, `hash`, `ip`, `port`, `agent`, `uploaded`, `downloaded`, `seeder`, `left`, `torrent_id`, `user_id`, `active`, `client_updated_at`, `updated_at`, `created_at`) 
+//     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
+//     ON DUPLICATE KEY UPDATE `updated_at` = VALUES(`updated_at`), `uploaded` = VALUES(`uploaded`), `downloaded` = VALUES(`downloaded`), `left` = VALUES(`left`), `seeder` = VALUES(`seeder`), `active` = VALUES(`active`), `client_updated_at` = VALUES(`client_updated_at`)
+// ", [
+//     $peer_id, $md5_peer_id, $hash, $ip, $port, $agent, $real_uploaded, $real_downloaded, ($left == 0 ? 1 : 0), $left, $torrent->id, $user->id, true, $client_updated_at, now(), now()
+// ]);
+
+
     $client->save();
 
     $history->agent = $agent;

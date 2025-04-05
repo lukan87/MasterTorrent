@@ -187,6 +187,38 @@
     </div>
 </div>
 
+<!-- Invites -->
+<div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="invites" class="form-label">Invites</label>
+                    <div class="input-group">
+                        <button type="button" class="btn btn-outline-secondary" onclick="adjustValue('invites', -1)">-</button>
+                        <input type="number" step="1" name="invites" id="invites" class="form-control"
+                               value="{{ old('invites', $user->invites) }}">
+                        <button type="button" class="btn btn-outline-secondary" onclick="adjustValue('invites', 1)">+</button>
+                    </div>
+                    <small class="text-muted">Adjust the number of invites.</small>
+                    @error('invites')
+                        <div class="text-danger">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <!-- Slots -->
+                <div class="col-md-6 mb-3">
+                    <label for="slots" class="form-label">Slots</label>
+                    <div class="input-group">
+                        <button type="button" class="btn btn-outline-secondary" onclick="adjustValue('slots', -1)">-</button>
+                        <input type="number" step="1" name="slots" id="slots" class="form-control"
+                               value="{{ old('slots', $user->slots) }}">
+                        <button type="button" class="btn btn-outline-secondary" onclick="adjustValue('slots', 1)">+</button>
+                    </div>
+                    <small class="text-muted">Adjust the number of slots.</small>
+                    @error('slots')
+                        <div class="text-danger">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
+
 
 
             <!-- User Info -->

@@ -35,7 +35,7 @@
             <div class="float-end d-none d-sm-inline">Seed until you bleed</div> <!--end::To the end--> <!--begin::Copyright--> 
             <strong>
     Copyright &copy; <?php echo date('Y'); ?>&nbsp;
-    <a href="/" class="text-decoration-none">My Site</a>.
+    <a href="/" class="text-decoration-none">LastFiles</a>.
 </strong>
             All rights reserved.
             <!--end::Copyright-->

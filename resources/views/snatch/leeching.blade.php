@@ -1,41 +1,67 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container mt-4">
-        <!-- Navigation Links as Buttons -->
-        <div class="mb-4">
+    <div class="mt-4">
+        <!-- Navigation Links -->
+        <div class="mb-4 text-center">
             <nav>
-                <div class="btn-group" role="group" aria-label="Snatch Sections">
-                    <a href="{{ route('snatch.seeding', ['userId' => $userId ?? Auth::id()]) }}" class="btn btn-primary">Seeding</a>
-                    <a href="{{ route('snatch.snatchlist', ['userId' => $userId ?? Auth::id()]) }}" class="btn btn-warning">Snatch List</a>
-                    <a href="{{ route('snatch.hitAndRun', ['userId' => $userId ?? Auth::id()]) }}" class="btn btn-danger">Hit and Run</a>
-                    <a href="{{ route('snatch.needToSeed', ['userId' => $userId ?? Auth::id()]) }}" class="btn btn-success">Need to Seed</a>
+                <div class="btn-group shadow-sm" role="group" aria-label="Snatch Sections">
+                    <a href="{{ route('snatch.seeding', ['userId' => $userId ?? Auth::id()]) }}" class="btn btn-outline-primary fw-bold">
+                        <i class="bi bi-cloud-upload"></i> Seeding
+                    </a>
+                    <a href="{{ route('snatch.snatchlist', ['userId' => $userId ?? Auth::id()]) }}" class="btn btn-outline-warning fw-bold">
+                        <i class="bi bi-collection"></i> Snatch List
+                    </a>
+                    <a href="{{ route('snatch.hitAndRun', ['userId' => $userId ?? Auth::id()]) }}" class="btn btn-outline-danger fw-bold">
+                        <i class="bi bi-exclamation-triangle"></i> Hit and Run
+                    </a>
+                    <a href="{{ route('snatch.needToSeed', ['userId' => $userId ?? Auth::id()]) }}" class="btn btn-outline-success fw-bold">
+                        <i class="bi bi-hourglass-split"></i> Need to Seed
+                    </a>
                 </div>
-                
             </nav>
         </div>
 
         <!-- Leeching Section -->
-        <h1 class="mb-4">Leeching Torrents</h1>
-        
-        @if($leeching->isEmpty())
-            <div class="alert alert-info" role="alert">
-                You are not currently leeching any torrents.
+        <div class="card shadow-lg border-0">
+            <div class="card-header bg-warning text-dark text-center">
+                <h2 class="fw-bold"><i class="bi bi-arrow-down-circle"></i> Leeching Torrents</h2>
             </div>
-        @else
-            <ul class="list-group">
-                @foreach($leeching as $peer)
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <strong>Torrent:</strong> {{ $peer->torrent->name ?? 'Unknown' }}<br>
-                            {{-- <strong>Uploaded:</strong> <a data-bs-toggle="tooltip" title="Actual Upload: {{ \App\Helpers\FormatHelper::formatSize($peer->history->actual_uploaded)}}">{{ \App\Helpers\FormatHelper::formatSize($peer->history->uploaded) ?? '0' }}</a><br> --}}
-                            {{-- <strong>Downloaded:</strong> <a data-bs-toggle="tooltip" title="Actual Download: {{ \App\Helpers\FormatHelper::formatSize($peer->history->actual_downloaded)}}">{{ \App\Helpers\FormatHelper::formatSize($peer->history->downloaded) ?? '0' }}</a><br> --}}
-                            {{-- <strong>Leeching Time:</strong> {{ \App\Helpers\FormatHelper::formatTime($peer->seedtime) ?? '0' }}<br> --}}
-                            <strong>Leeching Since:</strong> {{ $peer->created_at->format('Y-m-d H:i') }}
-                        </div>
-                    </li>
-                @endforeach
-            </ul>
-        @endif
+            <div class="card-body">
+                @if($leeching->isEmpty())
+                    <div class="alert alert-info text-center fw-bold" role="alert">
+                        🎉 You are not currently leeching any torrents.
+                    </div>
+                @else
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Torrent</th>
+                                    <th>Leeching Since</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($leeching as $peer)
+                                    <tr>
+                                        <td>
+                                            <a href="{{ route('torrents.show', ['id' => $peer->torrent->id]) }}" class="text-decoration-none fw-bold">
+                                                <i class="bi bi-file-earmark-arrow-down"></i> {{ $peer->torrent->name ?? 'Unknown' }}
+                                            </a>
+                                        </td>
+                                        <td>{{ $peer->created_at->format('Y-m-d H:i') }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="d-flex justify-content-center mt-4">
+                        {{ $leeching->links('pagination::bootstrap-5') }}
+                    </div>
+                @endif
+            </div>
+        </div>
     </div>
 @endsection

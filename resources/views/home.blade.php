@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title',  'Mysite::Welcome Home' )
+@section('title',  'LastFiles::Welcome Home' )
 
 @section('content')
 
@@ -18,9 +18,11 @@
 
 </div>
 
+@if (Auth::check() && Auth::user()->id !=3 )
 
+<iframe src="https://stream.clever-host.ro/cp/widgets/player/single/?p=8036" height="110" width="100%" scrolling="no" style="border:none;"></iframe>
 
-
+@endif
 
 @include('partials.slider')
 

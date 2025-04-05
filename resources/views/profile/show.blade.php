@@ -114,13 +114,13 @@
                     </div>
 
                      <!-- Slots -->
-                      @if (auth()->id() === $user->id)
+                      @if (auth()->id() === $user->id || (Auth::user()->user_class >= \App\Models\UserClass::ADMIN))
     <div class="row mb-3">
         <label for="seedbonus" class="col-md-2 col-form-label text-md-end">
             <i class="bi bi-list" data-bs-toggle="tooltip" data-bs-title="Slots"></i>
         </label>
         <div class="col-md-10">
-            <p class="form-control-static"><a href="{{ route('profile.slots', ['id' => $user->id, 'name' => $user->name]) }}">Slots available: {{$user->slots}}</a></p>
+            <p class="form-control-static"><a href="{{ route('profile.tokens', ['id' => $user->id, 'name' => $user->name]) }}">Slots available: {{$user->slots}}</a></p>
         </div>
     </div>
 @endif 

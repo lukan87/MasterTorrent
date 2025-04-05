@@ -1,52 +1,89 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container mt-4">
-        <!-- Navigation Links as Buttons -->
-        <div class="mb-4">
+    <div class="mt-4">
+        <!-- Navigation Links -->
+        <div class="mb-4 text-center">
             <nav>
-                <div class="btn-group" role="group" aria-label="Snatch Sections">
-                    <a href="{{ route('snatch.seeding', ['userId' => $userId ?? Auth::id()]) }}" class="btn btn-primary">Seeding</a>
-                    <a href="{{ route('snatch.leeching', ['userId' => $userId ?? Auth::id()]) }}" class="btn btn-warning">Leeching</a>
-                    <a href="{{ route('snatch.snatchlist', ['userId' => $userId ?? Auth::id()]) }}" class="btn btn-danger">Snatch List</a>
-                    <a href="{{ route('snatch.needToSeed', ['userId' => $userId ?? Auth::id()]) }}" class="btn btn-success">Need to Seed</a>
+                <div class="btn-group shadow-sm" role="group" aria-label="Snatch Sections">
+                    <a href="{{ route('snatch.seeding', ['userId' => $userId ?? Auth::id()]) }}" class="btn btn-outline-primary fw-bold">
+                        <i class="bi bi-cloud-upload"></i> Seeding
+                    </a>
+                    <a href="{{ route('snatch.leeching', ['userId' => $userId ?? Auth::id()]) }}" class="btn btn-outline-warning fw-bold">
+                        <i class="bi bi-arrow-down-circle"></i> Leeching
+                    </a>
+                    <a href="{{ route('snatch.snatchlist', ['userId' => $userId ?? Auth::id()]) }}" class="btn btn-outline-danger fw-bold">
+                        <i class="bi bi-collection"></i> Snatch List
+                    </a>
+                    <a href="{{ route('snatch.needToSeed', ['userId' => $userId ?? Auth::id()]) }}" class="btn btn-outline-success fw-bold">
+                        <i class="bi bi-hourglass-split"></i> Need to Seed
+                    </a>
                 </div>
             </nav>
         </div>
 
         <!-- Hit-and-Run Section -->
-        <h1 class="mb-4">Hit-and-Run Torrents</h1>
-        
-        @if($hitAndRun->isEmpty())
-            <div class="alert alert-info" role="alert">
-                You have no hit-and-run torrents.
+        <div class="card shadow-lg border-0">
+            <div class="card-header bg-danger text-white text-center">
+                <h2 class="fw-bold"><i class="bi bi-exclamation-triangle"></i> Hit-and-Run Torrents</h2>
             </div>
-        @else
-            <ul class="list-group">
-                @foreach($hitAndRun as $history)
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <strong>Torrent:</strong> {{ $history->torrent->name ?? 'Unknown' }}<br>
-                            <strong>Uploaded:</strong> {{ \App\Helpers\FormatHelper::formatSize($history->uploaded) ?? '0' }}<br>
-                            <strong>Downloaded:</strong> {{ \App\Helpers\FormatHelper::formatSize($history->downloaded) ?? '0' }}<br>
-                            <strong>Seedtime:</strong> {{ \App\Helpers\FormatHelper::formatTime($history->seedtime) }}<br>
-                            <strong>Ratio:</strong> {{ number_format(($history->uploaded / max($history->downloaded, 1)), 2) }}<br>
-                            <strong>Status:</strong> <span class="text-danger">Hit-and-Run</span>
-                        </div>
+            <div class="card-body">
+                @if($hitAndRun->isEmpty())
+                    <div class="alert alert-info text-center fw-bold" role="alert">
+                        🎉 You have no hit-and-run torrents!
+                    </div>
+                @else
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Torrent</th>
+                                    <th>Uploaded</th>
+                                    <th>Downloaded</th>
+                                    <th>Seedtime</th>
+                                    <th>Ratio</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($hitAndRun as $history)
+                                    <tr>
+                                        <td>
+                                            <a href="{{ route('torrents.show', ['id' => $history->torrent->id]) }}" class="text-decoration-none fw-bold">
+                                                <i class="bi bi-file-earmark-arrow-down"></i> {{ $history->torrent->name ?? 'Unknown' }}
+                                            </a>
+                                        </td>
+                                        <td>{{ \App\Helpers\FormatHelper::formatSize($history->uploaded) ?? '0' }}</td>
+                                        <td>{{ \App\Helpers\FormatHelper::formatSize($history->downloaded) ?? '0' }}</td>
+                                        <td>{{ \App\Helpers\FormatHelper::formatTime($history->seedtime) }}</td>
+                                        <td class="fw-bold {{ ($history->uploaded / max($history->downloaded, 1)) < 1 ? 'text-danger' : 'text-success' }}">
+                                            {{ number_format(($history->uploaded / max($history->downloaded, 1)), 2) }}
+                                        </td>
+                                        <td><span class="badge bg-danger">Hit-and-Run</span></td>
+                                        <td>
+                                            @if (auth()->id() === $history->user_id)
+                                                <form action="{{ route('bonus.removeHNR') }}" method="POST" class="d-inline-block">
+                                                    @csrf
+                                                    <input type="hidden" name="torrent_id" value="{{ $history->torrent_id }}">
+                                                    <button type="submit" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="5000 seedbonus points">
+                                                        <i class="bi bi-cash-coin"></i> Remove HNR
+                                                    </button>
+                                                </form>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
 
-                        <!-- Buy Seedtime Button and Remove HNR Button -->
-                        @if (auth()->id() === $history->user_id)  <!-- Make sure the user is the one who uploaded the torrent -->
-                            <form action="{{ route('bonus.removeHNR') }}" method="POST" class="mt-2">
-                                @csrf
-                                <input type="hidden" name="torrent_id" value="{{ $history->torrent_id }}">
-                                <button type="submit" class="btn btn-primary btn-sm" data-bs-toggle="tooltip" title="5000 seedbonus points">
-                                    Remove Hit-and-Run
-                                </button>
-                            </form>
-                        @endif
-                    </li>
-                @endforeach
-            </ul>
-        @endif
+                    <!-- Pagination -->
+                    <div class="d-flex justify-content-center mt-4">
+                        {{ $hitAndRun->links('pagination::bootstrap-5') }}
+                    </div>
+                @endif
+            </div>
+        </div>
     </div>
 @endsection

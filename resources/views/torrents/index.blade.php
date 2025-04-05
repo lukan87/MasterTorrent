@@ -85,7 +85,10 @@
                 <tr>
                     <th>Category</th>
                     <th>Name</th>
+                    @if (Auth::user()->hit_and_run_count > '10' ) 
+                    @else
                     <th></th>
+                    @endif
                     <th><i class="bi bi-stopwatch"></i></th>
                     <th>
                         <a href="{{ route('torrents.index', array_merge(request()->all(), ['sort' => 'size', 'direction' => request('direction') == 'asc' ? 'desc' : 'asc'])) }}">
@@ -156,11 +159,14 @@
                                 @endforeach
                             </div>
                         </td>
+                        @if (Auth::user()->hit_and_run_count > '10' ) 
+                        @else
                         <td>
                             <a href="{{ route('torrents.download', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}" class="btn btn-success btn-sm" data-bs-toggle="tooltip" title="Download torrent">
                                 <i class="bi bi-file-earmark-arrow-down-fill"></i>
                             </a>
                         </td>
+                        @endif
                         <td><div data-bs-toggle="tooltip" title="{{ \Carbon\Carbon::parse($torrent->created_at)->diffForHumans() }}">{{ \Carbon\Carbon::parse($torrent->created_at)->format('d-M-Y') }}</div></td>
                         <td>{{ App\Helpers\FormatHelper::formatSize($torrent->size) }}</td>
                         <td>{{ $torrent->seeders }}</td>
@@ -181,11 +187,17 @@
                         @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
                             <td class="d-none d-md-table-cell">
                                 <a href="{{ route('torrents.edit', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}" class="btn btn-warning btn-sm action-btn"><i class="bi bi-pencil-square"></i></a>
-                                
+                        @endif        
+                        @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::ADMIN)    
                                 <form action="{{ route('torrents.destroy', $torrent->slug) }}" method="POST" style="display: inline-block;">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-danger btn-sm action-btn"><i class="bi bi-trash"></i></button>
+                                </form>
+
+                                <form action="{{ route('torrents.bump', $torrent->id) }}" method="POST" style="display: inline-block;">
+                                    @csrf
+                                    <button type="submit" class="btn btn-success btn-sm action-btn" data-bs-toggle="tooltip" title="Bump torrent to actual date"><i class="bi bi-arrow-up-circle"></i></button>
                                 </form>
                             </td>
                         @endif

@@ -2,7 +2,7 @@
     <!--begin::Sidebar Brand-->
     <div class="sidebar-brand">
         <i class="bi bi-globe-europe-africa opacity-75 shadow"></i>
-        <span class="brand-text fw-light">My Site</span>
+        <span class="brand-text fw-light">LastFiles</span>
     </div>
     <!--end::Sidebar Brand-->
 

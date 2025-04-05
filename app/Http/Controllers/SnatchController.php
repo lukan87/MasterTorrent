@@ -76,7 +76,7 @@ class SnatchController extends Controller
         $leeching = Peer::where('user_id', $userId)
             ->where('seeder', 0)
             ->with('history')
-            ->get();
+            ->paginate(10);
 
         return view('snatch.leeching', [
             'leeching' => $leeching,
@@ -100,7 +100,7 @@ class SnatchController extends Controller
         $hitAndRun = History::where('user_id', $userId)
             ->where('hitrun', true)
             ->with('torrent')
-            ->get();
+            ->paginate(20);
 
         return view('snatch.hit_and_run', [
             'hitAndRun' => $hitAndRun,
@@ -139,7 +139,7 @@ class SnatchController extends Controller
         ->where('hitrun', false)    // User is not a hit-and-run
         ->where('active', false)    // User is not active
         ->orderBy('created_at', 'desc')  // Sort by the most recent activity
-        ->paginate(5);  // Limit the results to 5 per page
+        ->paginate(20);  // Limit the results to 5 per page
 
     return view('snatch.need_to_seed', [
         'needToSeed' => $needToSeed,
@@ -147,5 +147,30 @@ class SnatchController extends Controller
         'userId' => $userId, // Pass the user ID to the view
     ]);
 }
+
+
+public function deleteNeedToSeed($userId, $torrentId)
+{
+    // Check if the logged-in user is staff
+    if (Auth::user()->user_class < 5) {
+        return redirect()->back()->with('error', 'Unauthorized action.');
+    }
+
+    // Find the user's specific history for the torrent
+    $history = History::where('torrent_id', $torrentId)
+                      ->where('user_id', $userId)
+                      ->first();
+
+    if (!$history) {
+        return redirect()->back()->with('error', 'No history record found for this torrent.');
+    }
+
+    // Delete the specific history record
+    $history->delete();
+
+    return redirect()->back()->with('success', 'Torrent history removed for this user.');
+}
+
+
 
 }

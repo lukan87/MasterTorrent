@@ -8,6 +8,17 @@
                 <ul class="navbar-nav ms-auto"> <!--begin::Navbar Search-->
                     <!-- <li class="nav-item"> <a class="nav-link" data-widget="navbar-search" href="#" role="button"> <i class="bi bi-search"></i> </a> </li> end::Navbar Search begin::Messages Dropdown Menu -->
                     <li class="nav-item">
+                    <a class="nav-link" href="{{ route('profile.tokens', ['id' => Auth::user()->id, 'name' => Auth::user()->name]) }}" role="button">
+    <span class="icon-circle">
+        <i class="bi bi-grid-1x2" aria-hidden="true" data-bs-toggle="tooltip" title="Tokens"></i>
+        <span class="navbar-badge badge {{ Auth::user()->slots > 0 ? 'text-bg-success' : 'text-bg-danger' }}">
+            {{ Auth::user()->slots }}
+        </span>
+    </span>
+</a>
+                    </li>
+                    
+                    <li class="nav-item">
                     <a class="nav-link" href="{{ route('invites.index') }}" role="button">
     <span class="icon-circle">
         <i class="fa fa-user-plus" aria-hidden="true" data-bs-toggle="tooltip" title="Invites"></i>

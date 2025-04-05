@@ -154,16 +154,21 @@
                         @endif
 
                         @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
-                        <td>
-                            <a href="{{ route('torrents.edit', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}" class="btn btn-warning btn-sm action-btn"><i class="bi bi-pencil-square"></i></a>
-                            @if (Auth::check() && Auth::user()->can_delete == 1)
-                            <form action="{{ route('torrents.destroy', $torrent->slug) }}" method="POST" style="display: inline-block;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-danger btn-sm action-btn" onclick="return confirm('Are you sure you want to delete this torrent?');"><i class="bi bi-trash3-fill"></i></button>
-                            </form>
-                            @endif
-                        </td>
+                            <td class="d-none d-md-table-cell">
+                                <a href="{{ route('torrents.edit', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}" class="btn btn-warning btn-sm action-btn"><i class="bi bi-pencil-square"></i></a>
+                        @endif        
+                        @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::ADMIN)    
+                                <form action="{{ route('torrents.destroy', $torrent->slug) }}" method="POST" style="display: inline-block;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger btn-sm action-btn"><i class="bi bi-trash"></i></button>
+                                </form>
+
+                                <form action="{{ route('torrents.bump', $torrent->id) }}" method="POST" style="display: inline-block;">
+                                    @csrf
+                                    <button type="submit" class="btn btn-success btn-sm action-btn" data-bs-toggle="tooltip" title="Bump torrent to actual date"><i class="bi bi-arrow-up-circle"></i></button>
+                                </form>
+                            </td>
                         @endif
                         </tr>
                     @empty

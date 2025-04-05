@@ -9,7 +9,7 @@
                 </span>
                 <div class="info-box-content">
                     <span class="info-box-text text-uppercase fw-bold">Torrents</span>
-                    <span class="info-box-number fs-4">{{ $torrentCount }}</span>
+                    <span class="info-box-number fs-5">{{ $torrentCount }}</span>
                 </div>
             </div>
         </div>
@@ -22,7 +22,7 @@
                 </span>
                 <div class="info-box-content">
                     <span class="info-box-text text-uppercase fw-bold">Active Torrents</span>
-                    <span class="info-box-number fs-4">{{ $torrentActive }}</span>
+                    <span class="info-box-number fs-5">{{ $torrentActive }}</span>
                 </div>
             </div>
         </div>
@@ -35,7 +35,7 @@
                 </span>
                 <div class="info-box-content">
                     <span class="info-box-text text-uppercase fw-bold">Users</span>
-                    <span class="info-box-number fs-4">{{ $userCount }}</span>
+                    <span class="info-box-number fs-5">{{ $userCount }}</span>
                 </div>
             </div>
         </div>
@@ -48,7 +48,7 @@
                 </span>
                 <div class="info-box-content">
                     <span class="info-box-text text-uppercase fw-bold">Forum Topics</span>
-                    <span class="info-box-number fs-4">{{ $forumTopicCount }}</span>
+                    <span class="info-box-number fs-5">{{ $forumTopicCount }}</span>
                 </div>
             </div>
         </div>
@@ -61,7 +61,7 @@
                 </span>
                 <div class="info-box-content">
                     <span class="info-box-text text-uppercase fw-bold">Active Seeders</span>
-                    <span class="info-box-number fs-4">{{ $uniqueSeeders }}</span>
+                    <span class="info-box-number fs-5">{{ $uniqueSeeders }}</span>
                 </div>
             </div>
         </div>
@@ -74,7 +74,7 @@
                 </span>
                 <div class="info-box-content">
                     <span class="info-box-text text-uppercase fw-bold">Active Leechers</span>
-                    <span class="info-box-number fs-4">{{ $uniqueLeechers }}</span>
+                    <span class="info-box-number fs-5">{{ $uniqueLeechers }}</span>
                 </div>
             </div>
         </div>

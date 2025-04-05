@@ -1,72 +1,96 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container mt-4">
-        <!-- Navigation Links as Buttons -->
-        <div class="mb-4">
+    <div class="mt-4">
+        <!-- Navigation Links -->
+        <div class="mb-4 text-center">
             <nav>
-                <div class="btn-group" role="group" aria-label="Snatch Sections">
-                    <a href="{{ route('snatch.seeding', ['userId' => $userId]) }}" class="btn btn-primary">Seeding</a>
-                    <a href="{{ route('snatch.leeching', ['userId' => $userId]) }}" class="btn btn-warning">Leeching</a>
-                    <a href="{{ route('snatch.hitAndRun', ['userId' => $userId]) }}" class="btn btn-danger">Hit and Run</a>
-                    <a href="{{ route('snatch.needToSeed', ['userId' => $userId]) }}" class="btn btn-success">Need to Seed</a>
+                <div class="btn-group shadow-sm" role="group" aria-label="Snatch Sections">
+                    <a href="{{ route('snatch.seeding', ['userId' => $userId]) }}" class="btn btn-outline-primary fw-bold">
+                        <i class="bi bi-cloud-upload"></i> Seeding
+                    </a>
+                    <a href="{{ route('snatch.leeching', ['userId' => $userId]) }}" class="btn btn-outline-warning fw-bold">
+                        <i class="bi bi-arrow-down-circle"></i> Leeching
+                    </a>
+                    <a href="{{ route('snatch.hitAndRun', ['userId' => $userId]) }}" class="btn btn-outline-danger fw-bold">
+                        <i class="bi bi-exclamation-triangle"></i> Hit and Run
+                    </a>
+                    <a href="{{ route('snatch.needToSeed', ['userId' => $userId]) }}" class="btn btn-outline-success fw-bold">
+                        <i class="bi bi-hourglass-bottom"></i> Need to Seed
+                    </a>
                 </div>
-                
             </nav>
         </div>
 
         <!-- Snatchlist Section -->
-        <h1 class="mb-4">
-            Snatchlist for {{ $user->name ?? 'Unknown User' }}
-        </h1>
-        
-        @if($snatchlist->isEmpty())
-            <div class="alert alert-info" role="alert">
-                No torrents in your snatchlist.
+        <div class="card shadow-lg border-0">
+            <div class="card-header bg-primary text-white text-center">
+                <h2 class="fw-bold"><i class="bi bi-collection"></i> Snatchlist for {{ $user->name ?? 'Unknown User' }}</h2>
             </div>
-        @else
-            <ul class="list-group">
-                @foreach($snatchlist as $snatch)
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <strong>Torrent:</strong> {{ $snatch->torrent->name ?? 'Unknown' }}<br>
-                            <small>Snatched on: {{ $snatch->created_at->format('Y-m-d') }}</small> /
-                            <small>
-                                Seeder: 
-                                @if($snatch->seeder)
-                                <span class="text-success">Yes</span>
-                                @else
-                                <span class="text-danger">No</span>
-                                @endif
-                            </small> /
-                            <small>Seedtime: {{ \App\Helpers\FormatHelper::formatTime($snatch->seedtime) }}</small> / 
-                            <small>
-    Ratio: 
-    @if($snatch->actual_downloaded > 0)
-        <span style="color: {{ $snatch->uploaded / $snatch->actual_downloaded >= 1 ? 'green' : 'red' }}">
-            {{ number_format($snatch->uploaded / $snatch->actual_downloaded, 2) }}
-        </span>
-    @else
-        <span style="color: green">∞</span>
-    @endif
-</small><br>
-<small>
-{{-- Uploaded: {{ \App\Helpers\FormatHelper::formatSize($snatch->uploaded) }} / Actual Uploaded: {{\App\Helpers\FormatHelper::formatSize( $snatch->actual_uploaded) }}<br>
-Downloaded: {{ \App\Helpers\FormatHelper::formatSize($snatch->downloaded) }} / Actual Downloaded: {{ \App\Helpers\FormatHelper::formatSize($snatch->actual_downloaded) }} --}}
-Uploaded: {{ \App\Helpers\FormatHelper::formatSize($snatch->uploaded) }}  /  Downloaded: {{ \App\Helpers\FormatHelper::formatSize($snatch->actual_downloaded) }}
-</small>                 
+            <div class="card-body">
+                @if($snatchlist->isEmpty())
+                    <div class="alert alert-info text-center fw-bold" role="alert">
+                        No torrents in your snatchlist.
+                    </div>
+                @else
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Torrent</th>
+                                    <th>Snatched On</th>
+                                    <th>Seeder</th>
+                                    <th>Seedtime</th>
+                                    <th>Ratio</th>
+                                    <th>Uploaded / Downloaded</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($snatchlist as $snatch)
+                                    @php
+                                        $ratio = $snatch->actual_downloaded > 0 ? number_format($snatch->uploaded / $snatch->actual_downloaded, 2) : '∞';
+                                        $ratioColor = $snatch->actual_downloaded > 0 ? ($snatch->uploaded / $snatch->actual_downloaded >= 1 ? 'text-success' : 'text-danger') : 'text-success';
+                                    @endphp
+                                    <tr>
+                                        <td>
+                                            <a href="{{ route('torrents.show', ['id' => $snatch->torrent->id]) }}" class="text-decoration-none fw-bold">
+                                                <i class="bi bi-file-earmark-arrow-down"></i> {{ $snatch->torrent->name ?? 'Unknown' }}
+                                            </a>
+                                        </td>
+                                        <td>{{ $snatch->created_at->format('Y-m-d') }}</td>
+                                        <td>
+                                            <span class="{{ $snatch->seeder ? 'text-success' : 'text-danger' }}">
+                                                {{ $snatch->seeder ? 'Yes' : 'No' }}
+                                            </span>
+                                        </td>
+                                        <td>{{ \App\Helpers\FormatHelper::formatTime($snatch->seedtime) }}</td>
+                                        <td>
+                                            <span class="{{ $ratioColor }}">
+                                                {{ $ratio }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            Uploaded:
+                                        <span data-bs-toggle="tooltip" data-bs-placement="top" title="Actual Uploaded: {{ \App\Helpers\FormatHelper::formatSize($snatch->actual_uploaded) }}">
+                                                                 {{ \App\Helpers\FormatHelper::formatSize($snatch->uploaded) }}
+                                        </span> <br>
+                                        Downloaded: 
+                                       <span data-bs-toggle="tooltip" data-bs-placement="top" title="Actual Downloaded: {{ \App\Helpers\FormatHelper::formatSize($snatch->actual_downloaded) }}">
+                                                                 {{ \App\Helpers\FormatHelper::formatSize($snatch->downloaded) }}
+                                       </span>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
 
-
-
-                        </div>
-                    </li>
-                @endforeach
-            </ul>
-
-            <!-- Pagination Links -->
-            <div class="d-flex justify-content-center">
-                {{ $snatchlist->links('pagination::bootstrap-5') }}
+                    <!-- Pagination -->
+                    <div class="d-flex justify-content-center mt-4">
+                        {{ $snatchlist->links('pagination::bootstrap-5') }}
+                    </div>
+                @endif
             </div>
-        @endif
+        </div>
     </div>
 @endsection

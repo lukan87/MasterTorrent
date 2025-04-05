@@ -23,6 +23,13 @@
 }
 </style>
 
+
+    @if (Auth::user()->hit_and_run_count > '10' ) 
+    <div class="alert alert-danger" role="alert">
+        Download restricted, you have more than 10 Hit&Run's.
+    </div>
+    
+    @else
     @if (Auth::check() && Auth::user()->slots >= 1)
     <div class="btn-group">
         <!-- Download Button -->
@@ -40,12 +47,12 @@
 
         <!-- Dropdown Menu -->
         <ul class="dropdown-menu dropdown-menu-dark shadow-lg">
-            <li><a class="dropdown-item" href="{{ route('torrents.download', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}?free=1" data-bs-toggle="tooltip" title="Free Download">
-                <i class="fa-solid fa-arrow-down me-2"></i> Free Download
+            <li><a class="dropdown-item" href="{{ route('torrents.download', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}?free=1" data-bs-toggle="tooltip" title="No Download Recoreded For This Torrent">
+                <i class="fa-solid fa-arrow-down me-2"></i> Free
             </a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="{{ route('torrents.download', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}?double=1" data-bs-toggle="tooltip" title="Double Upload">
-                <i class="fa-solid fa-arrow-up me-2"></i> Double Upload
+            <li><a class="dropdown-item" href="{{ route('torrents.download', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}?double=1" data-bs-toggle="tooltip" title="Double Upload Recoreded For This Torrent">
+                <i class="fa-solid fa-arrow-up me-2"></i> Double
             </a></li>
         </ul>
     </div>
@@ -57,16 +64,19 @@
         </a>
     </button>
 @endif
+@endif
 
 
 
 
     
-    @if (Auth::check() && (Auth::user()->user_class >= \App\Models\UserClass::MODERATOR || Auth::id() === $torrent->owner))
-    <a href="{{ route('torrents.edit', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}" class="btn btn-secondary btn-sm mr-2">
-        Edit
-    </a>
+@if (Auth::check() && (Auth::user()->user_class >= \App\Models\UserClass::MODERATOR || Auth::id() === $torrent->owner))
+<a href="{{ route('torrents.edit', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}" class="btn btn-secondary btn-sm mr-2" data-bs-toggle="tooltip" title="Edit Torrent">
+    <i class="fas fa-edit d-inline d-sm-none"></i>  <!-- Show only the icon on small screens -->
+    <span class="d-none d-sm-inline">Edit</span>  <!-- Show the text on medium+ screens -->
+</a>
 @endif
+
 
 
     @if(!$hasThanked)
@@ -89,10 +99,11 @@
 <div class="d-flex ms-auto">
 
 
-<p class="mb-0 mx-2">
+    <p class="mb-0 mx-2 d-none d-sm-block">
         <strong><i class="bi bi-tags" data-bs-toggle="tooltip" title="Category"></i></strong>
         {{ $torrent->category->name }}
     </p>
+    
 
 @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
 <a href="{{ route('torrent.peers', ['torrent' => $torrent->id]) }}?seeders">

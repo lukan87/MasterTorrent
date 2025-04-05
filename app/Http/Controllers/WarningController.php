@@ -103,35 +103,50 @@ class WarningController extends Controller
     }
 
    
-    public function deactivateAllWarnings(Request $request, $id, $username)
-    {
-        if ($request->user()->user_class < 6) {
-            abort(403);
-        }
-    
-        $staff = $request->user();
-        $user = User::where('username', '=', $username)->firstOrFail();
-    
-        $warnings = Warning::where('user_id', '=', $user->id)->get();
-    
-        foreach ($warnings as $warning) {
-            $warning->expires_on = Carbon::now();
-            $warning->active = 0;
-            $warning->save();
-        }
-    
-        // Send Private Message
-        $privateMessage = new Message();
-        $privateMessage->sender_id = $staff->id;
-        $privateMessage->receiver_id = $user->id;
-        $privateMessage->subject = 'All Hit and Run Warning Deactivated';
-        $privateMessage->body = $staff->username.' has decided to deactivate all of your active hit and run warnings. You lucked out! [color=red][b]THIS IS AN AUTOMATED SYSTEM MESSAGE, PLEASE DO NOT REPLY![/b][/color]';
-        $privateMessage->is_read = 0;
-        $privateMessage->save();
-    
-        return redirect()->route('warnings.show', ['id' => $user->id, 'username' => $user->username])
-            ->withSuccess('All Warnings Were Successfully Deactivated');
+    public function deactivateAllWarnings(Request $request, $id)
+{
+    if ($request->user()->user_class < 6) {
+        abort(403);
     }
+
+    $staff = $request->user();
+    $user = User::find($id);
+
+    if (!$user) {
+        return redirect()->route('warnings.index')
+            ->with('error', 'User not found.');
+    }
+
+    // Fetch only active warnings for this user
+    $warnings = Warning::where('user_id', '=', $user->id)
+                        ->where('active', 1)
+                        ->get();
+
+    if ($warnings->isEmpty()) {
+        return redirect()->route('warnings.show', ['id' => $user->id])
+            ->with('error', 'Nothing to deactivate.');
+    }
+
+    foreach ($warnings as $warning) {
+        $warning->expires_on = Carbon::now();
+        $warning->active = 0;
+        $warning->save();
+    }
+
+    // Send Private Message
+    $privateMessage = new Message();
+    $privateMessage->sender_id = $staff->id;
+    $privateMessage->receiver_id = $user->id;
+    $privateMessage->subject = 'All Hit and Run Warnings Deactivated';
+    $privateMessage->body = $staff->username.' has decided to deactivate all of your active hit and run warnings. You lucked out! [color=red][b]THIS IS AN AUTOMATED SYSTEM MESSAGE, PLEASE DO NOT REPLY![/b][/color]';
+    $privateMessage->is_read = 0;
+    $privateMessage->save();
+
+    return redirect()->route('warnings.show', ['id' => $user->id])
+        ->with('success', 'All Warnings Were Successfully Deactivated');
+}
+
+
     
 
    
@@ -164,36 +179,47 @@ class WarningController extends Controller
     }
 
    
-    public function deleteAllWarnings(Request $request,  $id, $username)
-    {
-        if ($request->user()->user_class < 6) {
-            abort(403);
-        }
-    
-
-        $staff = $request->user();
-        $user = User::where('username', '=', $username)->firstOrFail();
-
-        $warnings = Warning::where('user_id', '=', $user->id)->get();
-
-        foreach ($warnings as $warning) {
-            $warning->deleted_by = $staff->id;
-            $warning->save();
-            $warning->delete();
-        }
-
-        // Send Private Message
-        $privateMessage = new Message();
-        $privateMessage->sender_id = $staff->id;
-        $privateMessage->receiver_id = $user->id;
-        $privateMessage->subject = 'All Hit and Run Warnings Deleted';
-        $privateMessage->body = $staff->username.' has decided to delete all of your warnings. You lucked out! [color=red][b]THIS IS AN AUTOMATED SYSTEM MESSAGE, PLEASE DO NOT REPLY![/b][/color]';
-        $privateMessage->is_read = 0;
-        $privateMessage->save();
-
-        return redirect()->route('warnings.show', ['id' => $warning->warneduser->id, 'username' => $warning->warneduser->username])
-            ->withSuccess('All Warnings Were Successfully Deleted');
+    public function deleteAllWarnings(Request $request, $id)
+{
+    if ($request->user()->user_class < 6) {
+        abort(403);
     }
+
+    $staff = $request->user();
+    $user = User::find($id);
+
+    if (!$user) {
+        return redirect()->route('warnings.index')
+            ->with('error', 'User not found.');
+    }
+
+    // Fetch all warnings for this user
+    $warnings = Warning::where('user_id', '=', $user->id)->get();
+
+    if ($warnings->isEmpty()) {
+        return redirect()->route('warnings.show', ['id' => $user->id])
+            ->with('error', 'No warnings to delete.');
+    }
+
+    foreach ($warnings as $warning) {
+        $warning->deleted_by = $staff->id;
+        $warning->save();
+        $warning->delete();
+    }
+
+    // Send Private Message
+    $privateMessage = new Message();
+    $privateMessage->sender_id = $staff->id;
+    $privateMessage->receiver_id = $user->id;
+    $privateMessage->subject = 'All Hit and Run Warnings Deleted';
+    $privateMessage->body = $staff->username.' has decided to delete all of your warnings. You lucked out! [color=red][b]THIS IS AN AUTOMATED SYSTEM MESSAGE, PLEASE DO NOT REPLY![/b][/color]';
+    $privateMessage->is_read = 0;
+    $privateMessage->save();
+
+    return redirect()->route('warnings.show', ['id' => $user->id])
+        ->with('success', 'All Warnings Were Successfully Deleted');
+}
+
 
    
     public function restoreWarning(Request $request, $id)

@@ -2,39 +2,150 @@
 
 @section('content')
 
-<div class="container my-5">
+
+<div class="my-5">
     <div class="card shadow-lg">
         <div class="card-header bg-secondary text-white text-center">
-            <h2 class="mb-0">My Site Rules</h2>
+            <h2 class="mb-0">LastFiles Rules</h2>
         </div>
         <div class="card-body">
-           
-            <h3>1. No Spam / Advertising / Self-promote in the forums</h3>
-            <p>These forums define spam as unsolicited advertisement for goods, services and/or other web sites, or posts with little, or completely unrelated content. Do not spam the forums with links to your site or product, or try to self-promote your website, business or forums etc.</p>
-            <h3>2. Do not post copyright-infringing material</h3>
-            <p>Providing or asking for information on how to illegally obtain copyrighted materials is forbidden.</p>
-            <h3>3. Do not post “offensive” posts, links or images</h3>
-            <p>Any material which constitutes defamation, harassment, or abuse is strictly prohibited
-                Material that is sexually or otherwise obscene, racist, or otherwise overly discriminatory is not permitted on these forums.
-                This includes user pictures. Use common sense while posting.</p>
-            <h3>4. Do not cross post questions</h3>
-            <p>Please refrain from posting the same question in several forums. There is normally one forum which is most suitable in which to post your question.</p>
-            <h3>5. Do not PM users asking for help</h3>
-            <p>Do not send private messages to any users asking for help. If you need help, make a new thread in the appropriate forum then the whole community can help and benefit.</p>
-            <h3>6. Remain respectful of other members at all times</h3>
-            <p>All posts should be professional and courteous. You have every right to disagree with your fellow community members and explain your perspective. However, you are not free to attack, degrade, insult, or otherwise belittle them or the quality of this community. It does not matter what title or power you hold in these forums, you are expected to obey this rule.</p>
-            <h3>7. Do not post inappropriate material</h3>
-            <p>Do not post anything that is inappropriate
-                This includes, but is not limited to, any material which is vulgar, sexually orientated, or otherwise violative of any law.</p>
-            <h3>8. Do not bump threads</h3>
-            <p>Bumping can refer to posting useless information, posting one-liners or any other action to deliberately keep a thread hot or to bring it to the top of its forum. Moderators will use their discretion, depending on the nature of the post, as to whether to take action or not.</p>
-            <h3>9. Do not post any information that is not your own</h3>
-            <p>Posting of any information that is not your own without the consent of the content owner is not allowed.</p>
-            <h3>10. Do not post any personal information</h3>
-            <p>Do not post any personal information such as phone numbers, addresses, email addresses, etc.</p>
-            <h3>11. Do not post any information that is not related to the forum</h3>
-            <p>Do not post any information that is not related to the forum.</p>
-            
+            <!-- Tabs Navigation -->
+            <ul class="nav nav-tabs" id="rulesTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="ro-tab" data-bs-toggle="tab" data-bs-target="#ro" type="button" role="tab" aria-controls="ro" aria-selected="true">RO</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="en-tab" data-bs-toggle="tab" data-bs-target="#en" type="button" role="tab" aria-controls="en" aria-selected="false">EN</button>
+                </li>
+            </ul>
+
+            <!-- Tabs Content -->
+            <div class="tab-content mt-3" id="rulesTabsContent">
+                <!-- Romanian Tab -->
+                <div class="tab-pane fade show active" id="ro" role="tabpanel" aria-labelledby="ro-tab">
+                    <h4 class="text-primary">Reguli de Descărcare</h4>
+                    <ul>
+                        <li>După ce terminați un download, nu închideți clientul dumneavoastră de torrente; lăsați-l pornit pentru a partaja fișierele.</li>
+                        <li>O rație prea mică va duce la dezactivarea contului.</li>
+                        <li>Trebuie să ții torrentul la seed minim 24 ore într-un interval de 7 zile.</li>
+                        <li>La 10 hit & run, nu mai poți descărca.</li>
+                        <li>După ce terminați un download, nu închideți clientul dumneavoastră de torrente (µTorrent, BitTorrent, qBittorrent, Deluge etc.); lăsați-l pornit pentru a partaja fișierele cu alții. Acest lucru vă ajută, de asemenea, să vă creșteți rația.</li>
+                        <li>O rație mică va duce, în cele din urmă, la dezactivarea contului.</li>
+                        <li>Dacă ați descărcat fișierul torrent și l-ați adăugat în client, asigurați-vă că finalizați descărcarea. Dacă, din orice motiv, nu puteți descărca torrentul, vă rugăm să anunțați staff-ul prin deschiderea unui ticket.</li>
+                        <li>Nu recomandăm descărcările parțiale! Timpul de seed începe să fie contorizat din momentul în care ați descărcat 100% torrentul</li>
+
+                       
+                    </ul>
+                
+                    <h4 class="text-primary">Respectarea celorlalți utilizatori</h4>
+                    <p>Este interzisă insultarea, hărțuirea sau discriminarea pe baza etniei, religiei, genului sau a altor criterii. Respectul reciproc este obligatoriu.</p>
+                
+                    <h4 class="text-primary">Partajarea fișierelor (seeding)</h4>
+                    <ul>
+                        <li>Fiecare utilizator este obligat să mențină un raport de <strong>cel puțin 1.0</strong> (raportul între upload și download).</li>
+                        <li>Torrentele trebuie să fie păstrate în seeding minim <strong>24 de ore în decurs de 7 zile</strong> sau până când se atinge un raport de 1.0.</li>
+                    </ul>
+                
+                    <h4 class="text-primary">Fișiere permise</h4>
+                    <ul>
+                        <li>Se pot partaja doar fișiere legale și fără conținut explicit ilegal (programe piratate, conținut care încalcă drepturile de autor etc.).</li>
+                        <li>Orice conținut ofensator, pornografic cu minori sau care promovează violența este strict interzis.</li>
+                    </ul>
+                
+                    <h4 class="text-primary">Conturi și securitate</h4>
+                    <ul>
+                        <li>Fiecare utilizator are voie să dețină <strong>un singur cont</strong>. Conturile multiple vor fi șterse fără avertisment.</li>
+                        <li>Este interzisă partajarea contului sau utilizarea acestuia de către alte persoane.</li>
+                    </ul>
+                
+                    <h4 class="text-primary">Titluri și descrieri ale torrentelor</h4>
+                    <p>Torrentele încărcate trebuie să aibă titluri clare și să includă descrieri detaliate. Torrentele incomplete sau fără informații vor fi șterse.</p>
+                
+                    <h4 class="text-primary">Comentarii și forumuri</h4>
+                    <ul>
+                        <li>Limbajul vulgar, spam-ul și publicitatea sunt interzise în comentarii și pe forumuri.</li>
+                        <li>Discuțiile trebuie să fie civilizate și la subiect.</li>
+                    </ul>
+                
+                    <h4 class="text-primary">Respectarea categoriilor</h4>
+                    <p>Torrentele trebuie plasate în categoria corespunzătoare (ex.: filme HD, muzică, aplicații). Torrentele plasate greșit pot fi șterse.</p>
+                
+                    <h4 class="text-primary">Viteza de upload și seeding</h4>
+                    <p>Dacă utilizați tracker-ul, vă rugăm să setați viteza de upload la un nivel rezonabil pentru a sprijini comunitatea.</p>
+                
+                    <h4 class="text-primary">Raportarea problemelor</h4>
+                    <p>Utilizatorii pot raporta problemele cu torrentele sau comportamentul neadecvat al altor membri folosind funcția de raportare.</p>
+                
+                    <h4 class="text-primary">Consecințe pentru nerespectarea regulilor</h4>
+                    <ul>
+                        <li><strong>Prima abatere:</strong> avertisment.</li>
+                        <li><strong>A doua abatere:</strong> restricționare temporară a contului.</li>
+                        <li><strong>Abateri repetate:</strong> suspendarea permanentă a contului.</li>
+                    </ul>
+                </div>
+                
+
+                <!-- English Tab -->
+                <div class="tab-pane fade" id="en" role="tabpanel" aria-labelledby="en-tab">
+                    <h4 class="text-primary">Downloading Rules</h4>
+                    <ul>
+                        <li>After finishing a download, do not close your torrent client; keep it running to share files.</li>
+                        <li>A low ratio will lead to account deactivation.</li>
+                        <li>You must seed the torrent for at least 24 hours within a 7-day period.</li>
+                        <li>After 10 hit & run penalties, you will no longer be able to download.</li>
+                        <li>After finishing a download, do not close your torrent client (µTorrent, BitTorrent, qBittorrent, Deluge, etc.); keep it running so that it can share the data with others. This also helps increase your ratio.</li>
+                        <li> A low ratio will eventually lead to account deactivation.</li>
+                        <li>If you have downloaded the torrent file and added it to your client, make sure to complete the torrent. If, for any reason, you cannot download the torrent, please notify the staff by opening a ticket.</li>
+                        <li>Seed time will only be counted if the torrent is downloaded in full.</li>
+                    </ul>
+
+                    <h4 class="text-primary">Respect for Other Users</h4>
+                    <p>Insulting, harassing, or discriminating based on ethnicity, religion, gender, or other criteria is prohibited. Mutual respect is mandatory.</p>
+
+                    <h4 class="text-primary">File Sharing (Seeding)</h4>
+                    <ul>
+                        <li>Each user is required to maintain a ratio of <strong>at least 1.0</strong> (the ratio of upload to download).</li>
+                        <li>Torrents must be seeded for a minimum of <strong>24 hours cumulated in 7 days</strong> or until a ratio of 1.0 is achieved.</li>
+                    </ul>
+
+                    <h4 class="text-primary">Allowed Files</h4>
+                    <ul>
+                        <li>Only legal files and those without explicitly illegal content (pirated software, copyright-infringing content, etc.) are allowed.</li>
+                        <li>Any offensive, child-pornographic, or violence-promoting content is strictly prohibited.</li>
+                    </ul>
+
+                    <h4 class="text-primary">Accounts and Security</h4>
+                    <ul>
+                        <li>Each user is allowed to have <strong>only one account</strong>. Multiple accounts will be deleted without warning.</li>
+                        <li>Sharing accounts or allowing others to use your account is prohibited.</li>
+                    </ul>
+
+                    <h4 class="text-primary">Torrent Titles and Descriptions</h4>
+                    <p>Uploaded torrents must have clear titles and detailed descriptions. Incomplete torrents or those lacking information will be deleted.</p>
+
+                    <h4 class="text-primary">Comments and Forums</h4>
+                    <ul>
+                        <li>Offensive language, spam, and advertisements are prohibited in comments and on forums.</li>
+                        <li>Discussions must be civilized and on-topic.</li>
+                    </ul>
+
+                    <h4 class="text-primary">Category Compliance</h4>
+                    <p>Torrents must be placed in the appropriate category (e.g., HD Movies, Music, Applications). Torrents placed incorrectly may be deleted.</p>
+
+                    <h4 class="text-primary">Upload Speed and Seeding</h4>
+                    <p>If you use the tracker, please set a reasonable upload speed to support the community.</p>
+
+                    <h4 class="text-primary">Reporting Issues</h4>
+                    <p>Users can report torrent issues or inappropriate behavior of other members using the report function.</p>
+
+                    <h4 class="text-primary">Consequences for Rule Violations</h4>
+                    <ul>
+                        <li><strong>First Offense:</strong> Warning.</li>
+                        <li><strong>Second Offense:</strong> Temporary account restriction.</li>
+                        <li><strong>Repeated Offenses:</strong> Permanent account suspension.</li>
+                    </ul>
+                </div>
+            </div>
         </div>
         <div class="card-footer text-center">
             <p class="mb-0">The administrators reserve the right to modify the rules and take additional measures to maintain a safe and friendly community. Follow the rules for an enjoyable experience on the tracker!</p>

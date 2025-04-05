@@ -65,13 +65,58 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
         $currentUser = Auth::user();
+        $oldInvites = $user->invites;
+        $oldSlots = $user->slots;
 
-        // Validează câmpurile de bază ale utilizatorului
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $id,
-            'user_class' => 'nullable|integer',
-        ]);
+       // Validate and update user information
+    $validatedData = $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|unique:users,email,' . $user->id,
+        // Add other validation rules as needed
+    ]);
+
+    // Handle invites and slots updates
+    $newInvites = $request->input('invites', $user->invites);
+    $newSlots = $request->input('slots', $user->slots);
+
+    $user->update($validatedData + [
+        'invites' => $newInvites,
+        'slots' => $newSlots,
+    ]);
+
+    // Track changes for timeline
+    $timelineMessage = [];
+
+    // Check for changes in invites
+    if ($newInvites != $oldInvites) {
+        $diffInvites = $newInvites - $oldInvites;
+        if ($diffInvites > 0) {
+            $timelineMessage[] = "Added {$diffInvites} invites";
+        } elseif ($diffInvites < 0) {
+            $timelineMessage[] = "Removed " . abs($diffInvites) . " invites";
+        }
+    }
+
+    // Check for changes in slots
+    if ($newSlots != $oldSlots) {
+        $diffSlots = $newSlots - $oldSlots;
+        if ($diffSlots > 0) {
+            $timelineMessage[] = "Added {$diffSlots} slots";
+        } elseif ($diffSlots < 0) {
+            $timelineMessage[] = "Removed " . abs($diffSlots) . " slots";
+        }
+    }
+
+    // If there was any change, create a timeline entry
+    if (!empty($timelineMessage)) {
+        $timelineEntry = new UserTimeline();
+        $timelineEntry->user_id = $user->id;
+        $timelineEntry->staff_id = auth()->user()->id;
+        $timelineEntry->comment = implode(' and ', $timelineMessage) . " by " . auth()->user()->name;
+        $timelineEntry->save();
+    }
+
+    
 
         // Actualizează câmpurile de bază ale utilizatorului
         $user->name = $request->name;

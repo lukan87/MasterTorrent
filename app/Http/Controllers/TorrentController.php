@@ -10,6 +10,7 @@ use App\Models\Torrent;
 use App\Models\Category;
 use App\Models\Comment;
 use App\Helpers\MediaInfo;
+use App\Models\Warning;
 use Illuminate\Support\Str;
 use App\Models\TorrentFiles;
 use Illuminate\Http\Request;
@@ -22,6 +23,7 @@ use App\Helpers\TorrentTools;
 use App\Services\TMDBService;
 use App\Models\TorrentThank;
 use App\Models\UserSlot;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\DB;
 
@@ -126,21 +128,25 @@ if ($request->has('categories') && is_array($request->categories)) {
                 $query->where('seeders', '>', 0);
             }
 
-            // Order first by sticky, then by the selected sort column and direction, or fallback to id
             return $query
-                ->orderByRaw('sticky DESC')            // Sticky torrents first
-                ->when(
-                    $request->has('sort') || $request->has('direction'),
-                    function ($q) use ($sortColumn, $sortDirection) {
-                        $q->orderBy($sortColumn, $sortDirection);  // Apply user-selected sorting
-                    },
-                    function ($q) {
-                        $q->orderBy('id', 'desc');    // Default to id (descending) if no query
-                    }
-                )
-                ->orderBy('id', 'desc')               // Then by id (descending)
-                ->paginate(50)
-                ->appends($request->query());         // Preserve query parameters
+    ->orderByRaw('sticky DESC')            // Sticky torrents first
+    ->when(
+        $request->has('sort') || $request->has('direction'),
+        function ($q) use ($sortColumn, $sortDirection) {
+            // Apply user-selected sorting
+            $q->orderBy($sortColumn, $sortDirection);  
+        },
+        function ($q) {
+            // If no query params, order by created_at first, then by id
+            $q->orderBy('created_at', 'desc')   // Then by created_at (descending)
+              ->orderBy('id', 'desc');          // Fallback to id (descending)
+        }
+    )
+    ->orderBy('created_at', 'desc')         // Ensure sorting by created_at if no sorting params
+    ->orderBy('id', 'desc')                 // Lastly order by id (descending)
+    ->paginate(50)
+    ->appends($request->query());           // Preserve query parameters
+
         });
 
         // Mark new torrents for the user
@@ -241,13 +247,17 @@ if ($request->has('categories') && is_array($request->categories)) {
                     $q->orderBy($sortColumn, $sortDirection);  // Apply user-selected sorting
                 },
                 function ($q) {
-                    $q->orderBy('id', 'desc');    // Default to id (descending) if no query
+                    // If no query params, order by created_at first, then by id
+                    $q->orderBy('created_at', 'desc')   // Then by created_at (descending)
+                      ->orderBy('id', 'desc');          // Fallback to id (descending)
                 }
             )
-            ->orderBy('id', 'desc')               // Then by id (descending)
+            ->orderBy('created_at', 'desc')         // Ensure sorting by created_at if no sorting params
+            ->orderBy('id', 'desc')                 // Lastly order by id (descending)
             ->paginate(50)
-            ->appends($request->query());         // Preserve query parameters
-    });
+            ->appends($request->query());           // Preserve query parameters
+        
+                });
 
     // Mark new torrents for the user
     $user = $request->user();
@@ -560,21 +570,29 @@ if ($existingSlot && ($slotType === 'free' || $slotType === 'double')) {
     
         // Modify the announce URL and add a comment
         $dict['announce'] = route('announce', ['passkey' => $user->passkey], false);
-        $dict['comment'] = 'Using this torrent binds you to MySite Confidentiality Agreement';
+        $dict['comment'] = 'Using this torrent binds you to LastFiles Confidentiality Agreement';
         // Add the label to the torrent's metadata
-        $dict['label'] = 'MySite';
+        $dict['custom']['label'] = 'LastFiles';
     
         // Add the announce-list for multiple trackers
-        $dict['announce-list'] = [
-            [route('announce', ['passkey' => $user->passkey])]
-        ];
+        // $dict['announce-list'] = [
+        // [route('announce', ['passkey' => $user->passkey])]
+        // ];
+
+        // Add the announce-list for multiple trackers
+    $dict['announce-list'] = [
+        // [route('announce', ['passkey' => $user->passkey])],
+        ["http://last-torrents.org/announce/{$user->passkey}"] // Secondary announce URL
+    ];
     
         // Re-encode the torrent file
         $fileToDownload = Bencode::bencode($dict);
     
         // Generate a custom filename
-        $prefix = 'MySite_';
+        $prefix = 'LastFiles_';
         $fileName = $prefix . preg_replace('/[^a-zA-Z0-9-_]/', '_', $torrent->name) . '.torrent';
+
+       
     
         // Clear all cache to ensure fresh data is loaded
         Cache::flush();
@@ -616,7 +634,18 @@ public function removeSlot($slotId)
     return redirect()->back()->with('success', 'Slot removed successfully.');
 }
 
+public function bump($id)
+{
+    $torrent = Torrent::findOrFail($id);
 
+   
+    $torrent->created_at = now();
+    $torrent->bumped = true;
+    $torrent->save();
+    Cache::flush();
+
+    return redirect()->route('torrents.index')->with('success', 'Torrent bumped to actual date successfully.');
+}
 
     // Show details of a specific torrent
     public function show($id, $slug = null)
@@ -699,7 +728,9 @@ public function removeSlot($slotId)
         $thankUserNames = User::whereIn('id', $thankUserNames)->pluck('name')->toArray(); // Get the user names
 
             // Return the data to the view
-            return view('torrents.show', compact('torrent', 'comments', 'tmdbData', 'omdbData', 'mediainfo', 'steamData', 'snatched', 'similarTorrents', 'recommendedTorrents', 'hasThanked', 'thankUserNames'));
+            $fileTree = $this->buildFileTree($torrent->files);
+            return view('torrents.show', compact('torrent', 'comments', 'tmdbData', 'omdbData', 'mediainfo', 'steamData', 'snatched', 'similarTorrents', 'recommendedTorrents', 'hasThanked', 'thankUserNames', 'fileTree'));
+            
 
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             // Handle the case where the torrent is not found
@@ -707,32 +738,70 @@ public function removeSlot($slotId)
         }
     }
 
-    public function thank($id)
-    {
-        $torrent = Torrent::findOrFail($id);
+    private function buildFileTree($files)
+{
+    $tree = [];
 
-        // Check if the authenticated user is the owner of the torrent
-        if ($torrent->owner == Auth::id()) {
-            return redirect()->route('torrents.show', ['id' => $torrent->id, 'slug' => $torrent->slug])
-                ->with('error', 'You cannot thank your own torrent.');
+    foreach ($files as $file) {
+        $parts = explode('/', $file->filename);
+        $current = &$tree;
+
+        foreach ($parts as $part) {
+            if (!isset($current[$part])) {
+                $current[$part] = [];
+            }
+            $current = &$current[$part];
         }
 
-        // Check if the user has already thanked the torrent
-        if (TorrentThank::where('torrent_id', $torrent->id)->where('user_id', Auth::id())->exists()) {
-            return redirect()->route('torrents.show', ['id' => $torrent->id, 'slug' => $torrent->slug])
-                ->with('error', 'You have already thanked this torrent.');
-        }
-
-        // Create a new "thank" record
-        TorrentThank::create([
-            'torrent_id' => $torrent->id,
-            'user_id' => Auth::id(),
-        ]);
-
-        // Redirect back to the torrent page with a success message
-        return redirect()->route('torrents.show', ['id' => $torrent->id, 'slug' => $torrent->slug])
-            ->with('success', 'Thank you for thanking this torrent!');
+        // Store file size at the last part of the path
+        $current['_size'] = \App\Helpers\FormatHelper::formatSize($file->size);
     }
+
+    return $tree;
+}
+
+public function thank($id)
+{
+    $torrent = Torrent::findOrFail($id);
+    $userId = Auth::id();
+
+    // Check if the authenticated user is the owner of the torrent
+    if ($torrent->owner == Auth::id()) {
+        return redirect()->route('torrents.show', ['id' => $torrent->id, 'slug' => $torrent->slug])
+            ->with('error', 'You cannot thank your own torrent.');
+    }
+
+    // Check if the user has already thanked the torrent
+    if (TorrentThank::where('torrent_id', $torrent->id)->where('user_id', Auth::id())->exists()) {
+        return redirect()->route('torrents.show', ['id' => $torrent->id, 'slug' => $torrent->slug])
+            ->with('error', 'You have already thanked this torrent.');
+    }
+
+    // Check the number of thanks given today
+$todayThanksCount = TorrentThank::where('user_id', $userId)
+->whereDate('created_at', Carbon::today())
+->count();
+
+if ($todayThanksCount >= 5) {
+return redirect()->route('torrents.show', ['id' => $torrent->id, 'slug' => $torrent->slug])
+    ->with('error', 'You have reached your daily thank limit (5 per day).');
+}
+
+    // Create a new "thank" record
+    TorrentThank::create([
+        'torrent_id' => $torrent->id,
+        'user_id' => Auth::id(),
+    ]);
+
+   
+$user = Auth::user();
+$user->seedbonus += 0.5; 
+$user->save();
+
+    // Redirect back to the torrent page with a success message
+    return redirect()->route('torrents.show', ['id' => $torrent->id, 'slug' => $torrent->slug])
+        ->with('success', 'Thank you for thanking this torrent!');
+}
 
 
 
@@ -903,14 +972,18 @@ if (empty($deletionReason)) {
     $deletionReason = $request->input('custom_reason');
 }
 
-         // Send a message to the owner about the deletion
+         // Ensure the owner exists before sending the message
+if ($owner && User::where('id', $owner)->exists()) {
+    // Send a message to the owner about the deletion
     Message::create([
         'receiver_id' => $owner,  // The owner receives the message
         'subject' => 'Torrent Deletion',
         'sender_id' => 2,  // The user deleting the torrent (usually admin or system)
-        'body' => 'Your torrent " ' . $torrent->name . ' " has been deleted. Reason: ' . $deletionReason,
+        'body' => 'Your torrent "' . $torrent->name . '" has been deleted. Reason: ' . $deletionReason,
         'is_read' => false,  // Mark as unread initially
     ]);
+}
+
 
         // Delete associated peers
         Peer::where('torrent_id', $torrent->id)->delete();
@@ -920,6 +993,16 @@ if (empty($deletionReason)) {
 
           // Delete associated comments
         Comment::where('torrent_id', $torrent->id)->delete();
+
+        //Delete associated warning records
+        if (Warning::where('torrent', $torrent->o)->exists()) {
+            Warning::where('torrent', $torrent->id)->delete();
+        }
+
+        // Delete associated slots
+        if (UserSlot::where('torrent_id', $torrent->id)->exists()) {
+            UserSlot::where('torrent_id', $torrent->id)->delete();
+        }
 
         // Detach associated genres
         $torrent->genres()->detach();

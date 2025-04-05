@@ -58,6 +58,8 @@
         transform: scale(1.05);
     }
 
+    
+
     .recommended-btn {
         background-color: #343a40;
         border: 1px solid #FFC90E;
@@ -108,4 +110,9 @@
 <!-- Seedbox Badge -->
 @if($torrent->seedbox)
     <div class="badge-btn seedbox-btn" data-bs-toggle="tooltip" title="This torrent was upload with a seedbox. Downloading speeds are higher!">Seedbox</div>
+@endif
+
+<!-- Bumped Badge -->
+@if($torrent->bumped)
+    <div class="badge-btn bump-btn" data-bs-toggle="tooltip" title="This torrent was bumped to an earlier date. Download it while it's here!"><i class="fa fa-refresh" style="font-size:16px" aria-hidden="true"></i></div>
 @endif

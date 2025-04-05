@@ -69,11 +69,16 @@ Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.
 use App\Http\Controllers\SnatchController;
 
 Route::prefix('snatch')->group(function () {
-    Route::get('/snatchlist/{userId?}', [SnatchController::class, 'snatchlist'])->name('snatch.snatchlist');
-    Route::get('/seeding/{userId?}', [SnatchController::class, 'seeding'])->name('snatch.seeding');
-    Route::get('/leeching/{userId?}', [SnatchController::class, 'leeching'])->name('snatch.leeching');
-    Route::get('/hit-and-run/{userId?}', [SnatchController::class, 'hitAndRun'])->name('snatch.hitAndRun');
-    Route::get('/need-to-seed/{userId?}', [SnatchController::class, 'needToSeed'])->name('snatch.needToSeed');
+    Route::get('/snatchlist/{userId?}', [SnatchController::class, 'snatchlist'])->name('snatch.snatchlist')->middleware('auth');
+    Route::get('/seeding/{userId?}', [SnatchController::class, 'seeding'])->name('snatch.seeding')->middleware('auth');
+    Route::get('/leeching/{userId?}', [SnatchController::class, 'leeching'])->name('snatch.leeching')->middleware('auth');
+    Route::get('/hit-and-run/{userId?}', [SnatchController::class, 'hitAndRun'])->name('snatch.hitAndRun')->middleware('auth');
+    Route::get('/need-to-seed/{userId?}', [SnatchController::class, 'needToSeed'])->name('snatch.needToSeed')->middleware('auth');
+    Route::delete('/snatch/delete/{userId}/{torrentId}', [SnatchController::class, 'deleteNeedToSeed'])
+    ->name('snatch.deleteNeedToSeed')
+    ->middleware('auth');
+
+
 });
 
 
@@ -99,6 +104,11 @@ Route::post('/bonus/buy-vip', [BonusController::class, 'buyVip'])->name('bonus.b
 
 Route::post('/bonus/buy-seedtime', [BonusController::class, 'buySeedtime'])->name('bonus.buySeedtime');
 Route::post('/remove-hnr', [BonusController::class, 'removeHNR'])->name('bonus.removeHNR');
+Route::post('/buy-invites', [BonusController::class, 'buyInvites'])->name('buy.invites')->middleware('auth');
+Route::post('/buy-slots', [BonusController::class, 'buySlots'])->name('buy.slots')->middleware('auth');
+Route::post('/bonus/surprise', [BonusController::class, 'buySurprise'])->name('bonus.surprise');
+
+
 
 Route::get('/staff', [StaffController::class, 'index'])->name('staff.index');
 
@@ -138,8 +148,8 @@ Route::get('/profile/{id}/{name}/seeding-torrents', [ProfileController::class, '
 Route::get('/profile/{id}/{name}/download-history', [ProfileController::class, 'downloadHistory'])->name('profile.download-history')->middleware('auth');
 
 //Slots
-Route::get('/profile/{id}/{name}/slots', [ProfileController::class, 'activeSlots'])
-    ->name('profile.slots');
+Route::get('/profile/{id}/{name}/tokens', [ProfileController::class, 'activeTokens'])
+    ->name('profile.tokens');
 
 
 
@@ -176,6 +186,7 @@ Route::get('/collections/{id}', [CollectionController::class, 'show'])->name('co
 
 Route::post('/comments', [CommentController::class, 'store'])->middleware('auth')->name('comments.store')->middleware('auth');
 Route::delete('/comments/{id}', [CommentController::class, 'destroy'])->middleware('auth')->name('comments.destroy')->middleware('auth');
+Route::put('/comments/{id}/update', [CommentController::class, 'update'])->name('comments.update')->middleware('auth');
 
 
 
@@ -274,6 +285,8 @@ Route::get('/torrents/{id}/{slug}/history', [TorrentHistoryController::class, 'i
 Route::post('torrents/{id}/thank', [TorrentController::class, 'thank'])->name('torrents.thank')->middleware('auth');
 Route::post('/slots/renew/{slotId}', [TorrentController::class, 'renewSlot'])->name('slots.renew')->middleware('auth');
 Route::post('/slots/remove/{slotId}', [TorrentController::class, 'removeSlot'])->name('slots.remove')->middleware('auth');
+Route::post('/torrents/bump/{id}', [TorrentController::class, 'bump'])->name('torrents.bump')->middleware('auth');
+
 
 
 

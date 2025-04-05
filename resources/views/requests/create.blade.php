@@ -43,7 +43,7 @@
 
         <div class="form-group">
             <label for="image">Image URL</label>
-            <input type="url" name="image" id="image" class="form-control" value="{{ old('image') }}">
+            <input type="url" name="image" id="image" class="form-control" value="{{ old('image') }}" required>
         </div>
 
         <div class="form-group">

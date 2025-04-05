@@ -43,7 +43,7 @@ class AutoPreWarning extends Command
         try {
             // Process History records in chunks
             History::with(['user', 'torrent'])
-                ->where('created_at', '>', '2024-12-15 00:00:00')
+                ->where('created_at', '>', '2025-02-01 00:00:00')
                 ->whereNull('prewarned_at')
                 ->where('hitrun', '=', 0)
                 ->where('immune', '=', 0)

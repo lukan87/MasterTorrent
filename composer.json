@@ -10,7 +10,7 @@
         "guzzlehttp/guzzle": "^7.9",
         "illuminate/database": "*",
         "ksubileau/color-thief-php": "^2.0",
-        "laravel/framework": "^12.2.0",
+        "laravel/framework": "^12",
         "laravel/tinker": "^2.9",
         "laravel/ui": "^4.5",
         "monicahq/laravel-cloudflare": "^3.7",

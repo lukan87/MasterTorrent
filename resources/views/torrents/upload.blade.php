@@ -15,9 +15,9 @@
     <h2 class="mt-10">
         <strong>Announce URL:</strong>
         <a href="javascript:void(0);" 
-           onclick="copyToClipboard('https://justtorrents.duckdns.org/announce/{{ $user->passkey }}')" 
+           onclick="copyToClipboard('http://last-torrents.org/announce/{{ $user->passkey }}')" 
            title="Click to copy this URL to your clipboard!">
-           https://justtorrents.duckdns.org/announce/{{ $user->passkey }}
+            http://last-torrents.org/announce/{{ $user->passkey }}
         </a>
     </h2>
     <p>Click the announce URL above to copy it automatically when creating a new torrent!</p>
@@ -62,7 +62,7 @@
     <label for="category_id">Category</label>
     <select name="category_id" id="category_id" class="form-control" required onchange="toggleFieldsByCategory()">
         <!-- Make sure category with id 10 comes first -->
-        @foreach($categories->sortByDesc(fn($cat) => $cat->id === 51) as $category)
+        @foreach($categories->sortByDesc(fn($cat) => $cat->id === 49) as $category)
             <option value="{{ $category->id }}">{{ $category->name }}</option>
         @endforeach
     </select>
@@ -153,10 +153,10 @@
                 <input type="checkbox" name="seedbox" id="seedbox" class="form-check-input" value="1" {{ old('seedbox') ? 'checked' : '' }}>
                 <label for="seedbox" class="form-check-label">Seedbox</label>
             </div>
-            <div class="form-check form-check-inline">
+            {{-- <div class="form-check form-check-inline">
                 <input type="checkbox" name="external" id="external" class="form-check-input" value="1" {{ old('external') ? 'checked' : '' }}>
                 <label for="external" class="form-check-label">External</label>
-            </div>
+            </div> --}}
         </div>
 
 

@@ -41,7 +41,7 @@ class TorrentRequestController extends Controller
             'imdb_url' => 'nullable|url',
             'tmdb_url' => 'nullable|url',
             'steam_url' => 'nullable|url',
-            'image' => 'nullable|url',  // Validate the image as a URL
+            'image' => ['nullable', 'url', 'regex:/\.(jpg|jpeg|png|gif|webp)$/i'],
             'description' => 'nullable|string|max:500'
         ]);
 

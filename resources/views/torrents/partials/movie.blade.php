@@ -80,7 +80,7 @@
 
 <dd class="col-lg-12">
 @foreach($torrent->genres as $genre)
-                <a href="{{ route('torrents.index', ['genre' => $genre->id]) }}" class="badge bg-secondary" title="Search for {{ $genre->name }} torrents">{{ $genre->name }}</a>
+                <a href="{{ route('torrents.index', ['genre' => $genre->id]) }}" class="badge bg-secondary" data-bs-toggle="tooltip" title="Search for {{ $genre->name }} torrents">{{ $genre->name }}</a>
             @endforeach
 </dd>
 
@@ -229,7 +229,7 @@ top: 55px;
 right: 0;
 bottom: 0;
 left: 0;
-background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 1)), url('{{$torrent->background}}');
+background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 1)), url('{{$torrent->background}}');
 background-position-x: center top;
 background-size: cover;
 background-repeat: no-repeat;

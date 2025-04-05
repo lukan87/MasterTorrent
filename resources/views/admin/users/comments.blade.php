@@ -36,7 +36,7 @@
         </small>
 
                         </h5>
-                        <p class="mb-1">{{ $comment->comment }}</p>
+                        <p class="mb-1">{!! convertCustomTagsToHtml($comment->comment) !!}</p>
                         <small class="text-muted">{{ $comment->created_at->diffForHumans() }}</small>
                     </div>
 

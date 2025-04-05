@@ -16,6 +16,12 @@ class Ticket extends Model
         'status',
         'title',
         'description',
+        'last_replied_at',  
+        'last_replier_id',  
+    ];
+
+    protected $casts = [
+        'last_replied_at' => 'datetime', // This ensures it is treated as a Carbon instance
     ];
 
     public function responses()
@@ -32,4 +38,10 @@ class Ticket extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function lastReplier()
+    {
+        return $this->belongsTo(User::class, 'last_replier_id');
+    }
 }
+

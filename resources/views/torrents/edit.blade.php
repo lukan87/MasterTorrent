@@ -4,24 +4,6 @@
 <div class="container">
     <h2>Edit Torrent: {{ $torrent->name }}</h2>
 
-    <!-- Display validation errors -->
-    @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
-    <!-- Success message -->
-    @if (session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
-        </div>
-    @endif
-
     <form action="{{ route('torrents.update', $torrent->slug) }}" method="POST" onsubmit="return confirm('Are you sure you want to update this torrent?');">
         @csrf
         @method('PUT')
@@ -154,14 +136,14 @@
             <input type="url" name="background" id="background" class="form-control" value="{{ old('background', $torrent->background) }}">
             @if ($torrent->background)
                 <div>
-                    <img src="{{ $torrent->background }}" alt="Background" class="img-thumbnail" style="max-width: 150px;">
+                    <img src="{{ $torrent->background }}" alt="Background" class="img-thumbnail" style="max-width: 350px;">
                     <p>Current background</p>
                 </div>
             @endif
         </div>
 
         <!-- IMDB URL (Optional) -->
-        <div class="form-group">
+        <div class="mb-3 form-group">
             <label for="imdb_url">IMDB URL:</label>
             <input type="url" name="imdb_url" id="imdb_url" class="form-control" value="{{ old('imdb_url', $torrent->imdb_url) }}">
             <button type="button" class="btn btn-success mt-2" onclick="fetchIMDBInfo()">Fetch Movie Info</button>
@@ -207,7 +189,7 @@ function fetchIMDBInfo() {
 }
 </script>
 
-        <div class="form-group">
+        <div class="mb-3 form-group">
             <label for="trailer">Trailer:</label>
             <input type="url" name="trailer" id="trailer" class="form-control" value="{{ old('trailer', $torrent->trailer) }}">
         </div>
