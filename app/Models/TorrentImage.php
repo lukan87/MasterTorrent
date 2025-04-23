@@ -11,6 +11,8 @@ class TorrentImage extends Model
 
     protected $fillable = ['torrent_id', 'path'];
 
+    protected $table = 'torrent_images'; // Explicitly specifying the table name
+
     public function torrent()
     {
         return $this->belongsTo(Torrent::class);

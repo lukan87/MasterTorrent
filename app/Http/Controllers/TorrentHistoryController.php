@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\History;
 use App\Models\Torrent;
+use Illuminate\Http\Request;
 
 class TorrentHistoryController extends Controller
 {
@@ -14,7 +15,7 @@ class TorrentHistoryController extends Controller
      * @param string $slug
      * @return \Illuminate\View\View|\Illuminate\Http\Response
      */
-    public function index(int $id, string $slug)
+    public function index(int $id, string $slug, Request $request)
     {
         // Find the torrent by ID
         $torrent = Torrent::findOrFail($id);
@@ -31,7 +32,7 @@ class TorrentHistoryController extends Controller
                 $query->whereNotNull('completed_at') // Include completed torrents
                       ->orWhere('seeder', true); // Or users who are actively seeding
             })
-            ->orderBy('created_at', 'desc') // Order by created_at in descending order
+            ->orderByRaw('user_id = ? DESC', [$request->user()->id])
             ->paginate(30);
 
         return view('torrents.history', [

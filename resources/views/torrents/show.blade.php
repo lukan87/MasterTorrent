@@ -22,6 +22,13 @@
 @include('torrents.partials.showbar')
 
 
+@if ($torrent->images->isNotEmpty())
+
+@include('torrents.partials.screens')
+
+@endif
+
+
 {{-- Details section --}}
 <div class="card card-blur">
     <div class="card-header">

@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Models\History; // Adjust the model if needed
+use App\Models\History;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Exception;
@@ -22,7 +22,7 @@ class AwardSeedBonus extends Command
      *
      * @var string
      */
-    protected $description = 'Award 0.5 seedbonus points for each torrent being seeded every hour based on history';
+    protected $description = 'Award 0.15 seedbonus points for each torrent being seeded every hour based on history, excluding torrent owners';
 
     /**
      * Execute the console command.
@@ -35,38 +35,43 @@ class AwardSeedBonus extends Command
         try {
             $current_time = now();
 
-            // Process history records in batches
-            History::where('seeder', true)
+            // Eager load user and torrent relationships to reduce DB queries
+            History::with(['torrent', 'user'])
+                ->where('seeder', true)
                 ->where(function ($query) use ($current_time) {
                     $query->whereNull('last_awarded')
-                          ->orWhere('last_awarded', '<=', $current_time->subHour());
+                          ->orWhere('last_awarded', '<=', $current_time->copy()->subHour());
                 })
                 ->chunk(100, function ($historyRecords) use ($current_time) {
                     $userPoints = [];
-                    $uniqueUsers = [];
 
                     foreach ($historyRecords as $record) {
-                        $userId = $record->user_id;
-                        $torrentId = $record->torrent_id;
+                        $user = $record->user;
+                        $torrent = $record->torrent;
 
-                        $key = "{$userId}-{$torrentId}";
+                        // Skip if missing user/torrent or user is the owner
+                        if (!$user || !$torrent || $torrent->owner == $user->id) {
+                            $this->info("Skipping bonus for user ID {$record->user_id} (owner or missing data).");
+                            continue;
+                        }
+
+                        $key = "{$user->id}-{$torrent->id}";
 
                         if (!isset($userPoints[$key])) {
                             $userPoints[$key] = [
-                                'user_id' => $userId,
-                                'points' => 0.15,
+                                'user_id' => $user->id,
+                                'points' => 0.15, 
                             ];
-                            $uniqueUsers[$userId] = true;
                         }
 
-                        // Update the last_awarded timestamp for this history record
+                        // Update last_awarded timestamp
                         $record->last_awarded = $current_time;
                         $record->save();
 
-                        $this->info("Processed history record for user ID {$userId} and torrent ID {$torrentId}.");
+                        $this->info("Processed history record for user ID {$user->id} and torrent ID {$torrent->id}.");
                     }
 
-                    // Update user points in bulk
+                    // Award seedbonus points
                     foreach ($userPoints as $data) {
                         User::where('id', $data['user_id'])->increment('seedbonus', $data['points']);
                         $this->info("User ID {$data['user_id']} awarded {$data['points']} points.");

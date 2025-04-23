@@ -78,6 +78,28 @@
                                 </small>
                             </div>
                         </div>
+                        @php
+                        $timezones = \DateTimeZone::listIdentifiers();
+                        @endphp
+                        <div class="row mb-3">
+                            <label for="timezone" class="col-md-4 col-form-label text-md-end">{{ __('Timezone') }}</label>
+
+                            <div class="col-md-6">
+                                <select id="timezone" name="timezone" class="form-select @error('timezone') is-invalid @enderror" required>
+                                    <option value="" disabled selected>Select your timezone</option>
+                                    @foreach($timezones as $timezone)
+                                        <option value="{{ $timezone }}" {{ old('timezone') == $timezone ? 'selected' : '' }}>{{ $timezone }}</option>
+                                    @endforeach
+                                </select>
+
+                                @error('timezone')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                        </div>
+                        
 
                         <!-- Conditionally display the invite code field -->
                         @if(config('app.invite_only') == true)

@@ -4,14 +4,15 @@ namespace App\Models;
 
 class UserClass
 {
-    const USER = 1;
-    const ELITE_USER = 2;
-    const VIP = 3;
-    const SUPERUSER = 4;
-    const UPLOADER = 5;
-    const MODERATOR = 6;
-    const ADMIN = 7;
-    const OWNER = 8;
+    const int USER = 1;
+    const int ELITE_USER = 2;
+    const int VIP = 3;
+    const int SUPERUSER = 4;
+    const int UPLOADER = 5;
+    const int MODERATOR = 6;
+    const int ADMIN = 7;
+    const int OWNER = 8;
+    const int WEB_DEVELOPER = 9;
 
     public static function getClasses()
     {
@@ -24,6 +25,7 @@ class UserClass
             self::MODERATOR => 'Moderator',
             self::ADMIN => 'Admin',
             self::OWNER => 'Owner',
+            self::WEB_DEVELOPER => 'Web Developer',
         ];
     }
 
@@ -45,9 +47,10 @@ class UserClass
             self::MODERATOR => 'yellow',
             self::ADMIN => 'red',
             self::OWNER => 'purple',
+            self::WEB_DEVELOPER => 'SlateBlue',
         ];
 
-        return $colors[$class] ?? 'gray'; // default to gray if class not found
+        return $colors[$class] ?? 'LightGray'; // default to gray if class not found
     }
 
 

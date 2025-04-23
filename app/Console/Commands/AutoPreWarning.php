@@ -54,7 +54,8 @@ class AutoPreWarning extends Command
                 ->has('torrent')
                 ->whereHas('user', function ($query) {
                     $query->where('is_immune', false)
-                          ->where('donor', 'no');
+                           ->where('user_class', '<', 3)
+                           ->where('donor', 'no');
                 })
                 ->whereHas('torrent', function ($query) {
                     $query->whereRaw('history.actual_downloaded > torrents.size * ?', [config('hitrun.buffer') / 100])

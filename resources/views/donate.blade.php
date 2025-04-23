@@ -38,12 +38,12 @@
                                 <div class="row">
                                     @php
                                         $donations = [
-                                            ['amount' => 5, 'vip' => '4 weeks', 'upload' => '50G', 'bonus' => '500'],
-                                            ['amount' => 7, 'vip' => '6 weeks', 'upload' => '150G', 'bonus' => '1500'],
-                                            ['amount' => 10, 'vip' => '2 months', 'upload' => '300G', 'bonus' => '2500'],
-                                            ['amount' => 15, 'vip' => '10 weeks', 'upload' => '500G', 'bonus' => '5000'],
-                                            ['amount' => 20, 'vip' => '3 months', 'upload' => '750G', 'bonus' => '7500'],
-                                            ['amount' => 30, 'vip' => 'Unlimited', 'upload' => '1000G', 'bonus' => '10000'],
+                                            ['amount' => 5, 'vip' => '4 weeks', 'upload' => '50Gb', 'bonus' => '500'],
+                                            ['amount' => 7, 'vip' => '6 weeks', 'upload' => '150Gb', 'bonus' => '1500'],
+                                            ['amount' => 10, 'vip' => '2 months', 'upload' => '300Gb', 'bonus' => '2500'],
+                                            ['amount' => 15, 'vip' => '10 weeks', 'upload' => '500Gb', 'bonus' => '5000'],
+                                            ['amount' => 20, 'vip' => '3 months', 'upload' => '750Gb', 'bonus' => '7500'],
+                                            ['amount' => 50, 'vip' => 'Unlimited', 'upload' => '1000Gb', 'bonus' => '10000'],
                                         ];
                                         $totalDonation = array_sum(array_column($donations, 'amount'));
                                     @endphp

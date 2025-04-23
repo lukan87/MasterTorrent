@@ -59,7 +59,7 @@
                 </div>
             </div>
         </div>
-        @if (Auth::check() && Auth::user()->user_class === \App\Models\UserClass::OWNER)
+        @if (Auth::check() && Auth::user()->user_class === \App\Models\UserClass::WEB_DEVELOPER)
         <div class="row">
 
         <div class="col-md-6 mt-4">

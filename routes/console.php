@@ -46,6 +46,9 @@ Schedule::command('invites:expire')->daily();
 //Change bumped torrents to not bumped after 30 days
 Schedule::command('torrents:unbump-old')->daily();
 
+//Sterge mesaje mai vechi de o luna si care sunt citite
+Schedule::command('messages:delete-old')->daily();
+
 
 
 

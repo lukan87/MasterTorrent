@@ -35,8 +35,8 @@
         <!-- Download Button -->
         <button type="button" class="btn btn-gradient-primary btn-sm d-flex align-items-center" aria-current="page" data-bs-toggle="tooltip" title="Download Torrent">
             <a href="{{ route('torrents.download', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}" class="text-white text-decoration-none">
-                <i class="fa-solid fa-download d-sm-none me-2"></i> <!-- Hide on small screens and larger -->
-                <span class="d-none d-sm-inline"><i class="fa-solid fa-download me-2"></i> Download</span> <!-- Hide on extra small screens (mobile) -->
+                <i class="bi bi-file-earmark-arrow-down-fill d-sm-none me-2"></i> <!-- Hide on small screens and larger -->
+                <span class="d-none d-sm-inline"><i class="bi bi-file-earmark-arrow-down-fill me-2"></i> Download</span> <!-- Hide on extra small screens (mobile) -->
             </a>
         </button>
 
@@ -48,19 +48,19 @@
         <!-- Dropdown Menu -->
         <ul class="dropdown-menu dropdown-menu-dark shadow-lg">
             <li><a class="dropdown-item" href="{{ route('torrents.download', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}?free=1" data-bs-toggle="tooltip" title="No Download Recoreded For This Torrent">
-                <i class="fa-solid fa-arrow-down me-2"></i> Free
+                <i class="bi bi-0-circle-fill me-2"></i> Free
             </a></li>
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item" href="{{ route('torrents.download', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}?double=1" data-bs-toggle="tooltip" title="Double Upload Recoreded For This Torrent">
-                <i class="fa-solid fa-arrow-up me-2"></i> Double
+                <i class="bi bi-chevron-double-down me-2"></i> Double
             </a></li>
         </ul>
     </div>
 @else
     <button type="button" class="btn btn-gradient-info btn-sm d-flex align-items-center" aria-current="page" data-bs-toggle="tooltip" title="Download Torrent">
         <a href="{{ route('torrents.download', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}" class="text-white text-decoration-none">
-            <i class="fa-solid fa-download d-sm-none me-2"></i> <!-- Hide on small screens and larger -->
-            <span class="d-none d-sm-inline"><i class="fa-solid fa-download me-2"></i> Download</span> <!-- Hide on extra small screens (mobile) -->
+            <i class="bi bi-file-earmark-arrow-down-fill d-sm-none me-2"></i> <!-- Hide on small screens and larger -->
+            <span class="d-none d-sm-inline"><i class="bi bi-file-earmark-arrow-down-fill me-2"></i> Download</span> <!-- Hide on extra small screens (mobile) -->
         </a>
     </button>
 @endif

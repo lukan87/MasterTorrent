@@ -3,39 +3,39 @@
 @section('content')
 
 <style>
-    /* Full-screen background with gradient overlay */
+   
     body {
         background: linear-gradient(rgba(20, 20, 20, 0.5), rgba(20, 20, 20, 0.9)),
 
         background-size: cover;
-        color: #ccc; /* Softer text color */
-        overflow: hidden; /* Prevents scrollbar */
+        color: #ccc; 
+        overflow: hidden;
         margin: 0;
         height: 100vh;
     }
 
-    /* Centered glassmorphic card */
+   
     .glass-card {
-        background: rgba(50, 50, 50, 0.7); /* Darker frosted glass effect */
+        background: rgba(50, 50, 50, 0.7); 
         border-radius: 15px;
         padding: 2rem;
         box-shadow: 0px 8px 32px rgba(0, 0, 0, 0.5);
         backdrop-filter: blur(8px);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        color: #eee; /* Light gray text color */
+        color: #eee; 
         max-width: 500px;
         width: 100%;
     }
 
-    /* Header style */
+   
     .glass-card-header {
-        color: #888; /* Dark gray header */
+        color: #888;
         font-size: 1.75rem;
         text-align: center;
         font-weight: bold;
     }
 
-    /* Input and form styling */
+ 
     .form-control {
         background-color: rgba(255, 255, 255, 0.1);
         color: #ddd;
@@ -43,11 +43,11 @@
     }
 
     .form-control:focus {
-        border-color: #666; /* Darker border on focus */
+        border-color: #666;
         box-shadow: 0px 0px 8px #666;
     }
 
-    /* Button styling with hover effects */
+   
     .btn-primary, .btn-info, .btn-warning {
         border-radius: 20px;
         padding: 0.5rem 1.5rem;
@@ -78,7 +78,7 @@
         background-color: #444;
     }
 
-    /* Error and success messages */
+   
     .alert {
         background-color: rgba(255, 0, 0, 0.8);
     }
@@ -134,8 +134,6 @@
                         {{ __('Remember Me') }}
                     </label>
                 </div>
-
-                <!-- Secțiunea pentru suport Facebook -->
 
 
 

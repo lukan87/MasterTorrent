@@ -272,7 +272,7 @@ public function buySurprise(Request $request)
     $user = Auth::user();
 
 
-    $cost = 5000;
+    $cost = 15000;
 
   
     if ($user->seedbonus < $cost) {

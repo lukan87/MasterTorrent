@@ -24,8 +24,15 @@
                             {{-- Message Header --}}
                             <div class="d-flex justify-content-between">
                             <span class="header">
-                            <a href="{{ route('profile.show', ['id' => $message->user->id]) }}" class="text-light">
+                            <a href="{{ route('profile.show', ['id' => $message->user->id]) }}"
+   style="color: {{ \App\Models\UserClass::getClassColor($message->user->user_class) }}">
     {{ $message->user->name }}
+    @if($message->user->warned)
+        <i class="bi bi-exclamation-triangle-fill text-danger" data-bs-toggle="tooltip" title="Warned"></i>
+    @endif
+    @if($message->user->donor == 'yes')
+        <i class="bi bi-star-fill text-success" data-bs-toggle="tooltip" title="Donor"></i>
+    @endif
 </a>
 
 </span>
@@ -61,7 +68,7 @@
                            {{-- Display Replies --}}
                            @if($message->replies && $message->replies->count() > 0)
     <div class="replies mt-3" style="background-color: #444444; padding: 10px; border-radius: 5px;">
-        @foreach($message->replies as $reply)
+        @foreach($message->replies->sortByDesc('created_at') as $reply)
             <div class="d-flex align-items-start mb-3">
                 {{-- Reply Avatar --}}
                 <div class="avatar-container">
@@ -74,9 +81,17 @@
                      <div class="arrow"></div>
                     <div class="d-flex justify-content-between">
                         <span class="header">
-                            <a href="{{ route('messages.create', ['receiver_id' => $reply->user->id]) }}" class="text-light">
-                                {{ $reply->user->name }}
-                            </a>
+                        <a href="{{ route('messages.create', ['receiver_id' => $reply->user->id]) }}"
+   style="color: {{ \App\Models\UserClass::getClassColor($reply->user->user_class) }}">
+    {{ $reply->user->name }}
+    @if($reply->user->warned)
+    <i class="bi bi-exclamation-triangle-fill text-danger" data-bs-toggle="tooltip" title="Warned"></i>
+    @endif
+    @if($reply->user->donor === 'yes')
+    <i class="bi bi-star-fill text-success" data-bs-toggle="tooltip" title="Donor"></i>
+    @endif
+</a>
+
                         </span>
                         <span class="timestamp">{{ $reply->created_at->format('Y-m-d H:i') }}
                              {{-- Actions for Reply --}}

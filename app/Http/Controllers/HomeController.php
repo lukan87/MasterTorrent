@@ -25,7 +25,7 @@ class HomeController extends Controller
 
         $recommendedTorrents = $this->getRecommendedTorrents();
 
-        // Get top uploaders and top downloaders
+        
         $topUploaders = User::orderBy('uploaded', 'desc')->take(10)->get();
         $topDownloaders = User::orderBy('downloaded', 'desc')->take(10)->get();
 
@@ -37,40 +37,56 @@ class HomeController extends Controller
         $onlineUsers = $onlineUsersData['users'];
         $onlineUserCount = $onlineUsersData['count'];
 
-       // Define time intervals for filtering
+       
 $now = now();
 
-// Cache torrents from the last day
+
 $topLastDay = Cache::remember('top_last_day', $cacheDuration, function () use ($now) {
     return Torrent::where('created_at', '>=', $now->copy()->subDay())
-                  ->orderByDesc('seeders')  // Order by seeders (descending)
+                  ->orderByDesc('seeders') 
                   ->limit(5)
                   ->get();
 });
 
-// Cache torrents from the last week
+
 $topLastWeek = Cache::remember('top_last_week', $cacheDuration, function () use ($now) {
     return Torrent::where('created_at', '>=', $now->copy()->subWeek())
-                  ->orderByDesc('seeders')  // Order by seeders (descending)
+                  ->orderByDesc('seeders') 
                   ->limit(5)
                   ->get();
 });
 
-// Cache torrents from the last month
+
 $topLastMonth = Cache::remember('top_last_month', $cacheDuration, function () use ($now) {
     return Torrent::where('created_at', '>=', $now->copy()->subMonth())
-                  ->orderByDesc('seeders')  // Order by seeders (descending)
+                  ->orderByDesc('seeders')  
                   ->limit(5)
                   ->get();
 });
 
 
-        // Cache latest news
+$topMovies = Cache::remember('top_movies', $cacheDuration, function () {
+    return Torrent::where('tmdb_type', 'movie')
+                  ->orderByDesc('seeders')
+                  ->limit(5)
+                  ->get();
+});
+
+
+$topSeries = Cache::remember('top_series', $cacheDuration, function () {
+    return Torrent::where('tmdb_type', 'tv')
+                  ->orderByDesc('seeders')
+                  ->limit(5)
+                  ->get();
+});
+
+
+        
         $latestNews = Cache::remember('latest_news', $cacheDuration, function () {
             return News::latest()->take(1)->get();
         });
 
-        // Cache polls with options and votes
+       
         $polls = Cache::remember('polls', $cacheDuration, function () {
             return Poll::with('options.votes')
                        ->orderBy('created_at', 'desc')
@@ -97,16 +113,16 @@ $topLastMonth = Cache::remember('top_last_month', $cacheDuration, function () us
 
         $uniqueSeeders = Cache::remember('unique_seeders', $cacheDuration, function () {
             return DB::table('history')
-                     ->where('seeder', 1)  // Filters for peers who are seeding (seeder = 1)
-                     ->where('active', true)  // Filters for active peers
-                     ->count();  // Counts all matching records, not distinct users
+                     ->where('seeder', 1)  
+                     ->where('active', true)  
+                     ->count();  
         });
         
 
         $uniqueLeechers = Cache::remember('unique_leechers', $cacheDuration, function () {
             return DB::table('history')
-            ->where('seeder', 0)  // Checks for users who are seeding (seeder = 1)
-            ->where('active', true)  // Checks for active peers
+            ->where('seeder', 0)  
+            ->where('active', true)  
             ->count();
 });
 
@@ -120,22 +136,24 @@ $topLastMonth = Cache::remember('top_last_month', $cacheDuration, function () us
             'torrentCount',
             'userCount',
             'forumTopicCount',
-           'recommendedTorrents',
+            'recommendedTorrents',
             'topUploaders',
             'topDownloaders',
             'torrentActive',
             'onlineUserCount',
             'uniqueSeeders',
-            'uniqueLeechers'
+            'uniqueLeechers',
+            'topMovies',
+            'topSeries',
 
         ));
     }
 
     public function getOnlineUsers()
     {
-        // Query online users and order by user class (highest to lowest)
+       
         $onlineUsers = User::where('updated_at', '>=', now()->subMinutes(3))
-            ->orderBy('user_class', 'desc') // 'user_class' is the integer column representing class
+            ->orderBy('user_class', 'desc') 
             ->get();
 
         $onlineUserCount = $onlineUsers->count();
@@ -145,11 +163,11 @@ $topLastMonth = Cache::remember('top_last_month', $cacheDuration, function () us
 
     public function getRecommendedTorrents()
     {
-        $cacheDuration = 3600; // Cache duration in seconds (1 hour)
+        $cacheDuration = 3600; 
     
-        // Cache the latest 10 recommended torrents
+       
         $recommendedTorrents = Cache::remember('recommended_torrents', $cacheDuration, function () {
-            return Torrent::with('genres') // Eager load genres if needed for display
+            return Torrent::with('genres') 
                           ->where('recommended', true)
                           ->where('category_id', '!=', 27)
                           ->latest('created_at')

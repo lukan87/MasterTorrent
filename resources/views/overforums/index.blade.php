@@ -16,14 +16,14 @@
                         </h5>
 
                        
-<div class="d-flex justify-content-start align-items-center">
+<div class="d-flex justify-content-start align-items-center gap-2">
     <!-- Edit Button -->
     @if (Auth::check() && (Auth::user()->user_class >= \App\Models\UserClass::ADMIN))
     <a href="{{ route('overforums.edit', $overforum->id) }}" class="btn btn-warning btn-sm mr-3">
         <i class="bi bi-pencil"></i>
     </a>
 @endif
- @if (Auth::check() && (Auth::user()->user_class == \App\Models\UserClass::OWNER))
+ @if (Auth::check() && (Auth::user()->user_class >= \App\Models\UserClass::OWNER))
     <!-- Delete Button -->
     <form action="{{ route('overforums.destroy', $overforum->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this overforum?')">
         @csrf
@@ -43,13 +43,13 @@
                                       
                     
                     <div class="card-body">
-                        <h6 class="card-subtitle mb-2 text-muted">Forums:</h6>
+                        
                         <ul class="list-group">
                             @foreach($overforum->forums as $forum)
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     <div>
                                         <a href="{{ route('forums.show', [$overforum->id, $forum->id]) }}" class="text-decoration-none">
-                                            {{ $forum->name }}
+                                            {{ $forum->name }} ( {{ $forum->created_at->format('F j, Y') }})
                                         </a>
                                         <!-- Latest Post with Topic Name -->
                                         @if($forum->topics->count() > 0)

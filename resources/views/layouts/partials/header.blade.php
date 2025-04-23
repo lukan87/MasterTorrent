@@ -22,10 +22,6 @@
 <link rel="stylesheet" href="{{ asset('css/sweet/sweet.css') }}">
 
 <script src="{{ asset('js/sweet/sweet.js') }}"></script>
-<!--NEW FONT AWSome-->
-<script src="https://kit.fontawesome.com/3ddcccf7b6.js" crossorigin="anonymous"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
-<!--NEW FONT AWSome-->
 
 
 <style>
@@ -41,6 +37,12 @@
     }
 }
 </style>
+
+<!-- Swiper CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+<!-- Swiper JS -->
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
 
 
 </head>

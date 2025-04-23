@@ -114,6 +114,78 @@
     </div>
 @endif
 
+@if (auth()->user()->user_class >= \App\Models\UserClass::MODERATOR && auth()->id() !== $user->id && auth()->user()->user_class > $user->user_class)
+<div class="card mb-3">
+    <div class="card-header">
+        Warnings
+    </div>
+    <div class="card-body">
+        <div class="row">
+        <!-- Warned (1/0) -->
+<div class="col-md-6 mb-3">
+    <label class="form-label">Warned</label>
+    <div class="d-flex align-items-center">
+        <label class="form-check-label me-3">
+            <input type="radio" name="warned" value="1" class="form-check-input"
+                   {{ old('warned', $user->warned) == 1 ? 'checked' : '' }}>
+            Yes
+        </label>
+        <label class="form-check-label">
+            <input type="radio" name="warned" value="0" class="form-check-input"
+                   {{ old('warned', $user->warned) == 0 ? 'checked' : '' }}>
+            No
+        </label>
+    </div>
+    @error('warned')
+        <div class="text-danger">{{ $message }}</div>
+    @enderror
+</div>
+
+<div class="mb-3" id="warned-reason-box" style="{{ $user->warned ? '' : 'display:none' }}">
+    <label for="warned_reason" class="form-label">Warning Reason</label>
+    <textarea name="warned_reason" id="warned_reason" class="form-control" rows="3">{{ old('warned_reason', $user->warned_reason) }}</textarea>
+    @error('warned_reason')
+        <div class="text-danger">{{ $message }}</div>
+    @enderror
+</div>
+
+<script>
+    const warnedRadios = document.querySelectorAll('[name="warned"]');
+    const reasonBox = document.getElementById('warned-reason-box');
+
+    // Function to toggle the reason box based on "Yes" (1) or "No" (0) selection
+    function toggleReasonBox() {
+        const warnedValue = document.querySelector('[name="warned"]:checked').value;
+        reasonBox.style.display = warnedValue == "1" ? 'block' : 'none';
+    }
+
+    // Trigger on page load to check current value
+    toggleReasonBox();
+
+    // Event listener for any change in the radio buttons
+    warnedRadios.forEach(radio => {
+        radio.addEventListener('change', toggleReasonBox);
+    });
+</script>
+
+
+
+
+            <!-- Warned Until (date) -->
+            <div class="col-md-6 mb-3">
+                <label for="warned_until" class="form-label">Warned Until</label>
+                <input type="date" name="warned_until" id="warned_until" class="form-control"
+                       value="{{ old('warned_until', optional($user->warned_until)->format('Y-m-d')) }}">
+                @error('warned_until')
+                    <div class="text-danger">{{ $message }}</div>
+                @enderror
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
+
 
  <!-- User Role -->
  @if (auth()->user()->user_class >= \App\Models\UserClass::MODERATOR && auth()->id() !== $user->id && auth()->user()->user_class > $user->user_class)
@@ -141,7 +213,7 @@
                 </div>
             @endif
 
-            @if (auth()->user()->user_class === \App\Models\UserClass::OWNER)
+            @if (auth()->user()->user_class >= \App\Models\UserClass::OWNER & auth()->id() !== $user->id)
                 <div class="mb-3">
                     <label for="vip_until" class="form-label">Set VIP Duration</label>
                     <select id="vip_until" name="vip_until" class="form-control">
@@ -157,6 +229,8 @@
             @endif
 
             <!-- Upload and Download -->
+
+            @if (auth()->id() !== $user->id)
             <div class="row">
     <div class="col-md-6 mb-3">
         <label for="uploaded" class="form-label">Uploaded (GB)</label>
@@ -171,6 +245,7 @@
             <div class="text-danger">{{ $message }}</div>
         @enderror
     </div>
+    
 
     <div class="col-md-6 mb-3">
         <label for="downloaded" class="form-label">Downloaded (GB)</label>
@@ -219,7 +294,7 @@
                 </div>
             </div>
 
-
+            @endif
 
             <!-- User Info -->
             <div class="mb-3">

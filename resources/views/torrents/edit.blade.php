@@ -1,211 +1,134 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <h2>Edit Torrent: {{ $torrent->name }}</h2>
-
-    <form action="{{ route('torrents.update', $torrent->slug) }}" method="POST" onsubmit="return confirm('Are you sure you want to update this torrent?');">
-        @csrf
-        @method('PUT')
-
-        <!-- Torrent Name -->
-        <div class="form-group">
-            <label for="name">Torrent Name:</label>
-            <input type="text" name="name" id="name" class="form-control" value="{{ old('name', $torrent->name) }}" required>
+<div class="container-fluid py-4">
+    <div class="card shadow">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4><i class="bi bi-pencil-square me-2"></i>Edit Torrent: {{ $torrent->name }}</h4>
+            <a href="{{ route('torrents.index') }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left-circle me-1"></i> Back
+            </a>
         </div>
+        <div class="card-body">
+            <form action="{{ route('torrents.update', $torrent->slug) }}" method="POST" enctype="multipart/form-data" onsubmit="return confirm('Are you sure you want to update this torrent?');">
+                @csrf
+                @method('PUT')
 
-        <!-- Category Selection -->
-        <div class="form-group mb-3">
-            <label for="category_id">Category:</label>
-            <select name="category_id" id="category_id" class="form-control" required>
-                @foreach ($categories as $category)
-                    <option value="{{ $category->id }}" {{ $category->id == $torrent->category_id ? 'selected' : '' }}>
-                        {{ $category->name }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
+                <div class="row mb-3">
+                    <div class="col-md-8">
+                        <label for="name" class="form-label"><i class="bi bi-card-text me-1"></i>Torrent Name</label>
+                        <input type="text" name="name" id="name" class="form-control" value="{{ old('name', $torrent->name) }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="category_id" class="form-label"><i class="bi bi-tags me-1"></i>Category</label>
+                        <select name="category_id" id="category_id" class="form-select" required>
+                            @foreach ($categories as $category)
+                                <option value="{{ $category->id }}" {{ $category->id == $torrent->category_id ? 'selected' : '' }}>
+                                    {{ $category->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
 
-        <div class="form-group mb-3">
-            <label for="name">Genre:</label>
-            <input type="text" name="genre" id="genre" class="form-control" value="{{ old('genre', $torrent->genre) }}">
-            <i>ie (Genre1, Genre2, Genre3)</i>
-        </div>
+                <div class="mb-3">
+                    <label for="genre" class="form-label"><i class="bi bi-collection me-1"></i>Genre</label>
+                    <input type="text" name="genre" id="genre" class="form-control" value="{{ old('genre', $torrent->genre) }}" placeholder="Genre1, Genre2">
+                </div>
 
-        <div class="form-group mb-3">
-            <label for="steamid">Steam ID:</label>
-            <input type="text" name="steamid" id="steamid" class="form-control" placeholder="Steam ID eg:https://store.steampowered.com/app/310950 ID=310950" value="{{ old('steamid', $torrent->steamid) }}">
-            <i>ie (Genre1, Genre2, Genre3)</i>
-        </div>
+                <div class="mb-3">
+                    <label for="steamid" class="form-label"><i class="bi bi-controller me-1"></i>Steam ID</label>
+                    <input type="text" name="steamid" id="steamid" class="form-control" placeholder="https://store.steampowered.com/app/310950" value="{{ old('steamid', $torrent->steamid) }}">
+                </div>
 
-        <!-- Torrent Options -->
-        <div class="form-group mb-3">
-            <label>Torrent Tags:</label>
-            <div class="form-check form-check-inline">
-                <input type="checkbox" name="free" id="free" class="form-check-input" value="1" {{ old('free', $torrent->free) ? 'checked' : '' }}>
-                <label for="free" class="form-check-label">Free</label>
-            </div>
-            <div class="form-check form-check-inline">
-                <input type="checkbox" name="double" id="double" class="form-check-input" value="1" {{ old('double', $torrent->double) ? 'checked' : '' }}>
-                <label for="double" class="form-check-label">Double</label>
-            </div>
-            <div class="form-check form-check-inline">
-                <input type="checkbox" name="sticky" id="sticky" class="form-check-input" value="1" {{ old('sticky', $torrent->sticky) ? 'checked' : '' }}>
-                <label for="sticky" class="form-check-label">Sticky</label>
-            </div>
-            <div class="form-check form-check-inline">
-                <input type="checkbox" name="recommended" id="recommended" class="form-check-input" value="1" {{ old('recommended', $torrent->recommended) ? 'checked' : '' }}>
-                <label for="recommended" class="form-check-label">Recommended</label>
-            </div>
-            <div class="form-check form-check-inline">
-                <input type="checkbox" name="seedbox" id="seedbox" class="form-check-input" value="1" {{ old('seedbox', $torrent->seedbox) ? 'checked' : '' }}>
-                <label for="seedbox" class="form-check-label">Seedbox</label>
-            </div>
-        </div>
+                <div class="mb-3">
+                    <label class="form-label"><i class="bi bi-bookmark-star me-1"></i>Torrent Tags</label><br>
+                    @foreach (['free' => 'Free', 'double' => 'Double', 'sticky' => 'Sticky', 'recommended' => 'Recommended', 'seedbox' => 'Seedbox'] as $field => $label)
+                        <div class="form-check form-check-inline">
+                            <input type="checkbox" name="{{ $field }}" id="{{ $field }}" class="form-check-input" value="1" {{ old($field, $torrent->$field) ? 'checked' : '' }}>
+                            <label for="{{ $field }}" class="form-check-label">{{ $label }}</label>
+                        </div>
+                    @endforeach
+                </div>
 
-        <!-- Description -->
+                <hr class="my-4">
 
-            <label for="description">Description:</label>
+                <div class="mb-3">
+                    <label for="description" class="form-label"><i class="bi bi-info-square me-1"></i>Description</label>
+                    @include('torrents.partials.description_editor')
+                    <textarea name="description" id="description" class="form-control" rows="6" oninput="adjustTextareaHeight(this)">{{ old('description', $torrent->description) }}</textarea>
+                </div>
 
-            <div class="form-group">
-        <div class="mb-2">
-        <!-- Font Size Dropdown -->
-        <select id="fontSize" class="form-select form-select-sm d-inline-block" style="width: auto;">
-            <option value="14">1 (Small)</option>
-            <option value="16">2 (Normal)</option>
-            <option value="18">3 (Medium)</option>
-            <option value="20">4 (Large)</option>
-            <option value="22">5 (Extra Large)</option>
-        </select>
-        <button type="button" class="btn btn-secondary btn-sm" onclick="insertBBCode('size', document.getElementById('fontSize').value)">Font Size</button>
+                <div class="mb-3">
+                    <label for="mediainfo" class="form-label"><i class="bi bi-music-note-list me-1"></i>Media Info</label>
+                    <textarea name="mediainfo" id="mediainfo" class="form-control" rows="6" oninput="adjustTextareaHeight(this)">{{ old('mediainfo', $torrent->mediainfo) }}</textarea>
+                </div>
 
-        <!-- Font Color Dropdown -->
-        <select id="fontColor" class="form-select form-select-sm d-inline-block" style="width: auto;">
-            <option value="black">Black</option>
-            <option value="red">Red</option>
-            <option value="blue">Blue</option>
-            <option value="green">Green</option>
-            <option value="purple">Purple</option>
-        </select>
-        <button type="button" class="btn btn-secondary btn-sm" onclick="insertBBCode('color', document.getElementById('fontColor').value)">Font Color</button>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="poster" class="form-label"><i class="bi bi-image me-1"></i>Poster URL</label>
+                        <input type="text" name="poster" id="poster" class="form-control" value="{{ old('poster', $torrent->poster) }}">
+                        @if ($torrent->poster)
+                            <img src="{{ $torrent->poster }}" alt="Poster" class="img-thumbnail mt-2" style="max-width: 150px;">
+                        @endif
+                    </div>
+                    <div class="col-md-6">
+                        <label for="background" class="form-label"><i class="bi bi-card-image me-1"></i>Background URL</label>
+                        <input type="url" name="background" id="background" class="form-control" value="{{ old('background', $torrent->background) }}">
+                        @if ($torrent->background)
+                            <img src="{{ $torrent->background }}" alt="Background" class="img-thumbnail mt-2" style="max-width: 350px;">
+                        @endif
+                    </div>
+                </div>
 
-        <!-- Font Family Dropdown -->
-        <select id="fontFamily" class="form-select form-select-sm d-inline-block" style="width: auto;">
-            <option value="Arial">Arial</option>
-            <option value="Verdana">Verdana</option>
-            <option value="Courier">Courier</option>
-            <option value="Georgia">Georgia</option>
-            <option value="Times New Roman">Times New Roman</option>
-        </select>
-        <button type="button" class="btn btn-secondary btn-sm" onclick="insertBBCode('font', document.getElementById('fontFamily').value)">Font Family</button>
+                <div class="mb-3">
+                    <label for="images" class="form-label"><i class="bi bi-images me-1"></i>Upload New Images</label>
+                    <input type="file" name="images[]" id="images" class="form-control" multiple accept="image/*">
+                </div>
 
-        <!-- Center Button -->
-        <button type="button" class="btn btn-secondary btn-sm" onclick="insertBBCode('center')">Center</button>
-        <button type="button" class="btn btn-secondary btn-sm" onclick="insertBBCode('b')">Bold</button>
-        <button type="button" class="btn btn-secondary btn-sm" onclick="insertBBCode('i')">Italic</button>
-        <button type="button" class="btn btn-secondary btn-sm" onclick="insertBBCode('u')">Underline</button>
-        <button type="button" class="btn btn-secondary btn-sm" onclick="insertBBCode('quote')">Quote</button>
-        <button type="button" class="btn btn-secondary btn-sm" onclick="insertBBCode('youtube')">YouTube</button>
-        <button type="button" class="btn btn-secondary btn-sm" onclick="insertBBCode('img')">Image</button>
+                @if ($torrent->images && $torrent->images->count())
+                    <div class="mb-3">
+                        <label class="form-label">Current Images</label>
+                        <div class="d-flex flex-wrap gap-3">
+                            @foreach ($torrent->images as $image)
+                                <div class="position-relative">
+                                    <img src="{{ asset('storage/' . $image->path) }}" class="img-thumbnail" style="max-width: 150px;">
+                                    <div class="form-check mt-1">
+                                        <input type="checkbox" name="delete_images[]" value="{{ $image->id }}" class="form-check-input" id="delete_image_{{ $image->id }}">
+                                        <label for="delete_image_{{ $image->id }}" class="form-check-label">Delete</label>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
+                <div class="mb-3">
+                    <label for="imdb_url" class="form-label"><i class="bi bi-film me-1"></i>IMDB URL</label>
+                    <input type="url" name="imdb_url" id="imdb_url" class="form-control" value="{{ old('imdb_url', $torrent->imdb_url) }}">
+                    <button type="button" class="btn btn-outline-primary mt-2" onclick="fetchIMDBInfo()">
+                        <i class="bi bi-cloud-download me-1"></i>Fetch Info
+                    </button>
+                </div>
+
+                <div class="mb-4">
+                    <label for="trailer" class="form-label"><i class="bi bi-play-btn me-1"></i>Trailer</label>
+                    <input type="url" name="trailer" id="trailer" class="form-control" value="{{ old('trailer', $torrent->trailer) }}">
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-save me-1"></i>Update Torrent
+                    </button>
+                    <a href="{{ route('torrents.index') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle me-1"></i>Cancel
+                    </a>
+                </div>
+            </form>
         </div>
     </div>
-            <textarea name="description" id="description" oninput="resizeTextarea('description')" style="min-height: 150px; max-height: 500px;" class="form-control">{{ old('description', $torrent->description) }}</textarea>
 
-
-        <!-- Media Info -->
-        <div class="form-group">
-            <label for="description">Media Info:</label>
-            <textarea name="mediainfo" id="mediainfo" class="form-control">{{ old('mediainfo', $torrent->mediainfo) }}</textarea>
-        </div>
-
-        <!-- Poster URL -->
-        <div class="form-group">
-            <label for="poster">Poster URL:</label>
-            <input type="text" name="poster" id="poster" class="form-control" value="{{ old('poster', $torrent->poster) }}">
-            @if ($torrent->poster)
-                <div>
-                    <img src="{{ $torrent->poster }}" alt="Poster" class="img-thumbnail" style="max-width: 150px;">
-                    <p>Current poster</p>
-                </div>
-            @endif
-        </div>
-
-        <!-- Background URL -->
-        <div class="form-group">
-            <label for="background">Background URL:</label>
-            <input type="url" name="background" id="background" class="form-control" value="{{ old('background', $torrent->background) }}">
-            @if ($torrent->background)
-                <div>
-                    <img src="{{ $torrent->background }}" alt="Background" class="img-thumbnail" style="max-width: 350px;">
-                    <p>Current background</p>
-                </div>
-            @endif
-        </div>
-
-        <!-- IMDB URL (Optional) -->
-        <div class="mb-3 form-group">
-            <label for="imdb_url">IMDB URL:</label>
-            <input type="url" name="imdb_url" id="imdb_url" class="form-control" value="{{ old('imdb_url', $torrent->imdb_url) }}">
-            <button type="button" class="btn btn-success mt-2" onclick="fetchIMDBInfo()">Fetch Movie Info</button>
-        </div>
-
-        <script>
-function fetchIMDBInfo() {
-    const imdbUrl = document.getElementById('imdb_url').value;
-    const imdbIdMatch = imdbUrl.match(/(?:imdb\.com\/title\/)(tt\d+)/); // Regex to extract IMDb ID
-    const imdbId = imdbIdMatch ? imdbIdMatch[1] : null;
-
-    if (imdbId) {
-        const apiKey = 'd3eb5201'; // Replace with your OMDb API key
-        const apiUrl = `https://www.omdbapi.com/?i=${imdbId}&apikey=${apiKey}&plot=full`;
-
-        fetch(apiUrl)
-            .then(response => response.json())
-            .then(data => {
-                if (data.Response === 'True') {
-                    const descriptionField = document.getElementById('description');
-                    const poster = data.Poster;
-                    const title = data.Title;
-                    const year = data.Year;
-                    const plot = data.Plot;
-                    const genre = data.Genre;
-
-                    // Constructing the string to insert into the description
-                    const movieInfo = `[center][img]${poster}[/img]\n\n\n[b]${title} (${year})[/b]\n\n\n[quote]${plot}[/quote]\n[font=Arial][color=grey]Genre: ${genre}[/color][/font][/center]`;
-
-                    // Inserting movie info into the description field
-                    descriptionField.value += movieInfo; // Append to existing content
-                } else {
-                    alert('Movie not found or invalid IMDb ID.');
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching IMDb data:', error);
-                alert('An error occurred while fetching movie information.');
-            });
-    } else {
-        alert('Please enter a valid IMDb URL.');
-    }
-}
-</script>
-
-        <div class="mb-3 form-group">
-            <label for="trailer">Trailer:</label>
-            <input type="url" name="trailer" id="trailer" class="form-control" value="{{ old('trailer', $torrent->trailer) }}">
-        </div>
-
-        <!-- Submit Button -->
-        <button type="submit" class="btn btn-primary">Update Torrent</button>
-
-        <!-- Back Button -->
-        <a href="{{ route('torrents.index') }}" class="btn btn-secondary">Back to List</a>
-    </form>
-
-    <!-- Delete Button -->
-
-
-
-@if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
+    @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
     <div class="card mt-5 shadow-lg">
         <div class="card-header bg-danger text-white">
             <h5 class="card-title mb-0">Delete Torrent</h5>
@@ -244,63 +167,7 @@ function fetchIMDBInfo() {
         </div>
     </div>
 @endif
-
 </div>
 
-
-
-<script>
-    function confirmDelete() {
-        return confirm("Are you sure you want to delete this torrent?");
-    }
-
-     // Show or hide the custom reason text area based on the dropdown selection
-     function toggleCustomReason(selectElement) {
-        const customReasonDiv = document.getElementById('custom_reason_div');
-        if (selectElement.value === 'custom') {
-            customReasonDiv.style.display = 'block';
-        } else {
-            customReasonDiv.style.display = 'none';
-        }
-    }
-</script>
-
-<script>
-
-function resizeTextarea(id) {
-    const textarea = document.getElementById(id);
-    textarea.style.height = 'auto'; // Reset the height to auto
-    textarea.style.height = Math.min(textarea.scrollHeight, 500) + 'px'; // Set the height to the minimum of scrollHeight and 500 pixels
-    textarea.scrollTop = textarea.scrollHeight; // Scroll to the bottom to keep the most recent content visible
-}
-
-function insertBBCode(tag, option = null) {
-    const textarea = document.getElementById("description"); // Make sure this matches your textarea ID
-    const startTag = option ? `[${tag}=${option}]` : `[${tag}]`;
-    const endTag = `[/${tag}]`;
-    const cursorPosition = textarea.selectionStart; // Store current cursor position
-    const selectedText = textarea.value.substring(textarea.selectionStart, textarea.selectionEnd);
-
-    // Insert the BBCode tags with the selected text in the middle
-    const newText = startTag + selectedText + endTag;
-    textarea.value = textarea.value.substring(0, cursorPosition) + newText + textarea.value.substring(textarea.selectionEnd);
-
-    // Set the cursor position in the middle of the tags, right after the opening tag
-    const newCursorPosition = cursorPosition + startTag.length;
-    textarea.selectionStart = newCursorPosition;
-    textarea.selectionEnd = newCursorPosition;
-
-    // Focus back on the textarea
-    textarea.focus();
-}
-</script>
-
-<style>
-    textarea {
-        resize: none; /* Disable the default textarea resizing */
-        overflow: auto; /* Enable scrollbar when necessary */
-        max-height: 500px; /* Maximum height for the textarea */
-        min-height: 150px; /* Minimum height for the textarea */
-    }
-</style>
+@include('torrents.partials.scripts')
 @endsection

@@ -161,7 +161,7 @@
             <i class="bi bi-person-dash" data-bs-toggle="tooltip" data-bs-title="Hit and Run"></i>
         </label>
         <div class="col-md-10">
-            <a href="{{ route('snatch.hitAndRun', ['userId' => $user->id]) }}">View Hit-and-Run Torrents</a>
+            <a href="{{ route('snatch.hitAndRun', ['userId' => $user->id]) }}">View Hit-and-Run Torrents - {{$user->hit_and_run_count}} </a>
         </div>
     </div>
 

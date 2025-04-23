@@ -7,165 +7,234 @@
 @if (Auth::check() && (Auth::user()->user_class >= \App\Models\UserClass::UPLOADER || Auth::user()->uploadpos === 'yes'))
 
 
-<div class="container">
-    <h1>Upload a New Torrent</h1>
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-12 col-xl-12">
+            <h1 class="mb-4 text-center">📤 Upload a New Torrent</h1>
 
-<div class="alert alert-info">
-    <!-- URL-ul Announce -->
-    <h2 class="mt-10">
-        <strong>Announce URL:</strong>
-        <a href="javascript:void(0);" 
-           onclick="copyToClipboard('http://last-torrents.org/announce/{{ $user->passkey }}')" 
-           title="Click to copy this URL to your clipboard!">
-            http://last-torrents.org/announce/{{ $user->passkey }}
-        </a>
-    </h2>
-    <p>Click the announce URL above to copy it automatically when creating a new torrent!</p>
+            <div class="alert alert-info shadow-sm rounded">
+                <h5>
+                    <strong>Announce URL:</strong>
+                    <a href="javascript:void(0);" 
+                       onclick="copyToClipboard('http://last-torrents.org/announce/{{ $user->passkey }}')" 
+                       title="Click to copy this URL to your clipboard!">
+                        http://last-torrents.org/announce/{{ $user->passkey }}
+                    </a>
+                </h5>
+                <p class="mb-0">Click the announce URL to copy it while creating your torrent file.</p>
+            </div>
+
+            <form action="{{ route('torrents.store') }}" method="POST" enctype="multipart/form-data" class="card shadow-sm p-4 rounded">
+                @csrf
+
+                <div class="mb-3">
+                    <label for="file" class="form-label">Torrent File</label>
+                    <input type="file" class="form-control" id="file" name="torrent" required onchange="setTorrentName()">
+                </div>
+
+                <div class="mb-3">
+                    <label for="name" class="form-label">Torrent Name</label>
+                    <input type="text" class="form-control" id="name" name="name" value="{{ old('name') }}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="genre" class="form-label">Genre <small>(e.g. Action, Drama)</small></label>
+                    <input type="text" class="form-control" id="genre" name="genre" value="{{ old('genre') }}">
+                </div>
+
+                <div class="mb-3">
+                    <label for="steamid" class="form-label">Steam ID</label>
+                    <input type="text" class="form-control" id="steamid" name="steamid" placeholder="e.g. https://store.steampowered.com/app/310950" value="{{ old('steamid') }}">
+                </div>
+
+                <div class="mb-3">
+                    <label for="category_id" class="form-label">Category</label>
+                    <select name="category_id" id="category_id" class="form-select" required onchange="toggleFieldsByCategory()">
+                        @foreach($categories->sortByDesc(fn($cat) => $cat->id === 49) as $category)
+                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="poster" class="form-label">Poster URL</label>
+                    <input type="url" name="poster" id="poster" class="form-control" value="{{ old('poster') }}">
+                </div>
+
+                <div class="mb-3">
+    <label for="images" class="form-label fw-bold">Screenshots (max 10)</label>
+    <input class="form-control" type="file" id="images" name="images[]" accept="image/*" multiple>
+    <div id="preview-container" class="mt-3 d-flex flex-wrap gap-3"></div>
 </div>
 
+
+
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+
+                    <div class="d-flex flex-wrap gap-2 mb-2">
+                        <!-- BBCode Controls -->
+                        <div class="d-flex gap-2">
+                            <select id="fontSize" class="form-select form-select-sm w-auto">
+                                <option value="14">1 (Small)</option>
+                                <option value="16">2 (Normal)</option>
+                                <option value="18">3 (Medium)</option>
+                                <option value="20">4 (Large)</option>
+                                <option value="22">5 (Extra Large)</option>
+                            </select>
+                            <button class="btn btn-sm btn-outline-secondary" type="button" onclick="insertBBCode('size', document.getElementById('fontSize').value)">Size</button>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <select id="fontColor" class="form-select form-select-sm w-auto">
+                                <option value="black">Black</option>
+                                <option value="red">Red</option>
+                                <option value="blue">Blue</option>
+                                <option value="green">Green</option>
+                                <option value="purple">Purple</option>
+                            </select>
+                            <button class="btn btn-sm btn-outline-secondary" type="button" onclick="insertBBCode('color', document.getElementById('fontColor').value)">Color</button>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <select id="fontFamily" class="form-select form-select-sm w-auto">
+                                <option value="Arial">Arial</option>
+                                <option value="Verdana">Verdana</option>
+                                <option value="Courier">Courier</option>
+                                <option value="Georgia">Georgia</option>
+                                <option value="Times New Roman">Times New Roman</option>
+                            </select>
+                            <button class="btn btn-sm btn-outline-secondary" type="button" onclick="insertBBCode('font', document.getElementById('fontFamily').value)">Font</button>
+                        </div>
+
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button class="btn btn-sm btn-outline-secondary" type="button" onclick="insertBBCode('center')">Center</button>
+                            <button class="btn btn-sm btn-outline-secondary" type="button" onclick="insertBBCode('b')">Bold</button>
+                            <button class="btn btn-sm btn-outline-secondary" type="button" onclick="insertBBCode('i')">Italic</button>
+                            <button class="btn btn-sm btn-outline-secondary" type="button" onclick="insertBBCode('u')">Underline</button>
+                            <button class="btn btn-sm btn-outline-secondary" type="button" onclick="insertBBCode('quote')">Quote</button>
+                            <button class="btn btn-sm btn-outline-secondary" type="button" onclick="insertBBCode('youtube')">YouTube</button>
+                            <button class="btn btn-sm btn-outline-secondary" type="button" onclick="insertBBCode('img')">Image</button>
+                        </div>
+                    </div>
+
+                    <textarea class="form-control" id="description" name="description" oninput="resizeTextarea('description')" style="min-height: 150px;" required>{{ old('description') }}</textarea>
+                </div>
+
+                <div id="conditionalFields" style="display: none;">
+                    <div class="mb-3">
+                        <label for="mediainfo" class="form-label">Media Info</label>
+                        <textarea class="form-control" id="mediainfo" name="mediainfo" oninput="resizeTextarea('mediainfo')" style="min-height: 150px;">{{ old('mediainfo') }}</textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="imdb_url" class="form-label">IMDB URL</label>
+                        <input type="text" class="form-control" id="imdb_url" name="imdb_url" value="{{ old('imdb_url') }}">
+                        <button class="btn btn-outline-success mt-2" type="button" onclick="fetchIMDBInfo()">🎬 Fetch Info</button>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">Torrent Tags:</label>
+                    <div class="form-check form-check-inline">
+                        <input type="checkbox" class="form-check-input" name="free" id="free" value="1" {{ old('free') ? 'checked' : '' }}>
+                        <label class="form-check-label" for="free">Free</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input type="checkbox" class="form-check-input" name="double" id="double" value="1" {{ old('double') ? 'checked' : '' }}>
+                        <label class="form-check-label" for="double">Double</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input type="checkbox" class="form-check-input" name="sticky" id="sticky" value="1" {{ old('sticky') ? 'checked' : '' }}>
+                        <label class="form-check-label" for="sticky">Sticky</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input type="checkbox" class="form-check-input" name="recommended" id="recommended" value="1" {{ old('recommended') ? 'checked' : '' }}>
+                        <label class="form-check-label" for="recommended">Recommended</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input type="checkbox" class="form-check-input" name="seedbox" id="seedbox" value="1" {{ old('seedbox') ? 'checked' : '' }}>
+                        <label class="form-check-label" for="seedbox">Seedbox</label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2">🚀 Upload Torrent</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+
 <script>
-    function copyToClipboard(text) {
+
+const maxImages = 10;
+    const fileInput = document.getElementById('images');
+    const previewContainer = document.getElementById('preview-container');
+    const dataTransfer = new DataTransfer();
+    let fileIdCounter = 0;
+
+    fileInput.addEventListener('change', function () {
+        const files = Array.from(fileInput.files);
+
+        files.forEach(file => {
+            if (dataTransfer.files.length >= maxImages) {
+                alert('You can upload a maximum of 10 images.');
+                return;
+            }
+
+            const uniqueId = 'file_' + (fileIdCounter++);
+            file.uniqueId = uniqueId; // attach custom ID
+
+            dataTransfer.items.add(file);
+            fileInput.files = dataTransfer.files;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'position-relative';
+                wrapper.dataset.id = uniqueId;
+
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.className = 'rounded border shadow-sm';
+                img.style.height = '120px';
+                img.style.objectFit = 'cover';
+
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'btn btn-sm btn-danger position-absolute top-0 end-0 m-1';
+                removeBtn.innerHTML = '&times;';
+                removeBtn.onclick = () => {
+                    // Remove from DataTransfer by filtering out the one with this uniqueId
+                    const newDT = new DataTransfer();
+                    Array.from(dataTransfer.files).forEach(f => {
+                        if (f.uniqueId !== uniqueId) newDT.items.add(f);
+                    });
+
+                    dataTransfer.items.clear();
+                    Array.from(newDT.files).forEach(f => dataTransfer.items.add(f));
+
+                    fileInput.files = dataTransfer.files;
+                    wrapper.remove();
+                };
+
+                wrapper.appendChild(img);
+                wrapper.appendChild(removeBtn);
+                previewContainer.appendChild(wrapper);
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // DO NOT clear the value, as it breaks file submission
+    fileInput.files = dataTransfer.files;
+    });
+
+function copyToClipboard(text) {
         navigator.clipboard.writeText(text).then(() => {
             alert('Announce URL copied to clipboard!');
         }).catch(err => {
             console.error('Failed to copy text: ', err);
         });
     }
-</script>
-
-
-
-    <form action="{{ route('torrents.store') }}" method="POST" enctype="multipart/form-data">
-        @csrf
-        <div class="form-group mb-3">
-            <label for="file">Torrent File</label>
-            <input type="file" class="form-control" id="file" name="torrent" required onchange="setTorrentName()">
-        </div>
-
-        <div class="form-group mb-3">
-            <label for="name">Torrent Name</label>
-            <input type="text" class="form-control" id="name" name="name" value="{{ old('name') }}" required>
-        </div>
-
-        <div class="form-group mb-3">
-            <label for="name">Genre (Example: Genre1, Genre2, Genre 3)</label>
-            <input type="text" class="form-control" id="genre" name="genre" value="{{ old('genre') }}">
-        </div>
-
-        <div class="form-group mb-3">
-            <label for="name">Steam ID</label>
-            <input type="text" class="form-control" id="steamid" name="steamid" placeholder="Steam ID eg:https://store.steampowered.com/app/310950 ID=310950" value="{{ old('steamid') }}">
-        </div>
-
-         <!-- Category Dropdown -->
-         <div class="form-group mb-3">
-    <label for="category_id">Category</label>
-    <select name="category_id" id="category_id" class="form-control" required onchange="toggleFieldsByCategory()">
-        <!-- Make sure category with id 10 comes first -->
-        @foreach($categories->sortByDesc(fn($cat) => $cat->id === 49) as $category)
-            <option value="{{ $category->id }}">{{ $category->name }}</option>
-        @endforeach
-    </select>
-</div>
-
-        <div class="form-group mb-3">
-            <label for="poster">Poster</label>
-            <input type="url" name="poster" id="poster" class="form-control" value="{{ old('poster') }}">
-        </div>
-
-        <div class="form-group mb-3">
-    <label for="description">Description</label>
-    <div class="mb-2">
-        <!-- Font Size Dropdown -->
-        <select id="fontSize" class="form-select form-select-sm d-inline-block" style="width: auto;">
-            <option value="14">1 (Small)</option>
-            <option value="16">2 (Normal)</option>
-            <option value="18">3 (Medium)</option>
-            <option value="20">4 (Large)</option>
-            <option value="22">5 (Extra Large)</option>
-        </select>
-        <button type="button" class="btn btn-secondary btn-sm" onclick="insertBBCode('size', document.getElementById('fontSize').value)">Font Size</button>
-
-        <!-- Font Color Dropdown -->
-        <select id="fontColor" class="form-select form-select-sm d-inline-block" style="width: auto;">
-            <option value="black">Black</option>
-            <option value="red">Red</option>
-            <option value="blue">Blue</option>
-            <option value="green">Green</option>
-            <option value="purple">Purple</option>
-        </select>
-        <button type="button" class="btn btn-secondary btn-sm" onclick="insertBBCode('color', document.getElementById('fontColor').value)">Font Color</button>
-
-        <!-- Font Family Dropdown -->
-        <select id="fontFamily" class="form-select form-select-sm d-inline-block" style="width: auto;">
-            <option value="Arial">Arial</option>
-            <option value="Verdana">Verdana</option>
-            <option value="Courier">Courier</option>
-            <option value="Georgia">Georgia</option>
-            <option value="Times New Roman">Times New Roman</option>
-        </select>
-        <button type="button" class="btn btn-secondary btn-sm" onclick="insertBBCode('font', document.getElementById('fontFamily').value)">Font Family</button>
-
-        <!-- Center Button -->
-        <button type="button" class="btn btn-secondary btn-sm" onclick="insertBBCode('center')">Center</button>
-        <button type="button" class="btn btn-secondary btn-sm" onclick="insertBBCode('b')">Bold</button>
-        <button type="button" class="btn btn-secondary btn-sm" onclick="insertBBCode('i')">Italic</button>
-        <button type="button" class="btn btn-secondary btn-sm" onclick="insertBBCode('u')">Underline</button>
-        <button type="button" class="btn btn-secondary btn-sm" onclick="insertBBCode('quote')">Quote</button>
-        <button type="button" class="btn btn-secondary btn-sm" onclick="insertBBCode('youtube')">YouTube</button>
-        <button type="button" class="btn btn-secondary btn-sm" onclick="insertBBCode('img')">Image</button>
-    </div>
-    <textarea class="form-control" id="description" oninput="resizeTextarea('description')" style="min-height: 150px; max-height: 500px;" name="description" required>{{ old('description') }}</textarea>
-
-    <div id="conditionalFields" style="display: none;">
-        <div class="form-group mb-3">
-            <label for="mediainfo">Media Info</label>
-            <textarea class="form-control" id="mediainfo" oninput="resizeTextarea('mediainfo')" style="min-height: 150px; max-height: 500px;" name="mediainfo">{{ old('mediainfo') }}</textarea>
-        </div>
-
-        <div class="form-group mb-3">
-            <label for="imdb_url">IMDB URL (For movies and series)</label>
-            <input type="text" class="form-control" id="imdb_url" name="imdb_url" value="{{ old('imdb_url') }}">
-            <button type="button" class="btn btn-success mt-2" onclick="fetchIMDBInfo()">Fetch Movie Info</button>
-         </div>
-        </div>
-
-         <!-- Torrent Options -->
-        <div class="form-group mb-3">
-            <label>Torrent Tags:</label>
-            <div class="form-check form-check-inline">
-                <input type="checkbox" name="free" id="free" class="form-check-input" value="1" {{ old('free') ? 'checked' : '' }}>
-                <label for="free" class="form-check-label">Free</label>
-            </div>
-            <div class="form-check form-check-inline">
-                <input type="checkbox" name="double" id="double" class="form-check-input" value="1" {{ old('double') ? 'checked' : '' }}>
-                <label for="double" class="form-check-label">Double</label>
-            </div>
-            <div class="form-check form-check-inline">
-                <input type="checkbox" name="sticky" id="sticky" class="form-check-input" value="1" {{ old('sticky') ? 'checked' : '' }}>
-                <label for="sticky" class="form-check-label">Sticky</label>
-            </div>
-            <div class="form-check form-check-inline">
-                <input type="checkbox" name="recommended" id="recommended" class="form-check-input" value="1" {{ old('recommended') ? 'checked' : '' }}>
-                <label for="recommended" class="form-check-label">Recommended</label>
-            </div>
-            <div class="form-check form-check-inline">
-                <input type="checkbox" name="seedbox" id="seedbox" class="form-check-input" value="1" {{ old('seedbox') ? 'checked' : '' }}>
-                <label for="seedbox" class="form-check-label">Seedbox</label>
-            </div>
-            {{-- <div class="form-check form-check-inline">
-                <input type="checkbox" name="external" id="external" class="form-check-input" value="1" {{ old('external') ? 'checked' : '' }}>
-                <label for="external" class="form-check-label">External</label>
-            </div> --}}
-        </div>
-
-
-        <button type="submit" class="btn btn-primary">Upload Torrent</button>
-    </form>
-</div>
-
-
-<script>
 
 function toggleFieldsByCategory() {
     const selectedCategory = document.getElementById('category_id').value;

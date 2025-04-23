@@ -2,23 +2,48 @@
 
 @section('content')
 
-    <h1>Shop</h1>
 
    
-    <div class="mb-4">
-        <h5>Your Seed Bonus Points: <strong>{{ Auth::user()->seedbonus }}</strong></h5>
-        <h5>Your Earning Rate: <strong>{{ Auth::user()->seedbonus_per_hour }}</strong> Points per hour</h5>
+    <div class="row mt-5 mb-4">
+        <!-- First Card: Seed Bonus Info -->
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-header">Seed Bonus</h5>
+                    <p class="card-text">
+                        <strong>Your Seed Bonus Points:</strong> {{ Auth::user()->seedbonus }}
+                    </p>
+                    <p class="card-text">
+                        <strong>Currently Seeding:</strong> 
+                        <strong>{{ Auth::user()->seeding_torrent_count }}</strong> Torrent{{ Auth::user()->seeding_torrent_count == 1 ? '' : 's' }}
+                    </p>
+                    <p class="card-text">
+                        <strong>Your Earning Rate:</strong> {{ Auth::user()->seedbonus_per_hour }} Points per hour
+                    </p>
+                    <p class="card-text">
+                        <strong>0.15 points per hour for seeding a torrent</strong>
+                    </p>
+                </div>
+            </div>
+        </div>
+    
+        <!-- Second Card: Other Ways to Earn -->
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="card-header">Other Ways to Earn Seedbonus</h4>
+                    <ul class="list-unstyled">
+                        <li><strong>Uploading a Torrent:</strong> 10 points</li>
+                        <li><strong>Thanking a Torrent:</strong> 0.5 points</li>
+                        <li><strong>Commenting a Torrent:</strong> 1 point</li>
+                    </ul>
+                    <p><strong>*Note: The site administrator can change your seedbonus points without prior notice.</strong></p>
+                    <p><strong>*Notă: Administratorul site-ului poate modifica punctele tale de seedbonus fără o notificare prealabilă.</strong></p>
+                </div>
+            </div>
+        </div>
     </div>
-
-
-    <div class="mt-5">
-        <h4>Other Ways to Earn Seedbonus</h4>
-        <ul>
-            <li><strong>Uploading a Torrent:</strong> 5 points</li>
-            <li><strong>Thanking a Torrent:</strong> 0.5 points</li>
-            <li><strong>Commenting a Torrent:</strong> 1 point</li>
-        </ul>
-    </div>
+    
 
     <div class="row">
         <!-- 10 GB Upload -->
@@ -150,7 +175,7 @@
                     <i class="bi bi-gift"></i> Buy a Surprise!
                 </div>
                 <div class="card-body">
-                    <p>Cost: 5000 Points</p>
+                    <p>Cost: 15000 Points</p>
                     <p><strong>Possible Rewards:</strong></p>
                     <ul>
                         <li><i class="bi bi-hdd"></i> 100GB, 250GB, or 500GB Upload</li>
@@ -160,7 +185,7 @@
                     </ul>
                     <form action="{{ route('bonus.surprise') }}" method="POST">
                         @csrf
-                        <button type="submit" class="btn btn-danger {{ Auth::user()->seedbonus < 5000 ? 'disabled' : '' }}">
+                        <button type="submit" class="btn btn-danger {{ Auth::user()->seedbonus < 15000 ? 'disabled' : '' }}">
                             <i class="bi bi-gift"></i> Buy Surprise!
                         </button>
                     </form>
@@ -172,5 +197,8 @@
 
 
 @endsection
+
+
+
 
 

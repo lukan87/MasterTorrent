@@ -72,7 +72,7 @@ class RegisterController extends Controller
              $inviterId = $invite->inviter_id;
 
 
-              // Send a message to the owner about the deletion
+              // Send a message to the owner about the invited user
         Message::create([
         'receiver_id' => $inviterId,  // The owner receives the message
         'subject' => 'Invite Used',
@@ -83,7 +83,7 @@ class RegisterController extends Controller
          }
 
         // Create user with IP address
-    $user = $this->create($request->all(), $request->ip(), $inviterId, $request->invite_code);
+    $user = $this->create($request->all(), $request->ip(), $inviterId, $request->invite_code, $request->timezone);
 
         // Log the user in after registration
         \Illuminate\Support\Facades\Auth::login($user);
@@ -98,7 +98,7 @@ class RegisterController extends Controller
      * @param  string  $ip
      * @return \App\Models\User
      */
-    protected function create(array $data, string $ip, $inviterId = null, $inviteCode = null)
+    protected function create(array $data, string $ip, $inviterId = null, $inviteCode = null, $timezone = null)
     {
    
         $passkey = bin2hex(random_bytes(16)); // Generate 32-char unique passkey
@@ -118,6 +118,7 @@ class RegisterController extends Controller
             'passkey' => $passkey, // Set the generated passkey
             'invited_by' => $inviterId, // Store the inviter's ID if available
             'invite_code' => $inviteCode, // Store the actual invite code used
+            'timezone' => $timezone,
         ]);
     }
 

@@ -135,6 +135,59 @@ class UserController extends Controller
             $user->enabled = $request->enabled;
         }
 
+
+        if ($request->input('warned') == 1 && empty($request->input('warned_reason'))) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['warned_reason' => 'Warning reason is required when issuing a warning.']);
+        }
+        
+        
+// Check if `warned_until` has changed
+if ($request->has('warned_until') && $user->warned_until != $request->warned_until) {
+    $changes[] = "warned_until";
+    $user->warned_until = $request->warned_until;
+}
+
+// Check if `warned_reason` has changed
+if ($request->has('warned_reason') && $user->warned_reason !== $request->warned_reason) {
+    $changes[] = "warned_reason";
+    $user->warned_reason = $request->warned_reason;
+}
+
+// Check if `warned` has changed
+if ($request->has('warned') && $user->warned != $request->warned) {
+    $changes[] = "warned";
+    $user->warned = $request->warned;
+}
+
+// Check if the user was just warned
+if (
+    $request->has('warned') && $request->input('warned') == 1 &&
+    ($user->getOriginal('warned') == 0 || $user->getOriginal('warned') === null)
+) {
+    // Log to timeline
+    UserTimeline::create([
+        'user_id' => $user->id,
+        'staff_id' => Auth::id(),
+        'comment' => 'User was warned by ' . $currentUser->name .
+                     ($request->warned_reason ? ' — Reason: ' . $request->warned_reason : ''),
+    ]);
+
+    // Send a message to the user
+    Message::create([
+        'sender_id' => 2,
+        'receiver_id' => $user->id,
+        'subject' => 'You have been warned',
+        'body' => "You have received a warning from {$currentUser->name}." .
+                  ($request->warned_reason ? "\n\nReason: " . $request->warned_reason : '') .
+                  "\n\nPlease check your account details or contact staff for more information.",
+        'is_read' => false,
+    ]);
+}
+
+
+
         // Check if `downloadpos` has changed (yes/no)
         if ($request->has('downloadpos') && $user->downloadpos != $request->downloadpos) {
             $changes[] = "downloadpos";
@@ -196,9 +249,9 @@ class UserController extends Controller
         }
 
         // Verifică și actualizează clasa utilizatorului doar pentru moderatori și utilizatori de nivel superior
-        if ($currentUser->user_class >= \App\Models\UserClass::MODERATOR && $request->filled('user_class')) {
+        if ($currentUser->user_class >= UserClass::MODERATOR && $request->filled('user_class')) {
             // Verifică dacă clasa solicitată este diferită de clasa curentă
-            if ((int) $request->user_class !== (int) $user->user_class) { // Asigură o comparație strictă
+            if ((int) $request->user_class !== (int) $user->user_class) {
                 // Previne promovările neautorizate
                 if (
                     $request->user_class >= $currentUser->user_class || // Noua clasă este egală sau mai mare decât clasa utilizatorului curent
@@ -206,22 +259,44 @@ class UserController extends Controller
                 ) {
                     return redirect()->back()->withErrors('Nu ai permisiunea de a face acest lucru.');
                 }
-
-                // Actualizează clasa utilizatorului și înregistrează schimbarea în timeline-ul utilizatorului
+        
+                // Verifică dacă este o promovare la clasa 3
+                if ((int) $request->user_class === 3 && (int) $user->user_class < 3) {
+                    // Acordă privilegii speciale
+                    $user->is_immune = 1;
+                    $user->is_freeleech = 1;
+        
+                    // Resetare avertismente și hit-and-run
+                    $user->warned = 0;
+                    $user->warned_until = null;
+                    $user->hit_and_run_count = 0;
+        
+                    // Șterge toate avertismentele utilizatorului
+                    DB::table('warnings')->where('user_id', $user->id)->delete();
+        
+                    // Actualizează istoricul torentelor
+                    DB::table('history')
+                        ->where('user_id', $user->id)
+                        ->where('hitrun', 1)
+                        ->update([
+                            'hitrun' => 0,
+                            'seedtime' => 86400,
+                        ]);
+                }
+        
+                // Actualizează clasa utilizatorului
                 $user->user_class = $request->user_class;
-                $user->save(); // Salvează clasa actualizată în baza de date
-
+                $user->save();
+        
                 // Înregistrează schimbarea în UserTimeline
                 UserTimeline::create([
                     'user_id' => $user->id,
                     'staff_id' => Auth::id(),
-                    'comment' => 'Clasa schimbată în ' . \App\Models\UserClass::getClassName($request->user_class) . ' de ' . $currentUser->name,
+                    'comment' => 'Clasa schimbată în ' . UserClass::getClassName($request->user_class) . ' de ' . $currentUser->name,
                 ]);
-            } else {
-                // Opțional: Adaugă loguri pentru scopuri de depanare
-
             }
         }
+        
 
         // Verifică dacă durata VIP este selectată
         if ($request->filled('vip_until')) {
@@ -393,51 +468,48 @@ $user->save();
 
 
 
-public function sendMassMessage(Request $request)
-{
-
-    $request->validate([
-        'message' => 'required|string',
-        'user_ids' => 'nullable|array',
-        'user_ids.*' => 'exists:users,id', // Ensure users exist
-        'user_class' => 'nullable|array', // Allow an array of user classes
-        'user_class.*' => 'in:' . implode(',', array_keys(UserClass::getClasses())), // Validate each user_class is a valid class
-    ]);
-
-
-    // Verifică dacă user_class este gol (neselectat)
- if (!$request->filled('user_class')) {
-    return redirect()->back()->with('error', 'Please select at least one user class to send the message.');
-}
-
-  // Obține utilizatorii cărora să le trimitem mesajul, filtrat opțional de clasele de utilizatori sau de ID-urile specifice ale utilizatorilor
-    $query = User::query();
-
-
-    if ($request->filled('user_class')) {
-        $query->whereIn('user_class', $request->user_class);
-    }
-
-
-    $users = $query->get();
-
-    $sentCount = 0;
-    // Trimite un mesaj fiecărui utilizator selectat
-    foreach ($users as $user) {
-        Message::create([
-            'sender_id' => 2, // Assuming the admin is sending the message
-            'receiver_id' => $user->id,
-            'subject' => 'Mass Message',
-            'body' => $request->message,
-            'is_read' => false, // You can customize the status as needed
+    public function sendMassMessage(Request $request)
+    {
+        $request->validate([
+            'message' => 'required|string',
+            'user_ids' => 'nullable|array',
+            'user_ids.*' => 'exists:users,id', // Ensure users exist
+            'user_class' => 'nullable|array', // Allow an array of user classes
+            'user_class.*' => 'in:' . implode(',', array_keys(UserClass::getClasses())), // Validate each user_class is a valid class
         ]);
-
-        // Increment the sent count
-        $sentCount++;
+    
+        // Verifică dacă user_class este gol (neselectat)
+        if (!$request->filled('user_class')) {
+            return redirect()->back()->with('error', 'Please select at least one user class to send the message.');
+        }
+    
+        // Obține utilizatorii cărora să le trimitem mesajul, filtrat opțional de clasele de utilizatori sau de ID-urile specifice ale utilizatorilor
+        $query = User::query();
+    
+        if ($request->filled('user_class')) {
+            $query->whereIn('user_class', $request->user_class);
+        }
+    
+        // Use chunk to process users in smaller batches
+        $sentCount = 0;
+        $query->chunk(100, function ($users) use (&$sentCount, $request) {
+            foreach ($users as $user) {
+                Message::create([
+                    'sender_id' => 2, // Assuming the admin is sending the message
+                    'receiver_id' => $user->id,
+                    'subject' => 'Mass Message',
+                    'body' => $request->message,
+                    'is_read' => false, // You can customize the status as needed
+                ]);
+                
+                // Increment the sent count
+                $sentCount++;
+            }
+        });
+    
+        return redirect()->route('admin.users.index')->with('success', "$sentCount messages sent successfully!");
     }
-
-    return redirect()->route('admin.users.index')->with('success', "$sentCount messages sent successfully!");
-}
+    
 
 
 

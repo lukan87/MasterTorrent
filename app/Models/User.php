@@ -148,20 +148,52 @@ public function history()
     }
 
 
+// public function getSeedbonusPerHourAttribute()
+// {
+//     // Count the number of seeding torrents for the authenticated user
+//     $seedingCount = DB::table('peers')
+//     ->where('user_id', $this->id) // Assuming 'userid' refers to the user's ID in the peers table
+//     ->where('seeder', true) // Check if the user is a seeder
+//     ->distinct('torrent_id') // Count only distinct torrents
+//     ->count('torrent'); // Count based on the unique 'torrent' field
+
+//     // Define how many points per torrent per hour (example value)
+//     $pointsPerTorrent = 0.15; // Change this to your actual earning rate per torrent
+
+//     // Calculate the total earning rate
+//     return $seedingCount * $pointsPerTorrent; // Total points earned per hour
+// }
+
 public function getSeedbonusPerHourAttribute()
 {
-    // Count the number of seeding torrents for the authenticated user
+    // Count the number of distinct torrents the user is seeding,
+    // excluding torrents they own
     $seedingCount = DB::table('peers')
-    ->where('user_id', $this->id) // Assuming 'userid' refers to the user's ID in the peers table
-    ->where('seeder', true) // Check if the user is a seeder
-    ->distinct('torrent_id') // Count only distinct torrents
-    ->count('torrent'); // Count based on the unique 'torrent' field
+        ->join('torrents', 'peers.torrent_id', '=', 'torrents.id')
+        ->where('peers.user_id', $this->id)
+        ->where('peers.seeder', true)
+        ->where('torrents.owner', '!=', $this->id) // Exclude owned torrents
+        ->distinct('peers.torrent_id')
+        ->count('peers.torrent_id');
 
-    // Define how many points per torrent per hour (example value)
-    $pointsPerTorrent = 0.15; // Change this to your actual earning rate per torrent
+    // Define how many points per torrent per hour
+    $pointsPerTorrent = 0.15;
 
-    // Calculate the total earning rate
-    return $seedingCount * $pointsPerTorrent; // Total points earned per hour
+    // Total points earned per hour
+    return $seedingCount * $pointsPerTorrent;
+}
+
+public function getSeedingTorrentCountAttribute()
+{
+    // Count the number of distinct torrents the user is seeding,
+    // excluding torrents they own
+    return DB::table('peers')
+        ->join('torrents', 'peers.torrent_id', '=', 'torrents.id')
+        ->where('peers.user_id', $this->id)
+        ->where('peers.seeder', true)
+        ->where('torrents.owner', '!=', $this->id) // Exclude owned torrents
+        ->distinct('peers.torrent_id')
+        ->count('peers.torrent_id');
 }
 
 
