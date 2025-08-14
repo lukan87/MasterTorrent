@@ -44,7 +44,7 @@
 
                 <div class="mb-3">
                     <label for="steamid" class="form-label">Steam ID</label>
-                    <input type="text" class="form-control" id="steamid" name="steamid" placeholder="e.g. https://store.steampowered.com/app/310950" value="{{ old('steamid') }}">
+                    <input type="text" class="form-control" id="steamid" name="steamid" placeholder="ONLY ONSERT THE ID FROM - https://store.steampowered.com/app/310950" value="{{ old('steamid') }}">
                 </div>
 
                 <div class="mb-3">
@@ -70,53 +70,95 @@
 
 
                 <div class="mb-3">
-                    <label for="description" class="form-label">Description</label>
+                 
 
-                    <div class="d-flex flex-wrap gap-2 mb-2">
-                        <!-- BBCode Controls -->
-                        <div class="d-flex gap-2">
-                            <select id="fontSize" class="form-select form-select-sm w-auto">
-                                <option value="14">1 (Small)</option>
-                                <option value="16">2 (Normal)</option>
-                                <option value="18">3 (Medium)</option>
-                                <option value="20">4 (Large)</option>
-                                <option value="22">5 (Extra Large)</option>
-                            </select>
-                            <button class="btn btn-sm btn-outline-secondary" type="button" onclick="insertBBCode('size', document.getElementById('fontSize').value)">Size</button>
+                   
+                        <label for="description" class="form-label"><strong>Description</strong></label>
+                    
+                        <div class="d-flex flex-wrap gap-3 mb-2 align-items-end">
+                            <!-- Font Size -->
+                            <div class="d-flex flex-column me-2">
+                                <label for="fontSize" class="form-label small">Size</label>
+                                <select id="fontSize" class="form-select form-select-sm"
+                                    onchange="insertBBCode('size', this.value)" aria-label="Font Size">
+                                    <option value="14" style="font-size: 14px;">1 (Small)</option>
+                                    <option value="16" style="font-size: 16px;">2 (Normal)</option>
+                                    <option value="18" style="font-size: 18px;">3 (Medium)</option>
+                                    <option value="20" style="font-size: 20px;">4 (Large)</option>
+                                    <option value="22" style="font-size: 22px;">5 (Extra Large)</option>
+                                </select>
+                            </div>
+                        
+                            <!-- Font Color -->
+                            <div class="d-flex flex-column me-2">
+                                <label for="fontColor" class="form-label small">Color</label>
+                                <select id="fontColor" class="form-select form-select-sm"
+                                    onchange="insertBBCode('color', this.value)" aria-label="Font Color">
+                                    <option value="black" style="color: black;">Black</option>
+                                    <option value="gray" style="color: gray;">Gray</option>
+                                    <option value="red" style="color: red;">Red</option>
+                                    <option value="darkred" style="color: darkred;">Dark Red</option>
+                                    <option value="orange" style="color: orange;">Orange</option>
+                                    <option value="gold" style="color: goldenrod;">Gold</option>
+                                    <option value="green" style="color: green;">Green</option>
+                                    <option value="darkgreen" style="color: darkgreen;">Dark Green</option>
+                                    <option value="blue" style="color: blue;">Blue</option>
+                                    <option value="darkblue" style="color: darkblue;">Dark Blue</option>
+                                    <option value="purple" style="color: purple;">Purple</option>
+                                    <option value="pink" style="color: deeppink;">Pink</option>
+                                    <option value="teal" style="color: teal;">Teal</option>
+                                    <option value="brown" style="color: brown;">Brown</option>
+                                </select>
+                            </div>
+                        
+                            <!-- Font Family -->
+                            <div class="d-flex flex-column me-2">
+                                <label for="fontFamily" class="form-label small">Font</label>
+                                <select id="fontFamily" class="form-select form-select-sm"
+                                    onchange="insertBBCode('font', this.value)" aria-label="Font Family">
+                                    <option value="Arial" style="font-family: Arial;">Arial</option>
+                                    <option value="Verdana" style="font-family: Verdana;">Verdana</option>
+                                    <option value="Courier New" style="font-family: 'Courier New';">Courier New</option>
+                                    <option value="Georgia" style="font-family: Georgia;">Georgia</option>
+                                    <option value="Times New Roman" style="font-family: 'Times New Roman';">Times New Roman</option>
+                                    <option value="Comic Sans MS" style="font-family: 'Comic Sans MS';">Comic Sans MS</option>
+                                    <option value="Trebuchet MS" style="font-family: 'Trebuchet MS';">Trebuchet MS</option>
+                                    <option value="Lucida Console" style="font-family: 'Lucida Console';">Lucida Console</option>
+                                    <option value="Tahoma" style="font-family: Tahoma;">Tahoma</option>
+                                    <option value="Impact" style="font-family: Impact;">Impact</option>
+                                </select>
+                            </div>
+                        
+                            <!-- BBCode Quick Buttons -->
+                            <div class="d-flex flex-wrap gap-2 mt-2">
+                                <button class="btn btn-sm btn-outline-secondary" type="button" onclick="insertBBCode('center')" data-bs-toggle="tooltip" data-bs-placement="top" title="Center">
+                                    <i class="bi bi-text-center"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" type="button" onclick="insertBBCode('b')" data-bs-toggle="tooltip" data-bs-placement="top" title="Bold">
+                                    <i class="bi bi-type-bold"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" type="button" onclick="insertBBCode('i')" data-bs-toggle="tooltip" data-bs-placement="top" title="Italic">
+                                    <i class="bi bi-type-italic"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" type="button" onclick="insertBBCode('u')" data-bs-toggle="tooltip" data-bs-placement="top" title="Underline">
+                                    <i class="bi bi-type-underline"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" type="button" onclick="insertBBCode('quote')" data-bs-toggle="tooltip" data-bs-placement="top" title="Quote">
+                                    <i class="bi bi-chat-left-quote"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" type="button" onclick="insertBBCode('youtube')" data-bs-toggle="tooltip" data-bs-placement="top" title="YouTube">
+                                    <i class="bi bi-youtube"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" type="button" onclick="insertBBCode('img')" data-bs-toggle="tooltip" data-bs-placement="top" title="Image">
+                                    <i class="bi bi-card-image"></i>
+                                </button>
+                            </div>
+                            
+                            
                         </div>
-
-                        <div class="d-flex gap-2">
-                            <select id="fontColor" class="form-select form-select-sm w-auto">
-                                <option value="black">Black</option>
-                                <option value="red">Red</option>
-                                <option value="blue">Blue</option>
-                                <option value="green">Green</option>
-                                <option value="purple">Purple</option>
-                            </select>
-                            <button class="btn btn-sm btn-outline-secondary" type="button" onclick="insertBBCode('color', document.getElementById('fontColor').value)">Color</button>
-                        </div>
-
-                        <div class="d-flex gap-2">
-                            <select id="fontFamily" class="form-select form-select-sm w-auto">
-                                <option value="Arial">Arial</option>
-                                <option value="Verdana">Verdana</option>
-                                <option value="Courier">Courier</option>
-                                <option value="Georgia">Georgia</option>
-                                <option value="Times New Roman">Times New Roman</option>
-                            </select>
-                            <button class="btn btn-sm btn-outline-secondary" type="button" onclick="insertBBCode('font', document.getElementById('fontFamily').value)">Font</button>
-                        </div>
-
-                        <div class="d-flex gap-2 flex-wrap">
-                            <button class="btn btn-sm btn-outline-secondary" type="button" onclick="insertBBCode('center')">Center</button>
-                            <button class="btn btn-sm btn-outline-secondary" type="button" onclick="insertBBCode('b')">Bold</button>
-                            <button class="btn btn-sm btn-outline-secondary" type="button" onclick="insertBBCode('i')">Italic</button>
-                            <button class="btn btn-sm btn-outline-secondary" type="button" onclick="insertBBCode('u')">Underline</button>
-                            <button class="btn btn-sm btn-outline-secondary" type="button" onclick="insertBBCode('quote')">Quote</button>
-                            <button class="btn btn-sm btn-outline-secondary" type="button" onclick="insertBBCode('youtube')">YouTube</button>
-                            <button class="btn btn-sm btn-outline-secondary" type="button" onclick="insertBBCode('img')">Image</button>
-                        </div>
-                    </div>
+                        
+                    
+                    
 
                     <textarea class="form-control" id="description" name="description" oninput="resizeTextarea('description')" style="min-height: 150px;" required>{{ old('description') }}</textarea>
                 </div>
@@ -132,31 +174,76 @@
                         <input type="text" class="form-control" id="imdb_url" name="imdb_url" value="{{ old('imdb_url') }}">
                         <button class="btn btn-outline-success mt-2" type="button" onclick="fetchIMDBInfo()">🎬 Fetch Info</button>
                     </div>
+
+                   <div id="imdb-duplicate-warning" class="alert alert-warning mt-2 d-none">
+    <strong>Similar torrents already exist with this IMDb URL. Check if your release is already uploaded!</strong>
+    <ul id="existing-torrent-list" class="mb-0"></ul>
+</div>
+
+<script>
+    document.getElementById('imdb_url').addEventListener('input', function () {
+        const imdbUrl = this.value.trim();
+        const warningBox = document.getElementById('imdb-duplicate-warning');
+        const list = document.getElementById('existing-torrent-list');
+
+        if (!imdbUrl) {
+            warningBox.classList.add('d-none');
+            list.innerHTML = '';
+            return;
+        }
+
+        fetch(`/torrents/check-imdb?url=${encodeURIComponent(imdbUrl)}`)
+            .then(response => response.json())
+            .then(data => {
+                list.innerHTML = '';
+                if (data.exists) {
+                   data.torrents.forEach(torrent => {
+    const li = document.createElement('li');
+    li.innerHTML = `
+        <a href="/torrents/${torrent.id}">${torrent.name}</a> 
+        — Seeders: ${torrent.seeders} | Leechers: ${torrent.leechers} | Completed: ${torrent.times_completed} 
+    `;
+    list.appendChild(li);
+});
+                    warningBox.classList.remove('d-none');
+                } else {
+                    warningBox.classList.add('d-none');
+                }
+            });
+    });
+</script>
+
+
                 </div>
 
-                <div class="mb-4">
-                    <label class="form-label">Torrent Tags:</label>
-                    <div class="form-check form-check-inline">
-                        <input type="checkbox" class="form-check-input" name="free" id="free" value="1" {{ old('free') ? 'checked' : '' }}>
-                        <label class="form-check-label" for="free">Free</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input type="checkbox" class="form-check-input" name="double" id="double" value="1" {{ old('double') ? 'checked' : '' }}>
-                        <label class="form-check-label" for="double">Double</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input type="checkbox" class="form-check-input" name="sticky" id="sticky" value="1" {{ old('sticky') ? 'checked' : '' }}>
-                        <label class="form-check-label" for="sticky">Sticky</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input type="checkbox" class="form-check-input" name="recommended" id="recommended" value="1" {{ old('recommended') ? 'checked' : '' }}>
-                        <label class="form-check-label" for="recommended">Recommended</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input type="checkbox" class="form-check-input" name="seedbox" id="seedbox" value="1" {{ old('seedbox') ? 'checked' : '' }}>
-                        <label class="form-check-label" for="seedbox">Seedbox</label>
-                    </div>
-                </div>
+                                   <!-- Torrent Tags -->
+                                   @if (Auth::check() && (Auth::user()->user_class >= \App\Models\UserClass::MODERATOR))
+                                   <div class="mb-4">
+                                    <label class="form-label fw-bold">Torrent Tags:</label>
+                                    <div class="d-flex flex-wrap gap-3">
+                                        <div class="form-check form-switch">
+                                            <input type="checkbox" class="form-check-input" name="free" id="free" value="1" {{ old('free') ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="free"><span class="badge bg-success">Free</span></label>
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input type="checkbox" class="form-check-input" name="double" id="double" value="1" {{ old('double') ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="double"><span class="badge bg-warning text-dark">Double</span></label>
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input type="checkbox" class="form-check-input" name="sticky" id="sticky" value="1" {{ old('sticky') ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="sticky"><span class="badge bg-danger">Sticky</span></label>
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input type="checkbox" class="form-check-input" name="recommended" id="recommended" value="1" {{ old('recommended') ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="recommended"><span class="badge bg-info">Recommended</span></label>
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input type="checkbox" class="form-check-input" name="seedbox" id="seedbox" value="1" {{ old('seedbox') ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="seedbox"><span class="badge bg-dark">Seedbox</span></label>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endif
 
                 <button type="submit" class="btn btn-primary w-100 py-2">🚀 Upload Torrent</button>
             </form>
@@ -336,11 +423,43 @@ function insertBBCode(tag, option = null) {
         max-height: 500px; /* Maximum height for the textarea */
         min-height: 150px; /* Minimum height for the textarea */
     }
+
+
+    .content-overlay {
+        background: none;
+        padding: 20px;
+    }
+
+    body::before {
+        content: '';
+        position: fixed;
+/* position: absolute; */
+top: 55px;
+right: 0;
+bottom: 0;
+left: 0;
+background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 1)), url('https://4kwallpapers.com/images/walls/thumbs_3t/8324.png');
+background-position-x: center top;
+background-size: cover;
+background-repeat: no-repeat;
+opacity: 0.7;
+
+    }
 </style>
 
 
 
 @else
-<div class="alert alert-danger mt-5"> <h1>You are not authorized to upload torrents! Speak with a staff member !</h1> </div>
+<div class="container mt-5">
+    <div class="alert alert-danger bg-gradient-danger text-white border-0 shadow-lg">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+            <div>
+                <h1 class="alert-heading mb-2">Upload Permission Required</h1>
+                <p class="mb-0">You are not authorized to upload torrents. Please contact staff if you believe this is an error.</p>
+            </div>
+        </div>
+    </div>
+</div>
 @endif
 @endsection

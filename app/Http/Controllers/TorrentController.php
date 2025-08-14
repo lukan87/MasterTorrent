@@ -27,10 +27,6 @@ use App\Models\UserSlot;
 use Carbon\Carbon;
 use App\Helpers\TorrentHelper;
 
-use Illuminate\Support\Facades\Response;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-
 
 
 class TorrentController extends Controller
@@ -189,6 +185,11 @@ if ($request->has('external') && $request->external == 1) {
     $torrentData['info']['private'] = 1; // Private mode for internal torrents
 }
         $infoHash = Bencode::get_infohash($torrentData);
+         // Check if a torrent with the same infohash already exists
+        if (Torrent::where('info_hash', $infoHash)->exists()) {
+            return back()->with('error', 'A torrent with the same infohash exists on the site!');
+        }
+
         $meta = Bencode::get_meta($torrentData);
 
         $announce = $torrentData['announce'];
@@ -280,14 +281,6 @@ if ($request->has('external') && $request->external == 1) {
             }
 
         }
-      
-       
-
-        // Check if a torrent with the same infohash already exists
-        if (Torrent::where('info_hash', $infoHash)->exists()) {
-            return back()->with('error', 'A torrent with the same infohash exists on the site!');
-        }
-
         
          
         // Save the torrent file to the server
@@ -555,93 +548,92 @@ public function bump($id)
     public function show($id, $slug = null)
     {
         try {
-            // Fetch the torrent by ID first to ensure it exists
-            $torrent = Torrent::with(['files', 'images'])->findOrFail($id);
-
+            // Fetch the torrent by ID first to ensure it exists, eager load related models
+            $torrent = Torrent::with(['files', 'images', 'genres'])
+                ->findOrFail($id);
+    
             // Check if the slug matches; if not, redirect to the correct URL
             if ($slug !== $torrent->slug) {
                 return redirect()->route('torrents.show', ['id' => $torrent->id, 'slug' => $torrent->slug]);
             }
-
-            // Fetch comments directly by torrent_id
+    
+            // Fetch comments directly by torrent_id (limit and paginate in one call)
             $comments = Comment::with('user')
                 ->where('torrent_id', $torrent->id)
-                ->orderBy('created_at', 'desc')
+                ->orderByDesc('created_at')
                 ->paginate(5);
-
-            // Get the snatched history from the history table (assuming 'history' table is tracking snatched torrents)
+    
+            // Fetch snatched history with user details using joins
             $snatched = History::select('history.*', 'users.name as user_name', 'users.id as user_id')
                 ->join('users', 'users.id', '=', 'history.user_id')
                 ->where('history.torrent_id', $torrent->id)
                 ->get();
 
-            $tmdbData = null; // Initialize variable to hold TMDB data
-            $omdbData = null; // Initialize variable to hold OMDB data
-            $steamData = null;
-
-            // Parse mediainfo only if it's not null
+                // Parse mediainfo only if it's not null
             $mediainfo = $torrent->mediainfo !== null ? (new MediaInfo())->parse($torrent->mediainfo) : null;
-
-            // Fetch TMDB data if available
-            $tmdbService = new TMDBService(); // Or inject this in the constructor.
-
-            if ($torrent->tmdbid) {
-                $tmdbData = $tmdbService->fetchTMDBData($torrent->tmdbid, $torrent->tmdb_type);
-            }
-
-            // Fetch OMDB data if a valid IMDB ID is available
-            if ($torrent->imdbid) {
-                $omdbData = $tmdbService->fetchOMDBData($torrent->imdbid);
-            }
-
-            // Fetch Steam data if a valid Steam ID is available
-            if ($torrent->steamid) {
-                $steamData = $tmdbService->fetchSteamData($torrent->steamid);
-            }
-
+    
+            // Use caching for TMDB, OMDB, Steam data to reduce external calls
+            $tmdbData = Cache::remember("tmdb_{$torrent->tmdbid}", 3600, function () use ($torrent) {
+                return $torrent->tmdbid ? (new TMDBService())->fetchTMDBData($torrent->tmdbid, $torrent->tmdb_type) : null;
+            });
+    
+            $omdbData = Cache::remember("omdb_{$torrent->imdbid}", 3600, function () use ($torrent) {
+                return $torrent->imdbid ? (new TMDBService())->fetchOMDBData($torrent->imdbid) : null;
+            });
+    
+            $steamData = Cache::remember("steam_{$torrent->steamid}", 3600, function () use ($torrent) {
+                return $torrent->steamid ? (new TMDBService())->fetchSteamData($torrent->steamid) : null;
+            });
+    
             // Fetch similar torrents based on category or TMDB ID
-            $similarTorrents = collect(); // Default to an empty collection
-
-            if ($torrent->tmdbid !== null) {
-                $similarTorrents = Torrent::where('id', '!=', $torrent->id)
+            $similarTorrents = $torrent->tmdbid
+                ? Torrent::where('id', '!=', $torrent->id)
                     ->where('tmdbid', $torrent->tmdbid)
                     ->where('seeders', '>', 0)
                     ->limit(5)
-                    ->get();
-            }
-
+                    ->get()
+                : collect(); // Default to empty collection if no TMDB ID
+    
+            // Fetch recommended torrents based on category and genres
             $recommendedTorrents = Torrent::where('category_id', $torrent->category_id)
-            ->where('seeders', '>', 0)
-            ->whereHas('genres', function ($query) use ($torrent) {
-                // Match torrents that have at least one genre in common with the current torrent
-                $query->whereIn('genres.id', $torrent->genres->pluck('id'));
-            })
-            ->orWhere('name', 'like', '%' . preg_replace('/[^\w]+/', '', $torrent->name) . '%')
-            ->select('id', 'slug', 'name', 'size', 'seeders', 'leechers', 'times_completed', 'poster')
-            ->inRandomOrder()
-            ->limit(6)
-            ->get();
-
-             // Check if the current user has already thanked this torrent
-        $hasThanked = TorrentThank::where('torrent_id', $torrent->id)
-        ->where('user_id', Auth::id())
-        ->exists();
-
-        $thanksUsers = TorrentThank::where('torrent_id', $torrent->id)->get();
-        $thankUserNames = $thanksUsers->pluck('user_id')->toArray(); // Get the list of user IDs who thanked the torrent
-        $thankUserNames = User::whereIn('id', $thankUserNames)->pluck('name')->toArray(); // Get the user names
-
-            // Return the data to the view
+                ->where('seeders', '>', 0)
+                ->whereHas('genres', function ($query) use ($torrent) {
+                    $query->whereIn('genres.id', $torrent->genres->pluck('id'));
+                })
+                ->orWhere('name', 'like', '%' . preg_replace('/[^\w]+/', '', $torrent->name) . '%')
+                ->select('id', 'slug', 'name', 'size', 'seeders', 'leechers', 'times_completed', 'poster')
+                ->inRandomOrder()
+                ->limit(6)
+                ->get();
+    
+            // Check if the current user has already thanked this torrent
+            $hasThanked = TorrentThank::where('torrent_id', $torrent->id)
+                ->where('user_id', Auth::id())
+                ->exists();
+    
+            // Get names of users who thanked the torrent (only fetch names, not entire user records)
+            $thankUserNames = TorrentThank::where('torrent_id', $torrent->id)
+                ->pluck('user_id')
+                ->toArray();
+    
+            $thankUserNames = User::whereIn('id', $thankUserNames)
+                ->pluck('name')
+                ->toArray();
+    
+            // Prepare file tree
             $fileTree = TorrentHelper::buildFileTree($torrent->files);
-            
-            return view('torrents.show', compact('torrent', 'comments', 'tmdbData', 'omdbData', 'mediainfo', 'steamData', 'snatched', 'similarTorrents', 'recommendedTorrents', 'hasThanked', 'thankUserNames', 'fileTree'));
-            
-
+    
+            return view('torrents.show', compact(
+                'torrent', 'comments', 'tmdbData', 'omdbData', 'mediainfo', 'steamData', 'snatched',
+                'similarTorrents', 'recommendedTorrents', 'hasThanked', 'thankUserNames', 'fileTree'
+            ));
+    
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             // Handle the case where the torrent is not found
-            return view('errors.torrent-not-found'); // Display custom "Torrent Not Found" page
+            return view('errors.torrent-not-found');
         }
     }
+    
 
 
 public function thank($id)
@@ -974,6 +966,56 @@ if ($owner && User::where('id', $owner)->exists()) {
     }
 
 
+public function bulkDelete(Request $request)
+{
+    $torrentIds = $request->input('torrent_ids', []);
+    $deletionReason = $request->input('deletion_reason');
+
+    if (empty($deletionReason)) {
+        $deletionReason = '0 seeders and 0 leechers';
+    } elseif ($deletionReason === 'custom') {
+        $deletionReason = $request->input('custom_reason');
+    }
+
+    foreach ($torrentIds as $id) {
+        $torrent = Torrent::find($id);
+
+        if (!$torrent) continue;
+
+        $owner = $torrent->owner;
+
+        if ($owner && User::where('id', $owner)->exists()) {
+            Message::create([
+                'receiver_id' => $owner,
+                'subject' => 'Torrent Deletion',
+                'sender_id' => 2,
+                'body' => 'Your torrent "' . $torrent->name . '" has been deleted. Reason: ' . $deletionReason,
+                'is_read' => false,
+            ]);
+        }
+
+        Peer::where('torrent_id', $torrent->id)->delete();
+        History::where('torrent_id', $torrent->id)->delete();
+        Comment::where('torrent_id', $torrent->id)->delete();
+        Warning::where('torrent', $torrent->id)->delete();
+        UserSlot::where('torrent_id', $torrent->id)->delete();
+        $torrent->genres()->detach();
+
+        $images = TorrentImage::where('torrent_id', $torrent->id)->get();
+        foreach ($images as $image) {
+            $filePath = storage_path('app/public/' . $image->path);
+            if (file_exists($filePath)) unlink($filePath);
+            $image->delete();
+        }
+
+        $filePath = public_path('files/torrents/' . $torrent->file_name);
+        if (file_exists($filePath)) unlink($filePath);
+
+        $torrent->delete();
+    }
+
+    return redirect()->route('torrents.index')->with('success', 'Selected torrents deleted successfully.');
+}
 
 
 
@@ -1003,6 +1045,32 @@ public function peers($torrentId, Request $request)
     // Return the view with the seeders or leechers based on the query parameters
     return view('torrents.peers', compact('torrent', 'seeders', 'leechers'));
 }
+
+
+public function checkImdbUrl(Request $request)
+{
+    $url = $request->query('url');
+
+    $torrents = \App\Models\Torrent::where('imdb_url', $url)
+        ->latest()
+        ->take(10)
+        ->get(['id', 'name', 'seeders', 'leechers', 'times_completed', 'size']);
+
+    if ($torrents->isNotEmpty()) {
+        
+        return response()->json([
+            'exists' => true,
+            'torrents' => $torrents
+        ]);
+    }
+
+    return response()->json(['exists' => false]);
+}
+
+
+
+
+
 
 
 

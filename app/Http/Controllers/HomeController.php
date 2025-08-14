@@ -43,6 +43,7 @@ $now = now();
 
 $topLastDay = Cache::remember('top_last_day', $cacheDuration, function () use ($now) {
     return Torrent::where('created_at', '>=', $now->copy()->subDay())
+                  ->where('category_id', '!=', 27)  // Exclude category 27
                   ->orderByDesc('seeders') 
                   ->limit(5)
                   ->get();
@@ -51,6 +52,7 @@ $topLastDay = Cache::remember('top_last_day', $cacheDuration, function () use ($
 
 $topLastWeek = Cache::remember('top_last_week', $cacheDuration, function () use ($now) {
     return Torrent::where('created_at', '>=', $now->copy()->subWeek())
+                  ->where('category_id', '!=', 27)  // Exclude category 27
                   ->orderByDesc('seeders') 
                   ->limit(5)
                   ->get();
@@ -59,6 +61,7 @@ $topLastWeek = Cache::remember('top_last_week', $cacheDuration, function () use 
 
 $topLastMonth = Cache::remember('top_last_month', $cacheDuration, function () use ($now) {
     return Torrent::where('created_at', '>=', $now->copy()->subMonth())
+                  ->where('category_id', '!=', 27)  // Exclude category 27
                   ->orderByDesc('seeders')  
                   ->limit(5)
                   ->get();
@@ -112,7 +115,7 @@ $topSeries = Cache::remember('top_series', $cacheDuration, function () {
         });
 
         $uniqueSeeders = Cache::remember('unique_seeders', $cacheDuration, function () {
-            return DB::table('history')
+            return DB::table('peers')
                      ->where('seeder', 1)  
                      ->where('active', true)  
                      ->count();  
@@ -120,7 +123,7 @@ $topSeries = Cache::remember('top_series', $cacheDuration, function () {
         
 
         $uniqueLeechers = Cache::remember('unique_leechers', $cacheDuration, function () {
-            return DB::table('history')
+            return DB::table('peers')
             ->where('seeder', 0)  
             ->where('active', true)  
             ->count();

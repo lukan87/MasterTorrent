@@ -1,168 +1,241 @@
 <div style="display:block; height:50px"></div>
 
-<div class="row">
-    <div class="col-md-12">
-        <!-- Removed card card-custom card-blur classes -->
-        <div class="content-overlay mb-3">
-            <div class="card-body"><div class="tagss">TV-Series</div>
-                <div class="row">
-                    <div class="col-12 col-sm-3 col-xxl-2 order-0 order-sm-1 order-xxl-0 text-center">
-                        <img src="{{$torrent->poster}}"
-                             style="border-radius: 12px;
-                                    box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
-                                    width:100%;
-                                    margin-top: -50px;">
-
-<div style="margin-top: 10px;">
-    <!-- TMDB Link -->
-    @if($torrent->tmdbid)
-        <a href="https://www.themoviedb.org/tv/{{ $torrent->tmdbid }}" target="_blank" class="btn btn-dark btn-sm">View on TMDB</a>
-    @endif
-
-    <!-- IMDb Link -->
-    @if($torrent->imdbid)
-        <a href="https://www.imdb.com/title/{{ $torrent->imdbid }}" target="_blank" class="btn btn-dark btn-sm">View on IMDb</a>
-    @endif
-</div>
+<div class="series-header-container">
+    <div class="series-header-card">
+        <div class="series-header-content">
+            <div class="row">
+                <!-- Poster Column -->
+                <div class="col-12 col-sm-4 col-md-3 col-lg-2 poster-column">
+                    <div class="poster-wrapper">
+                        <img src="{{$torrent->poster}}" class="series-poster" alt="{{$tmdbData['name'] ?? 'TV Series Poster'}}" loading="lazy">
+                        
+                        <!-- Action Buttons -->
+                        <div class="poster-actions">
+                            @if($torrent->tmdbid)
+                                <a href="https://www.themoviedb.org/tv/{{ $torrent->tmdbid }}" 
+                                   target="_blank" 
+                                   class="action-btn tmdb-btn"
+                                   data-bs-toggle="tooltip" title="View on TMDB">
+                                    <i class="bi bi-star-fill"></i>
+                                </a>
+                            @endif
+                            
+                            @if($torrent->imdbid)
+                                <a href="https://www.imdb.com/title/{{ $torrent->imdbid }}" 
+                                   target="_blank" 
+                                   class="action-btn imdb-btn"
+                                   data-bs-toggle="tooltip" title="View on IMDb">
+                                    <i class="bi bi-film"></i>
+                                </a>
+                            @endif
+                        </div>
                     </div>
-
-                    <div class="col-sm-9 col-xxl-10 order-1 order-sm-0 order-xxl-1">
-
-
-    <!-- Rated (OMDB) -->
-
-    @php
-    $PG = ''; // Initialize the variable
-    @endphp
-    @if(isset($omdbData['Rated']) && $omdbData['Rated'] != 'N/A')
-    @php
-        $rating = $omdbData['Rated'];
-
-
-        switch ($rating) {
-             // TV Ratings
-       case 'TV-Y':
-        $PG = "<i class='bi bi-stars' aria-hidden='false' data-bs-toggle='tooltip' title='Designed to be appropriate for children of all ages. The thematic elements portrayed in programs with this rating are specifically designed for a very young audience, including children from ages 2-6. '><b>$rating</b></i>";
-        break;
-    case 'TV-Y7':
-        $PG = "<i class='bi bi-stars' aria-hidden='false' data-bs-toggle='tooltip' title='Designed for children age 7 and older. The FCC states that it \"may be more appropriate for children who have acquired the developmental skills needed to distinguish between make-believe and reality\".The thematic elements portrayed in programs with this rating contain mild fantasy and comedic violence. '><b>$rating</b></i>";
-        break;
-    case 'TV-G':
-        $PG = "<i class='bi bi-stars' aria-hidden='false' data-bs-toggle='tooltip' title='Programs are generally suitable for all audiences, though they may not necessarily contain content of interest to children. The FCC states that \"this rating does not signify a program designed specifically for children, [and] most parents may let younger children watch this program unattended\". The thematic elements portrayed in programs with this rating contain little or no violence, mild language, and little or no sexual dialogue or situations'><b>$rating</b></i>";
-        break;
-    case 'TV-PG':
-        $PG = "<i class='bi bi-stars' aria-hidden='false' data-bs-toggle='tooltip' title='Programs may contain some material that parents or guardians may find inappropriate for younger children. Programs assigned a TV-PG rating may include infrequent coarse language, some sexual content, some suggestive dialogue, or moderate violence.'><b>$rating</b></i>";
-        break;
-    case 'TV-14':
-        $PG = "<i class='bi bi-stars' aria-hidden='false' data-bs-toggle='tooltip' title='Programs contain material that parents or adult guardians may find unsuitable for children under the age of 14. The FCC warns that \"parents are cautioned to exercise some care in monitoring this program and are cautioned against letting children under the age of 14 watch unattended\". Programs with this rating contain intensely suggestive dialogue, strong coarse language, intense sexual situations or intense violence.'><b>$rating</b></i>";
-        break;
-    case 'TV-MA':
-        $PG = "<i class='bi bi-stars' aria-hidden='false' data-bs-toggle='tooltip' title='Contains content that may be unsuitable for children. This rating was originally TV-M prior to the announced revisions to the rating system in August 1997 but was changed due to a trademark dispute and in order to remove confusion with the Entertainment Software Rating Board's (ESRB) \"M for Mature\" rating for video games.This rating is rarely used by broadcast networks or local television stations due to FCC restrictions on program content, although it is commonly applied to television programs featured on certain cable channels (basic and premium networks) and streaming networks for both mainstream and softcore programs. Programs with this rating may include crude indecent language, explicit sexual activity and graphic violence.'><b>$rating</b></i>
-        ";
-        break;
-
-    default:
-        $PG = "<i class='fa fa-star-o' aria-hidden='false' data-bs-toggle='tooltip' title='Rated'><b>$rating</b></i>";
-        break;
-        }
-    @endphp
-@endif
-                    <h3>{{ $tmdbData['name'] }}
-                    @if(isset($tmdbData['first_air_date']))
-                    ( {{ \Carbon\Carbon::parse($tmdbData['first_air_date'])->format('F j, Y') }} )
-                    @endif
-    {!! $PG !!}</h3>
-                    @if(isset($tmdbData['tagline']))
-                    <h5><i>{{ $tmdbData['tagline'] }}</i></h5>
-                    @endif
-
-<dd class="col-lg-12">
-@foreach($torrent->genres as $genre)
-                <a href="{{ route('torrents.index', ['genre' => $genre->id]) }}" class="badge bg-secondary" title="Search for {{ $genre->name }} torrents">{{ $genre->name }}</a>
-            @endforeach
-</dd>
-
-@if(isset($tmdbData['overview']))
-    <dd class="col-sm-12">
-        <b>
-            <font size="3">
-                <i class="bi bi-info-circle-fill" data-bs-toggle="tooltip" title="Overview"></i>&nbsp;&nbsp;{{ $tmdbData['overview'] }}
-            </font>
-        </b>
-    </dd>
-@endif
-
-
-
-<!-- OMDB Data Section -->
-
-
-
-    @if(isset($omdbData['imdbVotes']))
-        <dd class="col-sm-12">
-            <p><strong>IMDB Votes: <i>{{ $omdbData['imdbVotes'] }}</i> </strong></p>
-        </dd>
-    @endif
-
-    <!-- OMDB Ratings (Multiple Sources) -->
-    @if(isset($omdbData['Ratings']) && count($omdbData['Ratings']) > 0)
-            <dd class="col-sm-12">
-                <p><strong>Ratings:</strong></p>
-                <ul>
-                    @foreach($omdbData['Ratings'] as $rating)
-                        <li><strong>{{ $rating['Source'] }}:</strong> {{ $rating['Value'] }}</li>
-                    @endforeach
-                </ul>
-            </dd>
-        @endif
-
-
-
-@if(isset($tmdbData['number_of_seasons']))
-        <dd class="col-sm-12">
-            <p><strong>Seasons: <i>{{ $tmdbData['number_of_seasons'] }}</i> </strong> /
-            <strong>Episodes: <i>{{ $tmdbData['number_of_episodes'] }}</i> </strong>
-            </p>
-        </dd>
-    @endif
-
-    <div class="col-12">
-        <h5><strong>Trailer</strong></h5>
-        
-            @if(!empty($torrent->trailer))
-                <!-- Display trailer from database -->
-                @php
-                    $dbTrailerUrl = htmlspecialchars($torrent->trailer);
-                    $embedUrl = str_replace("watch?v=", "embed/", $dbTrailerUrl);
-                @endphp
-                <a href="{{ $embedUrl }}?version=3&amp;autohide=3&amp;hl=ro_RO&amp;showinfo=0&amp;autoplay=1&amp;disablekb=0&amp;hd=1&amp;theme=dark" 
-                   data-lity>
-                    <img src="{{ asset('images/youtube-hover.png') }}" alt="Play Trailer" style="width: 30px; border-radius: 50%;" data-bs-toggle="tooltip" title="Play {{$tmdbData['title']}} Trailer">
-                </a>
-            @elseif(isset($tmdbData['videos']['results']) && count($tmdbData['videos']['results']) > 0)
-                <!-- Display trailer from TMDB -->
-                @php
-                    $tmdbTrailer = collect($tmdbData['videos']['results'])->firstWhere('type', 'Trailer');
-                @endphp
-                @if($tmdbTrailer)
-                    <a href="https://www.youtube.com/embed/{{ $tmdbTrailer['key'] }}?version=3&amp;autohide=3&amp;hl=ro_RO&amp;showinfo=0&amp;autoplay=1&amp;disablekb=0&amp;hd=1&amp;theme=dark" 
-                       data-lity>
-                        <img src="{{ asset('images/youtube-hover.png') }}" alt="Play Trailer" style="width: 30px; border-radius: 50%;" data-bs-toggle="tooltip" title="Play {{$tmdbData['name']}} Trailer">
-                    </a>
-                @else
-                    <p>No trailer available.</p>
-                @endif
-            @else
-                <p>No trailer available.</p>
-            @endif
-       
-    </div>
+                </div>
+                
+                <!-- Info Column -->
+                <div class="col-12 col-sm-8 col-md-9 col-lg-10 info-column">
+                    <div class="series-info">
+                        <!-- Title Section -->
+                        <div class="title-section">
+                            <h1 class="series-title">
+                                {{ $tmdbData['name'] ?? '<span class="text-muted">Title not available</span>' }}
+                                @if(isset($tmdbData['first_air_date']))
+                                    <span class="release-year">({{ \Carbon\Carbon::parse($tmdbData['first_air_date'])->format('Y') }})</span>
+                                @endif
+                            </h1>
+                            
+                            @if(isset($omdbData['Rated']) && $omdbData['Rated'] != 'N/A')
+                                <div class="content-rating">
+                                    {!! getTVRatingBadge($omdbData['Rated']) !!}
+                                    @if(isset($tmdbData['episode_run_time']))
+                                        <span class="runtime">
+                                            <i class="bi bi-clock"></i> 
+                                            {{ $tmdbData['episode_run_time'][0] ?? 'N/A' }}m/episode
+                                        </span>
+                                    @endif
+                                </div>
+                            @endif
+                            
+                            @if(isset($tmdbData['tagline']))
+                                <p class="tagline">{{ $tmdbData['tagline'] }}</p>
+                            @endif
+                        </div>
+                        
+                        <!-- Genres -->
+                        <div class="genres-section">
+                            @foreach($torrent->genres as $genre)
+                                <a href="{{ route('torrents.index', ['genre' => $genre->id]) }}" 
+                                   class="genre-tag"
+                                   data-bs-toggle="tooltip" title="Browse {{ $genre->name }} series">
+                                    {{ $genre->name }}
+                                </a>
+                            @endforeach
+                        </div>
+                        
+                        <!-- Series Info -->
+                        <div class="series-meta">
+                            @if(isset($tmdbData['number_of_seasons']))
+                                <div class="meta-badge seasons">
+                                    <i class="bi bi-collection-play"></i>
+                                    {{ $tmdbData['number_of_seasons'] }} Season{{ $tmdbData['number_of_seasons'] > 1 ? 's' : '' }}
+                                </div>
+                            @endif
+                            
+                            @if(isset($tmdbData['number_of_episodes']))
+                                <div class="meta-badge episodes">
+                                    <i class="bi bi-tv"></i>
+                                    {{ $tmdbData['number_of_episodes'] }} Episode{{ $tmdbData['number_of_episodes'] > 1 ? 's' : '' }}
+                                </div>
+                            @endif
+                            
+                            @if(isset($tmdbData['status']))
+                                <div class="meta-badge status">
+                                    <i class="bi bi-info-circle"></i>
+                                    {{ $tmdbData['status'] }}
+                                </div>
+                            @endif
+                        </div>
+                        
+                        <!-- Ratings -->
+                        <div class="ratings-section">
+                            @if(isset($tmdbData['vote_average']))
+                                <div class="rating-badge tmdb-rating" data-bs-toggle="tooltip" title="TMDB Rating">
+                                    <div class="rating-value">{{ number_format($tmdbData['vote_average'], 1) }}</div>
+                                    <div class="rating-source">TMDB</div>
+                                </div>
+                            @endif
+                            
+                            @if(isset($omdbData['imdbRating']))
+                                <div class="rating-badge imdb-rating" data-bs-toggle="tooltip" title="IMDb Rating">
+                                    <div class="rating-value">{{ $omdbData['imdbRating'] }}</div>
+                                    <div class="rating-source">IMDb</div>
+                                </div>
+                            @endif
+                            
+                            @if(isset($omdbData['Ratings']))
+                                @foreach($omdbData['Ratings'] as $rating)
+                                    @if($rating['Source'] == 'Rotten Tomatoes')
+                                        <div class="rating-badge rt-rating" data-bs-toggle="tooltip" title="Rotten Tomatoes">
+                                            <div class="rating-value">{{ $rating['Value'] }}</div>
+                                            <div class="rating-source">RT</div>
+                                        </div>
+                                    @endif
+                                @endforeach
+                            @endif
+                        </div>
+                        
+                        <!-- Overview -->
+                        <div class="overview-section">
+                            <h3 class="section-heading"><i class="bi bi-info-circle"></i> Overview</h3>
+                            <h5>{{ $tmdbData['overview'] ?? 'No overview available.' }}</h5>
+                        </div>
+                        
+                        <!-- Network/Production Info -->
+                        @if(isset($tmdbData['networks']) && count($tmdbData['networks']) > 0)
+                            <div class="network-section">
+                                <h3 class="section-heading"><i class="bi bi-broadcast"></i> Network</h3>
+                                <div class="networks">
+                                    @foreach($tmdbData['networks'] as $network)
+                                        @if(isset($network['logo_path']))
+                                            <img src="https://www.themoviedb.org/t/p/w154{{ $network['logo_path'] }}" 
+                                                 alt="{{ $network['name'] }}" 
+                                                 class="network-logo"
+                                                 data-bs-toggle="tooltip" 
+                                                 title="{{ $network['name'] }}">
+                                        @endif
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+                        
+                        <!-- Quick Facts -->
+                        <div class="quick-facts">
+                            @if(isset($tmdbData['original_language']))
+                                <div class="fact-item">
+                                    <span class="fact-label">Language:</span>
+                                    <span class="fact-value">{{ getLanguageName($tmdbData['original_language']) }}</span>
+                                </div>
+                            @endif
+                            
+                            @if(isset($omdbData['imdbVotes']))
+                                <div class="fact-item">
+                                    <span class="fact-label">IMDb Votes:</span>
+                                    <span class="fact-value">{{ $omdbData['imdbVotes'] }}</span>
+                                </div>
+                            @endif
+                        </div>
+                        
+                        <!-- Trailer Section -->
+                        <div class="trailer-section">
+                            @if(!empty($torrent->trailer))
+                                @php
+                                    $dbTrailerUrl = htmlspecialchars($torrent->trailer);
+                                    $embedUrl = str_replace("watch?v=", "embed/", $dbTrailerUrl);
+                                @endphp
+                                <a href="{{ $embedUrl }}?version=3&amp;autohide=3&amp;hl=ro_RO&amp;showinfo=0&amp;autoplay=1&amp;disablekb=0&amp;hd=1&amp;theme=dark" 
+                                   data-lity
+                                   class="trailer-link">
+                                    <i class="bi bi-play-circle-fill"></i> Play Trailer
+                                </a>
+                            @elseif(isset($tmdbData['videos']['results']) && count($tmdbData['videos']['results']) > 0)
+                                @php
+                                    $tmdbTrailer = collect($tmdbData['videos']['results'])->firstWhere('type', 'Trailer');
+                                @endphp
+                                @if($tmdbTrailer)
+                                    <a href="https://www.youtube.com/embed/{{ $tmdbTrailer['key'] }}?version=3&amp;autohide=3&amp;hl=ro_RO&amp;showinfo=0&amp;autoplay=1&amp;disablekb=0&amp;hd=1&amp;theme=dark" 
+                                       data-lity
+                                       class="trailer-link">
+                                        <i class="bi bi-play-circle-fill"></i> Play Trailer
+                                    </a>
+                                @else
+                                    <p class="no-trailer">No trailer available.</p>
+                                @endif
+                            @else
+                                <p class="no-trailer">No trailer available.</p>
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Seasons Section -->
+{{-- @if(isset($tmdbData['seasons']) && count($tmdbData['seasons']) > 0)
+<div class="seasons-section">
+    <h2 class="section-title"><i class="bi bi-collection"></i> Seasons</h2>
+    <div class="seasons-grid">
+        @foreach($tmdbData['seasons'] as $season)
+            @if($season['season_number'] > 0) <!-- Skip special seasons -->
+                <div class="season-card">
+                    <div class="season-poster">
+                        @if(isset($season['poster_path']))
+                            <img src="https://www.themoviedb.org/t/p/w300_and_h450_bestv2{{ $season['poster_path'] }}" 
+                                 alt="Season {{ $season['season_number'] }}" 
+                                 loading="lazy">
+                        @else
+                            <div class="no-poster">
+                                <i class="bi bi-image"></i>
+                            </div>
+                        @endif
+                    </div>
+                    <div class="season-info">
+                        <h4>Season {{ $season['season_number'] }}</h4>
+                        @if(isset($season['air_date']))
+                            <p class="air-date">{{ \Carbon\Carbon::parse($season['air_date'])->format('Y') }}</p>
+                        @endif
+                        @if(isset($season['episode_count']))
+                            <p class="episode-count">{{ $season['episode_count'] }} episodes</p>
+                        @endif
+                    </div>
+                </div>
+            @endif
+        @endforeach
+    </div>
+</div>
+@endif --}}
+
 <div class="col-12 d-xxl-none">
                                          <h4>Cast</h4>
                                     </div>
@@ -254,4 +327,524 @@
     .select:hover {
         backdrop-filter: brightness(130%) blur(10px);
     }
+     /* Series Header Container */
+    .series-header-container {
+        position: relative;
+        margin-bottom: 30px;
+    }
+    
+    .series-header-card {
+        /* background: rgba(20, 20, 30, 0.85); */
+        backdrop-filter: blur(1px);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    
+    .series-header-content {
+        padding: 25px;
+    }
+    
+    /* Poster Column */
+    .poster-column {
+        margin-bottom: 20px;
+    }
+    
+    .poster-wrapper {
+        position: relative;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+        transition: transform 0.3s ease;
+    }
+    
+    .series-poster {
+        width: 100%;
+        height: auto;
+        display: block;
+        transition: transform 0.5s ease;
+    }
+    
+    .poster-wrapper:hover {
+        transform: translateY(-5px);
+    }
+    
+    .poster-wrapper:hover .series-poster {
+        transform: scale(1.03);
+    }
+    
+    .poster-actions {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: center;
+        padding: 15px;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .poster-wrapper:hover .poster-actions {
+        opacity: 1;
+    }
+    
+    .action-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 5px;
+        color: white;
+        font-size: 1.2rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .tmdb-btn {
+        background: linear-gradient(135deg, #01b4e4 0%, #1a73e8 100%);
+    }
+    
+    .imdb-btn {
+        background: linear-gradient(135deg, #f5c518 0%, #e2b616 100%);
+        color: #000;
+    }
+    
+    .action-btn:hover {
+        transform: scale(1.1) translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Info Column */
+    .info-column {
+        color: #fff;
+    }
+    
+    /* Title Section */
+    .title-section {
+        margin-bottom: 15px;
+    }
+    
+    .series-title {
+        font-size: 2.2rem;
+        font-weight: 800;
+        margin-bottom: 5px;
+        color: #fff;
+        line-height: 1.2;
+    }
+    
+    .release-year {
+        font-size: 1.5rem;
+        color: #aaa;
+        font-weight: 400;
+    }
+    
+    .content-rating {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 10px;
+    }
+    
+    .tagline {
+        font-size: 1.1rem;
+        color: #ddd;
+        font-style: italic;
+        margin-bottom: 0;
+    }
+    
+    /* Genres */
+    .genres-section {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 15px;
+    }
+    
+    .genre-tag {
+        display: inline-block;
+        background: rgba(110, 72, 170, 0.3);
+        color: #fff;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(110, 72, 170, 0.5);
+    }
+    
+    .genre-tag:hover {
+        background: rgba(110, 72, 170, 0.5);
+        transform: translateY(-2px);
+        text-decoration: none;
+    }
+    
+    /* Series Meta */
+    .series-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .meta-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+    }
+    
+    .seasons {
+        background: rgba(30, 170, 120, 0.2);
+        border: 1px solid rgba(30, 170, 120, 0.5);
+    }
+    
+    .episodes {
+        background: rgba(100, 120, 200, 0.2);
+        border: 1px solid rgba(100, 120, 200, 0.5);
+    }
+    
+    .status {
+        background: rgba(200, 100, 100, 0.2);
+        border: 1px solid rgba(200, 100, 100, 0.5);
+    }
+    
+    /* Ratings */
+    .ratings-section {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+    
+    .rating-badge {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .tmdb-rating {
+        background: linear-gradient(135deg, #01b4e4 0%, #1a73e8 100%);
+    }
+    
+    .imdb-rating {
+        background: linear-gradient(135deg, #f5c518 0%, #e2b616 100%);
+        color: #000;
+    }
+    
+    .rt-rating {
+        background: linear-gradient(135deg, #fa320a 0%, #e00909 100%);
+    }
+    
+    .rating-value {
+        font-size: 1.3rem;
+        line-height: 1;
+    }
+    
+    .rating-source {
+        font-size: 0.7rem;
+        opacity: 0.9;
+    }
+    
+    /* Overview */
+    .overview-section {
+        margin-bottom: 20px;
+    }
+    
+    .section-heading {
+        font-size: 1.3rem;
+        margin-bottom: 10px;
+        color: #fff;
+    }
+    
+    .overview-section p {
+        font-size: 1rem;
+        line-height: 1.6;
+        color: #ddd;
+    }
+    
+    /* Network Section */
+    .network-section {
+        margin-bottom: 15px;
+    }
+    
+    .networks {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+    
+    .network-logo {
+        height: 30px;
+        width: auto;
+        filter: brightness(0) invert(1);
+        opacity: 0.8;
+        transition: all 0.3s ease;
+    }
+    
+    .network-logo:hover {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    
+    /* Quick Facts */
+    .quick-facts {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .fact-item {
+        display: flex;
+        align-items: center;
+    }
+    
+    .fact-label {
+        font-weight: 600;
+        color: #aaa;
+        margin-right: 5px;
+    }
+    
+    .fact-value {
+        color: #fff;
+    }
+    
+    /* Trailer Section */
+    .trailer-section {
+        margin-top: 15px;
+    }
+    
+    .trailer-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #fff;
+        font-weight: 600;
+        padding: 8px 16px;
+        background: rgba(255, 0, 0, 0.7);
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .trailer-link:hover {
+        background: rgba(255, 0, 0, 0.9);
+        text-decoration: none;
+        transform: translateY(-2px);
+    }
+    
+    .trailer-link i {
+        font-size: 1.2rem;
+    }
+    
+    .no-trailer {
+        color: #aaa;
+        font-style: italic;
+    }
+    
+    /* Seasons Section */
+    .seasons-section {
+        background: rgba(20, 20, 30, 0.85);
+        backdrop-filter: blur(12px);
+        border-radius: 16px;
+        padding: 25px;
+        margin-top: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+    
+    .seasons-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 25px;
+    }
+    
+    .season-card {
+        background: rgba(30, 30, 40, 0.7);
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .season-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    .season-poster {
+        position: relative;
+        width: 100%;
+        padding-top: 150%;
+        overflow: hidden;
+    }
+    
+    .season-poster img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .no-poster {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(50, 50, 70, 0.5);
+        color: #aaa;
+        font-size: 3rem;
+    }
+    
+    .season-info {
+        padding: 15px;
+        text-align: center;
+    }
+    
+    .season-info h4 {
+        font-size: 1rem;
+        margin-bottom: 5px;
+        color: #fff;
+    }
+    
+    .air-date, .episode-count {
+        font-size: 0.85rem;
+        color: #aaa;
+        margin-bottom: 0;
+    }
+
+     /* Responsive Adjustments */
+    @media (max-width: 1200px) {
+        .seasons-grid,
+        .cast-grid {
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 20px;
+        }
+    }
+    
+    @media (max-width: 992px) {
+        .series-title {
+            font-size: 1.8rem;
+        }
+        
+        .release-year {
+            font-size: 1.2rem;
+        }
+        
+        .seasons-grid,
+        .cast-grid {
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 18px;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .series-header-content {
+            padding: 15px;
+        }
+        
+        .series-title {
+            font-size: 1.6rem;
+        }
+        
+        .rating-badge {
+            width: 50px;
+            height: 50px;
+        }
+        
+        .rating-value {
+            font-size: 1.1rem;
+        }
+        
+        .section-title {
+            font-size: 1.6rem;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .series-title {
+            font-size: 1.4rem;
+        }
+        
+        .poster-actions {
+            opacity: 1;
+            padding: 10px;
+        }
+        
+        .action-btn {
+            width: 35px;
+            height: 35px;
+            font-size: 1rem;
+        }
+        
+        .seasons-grid,
+        .cast-grid {
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 12px;
+        }
+        
+        .seasons-section,
+        .cast-section {
+            padding: 20px;
+        }
+    }
+
+
+    
 </style>
+
+@php
+function getTVRatingBadge($rating) {
+    switch ($rating) {
+        case 'TV-Y':
+            return "<span class='rating-badge tv-y-rating' data-bs-toggle='tooltip' title='All Children - Appropriate for all children'><i class='bi bi-emoji-smile'></i> TV-Y</span>";
+        case 'TV-Y7':
+            return "<span class='rating-badge tv-y7-rating' data-bs-toggle='tooltip' title='Directed to Older Children - For children age 7 and older'><i class='bi bi-emoji-neutral'></i> TV-Y7</span>";
+        case 'TV-G':
+            return "<span class='rating-badge tv-g-rating' data-bs-toggle='tooltip' title='General Audience - Suitable for all ages'><i class='bi bi-emoji-smile'></i> TV-G</span>";
+        case 'TV-PG':
+            return "<span class='rating-badge tv-pg-rating' data-bs-toggle='tooltip' title='Parental Guidance Suggested - May contain material unsuitable for young children'><i class='bi bi-emoji-frown'></i> TV-PG</span>";
+        case 'TV-14':
+            return "<span class='rating-badge tv-14-rating' data-bs-toggle='tooltip' title='Parents Strongly Cautioned - May be unsuitable for children under 14'><i class='bi bi-emoji-dizzy'></i> TV-14</span>";
+        case 'TV-MA':
+            return "<span class='rating-badge tv-ma-rating' data-bs-toggle='tooltip' title='Mature Audience Only - Designed for adults and may be unsuitable for children under 17'><i class='bi bi-emoji-angry'></i> TV-MA</span>";
+        default:
+            return "<span class='rating-badge'>$rating</span>";
+    }
+}
+
+function getLanguageName($code) {
+    $languages = [
+        'en' => 'English',
+        'es' => 'Spanish',
+        'fr' => 'French',
+        'de' => 'German',
+        'it' => 'Italian',
+        'ja' => 'Japanese',
+        'ko' => 'Korean',
+        'zh' => 'Chinese',
+        'ru' => 'Russian',
+        'hi' => 'Hindi'
+    ];
+    
+    return $languages[$code] ?? strtoupper($code);
+}
+@endphp

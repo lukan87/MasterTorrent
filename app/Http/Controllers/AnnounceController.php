@@ -16,11 +16,52 @@ use App\Services\Bencode;
 
 class AnnounceController extends Controller
 {
+    private function isBannedClient($userAgent)
+{
+    $bannedClients = [
+        // List of banned clients (user agent strings or patterns)
+        'BitTorrent/5',
+        'BitTorrent/6',
+        'BitTorrent/7',
+        'uTorrent/2.2',
+        'µTorrent/2.2',
+        'uTorrent/3.0',
+        'µTorrent/3.0',
+        'uTorrent/3.1',
+        'µTorrent/3.1',
+        //'Transmission/2.92',
+        'qBittorrent/3.3.8',
+        'Deluge/1.3.15',
+        // Add more banned clients as needed
+         // New additions to ban ALL uTorrent versions
+        // 'µTorrent', // Unicode µ symbol
+        // 'utorrent',  // All lowercase
+        // 'uTorrent',  // Standard capitalization
+        // 'uTorrent/', // With version slash
+        // 'BTWebClient', // Some uTorrent variants use this
+        //  'µTorrent/3.5.5',
+    ];
+
+    foreach ($bannedClients as $banned) {
+        if (str_contains($userAgent, $banned)) {
+            return true;
+        }
+    }
+    
+    return false;
+}
 
     public function announce(Request $request, $passkey)
     {
 
         $agent = $request->server('HTTP_USER_AGENT') ?: "Unknown";
+
+        // Check for banned clients
+    if ($this->isBannedClient($agent)) {
+        return response(Bencode::bencode([
+            'failure reason' => 'Your client is banned. Please use an updated client.'
+        ]), 200, ['Content-Type' => 'text/plain']);
+    }
 
        
 
@@ -74,9 +115,9 @@ if ($user->enabled === 'no'){
     return response(Bencode::bencode(['failure reason' => 'Your download privileges are Revoked']))->withHeaders(['Content-Type' => 'text/plain']);
 }
 
-// If User has more that 10 hit and runs Return Error to Client
-if ($user->hit_and_run_count > '10' ) {
-    return response(Bencode::bencode(['failure reason' => 'You cannot download any torrents as you have more than 10 hit and runs. Contact staff!!!']))->withHeaders(['Content-Type' => 'text/plain']);
+// If User has more that 20 hit and runs Return Error to Client
+if ($user->hit_and_run_count > '20' ) {
+    return response(Bencode::bencode(['failure reason' => 'You cannot download any torrents as you have more than 20 hit and runs. Contact staff!!!']))->withHeaders(['Content-Type' => 'text/plain']);
 }
 
  // If User Client Is Sending Negitive Values Return Error to Client
@@ -201,7 +242,6 @@ $isFree = $userSlotExists ? $userSlot->free : false;
 $isDouble = $userSlotExists ? $userSlot->double : false;
 
 
-// Check if the user is freeleech
 $userfree = $user->is_freeleech; // Assuming it's a boolean, no need for '== true'
 
 if (config('settings.freeleech') === true || $torrent->free || $isFree || $userfree) {
@@ -227,23 +267,38 @@ if ($event === 'started') {
     // Peer update
     $client->peer_id = $peer_id;
     $client->md5_peer_id = $md5_peer_id;
-    // $client->hash = $hash;
-   // Ensure IP is in IPv4 format
-   $ip = $request->ip();
-   if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
-       // If IPv6, check if IPv4 is available in headers
-       $ipv4 = $request->server('HTTP_X_FORWARDED_FOR') ?: $request->server('REMOTE_ADDR');
-       if (filter_var($ipv4, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-           $ip = $ipv4; // Prefer IPv4
-       }
-   }
-   $client->ip = $ip;
+    
+    // Ensure IP is properly validated as either IPv4 or IPv6
+    $ip = $request->ip();
+    
+    // Check if it's a valid IPv6
+    $isIPv6 = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
+    
+    // Check if it's a valid IPv4
+    $isIPv4 = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4);
+    
+    // If neither valid IPv4 nor IPv6, try to get IPv4 from headers
+    if (!$isIPv4 && !$isIPv6) {
+        $ipv4 = $request->server('HTTP_X_FORWARDED_FOR') ?: $request->server('REMOTE_ADDR');
+        if (filter_var($ipv4, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+            $ip = $ipv4;
+            $isIPv4 = true;
+        }
+    }
+    
+    // If still not valid, you might want to handle this case (log error, use default, etc.)
+    if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6)) {
+        // Handle invalid IP case - maybe log an error or use a default IP
+         $ip = '0.0.0.0'; // Example fallback
+    }
+    
+    $client->ip = $ip;
     $client->port = $port;
     $client->agent = $agent;
     $client->uploaded = $real_uploaded;
     $client->downloaded = $real_downloaded;
     if ($left == 0) {
-    $client->seeder = 1;
+        $client->seeder = 1;
     } else {
         $client->seeder = 0;
     }
@@ -256,17 +311,16 @@ if ($event === 'started') {
 
     $history->agent = $agent;
     $history->active = true;
-   // Set seeder only if torrent is completed
-   if ($left == 0) {
-    $history->seeder = 1;
-}
+    if ($left == 0) {
+        $history->seeder = 1;
+    }
     $history->uploaded += 0;
     $history->actual_uploaded += 0;
     $history->client_uploaded = $real_uploaded;
     $history->downloaded += 0;
     $history->actual_downloaded += 0;
     $history->client_downloaded = $real_downloaded;
-    $history->ip = request()->ip();
+    $history->ip = $ip; // Use the same validated IP
     $history->save();
 
     // Clear all cache to ensure fresh data is loaded

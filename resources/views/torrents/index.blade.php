@@ -202,7 +202,7 @@
                         <td>
                             <a class="text-muted" href="{{ route('torrents.show', ['id' => $torrent->id, 'slug' => urlencode($torrent->slug)]) }}"
                                data-bs-toggle="tooltip" data-bs-html="true"
-                               data-bs-title="<img src='{{ $torrent->poster }}' class='img-fluid rounded' style='max-width: 180px;'>">
+                               data-bs-title="<img src='{{ $torrent->poster }}' loading='lazy'class='img-fluid rounded' style='max-width: 180px;'>">
                                 <strong>{{ \Illuminate\Support\Str::limit($torrent->name, 75, ' ...') }}</strong>
                             </a>
                             @include('torrents.partials.tags')

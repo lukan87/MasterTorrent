@@ -304,7 +304,11 @@ public function userSlots()
     return $this->hasMany(UserSlot::class);
 }
 
-
+public function isOnline()
+{
+    // Consider user online if they've been active in the last 5 minutes
+    return $this->last_activity && $this->last_activity->gt(now()->subMinutes(5));
+}
 
 
 }

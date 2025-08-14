@@ -49,6 +49,10 @@ Schedule::command('torrents:unbump-old')->daily();
 //Sterge mesaje mai vechi de o luna si care sunt citite
 Schedule::command('messages:delete-old')->daily();
 
+//Sterge waned_until daca e expirat
+Schedule::command('users:clear-expired-warnings')->hourly();
+
+
 
 
 

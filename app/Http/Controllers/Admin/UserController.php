@@ -352,6 +352,7 @@ if (
                     $user->user_class = 3;
                     $user->is_immune = 1;
                     $user->is_freeleech = 1;
+                    $user->donor = 'yes'; // Setează donatorul la "da" pentru utilizatorii VIP
 
                     // Resetare avertisment și hit-and-run
                     $user->warned = 0;
@@ -396,39 +397,44 @@ if (
 // Get the current authenticated user making the change
 $changer = Auth::user();
 
-// Update uploaded value only if it has changed
-if ($request->has('uploaded')) {
-    $newUploaded = $request->input('uploaded') * (1024 ** 3); // Convert from GB to bytes
 
-    if ($user->uploaded != $newUploaded) { // Only update if the value has changed
+if ($request->has('uploaded')) {
+    $inputGB = round($request->input('uploaded'), 2);
+    $currentGB = round($user->uploaded / (1024 ** 3), 2);
+
+    if ($inputGB !== $currentGB) {
         $oldUploaded = $user->uploaded;
+        $newUploaded = $inputGB * (1024 ** 3); 
         $user->uploaded = $newUploaded;
 
-        // Log the change in UserTimeline
+       
         UserTimeline::create([
             'user_id' => $user->id,
-            'staff_id' => $changer->id, // ID of the user making the change
-            'comment' => "Updated uploaded amount from " . ($oldUploaded / (1024 ** 3)) . " GB to " . ($newUploaded / (1024 ** 3)) . " GB by " . $changer->name . ".",
+            'staff_id' => $changer->id,
+            'comment' => "Updated uploaded amount from {$currentGB} GB to {$inputGB} GB by {$changer->name}.",
         ]);
     }
 }
 
-// Update downloaded value only if it has changed
-if ($request->has('downloaded')) {
-    $newDownloaded = $request->input('downloaded') * (1024 ** 3); // Convert from GB to bytes
 
-    if ($user->downloaded != $newDownloaded) { // Only update if the value has changed
+if ($request->has('downloaded')) {
+    $inputGB = round($request->input('downloaded'), 2);
+    $currentGB = round($user->downloaded / (1024 ** 3), 2);
+
+    if ($inputGB !== $currentGB) {
         $oldDownloaded = $user->downloaded;
+        $newDownloaded = $inputGB * (1024 ** 3); 
         $user->downloaded = $newDownloaded;
 
         // Log the change in UserTimeline
         UserTimeline::create([
             'user_id' => $user->id,
-            'staff_id' => $changer->id, // ID of the user making the change
-            'comment' => "Updated downloaded amount from " . ($oldDownloaded / (1024 ** 3)) . " GB to " . ($newDownloaded / (1024 ** 3)) . " GB by " . $changer->name . ".",
+            'staff_id' => $changer->id,
+            'comment' => "Updated downloaded amount from {$currentGB} GB to {$inputGB} GB by {$changer->name}.",
         ]);
     }
 }
+
 
 $user->save();
 

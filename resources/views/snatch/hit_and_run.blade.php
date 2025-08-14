@@ -25,7 +25,12 @@
         <!-- Hit-and-Run Section -->
         <div class="card shadow-lg border-0">
             <div class="card-header bg-danger text-white text-center">
-                <h2 class="fw-bold"><i class="bi bi-exclamation-triangle"></i> Hit-and-Run Torrents</h2>
+                <h2 class="fw-bold">
+                    <i class="bi bi-exclamation-triangle"></i> Hit-and-Run Torrents
+                    @if($user->hit_and_run_count > 0)
+                        <span class="badge bg-dark ms-2">{{ $user->hit_and_run_count }}</span>
+                    @endif
+                </h2>
             </div>
             <div class="card-body">
                 @if($hitAndRun->isEmpty())
@@ -72,6 +77,18 @@
                                                 </form>
                                             @endif
                                         </td>
+
+                                        @if (auth()->user()->id == 3 && auth()->id() !== $history->user_id)
+                                        <td class="d-flex gap-2">
+                                                 <!-- Delete History Button -->
+                                            <form action="{{ route('snatch.deleteHNR', ['userId' => $history->user_id, 'torrentId' => $history->torrent->id]) }}" method="POST"
+                                                    onsubmit="return confirm('Are you sure you want to remove this torrent from the user\'s history?');">
+                                                       @csrf
+                                                       @method('DELETE')
+                                                    <button type="submit" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" title="Remove from user's history"><i class="bi bi-trash"></i></button>
+                                            </form>
+                                        </td>
+                                        @endif
                                     </tr>
                                 @endforeach
                             </tbody>

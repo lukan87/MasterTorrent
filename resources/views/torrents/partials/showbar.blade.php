@@ -24,9 +24,9 @@
 </style>
 
 
-    @if (Auth::user()->hit_and_run_count > '10' ) 
+    @if (Auth::user()->hit_and_run_count > '20' ) 
     <div class="alert alert-danger" role="alert">
-        Download restricted, you have more than 10 Hit&Run's.
+        Download restricted, you have more than 20 Hit&Run's.
     </div>
     
     @else
@@ -71,10 +71,18 @@
 
     
 @if (Auth::check() && (Auth::user()->user_class >= \App\Models\UserClass::MODERATOR || Auth::id() === $torrent->owner))
-<a href="{{ route('torrents.edit', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}" class="btn btn-secondary btn-sm mr-2" data-bs-toggle="tooltip" title="Edit Torrent">
+<a href="{{ route('torrents.edit', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}" class="btn btn-info btn-sm mr-2" data-bs-toggle="tooltip" title="Edit Torrent">
     <i class="fas fa-edit d-inline d-sm-none"></i>  <!-- Show only the icon on small screens -->
-    <span class="d-none d-sm-inline">Edit</span>  <!-- Show the text on medium+ screens -->
+    <span class="d-none d-sm-inline"><i class="bi bi-pencil-square"></i></span>  <!-- Show the text on medium+ screens -->
 </a>
+@endif
+@if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::ADMIN)
+    @if (!$torrent->bumped)
+    <form action="{{ route('torrents.bump', $torrent->id) }}" method="POST" class="d-inline">
+        @csrf
+        <button type="submit" class="btn btn-success btn-sm " data-bs-toggle="tooltip" title="Bump Torrent"><i class="bi bi-arrow-up-circle"></i></button>
+    </form>
+    @endif
 @endif
 
 
@@ -91,6 +99,8 @@
     {{ $torrent->thanksCount() }} <i class="bi bi-hand-thumbs-up-fill"></i>
     </button>
     @endif
+
+                            
 </div>
 
 

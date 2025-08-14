@@ -6,7 +6,6 @@ use App\Models\Peer;
 use App\Models\History;
 use App\Models\User;
 use App\Models\UserClass;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class SnatchController extends Controller
@@ -127,7 +126,7 @@ class SnatchController extends Controller
     $needToSeed = History::where('user_id', $userId)
         ->where(function ($query) {
             // Condition for seedtime < 86400 (less than 24 hours) or no seedtime (0)
-            $query->where('seedtime', '<', 86400)
+            $query->where('seedtime', '<', config('hitrun.seedtime')) // Assuming seedtime is defined in hitrun config
                   ->orWhere('seedtime', '=', 0);
         })
         ->where(function ($query) {
@@ -135,21 +134,43 @@ class SnatchController extends Controller
             $query->whereRaw('uploaded / (CASE WHEN actual_downloaded = 0 THEN 1 ELSE actual_downloaded END) < ?', [1.00]);
         })
         ->where('created_at', '>', '2025-02-01 00:00:00')
-        ->where('seeder', false)    // User is not seeding
-        ->where('hitrun', false)    // User is not a hit-and-run
-        ->where('active', false)    // User is not active
-        ->orderBy('created_at', 'desc')  // Sort by the most recent activity
-        ->paginate(20);  // Limit the results to 5 per page
+        ->where('seeder', false)    
+        ->where('hitrun', false)   
+        ->where('active', false)   
+        ->orderBy('created_at', 'desc')  
+        ->paginate(20);  
 
     return view('snatch.need_to_seed', [
         'needToSeed' => $needToSeed,
         'user' => User::find($userId),
-        'userId' => $userId, // Pass the user ID to the view
+        'userId' => $userId, 
     ]);
 }
 
 
 public function deleteNeedToSeed($userId, $torrentId)
+{
+    
+    if (Auth::user()->user_class < 5) {
+        return redirect()->back()->with('error', 'Unauthorized action.');
+    }
+
+    
+    $history = History::where('torrent_id', $torrentId)
+                      ->where('user_id', $userId)
+                      ->first();
+
+    if (!$history) {
+        return redirect()->back()->with('error', 'No history record found for this torrent.');
+    }
+
+   
+    $history->delete();
+
+    return redirect()->back()->with('success', 'Torrent history removed for this user.');
+}
+
+public function deleteHNR($userId, $torrentId)
 {
     // Check if the logged-in user is staff
     if (Auth::user()->user_class < 5) {
@@ -165,10 +186,20 @@ public function deleteNeedToSeed($userId, $torrentId)
         return redirect()->back()->with('error', 'No history record found for this torrent.');
     }
 
+    // Get the user
+    $user = User::find($userId);
+    
+    if ($user) {
+        // Decrement hit_and_run_count if it's greater than 0
+        if ($user->hit_and_run_count > 0) {
+            $user->decrement('hit_and_run_count');
+        }
+    }
+
     // Delete the specific history record
     $history->delete();
 
-    return redirect()->back()->with('success', 'Torrent history removed for this user.');
+    return redirect()->back()->with('success', 'Torrent history removed and H&R count decreased for this user.');
 }
 
 

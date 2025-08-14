@@ -18,7 +18,7 @@
                         </div>
                         <div class="card-body">
                             <p class="text-muted">Sent to: {{ $message->receiver->name }}</p>
-                            <p class="card-text">{{ Str::limit($message->body, 100) }}</p>
+                            <p class="card-text">{!! Str::limit(convertCustomTagsToHtml( $message->body, 100)) !!}</p>
                         </div>
                         <div class="card-footer text-end">
                             <span class="badge bg-secondary">{{ $message->created_at->diffForHumans() }}</span>

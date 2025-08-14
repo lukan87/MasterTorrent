@@ -19,21 +19,24 @@ class PollController extends Controller
     }
 
 
-    public function show(Request $request)
-    {
-        $user = $request->user(); // Get the authenticated user
-        $poll = Poll::with('options.votes')->latest()->first(); // Fetch the latest poll with options and votes
+ public function show(Request $request, $id)
+{
+    $user = $request->user(); // Get the authenticated user
 
-        if (!$poll) {
-            // Redirect or show a message if there are no polls available
-            return redirect()->route('polls.index')->with('error', 'No polls available at the moment.');
-        }
+    // Try to find the poll by ID
+    $poll = Poll::with('options.votes')->find($id);
 
-        // Check if user has voted on this poll
-        $userVote = $user ? $poll->votes()->where('user_id', $user->id)->first() : null;
-
-        return view('polls.show', compact('poll', 'user', 'userVote'));
+    if (!$poll) {
+        return redirect()->back()->with('error', 'The poll you are looking for does not exist.');
     }
+
+    // Check if user has voted on this poll
+    $userVote = $user ? $poll->votes()->where('user_id', $user->id)->first() : null;
+
+    return view('polls.show', compact('poll', 'user', 'userVote'));
+}
+
+
 
 
     public function create()

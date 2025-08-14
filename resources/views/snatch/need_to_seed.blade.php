@@ -54,7 +54,7 @@
                                 @foreach($needToSeed as $torrent)
                                     @php
                                         $ratio = number_format(($torrent->uploaded / max($torrent->actual_downloaded, 1)), 2);
-                                        $remainingSeedtime = max(0, 86400 - $torrent->seedtime);
+                                        $remainingSeedtime = max(0, 43200 - $torrent->seedtime);
                                     @endphp
                                     <tr>
                                         <td>
@@ -99,7 +99,7 @@
                                                 <form action="{{ route('bonus.buySeedtime') }}" method="POST">
                                                     @csrf
                                                     <input type="hidden" name="torrent_id" value="{{ $torrent->torrent_id }}">
-                                                    <button type="submit" class="btn btn-primary btn-sm" data-bs-toggle="tooltip" title="5000 seedbonus points">
+                                                    <button type="submit" class="btn btn-primary btn-sm" data-bs-toggle="tooltip" title="1000 seedbonus points">
                                                         <i class="bi bi-coin"></i>
                                                     </button>
                                                 </form>

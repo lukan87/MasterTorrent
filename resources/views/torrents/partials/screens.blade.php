@@ -1,5 +1,5 @@
 @if ($torrent->images->isNotEmpty())
-    <div class="card mb-4 border-0 shadow-sm rounded-4">
+    <div class="card card-blur mb-4 border-0 shadow-sm rounded-4">
         <div class="card-body">
             <h5 class="fw-bold mb-3 text-primary">
                 <i class="bi bi-images me-2"></i> Screenshots

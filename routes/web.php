@@ -28,41 +28,43 @@ use App\Helpers\EmojiHelper;
 
 use App\Http\Controllers\OverforumController;
 
-Route::get('/overforums', [OverforumController::class, 'index'])->name('overforums.index');
-Route::get('/overforums/create', [OverforumController::class, 'create'])->name('overforums.create');
-Route::post('/overforums', [OverforumController::class, 'store'])->name('overforums.store');
-Route::get('/overforums/{id}', [OverforumController::class, 'show'])->name('overforums.show');
-Route::delete('/overforums/{id}', [OverforumController::class, 'destroy'])->name('overforums.destroy');
-Route::get('overforums/{overforum}/edit', [OverforumController::class, 'edit'])->name('overforums.edit');
-Route::put('overforums/{overforum}', [OverforumController::class, 'update'])->name('overforums.update');
+
+
+Route::get('/overforums', [OverforumController::class, 'index'])->name('overforums.index')->middleware('auth');
+Route::get('/overforums/create', [OverforumController::class, 'create'])->name('overforums.create')->middleware('auth');
+Route::post('/overforums', [OverforumController::class, 'store'])->name('overforums.store')->middleware('auth');
+Route::get('/overforums/{id}', [OverforumController::class, 'show'])->name('overforums.show')->middleware('auth');
+Route::delete('/overforums/{id}', [OverforumController::class, 'destroy'])->name('overforums.destroy')->middleware('auth');
+Route::get('overforums/{overforum}/edit', [OverforumController::class, 'edit'])->name('overforums.edit')->middleware('auth');
+Route::put('overforums/{overforum}', [OverforumController::class, 'update'])->name('overforums.update')->middleware('auth');
 
 
 
 use App\Http\Controllers\ForumController;
 
-Route::get('/overforums/{overforumId}/forums', [ForumController::class, 'index'])->name('forums.index');
-Route::get('/overforums/{overforumId}/forums/create', [ForumController::class, 'create'])->name('forums.create');
-Route::post('/overforums/{overforumId}/forums', [ForumController::class, 'store'])->name('forums.store');
-Route::get('/overforums/{overforumId}/forums/{forumId}', [ForumController::class, 'show'])->name('forums.show');
+Route::get('/overforums/{overforumId}/forums', [ForumController::class, 'index'])->name('forums.index')->middleware('auth');
+Route::get('/overforums/{overforumId}/forums/create', [ForumController::class, 'create'])->name('forums.create')->middleware('auth');
+Route::post('/overforums/{overforumId}/forums', [ForumController::class, 'store'])->name('forums.store')->middleware('auth');
+Route::get('/overforums/{overforumId}/forums/{forumId}', [ForumController::class, 'show'])->name('forums.show')->middleware('auth');
 
 
 use App\Http\Controllers\TopicController;
 
-Route::get('/forums/{forumId}/topics', [TopicController::class, 'index'])->name('topics.index');
-Route::get('/forums/{forumId}/topics/create', [TopicController::class, 'create'])->name('topics.create');
-Route::post('/forums/{forumId}/topics', [TopicController::class, 'store'])->name('topics.store');
-Route::get('/forums/{forumId}/topics/{topicId}', [TopicController::class, 'show'])->name('topics.show');
+Route::get('/forums/{forumId}/topics', [TopicController::class, 'index'])->name('topics.index')->middleware('auth');
+Route::get('/forums/{forumId}/topics/create', [TopicController::class, 'create'])->name('topics.create')->middleware('auth');
+Route::post('/forums/{forumId}/topics', [TopicController::class, 'store'])->name('topics.store')->middleware('auth');
+Route::get('/forums/{forumId}/topics/{topicId}', [TopicController::class, 'show'])->name('topics.show')->middleware('auth');
 
 
 use App\Http\Controllers\PostController;
 
 // Store a new post
-Route::post('/topics/{topicId}/posts', [PostController::class, 'store'])->name('posts.store');
-Route::get('/posts/{post}/edit', [PostController::class, 'edit'])->name('posts.edit');
-Route::put('/posts/{post}', [PostController::class, 'update'])->name('posts.update');
-Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
-Route::post('/posts/{post}/reply', [PostController::class, 'reply'])->name('posts.reply');
-Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
+Route::post('/topics/{topicId}/posts', [PostController::class, 'store'])->name('posts.store')->middleware('auth');
+Route::get('/posts/{post}/edit', [PostController::class, 'edit'])->name('posts.edit')->middleware('auth');
+Route::put('/posts/{post}', [PostController::class, 'update'])->name('posts.update')->middleware('auth');
+Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy')->middleware('auth');
+Route::post('/posts/{post}/reply', [PostController::class, 'reply'])->name('posts.reply')->middleware('auth');
+Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy')->middleware('auth');
 
 
 
@@ -74,12 +76,17 @@ Route::prefix('snatch')->group(function () {
     Route::get('/leeching/{userId?}', [SnatchController::class, 'leeching'])->name('snatch.leeching')->middleware('auth');
     Route::get('/hit-and-run/{userId?}', [SnatchController::class, 'hitAndRun'])->name('snatch.hitAndRun')->middleware('auth');
     Route::get('/need-to-seed/{userId?}', [SnatchController::class, 'needToSeed'])->name('snatch.needToSeed')->middleware('auth');
-    Route::delete('/snatch/delete/{userId}/{torrentId}', [SnatchController::class, 'deleteNeedToSeed'])
-    ->name('snatch.deleteNeedToSeed')
-    ->middleware('auth');
-
-
+    
+     Route::delete('/delete-need-to-seed/{userId}/{torrentId}', [SnatchController::class, 'deleteNeedToSeed'])
+     ->name('snatch.deleteNeedToSeed')
+     ->middleware('auth');
+     
+ Route::delete('/delete-hnr/{userId}/{torrentId}', [SnatchController::class, 'deleteHNR'])
+     ->name('snatch.deleteHNR')
+     ->middleware('auth');
 });
+
+
 
 
 Route::get('/get-emoji/{emojiCode}', function ($emojiCode) {
@@ -87,36 +94,34 @@ Route::get('/get-emoji/{emojiCode}', function ($emojiCode) {
 });
 
 
-Route::resource('uploadapps', UploadAppController::class);
-Route::get('/uploadapps/{id}', [UploadAppController::class, 'show'])->name('uploadapps.show');
-Route::delete('/uploadapps/{id}', [UploadAppController::class, 'destroy'])->name('uploadapps.destroy');
-Route::put('/uploadapps/{id}/update-status', [UploadAppController::class, 'updateStatus'])->name('uploadapps.updateStatus');
+Route::resource('uploadapps', UploadAppController::class)->middleware('auth');
+Route::get('/uploadapps/{id}', [UploadAppController::class, 'show'])->name('uploadapps.show')->middleware('auth');
+Route::delete('/uploadapps/{id}', [UploadAppController::class, 'destroy'])->name('uploadapps.destroy')->middleware('auth');
+Route::put('/uploadapps/{id}/update-status', [UploadAppController::class, 'updateStatus'])->name('uploadapps.updateStatus')->middleware('auth');
 
 
 
 
 
-Route::get('/hitandrun', [HitAndRunController::class, 'index'])->name('hitandrun.index');
+Route::get('/hitandrun', [HitAndRunController::class, 'index'])->name('hitandrun.index')->middleware('auth');
 // View another user's hit and run status
-Route::get('/hitandrun/{userId}', [HitAndRunController::class, 'showOtherUserHitAndRun'])->name('hitandrun.showOther');
+Route::get('/hitandrun/{userId}', [HitAndRunController::class, 'showOtherUserHitAndRun'])->name('hitandrun.showOther')->middleware('auth');
 
-Route::post('/bonus/buy-vip', [BonusController::class, 'buyVip'])->name('bonus.buyVip');
+Route::post('/bonus/buy-vip', [BonusController::class, 'buyVip'])->name('bonus.buyVip')->middleware('auth');
 
-Route::post('/bonus/buy-seedtime', [BonusController::class, 'buySeedtime'])->name('bonus.buySeedtime');
-Route::post('/remove-hnr', [BonusController::class, 'removeHNR'])->name('bonus.removeHNR');
+Route::post('/bonus/buy-seedtime', [BonusController::class, 'buySeedtime'])->name('bonus.buySeedtime')->middleware('auth');
+Route::post('/remove-hnr', [BonusController::class, 'removeHNR'])->name('bonus.removeHNR')->middleware('auth');
 Route::post('/buy-invites', [BonusController::class, 'buyInvites'])->name('buy.invites')->middleware('auth');
 Route::post('/buy-slots', [BonusController::class, 'buySlots'])->name('buy.slots')->middleware('auth');
-Route::post('/bonus/surprise', [BonusController::class, 'buySurprise'])->name('bonus.surprise');
+Route::post('/bonus/surprise', [BonusController::class, 'buySurprise'])->name('bonus.surprise')->middleware('auth');
 
-
-
-Route::get('/staff', [StaffController::class, 'index'])->name('staff.index');
+Route::get('/staff', [StaffController::class, 'index'])->name('staff.index')->middleware('auth');
 
 
 
 
 Auth::routes();
-Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home')->middleware('last_activity');
+Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home')->middleware('last_activity')->middleware('auth');
 Route::get('/recover-password', [App\Http\Controllers\Auth\ResetPasswordController::class, 'showRecoveryForm'])->name('password.recover');
 Route::post('/password/reset', [App\Http\Controllers\Auth\ResetPasswordController::class, 'updatePassword'])->name('password.update');
 
@@ -277,6 +282,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/torrents/adult', [TorrentController::class, 'adult'])->name('torrents.adult');
 
 });
+Route::get('/torrents/check-imdb', [TorrentController::class, 'checkImdbUrl']);
+
 Route::get('/torrents/{id}/{slug?}', [TorrentController::class, 'show'])->name('torrents.show')->middleware('auth');
 Route::get('/torrents/download/{id}/{slug}', [TorrentController::class, 'download'])->name('torrents.download');
 Route::get('/torrent/{torrent}/peers', [TorrentController::class, 'peers'])->name('torrent.peers')->middleware('auth');
@@ -286,6 +293,8 @@ Route::post('torrents/{id}/thank', [TorrentController::class, 'thank'])->name('t
 Route::post('/slots/renew/{slotId}', [TorrentController::class, 'renewSlot'])->name('slots.renew')->middleware('auth');
 Route::post('/slots/remove/{slotId}', [TorrentController::class, 'removeSlot'])->name('slots.remove')->middleware('auth');
 Route::post('/torrents/bump/{id}', [TorrentController::class, 'bump'])->name('torrents.bump')->middleware('auth');
+Route::delete('/torrents/bulk-delete', [TorrentController::class, 'bulkDelete'])->name('torrents.bulkDelete');
+
 
 
 
@@ -386,29 +395,28 @@ Route::middleware('auth')->group(function () {
 
 // Route::resource('polls', PollController::class);
 // Display a list of all polls
-Route::get('polls', [PollController::class, 'index'])->name('polls.index');
+Route::get('polls', [PollController::class, 'index'])->name('polls.index')->middleware('auth');
 
 // Show the form for creating a new poll
-Route::get('polls/create', [PollController::class, 'create'])->name('polls.create')->middleware('permission:create_polls');
+Route::get('polls/create', [PollController::class, 'create'])->name('polls.create')->middleware('auth');
 
 // Store a newly created poll in storage
-Route::post('polls', [PollController::class, 'store'])->name('polls.store');
+Route::post('polls', [PollController::class, 'store'])->name('polls.store')->middleware('auth');
 
 // Display a specific poll
-Route::get('polls/{poll}', [PollController::class, 'show'])->name('polls.show');
+Route::get('polls/{poll}', [PollController::class, 'show'])->name('polls.show')->middleware('auth');
 
 // Show the form for editing a specific poll
 Route::get('polls/{poll}/edit', [PollController::class, 'edit'])->name('polls.edit')->middleware('auth');
 
 // Update a specific poll in storage
-Route::put('polls/{poll}', [PollController::class, 'update'])->name('polls.update');
+Route::put('polls/{poll}', [PollController::class, 'update'])->name('polls.update')->middleware('auth');
 
 // Delete a specific poll
 Route::delete('polls/{poll}', [PollController::class, 'destroy'])->name('polls.destroy')->middleware('auth');
 
-Route::post('polls/{poll}/vote', [PollController::class, 'vote'])->name('polls.vote');
-
-Route::post('/polls/{pollId}/vote', [PollController::class, 'vote'])->name('polls.vote');
+Route::post('polls/{poll}/vote', [PollController::class, 'vote'])->name('polls.vote')->middleware('auth');
+Route::post('/polls/{pollId}/vote', [PollController::class, 'vote'])->name('polls.vote')->middleware('auth');
 
 //Requests//
 

@@ -55,6 +55,7 @@ class Torrent extends Model
         'background',
         'tmdb_type',
         'trailer',
+        'bumped'
         // Add other fields as necessary
     ];
 

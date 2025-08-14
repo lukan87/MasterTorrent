@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+@if (Auth::check() && (Auth::user()->user_class >= \App\Models\UserClass::ADMIN))
     <h1>Create a Poll</h1>
     <form action="{{ route('polls.store') }}" method="POST">
         @csrf
@@ -36,4 +37,8 @@
             container.appendChild(newOption);
         });
     </script>
+@else
+    <h1>Access Denied</h1>
+    <p>You do not have permission to create a poll.</p>
+@endif
 @endsection

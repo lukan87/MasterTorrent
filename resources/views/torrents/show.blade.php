@@ -37,7 +37,7 @@
                 <a class="nav-link active" id="description-tab" data-bs-toggle="tab" href="#description" role="tab" aria-controls="description" aria-selected="true">Description</a>
             </li>
 
-            @if(!empty($mediainfo))
+            @if(!empty($torrent->mediainfo))
                 <li class="nav-item">
                     <a class="nav-link" id="mediainfo-tab" data-bs-toggle="tab" href="#mediainfo" role="tab" aria-controls="mediainfo" aria-selected="false">Media Info</a>
                 </li>
@@ -65,7 +65,7 @@
                 </div>
             </div>
 
-            @if(!empty($mediainfo))
+            @if(!empty($torrent->mediainfo))
                 <div class="tab-pane fade" id="mediainfo" role="tabpanel" aria-labelledby="mediainfo-tab">
                     @include('torrents.partials.mediainfo')
                 </div>
@@ -122,7 +122,7 @@
 
 @include('torrents.partials.comments')
 @include('torrents.partials.similar')
-@include('torrents.partials.recommended')
+{{-- @include('torrents.partials.recommended') --}}
 
 
 

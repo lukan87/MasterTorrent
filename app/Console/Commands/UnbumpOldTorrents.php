@@ -20,7 +20,7 @@ class UnbumpOldTorrents extends Command
         // Get the current date and subtract 30 days
         $dateLimit = Carbon::now()->subDays(30);
 
-        // Query to find torrents with bumped true and created_at older than 10 days
+        // Query to find torrents with bumped true and created_at older than 30 days
         $torrents = Torrent::where('bumped', true)
             ->where('created_at', '<', $dateLimit)
             ->get();

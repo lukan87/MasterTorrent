@@ -43,7 +43,7 @@
                                 <div class="torrent-info w-100">
                                     <a href="{{ route('torrents.show', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}" class="fw-bold">{{ $torrent->name }}</a><br>
                                     @include('torrents.partials.tags')
-                                    <div class="small text-muted">{{ $torrent->created_at->diffForHumans() }}</div>
+                                    <div class="small text-muted">Uploaded: {{ $torrent->created_at->diffForHumans() }}</div>
                                 </div>
                                 <div class="torrent-stats d-flex flex-wrap w-100 mt-2">
                                     <div class="badge bg-primary me-2 mb-2">{{ $torrent->seeders }} Seeder(s)</div>

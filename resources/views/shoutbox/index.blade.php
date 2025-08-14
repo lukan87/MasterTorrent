@@ -3,25 +3,83 @@
 @section('content')
 
 
+<!-- Shoutbox Rules Dropdown -->
+<div class="dropdown mb-3 mt-1">
+    <button class="btn btn-secondary dropdown-toggle" type="button" id="chatRulesDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        Chat Rules
+    </button>
+    <div class="dropdown-menu dropdown-menu-dark p-3" aria-labelledby="chatRulesDropdown" style="width: 100%; overflow-y: auto;">
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Romanian Rules Card -->
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <div class="card bg-dark text-white h-100">
+                        <div class="card-header bg-secondary">
+                            <h5 class="mb-0">RO Reguli</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item bg-transparent text-white border-secondary">1. Folosiți un limbaj prietenos față de colegi</li>
+                                <li class="list-group-item bg-transparent text-white border-secondary">2. Dacă aveți frustrări referitoare la ceea ce se discută pe chat, vă rugăm să comentați într-un mod cât mai amiabil, sau mai bine, nu comentați!</li>
+                                <li class="list-group-item bg-transparent text-white border-secondary">3. Nu faceți request-uri pe chat. Aveți secțiunea Request. Veți primi warn timp de o săptămână!</li>
+                                <li class="list-group-item bg-transparent text-white border-secondary">4. Nu folosiți mesaje repetitive sau spam</li>
+                                <li class="list-group-item bg-transparent text-white border-secondary">5. Discuțiile politice și religioase sunt strict interzise</li>
+                                <li class="list-group-item bg-transparent text-white border-secondary">6. Respectați deciziile moderatorilor</li>
+                            </ul>
+                        </div>
+                        <div class="card-footer bg-transparent border-secondary">
+                            <div class="alert alert-warning mb-0">
+                                <strong>Atenție:</strong> Nerespectarea acestor reguli poate duce la avertizări sau suspendarea accesului la chat.
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
+                <!-- English Rules Card -->
+                <div class="col-md-6">
+                    <div class="card bg-dark text-white h-100">
+                        <div class="card-header bg-secondary">
+                            <h5 class="mb-0">EN Rules</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item bg-transparent text-white border-secondary">1. Use friendly language with other members</li>
+                                <li class="list-group-item bg-transparent text-white border-secondary">2. If you have frustrations about the chat discussion, please comment in a friendly manner, or better, don't!</li>
+                                <li class="list-group-item bg-transparent text-white border-secondary">3. Do not make requests in the chat. Use the Request section. You will receive a 1-week warning!</li>
+                                <li class="list-group-item bg-transparent text-white border-secondary">4. Do not use repetitive messages or spam</li>
+                                <li class="list-group-item bg-transparent text-white border-secondary">5. Political and religious discussions are strictly prohibited</li>
+                                <li class="list-group-item bg-transparent text-white border-secondary">6. Respect the moderators' decisions</li>
+                            </ul>
+                        </div>
+                        <div class="card-footer bg-transparent border-secondary">
+                            <div class="alert alert-warning mb-0">
+                                <strong>Warning:</strong> Breaking these rules may result in warnings or suspension of chat access.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
     {{-- Shoutbox Card --}}
     <div class="card shoutbox-container mt-2">
         <div class="card-body">
-            {{-- Display Messages and Replies --}}
+          
             <div class="shoutbox-messages">
                 @foreach($messages as $message)
                     <div class="d-flex align-items-start mb-3">
-                        {{-- Avatar --}}
+                      
                         <div class="avatar-container">
                             <img src="{{ $message->user->profile_image ?? asset('images/default_avatar/default-avatar.jpg') }}" alt="User Avatar">
                         </div>
 
-                        {{-- Message Content --}}
+                        
                         <div class="content-container w-100">
-                             {{-- Arrow --}}
+                             
                             <div class="arrow"></div>
-                            {{-- Message Header --}}
+                            
                             <div class="d-flex justify-content-between">
                             <span class="header">
                             <a href="{{ route('profile.show', ['id' => $message->user->id]) }}"
@@ -38,7 +96,7 @@
 </span>
 
                                 <span class="timestamp">{{ $message->created_at->format('Y-m-d H:i') }}
-                                    {{-- Actions --}}
+                                  
                             <div class="actions">
                             @if(auth()->id() === $message->user_id || Auth::user()->user_class >= \App\Models\UserClass::ADMIN)
                                     <a href="{{ route('shoutbox.edit', $message->id) }}" class="btn btn-sm btn-outline-warning">Edit</a>
@@ -53,10 +111,10 @@
                                 </span>
                             </div>
 
-                            {{-- Message Text --}}
+                          
                             <div class="message-content"> {!! convertCustomTagsToHtml( $message->message ) !!}</div>
 
-                            {{-- Reply Form --}}
+                         
                             <form id="reply-form-{{ $message->id }}" action="{{ route('shoutbox.reply', $message->id) }}" method="POST" style="display: none;" class="mt-2">
                                 @csrf
                                 <div class="form-group">
@@ -65,19 +123,19 @@
                                 <button type="submit" class="btn btn-primary btn-sm mt-2">Post Reply</button>
                             </form>
 
-                           {{-- Display Replies --}}
+                          
                            @if($message->replies && $message->replies->count() > 0)
     <div class="replies mt-3" style="background-color: #444444; padding: 10px; border-radius: 5px;">
         @foreach($message->replies->sortByDesc('created_at') as $reply)
             <div class="d-flex align-items-start mb-3">
-                {{-- Reply Avatar --}}
+               
                 <div class="avatar-container">
                     <img src="{{ $reply->user->profile_image ?? asset('images/default_avatar/default-avatar.jpg') }}" alt="User Avatar">
                 </div>
 
-                {{-- Reply Content --}}
+               
                 <div class="content-container w-100">
-                     {{-- Arrow --}}
+                    
                      <div class="arrow"></div>
                     <div class="d-flex justify-content-between">
                         <span class="header">
@@ -94,7 +152,7 @@
 
                         </span>
                         <span class="timestamp">{{ $reply->created_at->format('Y-m-d H:i') }}
-                             {{-- Actions for Reply --}}
+                           
                             <div class="actions">
                                 @if(auth()->id() === $reply->user_id || Auth::user()->user_class >= \App\Models\UserClass::ADMIN)
                                     <a href="{{ route('shoutbox.edit', $reply->id) }}" class="btn btn-sm btn-outline-warning">Edit</a>
@@ -125,7 +183,7 @@
 
 
     @include('shoutbox.partials.emoji')
-    {{-- Form to Post New Message --}}
+   
     <form id="shoutbox-form" action="{{ route('shoutbox.store') }}" method="POST" class="mb-4 mt-3">
     @csrf
     <div class="form-group">
@@ -193,9 +251,7 @@
         .catch(error => console.error('Error fetching emoji:', error));
 }
 
-</script>
 
-<script>
     function submitOnEnter(event) {
         // Check if the key pressed is Enter
         if (event.key === 'Enter' && !event.shiftKey) { // Allow shift+enter for new line
@@ -203,11 +259,7 @@
             document.getElementById('shoutbox-form').submit(); // Submit the form
         }
     }
-</script>
 
-
-
-<script>
     document.getElementById('shoutbox-form').addEventListener('submit', function(event) {
         event.preventDefault();
         const formData = new FormData(this);
@@ -225,9 +277,7 @@
         })
         .catch(error => console.error('Error:', error));
     });
-</script>
 
-<script>
     function toggleReplyForm(id) {
         var form = document.getElementById('reply-form-' + id);
         if (form.style.display === 'none') {
@@ -310,7 +360,7 @@
     }
 
     .shoutbox-container {
-        max-height: 800px;
+        max-height: 750px;
         overflow-y: auto; /* Add vertical scrolling */
     }
 </style>

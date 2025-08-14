@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en"> <!--begin::Head-->
+<html lang="en"> 
 
 @include('layouts.partials.header')
 
-<body class="layout-fixed sidebar-expand-lg bg-body-tertiary" data-bs-theme="dark"> <!--begin::App Wrapper-->
-    <div class="app-wrapper"> <!--begin::Header-->
+<body class="layout-fixed sidebar-expand-lg bg-body-tertiary" data-bs-theme="dark"> 
+    <div class="app-wrapper"> 
 
-    <!-- Check if user is logged in -->
+    
     @auth
 
     @include('layouts.partials.navbar')
@@ -16,10 +16,10 @@
 
  @endauth
 
-        <main class="app-main"> <!--begin::App Content Header-->
+        <main class="app-main"> 
 
-            <div class="app-content"> <!--begin::Container-->
-                <div class="container-fluid"> <!-- Info boxes -->
+            <div class="app-content"> 
+                <div class="container-fluid"> 
 
 
                 @yield('content')
@@ -28,28 +28,78 @@
            </div>
 
 
-        </div> <!--end::App Content-->
-        </main> <!--end::App Main--> <!--begin::Footer-->
+        </div> 
+        </main> 
         @auth
-        <footer class="app-footer"> <!--begin::To the end-->
-            <div class="float-end d-none d-sm-inline">Seed until you bleed</div> <!--end::To the end--> <!--begin::Copyright--> 
-            <strong>
-    Copyright &copy; <?php echo date('Y'); ?>&nbsp;
-    <a href="/" class="text-decoration-none">LastFiles</a>.
-</strong>
-            All rights reserved.
-            <!--end::Copyright-->
-        </footer> <!--end::Footer-->
+        
+        <footer class="app-footer bg-dark text-white py-3 mb-1">
+           
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center">
+                            <span class="text-muted">
+                                <span class="text-primary"> <i class="bi bi-globe2"></i> LastFiles</span>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mt-2 mt-md-0">
+                        <div class="text-md-end">
+                            <small class="text-muted">
+                                <span class="me-2">Built with Laravel</span>
+                                <span class="me-2">|</span>
+                                <span> <i class="bi bi-filetype-php"></i> Developed and maintained by <strong>lukan87</strong> </span>
+                                <span class="mx-2">|</span>
+                                <span>Seed until you bleed</span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-2">
+                    <div class="col-12 text-center text-md-start">
+                        <small class="text-muted">
+                            © <?php echo date('Y'); ?> All rights reserved
+                        </small>
+                    </div>
+                </div>
+           
+        </footer>
+    
+        
+        <style>
+        .app-footer {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.9rem;
+        }
+        .text-primary {
+            color: #4da6ff !important;
+        }
+        </style>
+        
+        <style>
+        .app-footer {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+        .app-footer a:hover {
+            color: #4da6ff !important;
+        }
+        .badge {
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+        </style>
         @endauth
-    </div> <!--end::App Wrapper--> <!--begin::Script--> <!--begin::Third Party Plugin(OverlayScrollbars)-->
+    </div> 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.3.0/browser/overlayscrollbars.browser.es6.min.js" integrity="sha256-H2VM7BKda+v2Z4+DRy69uknwxjyDRhszjXFhsL4gD3w=" crossorigin="anonymous"></script> <!--end::Third Party Plugin(OverlayScrollbars)--><!--begin::Required Plugin(popperjs for Bootstrap 5)-->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha256-whL0tQWoY1Ku1iskqPFvmZ+CHsvmRWx/PIoEvIeWh4I=" crossorigin="anonymous"></script> <!--end::Required Plugin(popperjs for Bootstrap 5)--><!--begin::Required Plugin(Bootstrap 5)-->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha256-YMa+wAM6QkVyz999odX7lPRxkoYAan8suedu4k2Zur8=" crossorigin="anonymous"></script> <!--end::Required Plugin(Bootstrap 5)--><!--begin::Required Plugin(AdminLTE)-->
-    <script src="{{ asset('dist/js/adminlte.js') }}"></script> <!--end::Required Plugin(AdminLTE)--><!--begin::OverlayScrollbars Configure-->
- <!--end::OverlayScrollbars Configure--> <!-- OPTIONAL SCRIPTS --> <!-- apexcharts -->
+    <script src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.3.0/browser/overlayscrollbars.browser.es6.min.js" integrity="sha256-H2VM7BKda+v2Z4+DRy69uknwxjyDRhszjXFhsL4gD3w=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha256-whL0tQWoY1Ku1iskqPFvmZ+CHsvmRWx/PIoEvIeWh4I=" crossorigin="anonymous"></script> 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha256-YMa+wAM6QkVyz999odX7lPRxkoYAan8suedu4k2Zur8=" crossorigin="anonymous"></script> 
+    <script src="{{ asset('dist/js/adminlte.js') }}"></script> 
+ 
     <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.37.1/dist/apexcharts.min.js" integrity="sha256-+vh8GkaU7C9/wbSLIcwq82tQ2wTf44aOHA8HlBMwRI8=" crossorigin="anonymous"></script>
-<!-- mine -->
+
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
 
 <script src="{{ asset('js/lity/litty.js') }}" defer></script>
@@ -112,7 +162,7 @@
 @endif
 
 <!-- Back to Top Button -->
-<button id="back-to-top" class="btn btn-secondary" style="position: fixed; bottom: 20px; right: 20px; display: none;">
+<button id="back-to-top" class="btn btn-secondary" style="position: fixed; bottom: 100px; right: 20px; display: none;">
 <i class="bi bi-arrow-up-circle-fill fs-3"></i>
 </button>
 

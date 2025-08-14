@@ -68,7 +68,7 @@ class BonusController extends Controller
     public function buyVip(Request $request)
 {
     $user = Auth::user();
-    $cost = 100000; 
+    $cost = 50000; 
     if ($user->seedbonus < $cost) {
         return redirect()->back()->with('error', 'Not enough points.');
     }
@@ -87,6 +87,7 @@ class BonusController extends Controller
     $user->user_class = 3;
     $user->slots += 10;
     $user->invites += 5;
+    $user->hit_and_run_count = 0;
 
     $user->save();
 
@@ -110,7 +111,7 @@ public function buySeedtime(Request $request)
     }
 
     $torrentId = $request->input('torrent_id');
-    $seedtimeCost = 5000; 
+    $seedtimeCost = 1000; 
     $additionalSeedtime = 86400; 
 
     
@@ -137,6 +138,7 @@ public function buySeedtime(Request $request)
         ->update([
             'prewarned_at' => NULL,
             'seedtime' => $additionalSeedtime, 
+            'hitrun' => false,
             'updated_at' => now(),
         ]);
 

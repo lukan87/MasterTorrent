@@ -4,6 +4,7 @@ namespace App\Helpers;
 
 use Illuminate\Http\Request;
 use App\Models\Torrent;
+use Illuminate\Support\Facades\Cache;
 
 class TorrentHelper
 {
@@ -123,25 +124,36 @@ class TorrentHelper
 
 
 public static function buildFileTree($files)
-    {
+{
+    $cacheKey = 'file_tree_' . md5(serialize($files->pluck('filename', 'size')->toArray()));
+
+    return Cache::remember($cacheKey, 300, function () use ($files) {
         $tree = [];
 
         foreach ($files as $file) {
-            $parts = explode('/', $file->filename);
-            $current = &$tree;
+            $parts = str_contains($file->filename, '/') 
+                ? explode('/', $file->filename) 
+                : [$file->filename];
 
-            foreach ($parts as $part) {
+            $current = &$tree;
+            $lastIndex = count($parts) - 1;
+
+            foreach ($parts as $index => $part) {
                 if (!isset($current[$part])) {
                     $current[$part] = [];
                 }
+
+                if ($index === $lastIndex) {
+                    $current[$part]['_size'] = FormatHelper::formatSize($file->size);
+                }
+
                 $current = &$current[$part];
             }
-
-            // Store file size at the last part of the path
-            $current['_size'] = FormatHelper::formatSize($file->size);
         }
 
         return $tree;
-    }
+    });
+}
+
 
 }

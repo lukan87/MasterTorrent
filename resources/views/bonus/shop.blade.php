@@ -115,13 +115,13 @@
                 </div>
 
                 <div class="card-body">
-                    <p>Cost: 100,000 Points</p>
+                    <p>Cost: 50,000 Points</p>
                     <form action="{{ route('bonus.buyVip') }}" method="POST">
                         @csrf
-                        <button type="submit" class="btn btn-warning {{ Auth::user()->seedbonus < 100000 || Auth::user()->user_class >= 3 ? 'disabled' : '' }}">
+                        <button type="submit" class="btn btn-warning {{ Auth::user()->seedbonus < 50000 || Auth::user()->user_class >= 3 ? 'disabled' : '' }}">
                             @if (Auth::user()->user_class >= 3)
                                 <i class="bi bi-gem"></i> You are already VIP or higher
-                            @elseif (Auth::user()->seedbonus < 100000)
+                            @elseif (Auth::user()->seedbonus < 50000)
                                 <i class="bi bi-x-circle"></i> Not enough points
                             @else
                                 <i class="bi bi-gem"></i> Buy VIP

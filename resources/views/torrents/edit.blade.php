@@ -37,10 +37,11 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="steamid" class="form-label"><i class="bi bi-controller me-1"></i>Steam ID</label>
-                    <input type="text" name="steamid" id="steamid" class="form-control" placeholder="https://store.steampowered.com/app/310950" value="{{ old('steamid', $torrent->steamid) }}">
+                    <label for="steamid" class="form-label"><i class="bi bi-controller me-1"></i>Steam ID EG: https://store.steampowered.com/app/310950 Use ONLY 310950</label>
+                    <input type="text" name="steamid" id="steamid" class="form-control" placeholder="STEAM ID - EX: 310950" value="{{ old('steamid', $torrent->steamid) }}">
                 </div>
 
+                @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
                 <div class="mb-3">
                     <label class="form-label"><i class="bi bi-bookmark-star me-1"></i>Torrent Tags</label><br>
                     @foreach (['free' => 'Free', 'double' => 'Double', 'sticky' => 'Sticky', 'recommended' => 'Recommended', 'seedbox' => 'Seedbox'] as $field => $label)
@@ -50,6 +51,7 @@
                         </div>
                     @endforeach
                 </div>
+                @endif
 
                 <hr class="my-4">
 

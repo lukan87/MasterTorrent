@@ -110,7 +110,10 @@
                             <td>{{ $ticket->category }}</td>
 
                             @if(Auth::user()->user_class > 5)
-                                <td>{{ $ticket->user->name }}</td>
+                                <td><a href="{{ route('profile.show', ['id' => $ticket->user->id]) }}"
+                                    class="fw-bold" style="color: {{ \App\Models\UserClass::getClassColor($ticket->user_class ?? '') }}">
+                                     {{ $ticket->user->name ?? 'Unknown' }}
+                                 </a></td>
                                 <td>
                                     @if($ticket->last_replied_at)
                                         <span class="badge bg-success">
