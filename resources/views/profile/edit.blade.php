@@ -100,6 +100,20 @@
                             </div>
 
 
+                            <div class="row mb-3">
+     <label class="col-md-4 col-form-label text-md-end">Timezone</label>
+     <div class="col-md-6">
+    <select name="timezone" id="timezone" class="form-control">
+        @foreach(timezone_identifiers_list() as $tz)
+            <option value="{{ $tz }}" {{ $user->timezone === $tz ? 'selected' : '' }}>
+                {{ $tz }}
+            </option>
+        @endforeach
+    </select>
+     </div>
+</div>
+
+
                             @if (Auth::check() && (Auth::user()->user_class >= \App\Models\UserClass::ADMIN || Auth::user()->name === $user->name))
                                 <div class="row mb-3">
                                     <label for="recovery_code" class="col-md-4 col-form-label text-md-end">{{ __('Recovery Code') }}</label>

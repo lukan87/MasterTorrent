@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="my-4">
+<div class="container-fluid my-5">
     <h1 class="mb-4">Peers for Torrent:
         <a href="{{ route('torrents.show', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}" class="text-info">
             {{ $torrent->name }}
@@ -14,7 +14,7 @@
         <div class="col-md-12 mb-4">
     <div class="card">
         <div class="card-header bg-success text-white">
-            <h5 class="mb-0">Seeders</h5>
+            <h5 class="mb-0">Seeders</span></h5>
         </div>
         <div class="card-body">
             @if($seeders->isEmpty())

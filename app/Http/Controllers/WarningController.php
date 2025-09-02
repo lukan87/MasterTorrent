@@ -88,6 +88,13 @@ class WarningController extends Controller
         $warning->active = 0;
         $warning->save();
 
+
+        // Reset user "warned" status
+    $user = User::findOrFail($warning->user_id);
+    $user->warned = 0;
+    $user->warned_until = null;
+    $user->save();
+
         // Send Private Message
         $privateMessage = new Message();
         $privateMessage->sender_id = 2;
@@ -132,6 +139,11 @@ class WarningController extends Controller
         $warning->active = 0;
         $warning->save();
     }
+
+    // Reset user "warned" status
+    $user->warned = 0;
+    $user->warned_until = null;   // make sure this matches your DB column
+    $user->save();
 
     // Send Private Message
     $privateMessage = new Message();

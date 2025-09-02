@@ -5,6 +5,35 @@
 @section('content')
 
 
+
+
+@if($movieOfTheDay)
+<div class="movie-highlight">
+    <div class="poster">
+        <img src="{{ $movieOfTheDay->poster ?? '/images/default-poster.jpg' }}" 
+             alt="{{ $movieOfTheDay->clean_name ?? str_replace('.', ' ', $movieOfTheDay->name) }}">
+    </div>
+    <div class="details">
+        <div class="info-card">
+            <h2 class="tagline">🎬 Movie of the Day</h2>
+            <h1 class="title">
+    <a href="{{ route('torrents.show', $movieOfTheDay->id) }}">
+        {{ $movieOfTheDay->clean_name ?? str_replace('.', ' ', $movieOfTheDay->name) }}
+    </a>
+</h1>
+
+            <p class="category">📂 {{ $movieOfTheDay->category->name ?? 'Unknown' }}</p>
+            <div class="stats">
+                <span class="badge1 seeders">🌱 {{ $movieOfTheDay->seeders }} Seeders</span>
+                <span class="badge1 leechers">⬇️ {{ $movieOfTheDay->leechers }} Leechers</span>
+                <span class="badge1 completed">✅ {{ $movieOfTheDay->times_completed }} Completed</span>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
+
 <!-- Search Form -->
 <div class="mt-5 card shadow-sm border-0 mb-4">
     <div class="card-header bg-grey">
@@ -224,10 +253,12 @@
 
                         {{-- <td>
                             <small>
-                                <div data-bs-toggle="tooltip" title="{{ \Carbon\Carbon::parse($torrent->created_at)->timezone(Auth::user()->timezone)->diffForHumans() }}">
-                                    {{ \Carbon\Carbon::parse($torrent->created_at)->timezone(Auth::user()->timezone)->format('M d, Y @ g:i A') }}
-                                </div>
-                            </small> 
+    <div data-bs-toggle="tooltip" 
+         title="{{ $torrent->created_at->timezone(Auth::user()->timezone ?? 'Europe/London')->diffForHumans() }}">
+        {{ $torrent->created_at->timezone(Auth::user()->timezone ?? 'Europe/London')->format('M d, Y @ g:i A') }}
+    </div>
+</small>
+
                         </td> --}}
                         
                        
@@ -279,5 +310,147 @@
 <div class="d-flex justify-content-center mt-4">
     {{ $torrents->links('pagination::bootstrap-5') }}
 </div>
+
+<style>
+.movie-highlight {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    max-width: 900px;
+    margin: 40px auto;
+    background: linear-gradient(145deg, #1c1c1c, #2a2a2a);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    overflow: hidden;
+    transition: transform 0.3s ease;
+    animation: glow 1.5s ease-in-out infinite alternate;
+}
+@keyframes glow {
+    0% {
+        box-shadow: 0 0 5px #c0b7b4ff, 0 0 10px #5f5755ff, 0 0 15px #aaa7a6ff;
+    }
+    50% {
+        box-shadow: 0 0 10px #5a5959ff, 0 0 20px #2b2a29ff, 0 0 30px #636261ff;
+    }
+    100% {
+        box-shadow: 0 0 5px #5070ffff, 0 0 10px #5350ffff, 0 0 15px #5065c4ff;
+    }
+}
+
+.movie-highlight:hover {
+    transform: translateY(-5px);
+}
+
+.poster {
+    flex: 0 0 200px;
+    position: relative;
+}
+
+.poster img {
+    width: 100%;
+    height: auto;
+    border-radius: 20px 0 0 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    transition: transform 0.3s ease;
+}
+
+.poster img:hover {
+    transform: scale(1.05);
+}
+
+.details {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    padding: 20px;
+}
+
+.info-card {
+    color: #fff;
+}
+
+.tagline {
+    color: #ff7f50;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+}
+
+.title {
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin-bottom: 10px;
+    line-height: 1.2;
+}
+
+.category {
+    font-size: 1rem;
+    margin-bottom: 20px;
+    color: #bbb;
+}
+
+/* Stats badges */
+.stats {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.badge1 {
+    padding: 8px 16px;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.badge1:hover {
+    transform: scale(1.1);
+}
+
+.badge1.seeders {
+    background: #28a745;
+    color: #fff;
+    box-shadow: 0 0 10px #28a745;
+}
+
+.badge1.leechers {
+    background: #dc3545;
+    color: #fff;
+    box-shadow: 0 0 10px #dc3545;
+}
+
+.badge1.completed {
+    background: #007bff;
+    color: #fff;
+    box-shadow: 0 0 10px #007bff;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .movie-highlight {
+        flex-direction: column;
+        max-width: 90%;
+    }
+
+    .poster img {
+        border-radius: 20px 20px 0 0;
+    }
+
+    .details {
+        padding: 15px;
+        text-align: center;
+    }
+
+    .stats {
+        justify-content: center;
+    }
+}
+
+
+
+
+    </style>
 
 @endsection

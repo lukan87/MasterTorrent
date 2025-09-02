@@ -3,116 +3,158 @@
 @section('content')
 
 <style>
-   
     body {
-        background: linear-gradient(rgba(20, 20, 20, 0.5), rgba(20, 20, 20, 0.9)),
-
-        background-size: cover;
-        color: #ccc; 
-        overflow: hidden;
+        background: linear-gradient(135deg, #1a1a1a, #121212);
         margin: 0;
         height: 100vh;
-    }
-
-   
-    .glass-card {
-        background: rgba(50, 50, 50, 0.7); 
-        border-radius: 15px;
-        padding: 2rem;
-        box-shadow: 0px 8px 32px rgba(0, 0, 0, 0.5);
-        backdrop-filter: blur(8px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        color: #eee; 
-        max-width: 500px;
-        width: 100%;
-    }
-
-   
-    .glass-card-header {
-        color: #888;
-        font-size: 1.75rem;
-        text-align: center;
-        font-weight: bold;
-    }
-
- 
-    .form-control {
-        background-color: rgba(255, 255, 255, 0.1);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: 'Poppins', sans-serif;
         color: #ddd;
-        border: none;
+    }
+
+    .auth-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        min-height: 100vh;
+        padding: 1rem;
+    }
+
+    .glass-card {
+        background: rgba(30, 30, 30, 0.85);
+        border-radius: 20px;
+        padding: 2.5rem;
+        width: 100%;
+        max-width: 500px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+    }
+
+    .glass-card-header {
+        text-align: center;
+        font-size: 2rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        color: #9fbad1;
+        text-shadow: 0 0 6px rgba(159, 186, 209, 0.4);
+        margin-bottom: 1.5rem;
+    }
+
+    /* Inputs */
+    .form-control {
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 10px !important;
+        color: #eee !important;
+        padding: 0.7rem 1rem !important;
+        font-size: 1rem !important;
+        transition: all 0.3s ease-in-out;
     }
 
     .form-control:focus {
-        border-color: #666;
-        box-shadow: 0px 0px 8px #666;
+        background: rgba(255, 255, 255, 0.08) !important;
+        border-color: #9fbad1 !important;
+        box-shadow: 0 0 10px rgba(159, 186, 209, 0.4) !important;
+        color: #fff !important;
+        outline: none !important;
     }
 
-   
-    .btn-primary, .btn-info, .btn-warning {
-        border-radius: 20px;
-        padding: 0.5rem 1.5rem;
-        transition: background-color 0.3s ease;
+    /* Buttons */
+    .btn {
+        border-radius: 25px;
+        padding: 0.6rem 1.6rem;
+        font-weight: 500;
+        border: none;
+        transition: all 0.3s ease-in-out;
+        font-size: 0.9rem;
     }
 
-    .btn-primary {
-        background-color: #555;
+    .btn-login {
+        background: #9fbad1;
+        color: #111;
+    }
+    .btn-login:hover {
+        background: #89a6c0;
+    }
+
+    .btn-secondary-custom {
+        background: #3e4e59;
         color: #ddd;
     }
-    .btn-primary:hover {
-        background-color: #666;
+    .btn-secondary-custom:hover {
+        background: #2f3c44;
     }
 
-    .btn-info {
-        background-color: #444;
-        color: #ddd;
-    }
-    .btn-info:hover {
-        background-color: #555;
-    }
-
-    .btn-warning {
-        background-color: #333;
-        color: #ddd;
-    }
-    .btn-warning:hover {
-        background-color: #444;
-    }
-
-   
+    /* Alerts */
     .alert {
-        background-color: rgba(255, 0, 0, 0.8);
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        font-size: 0.9rem;
+    }
+    .alert-danger {
+        background: rgba(200, 60, 60, 0.85);
+        color: #fff;
+    }
+    .alert-success {
+        background: rgba(60, 160, 100, 0.85);
+        color: #fff;
+    }
+
+    /* Action buttons */
+    .form-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.8rem;
+        margin-top: 1rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 650px) {
+        .glass-card {
+            padding: 1.5rem;
+        }
+        .form-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .btn {
+            width: 100%;
+        }
     }
 </style>
 
-<div class="d-flex justify-content-center align-items-center" style="height: 100vh; margin: 0;">
+<div class="auth-wrapper">
     <div class="glass-card">
         <div class="glass-card-header">{{ __('Login') }}</div>
 
+        @if(session('status'))
+            <div class="alert alert-success">{{ session('status') }}</div>
+        @endif
+
+        @if($errors->any())
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <div class="card-body">
-            @if(session('status'))
-                <div class="alert alert-success">
-                    {{ session('status') }}
-                </div>
-            @endif
-
-            @if($errors->any())
-                <div class="alert alert-danger">
-                    <ul>
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
             <form method="POST" action="{{ route('login') }}">
                 @csrf
 
                 <div class="mb-3">
                     <label for="name" class="form-label">{{ __('Username') }}</label>
-                    <input id="name" type="name" class="form-control @error('name') is-invalid @enderror" name="name" placeholder="Enter Username" required autocomplete="name" autofocus>
+                    <input id="name" type="text" class="form-control @error('name') is-invalid @enderror"
+                           name="name" placeholder="Enter Username" required autocomplete="name" autofocus>
                     @error('name')
-                        <span class="invalid-feedback" role="alert">
+                        <span class="invalid-feedback d-block" role="alert">
                             <strong>{{ $message }}</strong>
                         </span>
                     @enderror
@@ -120,27 +162,24 @@
 
                 <div class="mb-3">
                     <label for="password" class="form-label">{{ __('Password') }}</label>
-                    <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="current-password">
+                    <input id="password" type="password"
+                           class="form-control @error('password') is-invalid @enderror"
+                           name="password" required>
                     @error('password')
-                        <span class="invalid-feedback" role="alert">
-                            <strong>{{ $message }}</strong>
-                        </span>
+                        <span class="invalid-feedback d-block"><strong>{{ $message }}</strong></span>
                     @enderror
                 </div>
 
                 <div class="mb-3 form-check">
-                    <input class="form-check-input" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
-                    <label class="form-check-label" for="remember">
-                        {{ __('Remember Me') }}
-                    </label>
+                    <input type="checkbox" class="form-check-input" name="remember" id="remember"
+                        {{ old('remember') ? 'checked' : '' }}>
+                    <label class="form-check-label" for="remember">{{ __('Remember Me') }}</label>
                 </div>
 
-
-
-                <div class="d-flex justify-content-between">
-                    <button type="submit" class="btn btn-primary btn-sm">{{ __('Login') }}</button>
-                    <a class="btn btn-info btn-sm" href="{{ route('register') }}">{{ __('Register') }}</a>
-                    <a class="btn btn-warning btn-sm" href="{{ route('custom.password.recover') }}">{{ __('Forgot Your Password?') }}</a>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-login">{{ __('Login') }}</button>
+                    <a href="{{ route('password.request') }}" class="btn btn-secondary-custom">{{ __('Forgot Password') }}</a>
+                    <a href="{{ route('register') }}" class="btn btn-secondary-custom">{{ __('Register') }}</a>
                 </div>
             </form>
         </div>
@@ -148,3 +187,5 @@
 </div>
 
 @endsection
+
+

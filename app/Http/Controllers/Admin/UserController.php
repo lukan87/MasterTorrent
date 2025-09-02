@@ -10,6 +10,7 @@ use App\Models\Message;
 use App\Models\History;
 use App\Models\UserClass;
 use App\Models\UserTimeline;
+use App\Jobs\SendMassMessageJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
@@ -474,47 +475,44 @@ $user->save();
 
 
 
-    public function sendMassMessage(Request $request)
-    {
-        $request->validate([
-            'message' => 'required|string',
-            'user_ids' => 'nullable|array',
-            'user_ids.*' => 'exists:users,id', // Ensure users exist
-            'user_class' => 'nullable|array', // Allow an array of user classes
-            'user_class.*' => 'in:' . implode(',', array_keys(UserClass::getClasses())), // Validate each user_class is a valid class
-        ]);
-    
-        // Verifică dacă user_class este gol (neselectat)
-        if (!$request->filled('user_class')) {
-            return redirect()->back()->with('error', 'Please select at least one user class to send the message.');
-        }
-    
-        // Obține utilizatorii cărora să le trimitem mesajul, filtrat opțional de clasele de utilizatori sau de ID-urile specifice ale utilizatorilor
-        $query = User::query();
-    
-        if ($request->filled('user_class')) {
-            $query->whereIn('user_class', $request->user_class);
-        }
-    
-        // Use chunk to process users in smaller batches
-        $sentCount = 0;
-        $query->chunk(100, function ($users) use (&$sentCount, $request) {
-            foreach ($users as $user) {
-                Message::create([
-                    'sender_id' => 2, // Assuming the admin is sending the message
-                    'receiver_id' => $user->id,
-                    'subject' => 'Mass Message',
-                    'body' => $request->message,
-                    'is_read' => false, // You can customize the status as needed
-                ]);
-                
-                // Increment the sent count
-                $sentCount++;
-            }
-        });
-    
-        return redirect()->route('admin.users.index')->with('success', "$sentCount messages sent successfully!");
+   public function sendMassMessage(Request $request)
+{
+    $request->validate([
+        'message' => 'required|string',
+        'user_ids' => 'nullable|array',
+        'user_ids.*' => 'exists:users,id', // Ensure users exist
+        'user_class' => 'nullable|array', // Allow an array of user classes
+        'user_class.*' => 'in:' . implode(',', array_keys(UserClass::getClasses())), // Validate each user_class is a valid class
+    ]);
+
+    // Check if user_class is empty
+    if (!$request->filled('user_class')) {
+        return redirect()->back()->with('error', 'Please select at least one user class to send the message.');
     }
+
+    // Get users filtered by class or specific IDs
+    $query = User::query();
+
+    if ($request->filled('user_class')) {
+        $query->whereIn('user_class', $request->user_class);
+    }
+
+    if ($request->filled('user_ids')) {
+        $query->whereIn('id', $request->user_ids);
+    }
+
+    // Collect all matching user IDs
+    $userIds = $query->pluck('id')->toArray();
+
+    if (!empty($userIds)) {
+        // Dispatch job once for all users
+        SendMassMessageJob::dispatch($request->message, $userIds);
+    }
+
+    return redirect()->route('admin.users.index')
+        ->with('success', 'Mass message has been queued for delivery!');
+}
+
     
 
 

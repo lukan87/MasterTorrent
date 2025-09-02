@@ -89,7 +89,7 @@ public function reply(Request $request, Post $post)
             'body' => "Hello {$creator->name},\n\n" .
                       "Your post has received a new reply from {$replyAuthor->name}:\n\n" .
                       "\"{$request->content}\"\n\n" .
-                      "Click [here]({$postLink}) to view the post and the reply.\n\n" .
+                      "Click [url][here]({$postLink})[/url] to view the post and the reply.\n\n" .
                       "Best regards,\nYour Forum Team",
             'is_read' => false, // Mark the message as unread
         ]);

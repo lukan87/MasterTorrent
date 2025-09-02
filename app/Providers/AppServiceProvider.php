@@ -9,6 +9,7 @@ use Monicahq\Cloudflare\LaravelCloudflare;
 use Monicahq\Cloudflare\Facades\CloudflareProxies;
 use App\Models\Message;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 
 class AppServiceProvider extends ServiceProvider
@@ -26,6 +27,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+
+        DB::statement("SET time_zone = '+00:00'");
 
         // Add your custom middleware here globally
         app('router')->pushMiddlewareToGroup('web', \App\Http\Middleware\CheckUserEnabled::class);

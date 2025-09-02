@@ -76,6 +76,7 @@ public function update(Request $request, $id, $name)
         'donor' => 'nullable|in:yes,no',
         'uploadpos' => 'nullable|in:yes,no',
         'downloadpos' => 'nullable|in:yes,no',
+        'timezone' => 'nullable|string|timezone',
     ]);
 
     // Update the user fields
@@ -85,7 +86,10 @@ public function update(Request $request, $id, $name)
     if ($request->filled('recovery_code')) {
         $user->recovery_code = Hash::make($request->recovery_code);
     }
-
+    
+if ($request->filled('timezone')) {
+    $user->timezone = $request->timezone;
+}
 
         $user->profile_image = $request->profile_image_url;
 

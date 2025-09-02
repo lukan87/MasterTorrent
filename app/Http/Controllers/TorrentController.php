@@ -80,16 +80,46 @@ class TorrentController extends Controller
     
         // Mark new torrents for the user
         $user = $request->user();
-        $newTorrents = $user
-            ? $torrents->filter(fn($torrent) => $torrent->created_at > $user->last_browse)
-            : collect();
+       $newTorrents = $user
+    ? $torrents->filter(fn($torrent) => $torrent->created_at->gt($user->last_browse))
+    : collect();
+
+        
+if ($user) {
+    $user->last_browse = now(); // stays UTC
+    $user->save();
+}
+
+    $movieOfTheDay = Cache::remember('movie_of_the_day', now()->endOfDay(), function () {
+    $categoryIds = [11,12,24,25,31,32,54,55,81,82];
+    $twoDaysAgo = now()->subDays(2);
+    $oneWeekAgo = now()->subWeek();
+
+    // Try to get top 5 torrents from the last 2 days
+    $topTorrents = Torrent::whereIn('category_id', $categoryIds)
+                          ->where('created_at', '>=', $twoDaysAgo)
+                          ->orderByDesc('seeders')
+                          ->orderByDesc('times_completed')
+                          ->take(5)
+                          ->get();
+
+    // If none, fallback to last week's uploads
+    if ($topTorrents->isEmpty()) {
+        $topTorrents = Torrent::whereIn('category_id', $categoryIds)
+                              ->where('created_at', '>=', $oneWeekAgo)
+                              ->orderByDesc('seeders')
+                              ->orderByDesc('times_completed')
+                              ->take(5)
+                              ->get();
+    }
+
+    // Pick one randomly from available torrents
+    return $topTorrents->isNotEmpty() ? $topTorrents->random() : null;
+});
+
+
     
-        if ($user) {
-            $user->last_browse = now();
-            $user->save();
-        }
-    
-        return view('torrents.index', compact('torrents', 'categories', 'allGenres', 'sortColumn', 'sortDirection', 'newTorrents'));
+        return view('torrents.index', compact('torrents', 'categories', 'allGenres', 'sortColumn', 'sortDirection', 'newTorrents','movieOfTheDay',));
     }
     
     
@@ -785,6 +815,17 @@ $user->save();
                    }
                }
            }
+
+    
+
+if ($request->has('recommended') && !$torrent->recommended) {
+    $recommendedCount = Torrent::where('recommended', 1)->count();
+
+    if ($recommendedCount >= 15) {
+            return redirect()->route('torrents.index')->with('error', 'You cannot have more than 15 recommended torrents at a time.');
+    }
+}
+
 
             // Update the torrent's details, including genres and TMDB data
             $torrent->update([

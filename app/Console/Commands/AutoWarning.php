@@ -57,6 +57,8 @@ class AutoWarning extends Command
                     ->where('warned', 0))
                 ->whereHas('torrent', fn ($query) => $query->whereRaw('history.actual_downloaded > torrents.size * ?', [config('hitrun.buffer') / 100])
                                                           ->where('seeders', '>', 0))
+
+                                                          ->whereRaw('(history.uploaded / NULLIF(history.actual_downloaded, 0)) < 1.0')
                 ->whereDoesntHave('user.warnings', fn ($query) => $query->withTrashed()->whereColumn('warnings.torrent', '=', 'history.torrent_id'))
                 ->chunkById(100, function ($hitrun) {
                     foreach ($hitrun as $hr) {

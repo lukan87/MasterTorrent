@@ -61,6 +61,7 @@ class AutoPreWarning extends Command
                     $query->whereRaw('history.actual_downloaded > torrents.size * ?', [config('hitrun.buffer') / 100])
                           ->where('seeders', '>', 0);  // Ensure there are seeders greater than 0
                 })
+                ->whereRaw('(history.uploaded / NULLIF(history.actual_downloaded, 0)) < 1.0')
                 ->whereDoesntHave('user.warnings', fn ($query) => $query->withTrashed()->whereColumn('warnings.torrent', '=', 'history.torrent_id'))
                 ->chunkById(100, function ($prewarns): void {
                     foreach ($prewarns as $pre) {
@@ -86,10 +87,11 @@ class AutoPreWarning extends Command
                         $torrentLink = route('torrents.show', ['id' => $pre->torrent_id, 'slug' => $pre->torrent->slug]);
 
                         // Build the message body with the torrent link
-                        $body = "This is a pre-warning regarding your recent torrent activity. Please be aware of the hit-and-run policy.\n\n";
-                        $body .= "Torrent: <a href=\"$torrentLink\">{$pre->torrent->name}</a>";
-                        $body .= "Your ratio for this torrent is: " . number_format($ratio, 2) . ".\n";
-
+                       $body = "This is a pre-warning regarding your recent torrent activity. "
+                  . "Please be aware of the hit-and-run policy.\n\n"
+                  . "Torrent: <a href=\"$torrentLink\">{$pre->torrent->name}</a>\n"
+                  . "Your ratio for this torrent is: " . number_format($ratio, 2) . ".\n";
+                  
                         // Create a new message for the user
                         Message::create([
                             'receiver_id' => $pre->user_id,  // The user receiving the message

@@ -240,18 +240,14 @@
                                          <h4>Cast</h4>
                                     </div>
 
-<div class="row justify-content-center">
-@php
-        $i = 0; // Initialize counter for cast members
-    @endphp
-
-@foreach ($tmdbData['credits']['cast'] as $castMember)
+<div class="cast-row">
+    @php $i = 0; @endphp
+    @foreach ($tmdbData['credits']['cast'] as $castMember)
         @if ($i++ > 5)
             @break
         @endif
 
         @php
-            // Check if cast member data exists
             $castName = $castMember['name'] ?? '';
             $castPlayed = $castMember['character'] ?? '';
             $castImage = $castMember['profile_path']
@@ -259,7 +255,7 @@
                 : "<img src='/images/not-found.jpg' class='actor-image'>";
         @endphp
 
-        <div class="select col-12 col-sm-6 col-md-3 col-lg-2 text-center">
+        <div class="select text-center">
             {!! $castImage !!}
             <div class="mt-2">
                 <h5>
@@ -273,6 +269,7 @@
 
     @endforeach
 </div>
+
 
 <style>
     /* Style adjustments for background display */
@@ -310,23 +307,57 @@
         height: 100%;
     }
 
-    .actor-image {
-        width: 150px;
-        height: 150px;
-        object-fit: cover;
-        border-radius: 50%;
-    }
+   .actor-image {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 50%;
+}
 
+.select {
+    gap: 3px 20px;
+    border-radius: 16px;
+    padding: 6px 26px 6px 6px;
+    overflow: hidden;
+    flex: 0 0 auto; /* prevent shrinking in scroll */
+}
+
+.select:hover {
+    backdrop-filter: brightness(130%) blur(10px);
+}
+
+/* Wrapper for horizontal scroll on md and below */
+.cast-row {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 50px;
+    padding: 10px 0;
+    -webkit-overflow-scrolling: touch; /* smooth scroll on mobile */
+}
+
+/* Use Bootstrap grid layout on large screens */
+@media (min-width: 992px) {
+    .cast-row {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        overflow-x: visible;
+    }
     .select {
-        gap: 3px 20px;
-        border-radius: 16px;
-        padding: 6px 26px 6px 6px;
-        overflow: hidden;
+        width: auto; /* Let col-* classes control width */
     }
+}
 
-    .select:hover {
-        backdrop-filter: brightness(130%) blur(10px);
-    }
+/* Optional: scrollbar styling */
+.cast-row::-webkit-scrollbar {
+    height: 6px;
+}
+.cast-row::-webkit-scrollbar-thumb {
+    background-color: rgba(0,0,0,0.3);
+    border-radius: 3px;
+}
+
      /* Series Header Container */
     .series-header-container {
         position: relative;
