@@ -316,10 +316,18 @@ if ($request->has('external') && $request->external == 1) {
         // Save the torrent file to the server
         file_put_contents(public_path('files/torrents') . '/' . $fileName, Bencode::bencode($torrentData));
 
+       
+$cleanName = str_replace(['{', '}'], '.', $request->name);
+$cleanName = preg_replace('/[^A-Za-z0-9\.\-\s]/', '.', $cleanName);
+$cleanName = preg_replace('/[\.]{2,}/', '.', $cleanName);
+$cleanName = preg_replace('/\s+/', ' ', $cleanName);
+$cleanName = trim($cleanName);
+$slug = Str::slug($cleanName, '-');
+
         // Save the torrent details to the database
         $torrent = Torrent::create([
             'info_hash' => $infoHash,
-            'name' => $request->name,
+            'name' => $cleanName,
             'slug' => $slug,
             'file_name' => $fileName,
             'description' => $sdescription ?? $request->description,
@@ -1092,7 +1100,7 @@ public function checkImdbUrl(Request $request)
 {
     $url = $request->query('url');
 
-    $torrents = \App\Models\Torrent::where('imdb_url', $url)
+    $torrents = Torrent::where('imdb_url', $url)
         ->latest()
         ->take(10)
         ->get(['id', 'name', 'seeders', 'leechers', 'times_completed', 'size']);

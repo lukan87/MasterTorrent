@@ -176,7 +176,7 @@
                 <tr>
                     <th>Category</th>
                     <th>Name</th>
-                    @if (Auth::user()->hit_and_run_count <= 10)
+                    @if (Auth::user()->hit_and_run_count <= 20)
                         <th></th>
                     @endif
                     <th class="text-center"><i class="bi bi-stopwatch"></i></th>
@@ -241,10 +241,10 @@
                                 @endforeach
                             </div>
                         </td>
-                        @if (Auth::user()->hit_and_run_count <= 10)
+                        @if (Auth::user()->hit_and_run_count <= 20)
                         <td>
-                            <a href="{{ route('torrents.download', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}" class="btn btn-success btn-sm rounded-circle" data-bs-toggle="tooltip" title="Download Torrent">
-                                <i class="bi bi-file-earmark-arrow-down-fill"></i>
+                            <a href="{{ route('torrents.download', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}" class="btn btn-secondary btn-sm rounded-circle" data-bs-toggle="tooltip" title="Download Torrent">
+                               <i class="bi bi-cloud-arrow-down-fill"></i>
                             </a>
                         </td>
                         @endif

@@ -68,37 +68,50 @@
         @if($comments->isEmpty())
             <p>No comments yet</p>
         @else
-            @foreach($comments as $comment)
-                <div class="card mb-3 card-blur">
-                    <div class="card-body d-flex justify-content-between align-items-start">
-                        <div class="comment-details flex-grow-1">
-                            <h5 class="card-subtitle mb-2 text-muted">{{ $comment->user->name ?? 'Unknown' }} <b>@ {{ $comment->created_at }}</b></h5>
-                            <p class="card-text">{!! convertCustomTagsToHtml($comment->comment) !!}</p>
-                        </div>
-                        <div class="comment-actions d-flex flex-column gap-2">
-                            @if(Auth::user()->user_class > 5 || $comment->user_id == Auth::id())
-                                <button class="btn btn-warning btn-sm" data-bs-toggle="collapse" data-bs-target="#edit-comment-{{ $comment->id }}" title="Edit Comment"><i class="bi bi-pencil"></i></button>
-                                <form action="{{ route('comments.destroy', $comment->id) }}" method="POST">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm" title="Delete Comment"><i class="bi bi-trash"></i></button>
-                                </form>
-                            @endif
-                        </div>
-                    </div>
+           @foreach($comments as $comment)
+    <div class="card mb-3 card-blur comment-card">
+        <div class="card-body d-flex justify-content-between align-items-start">
+            <div class="comment-details flex-grow-1">
+                <h5 class="card-subtitle mb-2">
+                    <span class="user-name" style="color: {{ \App\Models\UserClass::getClassColor($comment->user->user_class ?? 1) }}">
+                        {{ $comment->user->name ?? 'Unknown' }}
+                    </span>
+                    <span class="user-badge" style="border-color: {{ \App\Models\UserClass::getClassColor($comment->user->user_class ?? 1) }}">
+                        {{ \App\Models\UserClass::getClassName($comment->user->user_class ?? 1) }}
+                    </span>
+                    <b class="text-muted"> @ {{ $comment->created_at->diffForHumans() }}</b>
+                </h5>
+                <p class="card-text">{!! convertCustomTagsToHtml($comment->comment) !!}</p>
+            </div>
+            <div class="comment-actions d-flex flex-column gap-2">
+                @if(Auth::user()->user_class > 5 || $comment->user_id == Auth::id())
+                    <button class="btn btn-warning btn-sm" data-bs-toggle="collapse" data-bs-target="#edit-comment-{{ $comment->id }}" title="Edit Comment">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <form action="{{ route('comments.destroy', $comment->id) }}" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger btn-sm" title="Delete Comment">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </form>
+                @endif
+            </div>
+        </div>
 
-                    <div id="edit-comment-{{ $comment->id }}" class="collapse">
-                        <form action="{{ route('comments.update', ['id'=>$comment->id]) }}" method="POST">
-                            @csrf
-                            @method('PUT')
-                            <div class="mb-3 mt-3">
-                                <textarea name="comment" class="form-control" rows="3" required>{{ $comment->comment }}</textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary btn-sm">Save</button>
-                        </form>
-                    </div>
+        <div id="edit-comment-{{ $comment->id }}" class="collapse">
+            <form action="{{ route('comments.update', ['id'=>$comment->id]) }}" method="POST">
+                @csrf
+                @method('PUT')
+                <div class="mb-3 mt-3">
+                    <textarea name="comment" class="form-control" rows="3" required>{{ $comment->comment }}</textarea>
                 </div>
-            @endforeach
+                <button type="submit" class="btn btn-primary btn-sm">Save</button>
+            </form>
+        </div>
+    </div>
+@endforeach
+
             {{ $comments->links() }}
         @endif
     </div>
@@ -153,6 +166,60 @@
 .comment-actions button {
     width: 100%;
 }
+.comment-card {
+    border-left: 5px solid transparent;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background: rgba(30,30,30,0.7);
+    position: relative;
+    overflow: hidden;
+}
+
+.comment-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.4);
+}
+
+.user-name {
+    font-weight: 600;
+    text-shadow: 0 0 3px rgba(255,255,255,0.2);
+}
+
+.user-badge {
+    font-size: 0.75rem;
+    font-weight: bold;
+    margin-left: 6px;
+    padding: 2px 6px;
+    border: 1px solid;
+    border-radius: 8px;
+    color: white;
+    background: rgba(255,255,255,0.05);
+    text-transform: uppercase;
+}
+
+.comment-text img {
+    max-width: 100%;
+    border-radius: 12px;
+}
+
+.comment-actions button {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+}
+
+.comment-details p {
+    line-height: 1.6;
+    word-wrap: break-word;
+}
+
+/* Optional glow for high-level users */
+.user-name[color="red"], 
+.user-name[color="purple"], 
+.user-name[color="SlateBlue"], 
+.user-name[color="gold"] {
+    text-shadow: 0 0 6px currentColor, 0 0 12px currentColor;
+}
+
 </style>
 
 <script>

@@ -10,7 +10,6 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Exception;
 use Throwable;
-use Illuminate\Support\Facades\DB;
 
 class AutoPreWarning extends Command
 {
@@ -36,11 +35,14 @@ class AutoPreWarning extends Command
     final public function handle(): void
     {
         // Check if the pre-warning feature is enabled in the config
-        if (config('hitrun.enabled') !== true) {
+        if (!config('hitrun.enabled', false)) {
             return;
         }
 
         try {
+            // Fetch download threshold from config
+            $downloadThreshold = config('hitrun.download_threshold', 25); // default 25%
+
             // Process History records in chunks
             History::with(['user', 'torrent'])
                 ->where('created_at', '>', '2025-02-01 00:00:00')
@@ -54,62 +56,75 @@ class AutoPreWarning extends Command
                 ->has('torrent')
                 ->whereHas('user', function ($query) {
                     $query->where('is_immune', false)
-                           ->where('user_class', '<', 3)
-                           ->where('donor', 'no');
+                          ->where('user_class', '<', 3)
+                          ->where('donor', 'no');
                 })
-                ->whereHas('torrent', function ($query) {
-                    $query->whereRaw('history.actual_downloaded > torrents.size * ?', [config('hitrun.buffer') / 100])
-                          ->where('seeders', '>', 0);  // Ensure there are seeders greater than 0
+                ->whereHas('torrent', function ($query) use ($downloadThreshold) {
+                    $query->whereRaw(
+                        'history.actual_downloaded >= torrents.size * ?',
+                        [$downloadThreshold / 100]
+                    )
+                    ->where('seeders', '>', 0);
                 })
                 ->whereRaw('(history.uploaded / NULLIF(history.actual_downloaded, 0)) < 1.0')
-                ->whereDoesntHave('user.warnings', fn ($query) => $query->withTrashed()->whereColumn('warnings.torrent', '=', 'history.torrent_id'))
-                ->chunkById(100, function ($prewarns): void {
+                ->whereDoesntHave('user.warnings', fn($query) => 
+                    $query->withTrashed()
+                          ->whereColumn('warnings.torrent', '=', 'history.torrent_id')
+                )
+                ->chunkById(100, function ($prewarns) use ($downloadThreshold): void {
                     foreach ($prewarns as $pre) {
 
-                         // Calculate the ratio
-                         $uploaded = $pre->uploaded ?? 0;
-                         $downloaded = $pre->actual_downloaded ?? 0;
-                         $ratio = $downloaded > 0 ? $uploaded / $downloaded : 0;
+                        // Calculate the ratio
+                        $uploaded = $pre->uploaded ?? 0;
+                        $downloaded = $pre->actual_downloaded ?? 0;
+                        $ratio = $downloaded > 0 ? $uploaded / $downloaded : 0;
 
-                         // Skip if the ratio is 1.00 or higher
-                         if ($ratio >= 1.00) {
-                             continue;
-                         }
-                        // Update prewarned_at timestamp for each user meeting the pre-warning conditions
+                        // Skip if the ratio is 1.00 or higher
+                        if ($ratio >= 1.00) {
+                            continue;
+                        }
+
+                        // Update prewarned_at timestamp
                         History::query()
-                            ->where('torrent_id', '=', $pre->torrent_id)
-                            ->where('user_id', '=', $pre->user_id)
-                            ->update([
-                                'prewarned_at' => now(),
-                            ]);
+                            ->where('torrent_id', $pre->torrent_id)
+                            ->where('user_id', $pre->user_id)
+                            ->update(['prewarned_at' => now()]);
 
-                        // Construct the link to the torrent page using the slug if available
-                        $torrentLink = route('torrents.show', ['id' => $pre->torrent_id, 'slug' => $pre->torrent->slug]);
-
-                        // Build the message body with the torrent link
-                       $body = "This is a pre-warning regarding your recent torrent activity. "
-                  . "Please be aware of the hit-and-run policy.\n\n"
-                  . "Torrent: <a href=\"$torrentLink\">{$pre->torrent->name}</a>\n"
-                  . "Your ratio for this torrent is: " . number_format($ratio, 2) . ".\n";
-                  
-                        // Create a new message for the user
-                        Message::create([
-                            'receiver_id' => $pre->user_id,  // The user receiving the message
-                            'subject' => 'Pre-Warning: Hit and Run',
-                            'sender_id' => 2,  // The system or admin user ID (assuming 2 for this example)
-                            'body' => $body,
-                            'is_read' => false,  // Mark as unread initially
+                        // Construct the torrent link
+                        $torrentLink = route('torrents.show', [
+                            'id' => $pre->torrent_id,
+                            'slug' => $pre->torrent->slug
                         ]);
 
-                        // Log or output a comment with the user and torrent name
+                        // Calculate downloaded percentage
+                        $downloadedPercent = $pre->torrent->size > 0
+                            ? ($downloaded / $pre->torrent->size) * 100
+                            : 0;
+
+                        // Build the message body
+                        $body = "This is a pre-warning regarding your recent torrent activity. "
+                              . "Please be aware of the hit-and-run policy.\n\n"
+                              . "Torrent: <a href=\"$torrentLink\">{$pre->torrent->name}</a>\n"
+                              . "You have downloaded about " . number_format($downloadedPercent, 2) . "% of this torrent.\n"
+                              . "Your ratio for this torrent is: " . number_format($ratio, 2) . ".\n\n"
+                              . "⚠️ Note: Warnings are only applied if you have downloaded at least {$downloadThreshold}% of a torrent.\n";
+
+                        // Create a new message for the user
+                        Message::create([
+                            'receiver_id' => $pre->user_id,
+                            'subject' => 'Pre-Warning: Hit and Run',
+                            'sender_id' => config('hitrun.system_user_id', 2),
+                            'body' => $body,
+                            'is_read' => false,
+                        ]);
+
+                        // Log or output
                         $this->comment("Pre-warning sent to User ID: {$pre->user_id} for Torrent: {$pre->torrent->name}");
                     }
                 });
 
-            // Output a success message
             $this->comment('Automated User Pre-Warning Command Complete');
         } catch (Throwable $e) {
-            // Log the error and output a message
             Log::error('Error sending pre-warnings: ' . $e->getMessage());
             $this->error('An error occurred while processing the pre-warnings.');
         }

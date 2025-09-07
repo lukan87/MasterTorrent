@@ -1,3 +1,9 @@
+<!-- Connectable Indicator -->
+@php
+    $latestPeer = Auth::user()->peers()->latest('updated_at')->first();
+    $connectable = $latestPeer ? $latestPeer->connectable : false;
+@endphp
+
 <nav class="app-header navbar navbar-expand bg-body sticky-top" data-bs-theme="dark"> <!--begin::Container-->
             <div class="container-fluid"> <!--begin::Start Navbar Links-->
                 <ul class="navbar-nav">
@@ -7,6 +13,20 @@
                 </ul> <!--end::Start Navbar Links--> <!--begin::End Navbar Links-->
                 <ul class="navbar-nav ms-auto"> <!--begin::Navbar Search-->
                     <!-- <li class="nav-item"> <a class="nav-link" data-widget="navbar-search" href="#" role="button"> <i class="bi bi-search"></i> </a> </li> end::Navbar Search begin::Messages Dropdown Menu -->
+
+
+<li class="nav-item">
+    <span class="nav-link">
+        <span class="icon-circle">
+            @if($connectable)
+                <i class="bi bi-plug-fill text-success" data-bs-toggle="tooltip" title="You are connectable"></i>
+            @else
+                <i class="bi bi-plug text-danger" data-bs-toggle="tooltip" title="Not connectable"></i>
+            @endif
+        </span>
+    </span>
+</li>
+
                     <li class="nav-item">
                     <a class="nav-link" href="{{ route('profile.tokens', ['id' => Auth::user()->id, 'name' => Auth::user()->name]) }}" role="button">
     <span class="icon-circle">

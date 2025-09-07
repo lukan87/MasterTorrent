@@ -10,7 +10,6 @@ return [
     | Hit and Run On / Off
     |
     */
-
     'enabled' => true,
 
     /*
@@ -21,7 +20,6 @@ return [
     | Min Seedtime Required In Seconds
     |
     */
-
     'seedtime' => 43200, // 12 hours in seconds
 
     /*
@@ -32,7 +30,6 @@ return [
     | Max Warnings Before Ban
     |
     */
-
     'max_warnings' => 1000,
 
     /*
@@ -43,7 +40,6 @@ return [
     | Max Warnings Before Certain Permissions Are Revoked
     |
     */
-
     'revoke' => 2,
 
     /*
@@ -55,19 +51,29 @@ return [
     | Is Not Yet Met. "In Days"
     |
     */
-
     'grace' => 14,
 
     /*
     |--------------------------------------------------------------------------
-    | Buffer
+    | Download Threshold
     |--------------------------------------------------------------------------
     |
-    | Percentage Buffer of Torrent thats checked against 'actual_downloaded'
+    | Minimum percentage of the torrent that must be downloaded before
+    | the hit-and-run rules apply. This prevents users from being penalized
+    | for torrents they haven't downloaded much of.
     |
     */
+    'download_threshold' => 25,
 
-    'buffer' => 3,
+    /*
+    |--------------------------------------------------------------------------
+    | Buffer (deprecated)
+    |--------------------------------------------------------------------------
+    |
+    | Legacy key for minimum percentage downloaded. Use 'download_threshold' instead.
+    |
+    */
+    'buffer' => 25,
 
     /*
     |--------------------------------------------------------------------------
@@ -77,7 +83,6 @@ return [
     | Max Days A Warning Lasts Before Expiring "In Days"
     |
     */
-
     'expire' => 14,
 
     /*
@@ -89,14 +94,16 @@ return [
     | Is Not Yet Met. A Prewarning PM Will Be Sent. "In Days"
     |
     */
-
     'prewarn' => 10,
 
-
-     /*
-     Staff ID
-     */
-
+    /*
+    |--------------------------------------------------------------------------
+    | System User ID
+    |--------------------------------------------------------------------------
+    |
+    | The ID of the system/admin user sending automated messages
+    |
+    */
     'system_user_id' => 2,
 
 ];

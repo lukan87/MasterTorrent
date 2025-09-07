@@ -16,7 +16,7 @@
         "pusher-js": "^8.4.0",
         "sass": "^1.90.0",
         "sweetalert2": "^11.22.4",
-        "vite": "^5.4.19"
+        "vite": "^6.3.5"
     },
     "dependencies": {
         "@fortawesome/fontawesome-free": "^6.6.0",

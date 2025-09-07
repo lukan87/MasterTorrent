@@ -80,41 +80,49 @@
                 </div>
             @endif
 
-            @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
-                <div class="tab-pane fade" id="snatched" role="tabpanel" aria-labelledby="snatched-tab">
-                    <div class="card mt-4">
-                        <div class="card-header bg-info text-white">
-                            <h5 class="mb-0">Users That Snatched The Torrent</h5>
+        @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
+<div class="tab-pane fade" id="snatched" role="tabpanel" aria-labelledby="snatched-tab">
+    <div class="glass-card snatched-card mt-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-person-check-fill me-2"></i>Users That Snatched The Torrent</h5>
+        </div>
+        <div class="card-body">
+            @if($snatched->isEmpty())
+                <p class="text-muted">No users have snatched this torrent yet.</p>
+            @else
+                <ul class="list-unstyled snatched-list mb-0">
+                    @foreach($snatched as $history)
+                    <li class="snatched-item">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap">
+                            <div>
+                                <a href="{{ route('profile.show', ['id'=>$history->user_id,'name'=>$history->user_name]) }}" 
+                                   class="snatched-user-link" 
+                                   data-bs-toggle="tooltip" 
+                                   title="See {{$history->user_name}}'s Profile">
+                                    {{ $history->user_name }}
+                                </a>
+                                <div class="stats mt-1">
+                                    <span class="badge bg-primary"><i class="bi bi-download me-1"></i> {{ \App\Helpers\FormatHelper::formatSize($history->downloaded) }}</span>
+                                    <span class="badge bg-success"><i class="bi bi-upload me-1"></i> {{ \App\Helpers\FormatHelper::formatSize($history->uploaded) }}</span>
+                                    <span class="badge bg-secondary"><i class="bi bi-clock me-1"></i> {{ \App\Helpers\FormatHelper::formatTime($history->seedtime) }}</span>
+                                </div>
+                            </div>
+                            <div class="seeder-info mt-2 mt-md-0">
+                                <span class="badge {{ $history->seeder ? 'bg-success' : 'bg-danger' }}">
+                                    {{ $history->seeder ? 'Seeding' : 'Not Seeding' }}
+                                </span>
+                                <small class="text-muted d-block mt-1">Snatched: {{ $history->created_at->diffForHumans() }}</small>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            @if($snatched->isEmpty())
-                                <p>No users have snatched this torrent yet.</p>
-                            @else
-                                <ul class="list-group">
-                                    @foreach($snatched as $history)
-                                        <li class="list-group-item">
-                                            <strong>
-                                                <a href="{{ route('profile.show', ['id' => $history->user_id, 'name' => $history->user_name]) }}" data-bs-toggle="tooltip" data-bs-title="See {{$history->user_name}}'s Profile">
-                                                    {{ $history->user_name }}
-                                                </a>
-                                                - Downloaded: {{ \App\Helpers\FormatHelper::formatSize($history->downloaded) }}
-                                                / Uploaded: {{ \App\Helpers\FormatHelper::formatSize($history->uploaded) }}
-                                                / Seedtime: {{ \App\Helpers\FormatHelper::formatTime($history->seedtime) }}
-                                            </strong>
-                                            <br>
-                                            <small>Snatched on: {{ $history->created_at->diffForHumans() }} / Seeder:
-                                                <span class="{{ $history->seeder ? 'text-success' : 'text-danger' }}">
-                                                    {{ $history->seeder ? 'Yes' : 'No' }}
-                                                </span>
-                                            </small>
-                                        </li>
-                                    @endforeach
-                                </ul>
-                            @endif
-                        </div>
-                    </div>
-                </div>
+                    </li>
+                    @endforeach
+                </ul>
             @endif
+        </div>
+    </div>
+</div>
+@endif
+
         </div>
     </div>
 </div>
@@ -131,6 +139,71 @@
 .scrollable-content {
     max-height: 750px;
     overflow-y: auto;
+}
+
+.snatched-card {
+    border-radius: 16px;
+    overflow: hidden;
+    background: rgba(20,20,20,0.6);
+    backdrop-filter: blur(4px);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+.snatched-card .card-header {
+    font-weight: 600;
+    background: rgba(0,123,255,0.15);
+    border-bottom: none;
+}
+
+.snatched-list {
+    padding: 0;
+    margin: 0;
+}
+
+.snatched-item {
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.snatched-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+}
+
+.snatched-user-link {
+    font-weight: 600;
+    color: #00BFFF;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.snatched-user-link:hover {
+    color: #1E90FF;
+    text-decoration: underline;
+}
+
+.stats .badge {
+    font-size: 0.75rem;
+    margin-right: 0.25rem;
+}
+
+.seeder-info .badge {
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+@media (max-width: 575px) {
+    .snatched-item {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+    }
+    .seeder-info {
+        margin-top: 0.5rem;
+    }
 }
 
 

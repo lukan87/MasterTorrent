@@ -16,7 +16,8 @@
         "monicahq/laravel-cloudflare": "^3.7",
         "predis/predis": "^2.2",
         "spatie/laravel-backup": "^9.1",
-        "theodorejb/polycast": "^1.0"
+        "theodorejb/polycast": "^1.0",
+        "league/commonmark": "2.7.1"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

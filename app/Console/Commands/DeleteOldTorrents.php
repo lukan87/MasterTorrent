@@ -10,7 +10,7 @@ use Symfony\Component\Console\Command\Command as SymfonyCommand;
 class DeleteOldTorrents extends Command
 {
     protected $signature = 'torrents:cleanup';
-    protected $description = 'Delete torrents older than 5 years with 0 seeders, including related data and torrent files.';
+    protected $description = 'Delete torrents older than 3 years with 0 seeders, including related data and torrent files.';
 
     // Base folder where torrent files are stored
     private string $torrentFolder = '/var/www/html/lastfiles/public/files/torrents';
@@ -19,10 +19,10 @@ class DeleteOldTorrents extends Command
     {
         $this->info("🔍 Starting torrents cleanup...");
 
-        $fiveYearsAgo = Carbon::now()->subYears(5);
+        $threeYearsAgo = Carbon::now()->subYears(3);
 
         $torrents = DB::table('torrents')
-            ->where('created_at', '<', $fiveYearsAgo)
+            ->where('created_at', '<', $threeYearsAgo)
             ->where('seeders', 0)
             ->select('id', 'name', 'file_name', 'created_at')
             ->orderBy('created_at', 'asc')
@@ -78,7 +78,7 @@ class DeleteOldTorrents extends Command
     /**
      * Truncate long strings for cleaner console output.
      */
-    private function truncate(string $text, int $maxLength = 40): string
+    private function truncate(string $text, int $maxLength = 50): string
     {
         return strlen($text) > $maxLength
             ? substr($text, 0, $maxLength - 3) . '...'

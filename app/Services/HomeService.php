@@ -46,7 +46,8 @@ class HomeService
 
     public function getTopTorrents($period = null, $type = null, $limit = 6)
     {
-        $query = Torrent::query()->where('category_id', '!=', 27);
+        $query = Torrent::query()->whereNotIn('category_id', [27, 34]);
+
 
         if ($period) {
             $query->where('created_at', '>=', now()->sub($period));

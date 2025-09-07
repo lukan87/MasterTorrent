@@ -52,6 +52,9 @@ Schedule::command('messages:delete-old')->daily();
 //Sterge waned_until daca e expirat
 Schedule::command('users:clear-expired-warnings')->hourly();
 
+//Sterge torrente mai vechi de 3 ani si care nu au seeders
+Schedule::command('torrents:cleanup')->monthly();
+
 
 
 
