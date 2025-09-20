@@ -68,21 +68,21 @@ class SyncPeers extends Command
         }, 5);
 
         // Sync Times Completed count
-        $syncedTorrents += DB::transaction(function (): int {
-            return Torrent::where('approved', 1) // Retrieve only torrents where approved = 1
-                ->leftJoinSub(
-                    History::query()
-                        ->select('torrent_id')
-                        ->addSelect(DB::raw('SUM(completed_at IS NOT NULL) as updated_times_completed'))
-                        ->groupBy('torrent_id'),
-                    'all_times_completed',
-                    fn ($join) => $join->on('torrents.id', '=', 'all_times_completed.torrent_id'),
-                )
-                ->where('times_completed', '!=', DB::raw('COALESCE(updated_times_completed, 0)'))
-                ->update([
-                    'times_completed' => DB::raw('COALESCE(updated_times_completed, 0)'),
-                ]);
-        }, 5);
+        // $syncedTorrents += DB::transaction(function (): int {
+        //     return Torrent::where('approved', 1) // Retrieve only torrents where approved = 1
+        //         ->leftJoinSub(
+        //             History::query()
+        //                 ->select('torrent_id')
+        //                 ->addSelect(DB::raw('SUM(completed_at IS NOT NULL) as updated_times_completed'))
+        //                 ->groupBy('torrent_id'),
+        //             'all_times_completed',
+        //             fn ($join) => $join->on('torrents.id', '=', 'all_times_completed.torrent_id'),
+        //         )
+        //         ->where('times_completed', '!=', DB::raw('COALESCE(updated_times_completed, 0)'))
+        //         ->update([
+        //             'times_completed' => DB::raw('COALESCE(updated_times_completed, 0)'),
+        //         ]);
+        // }, 5);
 
         // Clear all cache to ensure fresh data is loaded
         Cache::flush();

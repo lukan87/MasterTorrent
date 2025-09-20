@@ -15,6 +15,10 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    
+    // Add your site URL here
+    'site_url' => 'https://last-torrents.org',
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment

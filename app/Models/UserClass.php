@@ -21,7 +21,7 @@ class UserClass
             self::ELITE_USER => 'Elite User',
             self::UPLOADER => 'Uploader',
             self::VIP => 'VIP',
-            self::SUPERUSER => 'SpecialUser',
+            self::SUPERUSER => 'Special User',
             self::MODERATOR => 'Moderator',
             self::ADMIN => 'Admin',
             self::OWNER => 'Owner',

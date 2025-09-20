@@ -19,7 +19,7 @@ class Peer extends Model
 protected $fillable = [
     'peer_id',
     'md5_peer_id',
-    'hash',
+    // 'hash',
     'ip',
     'port',
     'agent',

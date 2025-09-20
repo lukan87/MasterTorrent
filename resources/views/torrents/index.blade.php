@@ -172,7 +172,7 @@
 <div class="card shadow-sm border-0">
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
-            <thead class="table-grey">
+            <thead class="table-grey rounded-thead">
                 <tr>
                     <th>Category</th>
                     <th>Name</th>
@@ -312,6 +312,18 @@
 </div>
 
 <style>
+    /* Rounded Table Header */
+.rounded-thead th:first-child {
+    border-top-left-radius: 0.5rem;
+}
+.rounded-thead th:last-child {
+    border-top-right-radius: 0.5rem;
+}
+
+/* Optional: add shadow or background if you want more rounded effect */
+.rounded-thead th {
+    background-color: #1d1c1c; /* matches table-grey */
+}
 .movie-highlight {
     display: flex;
     flex-wrap: wrap;

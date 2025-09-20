@@ -308,8 +308,8 @@
     }
 
    .actor-image {
-    width: 150px;
-    height: 150px;
+    width: 130px;
+    height: 130px;
     object-fit: cover;
     border-radius: 50%;
 }

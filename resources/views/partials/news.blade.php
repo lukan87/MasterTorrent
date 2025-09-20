@@ -10,7 +10,7 @@
 @else
     @foreach($latestNews as $news)
     <div class="col-md-9 col-lg-12 mb-4 mt-5">
-        <div class="card h-100 shadow-sm rounded-3 border-light">
+        <div class="card h-100 rounded-3">
             @if($news->image)
                 <img src="{{ asset('storage/' . $news->image) }}" class="card-img-top" alt="News Image" style="object-fit: cover; height: 200px;">
             @endif

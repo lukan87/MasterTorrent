@@ -15,7 +15,7 @@
                     <!-- <li class="nav-item"> <a class="nav-link" data-widget="navbar-search" href="#" role="button"> <i class="bi bi-search"></i> </a> </li> end::Navbar Search begin::Messages Dropdown Menu -->
 
 
-<li class="nav-item">
+{{-- <li class="nav-item">
     <span class="nav-link">
         <span class="icon-circle">
             @if($connectable)
@@ -25,7 +25,7 @@
             @endif
         </span>
     </span>
-</li>
+</li> --}}
 
                     <li class="nav-item">
                     <a class="nav-link" href="{{ route('profile.tokens', ['id' => Auth::user()->id, 'name' => Auth::user()->name]) }}" role="button">

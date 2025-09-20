@@ -14,26 +14,34 @@ class MessageController extends Controller
 {
     $inboxMessages = Message::where('receiver_id', Auth::id())
                             ->orderBy('created_at', 'desc')
-                            ->take(5)
+                            ->take(10)
                             ->get();
 
     $outboxMessages = Message::where('sender_id', Auth::id())
                              ->orderBy('created_at', 'desc')
-                             ->take(5)
+                             ->take(10)
                              ->get();
 
     return view('messages.index', compact('inboxMessages', 'outboxMessages'));
 }
 
-    public function inbox()
-    {
-        $messages = Message::where('receiver_id', Auth::id())->orderBy('created_at', 'desc')->get();
-        return view('messages.inbox', compact('messages'));
-    }
+   public function inbox()
+{
+    
+    $messages = Message::where('receiver_id', Auth::id())
+                        ->orderBy('created_at', 'desc')
+                        ->paginate(15);
+
+    return view('messages.inbox', compact('messages'));
+}
+
 
     public function outbox()
     {
-        $messages = Message::where('sender_id', Auth::id())->orderBy('created_at', 'desc')->get();
+        $messages = Message::where('sender_id', Auth::id())
+                        ->orderBy('created_at', 'desc')
+                        ->paginate(15);
+
         return view('messages.outbox', compact('messages'));
     }
 

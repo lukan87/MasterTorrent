@@ -140,6 +140,10 @@ class Torrent extends Model
     {
         return $this->hasMany(Comment::class, 'torrent_id', 'id');
     }
+    public function comments()
+{
+    return $this->commentsByTorrentId();
+}
 
     public function genres()
     {

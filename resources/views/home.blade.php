@@ -7,14 +7,14 @@
 <div class="row">
 
 
-<div class="col-lg-8 col-md-8 col-sm-6">
+<div class="col-lg-7 col-md-6 col-sm-6">
 
 @include('partials.news')
 
 </div>
-<div class="col-lg-4 col-md-4 col-sm-6">
+<div class="col-lg-5 col-md-6 col-sm-6">
 
-@include('partials.poll')
+<x-poll-list :polls="$polls" />
 
 </div>
 
@@ -24,7 +24,7 @@
 
 @endif
 
-@include('partials.slider')
+
 
 @include('partials.toptorrents')
 

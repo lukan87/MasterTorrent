@@ -178,7 +178,7 @@
 
                 <div class="form-actions">
                     <button type="submit" class="btn btn-login">{{ __('Login') }}</button>
-                    <a href="{{ route('password.request') }}" class="btn btn-secondary-custom">{{ __('Forgot Password') }}</a>
+                    <a href="{{ route('custom.password.recover') }}" class="btn btn-secondary-custom">{{ __('Forgot Password') }}</a>
                     <a href="{{ route('register') }}" class="btn btn-secondary-custom">{{ __('Register') }}</a>
                 </div>
             </form>

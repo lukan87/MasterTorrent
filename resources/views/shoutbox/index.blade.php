@@ -70,6 +70,7 @@ $rules = [
             </div>
             <div class="message-bubble w-100" style="border-left: 4px solid {{ $classColor }}">
                 <div class="d-flex justify-content-between align-items-start">
+                    <!-- Username -->
                     <span class="username">
                         <a href="{{ route('profile.show', $message->user->id) }}" style="color: {{ $classColor }}">
                             {{ $message->user->name }}
@@ -81,21 +82,29 @@ $rules = [
                             @endif
                         </a>
                     </span>
-                    <span class="timestamp badge bg-secondary ms-1"><b>{{ $message->created_at->format('Y-m-d H:i') }}</b></span>
+
+                    <!-- Timestamp + Actions stacked right -->
+                    <div class="d-flex flex-column align-items-end">
+                        <span class="timestamp badge bg-secondary ms-1">
+                            <b>{{ $message->created_at->format('Y-m-d H:i') }}</b>
+                        </span>
+                        <div class="message-actions mt-1">
+                            @if(auth()->id() === $message->user_id || Auth::user()->user_class >= \App\Models\UserClass::ADMIN)
+                                <a href="{{ route('shoutbox.edit', $message->id) }}" class="btn btn-sm btn-outline-warning">Edit</a>
+                                <form action="{{ route('shoutbox.destroy', $message->id) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this shout?')">Delete</button>
+                                </form>
+                            @endif
+                            <button class="btn btn-sm btn-outline-primary" onclick="toggleReplyForm({{ $message->id }})">Reply</button>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Message -->
                 <div class="message-content mt-2">
                     <b>{!! convertCustomTagsToHtml($message->message) !!}</b>
-                </div>
-                <div class="message-actions mt-2">
-                    @if(auth()->id() === $message->user_id || Auth::user()->user_class >= \App\Models\UserClass::ADMIN)
-                        <a href="{{ route('shoutbox.edit', $message->id) }}" class="btn btn-sm btn-outline-warning">Edit</a>
-                        <form action="{{ route('shoutbox.destroy', $message->id) }}" method="POST" class="d-inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this shout?')">Delete</button>
-                        </form>
-                    @endif
-                    <button class="btn btn-sm btn-outline-primary" onclick="toggleReplyForm({{ $message->id }})">Reply</button>
                 </div>
 
                 <!-- Reply Form -->
@@ -178,73 +187,55 @@ body {
 .timestamp { font-size: 0.8rem; color: #aaa; }
 .message-actions { display: flex; gap: 5px; margin-top: 5px; }
 .replies { border-left: 2px solid #555; }
-
 </style>
 
 <script>
     function insertBBCode(tag) {
-        // Get the textarea element
         var textarea = document.getElementById('content');
-
-        // Get the selected text (if any)
         var selectedText = textarea.value.substring(textarea.selectionStart, textarea.selectionEnd);
-
-        // Determine the cursor position for inserting BBCode
         var cursorPos;
         if (selectedText.length > 0) {
-            // If there is selected text, insert the BBCode around it
             cursorPos = textarea.selectionEnd + tag.length;
         } else {
-            // If no text is selected, insert the BBCode with the cursor after the closing square bracket
             cursorPos = textarea.selectionStart + tag.length + 2;
         }
-
-        // Insert the BBCode into the textarea
         var currentContent = textarea.value;
         var newContent = currentContent.substring(0, textarea.selectionStart) +
             '[' + tag + ']' + selectedText + '[/' + tag + ']' +
             currentContent.substring(textarea.selectionEnd);
         textarea.value = newContent;
-
-        // Set the cursor position
         textarea.setSelectionRange(cursorPos, cursorPos);
         textarea.focus();
     }
 
     function insertEmoji(emojiCode) {
-    var textarea = document.getElementById('content');
-    var cursorPos;
-
-    // Fetch the emoji from the server using AJAX
-    fetch(`/get-emoji/${emojiCode}`)
-        .then(response => response.json())
-        .then(data => {
-            var emoji = data.emoji;
-            var selectedText = textarea.value.substring(textarea.selectionStart, textarea.selectionEnd);
-
-            if (selectedText.length > 0) {
-                cursorPos = textarea.selectionEnd + emoji.length;
-                textarea.value = textarea.value.substring(0, textarea.selectionStart) +
-                    emoji + selectedText + emoji +
-                    textarea.value.substring(textarea.selectionEnd);
-            } else {
-                cursorPos = textarea.selectionStart + emoji.length;
-                textarea.value = textarea.value.substring(0, textarea.selectionStart) +
-                    emoji + textarea.value.substring(textarea.selectionEnd);
-            }
-
-            textarea.setSelectionRange(cursorPos, cursorPos);
-            textarea.focus();
-        })
-        .catch(error => console.error('Error fetching emoji:', error));
-}
-
+        var textarea = document.getElementById('content');
+        var cursorPos;
+        fetch(`/get-emoji/${emojiCode}`)
+            .then(response => response.json())
+            .then(data => {
+                var emoji = data.emoji;
+                var selectedText = textarea.value.substring(textarea.selectionStart, textarea.selectionEnd);
+                if (selectedText.length > 0) {
+                    cursorPos = textarea.selectionEnd + emoji.length;
+                    textarea.value = textarea.value.substring(0, textarea.selectionStart) +
+                        emoji + selectedText + emoji +
+                        textarea.value.substring(textarea.selectionEnd);
+                } else {
+                    cursorPos = textarea.selectionStart + emoji.length;
+                    textarea.value = textarea.value.substring(0, textarea.selectionStart) +
+                        emoji + textarea.value.substring(textarea.selectionEnd);
+                }
+                textarea.setSelectionRange(cursorPos, cursorPos);
+                textarea.focus();
+            })
+            .catch(error => console.error('Error fetching emoji:', error));
+    }
 
     function submitOnEnter(event) {
-        // Check if the key pressed is Enter
-        if (event.key === 'Enter' && !event.shiftKey) { // Allow shift+enter for new line
-            event.preventDefault(); // Prevent the default action (new line)
-            document.getElementById('shoutbox-form').submit(); // Submit the form
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            document.getElementById('shoutbox-form').submit();
         }
     }
 
@@ -254,28 +245,19 @@ body {
         fetch(this.action, {
             method: 'POST',
             body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-            }
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
         })
         .then(response => response.json())
         .then(data => {
-            // Handle success (e.g., update message list)
-            // You can reload messages or append the new message directly
+            // handle success
         })
         .catch(error => console.error('Error:', error));
     });
 
     function toggleReplyForm(id) {
         var form = document.getElementById('reply-form-' + id);
-        if (form.style.display === 'none') {
-            form.style.display = 'block';
-        } else {
-            form.style.display = 'none';
-        }
+        form.style.display = (form.style.display === 'none') ? 'block' : 'none';
     }
-
-
 </script>
 
 @endsection

@@ -946,7 +946,7 @@ function getLanguageName($code) {
 <div class="cast-row">
     @php $i = 1; @endphp
     @foreach (($tmdbData['credits']['cast'] ?? []) as $castMember)
-        @if ($i > 6)
+        @if ($i > 7)
             @break
         @endif
 
@@ -1019,8 +1019,8 @@ opacity: 0.7;
     }
 
  .actor-image {
-    width: 150px;
-    height: 150px;
+    width: 130px;
+    height: 130px;
     object-fit: cover;
     border-radius: 50%;
 }

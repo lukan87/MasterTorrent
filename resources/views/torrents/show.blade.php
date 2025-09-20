@@ -91,31 +91,35 @@
                 <p class="text-muted">No users have snatched this torrent yet.</p>
             @else
                 <ul class="list-unstyled snatched-list mb-0">
-                    @foreach($snatched as $history)
-                    <li class="snatched-item">
-                        <div class="d-flex justify-content-between align-items-center flex-wrap">
-                            <div>
-                                <a href="{{ route('profile.show', ['id'=>$history->user_id,'name'=>$history->user_name]) }}" 
-                                   class="snatched-user-link" 
-                                   data-bs-toggle="tooltip" 
-                                   title="See {{$history->user_name}}'s Profile">
-                                    {{ $history->user_name }}
-                                </a>
-                                <div class="stats mt-1">
-                                    <span class="badge bg-primary"><i class="bi bi-download me-1"></i> {{ \App\Helpers\FormatHelper::formatSize($history->downloaded) }}</span>
-                                    <span class="badge bg-success"><i class="bi bi-upload me-1"></i> {{ \App\Helpers\FormatHelper::formatSize($history->uploaded) }}</span>
-                                    <span class="badge bg-secondary"><i class="bi bi-clock me-1"></i> {{ \App\Helpers\FormatHelper::formatTime($history->seedtime) }}</span>
-                                </div>
-                            </div>
-                            <div class="seeder-info mt-2 mt-md-0">
-                                <span class="badge {{ $history->seeder ? 'bg-success' : 'bg-danger' }}">
-                                    {{ $history->seeder ? 'Seeding' : 'Not Seeding' }}
-                                </span>
-                                <small class="text-muted d-block mt-1">Snatched: {{ $history->created_at->diffForHumans() }}</small>
-                            </div>
-                        </div>
-                    </li>
-                    @endforeach
+                   @foreach($snatched as $history)
+<li class="snatched-item">
+    <div class="d-flex justify-content-between align-items-center flex-wrap">
+        <div>
+            <a href="{{ route('profile.show', ['id'=>$history->user_id,'name'=>$history->user_name]) }}" 
+               class="snatched-user-link" 
+               data-bs-toggle="tooltip" 
+               title="See {{$history->user_name}}'s Profile">
+                {{ $history->user_name }}
+            </a>
+            @if($history->user_id === $torrent->owner)
+                <span class="badge bg-warning text-dark">Torrent Owner</span>
+            @endif
+            <div class="stats mt-1">
+                <span class="badge bg-primary"><i class="bi bi-download me-1"></i> {{ \App\Helpers\FormatHelper::formatSize($history->downloaded) }}</span>
+                <span class="badge bg-success"><i class="bi bi-upload me-1"></i> {{ \App\Helpers\FormatHelper::formatSize($history->uploaded) }}</span>
+                <span class="badge bg-secondary"><i class="bi bi-clock me-1"></i> {{ \App\Helpers\FormatHelper::formatTime($history->seedtime) }}</span>
+            </div>
+        </div>
+        <div class="seeder-info mt-2 mt-md-0">
+            <span class="badge {{ $history->seeder ? 'bg-success' : 'bg-danger' }}">
+                {{ $history->seeder ? 'Seeding' : 'Not Seeding' }}
+            </span>
+            <small class="text-muted d-block mt-1">Snatched: {{ $history->created_at->diffForHumans() }}</small>
+        </div>
+    </div>
+</li>
+@endforeach
+
                 </ul>
             @endif
         </div>

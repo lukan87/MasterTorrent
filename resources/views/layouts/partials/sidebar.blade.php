@@ -144,15 +144,27 @@
                         </li>
                     </ul>
                 </li>
-                @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
-                    <li class="nav-header">Administration</li>
-                    <li class="nav-item">
-                        <a href="{{ route('admin.index') }}" class="nav-link">
-                            <i class="nav-icon bi bi-gear"></i>
-                            <p>Admin Panel</p>
-                        </a>
-                    </li>
-                @endif
+               @auth
+    @if(Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
+        <li class="nav-header">Administration</li>
+        <li class="nav-item">
+            <a href="{{ route('admin.index') }}" class="nav-link">
+                <i class="nav-icon bi bi-gear"></i>
+                <p>Admin Panel</p>
+            </a>
+        </li>
+
+        @if(Auth::user()->user_class >= \App\Models\UserClass::WEB_DEVELOPER)
+            <li class="nav-item">
+                <a href="https://last-torrents.org/horizon/dashboard" class="nav-link">
+                    <i class="bi bi-journal-text"></i>
+                    <p>Horizon Dashboard</p>
+                </a>
+            </li>
+        @endif
+    @endif
+@endauth
+
             </ul>
             <!--end::Sidebar Menu-->
         </nav>

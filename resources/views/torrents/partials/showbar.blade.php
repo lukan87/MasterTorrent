@@ -68,7 +68,7 @@
             @if(!$hasThanked)
                 <form action="{{ route('torrents.thank', $torrent->id) }}" method="POST" class="d-inline">
                     @csrf
-                    <button type="submit" class="btn btn-primary btn-sm shadow-sm glass-btn">
+                    <button type="submit" class="btn btn-primary btn-sm shadow-sm glass-btn" data-bs-toggle="tooltip" title="Thanked by: {{ implode(', ', $thankUserNames) }}">
                         {{ $torrent->thanksCount() }} <i class="bi bi-hand-thumbs-up-fill"></i>
                     </button>
                 </form>
@@ -94,6 +94,13 @@
                    class="badge glass-badge bg-danger text-decoration-none" data-bs-toggle="tooltip" title="View Leechers List">
                     <i class="bi bi-cloud-arrow-down-fill me-1"></i> {{ $torrent->leechers }}
                 </a>
+                 <span class="badge glass-badge bg-primary" data-bs-toggle="tooltip" title="Uploader">
+                      <i class="bi bi-person-fill me-1"></i> {{ $torrent->uploader->name }}
+                </span>
+                  <a href="{{ route('torrent.history', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}" 
+                   class="badge glass-badge bg-primary text-decoration-none" data-bs-toggle="tooltip" title="View Download History">
+                    <i class="bi bi-download me-1"></i> {{ $torrent->times_completed }}
+                </a>
             @else
                 <span class="badge glass-badge bg-success" data-bs-toggle="tooltip" title="Seeders">
                     <i class="bi bi-cloud-arrow-up-fill me-1"></i> {{ $torrent->seeders }}
@@ -101,14 +108,6 @@
                 <span class="badge glass-badge bg-danger" data-bs-toggle="tooltip" title="Leechers">
                     <i class="bi bi-cloud-arrow-down-fill me-1"></i> {{ $torrent->leechers }}
                 </span>
-            @endif
-
-            @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
-                <a href="{{ route('torrent.history', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}" 
-                   class="badge glass-badge bg-primary text-decoration-none" data-bs-toggle="tooltip" title="View Download History">
-                    <i class="bi bi-download me-1"></i> {{ $torrent->times_completed }}
-                </a>
-            @else
                 <span class="badge glass-badge bg-primary" data-bs-toggle="tooltip" title="Times Completed">
                     <i class="bi bi-download me-1"></i> {{ $torrent->times_completed }}
                 </span>

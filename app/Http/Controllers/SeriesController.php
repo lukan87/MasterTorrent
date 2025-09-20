@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Series;
+use App\Models\Torrent;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -72,63 +73,104 @@ class SeriesController extends Controller
     }
 
 
-    public function show($id, $slug = null)
-    {
-        // If slug is not provided, get the series by id and redirect to the full URL with id and slug
-        if (!$slug) {
-            $series = Series::findOrFail($id);
-            return redirect()->route('series.show', ['id' => $series->id, 'slug' => $series->slug]);
-        }
+  public function show($id, $slug = null)
+{
+    // If slug is not provided, get the series by id and redirect
+    if (!$slug) {
+        $series = Series::findOrFail($id);
+        return redirect()->route('series.show', ['id' => $series->id, 'slug' => $series->slug]);
+    }
 
-        $apiKey = '325f0b42fccd356be82ede4d2be6312c';
-        $series = Series::where('slug', $slug)->firstOrFail();
-        $comments = $series->comments()->with('user')->get(); // Eager load users
+    $apiKey = '325f0b42fccd356be82ede4d2be6312c';
+    $series = Series::where('slug', $slug)->firstOrFail();
+    $comments = $series->comments()->with('user')->get(); // Eager load users
 
-        if (!$series) {
-            // Series not found, return error message
-            return redirect()->back()->with('error', 'Series Not Found');
-        }
+    if (!$series) {
+        return redirect()->back()->with('error', 'Series Not Found');
+    }
 
-        // Cache key based on series TMDB ID and IMDb ID
-        $seriesCacheKey = 'series_' . $series->tmdb_id . '_details';
-        $omdbCacheKey = 'series_' . $series->imdb_id . '_omdb';
-        $tvMazeCacheKey = 'series_' . $series->imdb_id . '_tvmaze';
-        $tvMazeSeasonsCacheKey = 'series_' . $series->imdb_id . '_tvmaze_seasons';
-        $tvMazeEpisodesCacheKey = 'series_' . $series->imdb_id . '_tvmaze_episodes';
+    // Cache keys
+    $seriesCacheKey = 'series_' . $series->tmdb_id . '_details';
+    $omdbCacheKey = 'series_' . $series->imdb_id . '_omdb';
+    $tvMazeCacheKey = 'series_' . $series->imdb_id . '_tvmaze';
+    $tvMazeSeasonsCacheKey = 'series_' . $series->imdb_id . '_tvmaze_seasons';
+    $tvMazeEpisodesCacheKey = 'series_' . $series->imdb_id . '_tvmaze_episodes';
 
-        // Cache series details from TMDB for 1 month
-        $seriesDetails = cache()->remember($seriesCacheKey, now()->addMonth(), function () use ($series, $apiKey) {
-            $seriesDetailsResponse = Http::get("https://api.themoviedb.org/3/tv/{$series->tmdb_id}?api_key=$apiKey&language=en-US&append_to_response=credits,videos,images,keywords,external_ids");
-            return $seriesDetailsResponse->json();
-        });
+    // Cache series details from TMDB
+    $seriesDetails = cache()->remember($seriesCacheKey, now()->addMonth(), function () use ($series, $apiKey) {
+        $seriesDetailsResponse = Http::get("https://api.themoviedb.org/3/tv/{$series->tmdb_id}?api_key=$apiKey&language=en-US&append_to_response=credits,videos,images,keywords,external_ids");
+        return $seriesDetailsResponse->json();
+    });
 
-        // Cache OMDB data for 1 month
-        $seriesOm = cache()->remember($omdbCacheKey, now()->addMonth(), function () use ($series) {
-            $seriesOmdbResponse = Http::get("http://www.omdbapi.com?apikey=d3eb5201&i={$series->imdb_id}&plot=full");
-            return $seriesOmdbResponse->json();
-        });
+    // Cache OMDB
+    $seriesOm = cache()->remember($omdbCacheKey, now()->addMonth(), function () use ($series) {
+        $seriesOmdbResponse = Http::get("http://www.omdbapi.com?apikey=d3eb5201&i={$series->imdb_id}&plot=full");
+        return $seriesOmdbResponse->json();
+    });
 
-        // Cache TVMaze data for 1 month
-        $TvMaze = cache()->remember($tvMazeCacheKey, now()->addMonth(), function () use ($series) {
-            $tvMazeResponse = Http::get("http://api.tvmaze.com/lookup/shows?imdb=$series->imdb_id");
-            return $tvMazeResponse->json();
-        });
+    // Cache TVMaze
+    $TvMaze = cache()->remember($tvMazeCacheKey, now()->addMonth(), function () use ($series) {
+        $tvMazeResponse = Http::get("http://api.tvmaze.com/lookup/shows?imdb=$series->imdb_id");
+        return $tvMazeResponse->json();
+    });
 
-        // Cache TVMaze seasons data for 1 month
+    // Seasons + Episodes from TVMaze
+    if (empty($TvMaze['id'])) {
+        $tvMazeSeasons = null;
+        $tvMazeEpisodes = null;
+    } else {
         $tvMazeSeasons = cache()->remember($tvMazeSeasonsCacheKey, now()->addMonth(), function () use ($TvMaze) {
             $tvMazeSeasonsResponse = Http::get("https://api.tvmaze.com/shows/{$TvMaze['id']}/seasons");
-            return $tvMazeSeasonsResponse->json();
+            return $tvMazeSeasonsResponse->failed() ? null : $tvMazeSeasonsResponse->json();
         });
 
-        // Cache TVMaze episodes data for 1 month
         $tvMazeEpisodes = cache()->remember($tvMazeEpisodesCacheKey, now()->addMonth(), function () use ($TvMaze) {
             $tvMazeEpisodesResponse = Http::get("https://api.tvmaze.com/shows/{$TvMaze['id']}/episodes");
-            return $tvMazeEpisodesResponse->json();
+            return $tvMazeEpisodesResponse->failed() ? null : $tvMazeEpisodesResponse->json();
         });
-
-        // Return the view with the cached data
-        return view('series.show', compact('seriesDetails', 'seriesOm', 'series', 'TvMaze', 'tvMazeSeasons', 'tvMazeEpisodes', 'comments'));
     }
+
+    // 🔹 Fetch all torrents with same tmdb_id
+   $torrents = Torrent::where('tmdbid', $series->tmdb_id)->latest()->get();
+
+$groupedTorrents = $torrents->groupBy(function ($torrent) {
+    $season = 'Unknown';
+    $name = $torrent->name;
+
+    // Extract season from episode pattern
+    if (preg_match('/S(\d{1,2})E\d{1,2}/i', $name, $matches)) {
+        $season = (int) $matches[1];
+    }
+    // Match "2x08"
+    elseif (preg_match('/(\d{1,2})x\d{1,2}/i', $name, $matches)) {
+        $season = (int) $matches[1];
+    }
+    // Match season packs (Complete)
+    elseif (preg_match('/S(\d{1,2})(?!E)/i', $name, $matches)) {
+        $season = (int) $matches[1];
+    }
+
+    return "Season {$season}";
+});
+
+
+
+
+
+
+    // Return to view
+    return view('series.show', compact(
+        'seriesDetails',
+        'seriesOm',
+        'series',
+        'TvMaze',
+        'tvMazeSeasons',
+        'tvMazeEpisodes',
+        'comments',
+         'groupedTorrents'
+    ));
+}
+
 
 
     public function create()
@@ -227,4 +269,19 @@ class SeriesController extends Controller
         $series = Series::where('name', 'LIKE', "%{$searchTerm}%")->paginate(12);
         return view('series.index', compact('series'));
     }
+
+    public function destroy($id)
+{
+    try {
+        $series = Series::findOrFail($id);
+
+        $series->delete();
+
+        return redirect()->route('series.index')->with('status', 'Series deleted successfully!');
+    } catch (\Exception $e) {
+        Log::error("Error deleting series: " . $e->getMessage());
+        return redirect()->route('series.index')->with('error', 'Error deleting series!');
+    }
+}
+
 }

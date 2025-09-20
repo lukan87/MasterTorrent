@@ -159,29 +159,61 @@ Route::get('/profile/{id}/{name}/tokens', [ProfileController::class, 'activeToke
 
 
 // Movies
-// Resource route with authentication middleware applied
-Route::resource('movies', MovieController::class)->middleware('auth');
+Route::resource('movies', MovieController::class)
+    ->middleware('auth')
+    ->except(['show']); // prevent duplicate movies.show
 
+// Additional custom routes
+Route::post('/movies/search', [MovieController::class, 'search'])
+    ->name('movies.search')
+    ->middleware('auth');
 
+Route::get('/movies/select/{tmdb_id}', [MovieController::class, 'selectMovie'])
+    ->name('movies.select')
+    ->middleware('auth');
 
-// Additional custom routes that do not conflict with resource routes
-Route::post('/movies/search', [MovieController::class, 'search'])->name('movies.search')->middleware('auth');
-Route::get('/movies/select/{tmdb_id}', [MovieController::class, 'selectMovie'])->name('movies.select')->middleware('auth');
-Route::get('/movies/{id}/{slug?}', [MovieController::class, 'show'])->name('movies.show')->middleware('auth');
-Route::post('/movies/bulk-select', [MovieController::class, 'bulkSelect'])->name('movies.bulkSelect')->middleware('auth');
-Route::post('/movies/search-movie', [MovieController::class, 'searchmovie'])->name('movies.search-movie')->middleware('auth');
+Route::get('/movies/{id}/{slug?}', [MovieController::class, 'show'])
+    ->name('movies.show')
+    ->middleware('auth');
+
+Route::post('/movies/bulk-select', [MovieController::class, 'bulkSelect'])
+    ->name('movies.bulkSelect')
+    ->middleware('auth');
+
+Route::post('/movies/search-movie', [MovieController::class, 'searchMovie'])
+    ->name('movies.search-movie')
+    ->middleware('auth');
+
 
 
 
 // Series
-Route::resource('series', SeriesController::class)->middleware('auth');
-Route::get('/series', [SeriesController::class, 'index'])->name('series.index')->middleware('auth');
-Route::get('/series/create', [SeriesController::class, 'create'])->name('series.create')->middleware('auth');
-Route::post('/series/search', [SeriesController::class, 'search'])->name('series.search')->middleware('auth');
-Route::get('/series/select/{tmdb_id}', [SeriesController::class, 'selectSeries'])->name('series.select')->middleware('auth');
-Route::get('series/{id}/{slug?}', [SeriesController::class, 'show'])->name('series.show')->middleware('auth');
-Route::post('/series/bulk-select', [SeriesController::class, 'bulkSelect'])->name('series.bulkSelect')->middleware('auth');
-Route::post('/series/search-movie', [SeriesController::class, 'searchSeries'])->name('series.search-series')->middleware('auth');
+Route::resource('series', SeriesController::class)
+    ->middleware('auth')
+    ->except(['show']); // exclude show so your SEO-friendly route takes over
+
+// Additional custom routes
+Route::post('/series/search', [SeriesController::class, 'search'])
+    ->name('series.search')
+    ->middleware('auth');
+
+Route::get('/series/select/{tmdb_id}', [SeriesController::class, 'selectSeries'])
+    ->name('series.select')
+    ->middleware('auth');
+
+Route::get('/series/{id}/{slug?}', [SeriesController::class, 'show'])
+    ->name('series.show')
+    ->middleware('auth');
+
+Route::post('/series/bulk-select', [SeriesController::class, 'bulkSelect'])
+    ->name('series.bulkSelect')
+    ->middleware('auth');
+
+Route::post('/series/search-movie', [SeriesController::class, 'searchSeries'])
+    ->name('series.search-series')
+    ->middleware('auth');
+
+
 
 // Collections
 Route::get('/collections', [CollectionController::class, 'index'])->name('collections.index')->middleware('auth');
@@ -488,6 +520,15 @@ Route::get('/tickets/{ticket}/responses/{response}/edit', [TicketController::cla
 Route::post('/tickets/{ticket}/responses/{response}', [TicketController::class, 'updateResponse'])->name('tickets.updateResponse');
 
 Route::delete('/tickets/{ticket}/responses/{response}/delete', [TicketController::class, 'deleteResponse'])->name('tickets.deleteResponse');
+
+
+//Coder Page
+Route::get('/coder', [App\Http\Controllers\CoderController::class, 'index'])->name('coder.index')->middleware('auth');
+Route::middleware(['auth'])->group(function () {
+   Route::get('/coder/torrents', [\App\Http\Controllers\CoderController::class, 'torrents'])->name('coder.torrents');
+
+});
+
 
 
 
