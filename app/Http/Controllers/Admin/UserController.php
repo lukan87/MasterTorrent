@@ -10,7 +10,6 @@ use App\Models\Message;
 use App\Models\History;
 use App\Models\UserClass;
 use App\Models\UserTimeline;
-use App\Jobs\SendMassMessageJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
@@ -475,45 +474,49 @@ $user->save();
 
 
 
-   public function sendMassMessage(Request $request)
+public function sendMassMessage(Request $request)
 {
     $request->validate([
         'message' => 'required|string',
-        'user_ids' => 'nullable|array',
-        'user_ids.*' => 'exists:users,id', // Ensure users exist
-        'user_class' => 'nullable|array', // Allow an array of user classes
-        'user_class.*' => 'in:' . implode(',', array_keys(UserClass::getClasses())), // Validate each user_class is a valid class
+        'user_class' => 'required|array',
+        'user_class.*' => 'in:' . implode(',', array_keys(UserClass::getClasses())),
     ]);
 
-    // Check if user_class is empty
-    if (!$request->filled('user_class')) {
-        return redirect()->back()->with('error', 'Please select at least one user class to send the message.');
-    }
-
-    // Get users filtered by class or specific IDs
-    $query = User::query();
-
-    if ($request->filled('user_class')) {
-        $query->whereIn('user_class', $request->user_class);
-    }
-
-    if ($request->filled('user_ids')) {
-        $query->whereIn('id', $request->user_ids);
-    }
-
-    // Collect all matching user IDs
-    $userIds = $query->pluck('id')->toArray();
+    // Get users in selected classes **and active in last 6 months**
+    $userIds = User::whereIn('user_class', $request->user_class)
+                   ->where('updated_at', '>=', now()->subMonths(6))
+                   ->pluck('id')
+                   ->toArray();
 
     if (!empty($userIds)) {
-        // Dispatch job once for all users
-        SendMassMessageJob::dispatch($request->message, $userIds);
+        // Split into chunks of 500 for memory efficiency
+        $chunks = array_chunk($userIds, 500);
+
+        foreach ($chunks as $chunk) {
+            $messages = [];
+
+            foreach ($chunk as $userId) {
+                $messages[] = [
+                    'sender_id'   => 2, // Admin/system ID
+                    'receiver_id' => $userId,
+                    'subject'     => 'Mass Message',
+                    'body'        => $request->message,
+                    'is_read'     => false,
+                    'created_at'  => now(),
+                    'updated_at'  => now(),
+                ];
+            }
+
+            // Insert messages in bulk
+            Message::insert($messages);
+        }
     }
 
     return redirect()->route('admin.users.index')
-        ->with('success', 'Mass message has been queued for delivery!');
+                     ->with('success', 'Mass message has been sent directly to all selected users!');
 }
 
-    
+
 
 
 

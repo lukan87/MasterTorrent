@@ -12,6 +12,12 @@ use App\Models\Torrent;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 use App\Models\UserTimeline;
+use App\Models\Message;
+use App\Models\Comment;
+use App\Models\Warning;
+use App\Models\UserSlot;
+use App\Models\TorrentImage;
+use App\Models\TorrentThank;
 
 class ProfileController extends Controller
 {
@@ -231,6 +237,67 @@ public function activeTokens($id, $name)
 
     return view('profile.active-tokens', compact('user', 'slots'));
 }
+
+
+
+
+public function destroyTorrent(Request $request, Torrent $torrent)
+{
+    $user = Auth::user();
+
+    // Only owner or admin can delete
+    if ($user->id !== $torrent->owner && $user->user_class < \App\Models\UserClass::WEB_DEVELOPER) {
+        abort(403, 'Unauthorized action.');
+    }
+
+    // Determine deletion reason
+    $deletionReason = $request->input('deletion_reason');
+    if (empty($deletionReason)) {
+        $deletionReason = '0 seeders and 0 leechers';
+    } elseif ($deletionReason === 'custom') {
+        $deletionReason = $request->input('custom_reason') ?: 'No reason provided';
+    }
+
+    // Send message to owner
+    $owner = User::find($torrent->owner);
+    if ($owner) {
+        Message::create([
+            'receiver_id' => $owner->id,
+            'sender_id' => $user->id, // who deleted it
+            'subject' => 'Torrent Deletion',
+            'body' => 'Your torrent "' . $torrent->name . '" has been deleted. Reason: ' . $deletionReason,
+            'is_read' => false,
+        ]);
+    }
+
+    // Clean up all related records
+    TorrentThank::where('torrent_id', $torrent->id)->delete();
+    Peer::where('torrent_id', $torrent->id)->delete();
+    History::where('torrent_id', $torrent->id)->delete();
+    Comment::where('torrent_id', $torrent->id)->delete();
+    Warning::where('torrent', $torrent->id)->delete();
+    UserSlot::where('torrent_id', $torrent->id)->delete();
+    $torrent->genres()->detach();
+
+    // Delete images
+    $images = TorrentImage::where('torrent_id', $torrent->id)->get();
+    foreach ($images as $image) {
+        $filePath = storage_path('app/public/' . $image->path);
+        if (file_exists($filePath)) unlink($filePath);
+        $image->delete();
+    }
+
+    // Delete torrent file
+    $filePath = public_path('files/torrents/' . $torrent->file_name);
+    if (file_exists($filePath)) unlink($filePath);
+
+    // Delete the torrent itself
+    $torrent->delete();
+
+    return redirect()->back()->with('success', 'Torrent deleted successfully and owner notified.');
+}
+
+
 
 
 

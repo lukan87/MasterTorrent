@@ -130,6 +130,6 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
-    'invite_only' => true,
+    'invite_only' => false,
 
 ];

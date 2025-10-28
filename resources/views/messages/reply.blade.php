@@ -27,7 +27,7 @@
             <form action="{{ route('messages.storeReply', $message) }}" method="POST" class="mt-4">
                 @csrf
                 <div class="input-group">
-                    <textarea name="body" id="body" class="form-control rounded-pill bg-dark text-light border-secondary" 
+                    <textarea name="body" id="body" class="form-control bg-dark text-light border-secondary" 
                               placeholder="Type your reply..." rows="1" required></textarea>
                     <button class="btn btn-gradient text-white fw-bold ms-2" type="submit">
                         <i class="bi bi-send-fill"></i>
@@ -64,14 +64,31 @@
         background: rgba(255,255,255,0.05);
     }
     textarea.form-control {
-        resize: none;
-        border-radius: 50px;
-        padding: 0.75rem 1rem;
-        min-height: 50px;
+    overflow: hidden;
+    min-height: 50px; 
+    max-height: 300px; 
     }
     .form-control::placeholder {
         color: #aaa;
     }
 </style>
 @endpush
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const textarea = document.getElementById('body');
+
+        const autoResize = (el) => {
+            el.style.height = 'auto'; // reset height
+            el.style.height = el.scrollHeight + 'px'; // set to scrollHeight
+        };
+
+        // Resize on input
+        textarea.addEventListener('input', () => autoResize(textarea));
+
+        // Initial resize in case there's pre-filled content
+        autoResize(textarea);
+    });
+</script>
 @endsection

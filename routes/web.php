@@ -23,10 +23,56 @@ use App\Http\Controllers\DonationController;
 use App\Http\Controllers\HitAndRunController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\UploadAppController;
+use App\Http\Controllers\HappyHourController;
 use App\Helpers\EmojiHelper;
 
 
 use App\Http\Controllers\OverforumController;
+
+use App\Http\Controllers\SeedboxController;
+
+
+
+//Happy Hour
+Route::prefix('admin/happyhour')->name('happyhour.')->middleware(['auth', 'admin'])->group(function () {
+    Route::get('/', [HappyHourController::class, 'index'])->name('index');
+    Route::get('/create', [HappyHourController::class, 'create'])->name('create');
+    Route::post('/store', [HappyHourController::class, 'store'])->name('store');
+    Route::post('/toggle-automatic', [HappyHourController::class, 'toggleAutomatic'])->name('toggleAutomatic');
+    Route::patch('/stop/{happyHour}', [HappyHourController::class, 'stop'])->name('stop');
+});
+//Happy Hour
+
+Route::middleware('auth')->group(function () {
+    Route::resource('seedboxes', SeedboxController::class);
+    Route::get('seedboxes/{seedbox}/test', [SeedboxController::class, 'testConnection'])->name('seedboxes.test');
+    Route::get('seedboxes/{seedbox}/torrents', [SeedboxController::class, 'showTorrents'])->name('seedboxes.torrents');
+    Route::post('/seedboxes/{seedbox}/add-torrent', [SeedboxController::class, 'addTorrent'])->name('seedboxes.addTorrent');
+    Route::post('/seedboxes/{seedbox}/start/{hash}', [SeedboxController::class, 'start'])->name('seedboxes.start');
+Route::post('/seedboxes/{seedbox}/pause/{hash}', [SeedboxController::class, 'pause'])->name('seedboxes.pause');
+Route::delete('/seedboxes/{seedbox}/delete/{hash}', [SeedboxController::class, 'delete'])->name('seedboxes.delete');
+Route::get('/seedboxes/{seedbox}/test', [SeedboxController::class, 'testConnection'])->name('seedboxes.test');
+Route::post('/seedboxes/{seedbox}/add-url', [SeedboxController::class, 'addTorrentUrl'])->name('seedboxes.addTorrentUrl');
+});
+
+Route::get('seedboxes/{seedbox}/torrent/{hash}/trackers', [SeedboxController::class, 'getTorrentTrackers']);
+
+
+
+Route::post('/torrents/{torrent}/send-to-seedbox', [TorrentController::class, 'sendToSeedbox'])
+    ->name('torrents.sendToSeedbox')
+    ->middleware('auth');
+
+  Route::post('seedboxes/{seedbox}/import/{hash}', [SeedboxController::class, 'importTorrent'])
+    ->name('seedboxes.import')
+      ->middleware('auth');
+
+Route::get('seedboxes/{seedbox}/download/{hash}', [SeedboxController::class, 'downloadTorrent'])
+    ->name('seedboxes.download');
+
+
+
+
 
 
 
@@ -95,9 +141,8 @@ Route::get('/get-emoji/{emojiCode}', function ($emojiCode) {
 
 
 Route::resource('uploadapps', UploadAppController::class)->middleware('auth');
-Route::get('/uploadapps/{id}', [UploadAppController::class, 'show'])->name('uploadapps.show')->middleware('auth');
-Route::delete('/uploadapps/{id}', [UploadAppController::class, 'destroy'])->name('uploadapps.destroy')->middleware('auth');
 Route::put('/uploadapps/{id}/update-status', [UploadAppController::class, 'updateStatus'])->name('uploadapps.updateStatus')->middleware('auth');
+
 
 
 
@@ -155,6 +200,12 @@ Route::get('/profile/{id}/{name}/download-history', [ProfileController::class, '
 //Slots
 Route::get('/profile/{id}/{name}/tokens', [ProfileController::class, 'activeTokens'])
     ->name('profile.tokens');
+
+Route::delete('/profile/torrents/{torrent}/delete', [\App\Http\Controllers\ProfileController::class, 'destroyTorrent'])
+    ->name('profile.torrents.destroy')
+    ->middleware('auth');
+
+
 
 
 
@@ -447,7 +498,7 @@ Route::put('polls/{poll}', [PollController::class, 'update'])->name('polls.updat
 // Delete a specific poll
 Route::delete('polls/{poll}', [PollController::class, 'destroy'])->name('polls.destroy')->middleware('auth');
 
-Route::post('polls/{poll}/vote', [PollController::class, 'vote'])->name('polls.vote')->middleware('auth');
+
 Route::post('/polls/{pollId}/vote', [PollController::class, 'vote'])->name('polls.vote')->middleware('auth');
 
 //Requests//

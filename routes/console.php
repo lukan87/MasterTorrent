@@ -41,7 +41,7 @@ Schedule::command('warn:uploaders')->daily();
 Schedule::command('users:demote-inactive-uploaders')->daily();
 
 //Invites expire after two weeks of creation and not being used
-Schedule::command('invites:expire')->daily();
+//Schedule::command('invites:expire')->daily();
 
 //Change bumped torrents to not bumped after 30 days
 Schedule::command('torrents:unbump-old')->daily();
@@ -54,6 +54,19 @@ Schedule::command('users:clear-expired-warnings')->hourly();
 
 //Sterge torrente mai vechi de 3 ani si care nu au seeders
 Schedule::command('torrents:cleanup')->monthly();
+
+//Sterge invitatiile nefolosite 
+Schedule::command('invites:process')->daily();
+
+Schedule::command('auto:update_torrent_stats')->everyThirtyMinutes();
+
+Schedule::command('storage:fix')->everyTenMinutes();
+
+Schedule::command('happyhour:check')->hourly();
+
+
+
+
 
 
 

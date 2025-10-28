@@ -153,37 +153,29 @@
             </div>
         </div>
         
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-4">
-                    <h5 class="fw-bold mb-3">
-                        <i class="bi bi-activity me-2"></i>Quick Actions
-                    </h5>
-                    <div class="row g-2">
-                        <div class="col-6">
-                            <button class="btn btn-outline-primary w-100">
-                                <i class="bi bi-arrow-repeat me-1"></i> Clear Cache
-                            </button>
-                        </div>
-                        <div class="col-6">
-                            <button class="btn btn-outline-success w-100">
-                                <i class="bi bi-database me-1"></i> Backup DB
-                            </button>
-                        </div>
-                        <div class="col-6">
-                            <button class="btn btn-outline-info w-100">
-                                <i class="bi bi-eye me-1"></i> View Logs
-                            </button>
-                        </div>
-                        <div class="col-6">
-                            <button class="btn btn-outline-warning w-100">
-                                <i class="bi bi-gear me-1"></i> Settings
-                            </button>
-                        </div>
-                    </div>
-                </div>
+        <!-- Happy Hour Quick Link -->
+<div class="col-md-6">
+    <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0 fw-bold">
+                    <i class="bi bi-clock-history me-2"></i>Happy Hour
+                </h5>
+                <span class="badge bg-primary bg-opacity-10 text-primary">Restricted</span>
+            </div>
+            <p class="text-muted">Manage manual and automatic Happy Hours</p>
+            <div class="d-grid gap-2 d-md-flex">
+                <a href="{{ route('happyhour.index') }}" class="btn btn-primary">
+                    <i class="bi bi-hourglass-split me-1"></i> Open Happy Hour Panel
+                </a>
+                <a href="{{ route('happyhour.create') }}" class="btn btn-outline-primary">
+                    <i class="bi bi-plus-circle me-1"></i> Start New Happy Hour
+                </a>
             </div>
         </div>
+    </div>
+</div>
+
     </div>
     @endif
 </div>

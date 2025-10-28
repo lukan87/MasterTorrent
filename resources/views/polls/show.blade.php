@@ -54,7 +54,7 @@
                         </div>
 
                         <div class="progress mt-2" style="height: 8px; border-radius:5px;">
-                            <div class="progress-bar @if($isUserChoice) bg-success @else bg-primary @endif" 
+                            <div class="progress-bar progress-bar-striped progress-bar-animated @if($isUserChoice) bg-success @else bg-primary @endif" 
                                  role="progressbar"
                                  style="width: {{ $poll->votes->count() > 0 ? ($option->votes->count() / $poll->votes->count()) * 100 : 0 }}%"
                                  aria-valuenow="{{ $option->votes->count() }}" 
@@ -119,7 +119,7 @@
                                 </div>
                                 
                                 <div class="progress mb-2" style="height: 8px;">
-                                    <div class="progress-bar 
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated 
                                         @if($userVote && $userVote->option_id == $option->id) bg-success
                                         @else bg-primary @endif" 
                                         role="progressbar" 

@@ -25,8 +25,10 @@ use App\Models\TorrentThank;
 use App\Models\TorrentImage;
 use App\Models\UserSlot;
 use Carbon\Carbon;
+use App\Models\HappyHour;
 use App\Helpers\TorrentHelper;
 use App\Services\TorrentDownloadService;
+use App\Models\Seedbox;
 
 
 
@@ -41,135 +43,212 @@ class TorrentController extends Controller
         $this->apiKey = env('TMDB_API_KEY');
         $this->service = $service;
     }
+
+    
     
 
-    public function index(Request $request)
-    {
-        // Cache categories and genres forever (they don’t change often)
-        $categories = Cache::rememberForever('categories', fn() => Category::all());
-        $allGenres = Cache::rememberForever('genres', fn() => Genre::all());
-    
-        $sortColumn = $request->get('sort', 'name');
-        $sortDirection = $request->get('direction', 'desc');
-        $currentPage = $request->get('page', 1);
-    
-        // Generate a cache key using filters and current page
-        $cacheKey = "torrents_page_{$currentPage}_sort_{$sortColumn}_dir_{$sortDirection}_" . 
-                    "keyword_{$request->get('keyword', 'null')}_" .
-                    "categories_" . implode('_', (array)$request->categories) . "_" .
-                    "genre_{$request->get('genre', 'null')}_torrent_status_{$request->get('torrent_status', 'null')}";
-    
-        // Check if we can use cache (only when no filters are set)
-        $useCache = !$request->filled(['keyword', 'categories', 'genre', 'torrent_status', 'sort', 'direction']);
-        
-        if ($useCache) {
-           
-            $torrents = Cache::remember($cacheKey, 60, function () use ($request, $sortColumn, $sortDirection) {
-                return TorrentHelper::buildTorrentQuery($request, $sortColumn, $sortDirection);
-            });
-        } else {
-          
-            $torrents = TorrentHelper::buildTorrentQuery($request, $sortColumn, $sortDirection);
-        }
-    
-       
-        if ($torrents->isEmpty()) {
-          
-        }
-    
-       
-        $user = $request->user();
-      $newTorrents = $user
-    ? $torrents->filter(fn($torrent) =>
-        !$user->last_browse || $torrent->created_at->gt($user->last_browse)
-    )
-    : collect();
 
+public function sendToSeedbox(User $user, Torrent $torrent, Request $request)
+{
+    try {
+        $authUser = auth()->user();
 
         
-if ($user) {
-    $user->last_browse = now(); // stays UTC
-    $user->save();
+
+        $path = public_path('files/torrents/' . $torrent->file_name);
+        if (!file_exists($path) || !is_readable($path)) {
+            return redirect()->back()->with('error', 'Torrent file not found or unreadable: ' . $path);
+        }
+
+       
+        $dict = Bencode::bdecode(file_get_contents($path));
+        if (!$dict) {
+            return redirect()->back()->with('error', 'Invalid torrent file (cannot decode)');
+        }
+
+        
+        $dict['announce'] = "http://last-torrents.org/announce/{$authUser->passkey}";
+        $dict['comment']  = 'Using this torrent binds you to LastFiles Confidentiality Agreement';
+       // $dict['custom']['label'] = 'LastFiles';
+        $dict['announce-list'] = [
+            ["http://last-torrents.org/announce/{$authUser->passkey}"]
+        ];
+
+        $fileToUpload = Bencode::bencode($dict);
+        if (!$fileToUpload) {
+            return redirect()->back()->with('error', 'Failed to encode torrent with user passkey');
+        }
+
+       
+        $tmpFileName = "seedbox__{$torrent->id}.torrent";
+        $tmpPath     = storage_path("app/tmp/{$tmpFileName}");
+        if (!is_dir(dirname($tmpPath))) {
+            mkdir(dirname($tmpPath), 0755, true);
+        }
+        file_put_contents($tmpPath, $fileToUpload);
+
+       
+        $seedbox = Seedbox::where('user_id', $authUser->id)
+            ->where('id', $request->input('seedbox_id'))
+            ->first();
+
+        if (!$seedbox) {
+            return redirect()->back()->with('error', 'Selected seedbox not found or not yours.');
+        }
+
+        
+        $service = new \App\Services\SeedboxService(
+            $seedbox->address,
+            $seedbox->username,
+            $seedbox->password,
+            $seedbox->auth_type
+        );
+
+        $result = $service->addTorrentFileSeedBox($tmpPath);
+
+       
+        @unlink($tmpPath);
+
+        if (isset($result['error'])) {
+            return redirect()->back()->with('error', $result['error']);
+        }
+
+        return redirect()->back()->with('success', "Torrent sent to {$seedbox->name} successfully!");
+    } catch (\Exception $e) {
+        return redirect()->back()->with('error', $e->getMessage());
+    }
 }
 
-    $movieOfTheDay = Cache::remember('movie_of_the_day', now()->endOfDay(), function () {
-    $categoryIds = [11,12,24,25,31,32,54,55,81,82];
+
+
+
+
+
+
+
+ public function index(Request $request)
+{
+    // Fetch categories and genres directly (no cache)
+    $categories = Category::all();
+    $allGenres = Genre::all();
+
+    $sortColumn = $request->get('sort', 'name');
+    $sortDirection = $request->get('direction', 'desc');
+
+    // Build torrent query (no caching)
+    $torrents = TorrentHelper::buildTorrentQuery($request, $sortColumn, $sortDirection);
+
+    // Handle empty torrent set (optional handling)
+    if ($torrents->isEmpty()) {
+        // You can add a flash message or fallback here if needed
+    }
+
+    // Get user and detect new torrents since last browse
+    $user = $request->user();
+
+    $newTorrents = $user
+        ? $torrents->filter(fn($torrent) =>
+            !$user->last_browse || $torrent->created_at->gt($user->last_browse)
+        )
+        : collect();
+
+    // Update user's last browse time
+    if ($user) {
+        $user->last_browse = now(); // stays UTC
+        $user->save();
+    }
+
+    // Movie of the day (no caching)
+    $categoryIds = [11, 12, 24, 25, 31, 32, 54, 55, 81, 82];
     $twoDaysAgo = now()->subDays(2);
     $oneWeekAgo = now()->subWeek();
 
-    
     $topTorrents = Torrent::whereIn('category_id', $categoryIds)
-                          ->where('created_at', '>=', $twoDaysAgo)
-                          ->orderByDesc('seeders')
-                          ->orderByDesc('times_completed')
-                          ->take(5)
-                          ->get();
+        ->where('created_at', '>=', $twoDaysAgo)
+        ->orderByDesc('seeders')
+        ->orderByDesc('times_completed')
+        ->take(5)
+        ->get();
 
-    
     if ($topTorrents->isEmpty()) {
         $topTorrents = Torrent::whereIn('category_id', $categoryIds)
-                              ->where('created_at', '>=', $oneWeekAgo)
-                              ->orderByDesc('seeders')
-                              ->orderByDesc('times_completed')
-                              ->take(5)
-                              ->get();
+            ->where('created_at', '>=', $oneWeekAgo)
+            ->orderByDesc('seeders')
+            ->orderByDesc('times_completed')
+            ->take(5)
+            ->get();
     }
 
-    
-    return $topTorrents->isNotEmpty() ? $topTorrents->random() : null;
-});
+    $movieOfTheDay = $topTorrents->isNotEmpty() ? $topTorrents->random() : null;
 
+    $currentHappyHour = HappyHour::where('active', true)
+                        ->where('start_at', '<=', now())
+                        ->where('end_at', '>=', now())
+                        ->latest('start_at')
+                        ->first();
+
+    return view('torrents.index', compact(
+        'torrents',
+        'categories',
+        'allGenres',
+        'sortColumn',
+        'sortDirection',
+        'newTorrents',
+        'movieOfTheDay',
+        'currentHappyHour'
+    ));
+}
 
     
-        return view('torrents.index', compact('torrents', 'categories', 'allGenres', 'sortColumn', 'sortDirection', 'newTorrents','movieOfTheDay',));
-    }
-    
     
     
 
-    public function adult(Request $request)
+   public function adult(Request $request)
 {
-    
-    $categories = Cache::remember('categories', now()->addMinutes(30), fn() => Category::all());
-    $allGenres = Cache::remember('allGenres', now()->addMinutes(30), fn() => Genre::all());
+    // Fetch categories and genres directly (no cache)
+    $categories = Category::all();
+    $allGenres = Genre::all();
 
-    
-    $sortColumn = $request->get('sort', 'name'); 
-    $sortDirection = $request->get('direction', 'desc'); 
+    // Sorting parameters
+    $sortColumn = $request->get('sort', 'name');
+    $sortDirection = $request->get('direction', 'desc');
 
-   
-    $currentPage = $request->get('page', 1); 
+    // Fetch torrents directly (no cache)
+    $adult = TorrentHelper::buildAdultTorrentQuery($request, $sortColumn, $sortDirection);
 
-    
-    $cacheKey = "cached_adult_torrents_page_{$currentPage}_sort_{$sortColumn}_dir_{$sortDirection}_" .
-    "keyword_" . ($request->get('keyword', '') ?: 'null') . "_" .
-    "category_" . ($request->get('category', '') ?: 'null') . "_" .
-    "genre_" . ($request->get('genre', '') ?: 'null') . "_" .
-    "torrent_status_" . ($request->get('torrent_status', '') ?: 'null') . "_" .
-    "sticky_" . ($request->get('sticky', '0') ?: 'null') . "_" .
-    "free_" . ($request->get('free', '0') ?: 'null') . "_" .
-    "double_" . ($request->get('double', '0') ?: 'null') . "_" .
-    "recommended_" . ($request->get('recommended', '0') ?: 'null');
-
-    
-    $adult = Cache::remember($cacheKey, now()->addMinutes(30), function () use ($request, $sortColumn, $sortDirection) {
-        return TorrentHelper::buildAdultTorrentQuery($request, $sortColumn, $sortDirection);
-    });
-    
-
-    
+    // Get current user
     $user = $request->user();
+
+    // Find new torrents since user's last browsex
     $newTorrents = $user
-        ? $adult->filter(fn($adult) => $adult->created_at > $user->last_browsex)
+        ? $adult->filter(fn($torrent) =>
+            !$user->last_browsex || $torrent->created_at->gt($user->last_browsex)
+        )
         : collect();
 
+    // Update user's last browsex timestamp
     if ($user) {
         $user->last_browsex = now();
-        $user->save(); 
+        $user->save();
     }
 
-    return view('torrents.adult', compact('adult', 'categories', 'allGenres', 'sortColumn', 'sortDirection', 'newTorrents'));
+     $currentHappyHour = \App\Models\HappyHour::where('active', true)
+                        ->where('start_at', '<=', now())
+                        ->where('end_at', '>=', now())
+                        ->latest('start_at')
+                        ->first();
+
+    return view('torrents.adult', compact(
+        'adult',
+        'categories',
+        'allGenres',
+        'sortColumn',
+        'sortDirection',
+        'newTorrents',
+        'currentHappyHour'
+    ));
 }
+
 
     
     public function create()
@@ -352,7 +431,6 @@ $slug = Str::slug($cleanName, '-');
             'free' => $request->has('free') || $meta['size'] > 5368709120 ? 1 : 0,
             'double' => $request->has('double') ? 1 : 0,
             'sticky' => $request->has('sticky') ? 1 : 0,
-            'recommended' => $request->has('recommended') ? 1 : 0,
             'seedbox' => $request->has('seedbox') ? 1 : 0,
             'external' => $request->has('external') ? 1 : 0,
         ]);
@@ -398,7 +476,7 @@ $slug = Str::slug($cleanName, '-');
         $user->update(['last_upload' => now()]);
 
 		
-        Cache::flush();
+        //Cache::flush();
 
         
         return redirect()->route('torrents.show', ['id' => $torrent->id, 'slug' => $slug])->with('success', 'Your torrent has been uploaded successfully.');
@@ -497,15 +575,15 @@ public function bump($id)
             $mediainfo = $torrent->mediainfo !== null ? (new MediaInfo())->parse($torrent->mediainfo) : null;
     
            
-            $tmdbData = Cache::remember("tmdb_{$torrent->tmdbid}", 3600, function () use ($torrent) {
+            $tmdbData = Cache::remember("tmdb_{$torrent->tmdbid}", 86400, function () use ($torrent) {
                 return $torrent->tmdbid ? (new TMDBService())->fetchTMDBData($torrent->tmdbid, $torrent->tmdb_type) : null;
             });
     
-            $omdbData = Cache::remember("omdb_{$torrent->imdbid}", 3600, function () use ($torrent) {
+            $omdbData = Cache::remember("omdb_{$torrent->imdbid}", 86400, function () use ($torrent) {
                 return $torrent->imdbid ? (new TMDBService())->fetchOMDBData($torrent->imdbid) : null;
             });
     
-            $steamData = Cache::remember("steam_{$torrent->steamid}", 3600, function () use ($torrent) {
+            $steamData = Cache::remember("steam_{$torrent->steamid}", 86400, function () use ($torrent) {
                 return $torrent->steamid ? (new TMDBService())->fetchSteamData($torrent->steamid) : null;
             });
     
@@ -519,16 +597,16 @@ public function bump($id)
                 : collect(); // Default to empty collection if no TMDB ID
     
          
-            $recommendedTorrents = Torrent::where('category_id', $torrent->category_id)
-                ->where('seeders', '>', 0)
-                ->whereHas('genres', function ($query) use ($torrent) {
-                    $query->whereIn('genres.id', $torrent->genres->pluck('id'));
-                })
-                ->orWhere('name', 'like', '%' . preg_replace('/[^\w]+/', '', $torrent->name) . '%')
-                ->select('id', 'slug', 'name', 'size', 'seeders', 'leechers', 'times_completed', 'poster')
-                ->inRandomOrder()
-                ->limit(6)
-                ->get();
+            // $recommendedTorrents = Torrent::where('category_id', $torrent->category_id)
+            //     ->where('seeders', '>', 0)
+            //     ->whereHas('genres', function ($query) use ($torrent) {
+            //         $query->whereIn('genres.id', $torrent->genres->pluck('id'));
+            //     })
+            //     ->orWhere('name', 'like', '%' . preg_replace('/[^\w]+/', '', $torrent->name) . '%')
+            //     ->select('id', 'slug', 'name', 'size', 'seeders', 'leechers', 'times_completed', 'poster')
+            //     ->inRandomOrder()
+            //     ->limit(6)
+            //     ->get();
     
            
             $hasThanked = TorrentThank::where('torrent_id', $torrent->id)
@@ -549,7 +627,7 @@ public function bump($id)
     
             return view('torrents.show', compact(
                 'torrent', 'comments', 'tmdbData', 'omdbData', 'mediainfo', 'steamData', 'snatched',
-                'similarTorrents', 'recommendedTorrents', 'hasThanked', 'thankUserNames', 'fileTree'
+                'similarTorrents',  'hasThanked', 'thankUserNames', 'fileTree'
             ));
     
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
@@ -607,7 +685,7 @@ $user->save();
 
     
     return redirect()->route('torrents.show', ['id' => $torrent->id, 'slug' => $torrent->slug])
-        ->with('success', 'Thank you for thanking this torrent!');
+        ->with('success', 'Your thanks has been registered! You received 0.5 seedbonus points!');
 }
 
 
@@ -717,16 +795,6 @@ $user->save();
                }
            }
 
-    
-
-if ($request->has('recommended') && !$torrent->recommended) {
-    $recommendedCount = Torrent::where('recommended', 1)->count();
-
-    if ($recommendedCount >= 15) {
-            return redirect()->route('torrents.index')->with('error', 'You cannot have more than 15 recommended torrents at a time.');
-    }
-}
-
 
            
             $torrent->update([
@@ -746,7 +814,6 @@ if ($request->has('recommended') && !$torrent->recommended) {
                 'free' => $request->has('free') ? 1 : 0,
                 'double' => $request->has('double') ? 1 : 0,
                 'sticky' => $request->has('sticky') ? 1 : 0,
-                'recommended' => $request->has('recommended') ? 1 : 0,
                 'seedbox' => $request->has('seedbox') ? 1 : 0,
             ]);
 
@@ -805,7 +872,7 @@ if ($request->hasFile('images')) {
 }
 
          
-            Cache::flush();
+          //  Cache::flush();
 
           
             if (!empty($genreIds)) {
@@ -854,7 +921,7 @@ if ($owner && User::where('id', $owner)->exists()) {
     ]);
 }
 
-
+        TorrentThank::where('torrent_id', $torrent->id)->delete();
       
         Peer::where('torrent_id', $torrent->id)->delete();
 

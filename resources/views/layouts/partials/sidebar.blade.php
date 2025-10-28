@@ -69,6 +69,12 @@
                                 <p>Rss Feed</p>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a href="{{ route('seedboxes.index') }}" class="nav-link" data-bs-toggle="tooltip" title="Connect and manage your seedboxes on LastFiles">
+                                  <i class="bi bi-hdd-network"></i>
+                                <p>Seedbox</p>
+                            </a>
+                        </li>
                     </ul>
                 </li>
                 <hr>
@@ -144,7 +150,7 @@
                         </li>
                     </ul>
                 </li>
-               @auth
+             
     @if(Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
         <li class="nav-header">Administration</li>
         <li class="nav-item">
@@ -153,17 +159,8 @@
                 <p>Admin Panel</p>
             </a>
         </li>
-
-        @if(Auth::user()->user_class >= \App\Models\UserClass::WEB_DEVELOPER)
-            <li class="nav-item">
-                <a href="https://last-torrents.org/horizon/dashboard" class="nav-link">
-                    <i class="bi bi-journal-text"></i>
-                    <p>Horizon Dashboard</p>
-                </a>
-            </li>
-        @endif
     @endif
-@endauth
+
 
             </ul>
             <!--end::Sidebar Menu-->

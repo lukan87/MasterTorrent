@@ -15,13 +15,19 @@ class BonusController extends Controller
 
     public function showShop()
 {
-
     $user = Auth::user();
-         if (!$user) {
-        return redirect()->route('login')->with('error', 'You cannot access this page unless you are a member !');
+    if (!$user) {
+        return redirect()->route('login')->with('error', 'You cannot access this page unless you are a member!');
     }
-    return view('bonus.shop'); 
+
+    // Get the currently active Happy Hour
+    $happyHour = \App\Models\HappyHour::where('active', true)
+        ->latest('start_at')
+        ->first();
+
+    return view('bonus.shop', compact('user', 'happyHour'));
 }
+
 
     public function buyUpload(Request $request)
     {

@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Helpers\Bencode;
+use App\Models\Seedbox;
 
 class TorrentDownloadService
 {
@@ -108,7 +109,7 @@ class TorrentDownloadService
         // Add the announce-list for multiple trackers (extendable)
         return [
             // Primary tracker
-            [route('announce', ['passkey' => $user->passkey], false)],
+           // [route('announce', ['passkey' => $user->passkey], false)],
 
             // Secondary tracker
             ["http://last-torrents.org/announce/{$user->passkey}"],
@@ -135,9 +136,10 @@ class TorrentDownloadService
         // Modify the announce URL and add a comment
         $dict['announce'] = route('announce', ['passkey' => $user->passkey], false);
         $dict['comment']  = 'Using this torrent binds you to LastFiles Confidentiality Agreement';
+        $dict['created_by']  = 'LastFiles Upload Service';
 
         // Add the label to the torrent's metadata
-        $dict['custom']['label'] = 'LastFiles';
+        //$dict['custom']['label'] = 'LastFiles';
 
         // Add announce-list
         $dict['announce-list'] = $this->trackerUrls($user);
@@ -161,4 +163,21 @@ class TorrentDownloadService
             ]
         );
     }
+
+public function handleUploadFromSeedbox(string $filePath, User $user)
+{
+    $request = new Request();
+    $request->files->set('torrent', new \Illuminate\Http\UploadedFile(
+        $filePath,
+        basename($filePath),
+        'application/x-bittorrent',
+        null,
+        true
+    ));
+
+    // Call your existing store method
+    $tmdbService = app(\App\Services\TMDBService::class);
+    app(\App\Http\Controllers\TorrentController::class)->store($request, $tmdbService);
+}
+
 }

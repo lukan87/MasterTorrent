@@ -1,13 +1,13 @@
 <div style="display:block; height:50px"></div>
 
 <div class="series-header-container">
-    <div class="series-header-card">
+    <div class="series-header-card mt-3">
         <div class="series-header-content">
             <div class="row">
                 <!-- Poster Column -->
                 <div class="col-12 col-sm-4 col-md-3 col-lg-2 poster-column">
                     <div class="poster-wrapper">
-                        <img src="{{$torrent->poster}}" class="series-poster" alt="{{$tmdbData['name'] ?? 'TV Series Poster'}}" loading="lazy">
+                        <img src="{{$torrent->poster}}" lazy="loading" class="series-poster" alt="{{$tmdbData['name'] ?? 'TV Series Poster'}}" loading="lazy">
                         
                         <!-- Action Buttons -->
                         <div class="poster-actions">
@@ -30,6 +30,36 @@
                             @endif
                         </div>
                     </div>
+
+                    <!-- Trailer Section -->
+                        <div class="trailer-section">
+                            @if(!empty($torrent->trailer))
+                                @php
+                                    $dbTrailerUrl = htmlspecialchars($torrent->trailer);
+                                    $embedUrl = str_replace("watch?v=", "embed/", $dbTrailerUrl);
+                                @endphp
+                                <a href="{{ $embedUrl }}?version=3&amp;autohide=3&amp;hl=ro_RO&amp;showinfo=0&amp;autoplay=1&amp;disablekb=0&amp;hd=1&amp;theme=dark" 
+                                   data-lity
+                                   class="trailer-link">
+                                    <i class="bi bi-play-circle-fill"></i> Play Trailer
+                                </a>
+                            @elseif(isset($tmdbData['videos']['results']) && count($tmdbData['videos']['results']) > 0)
+                                @php
+                                    $tmdbTrailer = collect($tmdbData['videos']['results'])->firstWhere('type', 'Trailer');
+                                @endphp
+                                @if($tmdbTrailer)
+                                    <a href="https://www.youtube.com/embed/{{ $tmdbTrailer['key'] }}?version=3&amp;autohide=3&amp;hl=ro_RO&amp;showinfo=0&amp;autoplay=1&amp;disablekb=0&amp;hd=1&amp;theme=dark" 
+                                       data-lity
+                                       class="trailer-link">
+                                        <i class="bi bi-play-circle-fill"></i> Play Trailer
+                                    </a>
+                                @else
+                                    <p class="no-trailer">No trailer available.</p>
+                                @endif
+                            @else
+                                <p class="no-trailer">No trailer available.</p>
+                            @endif
+                        </div>
                 </div>
                 
                 <!-- Info Column -->
@@ -42,6 +72,9 @@
                                 @if(isset($tmdbData['first_air_date']))
                                     <span class="release-year">({{ \Carbon\Carbon::parse($tmdbData['first_air_date'])->format('Y') }})</span>
                                 @endif
+                                @if(isset($tmdbData['tagline']))
+                                <p class="tagline">{{ $tmdbData['tagline'] }}</p>
+                            @endif
                             </h1>
                             
                             @if(isset($omdbData['Rated']) && $omdbData['Rated'] != 'N/A')
@@ -54,10 +87,6 @@
                                         </span>
                                     @endif
                                 </div>
-                            @endif
-                            
-                            @if(isset($tmdbData['tagline']))
-                                <p class="tagline">{{ $tmdbData['tagline'] }}</p>
                             @endif
                         </div>
                         
@@ -126,7 +155,6 @@
                         
                         <!-- Overview -->
                         <div class="overview-section">
-                            <h3 class="section-heading"><i class="bi bi-info-circle"></i> Overview</h3>
                             <h5>{{ $tmdbData['overview'] ?? 'No overview available.' }}</h5>
                         </div>
                         
@@ -162,36 +190,6 @@
                                     <span class="fact-label">IMDb Votes:</span>
                                     <span class="fact-value">{{ $omdbData['imdbVotes'] }}</span>
                                 </div>
-                            @endif
-                        </div>
-                        
-                        <!-- Trailer Section -->
-                        <div class="trailer-section">
-                            @if(!empty($torrent->trailer))
-                                @php
-                                    $dbTrailerUrl = htmlspecialchars($torrent->trailer);
-                                    $embedUrl = str_replace("watch?v=", "embed/", $dbTrailerUrl);
-                                @endphp
-                                <a href="{{ $embedUrl }}?version=3&amp;autohide=3&amp;hl=ro_RO&amp;showinfo=0&amp;autoplay=1&amp;disablekb=0&amp;hd=1&amp;theme=dark" 
-                                   data-lity
-                                   class="trailer-link">
-                                    <i class="bi bi-play-circle-fill"></i> Play Trailer
-                                </a>
-                            @elseif(isset($tmdbData['videos']['results']) && count($tmdbData['videos']['results']) > 0)
-                                @php
-                                    $tmdbTrailer = collect($tmdbData['videos']['results'])->firstWhere('type', 'Trailer');
-                                @endphp
-                                @if($tmdbTrailer)
-                                    <a href="https://www.youtube.com/embed/{{ $tmdbTrailer['key'] }}?version=3&amp;autohide=3&amp;hl=ro_RO&amp;showinfo=0&amp;autoplay=1&amp;disablekb=0&amp;hd=1&amp;theme=dark" 
-                                       data-lity
-                                       class="trailer-link">
-                                        <i class="bi bi-play-circle-fill"></i> Play Trailer
-                                    </a>
-                                @else
-                                    <p class="no-trailer">No trailer available.</p>
-                                @endif
-                            @else
-                                <p class="no-trailer">No trailer available.</p>
                             @endif
                         </div>
                     </div>
@@ -248,21 +246,28 @@
         @endif
 
         @php
-            $castName = $castMember['name'] ?? '';
-            $castPlayed = $castMember['character'] ?? '';
+            $castId = $castMember['id'] ?? 0;
+            $castName = $castMember['name'] ?? 'Unknown Actor';
+            $castPlayed = $castMember['character'] ?? 'Unknown Role';
+            $castPlayed = Str::limit($castPlayed, 30); // Limit to 30 chars
             $castImage = $castMember['profile_path']
-                ? "<img class='actor-image' src='https://www.themoviedb.org/t/p/w300_and_h450_bestv2{$castMember['profile_path']}'>"
+                ? "<img class='actor-image' lazy='loading' src='https://www.themoviedb.org/t/p/w185/{$castMember['profile_path']}'>"
                 : "<img src='/images/not-found.jpg' class='actor-image'>";
         @endphp
 
         <div class="select text-center">
             {!! $castImage !!}
             <div class="mt-2">
-                <h5>
-                    <a href="https://www.themoviedb.org/person/{{ $castMember['id'] }}" rel="noreferrer" target="_blank">
+                <h6>
+                    @if($castId)
+                        <a href="https://www.themoviedb.org/person/{{ $castId }}" rel="noreferrer" target="_blank">
+                            <b>{{ $castName }}</b>
+                            <div class="small text-muted">{{ $castPlayed }}</div>
+                        </a>
+                    @else
                         <b>{{ $castName }}</b>
                         <div class="small text-muted">{{ $castPlayed }}</div>
-                    </a>
+                    @endif
                 </h5>
             </div>
         </div>
@@ -368,7 +373,7 @@
         /* background: rgba(20, 20, 30, 0.85); */
         backdrop-filter: blur(1px);
         border-radius: 16px;
-        overflow: hidden;
+        overflow: visible;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
         border: 1px solid rgba(255, 255, 255, 0.08);
     }
@@ -384,6 +389,7 @@
     
     .poster-wrapper {
         position: relative;
+        margin-top: -75px;
         border-radius: 12px;
         overflow: hidden;
         box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
@@ -556,16 +562,24 @@
     }
     
     .rating-badge {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    }
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #fff;
+}
+
+/* Color-coded by content level */
+.tv-y-rating { background: #4CAF50; }        /* Green – all ages */
+.tv-y7-rating { background: #7BC043; }       /* Lime – kids 7+ */
+.tv-g-rating { background: #2196F3; }        /* Blue – general audience */
+.tv-pg-rating { background: #FFC107; color: #000; } /* Yellow – parental guidance */
+.tv-14-rating { background: #FF9800; }       /* Orange – teens */
+.tv-ma-rating { background: #F44336; }       /* Red – mature */
+
     
     .tmdb-rating {
         background: linear-gradient(135deg, #01b4e4 0%, #1a73e8 100%);
@@ -656,8 +670,9 @@
     
     /* Trailer Section */
     .trailer-section {
-        margin-top: 15px;
-    }
+    margin-top: 15px;
+    text-align: center; 
+}
     
     .trailer-link {
         display: inline-flex;
@@ -666,13 +681,13 @@
         color: #fff;
         font-weight: 600;
         padding: 8px 16px;
-        background: rgba(255, 0, 0, 0.7);
+        background: rgba(80, 77, 77, 0.7);
         border-radius: 8px;
         transition: all 0.3s ease;
     }
     
     .trailer-link:hover {
-        background: rgba(255, 0, 0, 0.9);
+        background: rgba(48, 46, 46, 0.9);
         text-decoration: none;
         transform: translateY(-2px);
     }
@@ -797,9 +812,24 @@
         }
         
         .rating-badge {
-            width: 50px;
-            height: 50px;
-        }
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #fff;
+}
+
+/* Color-coded by content level */
+.tv-y-rating { background: #4CAF50; }        /* Green – all ages */
+.tv-y7-rating { background: #7BC043; }       /* Lime – kids 7+ */
+.tv-g-rating { background: #2196F3; }        /* Blue – general audience */
+.tv-pg-rating { background: #FFC107; color: #000; } /* Yellow – parental guidance */
+.tv-14-rating { background: #FF9800; }       /* Orange – teens */
+.tv-ma-rating { background: #F44336; }       /* Red – mature */
+
         
         .rating-value {
             font-size: 1.1rem;
@@ -843,24 +873,52 @@
 </style>
 
 @php
+
 function getTVRatingBadge($rating) {
-    switch ($rating) {
+    switch (strtoupper($rating)) {
         case 'TV-Y':
-            return "<span class='rating-badge tv-y-rating' data-bs-toggle='tooltip' title='All Children - Appropriate for all children'><i class='bi bi-emoji-smile'></i> TV-Y</span>";
+            return "<span class='rating-badge tv-y-rating' data-bs-toggle='tooltip' 
+                title='TV-Y — All Children. Suitable for all ages, including young children. Contains no violence, language, or sexual content.'>
+                <i class='bi bi-balloon-heart'></i> TV-Y
+            </span>";
+
         case 'TV-Y7':
-            return "<span class='rating-badge tv-y7-rating' data-bs-toggle='tooltip' title='Directed to Older Children - For children age 7 and older'><i class='bi bi-emoji-neutral'></i> TV-Y7</span>";
+            return "<span class='rating-badge tv-y7-rating' data-bs-toggle='tooltip' 
+                title='TV-Y7 — Older Children. Recommended for ages 7 and up. May contain mild fantasy violence or comedic action.'>
+                <i class='bi bi-emoji-sunglasses'></i> TV-Y7
+            </span>";
+
         case 'TV-G':
-            return "<span class='rating-badge tv-g-rating' data-bs-toggle='tooltip' title='General Audience - Suitable for all ages'><i class='bi bi-emoji-smile'></i> TV-G</span>";
+            return "<span class='rating-badge tv-g-rating' data-bs-toggle='tooltip' 
+                title='TV-G — General Audience. Suitable for all ages. Contains little or no violence, no strong language, and minimal sexual content.'>
+                <i class='bi bi-people'></i> TV-G
+            </span>";
+
         case 'TV-PG':
-            return "<span class='rating-badge tv-pg-rating' data-bs-toggle='tooltip' title='Parental Guidance Suggested - May contain material unsuitable for young children'><i class='bi bi-emoji-frown'></i> TV-PG</span>";
+            return "<span class='rating-badge tv-pg-rating' data-bs-toggle='tooltip' 
+                title='TV-PG — Parental Guidance Suggested. May contain some mild violence, suggestive themes, or infrequent coarse language.'>
+                <i class='bi bi-exclamation-circle'></i> TV-PG
+            </span>";
+
         case 'TV-14':
-            return "<span class='rating-badge tv-14-rating' data-bs-toggle='tooltip' title='Parents Strongly Cautioned - May be unsuitable for children under 14'><i class='bi bi-emoji-dizzy'></i> TV-14</span>";
+            return "<span class='rating-badge tv-14-rating' data-bs-toggle='tooltip' 
+                title='TV-14 — Parents Strongly Cautioned. May be unsuitable for children under 14 due to stronger language, violence, or sexual content.'>
+                <i class='bi bi-shield-exclamation'></i> TV-14
+            </span>";
+
         case 'TV-MA':
-            return "<span class='rating-badge tv-ma-rating' data-bs-toggle='tooltip' title='Mature Audience Only - Designed for adults and may be unsuitable for children under 17'><i class='bi bi-emoji-angry'></i> TV-MA</span>";
+            return "<span class='rating-badge tv-ma-rating' data-bs-toggle='tooltip' 
+                title='TV-MA — Mature Audience Only. Intended for adults and may contain explicit sexual content, strong language, or graphic violence.'>
+                <i class='bi bi-explicit'></i> TV-MA
+            </span>";
+
         default:
-            return "<span class='rating-badge'>$rating</span>";
+            return "<span class='rating-badge' data-bs-toggle='tooltip' title='Unrated or Unknown Rating'>
+                <i class='bi bi-question-circle'></i> $rating
+            </span>";
     }
 }
+
 
 function getLanguageName($code) {
     $languages = [

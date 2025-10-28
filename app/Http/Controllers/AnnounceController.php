@@ -21,6 +21,14 @@ class AnnounceController extends Controller
         if ($user->downloadpos === 'no') return $this->failure('Your download privileges are revoked');
         if ($user->hit_and_run_count > 20) return $this->failure('You cannot download any torrents due to more than 20 hit and runs.');
 
+        // --- STEP 2: Check banned clients ---
+        // $bannedClients = config('clients.banned', []);
+        // foreach ($bannedClients as $banned) {
+        //     if (stripos($agent, $banned) !== false) {
+        //         return $this->failure("Your client ($agent) is not allowed on this tracker.");
+        //     }
+        // }
+
         $ip = $request->ip() ?: $request->server('REMOTE_ADDR');
 
         $announceService = app(AnnounceService::class);

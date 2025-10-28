@@ -5,87 +5,98 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\History;
 use App\Models\User;
+use App\Models\HappyHour;
 use Illuminate\Support\Facades\Log;
 use Exception;
 
 class AwardSeedBonus extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'auto:seedbonus_award';
+    protected $description = 'Award seedbonus points per hour for active seeders, with Happy Hour bonuses.';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Award 0.15 seedbonus points for each torrent being seeded every hour based on history, excluding torrent owners';
-
-    /**
-     * Execute the console command.
-     */
-    final public function handle()
+    public function handle()
     {
-        $this->info('Starting the seed bonus awarding process...');
-        Log::info('Seed bonus awarding process started.');
+        $this->info('🟢 Starting seedbonus awarding process...');
+        Log::info('Seedbonus awarding process started.');
 
         try {
-            $current_time = now();
+            $currentTime = now();
 
-            // Eager load user and torrent relationships to reduce DB queries
-            History::with(['torrent', 'user'])
+            // Check if a Happy Hour is active
+            $happyHour = HappyHour::where('active', true)
+                            ->latest('start_at')
+                            ->first();
+
+            $baseBonus = 0.15;
+            $multiplier = 1;
+
+            if ($happyHour) {
+                $this->info("🎉 Happy Hour active: {$happyHour->theme}");
+                Log::info("Happy Hour active: {$happyHour->theme}");
+
+                // Use upload_multiplier as multiplier
+                $multiplier = $happyHour->upload_multiplier ?? 1;
+
+                // Optional: extra bonus for free download
+                if ($happyHour->free_download) {
+                    $this->info("💎 Free Download bonus applied!");
+                    $multiplier += 0.1; // add 0.1 bonus points
+                }
+            }
+
+            $effectiveBonus = $baseBonus * $multiplier;
+
+            // Process active seeders in chunks
+            History::with(['user', 'torrent'])
                 ->where('seeder', true)
-                ->where(function ($query) use ($current_time) {
+                ->where('active', true)
+                ->where(function ($query) use ($currentTime) {
                     $query->whereNull('last_awarded')
-                          ->orWhere('last_awarded', '<=', $current_time->copy()->subHour());
+                          ->orWhere('last_awarded', '<=', $currentTime->copy()->subHour());
                 })
-                ->chunk(100, function ($historyRecords) use ($current_time) {
-                    $userPoints = [];
+                ->chunkById(200, function ($records) use ($currentTime, $effectiveBonus) {
+                    $awardedUsers = [];
 
-                    foreach ($historyRecords as $record) {
+                    foreach ($records as $record) {
                         $user = $record->user;
                         $torrent = $record->torrent;
 
-                        // Skip if missing user/torrent or user is the owner
-                        if (!$user || !$torrent || $torrent->owner == $user->id) {
-                            $this->info("Skipping bonus for user ID {$record->user_id} (owner or missing data).");
+                        if (!$user || !$torrent) {
+                            Log::warning("Skipping record ID {$record->id}: Missing user or torrent.");
                             continue;
                         }
 
-                        $key = "{$user->id}-{$torrent->id}";
-
-                        if (!isset($userPoints[$key])) {
-                            $userPoints[$key] = [
-                                'user_id' => $user->id,
-                                'points' => 0.15, 
-                            ];
+                        if ($torrent->owner === $user->id) {
+                            Log::info("Skipping user {$user->id}: owns torrent {$torrent->id}.");
+                            continue;
                         }
 
-                        // Update last_awarded timestamp
-                        $record->last_awarded = $current_time;
-                        $record->save();
+                        if (!$record->seeder || !$record->active) {
+                            Log::info("Skipping user {$user->id}: not active seeder.");
+                            continue;
+                        }
 
-                        $this->info("Processed history record for user ID {$user->id} and torrent ID {$torrent->id}.");
+                        // Award seedbonus
+                        $user->increment('seedbonus', $effectiveBonus);
+                        $awardedUsers[] = $user->id;
+
+                        $record->update(['last_awarded' => $currentTime]);
+
+                        Log::info("Awarded {$effectiveBonus} points to user {$user->id} for torrent {$torrent->id}.");
                     }
 
-                    // Award seedbonus points
-                    foreach ($userPoints as $data) {
-                        User::where('id', $data['user_id'])->increment('seedbonus', $data['points']);
-                        $this->info("User ID {$data['user_id']} awarded {$data['points']} points.");
+                    if (!empty($awardedUsers)) {
+                        $this->info('✅ Seedbonus awarded to users: ' . implode(', ', $awardedUsers));
                     }
-
-                    $this->info('Batch processed successfully.');
                 });
 
-            $this->info('Seedbonus points awarding process completed.');
-            Log::info('Seedbonus points awarding process completed.');
+            $this->info('🎯 Seedbonus awarding process completed successfully.');
+            Log::info('Seedbonus awarding process completed successfully.');
 
         } catch (Exception $e) {
-            $this->error("An error occurred: {$e->getMessage()}");
-            Log::error("Seedbonus awarding process failed: {$e->getMessage()}", [
+            $this->error('❌ Error: ' . $e->getMessage());
+            Log::error('Seedbonus awarding failed', [
+                'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
         }

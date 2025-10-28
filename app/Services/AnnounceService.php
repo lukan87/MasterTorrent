@@ -7,6 +7,7 @@ use App\Models\Peer;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Models\History;
+use App\Models\HappyHour;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -20,102 +21,154 @@ class AnnounceService
         $md5PeerId = md5($peerId);
         $realUp    = $dto->uploaded;
         $realDown  = $dto->downloaded;
+        $ttl       = config('settings.cache_ttl', 30);
 
-        $ttl = config('settings.cache_ttl', 30);
-
-        // Load torrent
-        $torrent = Cache::remember("torrent:{$hash}", $ttl, function () use ($hash) {
-            return Torrent::select(['id', 'status', 'free', 'double', 'times_completed', 'seeders', 'leechers'])
-                ->with('peers')
+        // --- STEP 1: Cache torrent ---
+        $torrent = Cache::remember("torrent:{$hash}", $ttl, fn() =>
+            Torrent::select(['id', 'status', 'free', 'double', 'times_completed', 'seeders', 'leechers'])
                 ->where('info_hash', $hash)
-                ->first();
-        });
+                ->first()
+        );
 
-        if (!$torrent) return ['failure reason' => 'Torrent not found'];
+        if (!$torrent) {
+            return ['failure reason' => 'Torrent not found'];
+        }
 
-        // Load peers
-        $peers = Cache::remember("torrent:{$torrent->id}:peers:{$user->id}", $ttl, function () use ($torrent, $user) {
-            return Peer::where('torrent_id', $torrent->id)
-                ->where('user_id', '!=', $user->id)
+        // --- STEP HH: Check for active Happy Hour ---
+       $happyHour = HappyHour::where('active', true)
+        ->where('start_at', '<=', now())
+        ->where('end_at', '>=', now())
+        ->latest('start_at')
+        ->first();
+
+//         if ($happyHour) {
+//        $shoutKey = "happyhour:announced:{$happyHour->id}";
+    
+//     // Only announce once per Happy Hour
+//     if (!Cache::has($shoutKey)) {
+//         try {
+//             \App\Models\Shoutbox::create([
+//                 'user_id' => 2, // system user ID
+//                 'message' => "🎉 {$happyHour->theme} Happy Hour is live! {$happyHour->upload_multiplier}x Uploads" . 
+//                              ($happyHour->free_download ? " + Free Downloads!" : ""),
+//                 'parent_id' => null,
+//             ]);
+            
+//             // Cache the announcement for the duration of the HH to prevent duplicates
+//             Cache::put($shoutKey, true, $happyHour->end_at->diffInSeconds(now()));
+            
+//             \Log::info("Happy Hour announcement posted to Shoutbox: {$happyHour->theme}");
+//         } catch (\Throwable $e) {
+//             \Log::error("Failed to post Happy Hour shoutbox message: ".$e->getMessage());
+//         }
+//     }
+// }
+
+        // --- STEP 2: Cache peers ---
+        $peers = Cache::remember("torrent:{$torrent->id}:peers", $ttl, fn() =>
+            Peer::where('torrent_id', $torrent->id)
                 ->take(50)
                 ->get()
-                ->toArray();
-        });
+                ->toArray()
+        );
 
-        // Existing peer
-        $oldClient = Peer::where('torrent_id', $torrent->id)
-            ->where('user_id', $user->id)
-            ->where('peer_id', $peerId)
-            ->first();
+        // Remove announcing user
+        $peers = array_filter($peers, fn($p) => $p['user_id'] !== $user->id);
 
-        $prevTs = $oldClient?->client_updated_at?->timestamp ?? Carbon::now()->timestamp;
-        $wasSeeding = $oldClient ? (int)$oldClient->seeder === 1 : false;
+        // --- STEP 3: Check connectable ---
+        $connectable = Cache::remember("peer:connectable:{$ip}:{$dto->port}", 300, fn() =>
+            $this->checkConnectable($ip, $dto->port)
+        );
 
-        $connectable = $this->checkConnectable($ip, $dto->port);
+        $prevTs = Carbon::now();
+        $wasSeeding = false;
 
-        // Update or create peer
-        $client = Peer::updateOrCreate(
+        // --- STEP 4: Upsert Peer safely ---
+        $client = $this->safeTransaction(function () use ($torrent, $user, $peerId, $md5PeerId, $ip, $dto, $agent, $connectable, &$prevTs, &$wasSeeding) {
+            $oldClient = Peer::where('torrent_id', $torrent->id)
+                ->where('user_id', $user->id)
+                ->where('peer_id', $dto->peerId)
+                ->lockForUpdate()
+                ->first();
+
+            $prevTs = $oldClient?->updated_at ?? Carbon::now();
+            $wasSeeding = $oldClient ? (int)$oldClient->seeder === 1 : false;
+
+           return Peer::updateOrCreate(
             ['torrent_id' => $torrent->id, 'user_id' => $user->id, 'peer_id' => $peerId],
             [
-                'md5_peer_id' => $md5PeerId,
-                'ip'          => $ip,
-                'port'        => $dto->port,
-                'agent'       => $agent,
-                'uploaded'    => $realUp,
-                'downloaded'  => $realDown,
-                'left'        => $dto->left,
-                'seeder'      => $dto->left == 0 ? 1 : 0,
-                'active'      => $dto->event !== 'stopped',
-                'connectable' => $connectable,
+                'md5_peer_id'       => $md5PeerId,
+                'ip'                => $ip,
+                'port'              => $dto->port,
+                'agent'             => $agent,
+                'uploaded'          => $dto->uploaded,
+                'downloaded'        => $dto->downloaded,
+                'left'              => $dto->left,
+                'seeder'            => $dto->left == 0 ? 1 : 0,
+                'active'            => $dto->event !== 'stopped',
+                'connectable'       => $connectable,
+                'client_updated_at' => now(),
             ]
         );
+        });
 
-        $elapsed = max(0, Carbon::now()->timestamp - $prevTs);
+        // --- STEP 5: Update History + seedtime ---
+        $history = $this->safeTransaction(function () use ($user, $hash, $torrent, $ip, $agent, $dto) {
+            return History::firstOrCreate(
+                ['user_id' => $user->id, 'info_hash' => $hash],
+                [
+                    'torrent_id' => $torrent->id,
+                    'ip'         => $ip,
+                    'agent'      => $agent,
+                    'active'     => true,
+                    'seeder'     => $dto->left == 0 ? 1 : 0,
+                    'seedtime'   => 0,
+                ]
+            );
+        });
 
-        // History
-        $history = History::firstOrCreate(
-            ['user_id' => $user->id, 'info_hash' => $hash],
-            [
-                'torrent_id' => $torrent->id,
-                'ip'         => $ip,
-                'agent'      => $agent,
-                'active'     => true,
-                'seeder'     => $dto->left == 0 ? 1 : 0,
-                'seedtime'   => 0,
-            ]
-        );
+        // --- STEP 6: Calculate seedtime ---
+        $now = Carbon::now();
+        if ($wasSeeding) {
+            $delta = max(0, $now->timestamp - $prevTs->timestamp);
+            $history->seedtime += $delta;
+        }
 
-        // Free/double
+        // --- STEP 7: Calculate deltas for upload/download ---
         $userSlot = DB::table('user_slots')->where('user_id', $user->id)->where('torrent_id', $torrent->id)->first();
         $isFree   = $userSlot ? (bool)$userSlot->free : false;
         $isDouble = $userSlot ? (bool)$userSlot->double : false;
         $userFree = (bool)$user->is_freeleech;
 
-        // Calculate deltas
         if ($dto->event !== 'stopped' && ($realUp > 0 || $realDown > 0)) {
             $deltaUp = max(0, $realUp - (float)$history->client_uploaded);
             $deltaDn = max(0, $realDown - (float)$history->client_downloaded);
         } else {
-            $deltaUp = max(0, $realUp - ($oldClient?->uploaded ?? 0));
-            $deltaDn = max(0, $realDown - ($oldClient?->downloaded ?? 0));
+            $deltaUp = max(0, $realUp - ($client?->uploaded ?? 0));
+            $deltaDn = max(0, $realDown - ($client?->downloaded ?? 0));
         }
+        //Happy Hour//
+        $multiplier = 1;
+        $freeDownload = false;
 
-        $modUp = ($torrent->double || $isDouble || config('settings.double')) ? $deltaUp * 2 : $deltaUp;
-        $modDn = ($torrent->free || $isFree || $userFree || config('settings.freeleech')) ? 0 : $deltaDn;
+          if ($happyHour) {
+           $multiplier = $happyHour->upload_multiplier ?? 1;
+           $freeDownload = $happyHour->free_download;
+                          }
 
-        if ($wasSeeding && $elapsed > 0) {
-            $history->seedtime += $elapsed;
-        }
+        //Happy Hour
 
-        // Update history
+        $modUp = ($torrent->double || $isDouble || config('settings.double') || $happyHour) ? $deltaUp * $multiplier : $deltaUp;
+
+        $modDn = ($torrent->free || $isFree || $userFree || config('settings.freeleech') || $freeDownload) ? 0 : $deltaDn;
+
+        // --- STEP 8: Update history ---
         $history->uploaded          += $modUp;
         $history->actual_uploaded   += $deltaUp;
         $history->client_uploaded    = $realUp;
-
         $history->downloaded        += $modDn;
         $history->actual_downloaded += $deltaDn;
         $history->client_downloaded  = $realDown;
-
         $history->left    = $dto->left;
         $history->ip      = $ip;
         $history->agent   = $agent;
@@ -123,23 +176,16 @@ class AnnounceService
         $history->seeder  = $dto->left == 0 ? 1 : 0;
         $history->save();
 
-        // Handle event
+if ($client) {
         $this->handleEvent($dto, $client, $history, $user, $torrent, $modUp, $modDn);
+}
+        // --- STEP 9: Incremental seeders/leechers safely ---
+      // Recalculate torrent stats
+if (in_array($dto->event, ['started', 'completed', 'stopped'])) {
+    DB::afterCommit(fn() => $this->updateTorrentStats($torrent));
+}
 
-        // Update client timestamp
-        $client->client_updated_at = Carbon::now();
-        $client->save();
 
-        // Update torrent stats
-        $torrent->seeders  = Peer::where('torrent_id', $torrent->id)->where('left', 0)->count();
-        $torrent->leechers = Peer::where('torrent_id', $torrent->id)->where('left', '>', 0)->count();
-        $torrent->save();
-
-        // Clear cache
-        Cache::forget("torrent:{$torrent->info_hash}");
-        Cache::forget("torrent:{$torrent->id}:peers:{$user->id}");
-
-        // Return final response
         return [
             'peers'      => $peers,
             'torrent'    => $torrent,
@@ -147,93 +193,136 @@ class AnnounceService
         ];
     }
 
-    private function handleEvent($dto, Peer $client, History $history, User $user, Torrent $torrent, float $modUp, float $modDn)
-    {
-        $event = $dto->event;
-        $left  = $dto->left;
+ private function handleEvent($dto, Peer $client, History $history, User $user, Torrent $torrent, float $modUp, float $modDn)
+{
+    $event = $dto->event;
+    $left  = $dto->left;
 
-        if (in_array($event, ['started', 'completed'])) {
-            $client->connectable = $this->checkConnectable($client->ip, $client->port);
-        }
+    switch ($event) {
+        case 'started':
+            $client->update([
+                'active'    => true,
+                'seeder'    => $left == 0 ? 1 : 0,
+                'left'      => $left,
+                'connectable' => $this->checkConnectable($client->ip, $client->port),
+            ]);
+            $history->update([
+                'active' => true,
+                'seeder' => $left == 0 ? 1 : 0,
+                'left'   => $left,
+            ]);
+            break;
 
-        switch ($event) {
-            case 'started':
-                $client->active = true;
-                $client->save();
-                break;
+        case 'completed':
+            $this->safeTransaction(function () use ($client, $history, $torrent, $left) {
+                $client->update(['active' => true, 'seeder' => 1, 'left' => $left]);
+                $history->update(['active' => true, 'seeder' => 1, 'completed_at' => now(), 'left' => $left]);
+                $torrent->increment('times_completed');
+            });
+            break;
 
-            case 'completed':
-                $client->active = true;
-                $client->seeder = 1;
-                $client->left   = $left;
-                $client->save();
-
-                $history->active = true;
-                $history->seeder = 1;
-                $history->completed_at = Carbon::now();
-                $history->save();
-
-                $torrent->times_completed++;
-                $torrent->save();
-                Cache::forget("torrent:{$torrent->info_hash}");
-                Cache::forget("torrent:{$torrent->id}:peers:{$user->id}");
-                break;
-
-            case 'stopped':
-                $client->active  = false;
-                $client->seeder  = 0;
-                $client->left    = $left;
-                $client->save();
+        case 'stopped':
+            $this->safeTransaction(function () use ($client, $history, $torrent) {
                 $client->delete();
+                $history->update(['active' => false, 'seeder' => false]);
+            });
+            break;
 
-                $history->active = false;
-                $history->seeder = false;
-                // Do not reset uploaded/downloaded
-                $history->save();
-                Cache::forget("torrent:{$torrent->info_hash}");
-                Cache::forget("torrent:{$torrent->id}:peers:{$user->id}");
-                break;
+        default:
+            $client->update([
+                'active' => true,
+                'seeder' => $left == 0 ? 1 : 0,
+                'left'   => $left,
+            ]);
+            $history->update([
+                'active' => true,
+                'seeder' => $left == 0 ? 1 : 0,
+                'left'   => $left,
+            ]);
+            break;
+    }
 
-            default:
-                $client->active = true;
-                $client->left   = $left;
-                $client->seeder = $left == 0 ? 1 : 0;
-                $client->save();
+    // Update user stats
+    $user->increment('uploaded', $modUp);
+    $user->increment('downloaded', $modDn);
 
-                $history->active = true;
-                $history->seeder = $left == 0 ? 1 : 0;
-                $history->save();
-                break;
+    // Recalculate torrent stats and clear cache immediately
+    $this->updateTorrentStats($torrent);
+}
+
+
+private function updateTorrentStats(Torrent $torrent): void
+{
+    $counts = Peer::where('torrent_id', $torrent->id)
+        ->selectRaw('
+            SUM(CASE WHEN seeder = 1 THEN 1 ELSE 0 END) as seeders,
+            SUM(CASE WHEN seeder = 0 THEN 1 ELSE 0 END) as leechers
+        ')
+        ->first();
+
+    if ($counts) {
+        $torrent->updateQuietly([
+            'seeders'  => (int) $counts->seeders,
+            'leechers' => (int) $counts->leechers,
+            'updated_at' => now(),
+        ]);
+
+      // Invalidate caches
+        Cache::forget("torrent:{$torrent->info_hash}");
+        Cache::forget("torrent:{$torrent->id}:peers");
+
+        // Optional: refresh torrent cache immediately
+        Cache::put("torrent:{$torrent->info_hash}", $torrent, config('settings.cache_ttl', 30));
+    }
+}
+
+
+
+    private function safeTransaction(callable $callback, int $maxAttempts = 3)
+    {
+        $attempts = 0;
+        while ($attempts < $maxAttempts) {
+            try {
+                return DB::transaction($callback);
+            } catch (\Illuminate\Database\QueryException $e) {
+                if (str_contains($e->getMessage(), 'Deadlock')) {
+                    $attempts++;
+                    usleep(100000 * $attempts);
+                    continue;
+                }
+                throw $e;
+            }
         }
-
-        // Update user totals
-        $user->uploaded   += $modUp;
-        $user->downloaded += $modDn;
-        $user->save();
+        \Log::warning("Deadlock persisted after {$maxAttempts} retries in AnnounceService::safeTransaction");
+        return null;
     }
 
     public function givePeers(array $peers, bool $compact, bool $noPeerId): mixed
     {
         if ($compact) {
-            $pcomp = "";
+            $pcomp = '';
             foreach ($peers as $p) {
-                if (!isset($p['ip'])) continue;
+                $ip = $p['ip'] ?? null;
                 $port = $p['port'] ?? 0;
-                if (filter_var($p['ip'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-                    $pcomp .= pack('Nn', ip2long($p['ip']), $port);
-                } elseif (filter_var($p['ip'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
-                    $ipBinary = @inet_pton($p['ip']);
-                    if ($ipBinary !== false) $pcomp .= $ipBinary . pack('n', $port);
-                }
+                if (!$ip) continue;
+                $ipBinary = @inet_pton($ip);
+                if ($ipBinary === false) continue;
+                $pcomp .= $ipBinary . pack('n', $port);
             }
             return $pcomp;
         }
 
-        if ($noPeerId) {
-            return array_map(fn($p) => ['ip' => $p['ip'] ?? '', 'port' => $p['port'] ?? 0], array_filter($peers, fn($p) => isset($p['ip'])));
+        $result = [];
+        foreach ($peers as $p) {
+            if (!isset($p['ip'])) continue;
+            $peerData = ['ip' => $p['ip'] ?? '', 'port' => $p['port'] ?? 0];
+            if (!$noPeerId && isset($p['peer_id'])) {
+                $peerData['peer_id'] = $p['peer_id'];
+            }
+            $result[] = $peerData;
         }
 
-        return array_filter($peers, fn($p) => isset($p['ip']));
+        return $result;
     }
 
     private function checkConnectable(string $ip, int $port): bool

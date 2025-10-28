@@ -25,7 +25,7 @@
 
     
     <div class="card shadow-lg border-0">
-        <div class="card-header bg-primary text-white text-center">
+        <div class="card-header text-white text-center">
             <h2 class="fw-bold"><i class="bi bi-cloud-upload"></i> Seeding Torrents</h2>
         </div>
         <div class="card-body d-flex flex-column align-items-center w-100">
@@ -53,15 +53,18 @@
                             </div>
 
                             
-                            <div class="text-md-end ms-auto">
-                                <span class="badge bg-success me-1" data-bs-toggle="tooltip" title="Actual Upload: {{ \App\Helpers\FormatHelper::formatSize($history->actual_uploaded) }}">
-                                    {{ \App\Helpers\FormatHelper::formatSize($history->uploaded) ?? '0' }}
-                                </span>
-                                <span class="badge bg-primary me-1" data-bs-toggle="tooltip" title="Actual Download: {{ \App\Helpers\FormatHelper::formatSize($history->actual_downloaded ?? '0') }}">
-                                    {{ \App\Helpers\FormatHelper::formatSize($history->downloaded) ?? '0' }}
-                                </span>
-                                <span class="badge bg-secondary">{{ \App\Helpers\FormatHelper::formatTime($history->seedtime) ?? '0' }}</span>
-                            </div>
+                           <div class="text-md-end ms-auto">
+   <span class="badge bg-success me-1" data-bs-toggle="tooltip" title="Actual Uploaded: {{ \App\Helpers\FormatHelper::formatSize($history->actual_uploaded) }}">
+                                Uploaded: {{ \App\Helpers\FormatHelper::formatSize($history->uploaded) }}
+                            </span>
+    <span class="badge bg-primary me-1" data-bs-toggle="tooltip" title="Actual Downloaded: {{ \App\Helpers\FormatHelper::formatSize($history->actual_downloaded) }}">
+                                Downloaded: {{ \App\Helpers\FormatHelper::formatSize($history->downloaded) }}
+                            </span>
+    <span class="badge bg-secondary">
+        {{ \App\Helpers\FormatHelper::formatTime($history->total_seedtime ?? 0) }}
+    </span>
+</div>
+
 
                         </div>
                     </div>

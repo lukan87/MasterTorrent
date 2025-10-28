@@ -49,8 +49,8 @@ return [
     | - min_interval: minimum wait time before re-announcing
     |
     */
-    'announce_interval' => 60 * 30, // 30 minutes
-    'min_interval'      => 60 * 10, // 10 minutes
+    'announce_interval' => 60 * 45, // 45 minutes
+    'min_interval'      => 60 * 20, // 20 minutes
 
 
 

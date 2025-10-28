@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Auth;
 use Monicahq\Cloudflare\LaravelCloudflare;
 use Monicahq\Cloudflare\Facades\CloudflareProxies;
 use App\Models\Message;
-use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 
@@ -28,7 +27,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
 
-        DB::statement("SET time_zone = '+00:00'");
+        //DB::statement("SET time_zone = '+00:00'");
 
         // Add your custom middleware here globally
         app('router')->pushMiddlewareToGroup('web', \App\Http\Middleware\CheckUserEnabled::class);
@@ -41,18 +40,17 @@ class AppServiceProvider extends ServiceProvider
             $leechingCount = 0;
             $messages = collect();
             $unreadMessagesCount = 0; // Initialize to 0 in case there is no authenticated user
-          //  $user = User::findOrFail($user->id);
           
 
             if ($user) {
                 // If the user is authenticated, fetch seeding and leeching counts
-                $seedingCount = $user->seedingCount(); // Call the method to get seeding count
-                $leechingCount = $user->leechingCount(); // Call the method to get leeching count
+                $seedingCount = $user->seedingCount(); 
+                $leechingCount = $user->leechingCount(); 
                 $unreadMessagesCount = Message::where('receiver_id', $user->id)
                                               ->where('is_read', false)
                                               ->count();
 
-                // Fetch the last 3 messages for the authenticated user
+                
                 $messages = Message::where('receiver_id', $user->id)
                     ->latest()
                     ->take(5)

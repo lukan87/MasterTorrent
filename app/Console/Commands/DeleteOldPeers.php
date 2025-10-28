@@ -6,8 +6,7 @@ use Illuminate\Console\Command;
 use App\Models\Peer;
 use App\Models\History;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log; // Add Log Facade
+use Illuminate\Support\Facades\Log;
 
 class DeleteOldPeers extends Command
 {
@@ -23,47 +22,59 @@ class DeleteOldPeers extends Command
      *
      * @var string
      */
-    protected $description = 'Flushes peers that have not been updated in the last hour';
+    protected $description = 'Flushes peers not updated in the last hour and marks related history as inactive';
 
     /**
      * Execute the console command.
      */
     final public function handle(): void
     {
-        // Log when the command is executed
-        Log::info('Auto:flush_peers command started at ' . Carbon::now());
+        $now = Carbon::now();
+        $cutoff = $now->copy()->subHour();
 
-        $carbon = new Carbon();
+        Log::info("Auto:flush_peers started at {$now}");
 
-        // Get the peers that need to be deleted
-        $peers = Peer::select(['id', 'hash', 'user_id', 'updated_at', 'client_updated_at'])
-                     ->where('client_updated_at', '<', $carbon->copy()->subHours(1)->toDateTimeString())
-                    //  ->where('seeder', '=', 0)
-                     ->get();
+        // Step 1: Handle old peers
+        $peers = Peer::select(['id', 'torrent_id', 'user_id', 'updated_at', 'client_updated_at'])
+            ->where('client_updated_at', '<', $cutoff)
+            ->get();
 
-        // Log the number of peers found
-        Log::info('Found ' . $peers->count() . ' peers to be flushed.');
+        Log::info('Found ' . $peers->count() . ' old peers to flush.');
 
-        // Process each peer
         foreach ($peers as $peer) {
-            $history = History::where('info_hash', '=', $peer->hash)
-                              ->where('user_id', '=', $peer->user_id)
-                              ->first();
+            // Update related history (if any)
+            $history = History::where('torrent_id', $peer->torrent_id)
+                ->where('user_id', $peer->user_id)
+                ->first();
+
             if ($history) {
                 $history->active = false;
                 $history->seeder = false;
                 $history->save();
-                $this->comment("History updated for peer with ID: {$peer->id} and Hash: {$peer->hash}");
-                //Log::info("History updated for peer with ID: {$peer->id} and Hash: {$peer->hash}");
+
+                $this->comment("History updated for Peer ID {$peer->id} (Torrent ID: {$peer->torrent_id})");
             }
 
             $peer->delete();
-            $this->comment("Peer with ID: {$peer->id} and Hash: {$peer->hash} has been deleted. Last updated at {$peer->client_updated_at}");
-           // Log::info("Peer with ID: {$peer->id} and Hash: {$peer->hash} has been deleted.");
+            $this->comment("Peer ID {$peer->id} (Torrent ID: {$peer->torrent_id}) deleted. Last update: {$peer->client_updated_at}");
         }
 
-        // Log completion of the command
-        $this->comment('Automated Flush Old Peers Command Complete');
-        Log::info('Auto:flush_peers command completed at ' . Carbon::now());
+        // Step 2: Handle old history entries without deleting peers
+        $oldHistories = History::where('updated_at', '<', $cutoff)
+            ->where('active', true)
+            ->get();
+
+        Log::info('Found ' . $oldHistories->count() . ' old histories to mark inactive.');
+
+        foreach ($oldHistories as $history) {
+            $history->active = false;
+            $history->seeder = false;
+            $history->save();
+
+            $this->comment("Marked History ID {$history->id} as inactive (User ID: {$history->user_id}, Torrent ID: {$history->torrent_id})");
+        }
+
+        $this->comment('Auto Flush Old Peers & Histories Command Complete.');
+        Log::info("Auto:flush_peers completed at {$now}");
     }
 }

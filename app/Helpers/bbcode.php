@@ -67,7 +67,7 @@ if (!function_exists('convertCustomTagsToHtml')) {
                 $url = $matches[1];
                 preg_match('/(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)|youtu\.be\/([a-zA-Z0-9_-]+)/', $url, $videoIdMatch);
                 $videoId = $videoIdMatch[1] ?? $videoIdMatch[2] ?? null;
-                return $videoId ? '<div class="videoWrapper"><iframe src="https://www.youtube.com/embed/' . $videoId . '" frameborder="0" allowfullscreen ></iframe></div>' : $url;
+                return $videoId ? "<div class=\"videoWrapper\"><iframe src=\"https://www.youtube.com/embed/$videoId\" frameborder=\"0\" allowfullscreen ></iframe></div>" : $url;
             },
             $content
         );

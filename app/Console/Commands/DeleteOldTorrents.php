@@ -17,23 +17,23 @@ class DeleteOldTorrents extends Command
 
     public function handle(): int
     {
-        $this->info("🔍 Starting torrents cleanup...");
+        $this->info(" Starting torrents cleanup...");
 
-        $threeYearsAgo = Carbon::now()->subYears(3);
+        $oneYearAgo = Carbon::now()->subYears(1);
 
         $torrents = DB::table('torrents')
-            ->where('created_at', '<', $threeYearsAgo)
+            ->where('created_at', '<', $oneYearAgo)
             ->where('seeders', 0)
             ->select('id', 'name', 'file_name', 'created_at')
             ->orderBy('created_at', 'asc')
             ->get();
 
         if ($torrents->isEmpty()) {
-            $this->info("✅ No torrents found for deletion.");
+            $this->info(" No torrents found for deletion.");
             return SymfonyCommand::SUCCESS;
         }
 
-        $this->info("⚠️  Found {$torrents->count()} torrents to delete.\n");
+        $this->info("  Found {$torrents->count()} torrents to delete.\n");
 
         // Create progress bar
         $bar = $this->output->createProgressBar($torrents->count());
@@ -51,7 +51,7 @@ class DeleteOldTorrents extends Command
                     try {
                         unlink($filePath);
                     } catch (\Exception $e) {
-                        $this->warn("⚠️ Could not delete file: {$filePath} ({$e->getMessage()})");
+                        $this->warn(" Could not delete file: {$filePath} ({$e->getMessage()})");
                     }
                 }
             }
@@ -70,7 +70,7 @@ class DeleteOldTorrents extends Command
         $bar->finish();
         $this->newLine(2);
 
-        $this->info("🎉 Cleanup complete. Deleted {$torrents->count()} torrents, related data, torrent files, and genres.");
+        $this->info(" Cleanup complete. Deleted {$torrents->count()} torrents, related data, torrent files, and genres.");
 
         return SymfonyCommand::SUCCESS;
     }

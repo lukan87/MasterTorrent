@@ -2,30 +2,48 @@
 
 @section('content')
 
+@section('content')
 
-   
-    <div class="row mt-5 mb-4">
-        <!-- First Card: Seed Bonus Info -->
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-header">Seed Bonus</h5>
-                    <p class="card-text">
-                        <strong>Your Seed Bonus Points:</strong> {{ Auth::user()->seedbonus }}
+@php
+    $happyHour = \App\Models\HappyHour::where('active', true)->latest('start_at')->first();
+    $multiplier = $happyHour ? $happyHour->upload_multiplier : 1;
+    $remaining = $happyHour ? now()->diffForHumans($happyHour->end_at, ['short' => true, 'parts' => 2]) : null;
+@endphp
+
+<div class="row mt-5 mb-4">
+    <!-- First Card: Seed Bonus Info -->
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-header">Seed Bonus</h5>
+                <p class="card-text">
+                    <strong>Your Seed Bonus Points:</strong> {{ Auth::user()->seedbonus }}
+                </p>
+                <p class="card-text">
+                    <strong>Currently Seeding:</strong> 
+                    <strong>{{ Auth::user()->seeding_torrent_count }}</strong> Torrent{{ Auth::user()->seeding_torrent_count == 1 ? '' : 's' }}
+                </p>
+                <p class="card-text">
+                    <strong>Your Earning Rate:</strong> {{ Auth::user()->seedbonus_per_hour * $multiplier }} Points per hour
+                    @if($happyHour)
+                        <span class="badge bg-success ms-2">
+                            🎉 Happy Hour! {{ $multiplier }}x
+                        </span>
+                    @endif
+                </p>
+                @if($happyHour)
+                    <p class="card-text text-warning">
+                        Duration remaining: {{ $remaining }} 
+                        @if($happyHour->free_download)
+                            | Free Downloads Enabled!
+                        @endif
                     </p>
-                    <p class="card-text">
-                        <strong>Currently Seeding:</strong> 
-                        <strong>{{ Auth::user()->seeding_torrent_count }}</strong> Torrent{{ Auth::user()->seeding_torrent_count == 1 ? '' : 's' }}
-                    </p>
-                    <p class="card-text">
-                        <strong>Your Earning Rate:</strong> {{ Auth::user()->seedbonus_per_hour }} Points per hour
-                    </p>
-                    <p class="card-text">
-                        <strong>0.15 points per hour for seeding a torrent</strong>
-                    </p>
-                </div>
+                @else
+                    <p class="card-text">Standard: 0.15 points per hour for seeding a torrent</p>
+                @endif
             </div>
         </div>
+    </div>
     
         <!-- Second Card: Other Ways to Earn -->
         <div class="col-md-6">

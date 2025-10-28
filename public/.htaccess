@@ -5,19 +5,23 @@
 
     RewriteEngine On
 
+    # Permite accesul necondiționat pentru IP-ul 62.210.38.52
+    RewriteCond %{REMOTE_ADDR} ^62\.210\.38\.52$
+    RewriteRule .* - [L]
+
+    # Permite accesul doar prin domeniile specificate
+    RewriteCond %{HTTP_HOST} !^(www\.)?(last-torrents\.org|lastfiles\.ro)$ [NC]
+    RewriteCond %{HTTP_HOST} !^(localhost|127\.0\.0\.1)$ [NC]
+    RewriteRule ^ - [F]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
     # Redirect Trailing Slashes If Not A Folder...
-    RewriteCond %{REQUEST_URI} !rss-style.xsl$
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_URI} (.+)/$
     RewriteRule ^ %1 [L,R=301]
-
-    # Allow direct access to images, CSS, JS, and fonts
-    RewriteCond %{REQUEST_URI} ^/(css|js|images|fonts|storage)/
-    RewriteRule . - [L]
 
     # Send Requests To Front Controller...
     RewriteCond %{REQUEST_FILENAME} !-d
@@ -28,3 +32,37 @@
     AddType text/xsl .xsl
     AddCharset UTF-8 .xsl
 </IfModule>
+
+## EXPIRES CACHING ##
+<IfModule mod_expires.c>
+ExpiresActive On
+ExpiresByType image/jpg "access 1 year"
+ExpiresByType image/jpeg "access 1 year"
+ExpiresByType image/gif "access 1 year"
+ExpiresByType image/png "access 1 year"
+ExpiresByType text/css "access 1 month"
+ExpiresByType application/pdf "access 1 month"
+ExpiresByType application/javascript "access 1 month"
+ExpiresByType application/x-javascript "access 1 month"
+ExpiresByType application/x-shockwave-flash "access 1 month"
+ExpiresByType image/x-icon "access 1 year"
+ExpiresDefault "access 2 days"
+</IfModule>
+
+# GZIP COMPRESSION
+# compress text, html, javascript, css, xml:
+AddOutputFilterByType DEFLATE text/plain
+AddOutputFilterByType DEFLATE text/html
+AddOutputFilterByType DEFLATE text/xml
+AddOutputFilterByType DEFLATE text/css
+AddOutputFilterByType DEFLATE application/xml
+AddOutputFilterByType DEFLATE application/xhtml+xml
+AddOutputFilterByType DEFLATE application/rss+xml
+AddOutputFilterByType DEFLATE application/javascript
+AddOutputFilterByType DEFLATE application/x-javascript
+
+# compress HTML
+<files *.html>
+SetOutputFilter DEFLATE
+</files>
+# GZIP COMPRESSION

@@ -50,6 +50,9 @@ class User extends Authenticatable
         'invite_code',
         'slots',
         'invites',
+        'last_upload',
+        'failed_attempts',
+        'banned_until',
     ];
 
 
@@ -308,6 +311,11 @@ public function isOnline()
 {
     // Consider user online if they've been active in the last 5 minutes
     return $this->last_activity && $this->last_activity->gt(now()->subMinutes(5));
+}
+
+public function seedboxes()
+{
+    return $this->hasMany(Seedbox::class);
 }
 
 

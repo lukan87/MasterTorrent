@@ -96,7 +96,7 @@
                                         <span class="text-muted">{{ $votesCount }} ({{ $percentage }}%)</span>
                                     </div>
                                     <div class="progress" style="height: 10px;">
-                                        <div class="progress-bar
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated
                                              @if($isUserChoice) bg-success
                                              @elseif($votesCount == $maxVotes && $maxVotes > 0) bg-info
                                              @else bg-primary @endif"

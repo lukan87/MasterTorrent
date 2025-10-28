@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Torrent;
 use App\Models\Poll;
 use App\Models\Topic;
+use App\Models\HappyHour;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
@@ -60,17 +61,14 @@ class HomeService
         return $query->orderByDesc('seeders')->limit($limit)->get();
     }
 
-    public function getRecommendedTorrents()
-    {
-        return $this->cacheQuery('recommended_torrents', function () {
-            return Torrent::with('genres')
-                          ->where('recommended', true)
-                          ->where('category_id', '!=', 27)
-                          ->latest('created_at')
-                          ->limit(20)
-                          ->get();
-        });
-    }
+    public function getCurrentHappyHour(): ?HappyHour
+{
+    return HappyHour::where('active', true)
+                    ->where('start_at', '<=', now())
+                    ->where('end_at', '>=', now())
+                    ->latest('start_at')
+                    ->first();
+}
 
     public function getDashboardData(): array
     {
@@ -86,8 +84,6 @@ class HomeService
             'topMovies'         => $this->cacheQuery('top_movies', fn() => $this->getTopTorrents(null, 'movie')),
             'topSeries'         => $this->cacheQuery('top_series', fn() => $this->getTopTorrents(null, 'tv')),
 
-            'recommendedTorrents' => $this->getRecommendedTorrents(),
-
             'topUploaders'      => User::orderBy('uploaded', 'desc')->take(10)->get(),
             'topDownloaders'    => User::orderBy('downloaded', 'desc')->take(10)->get(),
 
@@ -101,6 +97,8 @@ class HomeService
 
             'uniqueSeeders'     => $this->cacheQuery('unique_seeders', fn() => DB::table('peers')->where('seeder', 1)->where('active', true)->count()),
             'uniqueLeechers'    => $this->cacheQuery('unique_leechers', fn() => DB::table('peers')->where('seeder', 0)->where('active', true)->count()),
+
+            'currentHappyHour'  => $this->getCurrentHappyHour(),
         ];
     }
 }

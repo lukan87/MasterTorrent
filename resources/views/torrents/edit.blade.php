@@ -44,7 +44,7 @@
                 @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
                 <div class="mb-3">
                     <label class="form-label"><i class="bi bi-bookmark-star me-1"></i>Torrent Tags</label><br>
-                    @foreach (['free' => 'Free', 'double' => 'Double', 'sticky' => 'Sticky', 'recommended' => 'Recommended', 'seedbox' => 'Seedbox'] as $field => $label)
+                    @foreach (['free' => 'Free', 'double' => 'Double', 'sticky' => 'Sticky', 'seedbox' => 'Seedbox'] as $field => $label)
                         <div class="form-check form-check-inline">
                             <input type="checkbox" name="{{ $field }}" id="{{ $field }}" class="form-check-input" value="1" {{ old($field, $torrent->$field) ? 'checked' : '' }}>
                             <label for="{{ $field }}" class="form-check-label">{{ $label }}</label>
@@ -54,6 +54,14 @@
                 @endif
 
                 <hr class="my-4">
+
+                <div class="mb-3">
+                    <label for="imdb_url" class="form-label"><i class="bi bi-film me-1"></i>IMDB URL</label>
+                    <input type="url" name="imdb_url" id="imdb_url" class="form-control" value="{{ old('imdb_url', $torrent->imdb_url) }}">
+                    <button type="button" class="btn btn-outline-primary mt-2" onclick="fetchIMDBInfo()">
+                        <i class="bi bi-cloud-download me-1"></i>Fetch Info
+                    </button>
+                </div>
 
                 <div class="mb-3">
                     <label for="description" class="form-label"><i class="bi bi-info-square me-1"></i>Description</label>
@@ -104,14 +112,6 @@
                         </div>
                     </div>
                 @endif
-
-                <div class="mb-3">
-                    <label for="imdb_url" class="form-label"><i class="bi bi-film me-1"></i>IMDB URL</label>
-                    <input type="url" name="imdb_url" id="imdb_url" class="form-control" value="{{ old('imdb_url', $torrent->imdb_url) }}">
-                    <button type="button" class="btn btn-outline-primary mt-2" onclick="fetchIMDBInfo()">
-                        <i class="bi bi-cloud-download me-1"></i>Fetch Info
-                    </button>
-                </div>
 
                 <div class="mb-4">
                     <label for="trailer" class="form-label"><i class="bi bi-play-btn me-1"></i>Trailer</label>

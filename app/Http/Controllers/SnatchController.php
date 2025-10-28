@@ -7,57 +7,95 @@ use App\Models\History;
 use App\Models\User;
 use App\Models\UserClass;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class SnatchController extends Controller
 {
-    public function snatchlist($userId = null)
-    {
-        // Get the current user's class
-        $currentUserClass = Auth::user()->user_class;
-    
-        // Check if the user is trying to view another user's snatchlist and if their class is below MODERATOR
-        if ($userId !== null && $userId != Auth::id() && $currentUserClass < UserClass::MODERATOR) {
-            abort(403, 'Unauthorized action.');
-        }
-    
-        $userId = $userId ?? Auth::id(); // Use the provided ID or the authenticated user's ID
-        $snatchlist = History::where('user_id', $userId)
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
-    
-        return view('snatch.snatchlist', [
-            'snatchlist' => $snatchlist,
-            'user' => User::find($userId), // Pass the user's info for display
-            'userId' => $userId, // Pass the user ID to the view
-        ]);
-    }
-    
+ public function snatchlist($userId = null)
+{
+    // Get the current user's class
+    $currentUserClass = Auth::user()->user_class;
 
-    public function seeding($userId = null)
-    {
-        // Get the current user's class
-        $currentUserClass = Auth::user()->user_class;
-    
-        // Check if the user is trying to view another user's snatchlist and if their class is below MODERATOR
-        if ($userId !== null && $userId != Auth::id() && $currentUserClass < UserClass::MODERATOR) {
-            abort(403, 'Unauthorized action.');
-        }
-    
-        $userId = $userId ?? Auth::id();
-    
-        // Fetch data from the History model with conditions
-        $seeding = History::where('user_id', $userId)
-            ->where('seeder', 1)
-            ->where('active', 1)
-            ->orderBy('created_at', 'desc')
-            ->paginate(30);
-    
-        return view('snatch.seeding', [
-            'seeding' => $seeding,
-            'user' => User::find($userId), // Pass user info for display
-            'userId' => $userId, // Pass the user ID to the view
-        ]);
+    // Check if the user is trying to view another user's snatchlist and if their class is below MODERATOR
+    if ($userId !== null && $userId != Auth::id() && $currentUserClass < UserClass::MODERATOR) {
+        abort(403, 'Unauthorized action.');
     }
+
+        $userId ??= Auth::id(); // Use the provided ID or the authenticated user's ID
+
+    // Get the date one month ago
+    $oneMonthAgo = Carbon::now()->subMonth();
+
+    // Fetch only history from the last month
+    $snatchlist = History::where('user_id', $userId)
+        // ->where('created_at', '>=', $oneMonthAgo)
+        ->orderBy('created_at', 'desc')
+        ->paginate(20);
+
+    return view('snatch.snatchlist', [
+        'snatchlist' => $snatchlist,
+        'user' => User::find($userId), // Pass the user's info for display
+        'userId' => $userId, // Pass the user ID to the view
+    ]);
+}
+    
+public function seeding($userId = null)
+{
+    $currentUserClass = Auth::user()->user_class;
+
+    if ($userId !== null && $userId != Auth::id() && $currentUserClass < UserClass::MODERATOR) {
+        abort(403, 'Unauthorized action.');
+    }
+
+    $userId ??= Auth::id();
+
+    // Get active peers that are seeders for the user, with torrent info
+    $seeding = Peer::where('user_id', $userId)
+        ->where('seeder', 1)
+        ->where('active', 1)
+        ->with('torrent')
+        ->orderBy('created_at', 'desc')
+        ->paginate(30);
+
+    // Get all history totals in one query for current page peers
+    $torrentIds = $seeding->pluck('torrent_id')->toArray();
+
+    $historyTotals = History::where('user_id', $userId)
+        ->whereIn('torrent_id', $torrentIds)
+        ->selectRaw('torrent_id,
+                     SUM(uploaded) as uploaded,
+                     SUM(downloaded) as downloaded,
+                     SUM(actual_uploaded) as actual_uploaded,
+                     SUM(actual_downloaded) as actual_downloaded,
+                     SUM(seedtime) as total_seedtime')
+        ->groupBy('torrent_id')
+        ->get()
+        ->keyBy('torrent_id');
+
+    // Attach totals to each peer
+    $seeding->getCollection()->transform(function ($peer) use ($historyTotals) {
+        $totals = $historyTotals->get($peer->torrent_id);
+        $peer->uploaded = $totals->uploaded ?? 0;
+        $peer->downloaded = $totals->downloaded ?? 0;
+        $peer->actual_uploaded = $totals->actual_uploaded ?? 0;
+        $peer->actual_downloaded = $totals->actual_downloaded ?? 0;
+        $peer->total_seedtime = $totals->total_seedtime ?? 0;
+        return $peer;
+    });
+
+    // Sort the current page collection by torrent added date
+    $sorted = $seeding->getCollection()->sortByDesc(fn($peer) => $peer->torrent->created_at ?? now());
+    $seeding->setCollection($sorted->values());
+
+    return view('snatch.seeding', [
+        'seeding' => $seeding,
+        'user' => User::find($userId),
+        'userId' => $userId,
+    ]);
+}
+
+
+
     
 
     public function leeching($userId = null)

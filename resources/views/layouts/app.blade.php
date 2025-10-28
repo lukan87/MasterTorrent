@@ -122,7 +122,7 @@
         Swal.fire({
             icon: 'success',
             title: 'Success',
-            text: "{{ session('success') }}",
+            text: @json(session('success')),
             showConfirmButton: true,
         });
     </script>
@@ -133,7 +133,7 @@
         Swal.fire({
             icon: 'warning',
             title: 'Warning',
-            text: "{{ session('warning') }}",
+            text: @json(session('warning')),
             showConfirmButton: true,
         });
     </script>
@@ -144,7 +144,7 @@
         Swal.fire({
             icon: 'info',
             title: 'Information',
-            text: "{{ session('info') }}",
+            text: @json(session('info')),
             showConfirmButton: true,
         });
     </script>
@@ -155,11 +155,12 @@
         Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: "{{ session('error') }}",
+            text: @json(session('error')),
             showConfirmButton: true,
         });
     </script>
 @endif
+
 
 <!-- Back to Top Button -->
 <button id="back-to-top" class="btn btn-secondary" style="position: fixed; bottom: 100px; right: 20px; display: none;">
@@ -210,6 +211,8 @@
         });
     });
 </script>
+
+
 
 </body><!--end::Body-->
 
