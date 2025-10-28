@@ -32,6 +32,7 @@ This project is a **torrent tracker** built using Laravel 11, offering a modern,
 - **Free or Double upload torrent:** Users can download torrents as free download or double upload - fully functional.
 - **Invite System:** Fully functional invite system. This can be enable/disabled. 
 - **Snatch List:** Displays torrents a user has downloaded, is currently seeding, or needs to reseed.
+- **HAPPY HOUR SYSTEM:** For a chosen period of time, during the day, the torrents upload can be recorded up 8x. Also the seedbonuspoints also can multiplied by 8x.
 - **Custom Announce System:** A dedicated announce system for tracking peers efficiently - fully functional.
 
 This tracker is designed to be **fast, scalable, and secure**, utilizing Laravel's powerful framework to handle high traffic and large datasets.
