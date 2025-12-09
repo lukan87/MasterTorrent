@@ -31,6 +31,23 @@ use App\Http\Controllers\OverforumController;
 
 use App\Http\Controllers\SeedboxController;
 
+Route::delete('/profile/{id}/{name}/delete', [ProfileController::class, 'deleteAccount'])
+    ->name('profile.delete')
+    ->middleware('auth');
+
+Route::get('/seedboxes/{seedbox}/test-rpc/{hash}', [SeedboxController::class, 'testRpc'])->middleware('auth');
+
+Route::get('/seedboxes/{seedbox}/torrent/{hash}/download', [SeedboxController::class, 'downloadTorrent'])->name('seedboxes.downloadTorrent');
+
+// routes/web.php
+Route::get('seedboxes/{seedbox}/download-torrent/{hash}', [SeedboxController::class, 'downloadTorrentFile'])
+    ->name('seedboxes.downloadTorrent');
+
+    Route::get('seedboxes/{seedbox}/torrent/{hash}/download-rebuilt', [SeedboxController::class, 'downloadRebuiltTorrent'])
+    ->name('seedboxes.downloadRebuiltTorrent');
+
+
+
 
 
 //Happy Hour

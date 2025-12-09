@@ -236,6 +236,75 @@ class SeedboxService
         return ['success' => true];
     }
 
+
+    // In App\Services\SeedboxService.php
+public function testRpcSessionPath(string $hash)
+{
+    try {
+        $client = new Client($this->url);
+        $client->setSSLVerifyPeer(false);
+        $client->setSSLVerifyHost(0);
+
+        $encoder = new Encoder();
+        $client->setCredentials($this->username, $this->password, CURLAUTH_ANY);
+
+        // Get session path
+        $req = new Request('session.path', [
+            $encoder->encode($hash),
+        ]);
+        $response = $client->send($req);
+
+        $sessionPath = $response->faultCode() ? null : rtrim($encoder->decode($response->value()), '/');
+
+        if ($response->faultCode() || !$sessionPath) {
+            return [
+                'error' => $response->faultString(),
+                'sessionPath' => $sessionPath,
+            ];
+        }
+
+        // Build remote torrent file path
+        $remoteTorrentPath = sprintf('%s/%s.torrent', $sessionPath, strtoupper($hash));
+
+        // Fetch torrent content
+        $torrentContent = $this->executeRemoteCommand($client, sprintf('cat "%s"', str_replace('"', '\\"', $remoteTorrentPath)));
+
+        return [
+            'sessionPath' => $sessionPath,
+            'remoteTorrentPath' => $remoteTorrentPath,
+            'torrentContent' => $torrentContent ?: null,
+        ];
+    } catch (\Exception $e) {
+        return ['error' => $e->getMessage()];
+    }
+}
+
+/**
+ * Execute a command on the remote server using XML-RPC 'execute.capture'
+ */
+protected function executeRemoteCommand(Client $client, string $command): ?string
+{
+    $encoder = new Encoder();
+    $args = [
+        '',
+        'bash',
+        '-c',
+        sprintf('%s | base64', $command),
+    ];
+    $args = array_map(fn($item) => $encoder->encode($item), $args);
+
+    $req = new Request('execute.capture', $args);
+    $response = $client->send($req);
+
+    if ($response->faultCode() !== 0) {
+        return null;
+    }
+
+    return base64_decode($encoder->decode($response->value()));
+}
+
+
+
    
 
 }

@@ -11,7 +11,6 @@
         "illuminate/database": "*",
         "ksubileau/color-thief-php": "^2.0",
         "laravel/framework": "^12",
-        "laravel/horizon": "^5.35",
         "laravel/tinker": "^2.9",
         "laravel/ui": "^4.5",
         "league/commonmark": "2.7.1",

@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use App\Models\User;
 use App\Models\Message;
 use Carbon\Carbon;
+use App\Models\UserTimeline;
 
 class PromoteDemoteUsers extends Command
 {

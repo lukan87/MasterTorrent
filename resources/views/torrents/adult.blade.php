@@ -150,7 +150,7 @@
                             @endif
                         </td>
                     @endif
-                    <td class="text-center">{{ \Carbon\Carbon::parse($torrent->created_at)->format('d-M-Y') }}</td>
+                    <td class="text-center"><small>{{ \Carbon\Carbon::parse($torrent->created_at)->format('d-M-Y') }}</small></td>
                     <td class="text-center">{{ App\Helpers\FormatHelper::formatSize($torrent->size) }}</td>
                     <td class="text-center text-success fw-bold">{{ $torrent->seeders }}</td>
                     <td class="text-center text-danger fw-bold">{{ $torrent->leechers }}</td>

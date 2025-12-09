@@ -10,7 +10,7 @@
                     <small class="text-white-50">Create and customize your Happy Hour promotion</small>
                 </div>
                 <div class="card-body p-4">
-                    <!-- Live Preview -->
+                    
                     <div class="alert alert-info rounded-3 mb-4" id="happy-hour-preview">
                         🎉 Theme: <strong>{{ $theme['name'] }}</strong>, 
                         Upload: <strong>{{ $theme['upload_multiplier'] }}x</strong>, 
@@ -20,7 +20,7 @@
                     <form action="{{ route('happyhour.store') }}" method="POST">
                         @csrf
 
-                        <!-- Theme Select -->
+                        
                         <div class="mb-3">
                             <label for="theme" class="form-label fw-semibold">Theme</label>
                             <select name="theme" id="theme" class="form-select form-select-lg">
@@ -37,25 +37,25 @@
                             </select>
                         </div>
 
-                        <!-- Custom Theme Name -->
+                       
                         <div class="mb-3" id="custom-theme-container" style="display: none;">
                             <label for="custom_theme_name" class="form-label fw-semibold">Custom Theme Name</label>
                             <input type="text" name="custom_theme_name" id="custom_theme_name" class="form-control form-control-lg" placeholder="Enter your custom theme name">
                         </div>
 
-                        <!-- Upload Multiplier -->
+                       
                         <div class="mb-3">
                             <label for="upload_multiplier" class="form-label fw-semibold">Upload Multiplier</label>
                             <input type="number" name="upload_multiplier" id="upload_multiplier" class="form-control form-control-lg" min="1" max="10" value="{{ $theme['upload_multiplier'] ?? 3 }}" required>
                         </div>
 
-                        <!-- Free Download -->
+                        
                         <div class="form-check form-switch mb-3">
                             <input type="checkbox" name="free_download" id="free_download" class="form-check-input" {{ !empty($theme['free_download']) ? 'checked' : '' }}>
                             <label class="form-check-label fw-semibold" for="free_download">Free Download</label>
                         </div>
 
-                        <!-- Start & End Date/Time -->
+                        
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
                                 <label for="start_at" class="form-label fw-semibold">Start At</label>
@@ -67,7 +67,7 @@
                             </div>
                         </div>
 
-                        <!-- Buttons -->
+                        
                         <div class="d-flex flex-column flex-md-row gap-3">
                             <button type="submit" class="btn btn-gradient btn-success flex-fill py-2 fw-bold">
                                 <i class="bi bi-hourglass-split me-1"></i> Start Happy Hour

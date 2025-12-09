@@ -45,7 +45,48 @@ class TorrentController extends Controller
     }
 
     
-    
+    public function sendToSeedboxInternal(User $user, Torrent $torrent, int $seedboxId)
+{
+    $authUser = $user;
+
+    $path = public_path('files/torrents/' . $torrent->file_name);
+    if (!file_exists($path) || !is_readable($path)) {
+        throw new \Exception('Torrent file not found or unreadable: ' . $path);
+    }
+
+    // Use the file as-is, no re-encode
+    $tmpFileName = "seedbox__{$torrent->id}.torrent";
+    $tmpPath     = storage_path("app/tmp/{$tmpFileName}");
+    if (!is_dir(dirname($tmpPath))) mkdir(dirname($tmpPath), 0755, true);
+
+    copy($path, $tmpPath); // copy directly
+
+    $seedbox = Seedbox::where('user_id', $authUser->id)
+        ->where('id', $seedboxId)
+        ->first();
+
+    if (!$seedbox) {
+        throw new \Exception('Selected seedbox not found or not yours.');
+    }
+
+    $service = new \App\Services\SeedboxService(
+        $seedbox->address,
+        $seedbox->username,
+        $seedbox->password,
+        $seedbox->auth_type
+    );
+
+    $result = $service->addTorrentFileSeedBox($tmpPath);
+
+    @unlink($tmpPath);
+
+    if (isset($result['error'])) {
+        throw new \Exception($result['error']);
+    }
+
+    return true;
+}
+
 
 
 public function sendToSeedbox(User $user, Torrent $torrent, Request $request)
@@ -70,9 +111,9 @@ public function sendToSeedbox(User $user, Torrent $torrent, Request $request)
         $dict['announce'] = "http://last-torrents.org/announce/{$authUser->passkey}";
         $dict['comment']  = 'Using this torrent binds you to LastFiles Confidentiality Agreement';
        // $dict['custom']['label'] = 'LastFiles';
-        $dict['announce-list'] = [
-            ["http://last-torrents.org/announce/{$authUser->passkey}"]
-        ];
+        // $dict['announce-list'] = [
+        //     ["http://last-torrents.org/announce/{$authUser->passkey}"]
+        // ];
 
         $fileToUpload = Bencode::bencode($dict);
         if (!$fileToUpload) {
@@ -128,37 +169,37 @@ public function sendToSeedbox(User $user, Torrent $torrent, Request $request)
 
  public function index(Request $request)
 {
-    // Fetch categories and genres directly (no cache)
     $categories = Category::all();
     $allGenres = Genre::all();
 
     $sortColumn = $request->get('sort', 'name');
     $sortDirection = $request->get('direction', 'desc');
 
-    // Build torrent query (no caching)
     $torrents = TorrentHelper::buildTorrentQuery($request, $sortColumn, $sortDirection);
 
-    // Handle empty torrent set (optional handling)
-    if ($torrents->isEmpty()) {
-        // You can add a flash message or fallback here if needed
-    }
-
-    // Get user and detect new torrents since last browse
     $user = $request->user();
+    $tz = $user->timezone ?? 'UTC';
 
+    
+    $torrents = $torrents->through(function ($torrent) use ($tz) {
+        $torrent->created_at_local = $torrent->created_at->clone()->tz($tz);
+        return $torrent;
+    });
+
+  
     $newTorrents = $user
-        ? $torrents->filter(fn($torrent) =>
-            !$user->last_browse || $torrent->created_at->gt($user->last_browse)
+        ? $torrents->getCollection()->filter(fn($torrent) =>
+            !$user->last_browse ||
+            $torrent->created_at->gt($user->last_browse)
         )
         : collect();
 
-    // Update user's last browse time
+   
     if ($user) {
-        $user->last_browse = now(); // stays UTC
+        $user->last_browse = now(); 
         $user->save();
     }
 
-    // Movie of the day (no caching)
     $categoryIds = [11, 12, 24, 25, 31, 32, 54, 55, 81, 82];
     $twoDaysAgo = now()->subDays(2);
     $oneWeekAgo = now()->subWeek();
@@ -182,10 +223,10 @@ public function sendToSeedbox(User $user, Torrent $torrent, Request $request)
     $movieOfTheDay = $topTorrents->isNotEmpty() ? $topTorrents->random() : null;
 
     $currentHappyHour = HappyHour::where('active', true)
-                        ->where('start_at', '<=', now())
-                        ->where('end_at', '>=', now())
-                        ->latest('start_at')
-                        ->first();
+        ->where('start_at', '<=', now())
+        ->where('end_at', '>=', now())
+        ->latest('start_at')
+        ->first();
 
     return view('torrents.index', compact(
         'torrents',
@@ -199,44 +240,45 @@ public function sendToSeedbox(User $user, Torrent $torrent, Request $request)
     ));
 }
 
+
+
     
     
     
 
-   public function adult(Request $request)
+  public function adult(Request $request)
 {
-    // Fetch categories and genres directly (no cache)
-    $categories = Category::all();
+    $categories = Category::whereIn('id', [27, 34, 60])->get();
     $allGenres = Genre::all();
 
-    // Sorting parameters
     $sortColumn = $request->get('sort', 'name');
     $sortDirection = $request->get('direction', 'desc');
 
-    // Fetch torrents directly (no cache)
     $adult = TorrentHelper::buildAdultTorrentQuery($request, $sortColumn, $sortDirection);
 
-    // Get current user
     $user = $request->user();
 
-    // Find new torrents since user's last browsex
+    // Convert paginator to collection
+    $adultCollection = $adult->getCollection();
+
+    // New torrents based on last_browsex
     $newTorrents = $user
-        ? $adult->filter(fn($torrent) =>
+        ? $adultCollection->filter(fn($torrent) =>
             !$user->last_browsex || $torrent->created_at->gt($user->last_browsex)
         )
         : collect();
 
-    // Update user's last browsex timestamp
+    // Update last_browsex
     if ($user) {
         $user->last_browsex = now();
         $user->save();
     }
 
-     $currentHappyHour = \App\Models\HappyHour::where('active', true)
-                        ->where('start_at', '<=', now())
-                        ->where('end_at', '>=', now())
-                        ->latest('start_at')
-                        ->first();
+    $currentHappyHour = HappyHour::where('active', true)
+        ->where('start_at', '<=', now())
+        ->where('end_at', '>=', now())
+        ->latest('start_at')
+        ->first();
 
     return view('torrents.adult', compact(
         'adult',
@@ -250,6 +292,8 @@ public function sendToSeedbox(User $user, Torrent $torrent, Request $request)
 }
 
 
+
+
     
     public function create()
     {
@@ -261,8 +305,12 @@ public function sendToSeedbox(User $user, Torrent $torrent, Request $request)
         return view('torrents.upload', compact('user', 'categories')); // Pass categories to view
     }
 
-    public function store(Request $request, TMDBService $tmdbService)
+    public function store(Request $request)
     {
+
+
+         $tmdbService = app(TMDBService::class);
+
         $user = $request->user();
         $request->validate([
             'torrent' => 'required|file|mimes:torrent',
@@ -289,12 +337,8 @@ public function sendToSeedbox(User $user, Torrent $torrent, Request $request)
 
        
         $torrentData = Bencode::bdecode($torrentContent);
-       
-if ($request->has('external') && $request->external == 1) {
-    $torrentData['info']['private'] = 0; // Allow DHT for external torrents
-} else {
-    $torrentData['info']['private'] = 1; // Private mode for internal torrents
-}
+
+        $torrentData['info']['private'] = ($request->has('external') && $request->external == 1) ? 0 : 1;
         $infoHash = Bencode::get_infohash($torrentData);
 
       
@@ -762,8 +806,11 @@ $user->save();
                     $tmdbData = $tmdbService->fetchTMDBData($tmdbId, $tmdbType);
 
                     if ($tmdbData) {
+                        $tmdbBaseUrlPoster = 'https://image.tmdb.org/t/p/w600_and_h900_bestv2';
+                        $tmdbBaseUrlBackdrop = 'https://image.tmdb.org/t/p/original';
 
-
+                    $poster = $tmdbBaseUrlPoster . $tmdbData['poster_path'] ?? $poster ?? $request->poster;
+                    $background = $tmdbBaseUrlBackdrop . $tmdbData['backdrop_path'] ?? $background ?? $request->background;
                      
                         $genres = $tmdbData['genres'] ?? [];
                         foreach ($genres as $genre) {

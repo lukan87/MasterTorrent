@@ -11,7 +11,7 @@ class HappyHourController extends Controller
     public function index()
 {
     // Get all happy hours, latest first
-    $happyHours = \App\Models\HappyHour::orderByDesc('start_at')->get();
+    $happyHours = HappyHour::orderByDesc('start_at')->get();
 
     // Get current automatic theme for today
     $day = now()->dayOfWeek;
@@ -24,7 +24,7 @@ class HappyHourController extends Controller
         'free_download' => true,
     ];
 
-    $automatic = \App\Models\HappyHour::where('automatic', true)->where('active', true)->exists();
+    $automatic = HappyHour::where('automatic', true)->where('active', true)->exists();
 
     return view('admin.happyhour.index', compact('happyHours', 'automatic', 'theme'));
 }

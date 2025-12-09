@@ -172,29 +172,16 @@
                         </td>
                         @endif
                      
-                        <td class="text-center"><small><div data-bs-toggle="tooltip" title="{{ \Carbon\Carbon::parse($torrent->created_at)->diffForHumans() }}">{{ \Carbon\Carbon::parse($torrent->created_at)->format('M d, Y @ g:i A') }}</div></small></td> 
+                        {{-- <td class="text-center"><small><div data-bs-toggle="tooltip" title="{{ \Carbon\Carbon::parse($torrent->created_at)->diffForHumans() }}">{{ \Carbon\Carbon::parse($torrent->created_at)->format('M d, Y @ g:i A') }}</div></small></td>  --}}
+                         <td class="text-center"><small>{{ \Carbon\Carbon::parse($torrent->created_at)->format('M d, Y') }}</></small></td> 
 
                       
                         
                        
-                        <td class="text-center">{{ App\Helpers\FormatHelper::formatSize($torrent->size) }}</td>
+                        <td class="text-center"><small>{{ App\Helpers\FormatHelper::formatSize($torrent->size) }}</small></td>
                         <td class="text-center text-success fw-bold">{{ $torrent->seeders }}</td>
                         <td class="text-center text-danger fw-bold">{{ $torrent->leechers }}</td>
                         <td class="text-center text-info fw-bold">{{ $torrent->times_completed }}</td>
-                        {{-- @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::VIP)
-    <td class="d-none d-md-table-cell text-center">
-        @if(isset($torrent->uploader->id))
-            <a href="{{ route('profile.show', ['id' => $torrent->uploader->id]) }}"
-               class="badge rounded-pill px-3 py-2 fw-semibold"
-               style="font-size: 0.90rem; background: rgba(123, 123, 123, 0.05); color: {{ \App\Models\UserClass::getClassColor($torrent->uploader->user_class ?? '') }};">
-                {{ $torrent->uploader->name ?? 'Unknown' }}
-            </a>
-        @else
-            <span class="badge bg-secondary rounded-pill px-3 py-2" style="font-size: 0.75rem;">Unknown</span>
-        @endif
-    </td>
-@endif --}}
-
                         @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
                             <td class="d-none d-md-table-cell text-center">
                                 <a href="{{ route('torrents.edit', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}" class="btn btn-warning btn-sm rounded-circle" data-bs-toggle="tooltip" title="Edit Torrent"><i class="bi bi-pencil-square"></i></a>

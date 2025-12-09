@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Schedule;
 
 
 
-Schedule::command('peers:remove-duplicates')->everyFiveMinutes();
+//Schedule::command('peers:remove-duplicates')->everyFiveMinutes();
 Schedule::command('auto:flush_peers')->everyFiveMinutes();
 //Schedule::command('auto:delete_stopped_peers')->hourly();
 Schedule::command('auto:sync_peers')->everyFiveMinutes();

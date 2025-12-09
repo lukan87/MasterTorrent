@@ -20,9 +20,9 @@
 
 
     {{-- 🔁 Auto-refresh toggle --}}
-    <button id="toggle-refresh" class="btn btn-sm btn-outline-info ms-auto">
+    {{-- <button id="toggle-refresh" class="btn btn-sm btn-outline-info ms-auto">
         <i class="bi bi-arrow-repeat"></i> Auto Refresh <span id="refresh-status">(off)</span>
-    </button>
+    </button> --}}
 </div>
 
 @if(session('success'))
@@ -151,20 +151,29 @@
 
                             </td>
                             <td class="text-end">
-                                <form method="POST" action="{{ route('seedboxes.'.$actionIcon['type'], [$seedbox, $hash]) }}" style="display:inline-block;">
-                                    @csrf
-                                    <button class="btn btn-link p-0 {{ $actionIcon['class'] }}" title="{{ $actionIcon['title'] }}">
-                                        <i class="bi {{ $actionIcon['icon'] }}" style="font-size:1.5rem;"></i>
-                                    </button>
-                                </form>
-                                <form method="POST" action="{{ route('seedboxes.delete', [$seedbox, $hash]) }}" style="display:inline-block;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="btn btn-link p-0 text-danger" title="Delete torrent" onclick="return confirm('Are you sure you want to delete this torrent? Only the torrent will be removed, not the data.');">
-                                        <i class="bi bi-trash-fill" style="font-size:1.5rem;"></i>
-                                    </button>
-                                </form>
-                            </td>
+    <form method="POST" action="{{ route('seedboxes.'.$actionIcon['type'], [$seedbox, $hash]) }}" style="display:inline-block;">
+        @csrf
+        <button class="btn btn-link p-0 {{ $actionIcon['class'] }}" title="{{ $actionIcon['title'] }}">
+            <i class="bi {{ $actionIcon['icon'] }}" style="font-size:1.5rem;"></i>
+        </button>
+    </form>
+    <form method="POST" action="{{ route('seedboxes.delete', [$seedbox, $hash]) }}" style="display:inline-block;">
+        @csrf
+        @method('DELETE')
+        <button class="btn btn-link p-0 text-danger" title="Delete torrent" onclick="return confirm('Are you sure you want to delete this torrent? Only the torrent will be removed, not the data.');">
+            <i class="bi bi-trash-fill" style="font-size:1.5rem;"></i>
+        </button>
+    </form>
+      @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::WEB_DEVELOPER)
+<a href="{{ route('seedboxes.downloadRebuiltTorrent', [$seedbox, $hash]) }}" 
+   class="btn btn-link p-0 text-info" 
+   title="Upload to LAstFiles">
+    <i class="bi bi-upload" style="font-size:1.5rem;"></i>
+</a>
+        @endif
+
+</td>
+
                         </tr>
                     @endforeach
                 </tbody>
@@ -177,47 +186,61 @@
     {{ $torrents->links('pagination::bootstrap-5') }}
 </div>
 
-{{-- 🔁 Auto-refresh script --}}
+{{-- 🔁 Auto-refresh torrents every 10 seconds --}}
 <script>
-let refreshEnabled = false;
-let intervalId = null;
-document.getElementById('toggle-refresh').addEventListener('click', function () {
-    refreshEnabled = !refreshEnabled;
-    document.getElementById('refresh-status').textContent = refreshEnabled ? '(on)' : '(off)';
-    if (refreshEnabled) {
-        intervalId = setInterval(() => location.reload(), 15000);
-    } else {
-        clearInterval(intervalId);
+document.addEventListener('DOMContentLoaded', () => {
+    const refreshInterval = 10000; // 10 seconds
+
+    function refreshTorrents() {
+        fetch(window.location.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(response => response.text())
+            .then(html => {
+                // Parse the returned HTML
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+
+                // Replace the torrents table
+                const newTable = doc.querySelector('.table-responsive');
+                const oldTable = document.querySelector('.table-responsive');
+                if (newTable && oldTable) {
+                    oldTable.innerHTML = newTable.innerHTML;
+                }
+
+                // Update trackers
+                document.querySelectorAll('.torrent-trackers').forEach(td => {
+                    const hash = td.dataset.hash;
+                    fetch(`/seedboxes/{{ $seedbox->id }}/torrent/${hash}/trackers`)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.trackers && data.trackers.length) {
+                                const hosts = data.trackers.map(url => {
+                                    try {
+                                        let host = new URL(url).hostname;
+                                        host = host.replace(/^(tracker\.|www\.)/i, '');
+                                        return host;
+                                    } catch(e) {
+                                        return url;
+                                    }
+                                });
+                                td.textContent = [...new Set(hosts)].join(', ');
+                            } else {
+                                td.textContent = 'N/A';
+                            }
+                        })
+                        .catch(() => td.textContent = 'Error');
+                });
+            })
+            .catch(err => console.error('Failed to refresh torrents:', err));
     }
+
+    // Initial refresh immediately
+    refreshTorrents();
+
+    // Set interval for auto-refresh
+    setInterval(refreshTorrents, refreshInterval);
 });
 </script>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.torrent-trackers').forEach(td => {
-        const hash = td.dataset.hash;
-        fetch(`/seedboxes/{{ $seedbox->id }}/torrent/${hash}/trackers`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.trackers && data.trackers.length) {
-                    const hosts = data.trackers.map(url => {
-                        try {
-                            let host = new URL(url).hostname;
-                            host = host.replace(/^(tracker\.|www\.)/i, '');
-                            return host;
-                        } catch(e) {
-                            return url;
-                        }
-                    });
-                    td.textContent = [...new Set(hosts)].join(', ');
-                } else {
-                    td.textContent = 'N/A';
-                }
-            })
-            .catch(() => td.textContent = 'Error');
-    });
-});
-</script>
 
 
 <style>

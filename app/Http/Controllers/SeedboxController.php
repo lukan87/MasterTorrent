@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Seedbox;
 use App\Services\SeedboxService;
+use App\Services\TorrentRebuildService;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
@@ -111,7 +112,13 @@ public function destroy(Seedbox $seedbox)
 
         return redirect()->back()->with('success', 'Connection successful');
     }
+public function testRpc(Seedbox $seedbox, string $hash)
+{
+    $service = $this->seedboxService($seedbox);
+    $result = $service->testRpcSessionPath($hash);
 
+    dd($result); // dump result and die
+}
 
 
   public function showTorrents(Seedbox $seedbox, Request $request)
@@ -263,6 +270,148 @@ public function getTorrentTrackers(Seedbox $seedbox, string $hash)
 
     return response()->json(['trackers' => $trackerUrls]);
 }
+
+// app/Http/Controllers/SeedboxController.php
+public function downloadTorrentFile($seedboxId, $hash)
+{
+    $seedbox = Seedbox::findOrFail($seedboxId);
+    
+    $service = new SeedboxService(
+        $seedbox->url,      // Make sure this is a valid string
+        $seedbox->username,
+        $seedbox->password,
+        'basic',
+        true                // using RPC
+    );
+
+    $result = $service->testRpcSessionPath($hash);
+
+    if (isset($result['error']) || empty($result['torrentContent'])) {
+        return redirect()->back()->with('error', 'Could not retrieve the torrent file.');
+    }
+
+    $torrentContent = $result['torrentContent'];
+
+    $filename = $hash . '.torrent';
+
+    return response($torrentContent)
+        ->header('Content-Type', 'application/x-bittorrent')
+        ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+}
+
+
+public function downloadTorrent($seedboxId, $hash)
+{
+    $seedbox = Seedbox::findOrFail($seedboxId);
+
+    // dd($seedbox->address, $seedbox->username, $seedbox->password);
+
+    $service = new SeedboxService(
+        $seedbox->address,
+        $seedbox->username,
+        $seedbox->password,
+        'basic', // or digest if needed
+        true     // use RPC
+    );
+
+    $result = $service->testRpcSessionPath($hash);
+
+    if (empty($result['torrentContent'])) {
+        return redirect()->back()->with('error', 'Failed to retrieve torrent file.');
+    }
+
+    $filename = strtoupper($hash) . '.torrent';
+
+    return response($result['torrentContent'])
+        ->header('Content-Type', 'application/x-bittorrent')
+        ->header('Content-Disposition', "attachment; filename=\"$filename\"");
+}
+
+public function downloadRebuiltTorrent($seedboxId, $hash)
+{
+    $seedbox = Seedbox::findOrFail($seedboxId);
+
+    // Get logged-in user and passkey
+    $user = Auth::user();
+    if (!$user || !$user->passkey) {
+        return back()->with('error', 'You do not have a passkey.');
+    }
+    $passkey = $user->passkey;
+
+    // Get raw torrent from seedbox
+    $service = new SeedboxService($seedbox->address, $seedbox->username, $seedbox->password, 'basic', true);
+    $torrentContent = $service->testRpcSessionPath($hash)['torrentContent'] ?? null;
+
+    if (!$torrentContent) {
+        return back()->with('error', 'Failed to retrieve torrent');
+    }
+
+    // Decode torrent to extract name
+    $decoded = \App\Helpers\Bencode::bdecode($torrentContent);
+    $torrentName = $decoded['info']['name'] ?? strtoupper($hash);
+
+    // Clean torrent name for metadata/search
+    $cleanTitle = preg_replace([
+        '/\bS\d+E\d+\b/i',
+        '/\b\d{3,4}p\b/i',
+        '/\b(BluRay|WEB-DL|WEBRip|HDRip|DVDRip|XviD|x264|x265|FiLELiST|YIFY|RARBG|Ganool|ETRG|REPACK|LIMITED)\b/i',
+        '/[\[\]\(\)\-]/',
+        '/\./'
+    ], ' ', $torrentName);
+    $cleanTitle = preg_replace('/\s+/', ' ', $cleanTitle);
+    $cleanTitle = trim($cleanTitle);
+
+    // Detect type: TV or Movie
+    $type = preg_match('/S\d+E\d+/i', $torrentName) ? 'tv' : 'movie';
+
+    // Rebuild torrent with your tracker
+    $announceUrl = "http://last-torrents.org/announce/{$passkey}";
+    $rebuildService = new TorrentRebuildService($announceUrl);
+    $rebuiltTorrent = $rebuildService->rebuildTorrent($torrentContent);
+
+    // Auto-generate description
+    $description = "[Auto Upload From Seedbox]\n\nGenerated automatically.";
+
+    // Auto-detect category
+    $category_id = 49; // default
+    if ($type === 'movie') {
+        $tnLower = strtolower($torrentName);
+        if (str_contains($tnLower, '4k')) $category_id = 31;
+        elseif (str_contains($tnLower, 'x265')) $category_id = 82;
+        elseif (str_contains($tnLower, 'bluray')) $category_id = 5;
+        elseif (str_contains($tnLower, 'dvd')) $category_id = 9;
+        elseif (str_contains($tnLower, 'xvid')) $category_id = 24;
+        elseif (str_contains($tnLower, 'web-dl')) $category_id = 54;
+    } elseif ($type === 'tv') {
+        $category_id = 20;
+    }
+
+    // Prepare data for auto-upload
+    $uploadData = [
+        'name' => $torrentName,
+        'genre' => null,
+        'steamid' => null,
+        'category_id' => $category_id,
+        'description' => $description,
+    ];
+
+    // Auto-upload torrent to your site
+    $auto = new \App\Services\AutoUploadService();
+    $uploadedTorrent = $auto->upload($uploadData, $rebuiltTorrent, $torrentName);
+
+    // Redirect to torrent list page
+    return redirect()->to('https://last-torrents.org/torrents?keyword=&genre=&torrent_status=dead')
+        ->with('success', "Torrent '$torrentName' uploaded successfully! You can now send it to seedbox.");
+}
+
+
+
+
+
+
+
+
+
 
 
 

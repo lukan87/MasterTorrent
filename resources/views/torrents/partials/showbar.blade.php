@@ -108,14 +108,14 @@
                 </a>
             @endif
 
-            {{-- @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::ADMIN && !$torrent->bumped)
+            @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::ADMIN && !$torrent->bumped)
                 <form action="{{ route('torrents.bump', $torrent->id) }}" method="POST" class="d-inline">
                     @csrf
                     <button type="submit" class="btn btn-success btn-sm shadow-sm glass-btn" data-bs-toggle="tooltip" title="Bump Torrent">
                         <i class="bi bi-arrow-up-circle"></i> Bump
                     </button>
                 </form>
-            @endif --}}
+            @endif
 
             @if(!$hasThanked)
                 <form action="{{ route('torrents.thank', $torrent->id) }}" method="POST" class="d-inline">

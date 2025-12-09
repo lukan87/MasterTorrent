@@ -70,61 +70,56 @@ public static function buildTorrentQuery(Request $request, $sortColumn, $sortDir
 }
 
 
-  public static function buildAdultTorrentQuery(Request $request, $sortColumn, $sortDirection)
+ public static function buildAdultTorrentQuery(Request $request, $sortColumn, $sortDirection)
 {
     $query = Torrent::query()
         ->with('genres')
         ->whereIn('category_id', [27, 34, 60]);
 
+    // Keyword search
     if ($request->filled('keyword')) {
         $keyword = $request->keyword;
         $query->where(function ($q) use ($keyword) {
-            $q->where('name', 'like', '%' . $keyword . '%')
-              ->orWhere('imdb_url', 'like', '%' . $keyword . '%');
+            $q->where('name', 'like', "%$keyword%")
+              ->orWhere('imdb_url', 'like', "%$keyword%");
         });
     }
 
+    // Override category filter (still inside allowed IDs)
     if ($request->filled('category')) {
         $query->where('category_id', $request->category);
     }
 
+    // Genre filter
     if ($request->filled('genre')) {
-        $query->whereHas('genres', function ($q) use ($request) {
-            $q->where('genres.id', $request->genre);
-        });
+        $query->whereHas('genres', fn($q) => $q->where('genres.id', $request->genre));
     }
 
+    // Torrent status filter
     if ($request->filled('torrent_status')) {
-        switch ($request->torrent_status) {
-            case 'active':
-                $query->where('seeders', '>', 0);
-                break;
-            case 'dead':
-                $query->where('seeders', '=', 0);
-                break;
-            case 'free':
-                $query->where('free', true)->where('seeders', '>', 0);
-                break;
-            case 'double':
-                $query->where('double', true)->where('seeders', '>', 0);
-                break;
-            case 'seedbox':
-                $query->where('seedbox', true)->where('seeders', '>', 0);
-                break;
-        }
+        match ($request->torrent_status) {
+            'active'  => $query->where('seeders', '>', 0),
+            'dead'    => $query->where('seeders', '=', 0),
+            'free'    => $query->where('free', true)->where('seeders', '>', 0),
+            'double'  => $query->where('double', true)->where('seeders', '>', 0),
+            'seedbox' => $query->where('seedbox', true)->where('seeders', '>', 0),
+            default   => null
+        };
     } else {
         $query->where('seeders', '>', 0);
     }
 
+    // Sorting
+    $query->orderByRaw('sticky DESC');
+
+    if ($request->has('sort') || $request->has('direction')) {
+        $query->orderBy($sortColumn, $sortDirection);
+    }
+
+    // Final backup ordering
+    $query->orderBy('created_at', 'desc')->orderBy('id', 'desc');
+
     return $query
-        ->orderByRaw('sticky DESC')
-        ->when(
-            $request->has('sort') || $request->has('direction'),
-            fn($q) => $q->orderBy($sortColumn, $sortDirection),
-            fn($q) => $q->orderBy('created_at', 'desc')->orderBy('id', 'desc')
-        )
-        ->orderBy('created_at', 'desc')
-        ->orderBy('id', 'desc')
         ->paginate(50)
         ->appends($request->query());
 }

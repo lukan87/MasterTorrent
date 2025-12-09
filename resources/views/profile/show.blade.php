@@ -221,6 +221,30 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                  @if (Auth::check() && Auth::id() === $user->id)
+    <div class="row mt-3">
+    <label class="col-sm-4 col-form-label text-muted">
+        <i class="bi bi-trash me-1"></i> Delete
+    </label>
+
+    <div class="col-sm-8">
+        <form action="{{ route('profile.delete', ['id' => $user->id, 'name' => $user->name]) }}"
+              method="POST"
+              onsubmit="return confirm('Are you absolutely sure? This will permanently delete your account and all of your data.');">
+
+            @csrf
+            @method('DELETE')
+
+            <button type="submit" class="btn btn-danger btn-sm w-100">
+                <i class="bi bi-trash me-1"></i> Delete My Account
+            </button>
+        </form>
+    </div>
+</div>
+
+@endif
+
                             </div>
                         </div>
 
@@ -232,7 +256,7 @@
                                 <h5 class="border-bottom pb-2 mb-3 fw-semibold">
                                     <i class="bi bi-info-circle me-2"></i>About
                                 </h5>
-                                <div class="p-3 rounded">
+                                <div class="p-3 rounded profile-info-box">
                                     {!! convertCustomTagsToHtml($user->info) !!}
                                 </div>
                             </div>
@@ -387,6 +411,13 @@
     transform: scale(1.3);
     background: #0d6efd;
 }
+.profile-info-box {
+    max-height: 450px;      
+    overflow-y: auto;    
+    overflow-x: hidden;     
+    white-space: normal;   
+}
+
 </style>
 
 @endsection

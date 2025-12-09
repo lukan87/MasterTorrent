@@ -121,6 +121,7 @@
                     </a>
                 </li>
                 <hr>
+                 @if(Auth::user()->user_class === \App\Models\UserClass::WEB_DEVELOPER)
                 <li class="nav-item">
                     <a href="#" class="nav-link">
                         <i class="nav-icon bi bi-globe"></i>
@@ -142,14 +143,15 @@
                                 <p>Series</p>
                             </a>
                         </li>
-                        <li class="nav-item">
+                        <!-- <li class="nav-item">
                             <a href="{{ route('collections.index') }}" class="nav-link">
                                 <i class="nav-icon bi bi-collection-play"></i>
                                 <p>Collections</p>
                             </a>
-                        </li>
+                        </li> -->
                     </ul>
                 </li>
+                @endif
              
     @if(Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
         <li class="nav-header">Administration</li>

@@ -32,6 +32,14 @@ class DemoteInactiveUploaders extends Command
                 $user->user_class = 1;
                 $user->save();
 
+                // Add to timeline
+        UserTimeline::create([
+            'user_id'  => $user->id,
+            'staff_id' => 2, // or auth()->id() if a staff runs it manually
+            'comment'  => "User was demoted from class {$oldClass} to 1 due to inactivity (no uploads for 5+ days).",
+        ]);
+
+
                 // Log the demotion action
                 $demotedUsers[] = [
                     'user_id' => $user->id,

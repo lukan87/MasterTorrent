@@ -152,8 +152,10 @@
                 </div>
             </div>
         </div>
+        @endif
         
         <!-- Happy Hour Quick Link -->
+         @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::ADMIN)
 <div class="col-md-6">
     <div class="card border-0 shadow-sm h-100">
         <div class="card-body p-4">

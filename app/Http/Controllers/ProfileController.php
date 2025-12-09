@@ -298,6 +298,45 @@ public function destroyTorrent(Request $request, Torrent $torrent)
 }
 
 
+public function deleteAccount(Request $request, $id, $name)
+{
+    $user = User::findOrFail($id);
+
+    // Ensure correct profile URL
+    if ($user->name !== $name) {
+        abort(404);
+    }
+
+    // Only the user themselves can delete the account
+    if (Auth::id() !== $user->id) {
+        abort(403, 'You do not have permission to delete this account.');
+    }
+
+    // Clean up related data
+    Peer::where('user_id', $user->id)->delete();
+    History::where('user_id', $user->id)->delete();
+    Message::where('receiver_id', $user->id)->orWhere('sender_id', $user->id)->delete();
+    Comment::where('user_id', $user->id)->delete();
+    UserTimeline::where('user_id', $user->id)->delete();
+    Warning::where('user', $user->id)->delete();
+    UserSlot::where('user_id', $user->id)->delete();
+
+    // Delete profile image if stored locally
+    if ($user->profile_image) {
+        $path = public_path('images/profiles/' . $user->profile_image);
+        if (file_exists($path)) unlink($path);
+    }
+
+    // Finally delete the user
+    $user->delete();
+
+    Auth::logout();
+
+    return redirect('/')->with('success', 'Your account has been deleted successfully.');
+}
+
+
+
 
 
 

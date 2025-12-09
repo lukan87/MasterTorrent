@@ -41,29 +41,6 @@ class AnnounceService
         ->latest('start_at')
         ->first();
 
-//         if ($happyHour) {
-//        $shoutKey = "happyhour:announced:{$happyHour->id}";
-    
-//     // Only announce once per Happy Hour
-//     if (!Cache::has($shoutKey)) {
-//         try {
-//             \App\Models\Shoutbox::create([
-//                 'user_id' => 2, // system user ID
-//                 'message' => "🎉 {$happyHour->theme} Happy Hour is live! {$happyHour->upload_multiplier}x Uploads" . 
-//                              ($happyHour->free_download ? " + Free Downloads!" : ""),
-//                 'parent_id' => null,
-//             ]);
-            
-//             // Cache the announcement for the duration of the HH to prevent duplicates
-//             Cache::put($shoutKey, true, $happyHour->end_at->diffInSeconds(now()));
-            
-//             \Log::info("Happy Hour announcement posted to Shoutbox: {$happyHour->theme}");
-//         } catch (\Throwable $e) {
-//             \Log::error("Failed to post Happy Hour shoutbox message: ".$e->getMessage());
-//         }
-//     }
-// }
-
         // --- STEP 2: Cache peers ---
         $peers = Cache::remember("torrent:{$torrent->id}:peers", $ttl, fn() =>
             Peer::where('torrent_id', $torrent->id)
@@ -114,7 +91,7 @@ class AnnounceService
 
         // --- STEP 5: Update History + seedtime ---
         $history = $this->safeTransaction(function () use ($user, $hash, $torrent, $ip, $agent, $dto) {
-            return History::firstOrCreate(
+            return History::updateOrCreate(
                 ['user_id' => $user->id, 'info_hash' => $hash],
                 [
                     'torrent_id' => $torrent->id,
