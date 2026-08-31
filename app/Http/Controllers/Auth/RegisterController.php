@@ -151,6 +151,7 @@ public function register(Request $request)
 
     // Enable the account immediately
     $user->enabled = 'yes';
+    $user->downloadpos = 'yes';
     $user->remember_token = null;
     $user->save();
 

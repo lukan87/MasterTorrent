@@ -324,7 +324,8 @@ public function downloadRebuiltTorrent($seedboxId, $hash)
        4️⃣ REBUILD TORRENT WITH USER PASSKEY
     ========================================================= */
 
-     $announceUrl = config('app.seedbox_url') . "/announce/{$user->passkey}";
+     //$announceUrl = config('app.seedbox_url') . "/announce/{$user->passkey}";
+     $announceUrl = 'https://tracker.fileiplay.org/announce/' . $user->passkey;
     //$announceUrl = env('APP_URL') . "/announce/{$user->passkey}";
 
     $rebuiltTorrent = (new TorrentRebuildService($announceUrl))

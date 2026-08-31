@@ -118,19 +118,27 @@ class TorrentDownloadService
         });
     }
 
-    protected function trackerUrls(User $user): array
-    {
-        // Add the announce-list for multiple trackers (extendable)
-        return [
-            // Primary tracker
-           // [route('announce', ['passkey' => $user->passkey], false)],
+    // protected function trackerUrls(User $user): array
+    // {
+    //     // Add the announce-list for multiple trackers (extendable)
+    //     return [
+    //         // Primary tracker
+    //        // [route('announce', ['passkey' => $user->passkey], false)],
 
-            // Secondary tracker
-            [config('app.seedbox_url') . "/announce/{$user->passkey}"],
-            // Uncomment to add additional trackers
-            // [config('app.site_url') . "/announce/{$user->passkey}"],
-        ];
-    }
+    //         // Secondary tracker
+    //         [config('app.seedbox_url') . "/announce/{$user->passkey}"],
+    //         // Uncomment to add additional trackers
+    //         // [config('app.site_url') . "/announce/{$user->passkey}"],
+    //     ];
+    // }
+    protected function trackerUrls(User $user): array
+{
+    return [
+        [
+            'https://tracker.fileiplay.org/announce/' . $user->passkey
+        ],
+    ];
+}
 
     protected function prepareTorrentResponse(Torrent $torrent, User $user)
     {

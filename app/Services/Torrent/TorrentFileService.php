@@ -27,7 +27,10 @@ class TorrentFileService
             abort(400, 'Invalid torrent structure');
         }
 
-        $announce = config('tracker.announce') . '?passkey=' . auth()->user()->passkey;
+        
+        //$announce = config('app.site_url') . '/announce/' . auth()->user()->passkey;
+        $announce = 'https://tracker.fileiplay.org/announce/' . auth()->user()->passkey;
+        
         $torrent['announce'] = $announce;
 
         unset($torrent['announce-list']);
