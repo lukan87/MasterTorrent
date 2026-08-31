@@ -285,7 +285,7 @@ public function deleted(Request $request)
         }
     }
 
-    public function sendToSeedbox(Request $request, Torrent $torrent)
+public function sendToSeedbox(Request $request, Torrent $torrent)
 {
     try {
         $authUser = auth()->user();
@@ -295,32 +295,39 @@ public function deleted(Request $request)
         ]);
 
         $path = public_path('files/torrents/' . $torrent->file_name);
+
         if (!file_exists($path) || !is_readable($path)) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Torrent file not found'
-            ], 404);
+            return redirect()->back()
+                ->with('error', 'Torrent file not found.');
         }
 
         $dict = Bencode::bdecode(file_get_contents($path));
+
         if (!$dict) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Invalid torrent file'
-            ], 400);
+            return redirect()->back()
+                ->with('error', 'Invalid torrent file.');
         }
 
-         $dict['announce']   = config('app.seedbox_url') . "/announce/{$authUser->passkey}";
-        //$dict['announce']   = env('APP_URL') . "/announce/{$authUser->passkey}";
-        $dict['comment']    = 'Downloaded with lukan87\'s Seedbox Script For ' . config('app.name');
-        $dict['created_by'] = config('app.name') . ' Seedbox Service';
+        // FileIplay tracker
+        $dict['announce'] =
+            'https://tracker.fileiplay.org/announce/' . $authUser->passkey;
+
+        $dict['comment'] =
+            'Downloaded with lukan87\'s Seedbox Script For ' . config('app.name');
+
+        $dict['created_by'] =
+            config('app.name') . ' Seedbox Service';
 
         $fileToUpload = Bencode::bencode($dict);
 
-        $tmpPath = storage_path("app/tmp/seedbox__{$torrent->id}.torrent");
+        $tmpPath = storage_path(
+            "app/tmp/seedbox__{$torrent->id}.torrent"
+        );
+
         if (!is_dir(dirname($tmpPath))) {
             mkdir(dirname($tmpPath), 0755, true);
         }
+
         file_put_contents($tmpPath, $fileToUpload);
 
         $seedbox = Seedbox::where('user_id', $authUser->id)
@@ -328,10 +335,10 @@ public function deleted(Request $request)
             ->first();
 
         if (!$seedbox) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Seedbox not found'
-            ], 403);
+            @unlink($tmpPath);
+
+            return redirect()->back()
+                ->with('error', 'Seedbox not found.');
         }
 
         $service = new SeedboxService(
@@ -342,25 +349,21 @@ public function deleted(Request $request)
         );
 
         $result = $service->addTorrentFileSeedBox($tmpPath);
+
         @unlink($tmpPath);
 
         if (isset($result['error'])) {
-            return response()->json([
-                'status' => 'error',
-                'message' => $result['error']
-            ], 500);
+            return redirect()->back()
+                ->with('error', $result['error']);
         }
 
-        return response()->json([
-            'status' => 'ok',
-            'message' => "Torrent sent to {$seedbox->name}"
-        ]);
+        return redirect()->back()
+            ->with('success', "Torrent sent to {$seedbox->name}.");
 
     } catch (\Throwable $e) {
-        return response()->json([
-            'status' => 'error',
-            'message' => $e->getMessage()
-        ], 500);
+
+        return redirect()->back()
+            ->with('error', $e->getMessage());
     }
 }
     

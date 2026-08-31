@@ -133,6 +133,7 @@ public function restore(Torrent $torrent, int $userId): void
         $torrent->update([
             'deleted_by' => null,
             'deletion_reason' => null,
+            'deleted_at' => null,
         ]);
 
      
