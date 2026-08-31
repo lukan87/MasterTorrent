@@ -76,7 +76,7 @@
                     </a>
                 </li> --}}
                 <li class="nav-item">
-                    <a href="{{ route('forums.index') }}" class="{{ request()->routeIs('forums.index') ? 'active' : '' }} nav-link">
+                    <a href="{{ route('forum.index') }}" class="{{ request()->routeIs('forums.index') ? 'active' : '' }} nav-link">
                         <i class="bi bi-book-half"></i>
                         <p>Forums</p>
                     </a>
@@ -87,12 +87,12 @@
                         <p>Shop</p>
                     </a>
                 </li>
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a href="{{ route('donate') }}" class="{{ request()->routeIs('donate') ? 'active' : '' }} nav-link">
                         <i class="bi bi-cash-coin"></i>
                         <p>Donate</p>
                     </a>
-                </li>
+                </li> -->
                 <li class="nav-item">
                     <a href="{{ route('rules') }}" class="{{ request()->routeIs('rules') ? 'active' : '' }} nav-link">
                     <i class="bi bi-info-square-fill"></i>

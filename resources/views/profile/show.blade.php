@@ -297,42 +297,6 @@ $minutes = $seedtime->minutes;
 
 </div>
 
-@if ($isOwner)
-{{-- ================= EMAIL PREF (KEEP ONLY THIS ONE) ================= --}}
-<div class="elite-card mt-3 p-3">
-
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-
-        <div>
-            <div class="fw-semibold">Email Preferences</div>
-            <div class="small text-muted">
-                Control whether you receive emails from us. We send important notifications and updates, so we recommend keeping this enabled.
-            </div>
-        </div>
-
-        <form method="POST" action="/user/email-preferences" class="d-flex align-items-center gap-2">
-            @csrf
-
-            <div class="form-check form-switch m-0">
-                <input 
-                    class="form-check-input"
-                    type="checkbox"
-                    name="subscribed"
-                    value="1"
-                    onchange="this.form.submit()"
-                    {{ $user->subscribed ? 'checked' : '' }}
-                >
-            </div>
-
-            <span class="small text-muted">
-                {{ $user->subscribed ? 'Enabled' : 'Disabled' }}
-            </span>
-        </form>
-
-    </div>
-
-</div>
-@endif
 
 @endif
 
@@ -758,20 +722,8 @@ $progress = $user->seeder_rank_progress ?? 0;
     </div>
 </div>
 
-{{-- Forum Posts --}}
-<div class="col-6 col-md-3 col-xl-3 d-flex">
-    <div class="elite-stat-compact stat-card">
 
-        <div class="stat-label"><i class="bi bi-chat-square-text me-1"></i>Forum Posts</div>
 
-        <div class="stat-value">
-            <a href="{{ route('profile.posts', ['id'=>$user->id,'name'=>$user->name]) }}" class="fancy-link">
-    {{ number_format($postCount) }}
-</a>
-        </div>
-
-    </div>
-</div>
 
 {{-- Comments --}}
 <div class="col-6 col-md-3 col-xl-3 d-flex">

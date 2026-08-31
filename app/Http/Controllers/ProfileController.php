@@ -12,7 +12,6 @@ use App\Models\Message;
 use App\Models\Comment;
 use App\Models\Warning;
 use App\Models\UserSlot;
-use App\Models\ForumPost;
 use App\Models\TorrentThank;
 use App\Models\Ticket;
 use App\Models\UserClass;
@@ -93,7 +92,6 @@ public function show($id, $name = null)
 |--------------------------------------------------------------------------
 */
 
-$postCount = ForumPost::where('user_id', $user->id)->count();
 
 $commentCount = Comment::where('user_id', $user->id)->count();
 
@@ -206,7 +204,6 @@ $timeline = $user->timeline()->latest()->get();
         'seederRank',
         'seederIcon',
         'timeline',
-        'postCount',
         'commentCount',
         'thanksCount'
     ));
@@ -640,18 +637,6 @@ public function regeneratePasskey($id)
     return back()->with('success', 'Passkey regenerated successfully.');
 }
 
-
-public function forumPosts($id, $name)
-{
-    $user = $this->resolveUserOrFail($id, $name);
-
-    $posts = ForumPost::where('user_id', $user->id)
-    ->with('topic')
-    ->latest()
-    ->paginate(25);
-
-    return view('profile.posts', compact('user', 'posts'));
-}
 
 public function comments($id, $name)
 {

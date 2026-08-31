@@ -54,13 +54,21 @@
 
                     </div>
 
-                    <a href="javascript:void(0);"
+                    <!-- <a href="javascript:void(0);"
                        onclick="copyToClipboard('{{ env('APP_URL') }}/announce/{{ $user->passkey }}')"
                        class="announce-link">
 
                         {{ env('APP_URL') }}/announce/{{ $user->passkey }}
 
-                    </a>
+                    </a> -->
+
+                    <a href="javascript:void(0);"
+   onclick="copyToClipboard('https://tracker.fileiplay.org/announce/{{ $user->passkey }}')"
+   class="announce-link">
+
+    https://tracker.fileiplay.org/announce/{{ $user->passkey }}
+
+</a>
 
                 </div>
 

@@ -552,5 +552,19 @@ public function getNextSeederRankAttribute()
     return self::SEEDER_RANKS[$nextRank];
 }
 
+//Forum Relationships
+
+public function forumTopics()
+{
+    return $this->hasMany(ForumTopic::class, 'user_id');
+}
+
+public function forumPosts()
+{
+    return $this->hasMany(ForumPost::class, 'user_id');
+}
+
+//
+
 
 }

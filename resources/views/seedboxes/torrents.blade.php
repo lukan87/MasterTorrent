@@ -641,8 +641,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     if(uploadBtn){
 
                         const hasInternalTracker = hosts.some(host =>
-                            host.includes('last-torrents.org') ||
-                            host.includes('lastfiles.ro')
+                            host.includes('fileiplay.org') ||
+                            host.includes('fileiplay.ro')
                         );
 
                         uploadBtn.style.display = hasInternalTracker

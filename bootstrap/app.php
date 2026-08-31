@@ -52,7 +52,7 @@ return Application::configure(basePath: dirname(__DIR__))
 $exceptions->render(function (\Exception $exception, \Illuminate\Http\Request $request) {
 
     // IDs allowed to see debug errors
-    $debugUsers = [1, 3, 5, 893, 1067, 1069421, 1076853]; // add whatever user IDs you want
+    $debugUsers = [1, 2]; // add whatever user IDs you want
 
     if (!auth()->check()) {
         return redirect()->route('login');

@@ -177,38 +177,47 @@
                                 {{-- SEEDBOXES --}}
                                 @if($hasSeedboxes)
 
-                                    <li>
-                                        <hr class="dropdown-divider">
-                                    </li>
+    <li>
+        <hr class="dropdown-divider">
+    </li>
 
-                                    <li class="dropdown-header text-info">
+    <li class="dropdown-header text-info">
 
-                                        <i class="bi bi-cloud-arrow-up-fill me-1"></i>
+        <i class="bi bi-cloud-arrow-up-fill me-1"></i>
+        Send to Seedbox
 
-                                        Send to Seedbox
+    </li>
 
-                                    </li>
+    @foreach($userSeedboxes as $seedbox)
 
-                                    @foreach($userSeedboxes as $seedbox)
+        <li>
 
-                                        <li>
+            <form action="{{ route('torrents.sendToSeedbox', $torrent) }}"
+                  method="POST"
+                  class="m-0 p-0">
 
-                                            <button type="button"
-                                                    class="dropdown-item modern-dropdown-item seedbox-send-btn"
-                                                    data-torrent="{{ $torrent->id }}"
-                                                    data-seedbox="{{ $seedbox->id }}">
+                @csrf
 
-                                                <i class="bi bi-hdd-network-fill me-2"></i>
+                <input type="hidden"
+                       name="seedbox_id"
+                       value="{{ $seedbox->id }}">
 
-                                                {{ $seedbox->name }}
+                <button type="submit"
+                        class="dropdown-item modern-dropdown-item">
 
-                                            </button>
+                    <i class="bi bi-hdd-network-fill me-2"></i>
 
-                                        </li>
+                    {{ $seedbox->name }}
 
-                                    @endforeach
+                </button>
 
-                                @endif
+            </form>
+
+        </li>
+
+    @endforeach
+
+@endif
 
                             </ul>
 

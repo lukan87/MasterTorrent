@@ -45,16 +45,54 @@ use App\Http\Controllers\Admin\MessagesController;
 
 use App\Http\Controllers\SeedboxController;
 use App\Http\Controllers\Admin\EmailController;
-
-//Forum routes
-use App\Http\Controllers\ForumController;
-use App\Http\Controllers\ForumTopicController;
-use App\Http\Controllers\ForumPostController;
-use App\Http\Controllers\ForumCategoryController;
-use App\Http\Controllers\TopicSubscriptionController;
 use App\Http\Controllers\NotificationController;
 
 //Forum routes
+
+use App\Http\Controllers\ForumController;
+
+Route::get('/forum', [ForumController::class, 'index'])
+    ->name('forum.index');
+
+Route::middleware('auth')->group(function () {
+
+    Route::get('/forum/{category:slug}/create',
+        [ForumController::class, 'create'])
+        ->name('forum.topic.create');
+
+    Route::post('/forum/{category:slug}',
+        [ForumController::class, 'store'])
+        ->name('forum.topic.store');
+
+        Route::post('/forum/{category:slug}/{topic:slug}/reply',
+    [ForumController::class, 'reply'])
+    ->name('forum.topic.reply');
+
+    Route::get('/forum/{category:slug}/{topic:slug}/post/{post}/edit',
+    [ForumController::class, 'editPost'])
+    ->name('forum.post.edit');
+
+Route::put('/forum/{category:slug}/{topic:slug}/post/{post}',
+    [ForumController::class, 'updatePost'])
+    ->name('forum.post.update');
+
+    Route::delete('/forum/{category:slug}/{topic:slug}/post/{post}',
+    [ForumController::class, 'deletePost'])
+    ->name('forum.post.delete');
+
+});
+
+Route::get('/forum/{category:slug}/{topic:slug}',
+    [ForumController::class, 'topic'])
+    ->name('forum.topic');
+
+Route::get('/forum/{category:slug}',
+    [ForumController::class, 'category'])
+    ->name('forum.category');
+
+
+
+
 
 Route::prefix('admin')->name('admin.')->group(function () {
 
@@ -82,110 +120,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 });
 
-//
-
-Route::middleware(['auth'])->group(function () {
-
-    // Forums index
-    Route::get('/forums', [ForumController::class, 'index'])
-        ->name('forums.index');
-
-    // Categories
-    Route::get('/forumcategories/create', [ForumCategoryController::class, 'create'])
-        ->name('categories.create');
-
-    Route::post('/forumcategories', [ForumCategoryController::class, 'store'])
-        ->name('categories.store');
-
-    Route::get('/forumcategories/{category}', [ForumCategoryController::class, 'show'])
-        ->name('forums.category');
-
-    // ✅ ADD THESE (this is what you were missing)
-    Route::get('/forumcategories/{category}/edit', [ForumCategoryController::class, 'edit'])
-        ->name('forumcategories.edit');
-
-    Route::put('/forumcategories/{category}', [ForumCategoryController::class, 'update'])
-        ->name('forumcategories.update');
-
-    Route::delete('/forumcategories/{category}', [ForumCategoryController::class, 'destroy'])
-        ->name('forumcategories.destroy');
-
-    // Forums
-    Route::get('/forums/{forum}', [ForumController::class, 'showForum'])
-        ->name('forums.show');
-
-    Route::get('/forums/{forum}/edit', [ForumController::class, 'edit'])
-        ->name('forums.edit');
-
-    Route::put('/forums/{forum}', [ForumController::class, 'update'])
-        ->name('forums.update');
-
-    Route::delete('/forums/{forum}', [ForumController::class, 'destroy'])
-        ->name('forums.destroy');
-
-    // Forums inside category
-    Route::get('/forumcategories/{category}/forums/create', [ForumController::class, 'createForum'])
-        ->name('forums.create');
-
-    Route::post('/forumcategories/{category}/forums', [ForumController::class, 'storeForum'])
-        ->name('forums.store');
-
-    // Topics
-    Route::get('/forums/{forum}/topics/create', [ForumTopicController::class, 'create'])
-        ->name('topics.create');
-
-    Route::post('/forums/{forum}/topics', [ForumTopicController::class, 'store'])
-        ->name('topics.store');
-
-    Route::get('/topics/{topic}', [ForumTopicController::class, 'show'])
-        ->name('topics.show');
-
-       Route::get('/topics/{topic}/edit', [ForumTopicController::class, 'edit'])
-    ->name('topics.edit');
-
-Route::put('/topics/{topic}', [ForumTopicController::class, 'update'])
-    ->name('topics.update');
-
-Route::delete('/topics/{topic}', [ForumTopicController::class, 'destroy'])
-    ->name('topics.destroy');
-
-    Route::post('/topics/{topic}/subscribe', [TopicSubscriptionController::class, 'subscribe'])
-    ->name('topics.subscribe');
-
-Route::delete('/topics/{topic}/unsubscribe', [TopicSubscriptionController::class, 'unsubscribe'])
-    ->name('topics.unsubscribe');
-
-
-
-    // Posts
-    Route::post('/topics/{topic}/posts', [ForumPostController::class, 'store'])
-        ->name('posts.store');
-
-    Route::get('/posts/{post}/edit', [ForumPostController::class, 'edit'])
-        ->name('posts.edit');
-
-    Route::put('/posts/{post}', [ForumPostController::class, 'update'])
-        ->name('posts.update');
-
-    Route::delete('/posts/{post}', [ForumPostController::class, 'destroy'])
-        ->name('posts.destroy');
-
-    
-
-
-
-        Route::post(
-    '/forumcategories/{category}/restore',
-    [ForumCategoryController::class, 'restore']
-)->name('forumcategories.restore');
-
-
-Route::delete('/forumcategories/{id}/force', 
-    [ForumCategoryController::class, 'forceDelete']
-)->name('forumcategories.forceDelete');
-
-
-});
 
 
 //Notifications

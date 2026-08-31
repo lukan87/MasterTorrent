@@ -2,22 +2,25 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Model;
+use App\Models\ForumCategory;
+use App\Models\ForumTopic;
+use App\Models\ForumPost;
 
 class ForumTopic extends Model
 {
     use HasFactory;
-    use SoftDeletes;
 
     protected $fillable = [
-        'forum_id',
+        'category_id',
         'user_id',
         'title',
+        'slug',
         'views',
         'is_pinned',
         'is_locked',
+        'last_post_id',
     ];
 
     protected $casts = [
@@ -25,63 +28,23 @@ class ForumTopic extends Model
         'is_locked' => 'boolean',
     ];
 
-    /**
-     * Topic belongs to a forum
-     */
-    public function forum()
+    public function category()
     {
-        return $this->belongsTo(Forum::class);
+        return $this->belongsTo(ForumCategory::class, 'category_id');
     }
 
-    /**
-     * Topic has many posts
-     */
-    public function posts()
-    {
-        return $this->hasMany(ForumPost::class);
-    }
-
-    // The last post in this topic
-    public function lastPost(): \Illuminate\Database\Eloquent\Relations\HasOne
-    {
-        return $this->hasOne(ForumPost::class, 'forum_topic_id')->latestOfMany();
-    }
-
-    /**
-     * Topic author
-     */
-    public function author()
+    public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    /**
-     * Scope: Only topics in forums visible to a given user class
-     */
-    public function scopeVisibleTo($query, ?int $userClass = null)
+    public function posts()
     {
-        $userClass = $userClass ?? \App\Models\UserClass::USER;
-
-        return $query->whereHas('forum', function ($f) use ($userClass) {
-            $f->where('min_class_required', '<=', $userClass)
-              ->whereHas('category', function ($c) use ($userClass) {
-                  $c->where('min_class_required', '<=', $userClass);
-              });
-        });
+        return $this->hasMany(ForumPost::class, 'topic_id');
     }
 
-    public function subscriptions()
-{
-    return $this->hasMany(TopicSubscription::class);
-}
-
-public function isSubscribedBy($user): bool
-{
-    if (!$user) return false;
-
-    return $this->subscriptions()
-        ->where('user_id', $user->id)
-        ->exists();
-}
-
+    public function lastPost()
+    {
+        return $this->belongsTo(ForumPost::class, 'last_post_id');
+    }
 }

@@ -2,44 +2,31 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Model;
 
 class ForumPost extends Model
 {
     use HasFactory;
-    use SoftDeletes;
 
     protected $fillable = [
-        'forum_topic_id',
+        'topic_id',
         'user_id',
-        'content',
+        'body',
+        'edited_at',
     ];
 
-    /**
-     * Post belongs to a topic
-     */
+    protected $casts = [
+        'edited_at' => 'datetime',
+    ];
+
     public function topic()
     {
-        return $this->belongsTo(ForumTopic::class, 'forum_topic_id');
+        return $this->belongsTo(ForumTopic::class, 'topic_id');
     }
 
-    /**
-     * Post author
-     */
-    public function author()
+    public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
-    }
-
-    /**
-     * Scope: Only posts in visible topics
-     */
-    public function scopeVisibleTo($query, ?int $userClass = null)
-    {
-        $userClass = $userClass ?? \App\Models\UserClass::USER;
-
-        return $query->whereHas('topic', fn($t) => $t->scopeVisibleTo($userClass));
     }
 }

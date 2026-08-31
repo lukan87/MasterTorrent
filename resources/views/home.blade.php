@@ -21,12 +21,6 @@
         <x-poll-list :polls="$polls" />
     </div>
 
-    {{-- Radio Player (only for authenticated users excluding ID 3) --}}
-  
-        @if(Auth::user()->id != 3)
-@include('partials.radio')
-    @endif
-
 
 
 @if(in_array(Auth::user()->id, [3, 5, 893]))
@@ -57,7 +51,7 @@
 
     @include('partials.latest-user-popup')
 
-     @include('partials.disclaimer')
+    @include('partials.disclaimer')
 
 
 </div>

@@ -42,7 +42,7 @@
 
 {{-- Facebook --}}
 <li class="nav-item">
-    <a class="nav-link" href="https://www.facebook.com/Lastfiles" target="_blank">
+    <a class="nav-link" href="https://www.facebook.com/" target="_blank">
         <i class="bi bi-facebook fs-4" data-bs-toggle="tooltip" title="Facebook"></i>
     </a>
 </li>

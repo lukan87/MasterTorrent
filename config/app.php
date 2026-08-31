@@ -13,13 +13,13 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Last-Torrents'),
+    'name' => env('APP_NAME', 'FileIplay'),
 
     
     // Add your site URL here
-    'site_url' => 'https://last-torrents.org',
+    'site_url' => 'https://fileiplay.org',
 
-    'seedbox_url' => env('SEEDBOX_URL', 'http://last-torrents.org'),
+    'seedbox_url' => env('SEEDBOX_URL', 'https://fileiplay.org'),
 
     /*
     |--------------------------------------------------------------------------

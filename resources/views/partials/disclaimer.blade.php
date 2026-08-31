@@ -37,19 +37,6 @@
         {{-- Body --}}
         <div class="disclaimer-body">
 
-            <div class="mb-3">
-
-                <a href="{{ route('terms.of.service') }}"
-                   class="tos-link">
-
-                    <i class="bi bi-file-earmark-text me-1"></i>
-
-                    Terms of Service
-
-                </a>
-
-            </div>
-
             <div class="disclaimer-text">
 
                 <p>
