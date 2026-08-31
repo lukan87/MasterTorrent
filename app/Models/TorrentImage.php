@@ -1,0 +1,20 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class TorrentImage extends Model
+{
+    use HasFactory;
+
+    protected $fillable = ['torrent_id', 'path'];
+
+    protected $table = 'torrent_images'; // Explicitly specifying the table name
+
+    public function torrent()
+    {
+        return $this->belongsTo(Torrent::class);
+    }
+}
