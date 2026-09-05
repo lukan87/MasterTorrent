@@ -6,31 +6,36 @@
 <div class="container py-5">
 
 
-    {{-- =========================================================
-         BREADCRUMB
-         ========================================================= --}}
 
-    <div class="mb-4 forum-breadcrumb">
+{{-- =========================================================
+     BREADCRUMB
+     ========================================================= --}}
 
-        <a href="{{ route('forum.index') }}"
-           class="text-muted text-decoration-none">
+<div class="forum-breadcrumb mb-4">
 
-            <i class="bi bi-house-door me-1"></i>
+    <a href="{{ route('forum.index') }}"
+       class="forum-breadcrumb-link">
 
-            Forum
+        <i class="bi bi-house-door-fill"></i>
 
-        </a>
+        <span>Forum</span>
 
-        <span class="text-muted mx-2">/</span>
+    </a>
 
-        <a href="{{ route('forum.category', $category->slug) }}"
-           class="text-muted text-decoration-none">
+    <i class="bi bi-chevron-right forum-breadcrumb-separator"></i>
 
-            {{ $category->name }}
+    <a href="{{ route('forum.category', $category->slug) }}"
+       class="forum-breadcrumb-link forum-breadcrumb-current">
 
-        </a>
+        <i class="bi bi-folder-fill"></i>
 
-    </div>
+        <span>{{ $category->name }}</span>
+
+    </a>
+
+</div>
+
+
 
 
     {{-- =========================================================
@@ -52,11 +57,86 @@
                 </div>
 
 
-                <h1 class="forum-topic-title">
+                <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
 
-                    {{ $topic->title }}
+    <h1 class="forum-topic-title mb-0">
 
-                </h1>
+        {{ $topic->title }}
+
+    </h1>
+
+
+    @auth
+
+        @if(!auth()->user()->forumblock)
+
+            @if($isFollowing)
+
+                <form method="POST"
+                      action="{{ route('forum.topic.unfollow', [
+                          'category' => $category->slug,
+                          'topic' => $topic->slug,
+                      ]) }}">
+
+                    @csrf
+                    @method('DELETE')
+
+                    <button type="submit"
+                            class="forum-follow-btn following">
+
+                        <i class="bi bi-bell-slash me-1"></i>
+
+                        Unfollow
+
+                    </button>
+
+                </form>
+
+            @else
+
+                <form method="POST"
+                      action="{{ route('forum.topic.follow', [
+                          'category' => $category->slug,
+                          'topic' => $topic->slug,
+                      ]) }}">
+
+                    @csrf
+
+                    <button type="submit"
+                            class="forum-follow-btn">
+
+                        <i class="bi bi-bell me-1"></i>
+
+                        Follow Topic
+
+                    </button>
+
+                </form>
+
+            @endif
+
+        @endif
+
+        @if($replies->count() > 0)
+
+    <a href="{{ route('forum.topic', [
+        'category' => $category->slug,
+        'topic' => $topic->slug,
+        'page' => $latestReplyPage,
+    ]) }}#post-{{ $topic->last_post_id }}"
+       class="forum-latest-btn">
+
+        <i class="bi bi-arrow-down-circle me-1"></i>
+
+        Latest Reply
+
+    </a>
+
+@endif
+
+    @endauth
+
+</div>
 
 
                 <div class="forum-topic-meta">
@@ -107,6 +187,118 @@
                 </div>
 
             </div>
+
+            @auth
+
+   @if(auth()->user()->user_class > \App\Models\UserClass::MODERATOR)
+
+    <div class="forum-topic-actions">
+
+        {{-- PIN / UNPIN --}}
+
+        <form method="POST"
+              action="{{ route('forum.topic.pin', [
+                  'category' => $category->slug,
+                  'topic' => $topic->slug,
+              ]) }}"
+              onsubmit="return confirm('{{ $topic->is_pinned ? 'Unpin this topic?' : 'Pin this topic?' }}');">
+
+            @csrf
+
+            @if($topic->is_pinned)
+
+                <button type="submit"
+                        class="forum-topic-action unpin">
+
+                    <i class="bi bi-pin-angle-fill me-1"></i>
+
+                    Unpin Topic
+
+                </button>
+
+            @else
+
+                <button type="submit"
+                        class="forum-topic-action pin">
+
+                    <i class="bi bi-pin-angle-fill me-1"></i>
+
+                    Pin Topic
+
+                </button>
+
+            @endif
+
+        </form>
+
+
+        {{-- LOCK / UNLOCK --}}
+
+        <form method="POST"
+              action="{{ route('forum.topic.lock', [
+                  'category' => $category->slug,
+                  'topic' => $topic->slug,
+              ]) }}"
+              onsubmit="return confirm('{{ $topic->is_locked ? 'Unlock this topic?' : 'Lock this topic?' }}');">
+
+            @csrf
+
+            @if($topic->is_locked)
+
+                <button type="submit"
+                        class="forum-topic-action unlock">
+
+                    <i class="bi bi-unlock-fill me-1"></i>
+
+                    Unlock Topic
+
+                </button>
+
+            @else
+
+                <button type="submit"
+                        class="forum-topic-action lock">
+
+                    <i class="bi bi-lock-fill me-1"></i>
+
+                    Lock Topic
+
+                </button>
+
+            @endif
+
+        </form>
+
+
+        {{-- DELETE TOPIC --}}
+
+        <form method="POST"
+      action="{{ route('forum.topic.delete', [
+          'category' => $category->slug,
+          'topic' => $topic->slug,
+      ]) }}"
+      onsubmit="return confirm('Are you sure you want to delete this topic? This will permanently delete the topic and all of its replies.');">
+
+    @csrf
+
+    @method('DELETE')
+
+    <button type="submit"
+            class="forum-topic-action delete-topic">
+
+        <i class="bi bi-trash3-fill me-1"></i>
+
+        Delete Topic
+
+    </button>
+
+</form>
+
+    </div>
+
+@endif
+
+@endauth
 
         </div>
 
@@ -163,7 +355,7 @@
                         @endif
 
 
-                        
+
 
                     @endauth
 
@@ -391,38 +583,297 @@
 
                         </div>
 
+                        {{-- LIKES --}}
+
+@auth
+
+   @php
+    $postLikes = $firstPost->likes;
+    $postLikeCount = $postLikes->count();
+    $postReaction = $postLikes
+        ->firstWhere('user_id', auth()->id())
+        ?->reaction;
+        $reactionCounts = $postLikes->groupBy('reaction')->map->count();
+@endphp
+
+    <div class="forum-like-section">
+
+        @if($firstPost->user_id !== auth()->id())
+    <div class="forum-reactions">
+
+        @foreach([
+            'like' => '👍',
+            'love' => '❤️',
+            'laugh' => '😂',
+            'wow' => '😮',
+            'sad' => '😢',
+        ] as $reaction => $emoji)
+
+            <form method="POST"
+                  action="{{ route('forum.post.like', [
+                      'category' => $category->slug,
+                      'topic' => $topic->slug,
+                      'post' => $firstPost->id,
+                  ]) }}"
+                  class="d-inline">
+
+                @csrf
+
+                <input type="hidden" name="reaction" value="{{ $reaction }}">
+
+                <button type="submit"
+                        class="forum-reaction-btn {{ $postReaction === $reaction ? 'active' : '' }}"
+                        title="{{ ucfirst($reaction) }}">
+                    <span class="forum-reaction-emoji">{{ $emoji }}</span>
+                </button>
+
+            </form>
+
+        @endforeach
+
+       @if($postLikeCount > 0)
+    <div class="reaction-summary">
+        @foreach([
+            'like' => '👍',
+            'love' => '❤️',
+            'laugh' => '😂',
+            'wow' => '😮',
+            'sad' => '😢',
+        ] as $reaction => $emoji)
+            @if(($reactionCounts[$reaction] ?? 0) > 0)
+                <span class="reaction-summary-item">
+                    <span>{{ $emoji }}</span>
+                    <span>{{ $reactionCounts[$reaction] }}</span>
+                </span>
+            @endif
+        @endforeach
+    </div>
+@endif
+
+    </div>
+
+@elseif($postLikeCount > 0)
+    <span class="reaction-total">
+        {{ $postLikeCount }}
+    </span>
+@endif
+
+
+        @if($postLikeCount > 0)
+
+          <div class="forum-liked-by">
+
+    <i class="bi bi-heart-fill liked-by-heart"></i>
+
+    <span class="liked-by-label">
+    Reacted by
+</span>
+
+    @php
+        $likedUsers = $postLikes
+            ->filter(fn ($like) => $like->user)
+            ->values();
+
+        $visibleLikedUsers = $likedUsers->take(2);
+        $remainingLikes = max(0, $likedUsers->count() - 2);
+    @endphp
+
+    @foreach($visibleLikedUsers as $like)
+
+       <a href="{{ route('profile.show', [
+    'id' => $like->user->id,
+    'username' => $like->user->name
+]) }}"
+   class="liked-by-user">
+    @switch($like->reaction)
+        @case('like')
+            👍
+            @break
+        @case('love')
+            ❤️
+            @break
+        @case('laugh')
+            😂
+            @break
+        @case('wow')
+            😮
+            @break
+        @case('sad')
+            😢
+            @break
+        @default
+            👍
+    @endswitch
+    {{ $like->user->name }}
+</a>
+
+        @if(!$loop->last)
+            <span class="liked-by-comma">,</span>
+        @endif
+
+    @endforeach
+
+    @if($remainingLikes > 0)
+
+        <button type="button"
+                class="liked-by-more"
+                data-bs-toggle="modal"
+                data-bs-target="#likeModal-{{ $firstPost->id }}">
+
+            {{ $remainingLikes }} {{ $remainingLikes === 1 ? 'other' : 'others' }}
+
+        </button>
+
+    @endif
+
+    @if($likedUsers->count() > 0 && $remainingLikes === 0)
+
+        <button type="button"
+                class="liked-by-more"
+                data-bs-toggle="modal"
+                data-bs-target="#likeModal-{{ $firstPost->id }}">
+
+            <i class="bi bi-chevron-down"></i>
+
+        </button>
+
+    @endif
+
+</div>
+
+        @endif
+
+    </div>
+
+@endauth
+
                     </div>
 
                 </div>
 
             </div>
 
-        </article>
+            @if($postLikeCount > 0)
+
+    <div class="modal fade"
+         id="likeModal-{{ $firstPost->id }}"
+         tabindex="-1"
+         aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered">
+
+            <div class="modal-content forum-like-modal">
+
+                <div class="modal-header">
+
+                    <h5 class="modal-title">
+    <i class="bi bi-emoji-smile me-2"></i>
+    Reactions {{ $postLikeCount }}
+</h5>
+
+                    <button type="button"
+                            class="btn-close btn-close-white"
+                            data-bs-dismiss="modal">
+                    </button>
+
+                </div>
+
+                <div class="modal-body">
+
+                    @foreach($postLikes as $like)
+
+                        @if($like->user)
+
+                            <div class="forum-like-user">
+
+                                <div class="forum-like-avatar">
+
+                                    @if($like->user->profile_image)
+
+                                        <img src="{{ $like->user->profile_image }}"
+                                             alt="{{ $like->user->name }}">
+
+                                    @else
+
+                                        <div class="forum-like-avatar-placeholder">
+                                            <i class="bi bi-person-fill"></i>
+                                        </div>
+
+                                    @endif
+
+                                </div>
+
+                                <div class="flex-grow-1">
+
+                                    <a href="{{ route('profile.show', [
+                                        'id' => $like->user->id,
+                                        'username' => $like->user->name
+                                    ]) }}"
+                                       class="forum-like-username">
+
+                                        {{ $like->user->name }}
+
+                                    </a>
+
+                                    <div class="small text-muted">
+                                        {{ $like->created_at->diffForHumans() }}
+                                    </div>
+
+                                </div>
+
+                               <span class="forum-modal-reaction">
+    @switch($like->reaction)
+        @case('like')
+            👍
+            @break
+        @case('love')
+            ❤️
+            @break
+        @case('laugh')
+            😂
+            @break
+        @case('wow')
+            😮
+            @break
+        @case('sad')
+            😢
+            @break
+        @default
+            👍
+    @endswitch
+</span>
+
+                            </div>
+
+                        @endif
+
+                    @endforeach
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
 
     @endif
 
+    </article>
 
+@endif
 
-    {{-- =========================================================
-         REPLIES
-         ========================================================= --}}
+@foreach($replies as $post)
 
-    @foreach($replies as $post)
+    <article id="post-{{ $post->id }}"
+             class="forum-reply-box forum-reply-post mb-4">
 
-        <article id="post-{{ $post->id }}"
-                 class="forum-reply-box forum-reply-post mb-4">
+             <div class="row g-0">
 
+    <div class="col-md-3 col-lg-2">
 
-            <div class="row g-0">
+        <div class="forum-user-panel">
 
-
-                {{-- =================================================
-                     USER PANEL
-                     ================================================= --}}
-
-                <div class="col-md-3 col-lg-2">
-
-                    <div class="forum-user-panel">
 
 
                         {{-- AVATAR --}}
@@ -623,9 +1074,34 @@
                             </div>
 
 
+
+
                             {{-- ACTIONS --}}
 
                             <div class="forum-post-actions">
+
+                                    {{-- QUOTE --}}
+
+        @auth
+
+            @if(
+                !$topic->is_locked &&
+                !auth()->user()->forumblock
+            )
+
+               <button
+    type="button"
+    class="forum-post-action quote-post-btn"
+    data-post-id="{{ $post->id }}"
+    data-username="{{ $post->user->name ?? 'Unknown' }}"
+    data-body='@json($post->body)'
+>
+    <i class="bi bi-quote me-1"></i>
+    Quote
+</button>
+            @endif
+
+        @endauth
 
                                 @auth
 
@@ -703,7 +1179,296 @@
 
                         <div class="forum-post-body">
 
-                            {!! nl2br(e($post->body)) !!}
+    {!! convertCustomTagsToHtml($post->body) !!}
+
+</div>
+
+{{-- LIKES --}}
+
+@auth
+
+   @php
+    $postLikes = $post->likes;
+    $postLikeCount = $postLikes->count();
+    $postReaction = $postLikes
+        ->firstWhere('user_id', auth()->id())
+        ?->reaction;
+        $reactionCounts = $postLikes->groupBy('reaction')->map->count();
+@endphp
+
+    <div class="forum-like-section">
+
+   @if($post->user_id !== auth()->id())
+    <div class="forum-reactions">
+
+        @foreach([
+            'like' => '👍',
+            'love' => '❤️',
+            'laugh' => '😂',
+            'wow' => '😮',
+            'sad' => '😢',
+        ] as $reaction => $emoji)
+
+            <form method="POST"
+                  action="{{ route('forum.post.like', [
+                      'category' => $category->slug,
+                      'topic' => $topic->slug,
+                      'post' => $post->id,
+                  ]) }}"
+                  class="d-inline">
+
+                @csrf
+
+                <input type="hidden"
+                       name="reaction"
+                       value="{{ $reaction }}">
+
+                <button type="submit"
+                        class="forum-reaction-btn {{ $postReaction === $reaction ? 'active' : '' }}"
+                        title="{{ ucfirst($reaction) }}">
+                    <span class="forum-reaction-emoji">{{ $emoji }}</span>
+                </button>
+
+            </form>
+
+        @endforeach
+
+        @if($postLikeCount > 0)
+    <div class="reaction-summary">
+        @foreach([
+            'like' => '👍',
+            'love' => '❤️',
+            'laugh' => '😂',
+            'wow' => '😮',
+            'sad' => '😢',
+        ] as $reaction => $emoji)
+            @if(($reactionCounts[$reaction] ?? 0) > 0)
+                <span class="reaction-summary-item">
+                    <span>{{ $emoji }}</span>
+                    <span>{{ $reactionCounts[$reaction] }}</span>
+                </span>
+            @endif
+        @endforeach
+    </div>
+@endif
+
+    </div>
+
+@else
+    @if($postLikeCount > 0)
+        <span class="reaction-total">
+            {{ $postLikeCount }}
+        </span>
+    @endif
+@endif
+
+
+        @if($postLikeCount > 0)
+
+           <div class="forum-liked-by">
+
+    <i class="bi bi-heart-fill liked-by-heart"></i>
+
+    <span class="liked-by-label">
+    Reacted by
+</span>
+    @php
+        $likedUsers = $postLikes
+            ->filter(fn ($like) => $like->user)
+            ->values();
+
+        $visibleLikedUsers = $likedUsers->take(2);
+        $remainingLikes = max(0, $likedUsers->count() - 2);
+    @endphp
+
+    @foreach($visibleLikedUsers as $like)
+
+        <a href="{{ route('profile.show', [
+    'id' => $like->user->id,
+    'username' => $like->user->name
+]) }}"
+   class="liked-by-user">
+    @switch($like->reaction)
+        @case('like')
+            👍
+            @break
+        @case('love')
+            ❤️
+            @break
+        @case('laugh')
+            😂
+            @break
+        @case('wow')
+            😮
+            @break
+        @case('sad')
+            😢
+            @break
+        @default
+            👍
+    @endswitch
+    {{ $like->user->name }}
+</a>
+        @if(!$loop->last)
+            <span class="liked-by-comma">,</span>
+        @endif
+
+    @endforeach
+
+    @if($remainingLikes > 0)
+
+        <button type="button"
+                class="liked-by-more"
+                data-bs-toggle="modal"
+                data-bs-target="#likeModal-{{ $post->id }}">
+
+            {{ $remainingLikes }} {{ $remainingLikes === 1 ? 'other' : 'others' }}
+
+        </button>
+
+    @endif
+
+    @if($likedUsers->count() > 0 && $remainingLikes === 0)
+
+        <button type="button"
+                class="liked-by-more"
+                data-bs-toggle="modal"
+                data-bs-target="#likeModal-{{ $post->id }}">
+
+            <i class="bi bi-chevron-down"></i>
+
+        </button>
+
+    @endif
+
+</div>
+
+        @endif
+
+    </div>
+
+@endauth
+
+                    </div>
+
+                </div>
+
+            </div>
+
+                </article>
+
+
+        {{-- =========================================================
+             REPLY REACTIONS MODAL
+             ========================================================= --}}
+
+        @if($postLikeCount > 0)
+
+            <div class="modal fade"
+                 id="likeModal-{{ $post->id }}"
+                 tabindex="-1"
+                 aria-hidden="true">
+
+                <div class="modal-dialog modal-dialog-centered">
+
+                    <div class="modal-content forum-like-modal">
+
+                        <div class="modal-header">
+
+                            <h5 class="modal-title">
+                                <i class="bi bi-emoji-smile me-2"></i>
+                                Reactions {{ $postLikeCount }}
+                            </h5>
+
+                            <button type="button"
+                                    class="btn-close btn-close-white"
+                                    data-bs-dismiss="modal"
+                                    aria-label="Close">
+                            </button>
+
+                        </div>
+
+                        <div class="modal-body">
+
+                            @foreach($postLikes as $like)
+
+                                @if($like->user)
+
+                                    <div class="forum-like-user">
+
+                                        <div class="forum-like-avatar">
+
+                                            @if($like->user->profile_image)
+
+                                                <img src="{{ $like->user->profile_image }}"
+                                                     alt="{{ $like->user->name }}">
+
+                                            @else
+
+                                                <div class="forum-like-avatar-placeholder">
+                                                    <i class="bi bi-person-fill"></i>
+                                                </div>
+
+                                            @endif
+
+                                        </div>
+
+
+                                        <div class="flex-grow-1">
+
+                                            <a href="{{ route('profile.show', [
+                                                'id' => $like->user->id,
+                                                'username' => $like->user->name
+                                            ]) }}"
+                                               class="forum-like-username">
+
+                                                {{ $like->user->name }}
+
+                                            </a>
+
+                                            <div class="small text-muted">
+                                                {{ $like->created_at->diffForHumans() }}
+                                            </div>
+
+                                        </div>
+
+
+                                        <span class="forum-modal-reaction">
+
+                                            @switch($like->reaction)
+
+                                                @case('like')
+                                                    👍
+                                                    @break
+
+                                                @case('love')
+                                                    ❤️
+                                                    @break
+
+                                                @case('laugh')
+                                                    😂
+                                                    @break
+
+                                                @case('wow')
+                                                    😮
+                                                    @break
+
+                                                @case('sad')
+                                                    😢
+                                                    @break
+
+                                                @default
+                                                    👍
+
+                                            @endswitch
+
+                                        </span>
+
+                                    </div>
+
+                                @endif
+
+                            @endforeach
 
                         </div>
 
@@ -713,7 +1478,8 @@
 
             </div>
 
-        </article>
+        @endif
+
 
     @endforeach
 
@@ -781,12 +1547,13 @@
                         <div class="mb-3">
 
                             <textarea
-                                name="body"
-                                rows="6"
-                                class="form-control forum-textarea @error('body') is-invalid @enderror"
-                                placeholder="Write your reply..."
-                                required
-                            >{{ old('body') }}</textarea>
+    id="forum-reply-body"
+    name="body"
+    rows="6"
+    class="form-control forum-textarea @error('body') is-invalid @enderror"
+    placeholder="Write your reply..."
+    required
+>{{ old('body') }}</textarea>
 
 
                             @error('body')
@@ -844,975 +1611,100 @@
 
 </div>
 
-<style>
-    ```css
-/* =========================================================
-   FORUM POST CARD
-   ========================================================= */
 
-.forum-post-card {
 
-    background: rgba(15, 20, 35, .96);
+@include('forum.partials.topic-css')
 
-    border: 1px solid rgba(255,255,255,.07);
+<script>
 
-    border-radius: 18px;
+document.addEventListener('DOMContentLoaded', function () {
 
-    overflow: hidden;
+    const replyBox = document.getElementById('forum-reply-body');
 
-    box-shadow:
-        0 12px 35px rgba(0,0,0,.25);
-
-}
-
-
-/* =========================================================
-   ORIGINAL / MAIN POST
-   ========================================================= */
-
-.forum-main-post {
-
-    border:
-        1px solid rgba(59,130,246,.40);
-
-    box-shadow:
-        0 15px 40px rgba(37,99,235,.12),
-        0 5px 20px rgba(0,0,0,.25);
-
-}
-
-
-.forum-main-post .forum-user-panel {
-
-    background:
-        rgba(59,130,246,.06);
-
-}
-
-
-.original-post-label {
-
-    min-height: 42px;
-
-    padding: 9px 18px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    gap: 15px;
-
-    background:
-        rgba(59,130,246,.12);
-
-    border-bottom:
-        1px solid rgba(59,130,246,.20);
-
-    color:
-        #93c5fd;
-
-    font-size:
-        .72rem;
-
-    font-weight:
-        800;
-
-    letter-spacing:
-        .08em;
-
-}
-
-
-/* =========================================================
-   POST ACTIONS
-   ========================================================= */
-
-.forum-post-actions {
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: flex-end;
-
-    gap: 12px;
-
-    margin-left: auto;
-
-    flex-shrink: 0;
-
-}
-
-
-.forum-post-action {
-
-    display: inline-flex;
-
-    align-items: center;
-
-    white-space: nowrap;
-
-    border: 0;
-
-    background: transparent;
-
-    padding: 2px 0;
-
-    font-size: .78rem;
-
-    font-weight: 700;
-
-    text-decoration: none;
-
-    cursor: pointer;
-
-    transition:
-        color .2s ease,
-        transform .2s ease;
-
-}
-
-
-/* EDIT */
-
-.edit-action {
-
-    color:
-        #93c5fd;
-
-}
-
-
-.edit-action:hover {
-
-    color:
-        #ffffff;
-
-    transform:
-        translateY(-1px);
-
-}
-
-
-/* DELETE */
-
-.delete-action {
-
-    color:
-        #f87171;
-
-}
-
-
-.delete-action:hover {
-
-    color:
-        #fca5a5;
-
-}
-
-
-.delete-action:disabled {
-
-    opacity:
-        .65;
-
-    cursor:
-        not-allowed;
-
-    transform:
-        none;
-
-}
-
-
-/* =========================================================
-   POST ANCHOR
-   ========================================================= */
-
-.post-anchor {
-
-    display: inline-flex;
-
-    align-items: center;
-
-    color:
-        rgba(255,255,255,.40);
-
-    text-decoration:
-        none;
-
-    font-size:
-        .75rem;
-
-    font-weight:
-        700;
-
-    white-space:
-        nowrap;
-
-}
-
-
-.post-anchor:hover {
-
-    color:
-        #93c5fd;
-
-}
-
-
-/* =========================================================
-   USER PANEL
-   ========================================================= */
-
-.forum-user-panel {
-
-    height:
-        100%;
-
-    padding:
-        24px 18px;
-
-    text-align:
-        center;
-
-    background:
-        rgba(255,255,255,.025);
-
-    border-right:
-        1px solid rgba(255,255,255,.06);
-
-}
-
-
-/* =========================================================
-   AVATAR
-   ========================================================= */
-
-.forum-avatar {
-
-    width:
-        90px;
-
-    height:
-        90px;
-
-    margin:
-        0 auto 12px;
-
-    border-radius:
-        50%;
-
-    overflow:
-        hidden;
-
-    border:
-        3px solid rgba(255,255,255,.08);
-
-}
-
-
-.forum-avatar img {
-
-    width:
-        100%;
-
-    height:
-        100%;
-
-    object-fit:
-        cover;
-
-}
-
-
-.forum-avatar-placeholder {
-
-    width:
-        100%;
-
-    height:
-        100%;
-
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    justify-content:
-        center;
-
-    background:
-        linear-gradient(135deg,#2563eb,#7c3aed);
-
-    color:
-        white;
-
-    font-size:
-        2rem;
-
-}
-
-
-/* =========================================================
-   USERNAME
-   ========================================================= */
-
-.forum-username {
-
-    display:
-        block;
-
-    color:
-        #fff;
-
-    font-size:
-        1.05rem;
-
-    font-weight:
-        800;
-
-    text-decoration:
-        none;
-
-}
-
-
-.forum-username:hover {
-
-    color:
-        #93c5fd;
-
-}
-
-
-/* =========================================================
-   USER TITLE
-   ========================================================= */
-
-.forum-user-title {
-
-    margin-top:
-        4px;
-
-    color:
-        #94a3b8;
-
-    font-size:
-        .85rem;
-
-}
-
-
-/* =========================================================
-   USER RANK
-   ========================================================= */
-
-.forum-user-rank {
-
-    display:
-        inline-block;
-
-    margin-top:
-        10px;
-
-    padding:
-        5px 10px;
-
-    border-radius:
-        20px;
-
-    background:
-        rgba(59,130,246,.15);
-
-    color:
-        #93c5fd;
-
-    font-size:
-        .75rem;
-
-    font-weight:
-        700;
-
-}
-
-
-/* =========================================================
-   USER INFO
-   ========================================================= */
-
-.forum-user-info {
-
-    margin-top:
-        12px;
-
-    color:
-        rgba(255,255,255,.5);
-
-    font-size:
-        .75rem;
-
-}
-
-
-/* =========================================================
-   POST CONTENT
-   ========================================================= */
-
-.forum-post-content {
-
-    min-height:
-        220px;
-
-    padding:
-        20px 24px;
-
-}
-
-
-/* =========================================================
-   POST HEADER
-   ========================================================= */
-
-.forum-post-header {
-
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    justify-content:
-        space-between;
-
-    gap:
-        15px;
-
-    padding-bottom:
-        12px;
-
-    margin-bottom:
-        18px;
-
-    border-bottom:
-        1px solid rgba(255,255,255,.06);
-
-    color:
-        rgba(255,255,255,.45);
-
-    font-size:
-        .8rem;
-
-}
-
-
-.forum-post-meta-left {
-
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    flex-wrap:
-        wrap;
-
-    gap:
-        12px;
-
-}
-
-
-/* =========================================================
-   EDITED LABEL
-   ========================================================= */
-
-.post-edited {
-
-    color:
-        rgba(147,197,253,.70);
-
-}
-
-
-/* =========================================================
-   POST BODY
-   ========================================================= */
-
-.forum-post-body {
-
-    color:
-        rgba(255,255,255,.9);
-
-    line-height:
-        1.75;
-
-    font-size:
-        .98rem;
-
-    overflow-wrap:
-        anywhere;
-
-    word-break:
-        break-word;
-
-}
-
-
-/* =========================================================
-   TOPIC HEADER
-   ========================================================= */
-
-.forum-topic-header {
-
-    padding:
-        10px 0;
-
-}
-
-
-.forum-topic-category {
-
-    color:
-        #93c5fd;
-
-    font-size:
-        .8rem;
-
-    font-weight:
-        800;
-
-    text-transform:
-        uppercase;
-
-    letter-spacing:
-        .08em;
-
-}
-
-
-.forum-topic-title {
-
-    margin:
-        0 0 12px;
-
-    color:
-        #fff;
-
-    font-size:
-        2rem;
-
-    font-weight:
-        800;
-
-    line-height:
-        1.25;
-
-    overflow-wrap:
-        anywhere;
-
-}
-
-
-.forum-topic-meta {
-
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    flex-wrap:
-        wrap;
-
-    gap:
-        15px;
-
-    color:
-        rgba(255,255,255,.50);
-
-    font-size:
-        .85rem;
-
-}
-
-
-.forum-locked-badge {
-
-    display:
-        inline-flex;
-
-    align-items:
-        center;
-
-    padding:
-        5px 10px;
-
-    border-radius:
-        20px;
-
-    background:
-        rgba(239,68,68,.15);
-
-    color:
-        #f87171;
-
-    font-weight:
-        700;
-
-}
-
-
-/* =========================================================
-   REPLY BOX
-   ========================================================= */
-
-.forum-reply-box {
-
-    background:
-        rgba(15,20,35,.96);
-
-    border:
-        1px solid rgba(255,255,255,.07);
-
-    border-radius:
-        18px;
-
-    overflow:
-        hidden;
-
-    box-shadow:
-        0 12px 35px rgba(0,0,0,.25);
-
-}
-
-
-.forum-reply-box-header {
-
-    padding:
-        18px 24px;
-
-    background:
-        rgba(255,255,255,.025);
-
-    border-bottom:
-        1px solid rgba(255,255,255,.06);
-
-}
-
-
-.forum-reply-box-header h5 {
-
-    color:
-        #fff;
-
-    font-weight:
-        800;
-
-}
-
-
-.forum-reply-box-header small {
-
-    color:
-        rgba(255,255,255,.45);
-
-}
-
-
-/* =========================================================
-   TEXTAREA
-   ========================================================= */
-
-.forum-textarea {
-
-    min-height:
-        140px;
-
-    background:
-        rgba(0,0,0,.20);
-
-    border:
-        1px solid rgba(255,255,255,.10);
-
-    color:
-        #fff;
-
-    resize:
-        vertical;
-
-}
-
-
-.forum-textarea::placeholder {
-
-    color:
-        rgba(255,255,255,.35);
-
-}
-
-
-.forum-textarea:focus {
-
-    background:
-        rgba(0,0,0,.25);
-
-    color:
-        #fff;
-
-    border-color:
-        rgba(59,130,246,.60);
-
-    box-shadow:
-        0 0 0 .2rem rgba(59,130,246,.10);
-
-}
-
-
-/* =========================================================
-   SUBMIT BUTTON
-   ========================================================= */
-
-.forum-submit-btn {
-
-    border:
-        0;
-
-    border-radius:
-        12px;
-
-    padding:
-        11px 18px;
-
-    background:
-        linear-gradient(135deg,#2563eb,#7c3aed);
-
-    color:
-        #fff;
-
-    font-weight:
-        700;
-
-    transition:
-        .2s ease;
-
-}
-
-
-.forum-submit-btn:hover {
-
-    color:
-        #fff;
-
-    transform:
-        translateY(-1px);
-
-}
-
-
-/* =========================================================
-   LOCKED BOX
-   ========================================================= */
-
-.forum-locked-box {
-
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    gap:
-        15px;
-
-    padding:
-        20px;
-
-    border:
-        1px solid rgba(239,68,68,.20);
-
-    border-radius:
-        16px;
-
-    background:
-        rgba(239,68,68,.08);
-
-    color:
-        #fca5a5;
-
-}
-
-
-/* =========================================================
-   BREADCRUMB
-   ========================================================= */
-
-.forum-breadcrumb a {
-
-    transition:
-        color .2s ease;
-
-}
-
-
-.forum-breadcrumb a:hover {
-
-    color:
-        #93c5fd !important;
-
-}
-
-
-/* =========================================================
-   PAGINATION
-   ========================================================= */
-
-.forum-pagination {
-
-    display:
-        flex;
-
-    justify-content:
-        center;
-
-}
-
-
-/* =========================================================
-   MOBILE
-   ========================================================= */
-
-@media (max-width: 767px) {
-
-    .forum-topic-title {
-
-        font-size:
-            1.45rem;
-
+    if (!replyBox) {
+        return;
     }
 
+    document.querySelectorAll('.quote-post-btn').forEach(function (button) {
 
-    .forum-topic-meta {
+        button.addEventListener('click', function () {
 
-        gap:
-            8px 12px;
+            const username = this.dataset.username || 'Unknown';
 
-        font-size:
-            .78rem;
+            let body = '';
 
-    }
+            try {
 
+                body = JSON.parse(this.dataset.body);
 
-    .original-post-label {
+            } catch (error) {
 
-        min-height:
-            44px;
+                console.error('Quote error:', error);
+                console.error('Post ID:', this.dataset.postId);
+                console.error('Raw body:', this.dataset.body);
 
-        padding:
-            9px 14px;
-
-        gap:
-            8px;
-
-    }
+                return;
+            }
 
 
-    .forum-post-actions {
-
-        gap:
-            8px;
-
-    }
+            const quote =
+                '[quote="' + username + '"]\n' +
+                body.trim() +
+                '\n[/quote]\n\n';
 
 
-    .forum-post-action {
+            /*
+             * If there is already text in the reply box,
+             * add the quote after it.
+             */
 
-        font-size:
-            .72rem;
+            if (replyBox.value.trim() !== '') {
 
-    }
+                replyBox.value =
+                    replyBox.value.trimEnd() +
+                    '\n\n' +
+                    quote;
 
+            } else {
 
-    .forum-user-panel {
+                replyBox.value = quote;
 
-        border-right:
-            0;
-
-        border-bottom:
-            1px solid rgba(255,255,255,.06);
-
-        padding:
-            18px;
-
-    }
+            }
 
 
-    .forum-avatar {
+            /*
+             * Focus the reply box.
+             */
 
-        width:
-            70px;
-
-        height:
-            70px;
-
-    }
+            replyBox.focus();
 
 
-    .forum-post-content {
+            /*
+             * Put cursor at the end.
+             */
 
-        padding:
-            18px;
-
-        min-height:
-            auto;
-
-    }
-
-
-    .forum-post-header {
-
-        align-items:
-            flex-start;
-
-        flex-wrap:
-            wrap;
-
-        gap:
-            10px;
-
-    }
+            replyBox.setSelectionRange(
+                replyBox.value.length,
+                replyBox.value.length
+            );
 
 
-    .forum-post-meta-left {
+            /*
+             * Scroll to reply box.
+             */
 
-        gap:
-            8px;
+            replyBox.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
 
-    }
+        });
 
+    });
 
-    .forum-post-header .forum-post-actions {
+});
 
-        width:
-            100%;
-
-        justify-content:
-            flex-start;
-
-        margin-left:
-            0;
-
-        padding-top:
-            4px;
-
-    }
-
-}
-</style>
+</script>
 
 @endsection
 

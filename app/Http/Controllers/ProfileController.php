@@ -10,6 +10,7 @@ use App\Models\Torrent;
 use App\Models\UserTimeline;
 use App\Models\Message;
 use App\Models\Comment;
+use App\Models\ForumPost;
 use App\Models\Warning;
 use App\Models\UserSlot;
 use App\Models\TorrentThank;
@@ -96,6 +97,8 @@ public function show($id, $name = null)
 $commentCount = Comment::where('user_id', $user->id)->count();
 
 $thanksCount = TorrentThank::where('user_id', $user->id)->count();
+
+$forumPostCount = ForumPost::where('user_id', $user->id)->count();
 
     /*
     |--------------------------------------------------------------------------
@@ -205,7 +208,8 @@ $timeline = $user->timeline()->latest()->get();
         'seederIcon',
         'timeline',
         'commentCount',
-        'thanksCount'
+        'thanksCount',
+        'forumPostCount'
     ));
 }
     /*
@@ -665,6 +669,20 @@ public function thanks($id, $name)
         ->paginate(25);
 
     return view('profile.thanks', compact('user', 'thanks'));
+}
+
+public function forumPosts($id, $name)
+{
+    $user = $this->resolveUserOrFail($id, $name);
+
+    $posts = ForumPost::where('user_id', $user->id)
+        ->with([
+            'topic.category',
+        ])
+        ->latest()
+        ->paginate(25);
+
+    return view('profile.posts', compact('user', 'posts'));
 }
 
 }

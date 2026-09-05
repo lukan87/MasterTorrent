@@ -47,4 +47,15 @@ class ForumTopic extends Model
     {
         return $this->belongsTo(ForumPost::class, 'last_post_id');
     }
+
+    public function subscriptions()
+{
+    return $this->hasMany(TopicSubscription::class, 'topic_id');
+}
+
+public function views()
+{
+    return $this->hasMany(ForumTopicView::class, 'topic_id');
+}
+
 }

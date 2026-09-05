@@ -103,7 +103,7 @@
         {{-- LEFT ACTIONS --}}
         <div class="d-flex flex-wrap align-items-center gap-2">
 
-            @if (Auth::user()->hit_and_run_count > 20)
+            @if (Auth::check() && Auth::user()->hit_and_run_count > 20)
 
                 <div class="modern-alert-danger">
 

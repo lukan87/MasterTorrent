@@ -191,9 +191,49 @@ $content = preg_replace_callback('/\[code(?:=(\w+))?\](.*?)\[\/code\]/s', functi
 }, $content);
 
 
-$content = preg_replace(
-    '/\[quote\](.*?)\[\/quote\]/s',
-    '<blockquote class="bbcode-quote">$1</blockquote>',
+/*
+|--------------------------------------------------------------------------
+| QUOTE
+|--------------------------------------------------------------------------
+|
+| Supports:
+|
+| [quote]message[/quote]
+|
+| [quote="username"]message[/quote]
+|
+*/
+
+$content = preg_replace_callback(
+    '/\[quote(?:="([^"]*)")?\](.*?)\[\/quote\]/is',
+    function ($matches) {
+
+        $username = !empty($matches[1])
+            ? trim($matches[1])
+            : null;
+
+        $body = trim($matches[2]);
+
+        $header = $username
+            ? '<div class="bbcode-quote-header">
+                    <i class="bi bi-quote me-1"></i>
+                    <strong>' . e($username) . '</strong> wrote:
+                    <i class="bi bi-quote me-1"></i>
+               </div>'
+            : '<div class="bbcode-quote-header">
+                    <i class="bi bi-quote me-1"></i>
+                    Quote
+               </div>';
+
+        return '
+            <blockquote class="bbcode-quote">
+                ' . $header . '
+                <div class="bbcode-quote-body">
+                    ' . $body . '
+                </div>
+            </blockquote>
+        ';
+    },
     $content
 );
 

@@ -89,6 +89,20 @@
             <em class="d-block mt-1">{{ $data['topic_title'] }}</em>
         @endif
 
+        {{-- Forum Like --}}
+@elseif($type === 'forum_like')
+
+    <i class="bi bi-heart-fill text-danger me-1"></i>
+
+    <strong>{{ $data['author'] ?? 'Someone' }}</strong>
+    liked your post
+
+    @if(!empty($data['topic_title']))
+        <em class="d-block mt-1">
+            {{ $data['topic_title'] }}
+        </em>
+    @endif
+
     {{-- Forum Reply (old structure without type) --}}
     @elseif(isset($data['author']) && isset($data['topic_title']))
         <i class="bi bi-chat-dots-fill text-info me-1"></i>

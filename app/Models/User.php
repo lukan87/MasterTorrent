@@ -395,7 +395,7 @@ public function seedboxes()
 
 public function topicSubscriptions()
 {
-    return $this->hasMany(TopicSubscription::class);
+    return $this->hasMany(TopicSubscription::class, 'user_id');
 }
 
 public function deletedBy()
@@ -565,6 +565,12 @@ public function forumPosts()
 }
 
 //
+
+
+public function forumPostLikes()
+{
+    return $this->hasMany(ForumPostLike::class, 'user_id');
+}
 
 
 }

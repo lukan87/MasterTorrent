@@ -105,7 +105,31 @@
                         <button type="submit" class="dropdown-item text-light text-start bg-transparent border-0 w-100">
 
                             <div class="fw-semibold">
-                                @if($type === 'forum_reply')
+                                @if($type === 'forum_mention')
+
+    <i class="bi bi-at text-warning me-1"></i>
+
+    <strong>{{ $notification->data['author'] ?? 'Someone' }}</strong>
+
+    mentioned you in
+
+    <em>{{ $notification->data['topic_title'] ?? 'a forum topic' }}</em>
+
+    {{-- Forum Like --}}
+@elseif($type === 'forum_like')
+
+    <i class="bi bi-heart-fill text-danger me-1"></i>
+
+    <strong>{{ $data['author'] ?? 'Someone' }}</strong>
+    liked your post
+
+    @if(!empty($data['topic_title']))
+        <em class="d-block mt-1">
+            {{ $data['topic_title'] }}
+        </em>
+    @endif
+
+@elseif($type === 'forum_reply')
                                     <i class="bi bi-chat-dots-fill text-info me-1"></i>
                                     <strong>{{ $notification->data['author'] }}</strong>
                                     replied to <em>{{ $notification->data['topic_title'] }}</em>

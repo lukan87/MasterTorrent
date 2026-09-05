@@ -214,8 +214,8 @@ fetch('/announcements-unread-count')
 
 
 <!-- Back to Top Button -->
-<button id="back-to-top" class="btn btn-secondary" style="position: fixed; bottom: 100px; right: 20px; display: none;">
-<i class="bi bi-arrow-up-circle-fill fs-3"></i>
+<button id="back-to-top" class="btn" type="button" aria-label="Back to top">
+<i class="bi bi-arrow-up fs-4" aria-hidden="true"></i>
 </button>
 
 <script>

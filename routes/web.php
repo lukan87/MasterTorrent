@@ -1,58 +1,94 @@
 <?php
 
-//Announce route without session and CSRF middleware
+use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\EmailController;
+use App\Http\Controllers\Admin\MessagesController;
+use App\Http\Controllers\Admin\MovieController as AdminMovieController;
+use App\Http\Controllers\Admin\SeriesController as AdminSeriesController;
+use App\Http\Controllers\Admin\SystemInfoController;
+use App\Http\Controllers\Admin\TorrentLogController;
 use App\Http\Controllers\Admin\TorrentsController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\AnnounceController;
 use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\Auth\ResetPasswordController as AuthResetPasswordController;
+use App\Http\Controllers\BonusController;
+use App\Http\Controllers\CollectionController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\ConversationController;
+use App\Http\Controllers\DonationController;
+use App\Http\Controllers\ForumCategoryController;
+use App\Http\Controllers\ForumController;
+use App\Http\Controllers\ForumPostLikeController;
+use App\Http\Controllers\HappyHourController;
+use App\Http\Controllers\HitAndRunController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\InviteController;
+use App\Http\Controllers\MessageController;
+use App\Http\Controllers\MovieController;
+use App\Http\Controllers\NewsController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PollController;
+use App\Http\Controllers\PostmarkController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ResetPassword\ResetPasswordController;
+use App\Http\Controllers\RssFeedController;
+use App\Http\Controllers\SeedboxController;
+use App\Http\Controllers\SeriesController;
+use App\Http\Controllers\ShoutboxController;
+use App\Http\Controllers\SnatchController;
+use App\Http\Controllers\StaffTicketController;
+use App\Http\Controllers\SubtitleController;
+use App\Http\Controllers\TeamController;
+use App\Http\Controllers\TicketController;
+use App\Http\Controllers\TicketDashboardController;
+use App\Http\Controllers\TicketReplyController;
+use App\Http\Controllers\TopicSubscriptionController;
+use App\Http\Controllers\TorrentController;
+use App\Http\Controllers\TorrentHistoryController;
 use App\Http\Controllers\TorrentMovieController;
-use Illuminate\Session\Middleware\StartSession;
-use Illuminate\View\Middleware\ShareErrorsFromSession;
+use App\Http\Controllers\TorrentRequestController;
+use App\Http\Controllers\UploadApplicationCommentController;
+use App\Http\Controllers\UploadApplicationController;
+use App\Http\Controllers\UploadApplicationVoteController;
+use App\Http\Controllers\WarningController;
+use App\Models\Ticket;
+use App\Models\User;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Http\Request;
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 // Other imports
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\MovieController;
-use App\Http\Controllers\SeriesController;
-use App\Http\Controllers\CollectionController;
-use App\Http\Controllers\CommentController;
-use App\Http\Controllers\TorrentController;
-use App\Http\Controllers\AnnounceController;
-use App\Http\Controllers\BonusController;
-use App\Http\Controllers\ShoutboxController;
-use App\Http\Controllers\MessageController;
-use App\Http\Controllers\NewsController;
-use App\Http\Controllers\PollController;
-use App\Http\Controllers\ResetPassword\ResetPasswordController;
-use App\Http\Controllers\TorrentRequestController;
-use App\Http\Controllers\Admin\SystemInfoController;
-use App\Http\Controllers\RssFeedController;
-use App\Http\Controllers\TorrentHistoryController;
-use App\Http\Controllers\DonationController;
-use App\Http\Controllers\HitAndRunController;
-use App\Http\Controllers\TeamController;
-use App\Http\Controllers\HappyHourController;
-use App\Http\Controllers\InviteController;
-use App\Http\Controllers\SubtitleController;
-use App\Helpers\EmojiHelper;
-
-use App\Http\Controllers\Admin\MessagesController;
-
-
-
-use App\Http\Controllers\SeedboxController;
-use App\Http\Controllers\Admin\EmailController;
-use App\Http\Controllers\NotificationController;
-
-//Forum routes
-
-use App\Http\Controllers\ForumController;
+// Forum routes
 
 Route::get('/forum', [ForumController::class, 'index'])
     ->name('forum.index');
+
+Route::get('/forum/categories/create', [ForumCategoryController::class, 'create'])
+    ->name('forum.category.create');
+
+Route::post('/forum/categories', [ForumCategoryController::class, 'store'])
+    ->name('forum.category.store');
+
+Route::get('/forum/categories/{category}/edit', [ForumCategoryController::class, 'edit'])
+    ->name('forum.category.edit');
+
+Route::put('/forum/categories/{category}', [ForumCategoryController::class, 'update'])
+    ->name('forum.category.update');
+
+Route::delete('/forum/categories/{category}', [ForumCategoryController::class, 'destroy'])
+    ->name('forum.category.destroy');
+
+Route::patch('/forum/categories/{category}/restore', [ForumCategoryController::class, 'restore'])
+    ->name('forum.category.restore');
+
+Route::delete('/forum/categories/{category}/permanent', [ForumCategoryController::class, 'forceDestroy'])
+    ->name('forum.category.force-delete');
 
 Route::middleware('auth')->group(function () {
 
@@ -64,21 +100,38 @@ Route::middleware('auth')->group(function () {
         [ForumController::class, 'store'])
         ->name('forum.topic.store');
 
-        Route::post('/forum/{category:slug}/{topic:slug}/reply',
-    [ForumController::class, 'reply'])
-    ->name('forum.topic.reply');
+    Route::post('/forum/{category:slug}/{topic:slug}/reply',
+        [ForumController::class, 'reply'])
+        ->name('forum.topic.reply');
 
     Route::get('/forum/{category:slug}/{topic:slug}/post/{post}/edit',
-    [ForumController::class, 'editPost'])
-    ->name('forum.post.edit');
+        [ForumController::class, 'editPost'])
+        ->name('forum.post.edit');
 
-Route::put('/forum/{category:slug}/{topic:slug}/post/{post}',
-    [ForumController::class, 'updatePost'])
-    ->name('forum.post.update');
+    Route::put('/forum/{category:slug}/{topic:slug}/post/{post}',
+        [ForumController::class, 'updatePost'])
+        ->name('forum.post.update');
 
     Route::delete('/forum/{category:slug}/{topic:slug}/post/{post}',
-    [ForumController::class, 'deletePost'])
-    ->name('forum.post.delete');
+        [ForumController::class, 'deletePost'])
+        ->name('forum.post.delete');
+
+    Route::post('/forum/{category:slug}/{topic:slug}/lock',
+        [ForumController::class, 'toggleLock'])
+        ->name('forum.topic.lock');
+
+    Route::post('/forum/{category:slug}/{topic:slug}/pin',
+        [ForumController::class, 'togglePin'])
+        ->name('forum.topic.pin');
+
+    Route::delete('/forum/{category:slug}/{topic:slug}',
+        [ForumController::class, 'deleteTopic'])
+        ->name('forum.topic.delete');
+
+    Route::post(
+        '/forum/{category:slug}/{topic:slug}/post/{post}/like',
+        [ForumPostLikeController::class, 'toggle']
+    )->name('forum.post.like');
 
 });
 
@@ -90,9 +143,21 @@ Route::get('/forum/{category:slug}',
     [ForumController::class, 'category'])
     ->name('forum.category');
 
+Route::middleware('auth')->group(function () {
 
+    Route::post(
+        '/forum/{category:slug}/{topic:slug}/follow',
+        [TopicSubscriptionController::class, 'store']
+    )->name('forum.topic.follow');
 
+    Route::delete(
+        '/forum/{category:slug}/{topic:slug}/follow',
+        [TopicSubscriptionController::class, 'destroy']
+    )->name('forum.topic.unfollow');
 
+});
+
+// Admin email routes
 
 Route::prefix('admin')->name('admin.')->group(function () {
 
@@ -108,7 +173,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/emails/count', [EmailController::class, 'count'])
         ->name('emails.count');
 
-          // ✅ DELETE OLD
+    // ✅ DELETE OLD
     Route::delete('/emails/delete-old', [EmailController::class, 'deleteOld'])
         ->name('emails.delete-old');
 
@@ -116,13 +181,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::delete('/emails/{email}', [EmailController::class, 'destroy'])
         ->name('emails.destroy');
 
-  
-
 });
 
-
-
-//Notifications
+// Notification routes
 
 Route::get('/notifications', [NotificationController::class, 'index'])
     ->middleware('auth')
@@ -138,16 +199,16 @@ Route::post('/notifications/{id}/read', function ($id) {
     $notification->markAsRead();
 
     // ✅ SAFE redirect with fallback reconstruction
-    if (!empty($notification->data['url'])) {
+    if (! empty($notification->data['url'])) {
         return redirect($notification->data['url']);
     }
 
     // 🛟 Fallback for OLD notifications
-    if (!empty($notification->data['topic_id'])) {
+    if (! empty($notification->data['topic_id'])) {
         return redirect(
             route('topics.show', $notification->data['topic_id'])
-            . (!empty($notification->data['post_id'])
-                ? '#post-' . $notification->data['post_id']
+            .(! empty($notification->data['post_id'])
+                ? '#post-'.$notification->data['post_id']
                 : '')
         );
     }
@@ -157,9 +218,9 @@ Route::post('/notifications/{id}/read', function ($id) {
 
 })->middleware('auth')->name('notifications.read');
 
-
 Route::post('/notifications/read-all', function () {
     auth()->user()->unreadNotifications->markAsRead();
+
     return back()->with('success', 'All notifications marked as read.');
 })->middleware('auth')->name('notifications.readAll');
 
@@ -175,51 +236,38 @@ Route::delete('/notifications/{notification}', function ($id) {
 
 Route::delete('/notifications', function () {
     auth()->user()->notifications()->delete();
+
     return back()->with('success', 'All notifications deleted.');
 })->middleware('auth')->name('notifications.deleteAll');
 
-
-
-//Notifications
-
-
-
+// Seedbox routes
 Route::get('/seedboxes/{seedbox}/test-rpc/{hash}', [SeedboxController::class, 'testRpc'])->middleware('auth');
 
 Route::get('/seedboxes/{seedbox}/torrent/{hash}/download', [SeedboxController::class, 'downloadTorrent'])->name('seedboxes.downloadTorrent');
 
-// routes/web.php
-
-
-    Route::get('seedboxes/{seedbox}/torrent/{hash}/download-rebuilt', [SeedboxController::class, 'downloadRebuiltTorrent'])
+Route::get('seedboxes/{seedbox}/torrent/{hash}/download-rebuilt', [SeedboxController::class, 'downloadRebuiltTorrent'])
     ->name('seedboxes.downloadRebuiltTorrent');
 
-
-
-
-
-// Happy Hour
+// Happy hour administration routes
 Route::prefix('admin/happyhour')
     ->name('happyhour.')
     ->middleware(['auth', 'admin'])
     ->group(function () {
 
-    Route::get('/', [HappyHourController::class, 'index'])->name('index');
-    Route::get('/create', [HappyHourController::class, 'create'])->name('create');
-    Route::post('/store', [HappyHourController::class, 'store'])->name('store');
+        Route::get('/', [HappyHourController::class, 'index'])->name('index');
+        Route::get('/create', [HappyHourController::class, 'create'])->name('create');
+        Route::post('/store', [HappyHourController::class, 'store'])->name('store');
 
-    Route::post('/toggle-automatic', [HappyHourController::class, 'toggleAutomatic'])
-        ->name('toggleAutomatic');
+        Route::post('/toggle-automatic', [HappyHourController::class, 'toggleAutomatic'])
+            ->name('toggleAutomatic');
 
-    Route::patch('/stop/{happyHour}', [HappyHourController::class, 'stop'])
-        ->name('stop');
+        Route::patch('/stop/{happyHour}', [HappyHourController::class, 'stop'])
+            ->name('stop');
 
-    // ✅ DELETE ROUTE
-    Route::delete('/delete/{happyHour}', [HappyHourController::class, 'destroy'])
-        ->name('destroy');
-});
-
-//Happy Hour
+        // ✅ DELETE ROUTE
+        Route::delete('/delete/{happyHour}', [HappyHourController::class, 'destroy'])
+            ->name('destroy');
+    });
 
 Route::middleware('auth')->group(function () {
     Route::resource('seedboxes', SeedboxController::class);
@@ -227,32 +275,26 @@ Route::middleware('auth')->group(function () {
     Route::get('seedboxes/{seedbox}/torrents', [SeedboxController::class, 'showTorrents'])->name('seedboxes.torrents');
     Route::post('/seedboxes/{seedbox}/add-torrent', [SeedboxController::class, 'addTorrent'])->name('seedboxes.addTorrent');
     Route::post('/seedboxes/{seedbox}/start/{hash}', [SeedboxController::class, 'start'])->name('seedboxes.start');
-Route::post('/seedboxes/{seedbox}/pause/{hash}', [SeedboxController::class, 'pause'])->name('seedboxes.pause');
-Route::delete('/seedboxes/{seedbox}/delete/{hash}', [SeedboxController::class, 'delete'])->name('seedboxes.delete');
-Route::get('/seedboxes/{seedbox}/test', [SeedboxController::class, 'testConnection'])->name('seedboxes.test');
-Route::post('/seedboxes/{seedbox}/add-url', [SeedboxController::class, 'addTorrentUrl'])->name('seedboxes.addTorrentUrl');
+    Route::post('/seedboxes/{seedbox}/pause/{hash}', [SeedboxController::class, 'pause'])->name('seedboxes.pause');
+    Route::delete('/seedboxes/{seedbox}/delete/{hash}', [SeedboxController::class, 'delete'])->name('seedboxes.delete');
+    Route::get('/seedboxes/{seedbox}/test', [SeedboxController::class, 'testConnection'])->name('seedboxes.test');
+    Route::post('/seedboxes/{seedbox}/add-url', [SeedboxController::class, 'addTorrentUrl'])->name('seedboxes.addTorrentUrl');
 });
 
 Route::get('seedboxes/{seedbox}/torrent/{hash}/trackers', [SeedboxController::class, 'getTorrentTrackers']);
-
-
 
 Route::post('/torrents/{torrent}/send-to-seedbox', [TorrentController::class, 'sendToSeedbox'])
     ->name('torrents.sendToSeedbox')
     ->middleware('auth');
 
-  Route::post('seedboxes/{seedbox}/import/{hash}', [SeedboxController::class, 'importTorrent'])
+Route::post('seedboxes/{seedbox}/import/{hash}', [SeedboxController::class, 'importTorrent'])
     ->name('seedboxes.import')
-      ->middleware('auth');
+    ->middleware('auth');
 
 Route::get('seedboxes/{seedbox}/download/{hash}', [SeedboxController::class, 'downloadTorrent'])
     ->name('seedboxes.download');
 
-
-
-
-use App\Http\Controllers\SnatchController;
-
+// Snatch and seeding routes
 Route::prefix('snatch')->group(function () {
     Route::get('/snatchlist/{userId?}', [SnatchController::class, 'snatchlist'])->name('snatch.snatchlist')->middleware('auth');
     Route::get('/seeding/{userId?}', [SnatchController::class, 'seeding'])->name('snatch.seeding')->middleware('auth');
@@ -261,31 +303,27 @@ Route::prefix('snatch')->group(function () {
     Route::get('/need-to-seed/{userId?}', [SnatchController::class, 'needToSeed'])->name('snatch.needToSeed')->middleware('auth');
 
     Route::get('/hnr-fixer/{userId?}', [SnatchController::class, 'hitRunFixer'])->name('snatch.hnrFixer')->middleware('auth');
-    
-     Route::delete('/delete-need-to-seed/{userId}/{torrentId}', [SnatchController::class, 'deleteNeedToSeed'])
-     ->name('snatch.deleteNeedToSeed')
-     ->middleware('auth');
-     
- Route::delete('/delete-hnr/{userId}/{torrentId}', [SnatchController::class, 'deleteHNR'])
-     ->name('snatch.deleteHNR')
-     ->middleware('auth');
+
+    Route::delete('/delete-need-to-seed/{userId}/{torrentId}', [SnatchController::class, 'deleteNeedToSeed'])
+        ->name('snatch.deleteNeedToSeed')
+        ->middleware('auth');
+
+    Route::delete('/delete-hnr/{userId}/{torrentId}', [SnatchController::class, 'deleteHNR'])
+        ->name('snatch.deleteHNR')
+        ->middleware('auth');
 });
 
-
-
-
+// Emoji routes
 Route::get('/get-emoji/{emojiCode}', function ($emojiCode) {
     return response()->json(['emoji' => emoji($emojiCode)]);
 });
 
-
-use App\Models\User;
-
+// Account verification routes
 Route::get('/verify/{token}', function ($token) {
 
     $user = User::where('remember_token', $token)->first();
 
-    if (!$user) {
+    if (! $user) {
         dd('USER NOT FOUND', $token);
     }
 
@@ -297,22 +335,22 @@ Route::get('/verify/{token}', function ($token) {
 
     // Debug after update
     $user->refresh();
-    
+
     return redirect('/login')->with('status', 'Email verified! You can now log in to your account.');
 });
 
-
-use App\Http\Controllers\Admin\TorrentLogController;
-
+// Admin torrent log routes
 Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/torrent-logs', [TorrentLogController::class, 'index'])->name('admin.torrent_logs.index');
     Route::get('/torrent-logs/{id}', [TorrentLogController::class, 'show'])->name('admin.torrent_logs.show');
 });
 
+// Hit and run routes
 Route::get('/hitandrun', [HitAndRunController::class, 'index'])->name('hitandrun.index')->middleware('auth');
 // View another user's hit and run status
 Route::get('/hitandrun/{userId}', [HitAndRunController::class, 'showOtherUserHitAndRun'])->name('hitandrun.showOther')->middleware('auth');
 
+// Bonus purchase routes
 Route::post('/bonus/buy-vip', [BonusController::class, 'buyVip'])->name('bonus.buyVip')->middleware('auth');
 
 Route::post('/bonus/buy-seedtime', [BonusController::class, 'buySeedtime'])->name('bonus.buySeedtime')->middleware('auth');
@@ -321,12 +359,14 @@ Route::post('/buy-invites', [BonusController::class, 'buyInvites'])->name('buy.i
 Route::post('/buy-slots', [BonusController::class, 'buySlots'])->name('buy.slots')->middleware('auth');
 Route::post('/bonus/surprise', [BonusController::class, 'buySurprise'])->name('bonus.surprise')->middleware('auth');
 
+// Team route
 Route::get('/team', [TeamController::class, 'index'])->name('team.index')->middleware('auth');
 
 Auth::routes();
-Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home')->middleware('last_activity')->middleware('auth');
-Route::get('/recover-password', [App\Http\Controllers\Auth\ResetPasswordController::class, 'showRecoveryForm'])->name('password.recover');
-Route::post('/password/reset', [App\Http\Controllers\Auth\ResetPasswordController::class, 'updatePassword'])->name('password.update');
+// Home and password recovery routes
+Route::get('/', [HomeController::class, 'index'])->name('home')->middleware('last_activity')->middleware('auth');
+Route::get('/recover-password', [AuthResetPasswordController::class, 'showRecoveryForm'])->name('password.recover');
+Route::post('/password/reset', [AuthResetPasswordController::class, 'updatePassword'])->name('password.update');
 
 Route::get('/test-ip', function () {
     return request()->ip();
@@ -335,8 +375,6 @@ Route::get('/test-ip', function () {
 // Custom password recovery routes
 Route::get('/custom-password/recover', [ResetPasswordController::class, 'showRecoveryForm'])->name('custom.password.recover');
 Route::post('/custom-password/reset', [ResetPasswordController::class, 'updatePassword'])->name('custom.password.update');
-
-
 
 // Show user profile by ID and name
 Route::get('/profile/{id}/{name?}', [ProfileController::class, 'show'])->name('profile.show')->middleware('auth');
@@ -355,31 +393,26 @@ Route::get('/profile/{id}/{name}/seeding-torrents', [ProfileController::class, '
 
 Route::get('/profile/{id}/{name}/download-history', [ProfileController::class, 'downloadHistory'])->name('profile.download-history')->middleware('auth');
 
-//Slots
+// Slots
 Route::get('/profile/{id}/{name}/tokens', [ProfileController::class, 'activeTokens'])
     ->name('profile.tokens')
-     ->middleware('auth');
+    ->middleware('auth');
 
 Route::delete('/profile/torrents/{torrent}/delete', [ProfileController::class, 'destroyTorrent'])
     ->name('profile.torrents.destroy')
     ->middleware('auth');
 
-        
 Route::delete('/profile/{id}/{name}/delete', [ProfileController::class, 'deleteAccount'])
     ->name('profile.delete')
     ->middleware('auth');
 
-    Route::patch('/profile/{id}/passkey/regenerate', 
+Route::patch('/profile/{id}/passkey/regenerate',
     [ProfileController::class, 'regeneratePasskey']
 )->name('profile.passkey.regenerate')->middleware('auth');
 
 Route::get('/profile/{id}/{name}/posts', [ProfileController::class, 'forumPosts'])->name('profile.posts');
 Route::get('/profile/{id}/{name}/comments', [ProfileController::class, 'comments'])->name('profile.comments');
 Route::get('/profile/{id}/{name}/thanks', [ProfileController::class, 'thanks'])->name('profile.thanks');
-
-
-
-
 
 // Movies
 Route::resource('movies', MovieController::class)
@@ -407,9 +440,6 @@ Route::post('/movies/search-movie', [MovieController::class, 'searchMovie'])
     ->name('movies.search-movie')
     ->middleware('auth');
 
-
-
-
 // Series
 Route::resource('series', SeriesController::class)
     ->middleware('auth')
@@ -436,80 +466,74 @@ Route::post('/series/search-movie', [SeriesController::class, 'searchSeries'])
     ->name('series.search-series')
     ->middleware('auth');
 
-
-
 // Collections
 Route::get('/collections', [CollectionController::class, 'index'])->name('collections.index')->middleware('auth');
 Route::get('/collections/{id}', [CollectionController::class, 'show'])->name('collections.show')->middleware('auth');
 
-//Comments
+// Comments
 
 Route::post('/comments', [CommentController::class, 'store'])->middleware('auth')->name('comments.store')->middleware('auth');
 Route::delete('/comments/{id}', [CommentController::class, 'destroy'])->middleware('auth')->name('comments.destroy')->middleware('auth');
 Route::put('/comments/{id}/update', [CommentController::class, 'update'])->name('comments.update')->middleware('auth');
 
-
-
 // Admin System
 Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function () {
 
-    Route::get('/', [App\Http\Controllers\Admin\AdminController::class, 'index'])->name('admin.index');
+    Route::get('/', [AdminController::class, 'index'])->name('admin.index');
     Route::name('admin.')->group(function () {
         // Users Management
-            Route::group(['prefix' => 'users'], function () {
-            Route::get('/', [App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
-            Route::get('/create', [App\Http\Controllers\Admin\UserController::class, 'create'])->name('users.create');
-            Route::post('/store', [App\Http\Controllers\Admin\UserController::class, 'store'])->name('users.store');
-            Route::get('/{name}', [App\Http\Controllers\Admin\UserController::class, 'show'])->name('users.show');
-            Route::get('/{id}/edit', [App\Http\Controllers\Admin\UserController::class, 'edit'])->name('users.edit');
-            Route::put('/{id}/update', [App\Http\Controllers\Admin\UserController::class, 'update'])->name('users.update');
-            Route::delete('/{id}/destroy', [App\Http\Controllers\Admin\UserController::class, 'destroy'])->name('users.destroy');
-            Route::post('/admin/users/sendMassMessage', [App\Http\Controllers\Admin\UserController::class, 'sendMassMessage'])->name('users.sendMassMessage');
-            Route::get('/users/comments', [App\Http\Controllers\Admin\UserController::class, 'comments'])->name('users.comments');
+        Route::group(['prefix' => 'users'], function () {
+            Route::get('/', [UserController::class, 'index'])->name('users.index');
+            Route::get('/create', [UserController::class, 'create'])->name('users.create');
+            Route::post('/store', [UserController::class, 'store'])->name('users.store');
+            Route::get('/{name}', [UserController::class, 'show'])->name('users.show');
+            Route::get('/{id}/edit', [UserController::class, 'edit'])->name('users.edit');
+            Route::put('/{id}/update', [UserController::class, 'update'])->name('users.update');
+            Route::delete('/{id}/destroy', [UserController::class, 'destroy'])->name('users.destroy');
+            Route::post('/admin/users/sendMassMessage', [UserController::class, 'sendMassMessage'])->name('users.sendMassMessage');
+            Route::get('/users/comments', [UserController::class, 'comments'])->name('users.comments');
 
             Route::post('/users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
 
-
-Route::delete('/admin/users/{id}/force', [App\Http\Controllers\Admin\UserController::class, 'deletePermanently'])->name('users.forceDelete');
-
+            Route::delete('/admin/users/{id}/force', [UserController::class, 'deletePermanently'])->name('users.forceDelete');
 
         });
 
         // Movies Management
         Route::group(['prefix' => 'movies'], function () {
-            Route::get('/', [App\Http\Controllers\Admin\MovieController::class, 'index'])->name('movies.index');
-            Route::get('/create', [App\Http\Controllers\Admin\MovieController::class, 'create'])->name('movies.create');
-            Route::post('/store', [App\Http\Controllers\Admin\MovieController::class, 'store'])->name('movies.store');
-            Route::get('/{id}/edit', [App\Http\Controllers\Admin\MovieController::class, 'edit'])->name('movies.edit');
-            Route::put('/{id}/update', [App\Http\Controllers\Admin\MovieController::class, 'update'])->name('movies.update');
-            Route::delete('/{id}/destroy', [App\Http\Controllers\Admin\MovieController::class, 'destroy'])->name('movies.destroy');
+            Route::get('/', [AdminMovieController::class, 'index'])->name('movies.index');
+            Route::get('/create', [AdminMovieController::class, 'create'])->name('movies.create');
+            Route::post('/store', [AdminMovieController::class, 'store'])->name('movies.store');
+            Route::get('/{id}/edit', [AdminMovieController::class, 'edit'])->name('movies.edit');
+            Route::put('/{id}/update', [AdminMovieController::class, 'update'])->name('movies.update');
+            Route::delete('/{id}/destroy', [AdminMovieController::class, 'destroy'])->name('movies.destroy');
         });
 
         // Series Management
         Route::group(['prefix' => 'series'], function () {
-            Route::get('/', [App\Http\Controllers\Admin\SeriesController::class, 'index'])->name('series.index');
-            Route::get('/create', [App\Http\Controllers\Admin\SeriesController::class, 'create'])->name('series.create');
-            Route::post('/store', [App\Http\Controllers\Admin\SeriesController::class, 'store'])->name('series.store');
-            Route::get('/{id}/edit', [App\Http\Controllers\Admin\SeriesController::class, 'edit'])->name('series.edit');
-            Route::put('/{id}/update', [App\Http\Controllers\Admin\SeriesController::class, 'update'])->name('series.update');
-            Route::delete('/{id}/destroy', [App\Http\Controllers\Admin\SeriesController::class, 'destroy'])->name('series.destroy');
+            Route::get('/', [AdminSeriesController::class, 'index'])->name('series.index');
+            Route::get('/create', [AdminSeriesController::class, 'create'])->name('series.create');
+            Route::post('/store', [AdminSeriesController::class, 'store'])->name('series.store');
+            Route::get('/{id}/edit', [AdminSeriesController::class, 'edit'])->name('series.edit');
+            Route::put('/{id}/update', [AdminSeriesController::class, 'update'])->name('series.update');
+            Route::delete('/{id}/destroy', [AdminSeriesController::class, 'destroy'])->name('series.destroy');
         });
 
         // Torrents Management
         Route::group(['prefix' => 'torrents'], function () {
-            Route::get('/', [App\Http\Controllers\Admin\TorrentsController::class, 'index'])->name('torrents.index');
-            Route::get('/{id}', [App\Http\Controllers\Admin\TorrentsController::class, 'show'])->name('torrents.show');
-            Route::get('/create', [App\Http\Controllers\Admin\TorrentsController::class, 'create'])->name('torrents.create');
-            Route::post('/store', [App\Http\Controllers\Admin\TorrentsController::class, 'store'])->name('torrents.store');
-            Route::get('/{id}/edit', [App\Http\Controllers\Admin\TorrentsController::class, 'edit'])->name('torrents.edit');
-            Route::put('/{id}/update', [App\Http\Controllers\Admin\TorrentsController::class, 'update'])->name('torrents.update');
-            Route::delete('/{id}/destroy', [App\Http\Controllers\Admin\TorrentsController::class, 'destroy'])->name('torrents.destroy');
-            Route::delete('/{id}/force', [App\Http\Controllers\Admin\TorrentsController::class, 'forceDelete'])->name('torrents.forceDelete');
-            Route::post('/{torrent}/restore', [App\Http\Controllers\Admin\TorrentsController::class, 'restore'])->withTrashed()->name('torrents.restore');
+            Route::get('/', [TorrentsController::class, 'index'])->name('torrents.index');
+            Route::get('/{id}', [TorrentsController::class, 'show'])->name('torrents.show');
+            Route::get('/create', [TorrentsController::class, 'create'])->name('torrents.create');
+            Route::post('/store', [TorrentsController::class, 'store'])->name('torrents.store');
+            Route::get('/{id}/edit', [TorrentsController::class, 'edit'])->name('torrents.edit');
+            Route::put('/{id}/update', [TorrentsController::class, 'update'])->name('torrents.update');
+            Route::delete('/{id}/destroy', [TorrentsController::class, 'destroy'])->name('torrents.destroy');
+            Route::delete('/{id}/force', [TorrentsController::class, 'forceDelete'])->name('torrents.forceDelete');
+            Route::post('/{torrent}/restore', [TorrentsController::class, 'restore'])->withTrashed()->name('torrents.restore');
         });
 
-         // System Info Routes
-         Route::group(['prefix' => 'system-info'], function () {
+        // System Info Routes
+        Route::group(['prefix' => 'system-info'], function () {
             Route::get('/', [SystemInfoController::class, 'index'])->name('systemInfo.index');
             Route::post('/clear-cache', [SystemInfoController::class, 'clearCache'])->name('systemInfo.clearCache');
             Route::post('/clear-views', [SystemInfoController::class, 'clearViews'])->name('systemInfo.clearViews');
@@ -518,27 +542,21 @@ Route::delete('/admin/users/{id}/force', [App\Http\Controllers\Admin\UserControl
             Route::get('/show-routes', [SystemInfoController::class, 'showRoutes'])->name('systemInfo.showRoutes');
             Route::post('/system/backup', [SystemInfoController::class, 'backup'])->name('systemInfo.backup');
         });
-        });
-
-
     });
 
+});
 
-
-
-//Torrents
-// Announce
+// Torrent routes
+// Announce route
 Route::get('/announce/{passkey}', [AnnounceController::class, 'announce'])
     ->withoutMiddleware([
         StartSession::class,
         ShareErrorsFromSession::class,
-        VerifyCsrfToken::class
+        VerifyCsrfToken::class,
     ])
     ->name('announce');
 
-
-
-// Group the routes under authentication middleware
+// Authenticated torrent routes
 Route::middleware('auth')->group(function () {
 
     // ---------------------------------
@@ -599,12 +617,10 @@ Route::middleware('auth')->group(function () {
     Route::delete('/torrents/bulk-delete', [TorrentController::class, 'bulkDelete'])
         ->name('torrents.bulkDelete');
 
-
 });
 
-
 // ---------------------------------
-// Public / Mixed
+// Public torrent routes
 // ---------------------------------
 
 Route::get('/torrents/download/{id}/{slug}', [TorrentController::class, 'download'])
@@ -618,8 +634,6 @@ Route::get('/torrents/{id}/{slug?}', [TorrentController::class, 'show'])
     ->name('torrents.show')
     ->middleware('auth');
 
-
-
 Route::get('/torrent/{torrent}/peers', [TorrentController::class, 'peers'])
     ->name('torrent.peers')
     ->middleware('auth');
@@ -628,27 +642,15 @@ Route::get('/torrents/{id}/{slug}/history', [TorrentHistoryController::class, 'i
     ->name('torrent.history')
     ->middleware('auth');
 
-
-
-
-
-
-
-
-
-//RSS//
+// RSS routes
 
 Route::get('/rss', [RssFeedController::class, 'index'])->name('rss.index')->middleware('auth'); // Show the form
 Route::get('/rss/feed', [RssFeedController::class, 'generateFeed'])->name('rss.feed'); // Generate the RSS feed
 Route::get('/rss/download/{fileName}/{passkey}', [RssFeedController::class, 'downloadrss'])->name('rss.download');
 
+// RSS routes
 
-
-
-//RSS//
-
-
-//Bonus page//
+// Bonus shop routes
 
 // Route to show the shop
 Route::get('/shop', [BonusController::class, 'showShop'])->name('shop')->middleware('auth');
@@ -656,25 +658,15 @@ Route::get('/shop', [BonusController::class, 'showShop'])->name('shop')->middlew
 // Route for purchasing upload space (POST method)
 Route::post('/shop', [BonusController::class, 'buyUpload'])->name('shop.upload')->middleware('auth');
 
-
-
-// Donate page beta //
+// Donation route
 Route::get('/donate', [DonationController::class, 'index'])->name('donate');
 
-//Rules Page Beta
+// Rules route
 Route::get('/rules', function () {
     return view('rules');
 })->middleware('auth')->name('rules');
 
-
-
-
-
-// Shoutbox//
-
-//Shoutbox
-
-
+// Shoutbox routes
 
 Route::get('/shoutbox', [ShoutboxController::class, 'index'])->name('shoutbox.index')->middleware('auth');
 Route::post('/shoutbox', [ShoutboxController::class, 'store'])->name('shoutbox.store')->middleware('auth');
@@ -684,8 +676,7 @@ Route::delete('/shoutbox/{id}', [ShoutboxController::class, 'destroy'])->name('s
 Route::get('/shoutbox/{id}/reply', [ShoutboxController::class, 'showReplyForm'])->name('shoutbox.showReplyForm')->middleware('auth');
 Route::post('/shoutbox/{id}/reply', [ShoutboxController::class, 'reply'])->name('shoutbox.reply')->middleware('auth');
 
-
-
+// Private message routes
 Route::middleware(['auth'])->group(function () {
     Route::get('messages/inbox', [MessageController::class, 'inbox'])->name('messages.inbox');
     Route::get('messages/outbox', [MessageController::class, 'outbox'])->name('messages.outbox');
@@ -699,8 +690,7 @@ Route::middleware(['auth'])->group(function () {
 
 });
 
-//News//
-
+// News routes
 
 Route::middleware('auth')->group(function () {
     // Display the list of news articles (index page)
@@ -724,7 +714,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/news/{news}', [NewsController::class, 'destroy'])->name('news.destroy');
 });
 
-//POLS
+// Poll routes
 
 // Route::resource('polls', PollController::class);
 // Display a list of all polls
@@ -748,20 +738,18 @@ Route::put('polls/{poll}', [PollController::class, 'update'])->name('polls.updat
 // Delete a specific poll
 Route::delete('polls/{poll}', [PollController::class, 'destroy'])->name('polls.destroy')->middleware('auth');
 
-
 Route::post('/polls/{pollId}/vote', [PollController::class, 'vote'])->name('polls.vote')->middleware('auth');
 
 Route::delete('/polls/{poll}/force-delete', [PollController::class, 'forceDelete'])
     ->name('polls.force-delete');
 
-    Route::post('/polls/{poll}/restore', [PollController::class, 'restore'])
+Route::post('/polls/{poll}/restore', [PollController::class, 'restore'])
     ->name('polls.restore');
 
-    Route::patch('/polls/{poll}/toggle', [PollController::class, 'toggle'])
+Route::patch('/polls/{poll}/toggle', [PollController::class, 'toggle'])
     ->name('polls.toggle');
 
-
-//Requests//
+// Torrent request routes
 
 Route::middleware('auth')->group(function () {
     Route::get('/requests', [TorrentRequestController::class, 'index'])->name('requests.index');
@@ -775,27 +763,21 @@ Route::middleware('auth')->group(function () {
 
 });
 
-
-
-
-use App\Http\Controllers\WarningController;
-
+// Warning routes
 Route::middleware(['auth'])->group(function () {
     Route::get('/warnings', [WarningController::class, 'index'])->name('warnings.index');
     Route::get('/warnings/{id}/{username?}', [WarningController::class, 'show'])->name('warnings.show');
     Route::post('/warnings/deactivate/{id}', [WarningController::class, 'deactivate'])->name('warnings.deactivate');
     Route::post('/warnings/deactivate-all/{id}/{username?}', [WarningController::class, 'deactivateAllWarnings'])->name('warnings.deactivateAll');
     Route::post('/warnings/delete-all/{id}/{username?}', [WarningController::class, 'deleteAllWarnings'])->name('warnings.deleteAll');
-    
+
     Route::post('/warnings/delete/{id}', [WarningController::class, 'deleteWarning'])->name('warnings.delete');
-   
+
     Route::post('/warnings/restore/{id}', [WarningController::class, 'restoreWarning'])->name('warnings.restore');
 });
 
-
-
 Route::middleware('auth')->group(function () {
-  
+
     Route::post('/invites/create', [InviteController::class, 'createInvite'])->name('invites.create'); // To create an invite
     Route::post('/invite/use', [InviteController::class, 'useInvite'])->name('invite.use'); // To use an invite code
     Route::get('/invites', [InviteController::class, 'showInvites'])->name('invites.index'); // To show all invites
@@ -803,27 +785,25 @@ Route::middleware('auth')->group(function () {
 
 });
 
-
+// Subtitle routes
 Route::post('/torrents/{torrent}/subtitles', [SubtitleController::class, 'store'])
     ->middleware('auth')
     ->name('subtitles.store');
 
-    Route::get('/subtitles/{subtitle}/download', [SubtitleController::class, 'download'])
+Route::get('/subtitles/{subtitle}/download', [SubtitleController::class, 'download'])
     ->middleware('auth')
     ->name('subtitles.download');
 
-    Route::delete('/subtitles/{subtitle}', [SubtitleController::class, 'destroy'])
+Route::delete('/subtitles/{subtitle}', [SubtitleController::class, 'destroy'])
     ->middleware('auth')
     ->name('subtitles.destroy');
 
-
-    Route::get(
+Route::get(
     '/subtitle/download/{id}',
     [SubtitleController::class, 'download']
 )->name('subtitle.download');
 
-    
-// Admin Messages Routes
+// Admin message routes
 Route::prefix('admin')
     ->middleware(['auth', 'admin'])
     ->name('admin.')
@@ -835,147 +815,135 @@ Route::prefix('admin')
 
     });
 
-     //Legal Terms
+// Legal and cookie-consent routes
 
-    Route::view('/terms-of-service', 'legal.terms')
+Route::view('/terms-of-service', 'legal.terms')
     ->name('terms.of.service');
 
-    Route::view('/privacy-policy', 'legal.privacy')
+Route::view('/privacy-policy', 'legal.privacy')
     ->name('privacy.policy');
 
-    Route::post('/cookie-consent', function (\Illuminate\Http\Request $request) {
+Route::post('/cookie-consent', function (Request $request) {
 
     if (auth()->check()) {
         auth()->user()->update([
             'cookie_consent' => $request->value,
-            'cookie_consent_at' => now()
+            'cookie_consent_at' => now(),
         ]);
     }
 
     return response()->json(['status' => 'ok']);
 })->name('cookie.consent');
-    // Legal Terms
+// Legal Terms
 
+// Ticket routes
 
-    // Tickets System
+Route::middleware('auth')->group(function () {
 
-use App\Http\Controllers\TicketController;
-use App\Http\Controllers\TicketReplyController;
-use App\Http\Controllers\StaffTicketController;
-use App\Http\Controllers\TicketDashboardController;
+    Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
 
-Route::middleware('auth')->group(function(){
-    
+    Route::get('/tickets/create', [TicketController::class, 'create'])->name('tickets.create');
 
-Route::get('/tickets',[TicketController::class,'index'])->name('tickets.index');
+    Route::post('/tickets', [TicketController::class, 'store'])->name('tickets.store');
 
-Route::get('/tickets/create',[TicketController::class,'create'])->name('tickets.create');
+    /*
+    |--------------------------------------------------------------------------
+    | Redirect OLD ticket URLs
+    |--------------------------------------------------------------------------
+    */
 
-Route::post('/tickets',[TicketController::class,'store'])->name('tickets.store');
+    Route::get('/tickets/{id}', function ($id) {
 
-/*
-|--------------------------------------------------------------------------
-| Redirect OLD ticket URLs
-|--------------------------------------------------------------------------
-*/
+        $ticket = Ticket::find($id);
 
-Route::get('/tickets/{id}', function($id){
+        if (! $ticket) {
+            return redirect()->route('tickets.index');
+        }
 
-    $ticket = \App\Models\Ticket::find($id);
+        return redirect()->route('tickets.show', [
+            'id' => $ticket->id,
+            'slug' => $ticket->slug,
+        ]);
 
-    if(!$ticket){
-        return redirect()->route('tickets.index');
-    }
+    });
 
-    return redirect()->route('tickets.show',[
-        'id'=>$ticket->id,
-        'slug'=>$ticket->slug
-    ]);
+    Route::get('/ticket/TK{id}-{slug}', [TicketController::class, 'show'])->name('tickets.show');
 
-});
+    Route::post('/tickets/{id}/reply', [TicketReplyController::class, 'store'])->name('tickets.reply');
 
-Route::get('/ticket/TK{id}-{slug}',[TicketController::class,'show'])->name('tickets.show');
+    Route::post('/tickets/{id}/claim', [StaffTicketController::class, 'claim'])->name('tickets.claim');
 
-Route::post('/tickets/{id}/reply',[TicketReplyController::class,'store'])->name('tickets.reply');
+    Route::post('/tickets/{id}/assign', [StaffTicketController::class, 'assign'])->name('tickets.assign');
 
-Route::post('/tickets/{id}/claim',[StaffTicketController::class,'claim'])->name('tickets.claim');
+    Route::post('/tickets/{id}/status', [StaffTicketController::class, 'changeStatus'])->name('tickets.status');
 
-Route::post('/tickets/{id}/assign',[StaffTicketController::class,'assign'])->name('tickets.assign');
+    Route::post('/tickets/{id}/lock', [StaffTicketController::class, 'lock'])->name('tickets.lock');
 
-Route::post('/tickets/{id}/status',[StaffTicketController::class,'changeStatus'])->name('tickets.status');
+    Route::get('/staff/tickets/dashboard', [TicketDashboardController::class, 'index'])->name('tickets.dashboard');
 
-Route::post('/tickets/{id}/lock',[StaffTicketController::class,'lock'])->name('tickets.lock');
+    Route::get('/staff/tickets/my', [StaffTicketController::class, 'myTickets'])->name('tickets.my');
 
-Route::get('/staff/tickets/dashboard',[TicketDashboardController::class,'index'])->name('tickets.dashboard');
+    Route::get('/staff/tickets/unassigned', [StaffTicketController::class, 'unassigned'])->name('tickets.unassigned');
 
-Route::get('/staff/tickets/my',[StaffTicketController::class,'myTickets'])->name('tickets.my');
+    Route::get('/tickets/{id}/replies', [TicketReplyController::class, 'fetch'])->name('tickets.fetchReplies');
 
-Route::get('/staff/tickets/unassigned',[StaffTicketController::class,'unassigned'])->name('tickets.unassigned');
+    Route::get('/ticket/attachment/{id}', [TicketReplyController::class, 'download'])
+        ->name('tickets.download')
+        ->middleware('auth');
 
-Route::get('/tickets/{id}/replies', [TicketReplyController::class,'fetch'])->name('tickets.fetchReplies');
+    Route::post('/tickets/{id}/typing', [TicketReplyController::class, 'typing']);
+    Route::get('/tickets/{id}/typing-status', [TicketReplyController::class, 'typingStatus']);
 
-Route::get('/ticket/attachment/{id}', [TicketReplyController::class,'download'])
-    ->name('tickets.download')
-    ->middleware('auth');
+    Route::post('/tickets/{id}/lock', [TicketController::class, 'lock'])->name('tickets.lock');
 
-    Route::post('/tickets/{id}/typing',[TicketReplyController::class,'typing']);
-Route::get('/tickets/{id}/typing-status',[TicketReplyController::class,'typingStatus']);
-
-Route::post('/tickets/{id}/lock', [TicketController::class, 'lock'])->name('tickets.lock');
-
-Route::post('/tickets/{id}/unlock', [TicketController::class, 'unlock'])->name('tickets.unlock');
+    Route::post('/tickets/{id}/unlock', [TicketController::class, 'unlock'])->name('tickets.unlock');
 
 });
 
-//Tickets System
+// Ticket routes
 
+// Shoutbox presence routes
 Route::post('/shoutbox/typing', [ShoutboxController::class, 'typing']);
 Route::post('/shoutbox/typing-stop', [ShoutboxController::class, 'stopTyping']);
 Route::get('/shoutbox/typing-users', [ShoutboxController::class, 'typingUsers']);
 
-
 /* Guest contact */
 
-Route::get('/contact', [ContactController::class,'create'])->name('contact.create');
-Route::post('/contact', [ContactController::class,'store'])->name('contact.store');
+// Contact routes
+Route::get('/contact', [ContactController::class, 'create'])->name('contact.create');
+Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 
-Route::get('/contact/check', [ContactController::class,'check'])->name('contact.check');
-Route::post('/contact/replies', [ContactController::class,'viewReply'])->name('contact.replies');
-Route::post('/contact/reply/{id}', [ContactController::class,'guestReply'])->name('contact.reply');
-
-
+Route::get('/contact/check', [ContactController::class, 'check'])->name('contact.check');
+Route::post('/contact/replies', [ContactController::class, 'viewReply'])->name('contact.replies');
+Route::post('/contact/reply/{id}', [ContactController::class, 'guestReply'])->name('contact.reply');
 
 /* Staff */
 
 Route::middleware(['auth'])->group(function () {
 
-    Route::get('/contactstaff', [ContactController::class,'index'])
+    Route::get('/contactstaff', [ContactController::class, 'index'])
         ->name('contactstaff.index');
 
-    Route::get('/contactstaff/{id}', [ContactController::class,'show'])
+    Route::get('/contactstaff/{id}', [ContactController::class, 'show'])
         ->name('contactstaff.show');
 
-    Route::post('/contactstaff/{id}/answer', [ContactController::class,'answer'])
+    Route::post('/contactstaff/{id}/answer', [ContactController::class, 'answer'])
         ->name('contactstaff.answer');
 
-        Route::post('/contactstaff/{id}/resolve',[ContactController::class,'resolve'])
-->name('contactstaff.resolve');
+    Route::post('/contactstaff/{id}/resolve', [ContactController::class, 'resolve'])
+        ->name('contactstaff.resolve');
 
 });
-
 
 Route::post('/admin/users/mass-message/preview', [UserController::class, 'previewMassMessage'])
     ->name('admin.users.mass-message.preview');
 
+Route::middleware(['auth'])->group(function () {
 
-    use App\Http\Controllers\ConversationController;
-
-Route::middleware(['auth'])->group(function(){
-
-    Route::get('/conversations', [ConversationController::class,'index'])
+    Route::get('/conversations', [ConversationController::class, 'index'])
         ->name('conversations.index');
 
-    Route::get('/conversations/{conversation}', [ConversationController::class,'show'])
+    Route::get('/conversations/{conversation}', [ConversationController::class, 'show'])
         ->name('conversations.show');
 
 });
@@ -986,34 +954,27 @@ Route::post('/messages/edit/{message}', [MessageController::class, 'edit'])
 Route::delete('/messages/delete/{message}', [MessageController::class, 'delete'])
     ->name('messages.delete');
 
-Route::delete('/messages/conversation/{conversation}', 
+Route::delete('/messages/conversation/{conversation}',
     [MessageController::class, 'destroyConversation']
 )->name('messages.destroyConversation');
 
-
-use App\Http\Controllers\UploadApplicationController;
-use App\Http\Controllers\UploadApplicationCommentController;
-use App\Http\Controllers\UploadApplicationVoteController;
-
 Route::middleware(['auth'])->group(function () {
 
-    Route::get('/upload-applications', [UploadApplicationController::class,'index'])->name('uploadapps.index');
-    Route::get('/upload-applications/create', [UploadApplicationController::class,'create'])->name('uploadapps.create');
-    Route::post('/upload-applications', [UploadApplicationController::class,'store'])->name('uploadapps.store');
+    Route::get('/upload-applications', [UploadApplicationController::class, 'index'])->name('uploadapps.index');
+    Route::get('/upload-applications/create', [UploadApplicationController::class, 'create'])->name('uploadapps.create');
+    Route::post('/upload-applications', [UploadApplicationController::class, 'store'])->name('uploadapps.store');
 
-    Route::get('/upload-applications/{id}', [UploadApplicationController::class,'show'])->name('uploadapps.show');
+    Route::get('/upload-applications/{id}', [UploadApplicationController::class, 'show'])->name('uploadapps.show');
 
-    Route::post('/upload-applications/{id}/comment', [UploadApplicationCommentController::class,'store'])->name('uploadapps.comment');
+    Route::post('/upload-applications/{id}/comment', [UploadApplicationCommentController::class, 'store'])->name('uploadapps.comment');
 
-    Route::post('/upload-applications/{id}/vote', [UploadApplicationVoteController::class,'vote'])->name('uploadapps.vote');
+    Route::post('/upload-applications/{id}/vote', [UploadApplicationVoteController::class, 'vote'])->name('uploadapps.vote');
 
-    Route::post('/upload-applications/{id}/accept', [UploadApplicationController::class,'accept'])->name('uploadapps.accept');
+    Route::post('/upload-applications/{id}/accept', [UploadApplicationController::class, 'accept'])->name('uploadapps.accept');
 
-    Route::post('/upload-applications/{id}/reject', [UploadApplicationController::class,'reject'])->name('uploadapps.reject');
+    Route::post('/upload-applications/{id}/reject', [UploadApplicationController::class, 'reject'])->name('uploadapps.reject');
 
 });
-
-
 
 Route::middleware('auth')->group(function () {
 
@@ -1035,39 +996,33 @@ Route::middleware('auth')->group(function () {
         ->whereNumber('id')
         ->name('announcements.destroy');
 
-        Route::get('/announcements/{id}/edit', [AnnouncementController::class, 'edit'])
-    ->name('announcements.edit');
+    Route::get('/announcements/{id}/edit', [AnnouncementController::class, 'edit'])
+        ->name('announcements.edit');
 
     Route::put('/announcements/{id}', [AnnouncementController::class, 'update'])
-    ->name('announcements.update');
-
+        ->name('announcements.update');
 
     Route::delete('/announcements/{id}', [AnnouncementController::class, 'destroy'])
-    ->name('announcements.destroy');
+        ->name('announcements.destroy');
 
-Route::post('/announcements/{id}/restore', [AnnouncementController::class, 'restore'])
-    ->name('announcements.restore');
+    Route::post('/announcements/{id}/restore', [AnnouncementController::class, 'restore'])
+        ->name('announcements.restore');
 
-Route::delete('/announcements/{id}/force-delete', [AnnouncementController::class, 'forceDelete'])
-    ->name('announcements.forceDelete');
+    Route::delete('/announcements/{id}/force-delete', [AnnouncementController::class, 'forceDelete'])
+        ->name('announcements.forceDelete');
 });
 
-
+// Library routes
 Route::prefix('library')->group(function () {
     Route::get('/movies', [TorrentMovieController::class, 'index'])->name('library.movies.index');
     Route::get('/movies/{tmdbid}/{slug?}', [TorrentMovieController::class, 'show'])->name('library.movies.show');
 });
 
-
-use App\Http\Controllers\PostmarkController;
-
+// Postmark webhook route
 Route::post('/postmark/bounce', [PostmarkController::class, 'bounce'])
     ->withoutMiddleware([VerifyCsrfToken::class]);
 
-
-    //Email subscribe
-
-  use Illuminate\Http\Request;
+// Account preference and availability routes
 
 Route::post('/user/email-preferences', function (Request $request) {
 
@@ -1079,16 +1034,14 @@ Route::post('/user/email-preferences', function (Request $request) {
     return back()->with('success', 'Email preferences updated.');
 });
 
-
 Route::get('/check-username', function (Request $request) {
     return response()->json([
-        'exists' => User::where('name', $request->name)->exists()
+        'exists' => User::where('name', $request->name)->exists(),
     ]);
 });
 
 Route::get('/check-email', function (Request $request) {
     return response()->json([
-        'exists' => User::where('email', $request->email)->exists()
+        'exists' => User::where('email', $request->email)->exists(),
     ]);
 });
-

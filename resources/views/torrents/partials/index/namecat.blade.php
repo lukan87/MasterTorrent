@@ -1,4 +1,4 @@
-<a href="{{ route('torrents.index', [
+<!-- <a href="{{ route('torrents.index', [
         'keyword' => '',
         'categories' => [$torrent->category->id],
         'genre' => '',
@@ -13,6 +13,27 @@
          style="width:74px;height:40px"
          alt="{{ $torrent->category->name }}">
 
+</a> -->
+
+<a href="{{ route('torrents.index', [
+        'keyword' => '',
+        'categories' => [$torrent->category->id],
+        'genre' => '',
+        'torrent_status' => 'active'
+    ]) }}"
+   class="category-pill me-2"
+   data-bs-toggle="tooltip"
+   data-bs-placement="top"
+   title="{{ $torrent->category->name }}">
+
+    <span class="category-icon">
+        <i class="{{ $torrent->category->icon }}" aria-hidden="true"></i>
+    </span>
+
+    <span class="category-name">
+        {{ $torrent->category->name }}
+    </span>
+
 </a>
 
 <div class="overflow-hidden w-100">
@@ -26,7 +47,7 @@
            data-bs-html="true"
            data-bs-title="<img src='{{ $torrent->poster }}' class='img-fluid rounded' style='max-width:180px'>">
 
-            <small class="torrent-title text-truncate d-block">
+            <small class="torrent-title text-truncate d-block fw-bold">
                 {{ $torrent->name }}
             </small>
 
@@ -173,5 +194,110 @@
 
     box-shadow: 0 0 10px rgba(154,176,255,.08);
 }
+
+
+.category-pill {
+    width: 150px;
+    height: 34px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    padding: 0 10px;
+
+    border-radius: 10px;
+
+    background: linear-gradient(
+        135deg,
+        rgba(255,255,255,.075),
+        rgba(255,255,255,.035)
+    );
+
+    border: 1px solid rgba(255,255,255,.10);
+
+    color: #d8d8d8;
+    text-decoration: none;
+
+    font-size: 11px;
+    font-weight: 600;
+
+    white-space: nowrap;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.04),
+        0 2px 8px rgba(0,0,0,.08);
+
+    transition:
+        transform .2s ease,
+        background .2s ease,
+        border-color .2s ease,
+        box-shadow .2s ease,
+        color .2s ease;
+}
+
+.category-pill i {
+    font-size: 17px;
+    line-height: 1;
+}
+
+.category-pill:hover {
+    background: rgba(108, 117, 125, 0.18);
+    border-color: rgba(108, 117, 125, 0.30);
+
+    color: inherit;
+    text-decoration: none;
+
+    transform: translateY(-1px);
+
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+.category-pill:active {
+    transform: translateY(0);
+}
+
+@media (max-width: 767.98px) {
+
+    .category-pill {
+        width: 32px;
+        height: 32px;
+
+        padding: 0;
+
+        margin-right: 6px !important;
+
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 8px;
+
+        gap: 0;
+    }
+
+    .category-pill .category-name {
+        display: none;
+    }
+
+    .category-pill .category-icon {
+        width: 100%;
+        height: 100%;
+
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 7px;
+
+        background: transparent;
+
+        font-size: 15px;
+    }
+
+}
+
 
 </style>

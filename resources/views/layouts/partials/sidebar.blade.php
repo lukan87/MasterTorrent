@@ -8,7 +8,7 @@
 
     <!--begin::Sidebar Wrapper-->
     <div class="sidebar-wrapper">
-        <nav class="mt-1 fs-6">
+        <nav class="mt-1 fs-5">
             <!--begin::Sidebar Menu-->
             <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu" data-accordion="false">
             <li class="nav-item">
@@ -223,7 +223,7 @@ title="Unassigned tickets">
     gap:10px;
     padding:16px 18px;
     border-bottom:1px solid #1f2937;
-    font-weight:500;
+    font-weight:300;
     letter-spacing:.3px;
 }
 
@@ -243,7 +243,7 @@ title="Unassigned tickets">
     border-radius:8px;
     margin:1px 1px;
    
-    font-size:14px;
+    font-size:13px;
     transition:all .2s ease;
     position:relative;
 }

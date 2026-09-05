@@ -86,8 +86,11 @@
 
     <i class="bi bi-chat-left-text text-info me-2"></i>
 
-    <a href="{{route('topics.show', $post->topic->id) }}"
-       class="fancy-link fw-semibold">
+   <a href="{{ route('forum.topic', [
+    'category' => $post->topic->category->slug,
+    'topic' => $post->topic->slug,
+]) }}"
+   class="fancy-link fw-semibold">
 
         {{ $post->topic->title }}
 
@@ -136,7 +139,7 @@
         {{-- Post Content --}}
         <div class="post-content">
 
-            {!! convertCustomTagsToHtml($post->content) !!}
+            {!! convertCustomTagsToHtml($post->body) !!}
 
         </div>
 

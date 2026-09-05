@@ -4,151 +4,413 @@
 
 <div class="container py-5">
 
-    <div class="mb-4">
 
-        <a href="{{ route('forum.index') }}"
-           class="text-muted text-decoration-none">
 
-            <i class="bi bi-arrow-left"></i>
-            Forum
+{{-- =========================================================
+     BREADCRUMB
+     ========================================================= --}}
 
-        </a>
+<div class="forum-breadcrumb mb-4">
 
-       <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <a href="{{ route('forum.index') }}"
+       class="forum-breadcrumb-link">
 
-    <div>
+        <i class="bi bi-arrow-left"></i>
 
-        <h1 class="mt-3">
-            {{ $category->name }}
-        </h1>
+        <span>Back to Forum</span>
 
-        @if($category->description)
-            <p class="text-muted">
-                {{ $category->description }}
-            </p>
-        @endif
-
-    </div>
-
-    @auth
-
-        @if(!auth()->user()->forumblock)
-
-            <a href="{{ route('forum.topic.create', $category->slug) }}"
-               class="btn btn-primary">
-
-                <i class="bi bi-plus-lg me-1"></i>
-
-                New Topic
-
-            </a>
-
-        @endif
-
-    @endauth
+    </a>
 
 </div>
 
-        @if($category->description)
 
-            <p class="text-muted">
-                {{ $category->description }}
-            </p>
+
+
+    {{-- =========================================================
+         CATEGORY HEADER
+         ========================================================= --}}
+
+    <div class="forum-category-header mb-4">
+
+        <div>
+
+            <div class="forum-category-icon">
+
+                <i class="bi bi-chat-square-text-fill"></i>
+
+            </div>
+
+        </div>
+
+
+        <div class="flex-grow-1">
+
+            <h1 class="forum-category-title">
+
+                {{ $category->name }}
+
+            </h1>
+
+            @if($category->description)
+
+                <p class="forum-category-description mb-0">
+
+                    {{ $category->description }}
+
+                </p>
+
+            @endif
+
+        </div>
+
+
+        {{-- Actions--}}
+@auth
+    <div class="d-flex flex-wrap gap-2">
+
+        @if(auth()->user()->user_class > \App\Models\UserClass::MODERATOR)
+
+            <a href="{{ route('forum.category.edit', $category->id) }}"
+               class="btn forum-edit-category-btn">
+                <i class="bi bi-pencil-square me-1"></i>
+                Edit Category
+            </a>
+
+            <form method="POST"
+                  action="{{ route('forum.category.destroy', $category->id) }}"
+                  onsubmit="return confirm('Are you sure you want to delete this category?');">
+                @csrf
+                @method('DELETE')
+
+                <button type="submit"
+                        class="btn forum-delete-category-btn">
+                    <i class="bi bi-trash me-1"></i>
+                    Delete Category
+                </button>
+            </form>
 
         @endif
+
+        @if(!auth()->user()->forumblock)
+            <a href="{{ route('forum.topic.create', $category->slug) }}"
+               class="btn forum-new-topic-btn">
+                <i class="bi bi-plus-lg me-1"></i>
+                New Topic
+            </a>
+        @endif
+
+    </div>
+@endauth
+
 
     </div>
 
 
-    <div class="card">
+    {{-- =========================================================
+         TOPIC LIST
+         ========================================================= --}}
 
-        <div class="card-body">
+    <div class="forum-topic-list">
 
-            @forelse($topics as $topic)
+        @forelse($topics as $topic)
 
-                <div class="border-bottom py-3">
+            <article class="forum-topic-row
+                {{ $topic->is_pinned ? 'topic-pinned' : '' }}
+                {{ $topic->is_locked ? 'topic-locked' : '' }}">
 
-                    <div class="d-flex justify-content-between">
 
-                        <div>
+                {{-- TOPIC ICON --}}
 
-                            <h5 class="mb-1">
+                <div class="forum-topic-icon">
 
-                                @if($topic->is_pinned)
-                                    <i class="bi bi-pin-fill text-warning"></i>
-                                @endif
+                    @if($topic->is_locked)
 
-                                @if($topic->is_locked)
-                                    <i class="bi bi-lock-fill text-danger"></i>
-                                @endif
+                        <i class="bi bi-lock-fill"></i>
 
-                               <a href="{{ route('forum.topic', [
-    'category' => $category->slug,
-    'topic' => $topic->slug,
-]) }}"
-   class="text-decoration-none">
+                    @elseif($topic->is_pinned)
 
-    {{ $topic->title }}
+                        <i class="bi bi-pin-fill"></i>
 
-</a>
+                    @else
 
-                            </h5>
+                        <i class="bi bi-chat-left-text-fill"></i>
 
-                            <small class="text-muted">
+                    @endif
 
-                                Started by
-                                {{ $topic->user->name ?? 'Unknown' }}
+                </div>
 
-                                ·
 
-                                {{ $topic->created_at->diffForHumans() }}
+                {{-- MAIN INFORMATION --}}
 
-                            </small>
+                <div class="forum-topic-main">
 
-                        </div>
+                    <div class="forum-topic-title-row">
 
-                        <div class="text-end">
+                        <a href="{{ route('forum.topic', [
+                            'category' => $category->slug,
+                            'topic' => $topic->slug,
+                        ]) }}"
+                           class="forum-topic-link">
 
-                            <strong>
-                                {{ $topic->posts_count }}
-                            </strong>
+                            {{ $topic->title }}
 
-                            <div class="text-muted small">
-                                Posts
-                            </div>
+                        </a>
+
+
+                        {{-- BADGES --}}
+
+                        <div class="forum-topic-badges">
+
+                            @if($topic->is_pinned)
+
+                                <span class="forum-topic-badge pinned">
+
+                                    <i class="bi bi-pin-fill me-1"></i>
+
+                                    Pinned
+
+                                </span>
+
+                            @endif
+
+
+@if($topic->new_replies_count > 0)
+
+    <span class="forum-topic-badge new">
+
+        <i class="bi bi-envelope-plus  me-1"></i>
+
+        {{ $topic->new_replies_count }}
+        {{ $topic->new_replies_count === 1 ? 'New Reply' : 'New Replies' }}
+
+    </span>
+
+@endif
+
+
+                            @if($topic->is_locked)
+
+                                <span class="forum-topic-badge locked">
+
+                                    <i class="bi bi-lock-fill me-1"></i>
+
+                                    Locked
+
+                                </span>
+
+                            @endif
 
                         </div>
 
                     </div>
 
+
+                    {{-- STARTED BY --}}
+
+                    <div class="forum-topic-started">
+
+                        <i class="bi bi-person-circle me-1"></i>
+
+                        Started by
+
+                        @if($topic->user)
+
+                            <strong>
+                                {{ $topic->user->name }}
+                            </strong>
+
+                        @else
+
+                            <strong>
+                                Unknown
+                            </strong>
+
+                        @endif
+
+                        <span class="mx-1">·</span>
+
+                        {{ $topic->created_at->diffForHumans() }}
+
+                    </div>
+
                 </div>
 
-            @empty
 
-                <div class="text-center py-5">
+                {{-- STATS --}}
 
-                    <i class="bi bi-chat-square-text fs-1 text-muted"></i>
+                <div class="forum-topic-stats">
 
-                    <h4 class="mt-3">
-                        No topics yet
-                    </h4>
+                    <div class="forum-topic-stat">
 
-                    <p class="text-muted">
-                        Be the first to start a discussion.
-                    </p>
+                        <strong>
+
+                            {{ $topic->posts_count }}
+
+                        </strong>
+
+                        <span>
+
+                            <i class="bi bi-chat-left-text me-1"></i>
+
+                            Posts
+
+                        </span>
+
+                    </div>
+
+
+                    <div class="forum-topic-stat">
+
+                        <strong>
+
+                            {{ $topic->views }}
+
+                        </strong>
+
+                        <span>
+
+                            <i class="bi bi-eye me-1"></i>
+
+                            Views
+
+                        </span>
+
+                    </div>
 
                 </div>
 
-            @endforelse
+
+            {{-- LAST POST --}}
+
+<div class="forum-last-post">
+
+    @if($topic->lastPost)
+
+        <a href="{{ route('forum.topic', [
+            'category' => $category->slug,
+            'topic' => $topic->slug,
+        ]) }}#post-{{ $topic->lastPost->id }}"
+           class="forum-last-post-link">
+
+            <div class="forum-last-post-label">
+
+                <i class="bi bi-arrow-return-right me-1"></i>
+
+                Last post
+
+            </div>
+
+            <div class="forum-last-post-user">
+
+                <i class="bi bi-person-fill me-1"></i>
+
+                {{ $topic->lastPost->user->name ?? 'Unknown' }}
+
+            </div>
+
+            <div class="forum-last-post-time">
+
+                <i class="bi bi-clock me-1"></i>
+
+                {{ $topic->lastPost->created_at->diffForHumans() }}
+
+            </div>
+
+        </a>
+
+    @else
+
+        <div class="forum-last-post-label">
+
+            <i class="bi bi-chat-left me-1"></i>
+
+            No replies
 
         </div>
 
-    </div>
-
-    <div class="mt-4">
-        {{ $topics->links() }}
-    </div>
+    @endif
 
 </div>
+
+
+                {{-- ARROW --}}
+
+                <div class="forum-topic-arrow">
+
+                    <i class="bi bi-chevron-right"></i>
+
+                </div>
+
+            </article>
+
+        @empty
+
+
+            {{-- EMPTY STATE --}}
+
+            <div class="forum-empty-state">
+
+                <div class="forum-empty-icon">
+
+                    <i class="bi bi-chat-square-text"></i>
+
+                </div>
+
+                <h4>
+
+                    No topics yet
+
+                </h4>
+
+                <p>
+
+                    Be the first to start a discussion.
+
+                </p>
+
+
+                @auth
+
+                    @if(!auth()->user()->forumblock)
+
+                        <a href="{{ route('forum.topic.create', $category->slug) }}"
+                           class="btn forum-new-topic-btn">
+
+                            <i class="bi bi-plus-lg me-1"></i>
+
+                            Start a Topic
+
+                        </a>
+
+                    @endif
+
+                @endauth
+
+            </div>
+
+        @endforelse
+
+    </div>
+
+
+    {{-- =========================================================
+         PAGINATION
+         ========================================================= --}}
+
+    @if($topics->hasPages())
+
+        <div class="forum-pagination mt-4">
+
+            {{ $topics->links('pagination::bootstrap-5') }}
+
+        </div>
+
+    @endif
+
+</div>
+
+
+
+@include('forum.partials.category-css')
 
 @endsection

@@ -41,12 +41,12 @@
 
     $donations = [
 
-        ['amount'=>5,'vip'=>'4 weeks','upload'=>'50 GB','bonus'=>'500','color'=>'tier1'],
-        ['amount'=>7,'vip'=>'6 weeks','upload'=>'150 GB','bonus'=>'1500','color'=>'tier2'],
-        ['amount'=>10,'vip'=>'2 months','upload'=>'300 GB','bonus'=>'2500','color'=>'tier3'],
-        ['amount'=>15,'vip'=>'10 weeks','upload'=>'500 GB','bonus'=>'5000','color'=>'tier4'],
-        ['amount'=>20,'vip'=>'3 months','upload'=>'750 GB','bonus'=>'7500','color'=>'tier5'],
-        ['amount'=>50,'vip'=>'Unlimited','upload'=>'1 TB','bonus'=>'10000','color'=>'tier6'],
+        ['amount'=>3,'vip'=>'4 weeks','upload'=>'50 GB','bonus'=>'500','color'=>'tier1'],
+        ['amount'=>5,'vip'=>'6 weeks','upload'=>'150 GB','bonus'=>'1500','color'=>'tier2'],
+        ['amount'=>7,'vip'=>'2 months','upload'=>'300 GB','bonus'=>'2500','color'=>'tier3'],
+        ['amount'=>10,'vip'=>'10 weeks','upload'=>'500 GB','bonus'=>'5000','color'=>'tier4'],
+        ['amount'=>25,'vip'=>'3 months','upload'=>'750 GB','bonus'=>'7500','color'=>'tier5'],
+        ['amount'=>30,'vip'=>'Unlimited','upload'=>'1 TB','bonus'=>'10000','color'=>'tier6'],
 
     ];
 
@@ -100,8 +100,8 @@
 
                     <form action="https://www.paypal.com/cgi-bin/webscr" method="POST">
 
-                        <input type="hidden" name="cmd" value="_donations">
-                        <input type="hidden" name="business" value="cristipnc@hotmail.com">
+                        <input type="hidden" name="cmd" value="_xclick">
+                        <input type="hidden" name="business" value="calapushai@gmail.com">
                         <input type="hidden" name="currency_code" value="EUR">
                         <input type="hidden" name="item_name" value="Donation">
                         <input type="hidden" name="amount" value="{{ $donation['amount'] }}">

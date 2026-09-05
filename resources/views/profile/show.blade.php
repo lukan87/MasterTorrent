@@ -755,6 +755,27 @@ $progress = $user->seeder_rank_progress ?? 0;
     </div>
 </div>
 
+{{-- Forum Posts --}}
+<div class="col-6 col-md-3 col-xl-3 d-flex">
+    <div class="elite-stat-compact stat-card">
+
+        <div class="stat-label">
+            <i class="bi bi-chat-square-text me-1"></i>
+            Forum Posts
+        </div>
+
+        <div class="stat-value">
+            <div class="stat-value">
+    <a href="{{ route('profile.posts', ['id'=>$user->id,'name'=>$user->name]) }}"
+       class="fancy-link">
+        {{ number_format($forumPostCount) }}
+    </a>
+</div>
+        </div>
+
+    </div>
+</div>
+
 </div>
 
 </div>
