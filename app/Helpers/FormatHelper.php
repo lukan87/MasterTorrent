@@ -61,5 +61,41 @@ class FormatHelper
             return sprintf('%d days, %d hours, %d minutes', $days, $remainingHours, $remainingMinutes);
         }
     }
+
+    //Short relative time, e.g. "just now", "5m ago", "2h ago", "3d ago", "2w ago"
+    public static function shortRelativeTime($date)
+    {
+        $now = \Illuminate\Support\Carbon::now();
+        $date = \Illuminate\Support\Carbon::parse($date);
+        $seconds = $date->diffInSeconds($now);
+
+        if ($seconds < 30) {
+            return 'just now';
+        }
+        if ($seconds < 60) {
+            return floor($seconds) . 's ago';
+        }
+        $minutes = floor($seconds / 60);
+        if ($minutes < 60) {
+            return $minutes . 'm ago';
+        }
+        $hours = floor($minutes / 60);
+        if ($hours < 24) {
+            return $hours . 'h ago';
+        }
+        $days = floor($hours / 24);
+        if ($days < 7) {
+            return $days . 'd ago';
+        }
+        $weeks = floor($days / 7);
+        if ($weeks < 5) {
+            return $weeks . 'w ago';
+        }
+        $months = floor($days / 30);
+        if ($months < 12) {
+            return $months . 'mo ago';
+        }
+        return floor($days / 365) . 'y ago';
+    }
     
 }

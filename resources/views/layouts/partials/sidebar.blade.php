@@ -145,7 +145,19 @@ title="Unassigned tickets">
 </li>
                 <hr>
                  @if(Auth::user()->user_class >= \App\Models\UserClass::USER)
+                 <li class="nav-item">
+                    <a href="{{ !Route::is('movies.index') ? route('movies.index') : '#' }}" class="{{ request()->routeIs('movies.index') ? 'active' : '' }} nav-link">
+                                <i class="nav-icon bi bi-film"></i>
+                                <p>Online Movies</p>
+                            </a>
+                </li>
                 <li class="nav-item">
+                    <a href="{{ !Route::is('series.index') ? route('series.index') : '#' }}" class="{{ request()->routeIs('series.index') ? 'active' : '' }} nav-link">
+                                <i class="nav-icon bi bi-tv"></i>
+                                <p>Online Series</p>
+                            </a>
+                </li>
+                <!-- <li class="nav-item">
                     <a href="#" class="nav-link">
                         <i class="nav-icon bi bi-globe"></i>
                         <p>
@@ -157,24 +169,26 @@ title="Unassigned tickets">
                         <li class="nav-item">
                             <a href="{{ !Route::is('movies.index') ? route('movies.index') : '#' }}" class="{{ request()->routeIs('movies.index') ? 'active' : '' }} nav-link">
                                 <i class="nav-icon bi bi-film"></i>
-                                <p>Movies</p>
+                                <p>Online Movies</p>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a href="{{ !Route::is('series.index') ? route('series.index') : '#' }}" class="{{ request()->routeIs('series.index') ? 'active' : '' }} nav-link">
                                 <i class="nav-icon bi bi-tv"></i>
-                                <p>Series</p>
+                                <p>Online Series</p>
                             </a>
                         </li>
-                        <!-- <li class="nav-item">
+                        <li class="nav-item">
                             <a href="{{ route('collections.index') }}" class="nav-link">
                                 <i class="nav-icon bi bi-collection-play"></i>
                                 <p>Collections</p>
                             </a>
-                        </li> -->
+                        </li> 
                     </ul>
-                </li>
+                </li> -->
                 @endif
+
+                <hr>
              
     @if(Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
         <li class="nav-header">Administration</li>

@@ -277,4 +277,24 @@ public function typingUsers()
     return response()->json($active);
 }
 
+public function poll(Request $request)
+{
+    $lastId = (int) $request->query('after', 0);
+
+    $query = Shoutbox::with(['user', 'replies.user'])
+        ->whereNull('parent_id')
+        ->latest();
+
+    if ($lastId > 0) {
+        $query->where('id', '>', $lastId);
+    }
+
+    $messages = $query->take(30)->get()->reverse();
+
+    return response()->json([
+        'messages' => $messages,
+        'count' => $messages->count(),
+    ]);
+}
+
 }

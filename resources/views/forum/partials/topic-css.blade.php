@@ -1695,89 +1695,256 @@
 
 
 /* =========================================================
-   BBCode TOOLBAR
+   POST HIGHLIGHT ON DEEP-LINK
    ========================================================= */
 
-.bbcode-toolbar {
+.post-flash-highlight {
+    animation: post-highlight-flash 3s ease-out;
+}
+
+@keyframes post-highlight-flash {
+    0% {
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.6);
+        background-color: rgba(59, 130, 246, 0.08);
+    }
+    100% {
+        box-shadow: none;
+        background-color: transparent;
+    }
+}
+
+/* =========================================================
+   BACK-TO-TOP BUTTON
+   ========================================================= */
+
+#forumBackToTop {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 1050;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background-color: var(--accent-color, #3b82f6);
+    color: #fff;
+    border: none;
+    cursor: pointer;
     display: flex;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 6px;
-    padding: 9px 10px;
-    margin-bottom: 0;
-    border: 1px solid rgba(203, 213, 225, 0.12);
-    border-bottom: 0;
-    border-radius: 12px 12px 0 0;
-    background: rgba(15, 23, 42, 0.88);
-}
-
-.bbcode-btn {
-    width: 34px;
-    height: 32px;
-    display: inline-flex;
-    align-items: center;
     justify-content: center;
-    padding: 0;
-    border: 1px solid rgba(203, 213, 225, 0.10);
-    border-radius: 7px;
-    background: rgba(255, 255, 255, 0.045);
-    color: #b8c7d9;
-    font-size: 0.82rem;
-    cursor: pointer;
-    transition:
-        color 0.18s ease,
-        background 0.18s ease,
-        border-color 0.18s ease,
-        transform 0.18s ease;
+    font-size: 1.3rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+    transform: translateY(10px);
 }
 
-.bbcode-btn:hover {
-    color: #63d2c6;
-    background: rgba(99, 210, 198, 0.10);
-    border-color: rgba(99, 210, 198, 0.30);
-    transform: translateY(-1px);
-}
-
-.bbcode-btn:active {
+#forumBackToTop.visible {
+    opacity: 1;
+    visibility: visible;
     transform: translateY(0);
 }
 
-.bbcode-btn:focus-visible {
-    outline: 2px solid rgba(99, 210, 198, 0.55);
-    outline-offset: 2px;
+#forumBackToTop:hover {
+    background-color: var(--accent-hover, #2563eb);
+    transform: translateY(-2px);
 }
 
-.bbcode-divider {
-    width: 1px;
-    height: 22px;
-    margin: 0 3px;
-    background: rgba(203, 213, 225, 0.12);
+/* =========================================================
+   SORT BAR (CATEGORY PAGE)
+   ========================================================= */
+
+.forum-sort-bar {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
 }
 
-/* Make textarea connect visually to toolbar */
-
-.bbcode-toolbar + textarea {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
+.forum-sort-bar .sort-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary, #94a3b8);
+    margin-right: 4px;
 }
 
-@media (max-width: 576px) {
-
-    .bbcode-toolbar {
-        gap: 5px;
-        padding: 8px;
-    }
-
-    .bbcode-btn {
-        width: 32px;
-        height: 30px;
-    }
-
-    .bbcode-divider {
-        display: none;
-    }
+.forum-sort-btn {
+    padding: 4px 12px;
+    font-size: 0.82rem;
+    border-radius: 20px;
+    background: transparent;
+    color: var(--text-secondary, #94a3b8);
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+    text-decoration: none;
+    transition: all 0.2s ease;
+    white-space: nowrap;
 }
 
+.forum-sort-btn:hover {
+    color: var(--text-primary, #e2e8f0);
+    border-color: var(--accent-color, #3b82f6);
+    background: rgba(59, 130, 246, 0.08);
+}
+
+.forum-sort-btn.active {
+    background: var(--accent-color, #3b82f6);
+    color: #fff;
+    border-color: var(--accent-color, #3b82f6);
+}
+
+/* =========================================================
+   SEARCH BAR
+   ========================================================= */
+
+.forum-search-bar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.forum-search-bar .form-control {
+    background: var(--input-bg, rgba(255, 255, 255, 0.05));
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+    color: var(--text-primary, #e2e8f0);
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 0.9rem;
+    max-width: 300px;
+    transition: border-color 0.2s ease;
+}
+
+.forum-search-bar .form-control:focus {
+    border-color: var(--accent-color, #3b82f6);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
+.forum-search-bar .btn-search {
+    background: var(--accent-color, #3b82f6);
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.forum-search-bar .btn-search:hover {
+    background: var(--accent-hover, #2563eb);
+}
+
+/* =========================================================
+   MULTI-QUOTE
+   ========================================================= */
+
+.multiquote-btn {
+    position: relative;
+}
+
+.multiquote-btn.active {
+    background: rgba(59, 130, 246, 0.15) !important;
+    color: var(--accent-color, #3b82f6) !important;
+}
+
+.multiquote-bar {
+    background: var(--card-bg, rgba(30, 30, 30, 0.8));
+    border: 1px solid var(--accent-color, #3b82f6);
+    border-radius: 8px;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    font-size: 0.9rem;
+    color: var(--text-primary, #e2e8f0);
+}
+
+.multiquote-bar .mq-count {
+    background: var(--accent-color, #3b82f6);
+    color: #fff;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+/* =========================================================
+   POST PREVIEW PANE
+   ========================================================= */
+
+.forum-post-preview-pane {
+    background: var(--card-bg, rgba(30, 30, 30, 0.5));
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 8px;
+    min-height: 60px;
+    color: var(--text-primary, #e2e8f0);
+}
+
+.forum-preview-btn {
+    background: var(--surface-2, rgba(255, 255, 255, 0.05));
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+    color: var(--text-secondary, #94a3b8);
+    font-size: 0.85rem;
+    padding: 4px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.forum-preview-btn:hover {
+    color: var(--text-primary, #e2e8f0);
+    border-color: var(--accent-color, #3b82f6);
+}
+
+/* =========================================================
+   DRAFT RESTORE TOAST
+   ========================================================= */
+
+.draft-restore-toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--card-bg, #1e1e1e);
+    border: 1px solid var(--accent-color, #3b82f6);
+    color: var(--text-primary, #e2e8f0);
+    padding: 10px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.9rem;
+    animation: draft-toast-in 0.3s ease;
+}
+
+.draft-restore-toast button {
+    background: var(--accent-color, #3b82f6);
+    color: #fff;
+    border: none;
+    padding: 4px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.82rem;
+}
+
+.draft-restore-toast button.draft-dismiss {
+    background: transparent;
+    color: var(--text-secondary, #94a3b8);
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+}
+
+@keyframes draft-toast-in {
+    from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
 
 /* =========================================================
    PREVENT HORIZONTAL OVERFLOW

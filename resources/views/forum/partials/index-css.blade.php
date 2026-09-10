@@ -617,4 +617,62 @@
         transition: none;
     }
 }
+
+/* =========================================================
+   SEARCH BAR
+   ========================================================= */
+
+.forum-search-bar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.forum-search-bar .form-control {
+    background: var(--input-bg, rgba(255, 255, 255, 0.05));
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+    color: var(--text-primary, #e2e8f0);
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 0.9rem;
+    max-width: 300px;
+    transition: border-color 0.2s ease;
+}
+
+.forum-search-bar .form-control:focus {
+    border-color: var(--accent-color, #3b82f6);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
+.forum-search-bar .btn-search {
+    background: var(--accent-color, #3b82f6);
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.forum-search-bar .btn-search:hover {
+    background: var(--accent-hover, #2563eb);
+}
+
+.forum-sort-btn {
+    padding: 4px 12px;
+    font-size: 0.82rem;
+    border-radius: 20px;
+    background: transparent;
+    color: var(--text-secondary, #94a3b8);
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.forum-sort-btn:hover {
+    color: var(--text-primary, #e2e8f0);
+    border-color: var(--accent-color, #3b82f6);
+    background: rgba(59, 130, 246, 0.08);
+}
 </style>

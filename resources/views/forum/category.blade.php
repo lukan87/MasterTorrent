@@ -107,6 +107,38 @@
 
 
     {{-- =========================================================
+         SORT BAR
+         ========================================================= --}}
+
+    <div class="forum-sort-bar mb-4">
+        <span class="sort-label">
+            <i class="bi bi-funnel me-1"></i>
+            Sort:
+        </span>
+
+        <a href="{{ route('forum.category', ['category' => $category->slug, 'sort' => 'latest']) }}"
+           class="forum-sort-btn {{ $sort === 'latest' ? 'active' : '' }}">
+            Latest activity
+        </a>
+
+        <a href="{{ route('forum.category', ['category' => $category->slug, 'sort' => 'created']) }}"
+           class="forum-sort-btn {{ $sort === 'created' ? 'active' : '' }}">
+            Newest
+        </a>
+
+        <a href="{{ route('forum.category', ['category' => $category->slug, 'sort' => 'views']) }}"
+           class="forum-sort-btn {{ $sort === 'views' ? 'active' : '' }}">
+            Most viewed
+        </a>
+
+        <a href="{{ route('forum.category', ['category' => $category->slug, 'sort' => 'replies']) }}"
+           class="forum-sort-btn {{ $sort === 'replies' ? 'active' : '' }}">
+            Most replied
+        </a>
+    </div>
+
+
+    {{-- =========================================================
          TOPIC LIST
          ========================================================= --}}
 
@@ -412,5 +444,7 @@
 
 
 @include('forum.partials.category-css')
+
+@include('forum.partials.back-to-top')
 
 @endsection

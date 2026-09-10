@@ -98,11 +98,13 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/forum/{category:slug}',
         [ForumController::class, 'store'])
-        ->name('forum.topic.store');
+        ->name('forum.topic.store')
+        ->middleware('throttle:6,1');
 
     Route::post('/forum/{category:slug}/{topic:slug}/reply',
         [ForumController::class, 'reply'])
-        ->name('forum.topic.reply');
+        ->name('forum.topic.reply')
+        ->middleware('throttle:10,1');
 
     Route::get('/forum/{category:slug}/{topic:slug}/post/{post}/edit',
         [ForumController::class, 'editPost'])
@@ -131,18 +133,28 @@ Route::middleware('auth')->group(function () {
     Route::post(
         '/forum/{category:slug}/{topic:slug}/post/{post}/like',
         [ForumPostLikeController::class, 'toggle']
-    )->name('forum.post.like');
+    )->name('forum.post.like')
+     ->middleware('throttle:30,1');
 
 });
 
-Route::get('/forum/{category:slug}/{topic:slug}',
-    [ForumController::class, 'topic'])
-    ->name('forum.topic');
+/*
+|--------------------------------------------------------------------------
+| Forum Static Routes (must be before wildcard {category:slug} routes)
+|--------------------------------------------------------------------------
+*/
+Route::get('/forum/search', [ForumController::class, 'search'])
+    ->name('forum.search');
 
-Route::get('/forum/{category:slug}',
-    [ForumController::class, 'category'])
-    ->name('forum.category');
+Route::get('/forum/my-topics', [ForumController::class, 'myTopics'])
+    ->middleware('auth')
+    ->name('forum.my-topics');
 
+/*
+|--------------------------------------------------------------------------
+| Forum Follow/Unfollow (authenticated, wildcard routes)
+|--------------------------------------------------------------------------
+*/
 Route::middleware('auth')->group(function () {
 
     Route::post(
@@ -156,6 +168,19 @@ Route::middleware('auth')->group(function () {
     )->name('forum.topic.unfollow');
 
 });
+
+/*
+|--------------------------------------------------------------------------
+| Forum Wildcard Routes (category / topic — must come last)
+|--------------------------------------------------------------------------
+*/
+Route::get('/forum/{category:slug}/{topic:slug}',
+    [ForumController::class, 'topic'])
+    ->name('forum.topic');
+
+Route::get('/forum/{category:slug}',
+    [ForumController::class, 'category'])
+    ->name('forum.category');
 
 // Admin email routes
 
@@ -906,6 +931,7 @@ Route::middleware('auth')->group(function () {
 Route::post('/shoutbox/typing', [ShoutboxController::class, 'typing']);
 Route::post('/shoutbox/typing-stop', [ShoutboxController::class, 'stopTyping']);
 Route::get('/shoutbox/typing-users', [ShoutboxController::class, 'typingUsers']);
+Route::get('/shoutbox/poll', [ShoutboxController::class, 'poll'])->middleware('auth');
 
 /* Guest contact */
 

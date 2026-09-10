@@ -10,6 +10,15 @@ if (!function_exists('convertCustomTagsToHtml')) {
             return '';
         }
 
+        /*
+        |------------------------------------------------------------------
+        | SECURITY: Strip raw HTML before BBCode processing.
+        | This prevents XSS via <script>, <iframe>, onerror, etc.
+        | BBCode tags like [b], [url] are NOT HTML and survive this.
+        |------------------------------------------------------------------
+        */
+        $content = strip_tags($content);
+
     
 
         /*
@@ -204,38 +213,45 @@ $content = preg_replace_callback('/\[code(?:=(\w+))?\](.*?)\[\/code\]/s', functi
 |
 */
 
-$content = preg_replace_callback(
-    '/\[quote(?:="([^"]*)")?\](.*?)\[\/quote\]/is',
-    function ($matches) {
+// Process nested [quote] from innermost outward.
+// Tempered greedy token prevents matching across nested [quote] tags.
+$quoteCount = 1;
+do {
+    $content = preg_replace_callback(
+        '/\[quote(?:="([^"]*)")?\]((?:(?!\[quote|\[\/quote\]).)*?)\[\/quote\]/is',
+        function ($matches) {
 
-        $username = !empty($matches[1])
-            ? trim($matches[1])
-            : null;
+            $username = !empty($matches[1])
+                ? trim($matches[1])
+                : null;
 
-        $body = trim($matches[2]);
+            $body = trim($matches[2]);
 
-        $header = $username
-            ? '<div class="bbcode-quote-header">
-                    <i class="bi bi-quote me-1"></i>
-                    <strong>' . e($username) . '</strong> wrote:
-                    <i class="bi bi-quote me-1"></i>
-               </div>'
-            : '<div class="bbcode-quote-header">
-                    <i class="bi bi-quote me-1"></i>
-                    Quote
-               </div>';
+            $header = $username
+                ? '<div class="bbcode-quote-header">
+                        <i class="bi bi-quote me-1"></i>
+                        <strong>' . e($username) . '</strong> wrote:
+                        <i class="bi bi-quote me-1"></i>
+                   </div>'
+                : '<div class="bbcode-quote-header">
+                        <i class="bi bi-quote me-1"></i>
+                        Quote
+                   </div>';
 
-        return '
-            <blockquote class="bbcode-quote">
-                ' . $header . '
-                <div class="bbcode-quote-body">
-                    ' . $body . '
-                </div>
-            </blockquote>
-        ';
-    },
-    $content
-);
+            return '
+                <blockquote class="bbcode-quote">
+                    ' . $header . '
+                    <div class="bbcode-quote-body">
+                        ' . $body . '
+                    </div>
+                </blockquote>
+            ';
+        },
+        $content,
+        -1,
+        $quoteCount
+    );
+} while ($quoteCount > 0);
 
 // Apply mentions first
 $content = preg_replace_callback('/@([A-Za-z0-9_]+)/', function ($matches) {

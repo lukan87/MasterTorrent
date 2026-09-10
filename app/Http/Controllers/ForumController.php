@@ -31,21 +31,44 @@ class ForumController extends Controller
     return view('forum.index', compact('categories', 'deletedCategories'));
 }
 
-    public function category(ForumCategory $category)
+    public function category(Request $request, ForumCategory $category)
     {
         if ($category->is_private) {
             abort(403);
         }
 
-$topics = $category->topics()
+        $sort = $request->query('sort', 'latest');
+
+        $allowedSorts = ['latest', 'created', 'views', 'replies'];
+
+        if (!in_array($sort, $allowedSorts, true)) {
+            $sort = 'latest';
+        }
+
+        $topics = $category->topics()
     ->with([
         'user',
         'lastPost.user',
     ])
     ->withCount('posts')
-    ->orderByDesc('is_pinned')
-    ->latest('updated_at')
-    ->paginate(25);
+    ->orderByDesc('is_pinned');
+
+        switch ($sort) {
+            case 'created':
+                $topics->latest('created_at');
+                break;
+            case 'views':
+                $topics->orderByDesc('views');
+                break;
+            case 'replies':
+                $topics->orderByDesc('posts_count');
+                break;
+            default:
+                $topics->latest('updated_at');
+                break;
+        }
+
+        $topics = $topics->paginate(25);
 
 if (auth()->check()) {
 
@@ -78,7 +101,9 @@ if ($topicView) {
 
 }
 
-        return view('forum.category', compact('category', 'topics'));
+        $topics->appends(['sort' => $sort]);
+
+        return view('forum.category', compact('category', 'topics', 'sort'));
     }
 
     public function create(ForumCategory $category)
@@ -118,11 +143,20 @@ public function store(Request $request, ForumCategory $category)
         ],
     ]);
 
+    $baseSlug = \Illuminate\Support\Str::slug($validated['title']);
+    $slug = $baseSlug;
+    $counter = 2;
+
+    while (\App\Models\ForumTopic::where('category_id', $category->id)->where('slug', $slug)->exists()) {
+        $slug = $baseSlug . '-' . $counter;
+        $counter++;
+    }
+
     $topic = \App\Models\ForumTopic::create([
         'category_id' => $category->id,
         'user_id'     => auth()->id(),
         'title'       => $validated['title'],
-        'slug'        => \Illuminate\Support\Str::slug($validated['title']),
+        'slug'        => $slug,
     ]);
 
    $post = ForumPost::create([
@@ -151,7 +185,12 @@ public function topic(ForumCategory $category, ForumTopic $topic)
         abort(404);
     }
 
-    $topic->increment('views');
+    $viewKey = 'forum_topic_view_' . $topic->id;
+    $lastView = (int) session($viewKey, 0);
+    if (now()->timestamp - $lastView > 86400) {
+        $topic->increment('views');
+        session([$viewKey => now()->timestamp]);
+    }
 
     $topic->load('user');
 
@@ -166,19 +205,21 @@ public function topic(ForumCategory $category, ForumTopic $topic)
 
 }
     $firstPost = $topic->posts()
-        ->with('user')
+        ->with(['user' => fn($q) => $q->withCount('forumPosts')])
         ->oldest('id')
         ->first();
 
     $replies = $topic->posts()
-        ->with('user')
+        ->with(['user' => fn($q) => $q->withCount('forumPosts')])
         ->when($firstPost, function ($query) use ($firstPost) {
             $query->where('id', '!=', $firstPost->id);
         })
-        ->oldest('id')
-        ->paginate(20);
+        ->orderByDesc('created_at')
+        ->orderByDesc('id')
+        ->paginate(15);
 
-        $latestReplyPage = $replies->lastPage();
+        // With newest-first replies, the latest post is always on page 1.
+        $latestReplyPage = $replies->total() > 0 ? 1 : 0;
 
    $isFollowing = false;
 
@@ -718,6 +759,58 @@ private function notifyMentionedUsers(ForumPost $post): void
         );
     }
 }
+
+
+    /**
+     * Search forum topics and posts.
+     */
+    public function search(Request $request)
+    {
+        $query = $request->query('q', '');
+        $results = collect();
+
+        if (mb_strlen($query) >= 2) {
+            $searchTerm = '%' . $query . '%';
+
+            $topics = ForumTopic::with(['user', 'category'])
+                ->withCount('posts')
+                ->where('title', 'LIKE', $searchTerm)
+                ->latest()
+                ->limit(50)
+                ->get();
+
+            $posts = ForumPost::with(['user', 'topic.category'])
+                ->where('body', 'LIKE', $searchTerm)
+                ->latest()
+                ->limit(50)
+                ->get();
+
+            $results = $topics->merge($posts)->sortByDesc('created_at')->take(50);
+        }
+
+        return view('forum.search', compact('query', 'results'));
+    }
+
+
+    /**
+     * Show topics that the current user has participated in.
+     */
+    public function myTopics()
+    {
+        $user = auth()->user();
+
+        $topicIds = ForumPost::where('user_id', $user->id)
+            ->distinct()
+            ->pluck('topic_id');
+
+        $topics = ForumTopic::whereIn('id', $topicIds)
+            ->with(['user', 'lastPost.user', 'category'])
+            ->withCount('posts')
+            ->latest('updated_at')
+            ->paginate(25);
+
+        return view('forum.my-topics', compact('topics'));
+    }
 
 
 }

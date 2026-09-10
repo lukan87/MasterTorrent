@@ -26,7 +26,9 @@
 
     {{-- Messages --}}
 
-    <div class="shoutbox-container glass p-3 mb-3">
+    <div class="shoutbox-container-wrap">
+
+    <div class="shoutbox-container glass p-3 mb-3" id="shoutbox-container">
 
        <div id="shoutbox-messages">
 
@@ -88,17 +90,20 @@
 
 {{-- NORMAL CHAT MESSAGES --}}
 
-@foreach($messages as $message)
+@php $prevUserId = null; @endphp
+
+@forelse($messages as $message)
 
             @php
 
                 $classColor = \App\Models\UserClass::getClassColor($message->user->user_class);
+                $grouped = ($prevUserId === $message->user_id && $message->user_id != 2);
 
             @endphp
 
 
 
-              <div class="message {{ auth()->id() === $message->user_id ? 'own' : '' }}" data-id="{{ $message->id }}">
+              <div class="message {{ auth()->id() === $message->user_id ? 'own' : '' }}{{ $grouped ? ' grouped' : '' }}" data-id="{{ $message->id }}">
 
                 <img class="avatar"
 
@@ -240,11 +245,11 @@ $isSystem = $message->user_id == 2;
 
                <i class="bi bi-clock me-1 fs-6"></i>
 
-              <span class="timestamp-text">
+              <time class="ts" datetime="{{ $message->created_at->toIso8601String() }}" title="{{ $message->created_at->format('Y-m-d H:i') }}">
 
-                     {{ $message->created_at->format('Y-m-d H:i') }}
+                     {{ \App\Helpers\FormatHelper::shortRelativeTime($message->created_at) }}
 
-                    </span>
+                    </time>
 
                 </span>
 
@@ -468,11 +473,11 @@ $isSystem = $message->user_id == 2;
 
 <span class="badge time-badge time-badge-sm">
 
-    <span class="timestamp-text">
+    <time class="ts" datetime="{{ $reply->created_at->toIso8601String() }}" title="{{ $reply->created_at->format('Y-m-d H:i') }}">
 
-        {{ $reply->created_at->format('Y-m-d H:i') }}
+        {{ \App\Helpers\FormatHelper::shortRelativeTime($reply->created_at) }}
 
-    </span>
+    </time>
 
     @if(
 
@@ -650,13 +655,27 @@ $isSystem = $message->user_id == 2;
 
             </div>
 
-        @endforeach
+        @php $prevUserId = $message->user_id; @endphp
+
+        @empty
+
+            <div class="shoutbox-empty">
+                <i class="bi bi-chat-dots" style="font-size:2.5rem;opacity:.35;"></i>
+                <p style="margin:0;opacity:.55;font-size:14px;">No messages yet. Be the first to say hello! &#x1F44B;</p>
+            </div>
+
+        @endforelse
 
         @endif
 
         </div>
 
+            <button id="shoutbox-jump-bottom" class="shoutbox-jump-bottom" data-bs-toggle="tooltip"  title="Scroll to last message" style="display:none;">
+            <i class="bi bi-chevron-double-down"></i>
+            <span id="shoutbox-jump-count" class="jump-count"></span>
+        </button>
 
+    </div>
 
     </div>
 
@@ -804,239 +823,174 @@ $isSystem = $message->user_id == 2;
 
 
 
+
+
+    </form>
+
+    @endif
+
+
+
+
+
+</div>
+
+ </div>
+
+</div>
+
+
+{{-- Shared Inline Script (works on both home and shoutbox pages) --}}
 <script>
+/* =========================================================
+   Shoutbox: Placeholder, Counter, BBCode, Emoji,
+   Relative Timestamps, Jump-to-Bottom
+   ========================================================= */
 
+/* --- Placeholder Rotation --- */
 (() => {
-
-    const messages = [
-
-        "Say something nice… 👋",
-
-        "What’s on your mind? 💭",
-
-        "Drop a thought, a joke, or a vibe ✨",
-
-        "Be kind. Be funny. Be real 💬",
-
-        "Got something to share? We’re listening 👀",
-
-        "Type here… magic happens sometimes 🪄",
-
-        "Press Enter to send • Shift+Enter for a new line ⏎"
-
-    ];
-
     const textarea = document.getElementById('content');
-
     const hint = document.querySelector('.chat-hint');
-
     if (!textarea || !hint) return;
 
-    // Pick a non-repeating random placeholder
+    const messages = [
+        "Say something nice… \ud83d\udc4b",
+        "What's on your mind? \ud83d\udcad",
+        "Drop a message in the chat!",
+        "Type something friendly \ud83d\ude0a",
+        "Join the conversation!",
+        "Share your thoughts \ud83d\udca1",
+        "Let's chat! \ud83d\ude80"
+    ];
 
     let lastIndex = -1;
-
     let index;
-
-    do {
-
-        index = Math.floor(Math.random() * messages.length);
-
-    } while (index === lastIndex);
-
+    do { index = Math.floor(Math.random() * messages.length); } while (index === lastIndex);
     lastIndex = index;
-
     hint.textContent = messages[index];
 
-    // Floating hint behavior
-
-    textarea.addEventListener('focus', () => {
-
-        hint.classList.add('active');
-
-    });
-
-    textarea.addEventListener('blur', () => {
-
-        if (!textarea.value.trim()) {
-
-            hint.classList.remove('active');
-
-        }
-
-    });
-
+    textarea.addEventListener('focus', () => hint.classList.add('active'));
+    textarea.addEventListener('blur', () => { if (!textarea.value.trim()) hint.classList.remove('active'); });
     textarea.addEventListener('input', () => {
-
         textarea.style.height = 'auto';
-
         textarea.style.height = textarea.scrollHeight + 'px';
-
     });
-
 })();
 
-</script>
-
-
-
-<script>
-
+/* --- Character Counter --- */
 (() => {
-
     const textarea = document.getElementById('content');
-
     const counter = document.getElementById('char-counter');
-
     const countEl = document.getElementById('char-count');
-
     if (!textarea || !counter || !countEl) return;
 
     const MAX = textarea.maxLength || 1000;
-
     const WARN_AT = 800;
 
     textarea.addEventListener('input', () => {
-
         const len = textarea.value.length;
-
         countEl.textContent = len;
-
-        // show immediately
-
         counter.classList.add('visible');
-
         counter.classList.toggle('warn', len >= WARN_AT);
-
         counter.classList.toggle('danger', len >= MAX);
-
-        // auto-grow textarea
-
         textarea.style.height = 'auto';
-
         textarea.style.height = textarea.scrollHeight + 'px';
-
     });
 
     textarea.addEventListener('blur', () => {
-
-        if (!textarea.value.length) {
-
-            counter.classList.remove('visible');
-
-        }
-
+        if (!textarea.value.length) counter.classList.remove('visible');
     });
-
 })();
 
-
-
-
-
-
-
-
-
-
-
-
-
+/* --- BBCode Wrap --- */
 function wrapText(before, after) {
-
     const textarea = document.getElementById('content');
-
     const start = textarea.selectionStart;
-
     const end = textarea.selectionEnd;
-
     const selected = textarea.value.substring(start, end);
 
-    // If text is selected → wrap it
-
     if (selected.length > 0) {
-
-        textarea.value =
-
-            textarea.value.substring(0, start) +
-
-            before + selected + after +
-
-            textarea.value.substring(end);
-
-        // keep selection around wrapped text
-
+        textarea.value = textarea.value.substring(0, start) + before + selected + after + textarea.value.substring(end);
         textarea.selectionStart = start + before.length;
-
         textarea.selectionEnd = end + before.length;
-
     } else {
-
-        // No selection → insert and place cursor in middle
-
         const insert = before + after;
-
-        textarea.value =
-
-            textarea.value.substring(0, start) +
-
-            insert +
-
-            textarea.value.substring(start);
-
-        // 👇 THIS is the key part
-
+        textarea.value = textarea.value.substring(0, start) + insert + textarea.value.substring(start);
         const cursorPos = start + before.length;
-
         textarea.selectionStart = cursorPos;
-
         textarea.selectionEnd = cursorPos;
-
     }
-
     textarea.focus();
-
     textarea.scrollTop = textarea.scrollHeight;
-
 }
 
+/* --- Emoji Insert --- */
 function addEmoji(emoji) {
-
     const textarea = document.getElementById('content');
-
     const start = textarea.selectionStart;
-
     const end = textarea.selectionEnd;
-
-    textarea.value =
-
-        textarea.value.substring(0, start) +
-
-        emoji +
-
-        textarea.value.substring(end);
-
+    textarea.value = textarea.value.substring(0, start) + emoji + textarea.value.substring(end);
     const cursor = start + emoji.length;
-
     textarea.selectionStart = cursor;
-
     textarea.selectionEnd = cursor;
-
     textarea.focus();
-
 }
 
+/* --- Jump-to-Bottom Button --- */
+(() => {
+    const container = document.getElementById('shoutbox-container');
+    const jumpBtn = document.getElementById('shoutbox-jump-bottom');
+    const jumpCount = document.getElementById('shoutbox-jump-count');
+    if (!container || !jumpBtn) return;
 
+    let newCount = 0;
 
+    container.addEventListener('scroll', () => {
+        const distFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+        if (distFromBottom > 150) {
+            jumpBtn.style.display = 'flex';
+        } else {
+            jumpBtn.style.display = 'none';
+            newCount = 0;
+            jumpBtn.classList.remove('has-count');
+        }
+    });
+
+    jumpBtn.addEventListener('click', () => {
+        container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+        newCount = 0;
+        jumpBtn.classList.remove('has-count');
+        if (window._shoutboxOnJumpToBottom) window._shoutboxOnJumpToBottom();
+    });
+
+    window._shoutboxNewMessages = function(count) {
+        newCount += count;
+        if (newCount > 0) {
+            jumpBtn.classList.add('has-count');
+            jumpCount.textContent = newCount > 99 ? '99+' : newCount;
+            if (jumpBtn.style.display === 'none') jumpBtn.style.display = 'flex';
+        }
+    };
+})();
+
+/* --- Scroll to Bottom Helper --- */
+function shoutboxScrollToBottom() {
+    const c = document.getElementById('shoutbox-container');
+    if (c) c.scrollTop = c.scrollHeight;
+}
+
+/* --- Near-Bottom Helper (used by polling) --- */
+window._shoutboxIsNearBottom = function() {
+    const c = document.getElementById('shoutbox-container');
+    if (!c) return true;
+    return (c.scrollHeight - c.scrollTop - c.clientHeight) < 150;
+};
 </script>
 
 
 
 
-
-
-
-
+{{-- Styles --}}
 
 <style>
 
@@ -1262,7 +1216,7 @@ function addEmoji(emoji) {
 
     right: 12px;
 
-    bottom: 8px;
+    bottom: 3px;
 
     font-size: .7rem;
 
@@ -1312,27 +1266,6 @@ function addEmoji(emoji) {
 
 
 
-    </style>
-
-    </form>
-
-    @endif
-
-
-
-
-
-</div>
-
- </div>
-
-</div>
-
-
-
-{{-- Styles --}}
-
-<style>
 
 body {
     color: #e6edf3;
@@ -2605,535 +2538,9 @@ body {
 
 }
 
-</style>
 
-{{-- Scripts --}}
 
-@if(Route::is('home'))
 
-@push('scripts')
-
-<script>
-
-document.addEventListener('DOMContentLoaded', () => {
-
-    const form = document.getElementById('shoutbox-form');
-
-    const textarea = document.getElementById('content');
-
-    const messagesBox = document.getElementById('shoutbox-messages');
-
-    if (!form || !textarea || !messagesBox) return;
-
-    let typingTimeout;
-
-    /* =========================
-
-       SEND MESSAGE (ENTER)
-
-    ========================= */
-
-    textarea.addEventListener('keydown', e => {
-
-        if (e.key === 'Enter' && !e.shiftKey) {
-
-            e.preventDefault();
-
-            if (!textarea.value.trim()) return;
-
-            fetch(form.action,{
-
-                method:'POST',
-
-                body:new FormData(form),
-
-                headers:{'X-Requested-With':'XMLHttpRequest'}
-
-            })
-
-            .then(() => {
-
-                textarea.value='';
-
-                reloadMessages();
-
-            })
-
-            .catch(console.error);
-
-        }
-
-    });
-
-
-
-    /* =========================
-
-       TYPING INDICATOR
-
-    ========================= */
-
-    textarea.addEventListener('input', () => {
-
-        fetch('/shoutbox/typing',{
-
-            method:'POST',
-
-            headers:{
-
-                'X-CSRF-TOKEN': document.querySelector('input[name=_token]').value,
-
-                'X-Requested-With':'XMLHttpRequest'
-
-            }
-
-        });
-
-        clearTimeout(typingTimeout);
-
-        typingTimeout = setTimeout(()=>{
-
-            fetch('/shoutbox/typing-stop',{
-
-                method:'POST',
-
-                headers:{
-
-                    'X-CSRF-TOKEN': document.querySelector('input[name=_token]').value,
-
-                    'X-Requested-With':'XMLHttpRequest'
-
-                }
-
-            });
-
-        },2000);
-
-    });
-
-
-
-    /* =========================
-
-       RELOAD CHAT
-
-    ========================= */
-
-    function reloadMessages(){
-
-        fetch(window.location.href)
-
-        .then(r=>r.text())
-
-        .then(html=>{
-
-            const dom = new DOMParser().parseFromString(html,'text/html');
-
-            const fresh = dom.querySelector('#shoutbox-messages');
-
-            if(!fresh) return;
-
-            messagesBox.innerHTML = fresh.innerHTML;
-
-            messagesBox.scrollTop = messagesBox.scrollHeight;
-
-        });
-
-    }
-
-
-
-});
-
-
-
-/* =========================
-
-   DELETE MESSAGE
-
-\========================= */
-
-document.addEventListener('click', e => {
-
-    const form = e.target.closest('.shoutbox-delete-form');
-
-    if(!form) return;
-
-    e.preventDefault();
-
-    if(!confirm('Delete this shout?')) return;
-
-    fetch(form.action,{
-
-        method:'POST',
-
-        body:new FormData(form),
-
-        headers:{'X-Requested-With':'XMLHttpRequest'}
-
-    })
-
-    .then(()=>{
-
-        form.closest('.message')?.remove();
-
-    })
-
-    .catch(console.error);
-
-});
-
-
-
-/* =========================
-
-   ESC CLOSE EDIT
-
-\========================= */
-
-document.addEventListener('keydown', e => {
-
-    if(e.key !== 'Escape') return;
-
-    const openForm = document.querySelector('.edit-form[style*="block"]');
-
-    if(!openForm) return;
-
-    const id = openForm.id.replace('edit-form-','');
-
-    closeEdit(id);
-
-});
-
-
-
-/* =========================
-
-   REPLY SUBMIT
-
-\========================= */
-
-document.addEventListener('submit', e => {
-
-    const form = e.target.closest('.shoutbox-reply-form');
-
-    if(!form) return;
-
-    e.preventDefault();
-
-    fetch(form.action,{
-
-        method:'POST',
-
-        body:new FormData(form),
-
-        headers:{'X-Requested-With':'XMLHttpRequest'}
-
-    })
-
-    .then(res=>res.json())
-
-    .then(data=>{
-
-        if(!data.html) return;
-
-        const bubble = form.closest('.bubble');
-
-        let replies = bubble.querySelector('.replies');
-
-        if(!replies){
-
-            replies=document.createElement('div');
-
-            replies.className='replies mt-3';
-
-            bubble.appendChild(replies);
-
-        }
-
-        replies.insertAdjacentHTML('afterbegin',data.html);
-
-        form.querySelector('textarea').value='';
-
-        form.style.display='none';
-
-    })
-
-    .catch(console.error);
-
-});
-
-
-
-/* =========================
-
-   DELETE REPLY
-
-\========================= */
-
-function handleReplyDelete(e, form){
-
-    e.preventDefault();
-
-    if(!confirm('Delete this reply?')) return;
-
-    fetch(form.action,{
-
-        method:'POST',
-
-        body:new FormData(form),
-
-        headers:{'X-Requested-With':'XMLHttpRequest'}
-
-    })
-
-    .then(()=>{
-
-        const card=form.closest('.reply-card');
-
-        if(!card) return;
-
-        card.style.opacity='0';
-
-        setTimeout(()=>{
-
-            card.remove();
-
-        },200);
-
-    })
-
-    .catch(console.error);
-
-}
-
-
-
-/* =========================
-
-   EDIT MESSAGE
-
-\========================= */
-
-function openEdit(id){
-
-    const wrapper=document.querySelector(`.message[data-id="${id}"]`);
-
-    if(!wrapper) return;
-
-    const content=wrapper.querySelector('.content');
-
-    const form=wrapper.querySelector(`#edit-form-${id}`);
-
-    if(!form || !content) return;
-
-    content.style.display='none';
-
-    form.style.display='block';
-
-    const textarea=form.querySelector('.edit-textarea');
-
-    if(textarea){
-
-        textarea.focus();
-
-        textarea.style.height='auto';
-
-        textarea.style.height=textarea.scrollHeight+'px';
-
-    }
-
-}
-
-
-
-function closeEdit(id){
-
-    const wrapper=document.querySelector(`.message[data-id="${id}"]`);
-
-    if(!wrapper) return;
-
-    const content=wrapper.querySelector('.content');
-
-    const form=wrapper.querySelector(`#edit-form-${id}`);
-
-    if(!form || !content) return;
-
-    form.style.display='none';
-
-    content.style.display='block';
-
-}
-
-
-
-/* =========================
-
-   AUTO EXPAND EDIT TEXTAREA
-
-\========================= */
-
-document.addEventListener('input', e=>{
-
-    if(!e.target.classList.contains('edit-textarea')) return;
-
-    e.target.style.height='auto';
-
-    e.target.style.height=e.target.scrollHeight+'px';
-
-});
-
-
-
-/* =========================
-
-   EDIT SUBMIT
-
-\========================= */
-
-document.addEventListener('submit', e=>{
-
-    const form=e.target.closest('.shoutbox-edit-form');
-
-    if(!form) return;
-
-    e.preventDefault();
-
-    fetch(form.action,{
-
-        method:'POST',
-
-        body:new FormData(form),
-
-        headers:{'X-Requested-With':'XMLHttpRequest'}
-
-    })
-
-    .then(r=>r.json())
-
-    .then(data=>{
-
-        if(!data.message) return;
-
-        const id=data.message.id;
-
-        const content=document.querySelector(`.message[data-id="${id}"] .content`);
-
-        if(content){
-
-            content.innerHTML=data.message.message;
-
-            closeEdit(id);
-
-        }
-
-    })
-
-    .catch(console.error);
-
-});
-
-
-
-/* =========================
-
-   REPLY EDIT
-
-\========================= */
-
-function openReplyEdit(id){
-
-    document.getElementById('reply-edit-form-'+id).style.display='block';
-
-}
-
-function closeReplyEdit(id){
-
-    document.getElementById('reply-edit-form-'+id).style.display='none';
-
-}
-
-
-
-/* =========================
-
-   TOGGLE REPLY FORM
-
-\========================= */
-
-function toggleReplyForm(id){
-
-    const form=document.getElementById('reply-form-'+id);
-
-    if(!form) return;
-
-    const open=form.style.display==='block';
-
-    document.querySelectorAll('.reply-form').forEach(f=>{
-
-        f.style.display='none';
-
-    });
-
-    if(!open){
-
-        form.style.display='block';
-
-        form.querySelector('textarea')?.focus();
-
-    }
-
-}
-
-
-
-function loadTypingUsers(){
-
-    fetch('/shoutbox/typing-users')
-
-    .then(r => r.json())
-
-    .then(users => {
-
-        const box = document.getElementById('typing-users');
-
-        const indicator = document.getElementById('typing-indicator');
-
-        if(!users.length){
-
-            box.innerHTML='';
-
-            indicator.style.opacity='0';
-
-            return;
-
-        }
-
-        indicator.style.opacity='1';
-
-        if(users.length === 1){
-
-            box.innerHTML = users[0] + ' is typing';
-
-        }else{
-
-            box.innerHTML = users.join(', ') + ' are typing';
-
-        }
-
-    });
-
-}
-
-setInterval(loadTypingUsers,2000);
-
-</script>
-
-@endpush
-
-@endif
-
-<style>
 /* =========================================================
    FileIplay Shoutbox — Forum Style Final Overrides
    ========================================================= */
@@ -3400,5 +2807,401 @@ setInterval(loadTypingUsers,2000);
         max-height: 560px;
     }
 }
+
+/* === JUMP-TO-BOTTOM BUTTON === */
+.shoutbox-container-wrap {
+    position: relative;
+}
+
+.shoutbox-jump-bottom {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    z-index: 10;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--ui-border);
+    background: linear-gradient(135deg, rgba(22,32,51,.95), rgba(15,23,42,.92));
+    color: var(--ui-accent);
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0,0,0,.35);
+    transition: opacity .2s, transform .2s;
+}
+
+.shoutbox-jump-bottom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 22px rgba(0,0,0,.45);
+}
+
+.jump-count {
+    display: none;
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    background: var(--ui-accent);
+    color: #000;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 20px;
+    text-align: center;
+    padding: 0 5px;
+}
+
+.shoutbox-jump-bottom.has-count .jump-count {
+    display: block;
+}
+
+/* === EMPTY STATE === */
+.shoutbox-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    gap: 10px;
+    color: rgba(255,255,255,.5);
+}
+
+/* === MESSAGE GROUPING === */
+.message.grouped {
+    margin-top: -6px;
+}
+
+.message.grouped .avatar {
+    visibility: hidden;
+}
+
+.message.grouped .header .username,
+.message.grouped .header .actions-inline {
+    display: none;
+}
+
+.message.grouped .bubble {
+    padding-top: 4px;
+}
+
+.message.grouped .time-badge {
+    opacity: 0;
+    transition: opacity .15s;
+}
+
+.message:hover .time-badge,
+.message.grouped:hover .time-badge {
+    opacity: 1;
+}
+
+/* === RELATIVE TIMESTAMP === */
+.ts {
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+}
 </style>
+
+
+{{-- Scripts --}}
+
+@if(Route::is('home'))
+
+@push('scripts')
+
+<script>
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    const form = document.getElementById('shoutbox-form');
+    const textarea = document.getElementById('content');
+    const messagesBox = document.getElementById('shoutbox-messages');
+
+    if (!form || !textarea || !messagesBox) return;
+
+    let typingTimeout;
+    let lastMessageId = 0;
+
+    // Track last message ID from initial load
+    function updateLastId() {
+        const msgs = messagesBox.querySelectorAll('.message[data-id]');
+        msgs.forEach(m => {
+            const id = parseInt(m.dataset.id);
+            if (id > lastMessageId) lastMessageId = id;
+        });
+    }
+    updateLastId();
+
+    /* === SEND MESSAGE (ENTER) === */
+    textarea.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            if (!textarea.value.trim()) return;
+
+            fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: {'X-Requested-With': 'XMLHttpRequest'}
+            })
+            .then(() => {
+                textarea.value = '';
+                textarea.style.height = 'auto';
+                reloadMessages();
+            })
+            .catch(console.error);
+        }
+    });
+
+    /* === TYPING INDICATOR === */
+    textarea.addEventListener('input', () => {
+        fetch('/shoutbox/typing', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('input[name=_token]').value,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        clearTimeout(typingTimeout);
+        typingTimeout = setTimeout(() => {
+            fetch('/shoutbox/typing-stop', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('input[name=_token]').value,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+        }, 2000);
+    });
+
+    /* === OPTIMIZED POLLING via /shoutbox/poll === */
+    function reloadMessages() {
+        fetch('/shoutbox/poll?after=' + lastMessageId)
+        .then(r => r.json())
+        .then(data => {
+            if (!data.messages || !data.messages.length) return;
+
+            // If the user is near the bottom, reload and scroll (feels live).
+            // Otherwise, don't yank them - show the jump-to-bottom badge instead.
+            const nearBottom = window._shoutboxIsNearBottom ? window._shoutboxIsNearBottom() : true;
+
+            if (nearBottom) {
+                fullReload();
+            } else {
+                if (window._shoutboxNewMessages) {
+                    window._shoutboxNewMessages(data.messages.length);
+                }
+                lastMessageId = data.messages[data.messages.length - 1].id;
+            }
+        })
+        .catch(console.error);
+    }
+
+    function fullReload() {
+        fetch(window.location.href)
+        .then(r => r.text())
+        .then(html => {
+            const dom = new DOMParser().parseFromString(html, 'text/html');
+            const fresh = dom.querySelector('#shoutbox-messages');
+            if (!fresh) return;
+            messagesBox.innerHTML = fresh.innerHTML;
+            updateLastId();
+            shoutboxScrollToBottom();
+        })
+        .catch(console.error);
+    }
+
+    // When the user clicks the jump-to-bottom button after new messages arrived,
+    // reload the messages then scroll to bottom.
+    window._shoutboxOnJumpToBottom = function() {
+        if (!messagesBox.querySelector('.message[data-id="' + lastMessageId + '"]')) {
+            fullReload();
+        }
+        shoutboxScrollToBottom();
+    };
+
+    // Poll every 4 seconds using the lightweight endpoint
+    setInterval(reloadMessages, 4000);
+
+});
+
+
+/* === DELETE MESSAGE === */
+document.addEventListener('click', e => {
+    const form = e.target.closest('.shoutbox-delete-form');
+    if (!form) return;
+    e.preventDefault();
+    if (!confirm('Delete this shout?')) return;
+    fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: {'X-Requested-With': 'XMLHttpRequest'}
+    })
+    .then(() => form.closest('.message')?.remove())
+    .catch(console.error);
+});
+
+/* === ESC CLOSE EDIT === */
+document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    const openForm = document.querySelector('.edit-form[style*="block"]');
+    if (!openForm) return;
+    const id = openForm.id.replace('edit-form-', '');
+    closeEdit(id);
+});
+
+/* === REPLY SUBMIT === */
+document.addEventListener('submit', e => {
+    const form = e.target.closest('.shoutbox-reply-form');
+    if (!form) return;
+    e.preventDefault();
+    fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: {'X-Requested-With': 'XMLHttpRequest'}
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (!data.html) return;
+        const bubble = form.closest('.bubble');
+        let replies = bubble.querySelector('.replies');
+        if (!replies) {
+            replies = document.createElement('div');
+            replies.className = 'replies mt-3';
+            bubble.appendChild(replies);
+        }
+        replies.insertAdjacentHTML('afterbegin', data.html);
+        form.querySelector('textarea').value = '';
+        form.style.display = 'none';
+    })
+    .catch(console.error);
+});
+
+/* === DELETE REPLY === */
+function handleReplyDelete(e, form) {
+    e.preventDefault();
+    if (!confirm('Delete this reply?')) return;
+    fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: {'X-Requested-With': 'XMLHttpRequest'}
+    })
+    .then(() => {
+        const card = form.closest('.reply-card');
+        if (!card) return;
+        card.style.opacity = '0';
+        setTimeout(() => card.remove(), 200);
+    })
+    .catch(console.error);
+}
+
+/* === EDIT MESSAGE === */
+function openEdit(id) {
+    const wrapper = document.querySelector('.message[data-id="' + id + '"]');
+    if (!wrapper) return;
+    const content = wrapper.querySelector('.content');
+    const form = wrapper.querySelector('#edit-form-' + id);
+    if (!form || !content) return;
+    content.style.display = 'none';
+    form.style.display = 'block';
+    const textarea = form.querySelector('.edit-textarea');
+    if (textarea) {
+        textarea.focus();
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+    }
+}
+
+function closeEdit(id) {
+    const wrapper = document.querySelector('.message[data-id="' + id + '"]');
+    if (!wrapper) return;
+    const content = wrapper.querySelector('.content');
+    const form = wrapper.querySelector('#edit-form-' + id);
+    if (!form || !content) return;
+    form.style.display = 'none';
+    content.style.display = 'block';
+}
+
+/* === AUTO EXPAND EDIT TEXTAREA === */
+document.addEventListener('input', e => {
+    if (!e.target.classList.contains('edit-textarea')) return;
+    e.target.style.height = 'auto';
+    e.target.style.height = e.target.scrollHeight + 'px';
+});
+
+/* === EDIT SUBMIT === */
+document.addEventListener('submit', e => {
+    const form = e.target.closest('.shoutbox-edit-form');
+    if (!form) return;
+    e.preventDefault();
+    fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: {'X-Requested-With': 'XMLHttpRequest'}
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (!data.message) return;
+        const id = data.message.id;
+        const content = document.querySelector('.message[data-id="' + id + '"] .content');
+        if (content) {
+            content.innerHTML = data.message.message;
+            closeEdit(id);
+        }
+    })
+    .catch(console.error);
+});
+
+/* === REPLY EDIT === */
+function openReplyEdit(id) {
+    document.getElementById('reply-edit-form-' + id).style.display = 'block';
+}
+function closeReplyEdit(id) {
+    document.getElementById('reply-edit-form-' + id).style.display = 'none';
+}
+
+/* === TOGGLE REPLY FORM === */
+function toggleReplyForm(id) {
+    const form = document.getElementById('reply-form-' + id);
+    if (!form) return;
+    const open = form.style.display === 'block';
+    document.querySelectorAll('.reply-form').forEach(f => f.style.display = 'none');
+    if (!open) {
+        form.style.display = 'block';
+        form.querySelector('textarea')?.focus();
+    }
+}
+
+/* === TYPING USERS POLLING === */
+function loadTypingUsers() {
+    fetch('/shoutbox/typing-users')
+    .then(r => r.json())
+    .then(users => {
+        const box = document.getElementById('typing-users');
+        const indicator = document.getElementById('typing-indicator');
+        if (!users.length) {
+            box.innerHTML = '';
+            indicator.style.opacity = '0';
+            return;
+        }
+        indicator.style.opacity = '1';
+        box.innerHTML = users.length === 1
+            ? users[0] + ' is typing'
+            : users.join(', ') + ' are typing';
+    });
+}
+setInterval(loadTypingUsers, 2000);
+
+</script>
+
+@endpush
+
+@endif
 

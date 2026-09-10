@@ -48,6 +48,34 @@
 
 </div>
 
+{{-- =========================================================
+     SEARCH + QUICK LINKS
+========================================================== --}}
+
+<div class="d-flex flex-wrap gap-3 mb-4 align-items-center">
+
+    <form method="GET" action="{{ route('forum.search') }}" class="forum-search-bar">
+        <input
+            type="text"
+            name="q"
+            class="form-control"
+            placeholder="Search forum..."
+        >
+        <button type="submit" class="btn btn-search">
+            <i class="bi bi-search"></i>
+        </button>
+    </form>
+
+    @auth
+        <a href="{{ route('forum.my-topics') }}"
+           class="btn forum-sort-btn">
+            <i class="bi bi-person me-1"></i>
+            My Topics
+        </a>
+    @endauth
+
+</div>
+
 
 {{-- =========================================================
      ACTIVE CATEGORIES
