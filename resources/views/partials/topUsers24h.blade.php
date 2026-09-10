@@ -7,17 +7,22 @@
 <h2 class="accordion-header">
 
 <button class="accordion-button modern-lb-button collapsed-show text-light"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#lbLeaderboards">
 
-    <span class="me-2">🏆</span>
+        type="button"
 
-    Community Leaderboards
+        data-bs-toggle="collapse"
 
-    <span class="modern-lb-subtitle ms-2">
-        (Last 24 Hours)
-    </span>
+        data-bs-target="#lbLeaderboards">
+
+    <span class="me-2">🏆</span>
+
+    Community Leaderboards
+
+    <span class="modern-lb-subtitle ms-2">
+
+        (Last 24 Hours)
+
+    </span>
 
 </button>
 
@@ -30,6 +35,7 @@
 <div class="row g-2">
 
 {{-- ================= UPLOADERS ================= --}}
+
 <div class="col-xl-4 col-md-6">
 
 <div class="card modern-lb-card border-0 h-100">
@@ -59,7 +65,8 @@ Top Uploaders
 </span>
 
 <a href="{{ route('profile.show',$user->id) }}"
-   class="modern-lb-user {{ $isMe?'text-warning':'text-light' }}">
+
+   class="modern-lb-user {{ $isMe?'text-warning':'text-light' }}">
 
 {{ $user->name }} @if($isMe) 👑 @endif
 
@@ -105,19 +112,19 @@ No uploads recorded.
 
 <span class="ms-2 {{ $uploadMovementClass }}" title="Compared to yesterday">
 
-    @if($uploadMovement > 0)
+    @if($uploadMovement > 0)
 
-        ↑ +{{ $uploadMovement }}
+        ↑ +{{ $uploadMovement }}
 
-    @elseif($uploadMovement < 0)
+    @elseif($uploadMovement < 0)
 
-        ↓ {{ $uploadMovement }}
+        ↓ {{ $uploadMovement }}
 
-    @else
+    @else
 
-        —
+        —
 
-    @endif
+    @endif
 
 </span>
 
@@ -162,6 +169,7 @@ Top {{ $uploadPercentile }}%
 </div>
 
 {{-- ================= DOWNLOADERS ================= --}}
+
 <div class="col-xl-4 col-md-6">
 
 <div class="card modern-lb-card border-0 h-100">
@@ -191,7 +199,8 @@ Top Downloaders
 </span>
 
 <a href="{{ route('profile.show',$user->id) }}"
-   class="modern-lb-user {{ $isMe?'text-warning':'text-light' }}">
+
+   class="modern-lb-user {{ $isMe?'text-warning':'text-light' }}">
 
 {{ $user->name }} @if($isMe) 👑 @endif
 
@@ -237,19 +246,19 @@ No downloads recorded.
 
 <span class="ms-2 {{ $downloadMovementClass }}" title="Compared to yesterday">
 
-    @if($downloadMovement > 0)
+    @if($downloadMovement > 0)
 
-        ↑ +{{ $downloadMovement }}
+        ↑ +{{ $downloadMovement }}
 
-    @elseif($downloadMovement < 0)
+    @elseif($downloadMovement < 0)
 
-        ↓ {{ $downloadMovement }}
+        ↓ {{ $downloadMovement }}
 
-    @else
+    @else
 
-        —
+        —
 
-    @endif
+    @endif
 
 </span>
 
@@ -294,6 +303,7 @@ Top {{ $downloadPercentile }}%
 </div>
 
 {{-- ================= SEEDERS ================= --}}
+
 <div class="col-xl-4 col-md-6">
 
 <div class="card modern-lb-card border-0 h-100">
@@ -323,7 +333,8 @@ Top Seeders
 </span>
 
 <a href="{{ route('profile.show',$user->id) }}"
-   class="modern-lb-user {{ $isMe?'text-warning':'text-light' }}">
+
+   class="modern-lb-user {{ $isMe?'text-warning':'text-light' }}">
 
 {{ $user->name }} @if($isMe) 👑 @endif
 
@@ -416,306 +427,302 @@ Top {{ $seederPercentile }}%
 </div>
 
 <style>
+/* =========================================================
+   FILEIPLAY COMMUNITY LEADERBOARDS
+   News / Poll matched typography
+   Maximum font size: 14px
+========================================================= */
 
-/* =========================================
-   ACCORDION
-========================================= */
-
-.modern-lb-accordion{
-
-    background:
-        rgba(40,40,40,.35);
-
-    backdrop-filter:blur(8px);
-
-    border-radius:18px;
-
-    border:
-        1px solid rgba(255,255,255,.06);
+.modern-lb-accordion {
+    overflow: hidden;
+    background: linear-gradient(
+        135deg,
+        rgba(22, 32, 51, .95),
+        rgba(15, 23, 42, .84)
+    );
+    border: 1px solid var(--ui-border);
+    border-radius: 1rem;
+    box-shadow: 0 10px 26px rgba(0,0,0,.16);
 }
 
-.modern-lb-button{
-
-    font-size:1rem;
-
-    font-weight:700;
-
-    padding:14px 18px;
-
-    box-shadow:none !important;
+.modern-lb-button {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 1rem 1.15rem;
+    color: #f1f5f9 !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    font-size: 14px;
+    font-weight: 700;
 }
 
-.modern-lb-button:not(.collapsed){
-
-    background:transparent;
-
-    color:#fff;
+.modern-lb-button::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 15px;
+    bottom: 15px;
+    width: 3px;
+    background: linear-gradient(
+        180deg,
+        var(--ui-accent),
+        var(--ui-accent-strong)
+    );
+    border-radius: 0 4px 4px 0;
 }
 
-.modern-lb-button::after{
-
-    filter:invert(1);
+.modern-lb-button::after {
+    filter: invert(1);
+    opacity: .55;
 }
 
-.modern-lb-subtitle{
-
-    font-size:.82rem;
-
-    color:rgba(255,255,255,.5);
-
-    font-weight:500;
+.modern-lb-subtitle {
+    color: #8fa3b7 !important;
+    font-size: 12px;
+    font-weight: 600;
 }
 
-/* =========================================
-   CARD
-========================================= */
-
-.modern-lb-card{
-
-    background:
-        rgba(255,255,255,.03);
-
-    backdrop-filter:blur(10px);
-
-    border-radius:16px;
-
-    border:
-        1px solid rgba(255,255,255,.05);
-
-    overflow:hidden;
+/* Cards */
+.modern-lb-card {
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        rgba(22, 32, 51, .90),
+        rgba(15, 23, 42, .78)
+    ) !important;
+    border: 1px solid var(--ui-border) !important;
+    border-radius: .85rem !important;
+    box-shadow: 0 8px 22px rgba(0,0,0,.14);
+    transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
 
-.modern-lb-header{
-
-    background:
-        rgba(255,255,255,.02);
-
-    font-size:.92rem;
-
-    font-weight:700;
-
-    padding:12px 16px;
-
-    border-bottom:
-        1px solid rgba(255,255,255,.04);
+.modern-lb-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    background: rgba(255,255,255,.07);
+    pointer-events: none;
 }
 
-/* =========================================
-   LIST ITEMS
-========================================= */
-
-.modern-lb-item{
-
-    background:transparent !important;
-
-    border-color:
-        rgba(255,255,255,.04) !important;
-
-    padding:10px 14px;
-
-    min-height:auto;
-
-    line-height:1.2;
+.modern-lb-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(99,210,198,.22) !important;
+    box-shadow: 0 12px 28px rgba(0,0,0,.20);
 }
 
-.modern-lb-item:hover{
-
-    background:
-        rgba(255,255,255,.03) !important;
+/* Card header */
+.modern-lb-header {
+    position: relative;
+    z-index: 2;
+    padding: .75rem .9rem !important;
+    color: #dce7f2 !important;
+    background: rgba(99,210,198,.035) !important;
+    border-bottom: 1px solid rgba(148,163,184,.08) !important;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: .01em;
 }
 
-.modern-rank-badge{
-
-    font-size:.7rem;
-
-    padding:4px 6px;
-
-    min-width:28px;
+.modern-lb-header i {
+    color: var(--ui-accent);
 }
 
-.modern-lb-user{
-
-    text-decoration:none;
-
-    font-size:1rem;
-
-    font-weight:600;
-
-    white-space:nowrap;
-
-    overflow:hidden;
-
-    text-overflow:ellipsis;
-
-    transition:.2s ease;
+/* List */
+.modern-lb-item {
+    position: relative;
+    z-index: 1;
+    min-height: 0;
+    padding: .7rem .8rem;
+    color: #cbd5e1;
+    background: transparent !important;
+    border-color: rgba(148,163,184,.065) !important;
+    line-height: 1.3;
+    transition: background 160ms ease, border-color 160ms ease;
 }
 
-.modern-lb-user:hover{
-
-    opacity:.85;
+.modern-lb-item:hover {
+    background: rgba(99,210,198,.035) !important;
 }
 
-.modern-lb-value{
-
-    font-size:.95rem;
-
-    font-weight:700;
-
-    white-space:nowrap;
+.modern-rank-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 26px;
+    padding: .2rem .4rem !important;
+    color: #aab8c7 !important;
+    background: rgba(148,163,184,.07) !important;
+    border: 1px solid rgba(148,163,184,.10);
+    border-radius: .4rem;
+    font-size: 12px;
+    font-weight: 700;
 }
 
-.modern-extra-info{
-
-    font-size:.95rem;
-
-    line-height:1.3;
+.modern-lb-item:first-child .modern-rank-badge {
+    border-color: rgba(99,210,198,.18);
 }
 
-/* =========================================
-   EMPTY / SEPARATOR
-========================================= */
-
-.modern-empty-item{
-
-    background:transparent !important;
-
-    border-color:
-        rgba(255,255,255,.04) !important;
-
-    color:rgba(255,255,255,.45);
-
-    text-align:center;
-
-    padding:12px;
-
-    font-size:.82rem;
+.modern-lb-user {
+    min-width: 0;
+    color: #dce7f2 !important;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color 160ms ease;
 }
 
-.modern-separator{
-
-    background:transparent !important;
-
-    border-color:
-        rgba(255,255,255,.04) !important;
-
-    text-align:center;
-
-    color:rgba(255,255,255,.2);
-
-    padding:4px 0;
-
-    font-size:.7rem;
+.modern-lb-user:hover {
+    color: var(--ui-accent) !important;
 }
 
-/* =========================================
-   HIGHLIGHT
-========================================= */
-
-.lb-highlight{
-
-    background:
-        linear-gradient(
-            90deg,
-            rgba(255,193,7,.12),
-            rgba(255,193,7,.03)
-        ) !important;
-
-    border-left:
-        2px solid #ffc107 !important;
-
-    box-shadow:
-        inset 0 0 10px rgba(255,193,7,.08);
+.modern-lb-value {
+    flex-shrink: 0;
+    color: #9db2c5 !important;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
 }
 
-/* =========================================
-   MOVEMENT COLORS
-========================================= */
-
-.move-big-up{
-
-    color:#00ff87;
-
-    font-weight:bold;
+.modern-extra-info {
+    min-width: 0;
+    color: var(--ui-accent) !important;
+    font-size: 12px;
+    font-weight: 650;
+    line-height: 1.4;
 }
 
-.move-up{
-
-    color:#28ff7a;
+/* Current user */
+.lb-highlight {
+    background: linear-gradient(
+        90deg,
+        rgba(99,210,198,.085),
+        rgba(99,210,198,.025)
+    ) !important;
+    border-left: 2px solid var(--ui-accent) !important;
+    box-shadow: inset 0 0 12px rgba(99,210,198,.035);
 }
 
-.move-small-up{
-
-    color:#7dffb3;
+.lb-highlight .modern-lb-value {
+    color: var(--ui-accent) !important;
 }
 
-.move-down{
-
-    color:#ff6b6b;
+/* Empty / separator */
+.modern-empty-item {
+    padding: .7rem !important;
+    color: #71859b !important;
+    background: transparent !important;
+    border-color: rgba(148,163,184,.065) !important;
+    text-align: center;
+    font-size: 12px;
 }
 
-.move-big-down{
-
-    color:#ff2e2e;
-
-    font-weight:bold;
+.modern-separator {
+    padding: .15rem 0 !important;
+    color: #52677d !important;
+    background: transparent !important;
+    border-color: rgba(148,163,184,.05) !important;
+    text-align: center;
+    font-size: 11px;
 }
 
-/* =========================================
-   MOBILE
-========================================= */
+/* Movement */
+.move-big-up,
+.move-up,
+.move-small-up {
+    color: var(--ui-accent) !important;
+    font-weight: 700;
+}
 
-@media(max-width:768px){
+.move-big-down,
+.move-down {
+    color: #e58b93 !important;
+    font-weight: 700;
+}
 
-    .modern-lb-button{
+.modern-extra-info .text-warning,
+.modern-extra-info .text-info {
+    color: inherit !important;
+}
 
-        font-size:.92rem;
+.lb-highlight .text-info {
+    color: #8fb8bd !important;
+}
 
-        padding:12px 14px;
+/* Prevent Bootstrap utility classes from creating tiny text */
+.modern-lb-accordion .small,
+.modern-lb-accordion small {
+    font-size: 12px !important;
+}
+
+/* Mobile */
+@media (max-width: 767.98px) {
+    .modern-lb-button {
+        padding: .85rem .9rem;
+        font-size: 14px;
     }
 
-    .modern-lb-header{
-
-        font-size:.86rem;
-
-        padding:10px 14px;
+    .modern-lb-subtitle {
+        margin-left: .4rem !important;
+        font-size: 12px;
     }
 
-    .modern-lb-item{
-
-        padding:9px 12px;
+    .modern-lb-header {
+        padding: .7rem .75rem !important;
+        font-size: 14px;
     }
 
-    .modern-lb-user{
-
-        font-size:.82rem;
+    .modern-lb-item {
+        padding: .65rem .7rem !important;
     }
 
-    .modern-lb-value{
-
-        font-size:.76rem;
+    .modern-lb-user {
+        font-size: 14px;
     }
 
+    .modern-lb-value {
+        font-size: 13px;
+    }
+
+    .modern-extra-info {
+        font-size: 12px;
+    }
+
+    .modern-rank-badge {
+        min-width: 27px;
+        height: 25px;
+        font-size: 12px;
+    }
 }
-
 </style>
 
 <script>
 
 document.addEventListener("DOMContentLoaded", function(){
 
-    const key = "leaderboardAccordionState";
+    const key = "leaderboardAccordionState";
 
-    const collapse = document.getElementById("lbLeaderboards");
+    const collapse = document.getElementById("lbLeaderboards");
 
-    if(localStorage.getItem(key) === "closed"){
+    if(localStorage.getItem(key) === "closed"){
 
-        collapse.classList.remove("show");
+        collapse.classList.remove("show");
 
-    }
+    }
 
-    collapse.addEventListener("shown.bs.collapse", () => localStorage.setItem(key,"open"));
+    collapse.addEventListener("shown.bs.collapse", () => localStorage.setItem(key,"open"));
 
-    collapse.addEventListener("hidden.bs.collapse", () => localStorage.setItem(key,"closed"));
+    collapse.addEventListener("hidden.bs.collapse", () => localStorage.setItem(key,"closed"));
 
 });
 

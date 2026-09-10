@@ -17,7 +17,7 @@
 
                 <i class="bi bi-newspaper me-2"></i>
 
-                LASTFILES NEWS
+                FileIplay NEWS
 
             </div>
 

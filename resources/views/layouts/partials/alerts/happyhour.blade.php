@@ -1,26 +1,23 @@
 @if(!empty($currentHappyHour) && $currentHappyHour->isActive())
 
-<div id="happy-hour-notice" class="happy-hour-notice mt-2">
+<div id="happy-hour-notice" class="happy-hour-notice mb-3 mt-2">
 
     <div class="happy-hour-glow"></div>
 
     <div class="happy-hour-inner">
 
         {{-- LEFT --}}
+
         <div class="happy-hour-left">
 
             <div class="happy-hour-icon">
-
                 🎉
-
             </div>
 
             <div class="happy-hour-text">
 
                 <div class="happy-hour-title">
-
                     {{ $currentHappyHour->theme }} Happy Hour
-
                 </div>
 
                 <div class="happy-hour-details">
@@ -28,9 +25,7 @@
                     {{ $currentHappyHour->upload_multiplier }}x Upload
 
                     @if($currentHappyHour->free_download)
-
                         • Free Downloads
-
                     @endif
 
                 </div>
@@ -40,18 +35,15 @@
         </div>
 
         {{-- RIGHT --}}
+
         <div class="happy-hour-right">
 
             <div class="happy-hour-timer-label">
-
                 Ends In
-
             </div>
 
             <div class="happy-hour-timer">
-
                 ⏰ <span id="happy-hour-countdown"></span>
-
             </div>
 
         </div>
@@ -59,11 +51,11 @@
     </div>
 
     {{-- Progress --}}
+
     <div class="happy-hour-progress-wrapper">
 
         <div id="happy-hour-progress"
              class="happy-hour-progress-bar">
-
         </div>
 
     </div>
@@ -71,248 +63,170 @@
 </div>
 
 <style>
-
 /* =========================================
-   MAIN
+   FILEIPLAY HAPPY HOUR
+   DARK GLASS / TEAL FORUM STYLE
 ========================================= */
 
-.happy-hour-notice{
+.happy-hour-notice {
+    position: sticky;
+    top: 10px;
+    z-index: 1000;
+    overflow: hidden;
+    max-width: 920px;
+    margin: 0 auto;
+    padding: .85rem 1rem;
 
-    position:sticky;
+    border: 1px solid var(--ui-border, rgba(255,255,255,.08));
+    border-left: 3px solid var(--ui-accent, #22d3ee);
+    border-radius: .85rem;
 
-    top:10px;
+    background: linear-gradient(
+        135deg,
+        rgba(22,32,51,.95),
+        rgba(15,23,42,.84)
+    );
 
-    z-index:1000;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 
-    overflow:hidden;
+    box-shadow: 0 10px 28px rgba(0,0,0,.18);
 
-    max-width:920px;
-
-    margin:0 auto;
-
-    padding:1rem 1.2rem;
-
-    border-radius:22px;
-
-    background:
-        linear-gradient(
-            135deg,
-            rgba(22,163,74,.22),
-            rgba(21,128,61,.14)
-        );
-
-    border:
-        1px solid rgba(255,255,255,.08);
-
-    backdrop-filter:blur(12px);
-
-    box-shadow:
-        0 12px 30px rgba(0,0,0,.18);
-
-    transition:
-        all .3s ease;
+    transition: all .3s ease;
 }
 
-/* =========================================
-   GLOW
-========================================= */
+.happy-hour-glow {
+    position: absolute;
+    top: -80px;
+    right: -80px;
+    width: 190px;
+    height: 190px;
+    border-radius: 50%;
 
-.happy-hour-glow{
+    background: radial-gradient(
+        circle,
+        rgba(34,211,238,.12),
+        transparent 70%
+    );
 
-    position:absolute;
-
-    top:-90px;
-    right:-90px;
-
-    width:220px;
-    height:220px;
-
-    border-radius:50%;
-
-    background:
-        radial-gradient(
-            circle,
-            rgba(34,197,94,.22),
-            transparent 70%
-        );
-
-    pointer-events:none;
-}
-
-/* =========================================
-   COMPACT
-========================================= */
-
-.happy-hour-notice.compact{
-
-    padding:.65rem 1rem;
-}
-
-.happy-hour-notice.compact .happy-hour-details,
-.happy-hour-notice.compact .happy-hour-progress-wrapper,
-.happy-hour-notice.compact .happy-hour-timer-label{
-
-    display:none;
-}
-
-.happy-hour-notice.compact .happy-hour-title{
-
-    font-size:.92rem;
-}
-
-.happy-hour-notice.compact .happy-hour-timer{
-
-    font-size:.82rem;
+    pointer-events: none;
 }
 
 /* =========================================
    LAYOUT
 ========================================= */
 
-.happy-hour-inner{
+.happy-hour-inner {
+    position: relative;
+    z-index: 2;
 
-    position:relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
-    z-index:2;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:space-between;
-
-    gap:1rem;
-
-    flex-wrap:wrap;
+    gap: 1rem;
+    flex-wrap: wrap;
 }
 
-.happy-hour-left{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:.9rem;
+.happy-hour-left {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    min-width: 0;
 }
 
-.happy-hour-right{
-
-    text-align:right;
+.happy-hour-right {
+    text-align: right;
 }
 
 /* =========================================
    ICON
 ========================================= */
 
-.happy-hour-icon{
+.happy-hour-icon {
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
 
-    width:46px;
-    height:46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-    border-radius:16px;
+    border: 1px solid var(--ui-border, rgba(255,255,255,.08));
+    border-radius: .7rem;
 
-    display:flex;
+    background: rgba(34,211,238,.08);
 
-    align-items:center;
-    justify-content:center;
+    box-shadow: inset 0 0 12px rgba(34,211,238,.05);
 
-    background:
-        rgba(255,255,255,.1);
-
-    font-size:1.25rem;
-
-    box-shadow:
-        inset 0 0 12px rgba(255,255,255,.12);
+    font-size: 1.1rem;
 }
 
 /* =========================================
    TEXT
 ========================================= */
 
-.happy-hour-title{
-
-    color:#fff;
-
-    font-size:1rem;
-
-    font-weight:700;
-
-    line-height:1.2;
+.happy-hour-title {
+    color: #f8fafc;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.25;
 }
 
-.happy-hour-details{
-
-    margin-top:3px;
-
-    color:rgba(255,255,255,.72);
-
-    font-size:.84rem;
-
-    font-weight:500;
+.happy-hour-details {
+    margin-top: 3px;
+    color: rgba(226,232,240,.72);
+    font-size: 12px;
+    font-weight: 500;
 }
 
 /* =========================================
    TIMER
 ========================================= */
 
-.happy-hour-timer-label{
+.happy-hour-timer-label {
+    margin-bottom: 2px;
 
-    color:rgba(255,255,255,.55);
+    color: rgba(226,232,240,.55);
 
-    font-size:.72rem;
+    font-size: 11px;
+    font-weight: 600;
 
-    text-transform:uppercase;
-
-    letter-spacing:.5px;
-
-    margin-bottom:2px;
+    text-transform: uppercase;
+    letter-spacing: .5px;
 }
 
-.happy-hour-timer{
-
-    color:#fff;
-
-    font-size:.92rem;
-
-    font-weight:700;
+.happy-hour-timer {
+    color: var(--ui-accent, #22d3ee);
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
 }
 
 /* =========================================
    PROGRESS
 ========================================= */
 
-.happy-hour-progress-wrapper{
+.happy-hour-progress-wrapper {
+    position: relative;
+    z-index: 2;
 
-    position:relative;
+    overflow: hidden;
 
-    z-index:2;
+    height: 5px;
+    margin-top: .75rem;
 
-    overflow:hidden;
-
-    height:8px;
-
-    margin-top:1rem;
-
-    border-radius:999px;
-
-    background:
-        rgba(255,255,255,.08);
+    border-radius: 999px;
+    background: rgba(255,255,255,.07);
 }
 
-.happy-hour-progress-bar{
+.happy-hour-progress-bar {
+    height: 100%;
+    width: 100%;
 
-    height:100%;
+    border-radius: 999px;
 
-    width:100%;
-
-    border-radius:999px;
-
-    background:
-        linear-gradient(
-            90deg,
-            #22c55e,
-            #4ade80
-        );
+    background: var(--ui-accent, #22d3ee);
 
     transition:
         width 1s linear,
@@ -320,51 +234,80 @@
 }
 
 /* =========================================
+   COMPACT
+========================================= */
+
+.happy-hour-notice.compact {
+    padding: .55rem .85rem;
+}
+
+.happy-hour-notice.compact .happy-hour-details,
+.happy-hour-notice.compact .happy-hour-progress-wrapper,
+.happy-hour-notice.compact .happy-hour-timer-label {
+    display: none;
+}
+
+.happy-hour-notice.compact .happy-hour-title {
+    font-size: 13px;
+}
+
+.happy-hour-notice.compact .happy-hour-timer {
+    font-size: 12px;
+}
+
+/* =========================================
+   HOVER
+========================================= */
+
+.happy-hour-notice:hover {
+    border-left-color: var(--ui-accent-strong, #67e8f9);
+    box-shadow: 0 12px 30px rgba(0,0,0,.22);
+}
+
+/* =========================================
    MOBILE
 ========================================= */
 
-@media(max-width:768px){
+@media (max-width: 768px) {
 
-    .happy-hour-notice{
-
-        border-radius:18px;
-
-        padding:.9rem 1rem;
+    .happy-hour-notice {
+        top: 6px;
+        border-radius: .75rem;
+        padding: .75rem .85rem;
     }
 
-    .happy-hour-inner{
-
-        align-items:flex-start;
+    .happy-hour-inner {
+        align-items: flex-start;
     }
 
-    .happy-hour-right{
-
-        width:100%;
-
-        text-align:left;
+    .happy-hour-left {
+        width: 100%;
     }
 
-    .happy-hour-title{
-
-        font-size:.95rem;
+    .happy-hour-right {
+        width: 100%;
+        text-align: left;
     }
 
-    .happy-hour-details{
-
-        font-size:.8rem;
+    .happy-hour-title {
+        font-size: 14px;
     }
 
-    .happy-hour-timer{
-
-        font-size:.85rem;
+    .happy-hour-details {
+        font-size: 12px;
     }
 
+    .happy-hour-timer {
+        font-size: 13px;
+    }
+
+    .happy-hour-progress-wrapper {
+        margin-top: .65rem;
+    }
 }
-
 </style>
 
 <script>
-
 document.addEventListener("DOMContentLoaded", () => {
 
     const notice = document.getElementById("happy-hour-notice");
@@ -372,11 +315,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!notice) return;
 
     const countdownEl = document.getElementById("happy-hour-countdown");
-
     const progressEl = document.getElementById("happy-hour-progress");
 
     const startTime = new Date("{{ $currentHappyHour->start_at->toIso8601String() }}").getTime();
-
     const endTime = new Date("{{ $currentHappyHour->end_at->toIso8601String() }}").getTime();
 
     const totalDuration = endTime - startTime;
@@ -388,23 +329,16 @@ document.addEventListener("DOMContentLoaded", () => {
     ========================================= */
 
     function shrinkNotice() {
-
         notice.classList.add("compact");
-
     }
 
     function expandNotice() {
-
         notice.classList.remove("compact");
-
     }
 
     function scheduleShrink() {
-
         clearTimeout(shrinkTimer);
-
         shrinkTimer = setTimeout(shrinkNotice, 3000);
-
     }
 
     /* =========================================
@@ -414,34 +348,35 @@ document.addEventListener("DOMContentLoaded", () => {
     function updateCountdown() {
 
         const now = Date.now();
-
         const remaining = endTime - now;
 
         if (remaining <= 0) {
-
             notice.remove();
-
             clearInterval(interval);
-
             return;
-
         }
 
-        const hours = Math.floor(remaining / (1000 * 60 * 60));
+        const hours = Math.floor(
+            remaining / (1000 * 60 * 60)
+        );
 
-        const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+        const minutes = Math.floor(
+            (remaining % (1000 * 60 * 60)) / (1000 * 60)
+        );
 
-        const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+        const seconds = Math.floor(
+            (remaining % (1000 * 60)) / 1000
+        );
 
         if (countdownEl) {
-
-            countdownEl.textContent = `${hours}h ${minutes}m ${seconds}s`;
-
+            countdownEl.textContent =
+                `${hours}h ${minutes}m ${seconds}s`;
         }
 
         if (progressEl) {
 
-            const percent = (remaining / totalDuration) * 100;
+            const percent =
+                (remaining / totalDuration) * 100;
 
             progressEl.style.width = percent + "%";
 
@@ -458,12 +393,9 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
 
                 progressEl.style.background =
-                    "linear-gradient(90deg,#22c55e,#4ade80)";
-
+                    "var(--ui-accent, #22d3ee)";
             }
-
         }
-
     }
 
     const interval = setInterval(updateCountdown, 1000);
@@ -479,7 +411,6 @@ document.addEventListener("DOMContentLoaded", () => {
     notice.addEventListener("mouseenter", () => {
 
         expandNotice();
-
         clearTimeout(shrinkTimer);
 
     });
@@ -491,7 +422,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 });
-
 </script>
 
 @endif

@@ -17,7 +17,7 @@
 
                 <div class="news-kicker">
 
-                    LASTFILES UPDATES
+                    FileIplay UPDATES
 
                 </div>
 

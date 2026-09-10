@@ -8,25 +8,17 @@
             <div class="d-flex align-items-center gap-2">
 
                 <div class="stats-header-icon">
-
                     <i class="bi bi-bar-chart-fill"></i>
-
                 </div>
 
                 <div>
-
                     <div class="stats-title">
-
                         Tracker Statistics
-
                     </div>
 
                     <div class="stats-subtitle">
-
                         Live community activity overview
-
                     </div>
-
                 </div>
 
             </div>
@@ -39,25 +31,21 @@
             <!-- Torrents -->
             <div class="col-12 col-sm-6 col-lg-4 col-xl-2 d-flex">
 
-                <div class="stat-card stat-primary flex-fill">
+                <div class="stat-card flex-fill">
 
                     <div class="stat-icon">
-
                         <i class="bi bi-server"></i>
-
                     </div>
 
                     <div class="stat-label">
-
                         Torrents
-
                     </div>
 
-                    <div class="stat-value count-up"
-                         data-value="{{ $torrentCount }}">
-
+                    <div
+                        class="stat-value count-up"
+                        data-value="{{ $torrentCount }}"
+                    >
                         0
-
                     </div>
 
                 </div>
@@ -67,25 +55,21 @@
             <!-- Active Torrents -->
             <div class="col-12 col-sm-6 col-lg-4 col-xl-2 d-flex">
 
-                <div class="stat-card stat-info flex-fill">
+                <div class="stat-card flex-fill">
 
                     <div class="stat-icon">
-
                         <i class="bi bi-gear-fill"></i>
-
                     </div>
 
                     <div class="stat-label">
-
                         Active Torrents
-
                     </div>
 
-                    <div class="stat-value count-up"
-                         data-value="{{ $torrentActive }}">
-
+                    <div
+                        class="stat-value count-up"
+                        data-value="{{ $torrentActive }}"
+                    >
                         0
-
                     </div>
 
                 </div>
@@ -95,25 +79,21 @@
             <!-- Users -->
             <div class="col-12 col-sm-6 col-lg-4 col-xl-2 d-flex">
 
-                <div class="stat-card stat-danger flex-fill">
+                <div class="stat-card flex-fill">
 
                     <div class="stat-icon">
-
                         <i class="bi bi-people-fill"></i>
-
                     </div>
 
                     <div class="stat-label">
-
                         Users
-
                     </div>
 
-                    <div class="stat-value count-up"
-                         data-value="{{ $userCount }}">
-
+                    <div
+                        class="stat-value count-up"
+                        data-value="{{ $userCount }}"
+                    >
                         0
-
                     </div>
 
                 </div>
@@ -123,25 +103,21 @@
             <!-- Visitors -->
             <div class="col-12 col-sm-6 col-lg-4 col-xl-2 d-flex">
 
-                <div class="stat-card stat-success flex-fill">
+                <div class="stat-card flex-fill">
 
                     <div class="stat-icon">
-
                         <i class="bi bi-clock-history"></i>
-
                     </div>
 
                     <div class="stat-label">
-
                         Visitors 24h
-
                     </div>
 
-                    <div class="stat-value count-up"
-                         data-value="{{ $activeUsers24hCount }}">
-
+                    <div
+                        class="stat-value count-up"
+                        data-value="{{ $activeUsers24hCount }}"
+                    >
                         0
-
                     </div>
 
                 </div>
@@ -151,25 +127,21 @@
             <!-- Seeders -->
             <div class="col-12 col-sm-6 col-lg-4 col-xl-2 d-flex">
 
-                <div class="stat-card stat-warning flex-fill">
+                <div class="stat-card flex-fill">
 
                     <div class="stat-icon">
-
                         <i class="bi bi-cloud-upload-fill"></i>
-
                     </div>
 
                     <div class="stat-label">
-
                         Active Seeders
-
                     </div>
 
-                    <div class="stat-value count-up"
-                         data-value="{{ $uniqueSeeders }}">
-
+                    <div
+                        class="stat-value count-up"
+                        data-value="{{ $uniqueSeeders }}"
+                    >
                         0
-
                     </div>
 
                 </div>
@@ -179,25 +151,21 @@
             <!-- Leechers -->
             <div class="col-12 col-sm-6 col-lg-4 col-xl-2 d-flex">
 
-                <div class="stat-card stat-secondary flex-fill">
+                <div class="stat-card flex-fill">
 
                     <div class="stat-icon">
-
                         <i class="bi bi-cloud-download-fill"></i>
-
                     </div>
 
                     <div class="stat-label">
-
                         Active Leechers
-
                     </div>
 
-                    <div class="stat-value count-up"
-                         data-value="{{ $uniqueLeechers }}">
-
+                    <div
+                        class="stat-value count-up"
+                        data-value="{{ $uniqueLeechers }}"
+                    >
                         0
-
                     </div>
 
                 </div>
@@ -209,6 +177,7 @@
     </div>
 
 </div>
+
 
 <script>
 
@@ -222,7 +191,10 @@ function animateCount(el) {
 
     let count = 0;
 
-    const increment = Math.max(1, Math.floor(target / 100));
+    const increment = Math.max(
+        1,
+        Math.floor(target / 100)
+    );
 
     const update = () => {
 
@@ -246,6 +218,7 @@ function animateCount(el) {
 
 }
 
+
 /* =========================================
    TRIGGER WHEN VISIBLE
 ========================================= */
@@ -258,7 +231,10 @@ function handleScroll() {
 
             const rect = el.getBoundingClientRect();
 
-            if (rect.top < window.innerHeight && rect.bottom >= 0) {
+            if (
+                rect.top < window.innerHeight &&
+                rect.bottom >= 0
+            ) {
 
                 el.classList.add("counted");
 
@@ -278,307 +254,342 @@ window.addEventListener("load", handleScroll);
 
 </script>
 
+
 <style>
 
 /* =========================================
    WRAPPER
 ========================================= */
 
-.stats-wrapper{
+.stats-wrapper {
 
-    position:relative;
+    position: relative;
 
-    overflow:hidden;
+    overflow: hidden;
 
-    padding:1.4rem;
-
-    border-radius:28px;
+    padding: 1rem;
 
     background:
         linear-gradient(
-            145deg,
-            rgba(255,255,255,.045),
-            rgba(255,255,255,.02)
+            135deg,
+            rgba(22, 32, 51, .95),
+            rgba(15, 23, 42, .84)
         );
 
-    border:
-        1px solid rgba(255,255,255,.06);
+    border: 1px solid var(--ui-border);
 
-    backdrop-filter:blur(14px);
+    border-radius: .9rem;
 
     box-shadow:
-        0 14px 40px rgba(0,0,0,.22);
+        0 10px 28px rgba(0, 0, 0, .24);
 }
+
+.stats-wrapper::before {
+
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    top: 0;
+    bottom: 0;
+
+    width: 3px;
+
+    background:
+        linear-gradient(
+            180deg,
+            var(--ui-accent),
+            var(--ui-accent-strong)
+        );
+
+    opacity: .9;
+}
+
 
 /* =========================================
    HEADER
 ========================================= */
 
-.stats-header{
+.stats-header {
 
-    display:flex;
+    display: flex;
 
-    align-items:center;
+    align-items: center;
 
-    justify-content:space-between;
+    justify-content: space-between;
 
-    margin-bottom:1.4rem;
+    margin-bottom: 1rem;
 
-    padding-bottom:1rem;
+    padding: .25rem .15rem .85rem;
 
     border-bottom:
-        1px solid rgba(255,255,255,.05);
+        1px solid var(--ui-border);
 }
 
-.stats-header-icon{
+.stats-header-icon {
 
-    width:42px;
-    height:42px;
+    width: 36px;
+    height: 36px;
 
-    border-radius:14px;
+    display: flex;
 
-    display:flex;
+    align-items: center;
+    justify-content: center;
 
-    align-items:center;
-    justify-content:center;
+    flex-shrink: 0;
+
+    border-radius: .65rem;
+
+    color: var(--ui-accent);
 
     background:
-        linear-gradient(
-            135deg,
-            #6366f1,
-            #8b5cf6
-        );
+        rgba(45, 212, 191, .08);
 
-    color:white;
+    border:
+        1px solid rgba(45, 212, 191, .18);
 
-    font-size:1rem;
-
-    box-shadow:
-        0 8px 20px rgba(99,102,241,.28);
+    font-size: 15px;
 }
 
-.stats-title{
+.stats-title {
 
-    color:white;
+    color: #fff;
 
-    font-size:1rem;
+    font-size: 14px;
 
-    font-weight:700;
+    font-weight: 700;
+
+    line-height: 1.25;
 }
 
-.stats-subtitle{
+.stats-subtitle {
 
-    color:rgba(255,255,255,.45);
+    color:
+        rgba(255, 255, 255, .55);
 
-    font-size:.78rem;
+    font-size: 13px;
 
-    margin-top:2px;
+    margin-top: .15rem;
 }
+
 
 /* =========================================
    STAT CARD
 ========================================= */
 
-.stat-card{
+.stat-card {
 
-    position:relative;
+    position: relative;
 
-    overflow:hidden;
+    overflow: hidden;
 
-    border-radius:22px;
+    min-height: 145px;
 
-    padding:1.2rem;
+    display: flex;
 
-    min-height:165px;
+    flex-direction: column;
 
-    display:flex;
+    align-items: center;
 
-    flex-direction:column;
+    justify-content: center;
 
-    justify-content:center;
+    padding: 1rem;
 
-    align-items:center;
+    text-align: center;
 
-    text-align:center;
+    background:
+        rgba(255, 255, 255, .025);
 
-    transition:
-        transform .25s ease,
-        box-shadow .25s ease;
-}
+    border:
+        1px solid var(--ui-border);
 
-.stat-card:hover{
-
-    transform:
-        translateY(-5px);
+    border-radius: .75rem;
 
     box-shadow:
-        0 14px 30px rgba(0,0,0,.22);
+        0 6px 18px rgba(0, 0, 0, .16);
+
+    transition:
+        transform .2s ease,
+        border-color .2s ease,
+        background .2s ease,
+        box-shadow .2s ease;
 }
 
-/* =========================================
-   COLORS
-========================================= */
+.stat-card::after {
 
-.stat-primary{
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    top: 0;
+
+    width: 100%;
+    height: 2px;
 
     background:
         linear-gradient(
-            135deg,
-            #2563eb,
-            #1d4ed8
+            90deg,
+            transparent,
+            var(--ui-accent),
+            transparent
         );
+
+    opacity: .65;
 }
 
-.stat-info{
+.stat-card:hover {
+
+    transform: translateY(-3px);
 
     background:
-        linear-gradient(
-            135deg,
-            #0891b2,
-            #0e7490
-        );
+        rgba(45, 212, 191, .045);
+
+    border-color:
+        rgba(45, 212, 191, .22);
+
+    box-shadow:
+        0 10px 24px rgba(0, 0, 0, .24);
 }
 
-.stat-danger{
-
-    background:
-        linear-gradient(
-            135deg,
-            #dc2626,
-            #991b1b
-        );
-}
-
-.stat-success{
-
-    background:
-        linear-gradient(
-            135deg,
-            #16a34a,
-            #166534
-        );
-}
-
-.stat-warning{
-
-    background:
-        linear-gradient(
-            135deg,
-            #eab308,
-            #a16207
-        );
-
-    color:#111827;
-}
-
-.stat-secondary{
-
-    background:
-        linear-gradient(
-            135deg,
-            #4b5563,
-            #1f2937
-        );
-}
 
 /* =========================================
    ICON
 ========================================= */
 
-.stat-icon{
+.stat-icon {
 
-    width:58px;
-    height:58px;
+    width: 48px;
+    height: 48px;
 
-    border-radius:18px;
+    display: flex;
 
-    display:flex;
+    align-items: center;
+    justify-content: center;
 
-    align-items:center;
-    justify-content:center;
+    margin-bottom: .7rem;
+
+    border-radius: .7rem;
+
+    color: var(--ui-accent);
 
     background:
-        rgba(255,255,255,.14);
+        rgba(45, 212, 191, .08);
 
-    color:white;
+    border:
+        1px solid rgba(45, 212, 191, .15);
 
-    font-size:1.5rem;
-
-    margin-bottom:1rem;
+    font-size: 20px;
 
     box-shadow:
-        inset 0 0 10px rgba(255,255,255,.18);
+        inset 0 0 12px rgba(45, 212, 191, .04);
 }
 
-.stat-warning .stat-icon{
-
-    color:#111827;
-}
 
 /* =========================================
    TEXT
 ========================================= */
 
-.stat-label{
+.stat-label {
 
-    font-size:.78rem;
+    margin-bottom: .35rem;
 
-    font-weight:700;
+    color:
+        rgba(255, 255, 255, .62);
 
-    text-transform:uppercase;
+    font-size: 13px;
 
-    letter-spacing:.5px;
+    font-weight: 600;
 
-    opacity:.92;
-
-    margin-bottom:.45rem;
+    line-height: 1.3;
 }
 
-.stat-value{
+.stat-value {
 
-    font-size:1.9rem;
+    color: #fff;
 
-    font-weight:800;
+    font-size: 14px;
 
-    line-height:1;
+    font-weight: 800;
+
+    line-height: 1.2;
+
+    letter-spacing: .2px;
 }
+
+
+/* =========================================
+   VALUE SIZE
+========================================= */
+
+.stat-value {
+
+    font-size: 14px;
+}
+
 
 /* =========================================
    MOBILE
 ========================================= */
 
-@media(max-width:768px){
+@media (max-width: 768px) {
 
-    .stats-wrapper{
+    .stats-wrapper {
 
-        padding:1rem;
+        padding: .8rem;
     }
 
-    .stat-card{
+    .stats-header {
 
-        min-height:145px;
+        margin-bottom: .8rem;
 
-        padding:1rem;
+        padding-bottom: .75rem;
     }
 
-    .stat-icon{
+    .stats-header-icon {
 
-        width:50px;
-        height:50px;
+        width: 34px;
+        height: 34px;
 
-        font-size:1.25rem;
-
-        margin-bottom:.8rem;
+        font-size: 14px;
     }
 
-    .stat-value{
+    .stats-title {
 
-        font-size:1.5rem;
+        font-size: 14px;
     }
 
-    .stat-label{
+    .stats-subtitle {
 
-        font-size:.72rem;
+        font-size: 13px;
+    }
+
+    .stat-card {
+
+        min-height: 135px;
+
+        padding: .85rem;
+    }
+
+    .stat-icon {
+
+        width: 44px;
+        height: 44px;
+
+        margin-bottom: .6rem;
+
+        font-size: 18px;
+    }
+
+    .stat-label {
+
+        font-size: 13px;
+    }
+
+    .stat-value {
+
+        font-size: 14px;
     }
 
 }

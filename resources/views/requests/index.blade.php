@@ -262,416 +262,331 @@
 </div>
 
 <style>
-
 /* =========================================
-   HERO
+   FILEIPLAY TORRENT REQUESTS
+   DARK GLASS / TEAL FORUM STYLE
 ========================================= */
 
-.requests-hero{
-
-    padding:28px;
-
-    border-radius:24px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(25,30,50,.92),
-            rgba(10,14,24,.96)
-        );
-
-    border:1px solid rgba(255,255,255,.06);
-
-    box-shadow:
-        0 15px 40px rgba(0,0,0,.35);
-
-    backdrop-filter:blur(16px);
+.requests-hero,
+.modern-request-card,
+.empty-state {
+    border: 1px solid var(--ui-border, rgba(255,255,255,.08));
+    background: linear-gradient(
+        135deg,
+        rgba(22,32,51,.95),
+        rgba(15,23,42,.84)
+    );
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 10px 28px rgba(0,0,0,.18);
 }
 
-.requests-title{
-
-    font-size:2rem;
-
-    font-weight:800;
-
-    color:#fff;
+.requests-hero {
+    padding: 1.1rem 1.2rem;
+    border-left: 3px solid var(--ui-accent, #22d3ee);
+    border-radius: .85rem;
 }
 
-.requests-subtitle{
-
-    color:rgba(255,255,255,.65);
-
-    font-size:.95rem;
+.requests-title {
+    color: #f8fafc;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.25;
 }
 
-/* =========================================
-   ALERT
-========================================= */
-
-.modern-alert{
-
-    display:flex;
-    align-items:center;
-    gap:12px;
-
-    padding:16px 18px;
-
-    border-radius:18px;
-
-    background:
-        rgba(250,204,21,.12);
-
-    border:
-        1px solid rgba(250,204,21,.22);
-
-    color:#fde68a;
-
-    font-weight:500;
+.requests-subtitle {
+    color: rgba(226,232,240,.62);
+    font-size: 13px;
 }
 
-/* =========================================
-   BUTTONS
-========================================= */
-
-.modern-create-btn{
-
-    background:
-        linear-gradient(135deg,#2563eb,#7c3aed);
-
-    border:none;
-
-    color:#fff;
-
-    padding:12px 18px;
-
-    border-radius:14px;
-
-    font-weight:700;
-
-    transition:.25s ease;
+.modern-alert {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    padding: .75rem .9rem;
+    border: 1px solid rgba(250,204,21,.20);
+    border-left: 3px solid rgba(250,204,21,.55);
+    border-radius: .7rem;
+    background: rgba(250,204,21,.07);
+    color: #fde68a;
+    font-size: 13px;
+    line-height: 1.45;
 }
 
-.modern-create-btn:hover{
-
-    transform:translateY(-2px);
-
-    color:#fff;
-
-    box-shadow:
-        0 10px 25px rgba(59,130,246,.35);
+.modern-alert i {
+    flex: 0 0 auto;
 }
 
-.modern-disabled-btn{
-
-    border:none;
-
-    background:
-        rgba(255,255,255,.08);
-
-    color:rgba(255,255,255,.55);
-
-    padding:12px 18px;
-
-    border-radius:14px;
-
-    font-weight:700;
+.modern-create-btn,
+.modern-disabled-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: .5rem .8rem;
+    border-radius: .55rem;
+    font-size: 13px;
+    font-weight: 700;
+    transition: all .2s ease;
 }
 
-/* =========================================
-   REQUEST CARD
-========================================= */
-
-.request-list{
-    display:flex;
-    flex-direction:column;
-    gap:16px;
+.modern-create-btn {
+    border: 1px solid rgba(34,211,238,.28);
+    background: rgba(34,211,238,.10);
+    color: var(--ui-accent, #22d3ee);
 }
 
-.modern-request-card{
-
-    padding:22px;
-
-    border-radius:22px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(20,25,40,.94),
-            rgba(10,14,24,.96)
-        );
-
-    border:
-        1px solid rgba(255,255,255,.05);
-
-    backdrop-filter:blur(14px);
-
-    transition:.25s ease;
-
-    box-shadow:
-        0 10px 25px rgba(0,0,0,.22);
+.modern-create-btn:hover {
+    color: #f8fafc;
+    border-color: var(--ui-accent, #22d3ee);
+    background: rgba(34,211,238,.16);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0,0,0,.18);
 }
 
-.modern-request-card:hover{
-
-    transform:translateY(-3px);
-
-    box-shadow:
-        0 18px 35px rgba(0,0,0,.35);
+.modern-disabled-btn {
+    border: 1px solid var(--ui-border, rgba(255,255,255,.08));
+    background: rgba(255,255,255,.04);
+    color: rgba(226,232,240,.45);
 }
 
-/* =========================================
-   CATEGORY
-========================================= */
+/* Request list */
 
-.modern-category-badge{
-
-    display:inline-flex;
-    align-items:center;
-
-    padding:8px 14px;
-
-    border-radius:999px;
-
-    background:
-        rgba(148,163,184,.14);
-
-    color:#cbd5e1;
-
-    font-size:.8rem;
-
-    font-weight:700;
+.request-list {
+    display: flex;
+    flex-direction: column;
+    gap: .65rem;
 }
 
-/* =========================================
-   REQUEST LINK
-========================================= */
-
-.request-link{
-
-    color:#fff;
-
-    font-size:1rem;
-
-    font-weight:700;
-
-    text-decoration:none;
-
-    transition:.2s ease;
+.modern-request-card {
+    position: relative;
+    overflow: hidden;
+    padding: .85rem 1rem;
+    border-radius: .8rem;
+    transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
 }
 
-.request-link:hover{
-    color:#93c5fd;
+.modern-request-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 2px;
+    background: var(--ui-accent, #22d3ee);
+    opacity: .45;
 }
 
-/* =========================================
-   META
-========================================= */
-
-.request-meta{
-    color:rgba(255,255,255,.65);
+.modern-request-card:hover {
+    transform: translateY(-1px);
+    border-color: rgba(34,211,238,.18);
+    box-shadow: 0 14px 30px rgba(0,0,0,.22);
 }
 
-.meta-user{
-
-    font-size:.92rem;
-
-    font-weight:600;
+.modern-category-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: .35rem .6rem;
+    border: 1px solid rgba(34,211,238,.20);
+    border-radius: 999px;
+    background: rgba(34,211,238,.07);
+    color: #cbd5e1;
+    font-size: 12px;
+    font-weight: 600;
 }
 
-.meta-date{
-
-    font-size:.78rem;
-
-    margin-top:3px;
+.request-link {
+    color: #f8fafc;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.35;
+    text-decoration: none;
+    transition: color .2s ease;
 }
 
-/* =========================================
-   IMDB
-========================================= */
-
-.imdb-btn{
-
-    display:inline-block;
-
-    padding:7px 12px;
-
-    border-radius:10px;
-
-    background:#f5c518;
-
-    color:#111;
-
-    text-decoration:none;
-
-    font-size:.78rem;
-
-    font-weight:800;
-
-    transition:.2s ease;
+.request-link:hover {
+    color: var(--ui-accent, #22d3ee);
 }
 
-.imdb-btn:hover{
-
-    transform:translateY(-2px);
-
-    color:#111;
+.request-meta {
+    color: rgba(226,232,240,.62);
 }
 
-/* =========================================
-   STATUS
-========================================= */
+.meta-user {
+    color: #cbd5e1;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.meta-date {
+    margin-top: 2px;
+    color: rgba(226,232,240,.48);
+    font-size: 12px;
+}
+
+.imdb-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: .3rem .55rem;
+    border: 1px solid rgba(245,197,24,.28);
+    border-radius: .45rem;
+    background: rgba(245,197,24,.10);
+    color: #f5c518;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all .2s ease;
+}
+
+.imdb-btn:hover {
+    color: #fef3c7;
+    border-color: rgba(245,197,24,.5);
+    background: rgba(245,197,24,.16);
+    transform: translateY(-1px);
+}
 
 .status-filled,
-.status-open{
-
-    display:inline-flex;
-    align-items:center;
-    gap:7px;
-
-    padding:8px 13px;
-
-    border-radius:999px;
-
-    font-size:.82rem;
-
-    font-weight:700;
+.status-open {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .3rem .55rem;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
 }
 
-.status-filled{
-
-    background:
-        rgba(34,197,94,.14);
-
-    color:#4ade80;
+.status-filled {
+    border: 1px solid rgba(34,197,94,.18);
+    background: rgba(34,197,94,.09);
+    color: #4ade80;
 }
 
-.status-open{
-
-    background:
-        rgba(239,68,68,.14);
-
-    color:#f87171;
+.status-open {
+    border: 1px solid rgba(239,68,68,.18);
+    background: rgba(239,68,68,.09);
+    color: #f87171;
 }
 
-.filled-user{
-
-    margin-top:6px;
-
-    font-size:.78rem;
-
-    color:rgba(255,255,255,.55);
+.filled-user {
+    margin-top: 3px;
+    color: rgba(226,232,240,.48);
+    font-size: 12px;
 }
 
-/* =========================================
-   ACTIONS
-========================================= */
-
-.request-actions{
-
-    display:flex;
-    justify-content:flex-end;
-    gap:10px;
+.request-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: .4rem;
 }
 
-.action-btn{
-
-    width:40px;
-    height:40px;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    border-radius:12px;
-
-    text-decoration:none;
-
-    border:none;
-
-    transition:.2s ease;
+.action-btn {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--ui-border, rgba(255,255,255,.08));
+    border-radius: .5rem;
+    text-decoration: none;
+    transition: all .2s ease;
 }
 
-.edit-btn{
-
-    background:
-        rgba(250,204,21,.14);
-
-    color:#fde047;
+.edit-btn {
+    background: rgba(250,204,21,.08);
+    color: #fde047;
 }
 
-.delete-btn{
-
-    background:
-        rgba(239,68,68,.14);
-
-    color:#f87171;
+.delete-btn {
+    background: rgba(239,68,68,.08);
+    color: #f87171;
 }
 
-.action-btn:hover{
-
-    transform:translateY(-2px);
+.action-btn:hover {
+    transform: translateY(-1px);
+    border-color: currentColor;
 }
 
-/* =========================================
-   EMPTY STATE
-========================================= */
+/* Empty state */
 
-.empty-state{
-
-    text-align:center;
-
-    padding:60px 20px;
-
-    border-radius:24px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(20,25,40,.94),
-            rgba(10,14,24,.96)
-        );
-
-    border:
-        1px solid rgba(255,255,255,.05);
+.empty-state {
+    padding: 3rem 1.25rem;
+    border-radius: .85rem;
+    text-align: center;
 }
 
-.empty-state i{
-
-    font-size:3rem;
-
-    color:#64748b;
-
-    margin-bottom:16px;
+.empty-state i {
+    display: block;
+    margin-bottom: .8rem;
+    color: rgba(148,163,184,.55);
+    font-size: 2.25rem;
 }
 
-.empty-state h4{
-    color:#fff;
+.empty-state h4 {
+    margin-bottom: .35rem;
+    color: #f8fafc;
+    font-size: 15px;
+    font-weight: 700;
 }
 
-.empty-state p{
-    color:rgba(255,255,255,.6);
+.empty-state p {
+    color: rgba(226,232,240,.55);
+    font-size: 13px;
 }
 
-/* =========================================
-   MOBILE
-========================================= */
+/* Pagination */
 
-@media(max-width:768px){
+.pagination {
+    --bs-pagination-bg: rgba(255,255,255,.04);
+    --bs-pagination-border-color: var(--ui-border, rgba(255,255,255,.08));
+    --bs-pagination-color: #cbd5e1;
+    --bs-pagination-hover-bg: rgba(34,211,238,.08);
+    --bs-pagination-hover-color: #f8fafc;
+    --bs-pagination-focus-color: #f8fafc;
+    --bs-pagination-active-bg: rgba(34,211,238,.14);
+    --bs-pagination-active-border-color: var(--ui-accent, #22d3ee);
+    --bs-pagination-active-color: #f8fafc;
+}
 
-    .requests-title{
-        font-size:1.6rem;
+.pagination .page-link {
+    font-size: 12px;
+    border-radius: .45rem !important;
+}
+
+/* Mobile */
+
+@media (max-width: 768px) {
+    .requests-hero {
+        padding: .9rem;
+        border-radius: .75rem;
     }
 
-    .modern-request-card{
-        padding:18px;
+    .requests-title {
+        font-size: 18px;
     }
 
-    .request-actions{
-        justify-content:flex-start;
-        margin-top:10px;
+    .requests-subtitle {
+        font-size: 12px;
+    }
+
+    .modern-request-card {
+        padding: .8rem;
+        border-radius: .7rem;
+    }
+
+    .request-link {
+        font-size: 14px;
+    }
+
+    .request-actions {
+        justify-content: flex-start;
+        margin-top: .15rem;
+    }
+
+    .modern-create-btn,
+    .modern-disabled-btn {
+        font-size: 12px;
     }
 }
-
 </style>
 
 @endsection

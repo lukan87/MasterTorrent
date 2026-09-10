@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Last-Torrents Upload')
+@section('title', 'FileIplay Upload')
 
 @section('content')
 
@@ -11,9 +11,11 @@
     <div class="modern-upload-wrapper">
 
         {{-- BACKDROP --}}
+
         <div class="upload-glow"></div>
 
         {{-- HEADER --}}
+
         <div class="modern-upload-header">
 
             <div class="upload-header-icon">
@@ -26,7 +28,7 @@
 
                 <h1 class="upload-title">
 
-                    Last-Torrents Upload Center
+                    FileIplay Upload Center
 
                 </h1>
 
@@ -41,9 +43,11 @@
         </div>
 
         {{-- BODY --}}
+
         <div class="modern-upload-body">
 
             {{-- ANNOUNCE --}}
+
             <div class="announce-card mb-4">
 
                 <div>
@@ -55,7 +59,9 @@
                     </div>
 
                     <!-- <a href="javascript:void(0);"
+
                        onclick="copyToClipboard('{{ env('APP_URL') }}/announce/{{ $user->passkey }}')"
+
                        class="announce-link">
 
                         {{ env('APP_URL') }}/announce/{{ $user->passkey }}
@@ -63,7 +69,9 @@
                     </a> -->
 
                     <a href="javascript:void(0);"
+
    onclick="copyToClipboard('https://tracker.fileiplay.org/announce/{{ $user->passkey }}')"
+
    class="announce-link">
 
     https://tracker.fileiplay.org/announce/{{ $user->passkey }}
@@ -81,7 +89,9 @@
             </div>
 
             <form action="{{ route('torrents.store') }}"
+
                   method="POST"
+
                   enctype="multipart/form-data">
 
                 @csrf
@@ -89,11 +99,13 @@
                 <div class="row g-4">
 
                     {{-- LEFT --}}
+
                     <div class="col-lg-6">
 
                         <div class="upload-card">
 
                             {{-- FILE --}}
+
                             <div class="mb-4">
 
                                 <label class="upload-label">
@@ -103,15 +115,21 @@
                                 </label>
 
                                 <input type="file"
+
                                        class="form-control upload-input"
+
                                        id="file"
+
                                        name="torrent"
+
                                        required
+
                                        onchange="setTorrentName()">
 
                             </div>
 
                             {{-- NAME --}}
+
                             <div class="mb-4">
 
                                 <label class="upload-label">
@@ -121,15 +139,21 @@
                                 </label>
 
                                 <input type="text"
+
                                        class="form-control upload-input"
+
                                        id="name"
+
                                        name="name"
+
                                        value="{{ old('name') }}"
+
                                        required>
 
                             </div>
 
                             {{-- CATEGORY --}}
+
                             <div class="mb-4">
 
                                 <label class="upload-label">
@@ -139,9 +163,13 @@
                                 </label>
 
                                 <select name="category_id"
+
                                         id="category_id"
+
                                         class="form-select upload-input"
+
                                         required
+
                                         onchange="toggleFieldsByCategory()">
 
                                     @foreach($categories->sortByDesc(fn($cat) => $cat->id === 49) as $category)
@@ -159,6 +187,7 @@
                             </div>
 
                             {{-- POSTER --}}
+
                             <div class="mb-4">
 
                                 <label class="upload-label">
@@ -168,14 +197,19 @@
                                 </label>
 
                                 <input type="url"
+
                                        name="poster"
+
                                        id="poster"
+
                                        class="form-control upload-input"
+
                                        value="{{ old('poster') }}">
 
                             </div>
 
                             {{-- GENRE --}}
+
                             <div class="mb-4">
 
                                 <label class="upload-label">
@@ -185,14 +219,19 @@
                                 </label>
 
                                 <input type="text"
+
                                        class="form-control upload-input"
+
                                        id="genre"
+
                                        name="genre"
+
                                        value="{{ old('genre') }}">
 
                             </div>
 
                             {{-- STEAM --}}
+
                             <div class="mb-3">
 
                                 <label class="upload-label">
@@ -202,15 +241,21 @@
                                 </label>
 
                                 <input type="text"
+
                                        class="form-control upload-input"
+
                                        id="steamid"
+
                                        name="steamid"
+
                                        placeholder="Steam App ID only"
+
                                        value="{{ old('steamid') }}">
 
                             </div>
 
                             {{-- CONDITIONAL --}}
+
                             <div id="conditionalFields" style="display:none;">
 
                                 <div class="mb-4">
@@ -222,13 +267,19 @@
                                     </label>
 
                                     <input type="text"
+
                                            class="form-control upload-input"
+
                                            id="imdb_url"
+
                                            name="imdb_url"
+
                                            value="{{ old('imdb_url') }}">
 
                                     <button class="btn imdb-fetch-btn mt-3"
+
                                             type="button"
+
                                             onclick="fetchIMDBInfo()">
 
                                         <i class="bi bi-film me-1"></i>
@@ -240,14 +291,19 @@
                                 </div>
 
                                 <div id="imdb-duplicate-warning"
+
                                      class="alert alert-warning rounded-4 d-none">
 
                                     <strong>
+
                                         Duplicate IMDb detected
+
                                     </strong>
 
                                     <ul id="existing-torrent-list"
+
                                         class="mb-0">
+
                                     </ul>
 
                                 </div>
@@ -261,9 +317,13 @@
                                     </label>
 
                                     <textarea class="form-control upload-input"
+
                                               id="mediainfo"
+
                                               name="mediainfo"
+
                                               oninput="resizeTextarea('mediainfo')"
+
                                               style="min-height:180px;">{{ old('mediainfo') }}</textarea>
 
                                 </div>
@@ -275,11 +335,13 @@
                     </div>
 
                     {{-- RIGHT --}}
+
                     <div class="col-lg-6">
 
                         <div class="upload-card">
 
                             {{-- SCREENSHOTS --}}
+
                             <div class="mb-4">
 
                                 <label class="upload-label">
@@ -289,19 +351,27 @@
                                 </label>
 
                                 <input class="form-control upload-input"
+
                                        type="file"
+
                                        id="images"
+
                                        name="images[]"
+
                                        accept="image/*"
+
                                        multiple>
 
                                 <div id="preview-container"
+
                                      class="mt-3 d-flex flex-wrap gap-3">
+
                                 </div>
 
                             </div>
 
                             {{-- DESCRIPTION --}}
+
                             <div class="mb-4">
 
                                 <label class="upload-label">
@@ -311,10 +381,13 @@
                                 </label>
 
                                 {{-- TOOLBAR --}}
+
                                 <div class="bbcode-toolbar mb-3">
 
                                     <button class="toolbar-btn"
+
                                             type="button"
+
                                             onclick="insertBBCode('b')">
 
                                         <i class="bi bi-type-bold"></i>
@@ -322,7 +395,9 @@
                                     </button>
 
                                     <button class="toolbar-btn"
+
                                             type="button"
+
                                             onclick="insertBBCode('i')">
 
                                         <i class="bi bi-type-italic"></i>
@@ -330,7 +405,9 @@
                                     </button>
 
                                     <button class="toolbar-btn"
+
                                             type="button"
+
                                             onclick="insertBBCode('u')">
 
                                         <i class="bi bi-type-underline"></i>
@@ -338,7 +415,9 @@
                                     </button>
 
                                     <button class="toolbar-btn"
+
                                             type="button"
+
                                             onclick="insertBBCode('center')">
 
                                         <i class="bi bi-text-center"></i>
@@ -346,7 +425,9 @@
                                     </button>
 
                                     <button class="toolbar-btn"
+
                                             type="button"
+
                                             onclick="insertBBCode('quote')">
 
                                         <i class="bi bi-chat-left-quote"></i>
@@ -354,7 +435,9 @@
                                     </button>
 
                                     <button class="toolbar-btn youtube-btn"
+
                                             type="button"
+
                                             onclick="insertBBCode('youtube')">
 
                                         <i class="bi bi-youtube"></i>
@@ -362,7 +445,9 @@
                                     </button>
 
                                     <button class="toolbar-btn image-btn"
+
                                             type="button"
+
                                             onclick="insertBBCode('img')">
 
                                         <i class="bi bi-card-image"></i>
@@ -372,15 +457,21 @@
                                 </div>
 
                                 <textarea class="form-control upload-input"
+
                                           id="description"
+
                                           name="description"
+
                                           required
+
                                           oninput="resizeTextarea('description')"
+
                                           style="min-height:260px;">{{ old('description') }}</textarea>
 
                             </div>
 
                             {{-- TAGS --}}
+
                             @if (Auth::check() && (Auth::user()->user_class >= \App\Models\UserClass::MODERATOR))
 
                             <div class="mb-3">
@@ -398,10 +489,15 @@
                                         <div class="modern-switch">
 
                                             <input type="checkbox"
+
                                                    class="form-check-input"
+
                                                    name="{{ $tag }}"
+
                                                    id="{{ $tag }}"
+
                                                    value="1"
+
                                                    {{ old($tag) ? 'checked' : '' }}>
 
                                             <label for="{{ $tag }}">
@@ -427,9 +523,11 @@
                 </div>
 
                 {{-- SUBMIT --}}
+
                 <div class="text-center mt-5">
 
                     <button type="submit"
+
                             class="upload-submit-btn">
 
                         <i class="bi bi-cloud-arrow-up-fill me-2"></i>
@@ -451,518 +549,539 @@
 @include('torrents.partials.scripts')
 
 <style>
+/* =========================================================
+   FILEIPLAY — UPLOAD CENTER
+   Dark navy glass + teal forum style
+   ========================================================= */
 
-/* =========================================
-   WRAPPER
-========================================= */
+.modern-upload-wrapper {
+    position: relative;
+    overflow: hidden;
+    border-radius: .85rem;
 
-.modern-upload-wrapper{
+    background: linear-gradient(
+        135deg,
+        rgba(22, 32, 51, .96),
+        rgba(15, 23, 42, .88)
+    );
 
-    position:relative;
+    border: 1px solid var(--ui-border);
+    box-shadow: 0 18px 45px rgba(0,0,0,.32);
+    backdrop-filter: blur(14px);
+}
 
-    overflow:hidden;
+.upload-glow {
+    position: absolute;
+    top: -160px;
+    right: -160px;
+    width: 340px;
+    height: 340px;
 
-    border-radius:30px;
+    background: radial-gradient(
+        circle,
+        rgba(45,212,191,.10),
+        transparent 70%
+    );
 
-    background:
-        linear-gradient(
-            145deg,
-            rgba(14,18,28,.95),
-            rgba(8,10,18,.98)
-        );
+    pointer-events: none;
+}
 
-    border:
-        1px solid rgba(255,255,255,.06);
+/* Header */
 
-    backdrop-filter:blur(20px);
+.modern-upload-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    padding: 20px 24px;
+
+    background: rgba(45,212,191,.045);
+    border-bottom: 1px solid var(--ui-border);
+}
+
+.upload-header-icon {
+    width: 52px;
+    height: 52px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 52px;
+
+    border-radius: .65rem;
+
+    background: rgba(45,212,191,.08);
+    border: 1px solid rgba(45,212,191,.22);
+
+    color: var(--ui-accent);
+
+    font-size: 22px;
+}
+
+.upload-title {
+    margin: 0;
+
+    color: #fff;
+
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.upload-subtitle {
+    margin-top: 3px;
+
+    color: rgba(255,255,255,.45);
+
+    font-size: 12px;
+    letter-spacing: .5px;
+}
+
+/* Body */
+
+.modern-upload-body {
+    padding: 22px;
+}
+
+/* Announce */
+
+.announce-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+
+    padding: 14px 16px;
+
+    border-radius: .65rem;
+
+    background: rgba(9,16,29,.55);
+    border: 1px solid var(--ui-border);
+}
+
+.announce-label {
+    margin-bottom: 5px;
+
+    color: rgba(255,255,255,.43);
+
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.announce-link {
+    color: var(--ui-accent);
+
+    font-size: 13px;
+    font-weight: 600;
+
+    text-decoration: none;
+    word-break: break-all;
+}
+
+.announce-link:hover {
+    color: #99f6e4;
+}
+
+.announce-copy {
+    width: 40px;
+    height: 40px;
+
+    flex: 0 0 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: .55rem;
+
+    background: rgba(45,212,191,.08);
+    border: 1px solid rgba(45,212,191,.16);
+
+    color: var(--ui-accent);
+
+    font-size: 16px;
+}
+
+/* Inner cards */
+
+.upload-card {
+    height: 100%;
+
+    padding: 20px;
+
+    border-radius: .75rem;
+
+    background: rgba(9,16,29,.48);
+    border: 1px solid var(--ui-border);
+}
+
+/* Labels */
+
+.upload-label {
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: rgba(255,255,255,.68);
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* Inputs */
+
+.upload-input {
+    min-height: 40px;
+
+    background: rgba(7,13,24,.75) !important;
+
+    border: 1px solid rgba(255,255,255,.10) !important;
+    border-radius: .55rem !important;
+
+    color: #fff !important;
+
+    font-size: 14px;
+
+    padding: 9px 11px;
+
+    transition:
+        border-color .18s ease,
+        box-shadow .18s ease,
+        background .18s ease;
+}
+
+.upload-input:focus {
+    background: rgba(7,13,24,.92) !important;
+
+    border-color: rgba(45,212,191,.42) !important;
 
     box-shadow:
-        0 25px 70px rgba(0,0,0,.45);
+        0 0 0 3px rgba(45,212,191,.08) !important;
+
+    outline: none;
 }
 
-.upload-glow{
-
-    position:absolute;
-
-    top:-150px;
-    right:-150px;
-
-    width:350px;
-    height:350px;
-
-    background:
-        radial-gradient(
-            circle,
-            rgba(59,130,246,.18),
-            transparent 70%
-        );
-
-    pointer-events:none;
+.upload-input::placeholder {
+    color: rgba(255,255,255,.34);
 }
 
-/* =========================================
-   HEADER
-========================================= */
-
-.modern-upload-header{
-
-    position:relative;
-
-    display:flex;
-
-    align-items:center;
-
-    gap:20px;
-
-    padding:28px 34px;
-
-    border-bottom:
-        1px solid rgba(255,255,255,.05);
-
-    background:
-        linear-gradient(
-            90deg,
-            rgba(59,130,246,.12),
-            rgba(124,58,237,.08)
-        );
+select.upload-input {
+    background-color: rgba(10,17,30,.95) !important;
 }
 
-.upload-header-icon{
-
-    width:74px;
-    height:74px;
-
-    display:flex;
-
-    align-items:center;
-    justify-content:center;
-
-    border-radius:22px;
-
-    background:
-        linear-gradient(
-            135deg,
-            #2563eb,
-            #7c3aed
-        );
-
-    font-size:2rem;
-
-    color:#fff;
-
-    box-shadow:
-        0 10px 30px rgba(59,130,246,.35);
-}
-
-.upload-title{
-
-    margin:0;
-
-    font-size:2rem;
-
-    font-weight:900;
-
-    color:#fff;
-}
-
-.upload-subtitle{
-
-    margin-top:4px;
-
-    color:rgba(255,255,255,.55);
-
-    letter-spacing:2px;
-
-    text-transform:uppercase;
-
-    font-size:.8rem;
-}
-
-/* =========================================
-   BODY
-========================================= */
-
-.modern-upload-body{
-
-    padding:34px;
-}
-
-/* =========================================
-   ANNOUNCE
-========================================= */
-
-.announce-card{
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
-    gap:20px;
-
-    padding:22px 24px;
-
-    border-radius:22px;
-
-    background:
-        rgba(255,255,255,.03);
-
-    border:
-        1px solid rgba(255,255,255,.05);
-}
-
-.announce-label{
-
-    font-size:.72rem;
-
-    font-weight:800;
-
-    letter-spacing:2px;
-
-    color:rgba(255,255,255,.45);
-
-    margin-bottom:6px;
-}
-
-.announce-link{
-
-    color:#67e8f9;
-
-    text-decoration:none;
-
-    font-weight:700;
-
-    word-break:break-all;
-}
-
-.announce-copy{
-
-    width:52px;
-    height:52px;
-
-    display:flex;
-
-    align-items:center;
-    justify-content:center;
-
-    border-radius:16px;
-
-    background:
-        rgba(59,130,246,.12);
-
-    color:#93c5fd;
-
-    font-size:1.2rem;
-}
-
-/* =========================================
-   CARD
-========================================= */
-
-.upload-card{
-
-    height:100%;
-
-    padding:28px;
-
-    border-radius:24px;
-
-    background:
-        rgba(255,255,255,.03);
-
-    border:
-        1px solid rgba(255,255,255,.05);
-}
-
-/* =========================================
-   LABELS
-========================================= */
-
-.upload-label{
-
-    display:block;
-
-    margin-bottom:10px;
-
-    font-size:.78rem;
-
-    font-weight:800;
-
-    letter-spacing:1px;
-
-    text-transform:uppercase;
-
-    color:#94a3b8;
-}
-
-/* =========================================
-   INPUTS
-========================================= */
-
-.upload-input{
-
-    background:
-        rgba(255,255,255,.04) !important;
-
-    border:
-        1px solid rgba(255,255,255,.06) !important;
-
-    color:#fff !important;
-
-    border-radius:16px;
-
-    padding:14px 16px;
-
-    transition:.2s ease;
-}
-
-.upload-input:focus{
-
-    border-color:
-        rgba(59,130,246,.55) !important;
-
-    box-shadow:
-        0 0 0 4px rgba(59,130,246,.12) !important;
-}
-
-.upload-input::placeholder{
-
-    color:rgba(255,255,255,.35);
-}
-
-/* SELECT FIX */
-select.upload-input{
-    background-color: rgba(20,25,35,.95) !important;
+select.upload-input option {
+    background: #111b2d !important;
     color: #fff !important;
 }
 
-/* DROPDOWN OPTIONS */
-select.upload-input option{
-    background: #111827 !important;
+select.upload-input option:checked {
+    background: #164e63 !important;
     color: #fff !important;
 }
 
-/* HOVER / SELECTED OPTION */
-select.upload-input option:hover,
-select.upload-input option:checked{
-    background: #2563eb !important;
-    color: #fff !important;
+input[type="file"].upload-input {
+    padding: 7px 9px;
 }
 
-/* =========================================
-   TOOLBAR
-========================================= */
+input[type="file"].upload-input::file-selector-button {
+    margin-right: 10px;
 
-.bbcode-toolbar{
+    padding: 6px 10px;
 
-    display:flex;
+    border: 1px solid rgba(45,212,191,.18);
+    border-radius: .4rem;
 
-    flex-wrap:wrap;
+    background: rgba(45,212,191,.08);
+    color: var(--ui-accent);
 
-    gap:10px;
+    font-size: 12px;
+    font-weight: 600;
+
+    cursor: pointer;
 }
 
-.toolbar-btn{
+/* BBCode toolbar */
 
-    width:42px;
-    height:42px;
-
-    border:none;
-
-    border-radius:14px;
-
-    background:
-        rgba(255,255,255,.05);
-
-    color:#dbeafe;
-
-    transition:.2s ease;
+.bbcode-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
 }
 
-.toolbar-btn:hover{
+.toolbar-btn {
+    width: 34px;
+    height: 34px;
 
-    transform:translateY(-2px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 
-    background:
-        rgba(59,130,246,.18);
+    border: 1px solid var(--ui-border);
+    border-radius: .45rem;
+
+    background: rgba(255,255,255,.035);
+    color: rgba(255,255,255,.65);
+
+    font-size: 13px;
+
+    transition:
+        background .15s ease,
+        color .15s ease,
+        border-color .15s ease,
+        transform .15s ease;
 }
 
-.youtube-btn{
+.toolbar-btn:hover {
+    transform: translateY(-1px);
 
-    color:#f87171;
+    background: rgba(45,212,191,.08);
+    border-color: rgba(45,212,191,.28);
+
+    color: var(--ui-accent);
 }
 
-.image-btn{
-
-    color:#67e8f9;
+.youtube-btn {
+    color: #ff7b84;
 }
 
-/* =========================================
-   BUTTONS
-========================================= */
-
-.imdb-fetch-btn{
-
-    border:none;
-
-    padding:10px 18px;
-
-    border-radius:14px;
-
-    font-weight:700;
-
-    background:
-        linear-gradient(
-            135deg,
-            #059669,
-            #10b981
-        );
-
-    color:#fff;
+.youtube-btn:hover {
+    color: #ff9da4;
+    border-color: rgba(239,68,68,.28);
+    background: rgba(239,68,68,.07);
 }
 
-.upload-submit-btn{
-
-    border:none;
-
-    padding:16px 34px;
-
-    border-radius:999px;
-
-    font-size:1rem;
-
-    font-weight:800;
-
-    letter-spacing:.5px;
-
-    color:#fff;
-
-    background:
-        linear-gradient(
-            135deg,
-            #2563eb,
-            #7c3aed
-        );
-
-    transition:.25s ease;
-
-    box-shadow:
-        0 12px 30px rgba(59,130,246,.25);
+.image-btn {
+    color: var(--ui-accent);
 }
 
-.upload-submit-btn:hover{
+/* IMDb */
 
-    transform:translateY(-3px);
+.imdb-fetch-btn {
+    border: 1px solid rgba(45,212,191,.24);
 
-    box-shadow:
-        0 18px 40px rgba(59,130,246,.35);
+    padding: 8px 13px;
+
+    border-radius: .5rem;
+
+    background: rgba(45,212,191,.08);
+    color: var(--ui-accent);
+
+    font-size: 13px;
+    font-weight: 600;
+
+    transition: .15s ease;
 }
 
-/* =========================================
-   SWITCHES
-========================================= */
-
-.tag-switch-grid{
-
-    display:flex;
-
-    flex-wrap:wrap;
-
-    gap:14px;
+.imdb-fetch-btn:hover {
+    background: rgba(45,212,191,.14);
+    border-color: rgba(45,212,191,.38);
+    color: #99f6e4;
 }
 
-.modern-switch{
+/* Duplicate warning */
 
-    display:flex;
+#imdb-duplicate-warning {
+    margin-top: 10px;
 
-    align-items:center;
+    background: rgba(245,158,11,.07);
+    border: 1px solid rgba(245,158,11,.20);
+    color: #fcd34d;
 
-    gap:8px;
-
-    padding:10px 16px;
-
-    border-radius:16px;
-
-    background:
-        rgba(255,255,255,.04);
-
-    border:
-        1px solid rgba(255,255,255,.05);
+    font-size: 13px;
 }
 
-.modern-switch label{
+/* Preview */
 
-    margin:0;
-
-    color:#fff;
-
-    font-weight:600;
+#preview-container {
+    gap: 8px !important;
 }
 
-/* =========================================
-   TEXTAREA
-========================================= */
-
-textarea{
-
-    resize:none;
-
-    overflow:auto;
-
-    max-height:600px;
+#preview-container img {
+    border-radius: .5rem;
+    border: 1px solid var(--ui-border);
 }
 
-/* =========================================
-   MOBILE
-========================================= */
+/* Tags */
 
-@media(max-width:768px){
+.tag-switch-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
 
-    .modern-upload-header{
+.modern-switch {
+    display: flex;
+    align-items: center;
+    gap: 7px;
 
-        flex-direction:column;
+    padding: 7px 10px;
 
-        text-align:center;
+    border-radius: .5rem;
 
-        padding:24px 20px;
+    background: rgba(255,255,255,.035);
+    border: 1px solid var(--ui-border);
+}
+
+.modern-switch label {
+    margin: 0;
+
+    color: rgba(255,255,255,.70);
+
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.modern-switch .form-check-input {
+    margin: 0;
+
+    background-color: rgba(255,255,255,.05);
+    border-color: rgba(255,255,255,.18);
+
+    cursor: pointer;
+}
+
+.modern-switch .form-check-input:checked {
+    background-color: var(--ui-accent);
+    border-color: var(--ui-accent);
+}
+
+/* Submit */
+
+.upload-submit-btn {
+    border: 1px solid rgba(45,212,191,.28);
+
+    padding: 10px 22px;
+
+    border-radius: .6rem;
+
+    background: rgba(45,212,191,.10);
+    color: var(--ui-accent);
+
+    font-size: 14px;
+    font-weight: 700;
+
+    transition:
+        background .15s ease,
+        border-color .15s ease,
+        transform .15s ease,
+        box-shadow .15s ease;
+}
+
+.upload-submit-btn:hover {
+    transform: translateY(-1px);
+
+    background: rgba(45,212,191,.16);
+
+    border-color: rgba(45,212,191,.42);
+
+    color: #99f6e4;
+
+    box-shadow: 0 8px 22px rgba(0,0,0,.25);
+}
+
+/* Textareas */
+
+textarea.upload-input {
+    resize: vertical;
+
+    min-height: 180px;
+
+    max-height: 600px;
+
+    line-height: 1.5;
+}
+
+/* Permission message */
+
+.upload-permission-card {
+    background: linear-gradient(
+        135deg,
+        rgba(22,32,51,.95),
+        rgba(15,23,42,.84)
+    );
+
+    border: 1px solid rgba(239,68,68,.25) !important;
+    border-radius: .85rem !important;
+
+    color: rgba(255,255,255,.75);
+}
+
+.upload-permission-card h4 {
+    color: #fff;
+    font-size: 15px;
+}
+
+.upload-permission-card p {
+    font-size: 13px;
+}
+
+/* Mobile */
+
+@media (max-width: 768px) {
+
+    .modern-upload-wrapper {
+        border-radius: .75rem;
     }
 
-    .modern-upload-body{
-
-        padding:20px;
+    .modern-upload-header {
+        padding: 16px;
+        gap: 12px;
     }
 
-    .upload-card{
-
-        padding:20px;
+    .upload-header-icon {
+        width: 44px;
+        height: 44px;
+        flex-basis: 44px;
+        font-size: 18px;
     }
 
-    .upload-title{
-
-        font-size:1.5rem;
+    .upload-title {
+        font-size: 14px;
     }
 
-    .announce-card{
-
-        flex-direction:column;
-
-        align-items:flex-start;
+    .upload-subtitle {
+        font-size: 11px;
     }
 
-    .upload-submit-btn{
+    .modern-upload-body {
+        padding: 14px;
+    }
 
-        width:100%;
+    .upload-card {
+        padding: 15px;
+    }
+
+    .announce-card {
+        align-items: flex-start;
+        padding: 12px;
+    }
+
+    .announce-copy {
+        width: 36px;
+        height: 36px;
+        flex-basis: 36px;
+    }
+
+    .upload-input {
+        font-size: 14px;
+    }
+
+    .upload-submit-btn {
+        width: 100%;
     }
 }
-
 </style>
+
 
 @else
 
 <div class="container mt-5">
 
-    <div class="alert alert-danger rounded-4 shadow-lg p-4">
+    <div class="alert alert-danger shadow-lg p-4 upload-permission-card">
 
         <h4 class="fw-bold mb-2">
 

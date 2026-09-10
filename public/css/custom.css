@@ -255,7 +255,7 @@
         .card-blur{background-color:rgba(44,44,48,.9)!important}
 
 
-                /* Tooltip */
+                /* Tooltip
                 .tooltip-inner {
                     max-width: 200px;
                     background-color: #333;
@@ -270,7 +270,7 @@
                 .tooltip.bs-tooltip-start .arrow::before,
                 .tooltip.bs-tooltip-end .arrow::before {
                     border-right-color: #333 !important;
-                }
+                } */
 
 
 
@@ -916,4 +916,27 @@ body.bg-body-tertiary {
     .app-content { padding-bottom: 1.5rem; }
     .card { border-radius: 0.8rem; }
     #back-to-top { right: 1rem; bottom: 1rem; width: 2.75rem; height: 2.75rem; }
+}
+
+
+.tooltip .tooltip-inner {
+    max-width: 210px;
+    padding: .6rem .75rem;
+    text-align: left;
+    font-size: 13px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, .8);
+    background: rgba(15, 23, 42, .98);
+    border: 1px solid var(--ui-border);
+    border-radius: .6rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, .35);
+}
+
+.tooltip.show {
+    opacity: 1;
+}
+
+.tooltip strong {
+    color: var(--ui-accent);
+    font-size: 14px;
 }

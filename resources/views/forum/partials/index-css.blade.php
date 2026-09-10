@@ -1,1076 +1,620 @@
 <style>
-
 /* =========================================================
-   FORUM INDEX
-========================================================= */
+   FILEIPLAY — FORUM INDEX
+   Bootstrap 5 friendly / dark glass UI
+   ========================================================= */
+
+/* ---------- Forum Header ---------- */
 
 .forum-index-header {
-
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
-
-    gap: 30px;
-
-    padding: 10px 2px 25px;
-
+    gap: 2rem;
+    padding: 1.75rem 0 1.5rem;
+    border-bottom: 1px solid var(--ui-border);
 }
 
-
-/* =========================================================
-   HEADER
-========================================================= */
-
 .forum-header-copy {
-    max-width: 760px;
+    min-width: 0;
 }
 
 .forum-eyebrow {
-
     display: inline-flex;
     align-items: center;
-
-    margin-bottom: 9px;
-
-    color: #8b5cf6;
-
+    margin-bottom: .55rem;
+    color: var(--ui-accent);
     font-size: .72rem;
-    font-weight: 800;
-
+    font-weight: 700;
     letter-spacing: .16em;
+    text-transform: uppercase;
+}
 
+.forum-eyebrow i {
+    font-size: .9rem;
 }
 
 .forum-page-title {
-
     margin: 0;
-
-    font-size: clamp(2.1rem, 4vw, 3.2rem);
-
-    font-weight: 900;
-
-    letter-spacing: -.045em;
-
-    background:
-        linear-gradient(
-            135deg,
-            #ffffff 0%,
-            #dbeafe 45%,
-            #c4b5fd 100%
-        );
-
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-
-    background-clip: text;
-
+    color: #f8fafc;
+    font-size: clamp(2rem, 4vw, 2.75rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -.035em;
 }
 
 .forum-page-subtitle {
-
-    margin: 8px 0 0;
-
-    color: rgba(255,255,255,.52);
-
-    font-size: .95rem;
-
+    max-width: 720px;
+    margin: .7rem 0 0;
+    color: var(--ui-text-muted);
+    font-size: .98rem;
     line-height: 1.65;
-
 }
 
-
-/* =========================================================
-   ADD CATEGORY BUTTON
-========================================================= */
+/* ---------- Add Category Button ---------- */
 
 .forum-add-category-btn {
-
     display: inline-flex;
-
     align-items: center;
     justify-content: center;
-
-    padding: 12px 19px;
-
-    border: 1px solid rgba(129,140,248,.30);
-
-    border-radius: 13px;
-
-    background:
-        linear-gradient(
-            135deg,
-            rgba(37,99,235,.95),
-            rgba(124,58,237,.95)
-        );
-
-    color: #fff;
-
-    font-size: .88rem;
-    font-weight: 800;
-
+    flex: 0 0 auto;
+    padding: .7rem 1rem;
+    color: #062523;
+    background: linear-gradient(
+        135deg,
+        var(--ui-accent),
+        var(--ui-accent-strong)
+    );
+    border: 1px solid rgba(99, 210, 198, .35);
+    border-radius: .7rem;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, .22);
+    font-size: .86rem;
+    font-weight: 700;
     text-decoration: none;
-
-    white-space: nowrap;
-
-    box-shadow:
-        0 10px 30px rgba(37,99,235,.20),
-        inset 0 1px 0 rgba(255,255,255,.16);
-
     transition:
-        transform .2s ease,
-        box-shadow .2s ease,
-        border-color .2s ease;
-
+        transform 160ms ease,
+        box-shadow 160ms ease,
+        filter 160ms ease;
 }
 
 .forum-add-category-btn:hover {
-
-    color: #fff;
-
+    color: #031716;
+    filter: brightness(1.06);
     transform: translateY(-2px);
-
-    border-color: rgba(165,180,252,.55);
-
-    box-shadow:
-        0 16px 35px rgba(37,99,235,.30),
-        inset 0 1px 0 rgba(255,255,255,.20);
-
+    box-shadow: 0 12px 28px rgba(0, 0, 0, .28);
 }
 
+.forum-add-category-btn:focus-visible {
+    outline: 0;
+    box-shadow:
+        0 0 0 .2rem rgba(99, 210, 198, .18),
+        0 10px 25px rgba(0, 0, 0, .25);
+}
 
-/* =========================================================
-   CATEGORY LIST
-========================================================= */
+/* ---------- Category List ---------- */
 
 .forum-category-list {
-
     display: flex;
-
     flex-direction: column;
-
-    gap: 12px;
-
+    gap: .85rem;
+    margin-top: 1.5rem;
 }
 
-
-/* =========================================================
-   CATEGORY LINK
-========================================================= */
+/* ---------- Category Link ---------- */
 
 .forum-category-link {
-
     display: block;
-
     color: inherit;
-
     text-decoration: none;
-
 }
 
+.forum-category-link:focus-visible {
+    outline: 0;
+}
 
-/* =========================================================
-   CATEGORY CARD
-========================================================= */
+/* ---------- Category Card ---------- */
 
 .forum-category-card {
-
     position: relative;
-
     display: flex;
-
     align-items: center;
-
-    gap: 18px;
-
-    min-height: 105px;
-
-    padding: 20px 22px;
-
+    gap: 1rem;
+    min-height: 104px;
+    padding: 1.15rem 1.25rem;
     overflow: hidden;
 
-    border: 1px solid rgba(255,255,255,.075);
-
-    border-radius: 17px;
-
     background:
-
         linear-gradient(
             135deg,
-            rgba(255,255,255,.055),
-            rgba(255,255,255,.018)
+            rgba(22, 32, 51, .94),
+            rgba(15, 23, 42, .84)
         );
+
+    border: 1px solid var(--ui-border);
+    border-radius: 1rem;
 
     box-shadow:
-
-        0 8px 25px rgba(0,0,0,.12),
-
-        inset 0 1px 0 rgba(255,255,255,.035);
+        0 10px 28px rgba(0, 0, 0, .16),
+        inset 0 1px 0 rgba(255, 255, 255, .025);
 
     transition:
-
-        transform .22s ease,
-        border-color .22s ease,
-        box-shadow .22s ease,
+        transform 180ms ease,
+        border-color 180ms ease,
+        box-shadow 180ms ease,
         background .22s ease;
-
 }
 
+/* subtle light at the top */
 .forum-category-card::before {
-
     content: "";
-
     position: absolute;
-
     top: 0;
+    left: 8%;
+    right: 8%;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, .08),
+        transparent
+    );
+    pointer-events: none;
+}
+
+/* teal accent line */
+.forum-category-card::after {
+    content: "";
+    position: absolute;
+    top: 16px;
+    bottom: 16px;
     left: 0;
-
     width: 3px;
-    height: 100%;
 
-    background:
-        linear-gradient(
-            180deg,
-            #3b82f6,
-            #8b5cf6
-        );
+    background: linear-gradient(
+        180deg,
+        var(--ui-accent),
+        var(--ui-accent-strong)
+    );
 
-    opacity: 0;
-
-    transition: opacity .22s ease;
-
+    border-radius: 0 4px 4px 0;
+    opacity: .75;
+    transition: opacity 180ms ease, width 180ms ease;
 }
 
 .forum-category-link:hover .forum-category-card {
-
     transform: translateY(-3px);
 
-    border-color: rgba(129,140,248,.28);
+    border-color: rgba(99, 210, 198, .22);
 
     background:
-
         linear-gradient(
             135deg,
-            rgba(59,130,246,.075),
-            rgba(139,92,246,.045)
+            rgba(27, 43, 61, .96),
+            rgba(16, 27, 46, .92)
         );
 
     box-shadow:
-
-        0 16px 35px rgba(0,0,0,.18),
-
-        0 0 0 1px rgba(99,102,241,.04);
-
+        0 16px 34px rgba(0, 0, 0, .24),
+        0 0 0 1px rgba(99, 210, 198, .04);
 }
 
-.forum-category-link:hover .forum-category-card::before {
+.forum-category-link:hover .forum-category-card::after {
+    width: 4px;
     opacity: 1;
 }
 
+.forum-category-link:focus-visible .forum-category-card {
+    border-color: rgba(99, 210, 198, .45);
+    box-shadow:
+        0 0 0 .2rem rgba(99, 210, 198, .12),
+        0 14px 30px rgba(0, 0, 0, .22);
+}
 
-/* =========================================================
-   CATEGORY ICON
-========================================================= */
+/* ---------- Category Icon ---------- */
 
 .forum-category-icon {
-
-    width: 54px;
-    height: 54px;
-
-    flex: 0 0 54px;
-
+    position: relative;
     display: flex;
-
     align-items: center;
     justify-content: center;
+    flex: 0 0 52px;
+    width: 52px;
+    height: 52px;
 
-    border: 1px solid rgba(129,140,248,.16);
-
-    border-radius: 15px;
+    color: var(--ui-accent);
 
     background:
-
         linear-gradient(
             135deg,
-            rgba(59,130,246,.15),
-            rgba(139,92,246,.13)
+            rgba(99, 210, 198, .14),
+            rgba(61, 179, 167, .05)
         );
 
-    color: #a5b4fc;
-
-    font-size: 1.35rem;
+    border: 1px solid rgba(99, 210, 198, .15);
+    border-radius: .85rem;
 
     box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.06);
+        inset 0 1px 0 rgba(255, 255, 255, .04),
+        0 8px 18px rgba(0, 0, 0, .12);
 
-    transition: .22s ease;
+    transition:
+        transform 180ms ease,
+        background 180ms ease,
+        border-color 180ms ease;
+}
 
+.forum-category-icon i {
+    font-size: 1.35rem;
 }
 
 .forum-category-link:hover .forum-category-icon {
-
-    transform: scale(1.06);
-
-    color: #c4b5fd;
-
-    border-color: rgba(165,180,252,.30);
-
+    transform: scale(1.05);
+    background:
+        linear-gradient(
+            135deg,
+            rgba(99, 210, 198, .2),
+            rgba(61, 179, 167, .08)
+        );
+    border-color: rgba(99, 210, 198, .28);
 }
 
-
-/* =========================================================
-   CATEGORY CONTENT
-========================================================= */
+/* ---------- Category Content ---------- */
 
 .forum-category-content {
-
     flex: 1 1 auto;
-
     min-width: 0;
-
 }
 
 .forum-category-title-row {
-
     display: flex;
-
     align-items: center;
-
-    gap: 10px;
-
+    gap: .75rem;
 }
 
 .forum-category-title {
-
     margin: 0;
-
-    color: rgba(255,255,255,.94);
-
+    color: #f1f5f9;
     font-size: 1.05rem;
-
-    font-weight: 800;
-
-    letter-spacing: -.015em;
-
-    transition: color .2s ease;
-
+    font-weight: 700;
+    line-height: 1.35;
+    transition: color 160ms ease;
 }
 
 .forum-category-link:hover .forum-category-title {
-    color: #c4b5fd;
+    color: #ffffff;
 }
 
 .forum-category-description {
+    margin: .3rem 0 0;
+    color: var(--ui-text-muted);
+    font-size: .85rem;
+    line-height: 1.55;
 
-    margin: 5px 0 0;
-
-    color: rgba(255,255,255,.46);
-
-    font-size: .84rem;
-
-    line-height: 1.5;
-
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
-
-    text-overflow: ellipsis;
-
 }
 
-
-/* =========================================================
-   ARROW
-========================================================= */
-
 .forum-category-arrow {
-
     display: inline-flex;
-
     align-items: center;
     justify-content: center;
+    flex: 0 0 auto;
 
-    width: 25px;
-    height: 25px;
+    width: 28px;
+    height: 28px;
 
-    color: rgba(255,255,255,.25);
-
-    font-size: .75rem;
+    color: #7890a9;
+    background: rgba(148, 163, 184, .055);
+    border: 1px solid rgba(148, 163, 184, .08);
+    border-radius: 50%;
 
     transition:
-        transform .2s ease,
-        color .2s ease;
+        transform 180ms ease,
+        color 180ms ease,
+        background 180ms ease;
+}
 
+.forum-category-arrow i {
+    font-size: .78rem;
 }
 
 .forum-category-link:hover .forum-category-arrow {
-
-    color: #a5b4fc;
-
+    color: var(--ui-accent);
+    background: rgba(99, 210, 198, .09);
     transform: translateX(3px);
-
 }
 
-
-/* =========================================================
-   TOPIC COUNT
-========================================================= */
+/* ---------- Topic Count ---------- */
 
 .forum-topic-count {
-
-    flex: 0 0 80px;
-
     display: flex;
-
     flex-direction: column;
-
     align-items: flex-end;
-
     justify-content: center;
-
-    padding-left: 10px;
-
-    border-left: 1px solid rgba(255,255,255,.07);
-
+    flex: 0 0 90px;
+    padding-left: .75rem;
+    border-left: 1px solid var(--ui-border);
 }
 
 .forum-topic-count strong {
-
-    color: rgba(255,255,255,.92);
-
-    font-size: 1.05rem;
-
-    font-weight: 800;
-
+    color: #e8f1f8;
+    font-size: 1.1rem;
+    font-weight: 750;
+    line-height: 1.2;
 }
 
 .forum-topic-count span {
-
-    margin-top: 2px;
-
-    color: rgba(255,255,255,.35);
-
+    margin-top: .2rem;
+    color: #71859d;
     font-size: .68rem;
-
     font-weight: 700;
-
+    letter-spacing: .08em;
     text-transform: uppercase;
-
-    letter-spacing: .06em;
-
 }
 
-
-/* =========================================================
-   EMPTY STATE
-========================================================= */
+/* ---------- Empty State ---------- */
 
 .forum-empty-state {
-
-    padding: 55px 25px;
-
+    padding: 4rem 1.5rem;
     text-align: center;
 
-    border: 1px dashed rgba(255,255,255,.10);
+    background:
+        linear-gradient(
+            135deg,
+            rgba(22, 32, 51, .82),
+            rgba(15, 23, 42, .72)
+        );
 
-    border-radius: 17px;
-
-    background: rgba(255,255,255,.018);
-
+    border: 1px dashed rgba(148, 163, 184, .2);
+    border-radius: 1rem;
 }
 
 .forum-empty-icon {
-
-    width: 58px;
-    height: 58px;
-
-    margin: 0 auto 15px;
-
     display: flex;
-
     align-items: center;
     justify-content: center;
 
-    border-radius: 16px;
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 1rem;
 
-    background: rgba(99,102,241,.10);
+    color: var(--ui-accent);
+    background: rgba(99, 210, 198, .08);
+    border: 1px solid rgba(99, 210, 198, .14);
+    border-radius: 50%;
+}
 
-    color: #a5b4fc;
-
-    font-size: 1.4rem;
-
+.forum-empty-icon i {
+    font-size: 1.5rem;
 }
 
 .forum-empty-state h3 {
-
-    margin-bottom: 6px;
-
-    color: rgba(255,255,255,.88);
-
+    margin-bottom: .4rem;
+    color: #e8f1f8;
     font-size: 1.05rem;
-
-    font-weight: 800;
-
+    font-weight: 700;
 }
 
 .forum-empty-state p {
-
     margin: 0;
-
-    color: rgba(255,255,255,.40);
-
-    font-size: .85rem;
-
+    color: var(--ui-text-muted);
+    font-size: .86rem;
 }
-
 
 /* =========================================================
    DELETED CATEGORIES
-========================================================= */
+   ========================================================= */
 
 .forum-deleted-categories {
-
-    overflow: hidden;
-
-    border: 1px solid rgba(248,113,113,.15);
-
-    border-radius: 18px;
-
-    background:
-
-        linear-gradient(
-            135deg,
-            rgba(127,29,29,.12),
-            rgba(69,10,10,.07)
-        );
-
-    box-shadow:
-        0 12px 35px rgba(0,0,0,.12);
-
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--ui-border);
 }
 
+.forum-deleted-categories h2,
+.forum-deleted-categories h3 {
+    color: #e8f1f8;
+}
 
-/* =========================================================
-   DELETED HEADER
-========================================================= */
-
-.forum-deleted-header {
-
-    display: flex;
-
-    align-items: center;
-    justify-content: space-between;
-
-    gap: 20px;
-
-    padding: 20px 22px;
-
-    border-bottom: 1px solid rgba(248,113,113,.12);
-
+.forum-deleted-categories .forum-category-card {
     background:
         linear-gradient(
             135deg,
-            rgba(127,29,29,.22),
-            rgba(127,29,29,.10)
+            rgba(65, 29, 38, .68),
+            rgba(31, 23, 35, .76)
         );
 
+    border-color: rgba(220, 53, 69, .15);
 }
 
-.forum-deleted-heading {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 14px;
-
+.forum-deleted-categories .forum-category-card::after {
+    background: linear-gradient(
+        180deg,
+        #dc3545,
+        #a71d2a
+    );
 }
 
-.forum-deleted-icon {
-
-    width: 45px;
-    height: 45px;
-
-    flex: 0 0 45px;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 12px;
-
-    background: rgba(239,68,68,.13);
-
-    color: #fca5a5;
-
-    font-size: 1rem;
-
+.forum-deleted-categories .forum-category-icon {
+    color: #ff8d99;
+    background: rgba(220, 53, 69, .09);
+    border-color: rgba(220, 53, 69, .15);
 }
 
-.forum-deleted-header h3 {
-
-    margin: 0;
-
-    color: #fca5a5;
-
-    font-size: 1rem;
-
-    font-weight: 850;
-
+.forum-deleted-categories .forum-category-title {
+    color: #f3d9dc;
 }
 
-.forum-deleted-header p {
-
-    margin: 3px 0 0;
-
-    color: rgba(255,255,255,.40);
-
-    font-size: .78rem;
-
+.forum-deleted-categories .forum-category-description {
+    color: #b99ca1;
 }
 
-.forum-deleted-count {
-
-    padding: 6px 10px;
-
-    border: 1px solid rgba(248,113,113,.18);
-
-    border-radius: 8px;
-
-    background: rgba(127,29,29,.18);
-
-    color: #fca5a5;
-
-    font-size: .68rem;
-
-    font-weight: 800;
-
-    text-transform: uppercase;
-
-    letter-spacing: .05em;
-
-    white-space: nowrap;
-
+.forum-deleted-categories .forum-category-link:hover .forum-category-card {
+    border-color: rgba(220, 53, 69, .3);
+    background:
+        linear-gradient(
+            135deg,
+            rgba(73, 31, 41, .76),
+            rgba(35, 24, 37, .82)
+        );
 }
 
+/* ---------- Deleted Action Buttons ---------- */
+
+.forum-deleted-categories .btn {
+    position: relative;
+    z-index: 2;
+}
+
+.forum-deleted-categories form {
+    position: relative;
+    z-index: 3;
+}
 
 /* =========================================================
-   DELETED LIST
-========================================================= */
+   RESPONSIVE
+   ========================================================= */
 
-.forum-deleted-category-list {
-
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 8px;
-
-    padding: 12px;
-
-}
-
-
-/* =========================================================
-   DELETED CARD
-========================================================= */
-
-.forum-deleted-category-card {
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    gap: 18px;
-
-    padding: 15px 16px;
-
-    border: 1px solid rgba(248,113,113,.09);
-
-    border-radius: 13px;
-
-    background: rgba(127,29,29,.12);
-
-    transition:
-        border-color .2s ease,
-        background .2s ease;
-
-}
-
-.forum-deleted-category-card:hover {
-
-    border-color: rgba(248,113,113,.17);
-
-    background: rgba(127,29,29,.17);
-
-}
-
-
-/* =========================================================
-   DELETED MAIN
-========================================================= */
-
-.forum-deleted-category-main {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 13px;
-
-    min-width: 0;
-
-}
-
-.forum-deleted-category-icon {
-
-    width: 42px;
-    height: 42px;
-
-    flex: 0 0 42px;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 11px;
-
-    background: rgba(239,68,68,.10);
-
-    color: #fca5a5;
-
-}
-
-.forum-deleted-category-info {
-
-    min-width: 0;
-
-}
-
-.forum-deleted-category-info h4 {
-
-    margin: 0 0 3px;
-
-    color: #fca5a5;
-
-    font-size: .9rem;
-
-    font-weight: 800;
-
-}
-
-.forum-deleted-category-info p {
-
-    margin: 0 0 5px;
-
-    color: rgba(255,255,255,.42);
-
-    font-size: .77rem;
-
-    overflow: hidden;
-
-    text-overflow: ellipsis;
-
-    white-space: nowrap;
-
-}
-
-.forum-deleted-date {
-
-    color: rgba(255,255,255,.28);
-
-    font-size: .68rem;
-
-}
-
-
-/* =========================================================
-   DELETED ACTIONS
-========================================================= */
-
-.forum-deleted-actions {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 7px;
-
-    flex: 0 0 auto;
-
-}
-
-.forum-deleted-actions form {
-    margin: 0;
-}
-
-
-/* =========================================================
-   RESTORE
-========================================================= */
-
-.forum-restore-category-btn {
-
-    display: inline-flex;
-
-    align-items: center;
-    justify-content: center;
-
-    padding: 8px 13px;
-
-    border: 1px solid rgba(74,222,128,.22);
-
-    border-radius: 9px;
-
-    background: rgba(34,197,94,.08);
-
-    color: #86efac;
-
-    font-size: .76rem;
-
-    font-weight: 750;
-
-    white-space: nowrap;
-
-    transition: .2s ease;
-
-}
-
-.forum-restore-category-btn:hover {
-
-    color: #fff;
-
-    background: rgba(34,197,94,.18);
-
-    border-color: rgba(74,222,128,.38);
-
-    transform: translateY(-1px);
-
-}
-
-
-/* =========================================================
-   PERMANENT DELETE
-========================================================= */
-
-.forum-permanent-delete-category-btn {
-
-    display: inline-flex;
-
-    align-items: center;
-    justify-content: center;
-
-    padding: 8px 13px;
-
-    border: 1px solid rgba(248,113,113,.22);
-
-    border-radius: 9px;
-
-    background: rgba(127,29,29,.13);
-
-    color: #fca5a5;
-
-    font-size: .76rem;
-
-    font-weight: 750;
-
-    white-space: nowrap;
-
-    transition: .2s ease;
-
-}
-
-.forum-permanent-delete-category-btn:hover {
-
-    color: #fff;
-
-    background: rgba(185,28,28,.30);
-
-    border-color: rgba(248,113,113,.45);
-
-    transform: translateY(-1px);
-
-}
-
-
-/* =========================================================
-   MOBILE
-========================================================= */
-
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
 
     .forum-index-header {
-
-        align-items: flex-start;
-
+        align-items: stretch;
         flex-direction: column;
-
-        gap: 18px;
-
-        padding-bottom: 20px;
-
+        gap: 1.15rem;
+        padding-top: 1rem;
     }
-
-    .forum-add-category-btn {
-
-        width: 100%;
-
-    }
-
-    .forum-category-card {
-
-        min-height: auto;
-
-        padding: 16px;
-
-        gap: 13px;
-
-    }
-
-    .forum-category-icon {
-
-        width: 46px;
-        height: 46px;
-
-        flex-basis: 46px;
-
-        border-radius: 13px;
-
-        font-size: 1.1rem;
-
-    }
-
-    .forum-category-title {
-
-        font-size: .92rem;
-
-    }
-
-    .forum-category-description {
-
-        font-size: .75rem;
-
-    }
-
-    .forum-topic-count {
-
-        flex: 0 0 52px;
-
-        padding-left: 7px;
-
-    }
-
-    .forum-topic-count strong {
-
-        font-size: .9rem;
-
-    }
-
-    .forum-topic-count span {
-
-        font-size: .58rem;
-
-    }
-
-    .forum-category-arrow {
-
-        display: none;
-
-    }
-
-
-    /* Deleted section */
-
-    .forum-deleted-header {
-
-        align-items: flex-start;
-
-        flex-direction: column;
-
-        padding: 17px;
-
-    }
-
-    .forum-deleted-count {
-
-        align-self: flex-start;
-
-    }
-
-    .forum-deleted-category-card {
-
-        align-items: flex-start;
-
-        flex-direction: column;
-
-        gap: 14px;
-
-        padding: 14px;
-
-    }
-
-    .forum-deleted-category-main {
-
-        width: 100%;
-
-    }
-
-    .forum-deleted-category-info p {
-
-        white-space: normal;
-
-    }
-
-    .forum-deleted-actions {
-
-        width: 100%;
-
-        flex-direction: column;
-
-    }
-
-    .forum-deleted-actions form {
-
-        width: 100%;
-
-    }
-
-    .forum-restore-category-btn,
-    .forum-permanent-delete-category-btn {
-
-        width: 100%;
-
-    }
-
-}
-
-
-/* =========================================================
-   EXTRA SMALL DEVICES
-========================================================= */
-
-@media (max-width: 420px) {
 
     .forum-page-title {
         font-size: 2rem;
     }
 
+    .forum-page-subtitle {
+        font-size: .9rem;
+    }
+
+    .forum-add-category-btn {
+        align-self: flex-start;
+    }
+
     .forum-category-card {
-        gap: 10px;
-        padding: 14px;
+        min-height: 0;
+        padding: 1rem;
+        gap: .85rem;
     }
 
     .forum-category-icon {
-        width: 42px;
-        height: 42px;
-        flex-basis: 42px;
+        flex-basis: 46px;
+        width: 46px;
+        height: 46px;
+    }
+
+    .forum-category-icon i {
+        font-size: 1.15rem;
+    }
+
+    .forum-category-title {
+        font-size: .96rem;
+    }
+
+    .forum-category-description {
+        font-size: .8rem;
     }
 
     .forum-topic-count {
-        flex-basis: 46px;
+        flex-basis: 65px;
+        padding-left: .6rem;
     }
 
+    .forum-topic-count strong {
+        font-size: .95rem;
+    }
+
+    .forum-topic-count span {
+        font-size: .6rem;
+    }
+
+    .forum-category-arrow {
+        display: none;
+    }
 }
 
+@media (max-width: 575.98px) {
+
+    .forum-index-header {
+        margin-bottom: .25rem;
+    }
+
+    .forum-page-title {
+        font-size: 1.8rem;
+    }
+
+    .forum-category-card {
+        align-items: flex-start;
+    }
+
+    .forum-category-icon {
+        flex-basis: 42px;
+        width: 42px;
+        height: 42px;
+        border-radius: .7rem;
+    }
+
+    .forum-category-icon i {
+        font-size: 1rem;
+    }
+
+    .forum-topic-count {
+        flex-basis: auto;
+        min-width: 52px;
+    }
+
+    .forum-topic-count span {
+        display: none;
+    }
+
+    .forum-topic-count strong {
+        font-size: .85rem;
+    }
+}
+
+@media (max-width: 419.98px) {
+
+    .forum-category-card {
+        padding: .85rem;
+        gap: .7rem;
+    }
+
+    .forum-category-icon {
+        flex-basis: 38px;
+        width: 38px;
+        height: 38px;
+    }
+
+    .forum-category-title {
+        font-size: .9rem;
+    }
+
+    .forum-category-description {
+        font-size: .75rem;
+        line-height: 1.45;
+    }
+
+    .forum-topic-count {
+        min-width: 42px;
+        padding-left: .45rem;
+    }
+}
+
+/* ---------- Reduced Motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .forum-category-card,
+    .forum-category-icon,
+    .forum-category-arrow,
+    .forum-add-category-btn {
+        transition: none;
+    }
+}
 </style>

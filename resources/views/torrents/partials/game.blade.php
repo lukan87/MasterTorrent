@@ -424,7 +424,7 @@
 
     <div class="modal-dialog modal-dialog-centered modal-xl">
 
-        <div class="modal-content bg-dark text-white border-0">
+        <div class="modal-content">
 
             <div class="modal-header border-secondary">
 
@@ -469,13 +469,13 @@
 
     <div class="modal-dialog modal-dialog-centered modal-xl">
 
-        <div class="modal-content bg-dark border-0">
+        <div class="modal-content">
 
             <div class="modal-body p-0 text-center">
 
                 <img id="screenshotModalImg"
                      src=""
-                     style="max-width:100%; max-height:90vh;">
+                     class="screenshot-modal-image">
 
             </div>
 
@@ -486,470 +486,41 @@
 </div>
 
 <style>
-
-/* =========================================
-   PAGE
-========================================= */
-
-.game-page{
-
-    color:#e5e7eb;
-
-    position:relative;
-
-    z-index:2;
-}
-
-body::before{
-
-    content:'';
-
-    position:fixed;
-
-    inset:55px 0 0 0;
-
-    background:
-        linear-gradient(
-            to bottom,
-            rgba(0,0,0,.78),
-            rgba(0,0,0,.94)
-        ),
-        url('{{ $torrent->background }}');
-
-    background-size:cover;
-
-    background-position:center;
-
-    z-index:-1;
-}
-
-/* =========================================
-   CARDS
-========================================= */
-
-.media-card,
-.info-card,
-.feature-card,
-.screenshot-carousel{
-
-    background:
-        rgba(20,20,20,.5);
-
-    backdrop-filter:blur(10px);
-
-    border:
-        1px solid rgba(255,255,255,.06);
-
-    border-radius:20px;
-
-    padding:1.2rem;
-
-    box-shadow:
-        0 10px 30px rgba(0,0,0,.3);
-}
-
-/* =========================================
-   POSTER
-========================================= */
-
-.poster-img{
-
-    width:100%;
-
-    border-radius:16px;
-
-    box-shadow:
-        0 20px 40px rgba(0,0,0,.6);
-}
-
-/* =========================================
-   TITLE
-========================================= */
-
-.game-title{
-
-    font-size:2.2rem;
-
-    font-weight:800;
-
-    color:#fff;
-}
-
-/* =========================================
-   GENRES
-========================================= */
-
-.genre-badge{
-
-    display:inline-flex;
-
-    align-items:center;
-
-    padding:8px 14px;
-
-    border-radius:999px;
-
-    background:
-        rgba(255,255,255,.06);
-
-    border:
-        1px solid rgba(255,255,255,.08);
-
-    color:#fff;
-
-    text-decoration:none;
-
-    font-size:.88rem;
-
-    transition:.2s ease;
-}
-
-.genre-badge:hover{
-
-    background:
-        rgba(59,130,246,.16);
-
-    color:#93c5fd;
-}
-
-/* =========================================
-   FEATURES
-========================================= */
-
-.feature-grid{
-
-    display:grid;
-
-    grid-template-columns:
-        repeat(auto-fit,minmax(160px,1fr));
-
-    gap:.7rem;
-}
-
-.feature-item{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:.6rem;
-
-    padding:.75rem;
-
-    border-radius:12px;
-
-    background:
-        rgba(255,255,255,.04);
-
-    font-size:.9rem;
-}
-
-/* =========================================
-   META
-========================================= */
-
-.meta-grid{
-
-    display:grid;
-
-    grid-template-columns:
-        repeat(auto-fit,minmax(180px,1fr));
-
-    gap:1rem;
-}
-
-.meta-box{
-
-    background:
-        rgba(255,255,255,.04);
-
-    padding:.9rem;
-
-    border-radius:14px;
-
-    display:flex;
-
-    flex-direction:column;
-
-    gap:.25rem;
-}
-
-.meta-box small{
-
-    color:#9ca3af;
-
-    font-size:.78rem;
-
-    text-transform:uppercase;
-
-    letter-spacing:.05em;
-}
-
-.meta-box span{
-
-    font-weight:600;
-
-    color:#fff;
-}
-
-/* =========================================
-   ABOUT
-========================================= */
-
-.about-box{
-
-    max-height:340px;
-
-    overflow-y:auto;
-
-    padding:1rem;
-
-    border-radius:14px;
-
-    background:
-        rgba(255,255,255,.03);
-
-    border-left:
-        3px solid #3b82f6;
-}
-
-.about-box::-webkit-scrollbar{
-
-    width:6px;
-}
-
-.about-box::-webkit-scrollbar-thumb{
-
-    background:
-        rgba(255,255,255,.25);
-
-    border-radius:999px;
-}
-
-/* =========================================
-   REVIEWS
-========================================= */
-
-.reviews-card{
-
-    background:
-        rgba(255,255,255,.04);
-
-    border-radius:16px;
-
-    padding:1rem;
-}
-
-.review-count{
-
-    color:#d1d5db;
-
-    font-size:.95rem;
-}
-
-.modern-progress{
-
-    height:10px;
-
-    border-radius:999px;
-
-    background:
-        rgba(255,255,255,.08);
-}
-
-/* =========================================
-   REQUIREMENTS
-========================================= */
-
-.req-card{
-
-    background:
-        rgba(255,255,255,.04);
-
-    border-radius:16px;
-
-    padding:1rem;
-
-    height:100%;
-}
-
-.req-title{
-
-    color:#fff;
-
-    margin-bottom:1rem;
-}
-
-/* =========================================
-   SCREENSHOTS
-========================================= */
-
-.screenshot-carousel .carousel-inner{
-
-    height:320px;
-
-    border-radius:16px;
-
-    overflow:hidden;
-}
-
-.screenshot-img{
-
-    width:100%;
-
-    height:100%;
-
-    object-fit:cover;
-
-    cursor:zoom-in;
-
-    transition:.2s ease;
-}
-
-.screenshot-img:hover{
-
-    transform:scale(1.02);
-}
-
-.carousel-control-prev-icon,
-.carousel-control-next-icon{
-
-    background-color:
-        rgba(0,0,0,.6);
-
-    border-radius:50%;
-
-    width:42px;
-
-    height:42px;
-
-    background-size:55%;
-}
-
-/* =========================================
-   MINI HEADER
-========================================= */
-
-.game-mini-header{
-
-    position:fixed;
-
-    top:62px;
-
-    left:50%;
-
-    transform:
-        translate(-50%, -120%);
-
-    width:calc(100% - 30px);
-
-    max-width:900px;
-
-    z-index:1050;
-
-    display:flex;
-
-    align-items:center;
-
-    gap:1rem;
-
-    padding:.8rem 1rem;
-
-    background:
-        rgba(20,20,20,.72);
-
-    backdrop-filter:blur(12px);
-
-    border:
-        1px solid rgba(255,255,255,.08);
-
-    border-radius:18px;
-
-    transition:
-        transform .25s ease;
-}
-
-.game-mini-header.visible{
-
-    transform:
-        translate(-50%, 0);
-}
-
-.mini-header-title{
-
-    overflow:hidden;
-
-    white-space:nowrap;
-
-    text-overflow:ellipsis;
-
-    font-size:1rem;
-
-    color:#fff;
-}
-
-/* =========================================
-   VIDEO
-========================================= */
-
-.videoWrapper{
-
-    position:relative;
-
-    padding-bottom:56.25%;
-}
-
-.videoWrapper video{
-
-    position:absolute;
-
-    width:100%;
-
-    height:100%;
-}
-
-/* =========================================
-   MOBILE
-========================================= */
-
-@media(max-width:768px){
-
-    .game-title{
-
-        font-size:1.7rem;
-    }
-
-    .screenshot-carousel .carousel-inner{
-
-        height:220px;
-    }
-
-    .meta-grid{
-
-        grid-template-columns:1fr;
-    }
-
-    .feature-grid{
-
-        grid-template-columns:1fr;
-    }
-
-    .game-mini-header{
-
-        top:58px;
-
-        width:calc(100% - 16px);
-
-        padding:.7rem .9rem;
-    }
-
-    .mini-header-title{
-
-        font-size:.9rem;
-    }
-
-}
-
+.game-page{position:relative;z-index:2;color:#e5e7eb}
+body::before{content:'';position:fixed;inset:55px 0 0 0;background:linear-gradient(to bottom,rgba(7,12,22,.82),rgba(7,12,22,.96)),url('{{ $torrent->background }}');background-size:cover;background-position:center;z-index:-1}
+.media-card,.info-card,.feature-card,.screenshot-carousel{background:linear-gradient(135deg,rgba(22,32,51,.95),rgba(15,23,42,.84));border:1px solid var(--ui-border);border-radius:.85rem;box-shadow:0 14px 36px rgba(0,0,0,.28);backdrop-filter:blur(14px)}
+.media-card,.feature-card,.screenshot-carousel{padding:16px}.info-card{padding:22px}
+.poster-img{display:block;width:100%;border-radius:.65rem;border:1px solid var(--ui-border);box-shadow:0 14px 30px rgba(0,0,0,.42)}
+.media-card .btn-outline-light{border-color:var(--ui-border);color:rgba(255,255,255,.78);font-size:13px}
+.media-card .btn-outline-light:hover{background:rgba(45,212,191,.08);border-color:rgba(45,212,191,.35);color:var(--ui-accent)}
+.section-title{color:#fff;font-size:14px;font-weight:700;margin-bottom:12px;padding-left:10px;border-left:3px solid var(--ui-accent)}
+.game-title{margin:0;color:#fff;font-size:22px;line-height:1.3;font-weight:700}
+.genre-badge{display:inline-flex;align-items:center;padding:5px 9px;border-radius:.45rem;background:rgba(45,212,191,.06);border:1px solid rgba(45,212,191,.18);color:var(--ui-accent);text-decoration:none;font-size:13px;font-weight:600;transition:.15s ease}
+.genre-badge:hover{background:rgba(45,212,191,.12);border-color:rgba(45,212,191,.34);color:#99f6e4}
+.feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:7px}
+.feature-item{display:flex;align-items:flex-start;gap:8px;padding:9px;border-radius:.55rem;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.055);color:rgba(255,255,255,.72);font-size:13px;line-height:1.4}
+.feature-item i{flex:0 0 auto;margin-top:2px}
+.media-card .badge.bg-warning{background:rgba(245,158,11,.12)!important;border:1px solid rgba(245,158,11,.22);color:#fcd34d!important;font-size:12px}
+.screenshot-carousel{overflow:hidden}.screenshot-carousel .small{color:rgba(255,255,255,.45)!important;font-size:12px}
+.screenshot-carousel .carousel-inner{height:320px;overflow:hidden;border-radius:.65rem;border:1px solid var(--ui-border)}
+.screenshot-img{width:100%;height:100%;object-fit:cover;cursor:zoom-in;transition:transform .2s ease}.screenshot-img:hover{transform:scale(1.015)}
+.carousel-control-prev-icon,.carousel-control-next-icon{width:34px;height:34px;padding:7px;background-color:rgba(7,13,24,.78);border:1px solid rgba(255,255,255,.10);border-radius:50%;background-size:52%}
+.short-description{padding:14px;background:rgba(9,16,29,.48);border:1px solid var(--ui-border);border-left:3px solid var(--ui-accent);border-radius:.65rem;color:rgba(255,255,255,.72);font-size:14px;line-height:1.65}
+.meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px}
+.meta-box{display:flex;flex-direction:column;gap:3px;padding:11px;border-radius:.6rem;background:rgba(255,255,255,.025);border:1px solid var(--ui-border)}
+.meta-box small{color:rgba(255,255,255,.42);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}.meta-box span{color:rgba(255,255,255,.82);font-size:13px;font-weight:600;word-break:break-word}
+.about-box{max-height:340px;overflow-y:auto;padding:14px;background:rgba(9,16,29,.42);border:1px solid var(--ui-border);border-left:3px solid var(--ui-accent);border-radius:.65rem;color:rgba(255,255,255,.72);font-size:14px;line-height:1.6}
+.about-box::-webkit-scrollbar{width:5px}.about-box::-webkit-scrollbar-thumb{background:rgba(45,212,191,.28);border-radius:999px}
+.reviews-card{padding:14px;background:rgba(9,16,29,.42);border:1px solid var(--ui-border);border-radius:.65rem}.reviews-card h5{color:#fff;font-size:14px}.reviews-card .text-success{color:#6ee7b7!important;font-size:13px}.review-count{color:rgba(255,255,255,.55);font-size:13px}
+.modern-progress{height:7px;overflow:hidden;border-radius:999px;background:rgba(255,255,255,.08)}.modern-progress .progress-bar{background:#34d399!important}
+.req-card{height:100%;padding:14px;background:rgba(9,16,29,.42);border:1px solid var(--ui-border);border-radius:.65rem;color:rgba(255,255,255,.68);font-size:13px;line-height:1.55}.req-title{margin-bottom:10px;color:#fff;font-size:14px;font-weight:700;padding-left:9px;border-left:3px solid var(--ui-accent)}
+.game-mini-header{position:fixed;top:62px;left:50%;transform:translate(-50%,-120%);width:calc(100% - 30px);max-width:900px;z-index:1050;display:flex;align-items:center;gap:10px;padding:9px 12px;background:linear-gradient(135deg,rgba(22,32,51,.96),rgba(15,23,42,.90));border:1px solid var(--ui-border);border-radius:.7rem;box-shadow:0 12px 30px rgba(0,0,0,.32);backdrop-filter:blur(14px);transition:transform .25s ease}
+.game-mini-header.visible{transform:translate(-50%,0)}.mini-header-title{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:#fff;font-size:14px}
+.game-mini-header .btn-info{flex:0 0 auto;border:1px solid rgba(45,212,191,.25);background:rgba(45,212,191,.10);color:var(--ui-accent);font-size:13px}.game-mini-header .btn-info:hover{background:rgba(45,212,191,.17);border-color:rgba(45,212,191,.4);color:#99f6e4}
+#trailerModal .modal-content,#screenshotModal .modal-content{background:linear-gradient(135deg,rgba(22,32,51,.98),rgba(15,23,42,.96))!important;border:1px solid var(--ui-border)!important;border-radius:.75rem}
+#trailerModal .modal-header{border-bottom-color:var(--ui-border)!important}#trailerModal .modal-title{color:#fff;font-size:14px}#screenshotModalImg{display:block;width:100%;max-height:90vh!important;object-fit:contain}
+.videoWrapper{position:relative;width:100%;padding-bottom:56.25%;overflow:hidden;border-radius:.6rem}.videoWrapper video{position:absolute;inset:0;width:100%;height:100%}
+@media(max-width:768px){.game-page{margin-top:1rem!important}.media-card,.info-card,.feature-card,.screenshot-carousel{border-radius:.7rem}.media-card,.feature-card,.screenshot-carousel{padding:12px}.info-card{padding:15px}.game-title{font-size:18px}.feature-grid,.meta-grid{grid-template-columns:1fr}.screenshot-carousel .carousel-inner{height:220px}.game-mini-header{top:58px;width:calc(100% - 16px);padding:8px 9px}.mini-header-title{font-size:13px}.game-mini-header .btn-info{padding:5px 9px!important;font-size:12px}}
 </style>
 
 <script>

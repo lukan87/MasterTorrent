@@ -357,540 +357,106 @@
 </div>
 
 
+
 <style>
-
-/* =========================================
-   WRAPPER
-========================================= */
-
 .modern-comments-wrapper{
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(20,25,40,.72),
-            rgba(10,14,24,.92)
-        );
-
-    border-radius:24px;
-
-    border:
-        1px solid rgba(255,255,255,.06);
-
+    background:linear-gradient(135deg,rgba(22,32,51,.95),rgba(15,23,42,.84));
+    border:1px solid var(--ui-border);
+    border-radius:.85rem;
     overflow:hidden;
-
-    backdrop-filter:blur(18px);
-
-    box-shadow:
-        0 20px 50px rgba(0,0,0,.45);
+    backdrop-filter:blur(14px);
+    box-shadow:0 12px 30px rgba(0,0,0,.28);
+    position:relative;
 }
-
-/* =========================================
-   HEADER
-========================================= */
-
+.modern-comments-wrapper::before{
+    content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
+    background:linear-gradient(180deg,var(--ui-accent),var(--ui-accent-strong));
+}
 .modern-comments-header{
-
-    padding:22px 24px;
-
-    border-bottom:
-        1px solid rgba(255,255,255,.05);
+    padding:16px 20px;border-bottom:1px solid var(--ui-border);
 }
-
 .comments-icon-box{
-
-    width:58px;
-    height:58px;
-
-    border-radius:18px;
-
-    display:flex;
-
-    align-items:center;
-    justify-content:center;
-
-    background:
-        linear-gradient(135deg,#2563eb,#7c3aed);
-
-    color:#fff;
-
-    font-size:1.3rem;
-
-    box-shadow:
-        0 10px 25px rgba(59,130,246,.35);
+    width:44px;height:44px;border-radius:.7rem;display:flex;align-items:center;justify-content:center;
+    background:rgba(20,184,166,.12);border:1px solid rgba(20,184,166,.28);
+    color:var(--ui-accent);font-size:1.05rem;
 }
-
-.modern-comments-title{
-
-    color:#fff;
-
-    font-size:1.4rem;
-
-    font-weight:800;
-}
-
-.modern-comments-subtitle{
-
-    color:rgba(255,255,255,.58);
-
-    font-size:.9rem;
-}
-
-/* =========================================
-   BODY
-========================================= */
-
-.modern-comments-body{
-    padding:24px;
-}
-
-/* =========================================
-   ALERT
-========================================= */
-
+.modern-comments-title{color:#fff;font-size:14px;font-weight:700;margin:0}
+.modern-comments-subtitle{color:rgba(255,255,255,.58);font-size:13px}
+.modern-comments-body{padding:18px 20px}
 .modern-comment-alert{
-
-    display:flex;
-
-    align-items:flex-start;
-
-    gap:14px;
-
-    background:
-        rgba(239,68,68,.12);
-
-    border:
-        1px solid rgba(239,68,68,.25);
-
-    color:#fca5a5;
-
-    padding:18px;
-
-    border-radius:18px;
-
-    margin-bottom:24px;
+    display:flex;align-items:flex-start;gap:12px;background:rgba(239,68,68,.10);
+    border:1px solid rgba(239,68,68,.24);color:#fca5a5;padding:14px;border-radius:.7rem;margin-bottom:18px;font-size:14px;
 }
-
-.modern-comment-alert i{
-
-    font-size:1.3rem;
-}
-
-/* =========================================
-   FORM
-========================================= */
-
 .modern-comment-form{
-
-    background:rgba(255,255,255,.04);
-
-    border:
-        1px solid rgba(255,255,255,.05);
-
-    border-radius:22px;
-
-    padding:22px;
-
-    margin-bottom:30px;
+    background:rgba(255,255,255,.025);border:1px solid var(--ui-border);
+    border-radius:.75rem;padding:16px;margin-bottom:22px;
 }
-
-/* =========================================
-   TOOLBAR
-========================================= */
-
-.modern-editor-toolbar{
-
-    display:flex;
-
-    flex-wrap:wrap;
-
-    gap:10px;
-
-    margin-bottom:16px;
+.modern-editor-toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.toolbar-group{display:flex;gap:6px}
+.modern-select,.toolbar-btn{
+    background:rgba(255,255,255,.045);border:1px solid var(--ui-border);
+    color:#e5e7eb;border-radius:.55rem;padding:7px 10px;font-size:13px;
 }
-
-.toolbar-group{
-
-    display:flex;
-
-    gap:8px;
-}
-
-.modern-select{
-
-    background:rgba(255,255,255,.06);
-
-    border:
-        1px solid rgba(255,255,255,.08);
-
-    color:#fff;
-
-    border-radius:12px;
-
-    padding:10px 12px;
-}
-
-.toolbar-btn{
-
-    border:none;
-
-    background:rgba(255,255,255,.06);
-
-    color:#fff;
-
-    border-radius:12px;
-
-    padding:10px 14px;
-
-    font-weight:700;
-
-    transition:.25s ease;
-}
-
-.toolbar-btn:hover{
-
-    background:
-        linear-gradient(135deg,#2563eb,#7c3aed);
-
-    transform:translateY(-2px);
-}
-
-/* =========================================
-   TEXTAREA
-========================================= */
-
+.modern-select option{background:#111827;color:#fff}
+.toolbar-btn{font-weight:600;transition:.2s ease}
+.toolbar-btn:hover{background:rgba(20,184,166,.12);border-color:rgba(20,184,166,.35);color:var(--ui-accent)}
 .modern-comment-textarea{
-
-    width:100%;
-
-    background:rgba(255,255,255,.04);
-
-    border:
-        1px solid rgba(255,255,255,.06);
-
-    border-radius:18px;
-
-    padding:18px;
-
-    color:#fff;
-
-    resize:vertical;
-
-    min-height:140px;
+    width:100%;background:rgba(15,23,42,.72);border:1px solid var(--ui-border);
+    border-radius:.7rem;padding:13px;color:#fff;resize:vertical;min-height:130px;font-size:14px;
 }
-
+.modern-comment-textarea::placeholder{color:rgba(255,255,255,.38)}
 .modern-comment-textarea:focus{
-
-    outline:none;
-
-    border-color:rgba(124,58,237,.4);
-
-    box-shadow:
-        0 0 0 4px rgba(124,58,237,.15);
+    outline:none;border-color:var(--ui-accent);
+    box-shadow:0 0 0 3px rgba(20,184,166,.10);
 }
-
-/* =========================================
-   BUTTON
-========================================= */
-
 .modern-submit-btn{
-
-    border:none;
-
-    border-radius:14px;
-
-    padding:12px 18px;
-
-    font-weight:700;
-
-    color:#fff;
-
-    background:
-        linear-gradient(135deg,#2563eb,#7c3aed);
-
-    transition:.25s ease;
+    border:1px solid rgba(20,184,166,.35);border-radius:.6rem;padding:9px 14px;
+    font-size:14px;font-weight:700;color:#fff;background:rgba(20,184,166,.12);transition:.2s ease;
 }
-
-.modern-submit-btn:hover{
-
-    transform:translateY(-2px);
-
-    box-shadow:
-        0 12px 25px rgba(59,130,246,.25);
-}
-
-/* =========================================
-   COMMENTS LIST
-========================================= */
-
-.modern-comments-list{
-
-    display:flex;
-
-    flex-direction:column;
-
-    gap:18px;
-}
-
-/* =========================================
-   COMMENT CARD
-========================================= */
-
+.modern-submit-btn:hover{background:rgba(20,184,166,.2);border-color:var(--ui-accent);color:#fff;transform:translateY(-1px)}
+.modern-comments-list{display:flex;flex-direction:column;gap:12px}
 .modern-comment-card{
-
-    background:rgba(255,255,255,.04);
-
-    border:
-        1px solid rgba(255,255,255,.05);
-
-    border-radius:22px;
-
-    padding:22px;
-
-    transition:.25s ease;
+    background:rgba(255,255,255,.025);border:1px solid var(--ui-border);
+    border-radius:.75rem;padding:16px;transition:.2s ease;
 }
-
-.modern-comment-card:hover{
-
-    transform:translateY(-3px);
-
-    border-color:rgba(124,58,237,.22);
-}
-
-/* =========================================
-   TOP
-========================================= */
-
-.modern-comment-top{
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:flex-start;
-
-    gap:16px;
-
-    margin-bottom:18px;
-}
-
-.comment-user{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:14px;
-}
-
+.modern-comment-card:hover{border-color:rgba(20,184,166,.28)}
+.modern-comment-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:14px}
+.comment-user{display:flex;align-items:center;gap:11px}
 .comment-avatar{
-
-    width:52px;
-    height:52px;
-
-    border-radius:16px;
-
-    background:
-        linear-gradient(135deg,#2563eb,#7c3aed);
-
-    display:flex;
-
-    align-items:center;
-    justify-content:center;
-
-    color:#fff;
-
-    font-weight:800;
-
-    font-size:1.1rem;
+    width:42px;height:42px;border-radius:.65rem;display:flex;align-items:center;justify-content:center;
+    background:rgba(20,184,166,.10);border:1px solid rgba(20,184,166,.25);
+    color:var(--ui-accent);font-weight:700;font-size:14px;
 }
-
-.comment-username{
-
-    font-weight:800;
-
-    font-size:1rem;
-}
-
+.comment-username{font-weight:700;font-size:14px}
 .comment-user-badge{
-
-    padding:4px 10px;
-
-    border-radius:999px;
-
-    border:1px solid;
-
-    background:rgba(255,255,255,.05);
-
-    color:#fff;
-
-    font-size:.72rem;
-
-    font-weight:700;
+    padding:3px 8px;border-radius:999px;border:1px solid;background:rgba(255,255,255,.035);
+    color:#fff;font-size:11px;font-weight:600
 }
-
-.comment-time{
-
-    color:rgba(255,255,255,.48);
-
-    font-size:.82rem;
-
-    margin-top:4px;
-}
-
-/* =========================================
-   ACTIONS
-========================================= */
-
-.comment-actions{
-
-    display:flex;
-
-    gap:10px;
-}
-
+.comment-time{color:rgba(255,255,255,.45);font-size:12px;margin-top:3px}
+.comment-actions{display:flex;gap:6px}
 .comment-action-btn{
-
-    width:42px;
-    height:42px;
-
-    border:none;
-
-    border-radius:14px;
-
-    display:flex;
-
-    align-items:center;
-    justify-content:center;
-
-    color:#fff;
-
-    transition:.25s ease;
+    width:34px;height:34px;border:1px solid var(--ui-border);border-radius:.55rem;
+    display:flex;align-items:center;justify-content:center;color:#fff;background:rgba(255,255,255,.035);transition:.2s ease;
 }
-
-.comment-action-btn:hover{
-
-    transform:translateY(-2px);
-}
-
-.warning-btn{
-
-    background:rgba(250,204,21,.18);
-
-    color:#fde047;
-}
-
-.danger-btn{
-
-    background:rgba(239,68,68,.18);
-
-    color:#f87171;
-}
-
-/* =========================================
-   CONTENT
-========================================= */
-
-.modern-comment-content{
-
-    color:#e5e7eb;
-
-    line-height:1.8;
-
-    word-break:break-word;
-
-    overflow-wrap:anywhere;
-}
-
-.modern-comment-content img{
-
-    max-width:100%;
-
-    border-radius:16px;
-
-    margin:12px 0;
-}
-
-.modern-comment-content pre{
-
-    background:rgba(0,0,0,.45);
-
-    border-radius:16px;
-
-    padding:16px;
-
-    overflow:auto;
-}
-
-/* =========================================
-   EMPTY
-========================================= */
-
-.empty-comments{
-
-    text-align:center;
-
-    padding:5px 10px;
-
-    color:rgba(255,255,255,.55);
-}
-
-.empty-comments i{
-
-    font-size:2rem;
-
-    display:block;
-
-    margin-bottom:16px;
-}
-
-/* =========================================
-   MOBILE
-========================================= */
-
+.comment-action-btn:hover{transform:translateY(-1px)}
+.warning-btn{background:rgba(250,204,21,.10);color:#fde047}
+.danger-btn{background:rgba(239,68,68,.10);color:#f87171}
+.modern-comment-content{color:#e5e7eb;font-size:14px;line-height:1.65;word-break:break-word;overflow-wrap:anywhere}
+.modern-comment-content img{max-width:100%;height:auto;border-radius:.65rem;margin:10px 0}
+.modern-comment-content pre{background:rgba(0,0,0,.35);border:1px solid var(--ui-border);border-radius:.65rem;padding:12px;overflow:auto}
+.empty-comments{text-align:center;padding:32px 10px;color:rgba(255,255,255,.5);font-size:14px}
+.empty-comments i{font-size:2rem;display:block;margin-bottom:10px;color:var(--ui-accent)}
 @media(max-width:768px){
-
-    .modern-comments-body,
-    .modern-comments-header{
-
-        padding:18px;
-    }
-
-    .modern-comment-card{
-
-        padding:18px;
-    }
-
-    .modern-comment-top{
-
-        flex-direction:column;
-    }
-
-    .modern-editor-toolbar{
-
-        overflow-x:auto;
-
-        flex-wrap:nowrap;
-
-        padding-bottom:6px;
-
-        scrollbar-width:none;
-    }
-
-    .modern-editor-toolbar::-webkit-scrollbar{
-        display:none;
-    }
-
-    .toolbar-btn,
-    .modern-select{
-
-        flex:0 0 auto;
-
-        white-space:nowrap;
-    }
+ .modern-comments-body,.modern-comments-header{padding:14px}
+ .modern-comment-card,.modern-comment-form{padding:14px}
+ .modern-comment-top{flex-direction:column}
+ .modern-editor-toolbar{overflow-x:auto;flex-wrap:nowrap;padding-bottom:5px;scrollbar-width:none}
+ .modern-editor-toolbar::-webkit-scrollbar{display:none}
+ .toolbar-btn,.modern-select{flex:0 0 auto;white-space:nowrap}
+ .modern-comment-content{font-size:14px}
 }
-
 </style>
+
 
 
 <script>

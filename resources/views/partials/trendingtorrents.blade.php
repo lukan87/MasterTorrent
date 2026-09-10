@@ -163,402 +163,260 @@
 </div>
 
 <style>
+/* =========================================================
+   FILEIPLAY TRENDING TORRENTS
+   Matches the News / Poll visual language
+   Maximum font size: 14px
+========================================================= */
 
-/* =========================================
-   WRAPPER
-========================================= */
-
-.modern-trending-wrapper{
-
-    overflow:hidden;
-
-    border-radius:28px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(255,255,255,.05),
-            rgba(255,255,255,.02)
-        );
-
-    border:
-        1px solid rgba(255,255,255,.06);
-
-    backdrop-filter:blur(18px);
-
-    box-shadow:
-        0 18px 50px rgba(0,0,0,.28);
+.modern-trending-wrapper {
+    overflow: hidden;
+    border: 1px solid var(--ui-border);
+    border-radius: 1rem;
+    background: linear-gradient(
+        135deg,
+        rgba(22, 32, 51, .95),
+        rgba(15, 23, 42, .84)
+    );
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .22);
 }
 
-/* =========================================
-   HEADER
-========================================= */
-
-.modern-trending-header{
-
-    padding:22px 26px;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:space-between;
-
-    border-bottom:
-        1px solid rgba(255,255,255,.05);
+/* Header */
+.modern-trending-header {
+    padding: 1rem 1.15rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--ui-border);
 }
 
-.modern-trending-icon{
-
-    width:52px;
-    height:52px;
-
-    border-radius:18px;
-
-    display:flex;
-
-    align-items:center;
-    justify-content:center;
-
-    background:
-        linear-gradient(
-            135deg,
-            #f97316,
-            #ef4444
-        );
-
-    color:white;
-
-    font-size:1.2rem;
-
-    box-shadow:
-        0 10px 24px rgba(249,115,22,.28);
+.modern-trending-icon {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+    border-radius: .7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(20, 184, 166, .10);
+    border: 1px solid rgba(20, 184, 166, .28);
+    color: var(--ui-accent);
+    font-size: 14px;
 }
 
-.modern-trending-title{
-
-    margin:0;
-
-    color:white;
-
-    font-size:1.2rem;
-
-    font-weight:800;
+.modern-trending-title {
+    margin: 0;
+    color: #f1f5f9;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.35;
 }
 
-.modern-trending-subtitle{
-
-    color:rgba(255,255,255,.55);
-
-    font-size:.88rem;
-
-    margin-top:2px;
+.modern-trending-subtitle {
+    margin-top: 2px;
+    color: #94a3b8;
+    font-size: 12px;
+    line-height: 1.4;
 }
 
-.modern-trending-toggle{
-
-    width:42px;
-    height:42px;
-
-    border:none;
-
-    border-radius:14px;
-
-    background:
-        rgba(255,255,255,.05);
-
-    color:#cbd5e1;
-
-    transition:.2s ease;
+.modern-trending-toggle {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    border: 1px solid var(--ui-border);
+    border-radius: .6rem;
+    background: rgba(255, 255, 255, .035);
+    color: #94a3b8;
+    transition: .2s ease;
 }
 
-.modern-trending-toggle:hover{
-
-    background:
-        rgba(255,255,255,.08);
-
-    color:white;
+.modern-trending-toggle:hover,
+.modern-trending-toggle:focus {
+    background: rgba(20, 184, 166, .10);
+    border-color: var(--ui-accent);
+    color: var(--ui-accent);
 }
 
-/* =========================================
-   BODY
-========================================= */
-
-.modern-trending-body{
-
-    padding:24px;
+/* Body */
+.modern-trending-body {
+    padding: 1rem;
 }
 
-/* =========================================
-   CARD
-========================================= */
-
-.modern-tt-card{
-
-    position:relative;
-
-    overflow:hidden;
-
-    border-radius:22px;
-
-    background:
-        rgba(255,255,255,.03);
-
-    border:
-        1px solid rgba(255,255,255,.05);
-
-    transition:.28s ease;
-
-    height:100%;
-}
-
-.modern-tt-card:hover{
-
-    transform:
-        translateY(-4px);
-
-    box-shadow:
-        0 16px 35px rgba(0,0,0,.3);
-}
-
-.modern-tt-glow{
-
-    position:absolute;
-
-    top:-80px;
-    right:-80px;
-
-    width:180px;
-    height:180px;
-
-    border-radius:50%;
-
-    background:
-        radial-gradient(
-            circle,
-            rgba(249,115,22,.12),
-            transparent 70%
-        );
-
-    z-index:1;
-}
-
-/* =========================================
-   IMAGE
-========================================= */
-
-.modern-tt-image-wrap{
-
-    position:relative;
-
-    overflow:hidden;
-
-    z-index:2;
-}
-
-.modern-tt-poster{
-
-    width:100%;
-
-    height:250px;
-
-    object-fit:cover;
-
+/* Torrent card */
+.modern-tt-card {
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    border: 1px solid var(--ui-border);
+    border-radius: .85rem;
+    background: rgba(15, 23, 42, .55);
     transition:
-        transform .35s ease;
+        transform .2s ease,
+        border-color .2s ease,
+        box-shadow .2s ease;
 }
 
-.modern-tt-card:hover .modern-tt-poster{
-
-    transform:scale(1.04);
+.modern-tt-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(20, 184, 166, .35);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, .25);
 }
 
-/* =========================================
-   RANK
-========================================= */
-
-.modern-tt-rank{
-
-    position:absolute;
-
-    top:12px;
-    left:12px;
-
-    padding:6px 10px;
-
-    border-radius:12px;
-
-    background:
-        linear-gradient(
-            135deg,
-            #facc15,
-            #f59e0b
-        );
-
-    color:#111;
-
-    font-size:.82rem;
-
-    font-weight:800;
-
-    box-shadow:
-        0 6px 18px rgba(245,158,11,.3);
+/* Very subtle teal ambient highlight */
+.modern-tt-glow {
+    position: absolute;
+    top: -70px;
+    right: -70px;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: radial-gradient(
+        circle,
+        rgba(20, 184, 166, .07),
+        transparent 70%
+    );
+    pointer-events: none;
 }
 
-/* =========================================
-   OVERLAY
-========================================= */
-
-.modern-tt-overlay{
-
-    position:absolute;
-
-    inset:0;
-
-    background:
-        linear-gradient(
-            to top,
-            rgba(0,0,0,.72),
-            transparent 45%
-        );
-
-    display:flex;
-
-    align-items:flex-end;
-
-    justify-content:center;
-
-    padding:14px;
-
-    opacity:0;
-
-    transition:.25s ease;
+/* Poster */
+.modern-tt-image-wrap {
+    position: relative;
+    overflow: hidden;
+    background: #0f172a;
 }
 
-.modern-tt-card:hover .modern-tt-overlay{
-
-    opacity:1;
+.modern-tt-poster {
+    display: block;
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    transition: transform .25s ease;
 }
 
-.overlay-stats{
-
-    display:flex;
-
-    gap:14px;
-
-    font-size:.88rem;
-
-    font-weight:700;
+.modern-tt-card:hover .modern-tt-poster {
+    transform: scale(1.025);
 }
 
-.overlay-seeders{
-
-    color:#4ade80;
+/* Rank */
+.modern-tt-rank {
+    position: absolute;
+    top: 9px;
+    left: 9px;
+    padding: 3px 7px;
+    border: 1px solid var(--ui-border);
+    border-radius: .5rem;
+    background: rgba(15, 23, 42, .90);
+    color: var(--ui-accent);
+    font-size: 12px;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .25);
 }
 
-.overlay-leechers{
-
-    color:#f87171;
+/* Hover statistics */
+.modern-tt-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to top,
+        rgba(15, 23, 42, .88),
+        transparent 50%
+    );
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 10px;
+    opacity: 0;
+    transition: opacity .2s ease;
 }
 
-/* =========================================
-   CONTENT
-========================================= */
-
-.modern-tt-content{
-
-    position:relative;
-
-    z-index:2;
-
-    padding:16px;
+.modern-tt-card:hover .modern-tt-overlay {
+    opacity: 1;
 }
 
-.modern-tt-title{
-
-    color:white;
-
-    font-size:1rem;
-
-    font-weight:700;
-
-    line-height:1.45;
-
-    overflow:hidden;
-
-    display:-webkit-box;
-
-    -webkit-line-clamp:2;
-
-    -webkit-box-orient:vertical;
-
-    min-height:46px;
+.overlay-stats {
+    display: flex;
+    gap: 12px;
+    font-size: 12px;
+    font-weight: 600;
 }
 
-.modern-tt-stats{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:14px;
-
-    margin-top:10px;
-
-    font-size:.88rem;
-
-    font-weight:700;
+.overlay-seeders {
+    color: #4ade80;
 }
 
-.modern-tt-seeders{
-
-    color:#4ade80;
+.overlay-leechers {
+    color: #f87171;
 }
 
-.modern-tt-leechers{
-
-    color:#f87171;
+/* Content */
+.modern-tt-content {
+    position: relative;
+    z-index: 2;
+    padding: .75rem;
 }
 
-/* =========================================
-   MOBILE
-========================================= */
+.modern-tt-title {
+    color: #e2e8f0;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    min-height: 39px;
+}
 
-@media(max-width:768px){
+.modern-tt-stats {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 7px;
+    font-size: 12px;
+    font-weight: 600;
+}
 
-    .modern-trending-header{
+.modern-tt-seeders {
+    color: #4ade80;
+}
 
-        padding:18px;
+.modern-tt-leechers {
+    color: #f87171;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .modern-trending-header {
+        padding: .85rem;
     }
 
-    .modern-trending-body{
-
-        padding:18px;
+    .modern-trending-body {
+        padding: .75rem;
     }
 
-    .modern-tt-poster{
-
-        height:210px;
+    .modern-trending-icon {
+        width: 36px;
+        height: 36px;
+        flex-basis: 36px;
     }
 
-    .modern-tt-content{
-
-        padding:14px;
+    .modern-tt-poster {
+        height: 210px;
     }
 
-    .modern-tt-title{
-
-        font-size:1rem;
-
-        min-height:42px;
+    .modern-tt-content {
+        padding: .65rem;
     }
 
-    .modern-tt-stats{
+    .modern-tt-title {
+        font-size: 14px;
+        min-height: 39px;
+    }
 
-        font-size:.8rem;
+    .modern-tt-stats {
+        font-size: 12px;
     }
 }
-
 </style>
 
 <script>

@@ -9,23 +9,17 @@
             <div class="d-flex align-items-center gap-2">
 
                 <div class="disclaimer-icon">
-
                     <i class="bi bi-shield-exclamation"></i>
-
                 </div>
 
                 <div>
 
                     <div class="disclaimer-title">
-
                         Disclaimer
-
                     </div>
 
                     <div class="disclaimer-subtitle">
-
                         Legal notice & platform responsibility
-
                     </div>
 
                 </div>
@@ -64,186 +58,253 @@
 
 </div>
 
+
 <style>
 
 /* =========================================
-   CARD
+   DISCLAIMER CARD
 ========================================= */
 
-.disclaimer-card{
+.disclaimer-card {
 
-    position:relative;
+    position: relative;
 
-    overflow:hidden;
-
-    border-radius:24px;
+    overflow: hidden;
 
     background:
         linear-gradient(
-            145deg,
-            rgba(255,255,255,.045),
-            rgba(255,255,255,.02)
+            135deg,
+            rgba(22, 32, 51, .95),
+            rgba(15, 23, 42, .84)
         );
 
-    border:
-        1px solid rgba(255,255,255,.06);
+    border: 1px solid var(--ui-border);
 
-    backdrop-filter:blur(14px);
+    border-radius: .9rem;
 
     box-shadow:
-        0 12px 32px rgba(0,0,0,.22);
+        0 10px 28px rgba(0, 0, 0, .24);
 }
+
+.disclaimer-card::before {
+
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    top: 0;
+    bottom: 0;
+
+    width: 3px;
+
+    background:
+        linear-gradient(
+            180deg,
+            var(--ui-accent),
+            var(--ui-accent-strong)
+        );
+
+    opacity: .9;
+
+    pointer-events: none;
+}
+
 
 /* =========================================
    HEADER
 ========================================= */
 
-.disclaimer-header{
+.disclaimer-header {
 
-    padding:1.1rem 1.35rem;
+    padding: .85rem 1rem;
 
     border-bottom:
-        1px solid rgba(255,255,255,.05);
+        1px solid var(--ui-border);
+
+    background: transparent;
 }
 
-.disclaimer-icon{
+.disclaimer-icon {
 
-    width:40px;
-    height:40px;
+    width: 36px;
+    height: 36px;
 
-    border-radius:14px;
+    display: flex;
 
-    display:flex;
+    align-items: center;
+    justify-content: center;
 
-    align-items:center;
-    justify-content:center;
+    flex-shrink: 0;
+
+    border-radius: .65rem;
+
+    color: var(--ui-accent);
 
     background:
-        linear-gradient(
-            135deg,
-            #f59e0b,
-            #d97706
-        );
+        rgba(45, 212, 191, .08);
 
-    color:white;
+    border:
+        1px solid rgba(45, 212, 191, .18);
 
-    font-size:1rem;
-
-    box-shadow:
-        0 8px 20px rgba(245,158,11,.25);
+    font-size: 15px;
 }
 
-.disclaimer-title{
+.disclaimer-title {
 
-    color:white;
+    color: #fff;
 
-    font-size:1rem;
+    font-size: 14px;
 
-    font-weight:700;
+    font-weight: 700;
+
+    line-height: 1.25;
 }
 
-.disclaimer-subtitle{
+.disclaimer-subtitle {
 
-    color:rgba(255,255,255,.45);
+    color:
+        rgba(255, 255, 255, .55);
 
-    font-size:.75rem;
+    font-size: 13px;
 
-    margin-top:2px;
+    margin-top: .15rem;
 }
+
 
 /* =========================================
    BODY
 ========================================= */
 
-.disclaimer-body{
+.disclaimer-body {
 
-    padding:1.25rem 1.35rem;
+    padding: 1rem;
 }
 
+.disclaimer-text {
+
+    color:
+        rgba(255, 255, 255, .72);
+
+    font-size: 14px;
+
+    line-height: 1.7;
+}
+
+.disclaimer-text p {
+
+    margin-bottom: 1rem;
+}
+
+.disclaimer-text p:last-child {
+
+    margin-bottom: 0;
+}
+
+
 /* =========================================
-   TERMS LINK
+   SUBTLE TEXT HIGHLIGHT
 ========================================= */
 
-.tos-link{
+.disclaimer-text strong {
 
-    display:inline-flex;
+    color: var(--ui-accent);
 
-    align-items:center;
+    font-weight: 700;
+}
 
-    padding:.55rem .9rem;
 
-    border-radius:12px;
+/* =========================================
+   OPTIONAL TERMS LINK
+========================================= */
+
+.tos-link {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: .4rem;
+
+    padding: .4rem .7rem;
+
+    color: var(--ui-accent);
+
+    text-decoration: none;
+
+    font-size: 13px;
+
+    font-weight: 600;
 
     background:
-        rgba(255,255,255,.04);
+        rgba(45, 212, 191, .05);
 
     border:
-        1px solid rgba(255,255,255,.05);
+        1px solid var(--ui-border);
 
-    color:#cbd5e1;
+    border-radius: .55rem;
 
-    text-decoration:none;
-
-    font-size:.88rem;
-
-    font-weight:600;
-
-    transition:.2s ease;
+    transition:
+        background .18s ease,
+        border-color .18s ease,
+        transform .18s ease,
+        color .18s ease;
 }
 
-.tos-link:hover{
+.tos-link:hover {
+
+    color: var(--ui-accent-strong);
 
     background:
-        rgba(59,130,246,.12);
+        rgba(45, 212, 191, .09);
 
     border-color:
-        rgba(59,130,246,.18);
-
-    color:#93c5fd;
+        rgba(45, 212, 191, .25);
 
     transform:
-        translateY(-2px);
+        translateY(-1px);
 }
 
-/* =========================================
-   TEXT
-========================================= */
-
-.disclaimer-text{
-
-    color:#d1d5db;
-
-    font-size:.92rem;
-
-    line-height:1.8;
-}
-
-.disclaimer-text p{
-
-    margin-bottom:1rem;
-}
 
 /* =========================================
    MOBILE
 ========================================= */
 
-@media(max-width:768px){
+@media (max-width: 768px) {
 
-    .disclaimer-header{
+    .disclaimer-header {
 
-        padding:1rem;
+        padding: .75rem;
     }
 
-    .disclaimer-body{
+    .disclaimer-body {
 
-        padding:1rem;
+        padding: .85rem;
     }
 
-    .disclaimer-text{
+    .disclaimer-icon {
 
-        font-size:.88rem;
+        width: 34px;
+        height: 34px;
 
-        line-height:1.7;
+        font-size: 14px;
+    }
+
+    .disclaimer-title {
+
+        font-size: 14px;
+    }
+
+    .disclaimer-subtitle {
+
+        font-size: 13px;
+    }
+
+    .disclaimer-text {
+
+        font-size: 14px;
+
+        line-height: 1.65;
     }
 
 }

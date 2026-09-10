@@ -3,10 +3,15 @@
 @section('content')
 
 @error('torrent')
+
     <div class="modern-alert modern-alert-danger mb-4">
+
         <i class="bi bi-exclamation-triangle-fill me-2"></i>
+
         {{ $message }}
+
     </div>
+
 @enderror
 
 <div class="seedbox-page">
@@ -14,14 +19,19 @@
     <div class="container-fluid py-5">
 
         {{-- =========================================
+
             HERO HEADER
+
         ========================================= --}}
+
         <div class="seedbox-hero mb-4">
 
             <div class="hero-content">
 
                 <div class="hero-kicker">
+
                     REMOTE CLIENT • TORRENT CONTROL
+
                 </div>
 
                 <h1 class="hero-title">
@@ -43,13 +53,17 @@
             <div class="d-flex align-items-center gap-2 flex-wrap">
 
                 @php
+
                     $isConnected = isset($torrents) && $torrents->count() > 0;
+
                 @endphp
 
                 <span class="connection-badge {{ $isConnected ? 'online' : 'offline' }}">
 
                     <i class="bi {{ $isConnected
+
                         ? 'bi-check-circle-fill'
+
                         : 'bi-x-circle-fill' }}"></i>
 
                     {{ $isConnected ? 'Connected' : 'Offline' }}
@@ -57,6 +71,7 @@
                 </span>
 
                 <a href="{{ route('seedboxes.index') }}"
+
                    class="btn modern-back-btn">
 
                     <i class="bi bi-arrow-left-circle me-1"></i>
@@ -70,18 +85,25 @@
         </div>
 
         {{-- =========================================
+
             SESSION ALERTS
+
         ========================================= --}}
+
         @if(session('success'))
 
             <div class="modern-alert modern-alert-success">
 
                 <div>
+
                     <i class="bi bi-check-circle-fill me-2"></i>
+
                     {!! session('success') !!}
+
                 </div>
 
                 <button class="btn-close btn-close-white"
+
                         data-bs-dismiss="alert"></button>
 
             </div>
@@ -93,11 +115,15 @@
             <div class="modern-alert modern-alert-danger">
 
                 <div>
+
                     <i class="bi bi-exclamation-triangle-fill me-2"></i>
+
                     {!! session('error') !!}
+
                 </div>
 
                 <button class="btn-close btn-close-white"
+
                         data-bs-dismiss="alert"></button>
 
             </div>
@@ -105,8 +131,11 @@
         @endif
 
         {{-- =========================================
+
             STATS
+
         ========================================= --}}
+
         <div class="stats-grid mb-4">
 
             <div class="modern-stat-card">
@@ -114,11 +143,15 @@
                 <i class="bi bi-hdd-network text-info"></i>
 
                 <div class="stat-value">
+
                     {{ $stats['total'] }}
+
                 </div>
 
                 <div class="stat-label">
+
                     Total Torrents
+
                 </div>
 
             </div>
@@ -128,11 +161,15 @@
                 <i class="bi bi-arrow-up-circle text-success"></i>
 
                 <div class="stat-value">
+
                     {{ $stats['seeding'] }}
+
                 </div>
 
                 <div class="stat-label">
+
                     Seeding
+
                 </div>
 
             </div>
@@ -142,11 +179,15 @@
                 <i class="bi bi-arrow-down-circle text-primary"></i>
 
                 <div class="stat-value">
+
                     {{ $stats['downloading'] }}
+
                 </div>
 
                 <div class="stat-label">
+
                     Downloading
+
                 </div>
 
             </div>
@@ -156,11 +197,15 @@
                 <i class="bi bi-pause-circle text-secondary"></i>
 
                 <div class="stat-value">
+
                     {{ $stats['paused'] }}
+
                 </div>
 
                 <div class="stat-label">
+
                     Paused
+
                 </div>
 
             </div>
@@ -170,11 +215,15 @@
                 <i class="bi bi-hdd-stack text-warning"></i>
 
                 <div class="stat-value">
+
                     {{ App\Helpers\FormatHelper::formatSize($stats['totalSize']) }}
+
                 </div>
 
                 <div class="stat-label">
+
                     Total Size
+
                 </div>
 
             </div>
@@ -184,11 +233,15 @@
                 <i class="bi bi-cloud-arrow-up text-info"></i>
 
                 <div class="stat-value">
+
                     {{ App\Helpers\FormatHelper::formatSize($stats['totalUploaded']) }}
+
                 </div>
 
                 <div class="stat-label">
+
                     Uploaded
+
                 </div>
 
             </div>
@@ -198,11 +251,15 @@
                 <i class="bi bi-cloud-arrow-down text-light"></i>
 
                 <div class="stat-value">
+
                     {{ App\Helpers\FormatHelper::formatSize($stats['totalDownloaded']) }}
+
                 </div>
 
                 <div class="stat-label">
+
                     Downloaded
+
                 </div>
 
             </div>
@@ -210,8 +267,11 @@
         </div>
 
         {{-- =========================================
+
             ADD TORRENT
+
         ========================================= --}}
+
         <div class="modern-card mb-4">
 
             <div class="modern-card-header">
@@ -229,7 +289,9 @@
             <div class="modern-card-body">
 
                 <form action="{{ route('seedboxes.addTorrent', $seedbox) }}"
+
                       method="POST"
+
                       enctype="multipart/form-data">
 
                     @csrf
@@ -245,10 +307,15 @@
                             </label>
 
                             <input class="form-control modern-input"
+
                                    type="file"
+
                                    name="torrent_file"
+
                                    id="torrent_file"
+
                                    accept=".torrent"
+
                                    required>
 
                         </div>
@@ -256,6 +323,7 @@
                         <div class="col-md-3">
 
                             <button type="submit"
+
                                     class="btn modern-upload-btn w-100">
 
                                 <i class="bi bi-upload me-1"></i>
@@ -275,13 +343,17 @@
         </div>
 
         {{-- =========================================
+
             SEARCH
+
         ========================================= --}}
+
         <div class="modern-card mb-4">
 
             <div class="modern-card-body">
 
                 <form method="GET"
+
                       action="{{ route('seedboxes.torrents', $seedbox) }}">
 
                     <div class="modern-search-wrap">
@@ -289,12 +361,17 @@
                         <i class="bi bi-search search-icon"></i>
 
                         <input type="text"
+
                                name="search"
+
                                class="modern-search-input"
+
                                placeholder="Search torrents by name..."
+
                                value="{{ request('search') }}">
 
                         <button class="btn modern-search-btn"
+
                                 type="submit">
 
                             Search
@@ -310,12 +387,17 @@
         </div>
 
         @php
+
             $torrentItems = $torrents->items();
+
         @endphp
 
         {{-- =========================================
+
             TORRENT LIST
+
         ========================================= --}}
+
         <div class="modern-card">
 
             <div class="modern-card-header">
@@ -347,56 +429,91 @@
                         @foreach($torrentItems as $hash => $torrent)
 
                             @php
+
                                 $name = $torrent[4] ?? 'Unknown';
+
                                 $size = $torrent[5] ?? 0;
+
                                 $path = $torrent[25] ?? 'Unknown';
+
                                 $downloaded = $torrent[8] ?? 0;
+
                                 $uploaded = $torrent[9] ?? 0;
+
                                 $progress = $size > 0 ? round(($downloaded / $size) * 100, 2) : 0;
+
                                 $state = $torrent[28] ?? 0;
+
                                 $ratio = $downloaded > 0 ? round($uploaded / $downloaded, 2) : 0;
 
                                 if ($progress >= 80) $color = 'bg-success-gradient';
+
                                 elseif ($progress >= 50) $color = 'bg-info-gradient';
+
                                 elseif ($progress >= 30) $color = 'bg-warning-gradient';
+
                                 else $color = 'bg-danger-gradient';
 
                                 if ($state == 1) {
+
                                     $statusText = 'Seeding';
+
                                     $statusIcon = 'bi-arrow-up-circle text-success';
+
                                     $actionIcon = ['type'=>'pause','icon'=>'bi-pause-circle-fill','title'=>'Pause','class'=>'text-warning'];
+
                                 } elseif ($state == 2) {
+
                                     $statusText = 'Downloading';
+
                                     $statusIcon = 'bi-arrow-down-circle text-info';
+
                                     $actionIcon = ['type'=>'pause','icon'=>'bi-pause-circle-fill','title'=>'Pause','class'=>'text-warning'];
+
                                 } elseif ($state == 0) {
+
                                     $statusText = 'Paused';
+
                                     $statusIcon = 'bi-stop-circle text-secondary';
+
                                     $actionIcon = ['type'=>'start','icon'=>'bi-play-circle-fill','title'=>'Start','class'=>'text-success'];
+
                                 } else {
+
                                     $statusText = 'Unknown';
+
                                     $statusIcon = 'bi-question-circle text-secondary';
+
                                     $actionIcon = ['type'=>'start','icon'=>'bi-play-circle-fill','title'=>'Start','class'=>'text-secondary'];
+
                                 }
 
                                 $addedDate = isset($torrent[21])
+
                                     ? \Carbon\Carbon::createFromTimestamp($torrent[21])->format('Y-m-d H:i')
+
                                     : 'N/A';
 
                                 $canUpload = Auth::check() && (
+
                                     Auth::user()->user_class >= \App\Models\UserClass::UPLOADER ||
+
                                     Auth::user()->uploadpos === 'yes'
+
                                 );
+
                             @endphp
 
                             <tr data-name="{{ $name }}">
 
                                 {{-- PROGRESS --}}
+
                                 <td class="progress-column">
 
                                     <div class="modern-progress">
 
                                         <div class="progress-bar {{ $color }}"
+
                                              style="width: {{ $progress }}%"></div>
 
                                         <span class="progress-text">
@@ -410,6 +527,7 @@
                                 </td>
 
                                 {{-- INFO --}}
+
                                 <td>
 
                                     <div class="torrent-name">
@@ -471,6 +589,7 @@
                                             <span class="tracker-badge">
 
                                                 <b class="torrent-trackers"
+
                                                    data-hash="{{ $hash }}">
 
                                                     Loading trackers...
@@ -486,16 +605,19 @@
                                 </td>
 
                                 {{-- ACTIONS --}}
+
                                 <td class="text-end">
 
                                     <div class="torrent-actions">
 
                                         <form method="POST"
+
                                               action="{{ route('seedboxes.'.$actionIcon['type'], [$seedbox, $hash]) }}">
 
                                             @csrf
 
                                             <button class="action-btn action-btn-dark"
+
                                                     title="{{ $actionIcon['title'] }}">
 
                                                 <i class="bi {{ $actionIcon['icon'] }} {{ $actionIcon['class'] }}"></i>
@@ -505,13 +627,17 @@
                                         </form>
 
                                         <form method="POST"
+
                                               action="{{ route('seedboxes.delete', [$seedbox, $hash]) }}">
 
                                             @csrf
+
                                             @method('DELETE')
 
                                             <button class="action-btn action-btn-danger"
+
                                                     title="Delete torrent"
+
                                                     onclick="return confirm('Are you sure you want to delete this torrent? Only the torrent will be removed, not the data.');">
 
                                                 <i class="bi bi-trash-fill"></i>
@@ -523,11 +649,15 @@
                                         @if($canUpload)
 
                                             <span class="upload-button"
+
                                                   data-hash="{{ $hash }}"
+
                                                   style="display:none;">
 
                                                 <a href="{{ route('seedboxes.downloadRebuiltTorrent', [$seedbox, $hash]) }}"
+
                                                    class="action-btn action-btn-info"
+
                                                    title="Upload to {{ config('app.name') }}">
 
                                                     <i class="bi bi-cloud-arrow-up-fill"></i>
@@ -567,9 +697,13 @@
 </div>
 
 {{-- =========================================
+
     AUTO REFRESH
+
 ========================================= --}}
+
 <script>
+
 document.addEventListener('DOMContentLoaded', () => {
 
     const refreshInterval = 20000;
@@ -577,9 +711,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function refreshTorrents() {
 
         fetch(window.location.href, {
+
             headers: {
+
                 'X-Requested-With': 'XMLHttpRequest'
+
             }
+
         })
 
         .then(response => response.text())
@@ -595,7 +733,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const oldTable = document.querySelector('.table-responsive');
 
             if (newTable && oldTable) {
+
                 oldTable.innerHTML = newTable.innerHTML;
+
             }
 
             document.querySelectorAll('.torrent-trackers').forEach(td => {
@@ -619,12 +759,12 @@ document.addEventListener('DOMContentLoaded', () => {
                                 let host = new URL(url).hostname;
 
                                 host = host.replace(/^(tracker\.|www\.)/i, '');
-
                                 return host.toLowerCase();
 
                             } catch (e) {
 
                                 return null;
+
                             }
 
                         }).filter(Boolean);
@@ -634,6 +774,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else {
 
                         td.textContent = 'N/A';
+
                     }
 
                     const uploadBtn = document.querySelector(`.upload-button[data-hash="${hash}"]`);
@@ -641,13 +782,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     if(uploadBtn){
 
                         const hasInternalTracker = hosts.some(host =>
+
                             host.includes('fileiplay.org') ||
+
                             host.includes('fileiplay.ro')
+
                         );
 
                         uploadBtn.style.display = hasInternalTracker
+
                             ? 'none'
+
                             : 'inline-block';
+
                     }
 
                 })
@@ -659,710 +806,552 @@ document.addEventListener('DOMContentLoaded', () => {
         })
 
         .catch(err => console.error('Failed to refresh torrents:', err));
+
     }
 
     refreshTorrents();
 
     setInterval(refreshTorrents, refreshInterval);
+
 });
+
 </script>
 
+
+
 <style>
-
 /* =========================================
-   BACKGROUND
+   FILEIPLAY SEEDBOX TORRENT CONTROL
+   DARK GLASS / TEAL FORUM STYLE
 ========================================= */
 
-body{
-
-    background:
-        radial-gradient(
-            circle at top,
-            #1e293b,
-            #0f172a 45%,
-            #020617
-        );
-
-    min-height:100vh;
+.seedbox-page {
+    color: #e2e8f0;
 }
 
-/* =========================================
-   HERO
-========================================= */
-
-.seedbox-hero{
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
-    gap:20px;
-
-    flex-wrap:wrap;
-
-    padding:32px;
-
-    border-radius:28px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(255,255,255,.07),
-            rgba(255,255,255,.03)
-        );
-
-    backdrop-filter:blur(18px);
-
-    border:
-        1px solid rgba(255,255,255,.08);
-
-    box-shadow:
-        0 20px 60px rgba(0,0,0,.45);
+.seedbox-hero,
+.modern-card,
+.modern-stat-card {
+    border: 1px solid var(--ui-border, rgba(255,255,255,.08));
+    background: linear-gradient(135deg, rgba(22,32,51,.95), rgba(15,23,42,.84));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 10px 28px rgba(0,0,0,.18);
 }
 
-.hero-kicker{
-
-    color:#60a5fa;
-
-    font-size:.75rem;
-
-    letter-spacing:2px;
-
-    font-weight:800;
-
-    margin-bottom:10px;
+.seedbox-hero {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 1.05rem 1.2rem;
+    border-left: 3px solid var(--ui-accent, #22d3ee);
+    border-radius: .85rem;
 }
 
-.hero-title{
-
-    color:white;
-
-    font-size:2.3rem;
-
-    font-weight:900;
-
-    margin:0;
+.seedbox-hero::after {
+    content: "";
+    position: absolute;
+    top: -100px;
+    right: -90px;
+    width: 210px;
+    height: 210px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(34,211,238,.09), transparent 70%);
+    pointer-events: none;
 }
 
-.hero-subtitle{
+.hero-content { min-width: 0; }
 
-    color:rgba(255,255,255,.65);
-
-    margin-top:8px;
+.hero-kicker {
+    margin-bottom: .3rem;
+    color: var(--ui-accent, #22d3ee);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.1px;
 }
 
-/* =========================================
-   BUTTONS
-========================================= */
-
-.modern-back-btn,
-.modern-upload-btn,
-.modern-search-btn{
-
-    border:none;
-
-    border-radius:16px;
-
-    font-weight:700;
-
-    color:white;
+.hero-title {
+    margin: 0;
+    color: #f8fafc;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
 }
 
-.modern-back-btn{
+.hero-title i { color: var(--ui-accent, #22d3ee); }
 
-    background:
-        rgba(255,255,255,.08);
-
-    padding:12px 18px;
+.hero-subtitle {
+    margin-top: .35rem;
+    color: rgba(226,232,240,.58);
+    font-size: 13px;
 }
 
-.modern-upload-btn{
-
-    background:
-        linear-gradient(135deg,#2563eb,#7c3aed);
-
-    padding:13px 18px;
+.connection-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .4rem .65rem;
+    border-radius: .55rem;
+    font-size: 12px;
+    font-weight: 700;
 }
 
-.modern-search-btn{
-
-    background:
-        linear-gradient(135deg,#0ea5e9,#2563eb);
-
-    padding:0 24px;
+.connection-badge.online {
+    border: 1px solid rgba(34,197,94,.22);
+    background: rgba(34,197,94,.08);
+    color: #86efac;
 }
 
-.modern-back-btn:hover,
-.modern-upload-btn:hover,
-.modern-search-btn:hover{
-
-    color:white;
-
-    transform:translateY(-2px);
+.connection-badge.offline {
+    border: 1px solid rgba(239,68,68,.22);
+    background: rgba(239,68,68,.08);
+    color: #fca5a5;
 }
 
-/* =========================================
-   CARDS
-========================================= */
-
-.modern-card{
-
-    border-radius:24px;
-
-    overflow:hidden;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(255,255,255,.05),
-            rgba(255,255,255,.03)
-        );
-
-    backdrop-filter:blur(16px);
-
-    border:
-        1px solid rgba(255,255,255,.06);
-
-    box-shadow:
-        0 18px 45px rgba(0,0,0,.35);
+.modern-back-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: .45rem .7rem;
+    border: 1px solid var(--ui-border, rgba(255,255,255,.08));
+    border-radius: .55rem;
+    background: rgba(255,255,255,.035);
+    color: rgba(226,232,240,.72);
+    font-size: 13px;
+    font-weight: 700;
 }
 
-.modern-card-header{
-
-    padding:20px 24px;
-
-    border-bottom:
-        1px solid rgba(255,255,255,.06);
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
-    color:white;
+.modern-back-btn:hover {
+    border-color: rgba(34,211,238,.28);
+    background: rgba(34,211,238,.06);
+    color: #fff;
 }
 
-.modern-card-body{
-
-    padding:24px;
+/* Alerts */
+.modern-alert {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: .65rem .8rem;
+    margin-bottom: .8rem;
+    border-radius: .65rem;
+    color: #e2e8f0;
+    font-size: 13px;
 }
 
-/* =========================================
-   ALERTS
-========================================= */
-
-.modern-alert{
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
-    padding:16px 18px;
-
-    border-radius:18px;
-
-    margin-bottom:18px;
-
-    color:white;
-
-    backdrop-filter:blur(10px);
+.modern-alert-success {
+    border: 1px solid rgba(34,197,94,.20);
+    border-left: 3px solid rgba(34,197,94,.60);
+    background: rgba(34,197,94,.07);
 }
 
-.modern-alert-success{
-
-    background:
-        rgba(34,197,94,.15);
-
-    border:
-        1px solid rgba(34,197,94,.25);
+.modern-alert-danger {
+    border: 1px solid rgba(239,68,68,.20);
+    border-left: 3px solid rgba(239,68,68,.60);
+    background: rgba(239,68,68,.07);
 }
 
-.modern-alert-danger{
-
-    background:
-        rgba(239,68,68,.15);
-
-    border:
-        1px solid rgba(239,68,68,.25);
+/* Stats */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: .65rem;
 }
 
-/* =========================================
-   STATS
-========================================= */
-
-.stats-grid{
-
-    display:grid;
-
-    grid-template-columns:
-        repeat(auto-fit,minmax(180px,1fr));
-
-    gap:18px;
+.modern-stat-card {
+    padding: .8rem .55rem;
+    border-radius: .7rem;
+    text-align: center;
+    background: rgba(255,255,255,.025);
+    transition: transform .2s ease, border-color .2s ease;
 }
 
-.modern-stat-card{
-
-    padding:22px;
-
-    border-radius:22px;
-
-    text-align:center;
-
-    background:
-        rgba(255,255,255,.05);
-
-    border:
-        1px solid rgba(255,255,255,.06);
-
-    backdrop-filter:blur(10px);
-
-    transition:.25s ease;
+.modern-stat-card:hover {
+    transform: translateY(-1px);
+    border-color: rgba(34,211,238,.20);
 }
 
-.modern-stat-card:hover{
-
-    transform:translateY(-4px);
+.modern-stat-card i {
+    display: block;
+    margin-bottom: .3rem;
+    font-size: 16px;
 }
 
-.modern-stat-card i{
-
-    font-size:1.6rem;
-
-    margin-bottom:10px;
+.modern-stat-card .text-info,
+.modern-stat-card .text-primary {
+    color: var(--ui-accent, #22d3ee) !important;
 }
 
-.stat-value{
-
-    color:white;
-
-    font-size:1.3rem;
-
-    font-weight:800;
+.stat-value {
+    color: #f8fafc;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
 }
 
-.stat-label{
-
-    color:rgba(255,255,255,.55);
-
-    font-size:.82rem;
-
-    margin-top:4px;
+.stat-label {
+    margin-top: .2rem;
+    color: rgba(226,232,240,.45);
+    font-size: 11px;
 }
 
-/* =========================================
-   CONNECTION
-========================================= */
-
-.connection-badge{
-
-    display:inline-flex;
-
-    align-items:center;
-
-    gap:8px;
-
-    padding:10px 16px;
-
-    border-radius:999px;
-
-    font-weight:700;
-
-    font-size:.9rem;
+/* Cards */
+.modern-card {
+    overflow: hidden;
+    border-radius: .85rem;
 }
 
-.connection-badge.online{
-
-    background:
-        rgba(34,197,94,.15);
-
-    color:#4ade80;
+.modern-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: .75rem .95rem;
+    border-bottom: 1px solid var(--ui-border, rgba(255,255,255,.08));
 }
 
-.connection-badge.offline{
-
-    background:
-        rgba(239,68,68,.15);
-
-    color:#f87171;
+.modern-card-header h5 {
+    margin: 0;
+    color: #f8fafc;
+    font-size: 14px;
+    font-weight: 700;
 }
 
-/* =========================================
-   INPUTS
-========================================= */
-
-.modern-label{
-
-    color:#cbd5e1;
-
-    font-size:.8rem;
-
-    font-weight:700;
-
-    letter-spacing:1px;
-
-    text-transform:uppercase;
+.modern-card-header .text-info {
+    color: var(--ui-accent, #22d3ee) !important;
 }
 
-.modern-input,
-.modern-search-input{
+.modern-card-body { padding: .95rem; }
 
-    background:
-        rgba(255,255,255,.04) !important;
-
-    border:
-        1px solid rgba(255,255,255,.08) !important;
-
-    color:white !important;
-
-    border-radius:16px !important;
-
-    padding:14px 18px !important;
+.torrent-count {
+    min-width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(34,211,238,.20);
+    border-radius: .5rem;
+    background: rgba(34,211,238,.07);
+    color: var(--ui-accent, #22d3ee);
+    font-size: 12px;
+    font-weight: 700;
 }
 
-.modern-input:focus,
-.modern-search-input:focus{
-
-    box-shadow:
-        0 0 0 4px rgba(59,130,246,.15) !important;
-
-    border-color:
-        rgba(59,130,246,.35) !important;
+/* Inputs */
+.modern-label {
+    color: #cbd5e1;
+    font-size: 12px;
+    font-weight: 700;
 }
 
-.modern-search-wrap{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:12px;
-
-    background:
-        rgba(255,255,255,.03);
-
-    border:
-        1px solid rgba(255,255,255,.06);
-
-    border-radius:20px;
-
-    padding:10px 12px;
+.modern-input {
+    min-height: 40px;
+    border: 1px solid var(--ui-border, rgba(255,255,255,.08)) !important;
+    border-radius: .6rem !important;
+    background: rgba(255,255,255,.035) !important;
+    color: #f8fafc !important;
+    font-size: 13px;
+    box-shadow: none !important;
 }
 
-.search-icon{
-
-    color:#60a5fa;
-
-    font-size:1.1rem;
-
-    padding-left:4px;
+.modern-input:focus {
+    border-color: rgba(34,211,238,.45) !important;
+    background: rgba(34,211,238,.035) !important;
+    box-shadow: 0 0 0 3px rgba(34,211,238,.08) !important;
 }
 
-.modern-search-input{
-
-    border:none !important;
-
-    background:transparent !important;
-
-    flex:1;
+.modern-input::file-selector-button {
+    margin: -0.375rem .75rem -0.375rem -0.75rem;
+    padding: .375rem .7rem;
+    border: 0;
+    border-right: 1px solid var(--ui-border, rgba(255,255,255,.08));
+    background: rgba(34,211,238,.06);
+    color: var(--ui-accent, #22d3ee);
 }
 
-/* =========================================
-   TABLE
-========================================= */
-
-.modern-table{
-
-    color:white;
-
-    margin-bottom:0;
+/* Search */
+.modern-search-wrap {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .35rem .4rem .35rem .65rem;
+    border: 1px solid var(--ui-border, rgba(255,255,255,.08));
+    border-radius: .65rem;
+    background: rgba(255,255,255,.025);
 }
 
-.modern-table tr{
-
-    border-color:
-        rgba(255,255,255,.05);
+.search-icon {
+    flex: 0 0 auto;
+    color: var(--ui-accent, #22d3ee);
+    font-size: 14px;
 }
 
-.modern-table td{
-
-    padding:20px;
+.modern-search-input {
+    min-width: 0;
+    flex: 1;
+    border: 0 !important;
+    outline: 0 !important;
+    background: transparent !important;
+    color: #f8fafc !important;
+    font-size: 13px;
+    box-shadow: none !important;
 }
 
-.modern-table tbody tr:hover{
+.modern-search-input::placeholder { color: rgba(226,232,240,.35); }
 
-    background:
-        rgba(255,255,255,.03);
+.modern-search-btn,
+.modern-upload-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(34,211,238,.28);
+    border-radius: .55rem;
+    background: rgba(34,211,238,.10);
+    color: var(--ui-accent, #22d3ee);
+    font-size: 13px;
+    font-weight: 700;
+    transition: all .2s ease;
 }
 
-/* =========================================
-   PROGRESS
-========================================= */
-
-.progress-column{
-
-    width:180px;
+.modern-search-btn {
+    min-height: 38px;
+    padding: 0 .85rem;
 }
 
-.modern-progress{
+.modern-upload-btn { min-height: 40px; }
 
-    position:relative;
-
-    height:28px;
-
-    border-radius:999px;
-
-    overflow:hidden;
-
-    background:
-        rgba(255,255,255,.06);
+.modern-search-btn:hover,
+.modern-upload-btn:hover {
+    border-color: var(--ui-accent, #22d3ee);
+    background: rgba(34,211,238,.16);
+    color: #fff;
+    transform: translateY(-1px);
 }
 
-.progress-bar{
-
-    height:100%;
-
-    border-radius:999px;
-
-    transition:width .4s ease;
+/* Table */
+.table-responsive {
+    border-radius: .65rem;
 }
 
-.progress-text{
-
-    position:absolute;
-
-    top:50%;
-    left:50%;
-
-    transform:translate(-50%,-50%);
-
-    font-size:.82rem;
-
-    font-weight:800;
-
-    color:white;
+.modern-table {
+    min-width: 850px;
+    margin-bottom: 0;
+    color: #e2e8f0;
+    font-size: 13px;
 }
 
-.bg-success-gradient{
-    background:linear-gradient(90deg,#22c55e,#4ade80);
+.modern-table tbody tr {
+    border-color: var(--ui-border, rgba(255,255,255,.06)) !important;
+    transition: background .2s ease;
 }
 
-.bg-info-gradient{
-    background:linear-gradient(90deg,#0ea5e9,#38bdf8);
+.modern-table tbody tr:hover {
+    background: rgba(34,211,238,.025);
 }
 
-.bg-warning-gradient{
-    background:linear-gradient(90deg,#f59e0b,#facc15);
+.modern-table td {
+    padding: .75rem .7rem;
+    border-color: var(--ui-border, rgba(255,255,255,.06)) !important;
+    vertical-align: middle;
 }
 
-.bg-danger-gradient{
-    background:linear-gradient(90deg,#ef4444,#f87171);
+/* Progress */
+.progress-column { width: 150px; }
+
+.modern-progress {
+    position: relative;
+    height: 24px;
+    overflow: hidden;
+    border: 1px solid var(--ui-border, rgba(255,255,255,.07));
+    border-radius: .45rem;
+    background: rgba(255,255,255,.045);
 }
 
-/* =========================================
-   TORRENT INFO
-========================================= */
-
-.torrent-name{
-
-    color:white;
-
-    font-size:1rem;
-
-    font-weight:700;
-
-    margin-bottom:10px;
+.progress-bar {
+    height: 100%;
+    border-radius: .35rem;
+    transition: width .4s ease;
 }
 
-.torrent-meta{
+.bg-success-gradient { background: linear-gradient(90deg, #16a34a, #22c55e); }
+.bg-info-gradient { background: linear-gradient(90deg, #0891b2, #22d3ee); }
+.bg-warning-gradient { background: linear-gradient(90deg, #d97706, #f59e0b); }
+.bg-danger-gradient { background: linear-gradient(90deg, #dc2626, #ef4444); }
 
-    display:flex;
-
-    flex-wrap:wrap;
-
-    gap:8px;
-
-    margin-bottom:10px;
+.progress-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #f8fafc;
+    font-size: 11px;
+    font-weight: 700;
 }
 
-.torrent-badge{
-
-    display:inline-flex;
-
-    align-items:center;
-
-    gap:6px;
-
-    padding:6px 12px;
-
-    border-radius:999px;
-
-    font-size:.75rem;
-
-    font-weight:700;
+/* Torrent info */
+.torrent-name {
+    margin-bottom: .4rem;
+    color: #f8fafc;
+    font-size: 14px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
 }
 
-.status-badge{
-    background:rgba(59,130,246,.15);
-    color:#93c5fd;
+.torrent-name .text-info { color: var(--ui-accent, #22d3ee) !important; }
+
+.torrent-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .3rem;
+    margin-bottom: .4rem;
 }
 
-.ratio-badge{
-    background:rgba(6,182,212,.15);
-    color:#67e8f9;
+.torrent-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    padding: .22rem .45rem;
+    border-radius: .4rem;
+    font-size: 11px;
+    font-weight: 700;
 }
 
-.upload-badge{
-    background:rgba(34,197,94,.15);
-    color:#4ade80;
+.status-badge {
+    border: 1px solid rgba(34,211,238,.18);
+    background: rgba(34,211,238,.06);
+    color: var(--ui-accent, #22d3ee);
 }
 
-.download-badge{
-    background:rgba(239,68,68,.15);
-    color:#f87171;
+.ratio-badge {
+    border: 1px solid rgba(34,211,238,.15);
+    background: rgba(34,211,238,.045);
+    color: #a5f3fc;
 }
 
-.torrent-extra{
-
-    display:flex;
-
-    flex-wrap:wrap;
-
-    gap:12px;
-
-    color:rgba(255,255,255,.55);
-
-    font-size:.82rem;
+.upload-badge {
+    border: 1px solid rgba(34,197,94,.16);
+    background: rgba(34,197,94,.055);
+    color: #86efac;
 }
 
-.tracker-badge{
-
-    display:inline-flex;
-
-    align-items:center;
-
-    padding:4px 10px;
-
-    border-radius:999px;
-
-    background:
-        rgba(255,255,255,.05);
+.download-badge {
+    border: 1px solid rgba(239,68,68,.16);
+    background: rgba(239,68,68,.055);
+    color: #fca5a5;
 }
 
-/* =========================================
-   ACTIONS
-========================================= */
-
-.torrent-actions{
-
-    display:flex;
-
-    justify-content:flex-end;
-
-    gap:10px;
+.torrent-extra {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .6rem;
+    color: rgba(226,232,240,.45);
+    font-size: 11px;
 }
 
-.action-btn{
-
-    width:42px;
-    height:42px;
-
-    border:none;
-
-    border-radius:14px;
-
-    display:flex;
-
-    align-items:center;
-    justify-content:center;
-
-    text-decoration:none;
-
-    transition:.2s ease;
-
-    background:
-        rgba(255,255,255,.06);
-
-    color:white;
+.tracker-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: .18rem .4rem;
+    border: 1px solid var(--ui-border, rgba(255,255,255,.07));
+    border-radius: .4rem;
+    background: rgba(255,255,255,.025);
 }
 
-.action-btn:hover{
-
-    transform:translateY(-2px);
-
-    color:white;
+/* Actions */
+.torrent-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: .35rem;
 }
 
-.action-btn-danger{
-    color:#f87171;
+.action-btn {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--ui-border, rgba(255,255,255,.08));
+    border-radius: .5rem;
+    background: rgba(255,255,255,.035);
+    color: rgba(226,232,240,.72);
+    text-decoration: none;
+    transition: all .2s ease;
 }
 
-.action-btn-info{
-    color:#67e8f9;
+.action-btn:hover {
+    border-color: rgba(34,211,238,.25);
+    background: rgba(34,211,238,.07);
+    color: #fff;
+    transform: translateY(-1px);
 }
 
-/* =========================================
-   PAGINATION
-========================================= */
+.action-btn-danger { color: #fca5a5; }
 
-.pagination .page-link{
-
-    background:
-        rgba(255,255,255,.04);
-
-    border:
-        1px solid rgba(255,255,255,.06);
-
-    color:white;
+.action-btn-danger:hover {
+    border-color: rgba(239,68,68,.25);
+    background: rgba(239,68,68,.07);
+    color: #fff;
 }
 
-/* =========================================
-   MOBILE
-========================================= */
+.action-btn-info { color: var(--ui-accent, #22d3ee); }
 
-@media(max-width:768px){
+/* Pagination */
+.pagination { margin-bottom: 0; }
 
-    .seedbox-hero{
+.pagination .page-link {
+    border-color: var(--ui-border, rgba(255,255,255,.08));
+    background: rgba(255,255,255,.035);
+    color: rgba(226,232,240,.72);
+    font-size: 12px;
+}
 
-        padding:24px;
+.pagination .page-link:hover {
+    border-color: rgba(34,211,238,.25);
+    background: rgba(34,211,238,.07);
+    color: #fff;
+}
+
+.pagination .active .page-link {
+    border-color: rgba(34,211,238,.30);
+    background: rgba(34,211,238,.12);
+    color: var(--ui-accent, #22d3ee);
+}
+
+/* Mobile */
+@media (max-width: 1100px) {
+    .stats-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 767.98px) {
+    .seedbox-page .container-fluid {
+        padding-top: 1rem !important;
+        padding-bottom: 1rem !important;
     }
 
-    .hero-title{
+    .seedbox-hero { padding: .9rem; }
+    .hero-title { font-size: 18px; }
+    .hero-subtitle { font-size: 12px; }
 
-        font-size:1.7rem;
+    .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .progress-column{
+    .modern-card-body { padding: .75rem; }
 
-        width:120px;
-    }
+    .modern-search-wrap { flex-wrap: wrap; }
+    .modern-search-btn { width: 100%; }
 
-    .modern-table td{
-
-        padding:16px 12px;
-    }
-
-    .torrent-actions{
-
-        flex-wrap:wrap;
-    }
-
-    .modern-search-wrap{
-
-        flex-wrap:wrap;
-    }
-
-    .modern-search-btn{
-
-        width:100%;
-        height:46px;
-    }
+    .torrent-actions { flex-wrap: wrap; }
 }
-
 </style>
 
 @endsection

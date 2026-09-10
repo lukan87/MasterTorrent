@@ -2,160 +2,103 @@
 
     <div class="card online-users-card">
 
-        {{-- Header --}}
         <div class="card-header online-users-header border-0">
 
-            <div class="d-flex align-items-center justify-content-between">
+            <div class="online-icon">
+                <i class="fas fa-users"></i>
+            </div>
 
-                <div class="d-flex align-items-center gap-2">
-
-                    <div class="online-icon">
-
-                        <i class="bi bi-people-fill"></i>
-
-                    </div>
-
-                    <div class="d-flex align-items-center">
-
-                        <span class="online-title">
-
-                            Online Users
-
-                        </span>
-
-                        <span class="online-count ms-2">
-
-                            {{ $onlineUserCount }}
-
-                        </span>
-
-                    </div>
-
+            <div class="online-header-content">
+                <div class="online-title">
+                    Users Online
                 </div>
 
-                <span class="live-dot" title="Live"></span>
-
+                <div class="online-count">
+                    {{ count($onlineUsers) }} users online
+                    <span class="live-dot"></span>
+                </div>
             </div>
 
         </div>
 
-        {{-- Body --}}
         <div class="card-body online-users-body">
 
-            @if ($onlineUsers->isEmpty())
+            @if($onlineUsers->isEmpty())
 
                 <div class="empty-online-users">
-
-                    <i class="bi bi-wifi-off me-2"></i>
-
-                    No users are currently online.
-
+                    <i class="fas fa-user-slash"></i>
+                    <span>No users are currently online.</span>
                 </div>
 
             @else
 
-                {{-- Users --}}
                 <div id="online-users-list" class="online-users-list">
 
-                    @foreach ($onlineUsers as $index => $user)
+                    @foreach($onlineUsers->take(100) as $user)
 
-                        <span class="{{ $index >= 100 ? 'd-none extra-user' : '' }}">
+                        <div
+                            class="online-user {{ $loop->index >= 100 ? 'extra-user' : '' }}"
+                        >
 
-                            <a href="{{ route('profile.show', ['id' => $user->id, 'name' => $user->name]) }}"
-                               class="online-user-link"
-                               style="--user-color: {{ \App\Models\UserClass::getClassColor($user->user_class) }}"
-                               data-bs-toggle="tooltip"
-                               data-bs-html="true"
-                               data-bs-title='
-                                   <div class="text-center">
-                                       <strong>{{ \App\Models\UserClass::getClassName($user->user_class) }}</strong>
-                                       <hr class="my-1">
-                                       <small>⬆ {{ App\Helpers\FormatHelper::formatSize($user->uploaded) }}</small><br>
-                                       <small>⬇ {{ App\Helpers\FormatHelper::formatSize($user->downloaded) }}</small>
-                                   </div>'>
+                            <a
+    href="{{ route('profile.show', ['id' => $user->id, 'name' => $user->name]) }}"
+    class="online-user-link"
+    style="--user-color: {{ \App\Models\UserClass::getClassColor($user->user_class) }}"
+    data-bs-toggle="tooltip"
+    data-bs-placement="top"
+    data-bs-html="true"
+    title="
+        <strong>{{ \App\Models\UserClass::getClassName($user->user_class) }}</strong><br>
+        Uploaded: {{ \App\Helpers\FormatHelper::formatSize($user->uploaded) }}<br>
+        Downloaded: {{ \App\Helpers\FormatHelper::formatSize($user->downloaded) }}
+    "
+>
 
-                                {{ $user->name }}
+                                <span class="online-user-dot"></span>
+
+                                <span class="online-user-name">
+                                    {{ $user->name }}
+                                </span>
 
                                 @if($user->warned)
-
-                                    <i class="bi bi-exclamation-triangle-fill text-danger ms-1"></i>
-
+                                    <i
+                                        class="fas fa-exclamation-triangle online-warn-icon"
+                                        title="Warned user"
+                                    ></i>
                                 @endif
 
-                                @if($user->donor === 'yes')
-
-                                    <i class="bi bi-star-fill text-warning ms-1"></i>
-
+                                @if($user->donor)
+                                    <i 
+                                        class="fas fa-star online-donor-icon"
+                                        title="Donor"
+                                    ></i>
                                 @endif
 
                             </a>
 
-                            @if(!$loop->last)
-
-                                <span class="comma">•</span>
-
-                            @endif
-
-                        </span>
+                            
+                        </div>
 
                     @endforeach
 
                 </div>
 
-                {{-- Show More --}}
                 @if($onlineUsers->count() > 100)
 
-                    <div class="mt-3">
+                    <div class="text-center mt-3">
 
-                        <button id="toggle-users-btn"
-                                class="btn btn-sm btn-outline-info rounded-pill px-3 py-1">
-
-                            <i class="bi bi-chevron-down me-1"></i>
-
-                            <span class="btn-text">
-
-                                Show more
-
-                            </span>
-
+                        <button
+                            type="button"
+                            id="toggle-users-btn"
+                            class="online-show-more"
+                        >
+                            <span>Show more</span>
+                            <i class="fas fa-chevron-down"></i>
                         </button>
 
                     </div>
 
                 @endif
-
-                {{-- Legend --}}
-                <div class="legend-section">
-
-                    <div class="legend-wrapper">
-
-                        @php
-                            $orderedClasses = [
-                                \App\Models\UserClass::OWNER,
-                                \App\Models\UserClass::ADMIN,
-                                \App\Models\UserClass::MODERATOR,
-                                \App\Models\UserClass::UPLOADER,
-                                \App\Models\UserClass::SUPERUSER,
-                                \App\Models\UserClass::VIP,
-                                \App\Models\UserClass::ELITE_USER,
-                                \App\Models\UserClass::USER,
-                            ];
-                        @endphp
-
-                        @foreach ($orderedClasses as $class)
-
-                            <span class="legend-item"
-                                  style="--legend-color: {{ \App\Models\UserClass::getClassColor($class) }}">
-
-                                ● {{ \App\Models\UserClass::getClassName($class) }}
-
-                            </span>
-
-                        @endforeach
-
-                    </div>
-
-                </div>
 
             @endif
 
@@ -165,356 +108,338 @@
 
 </div>
 
+
 <style>
 
-/* =========================================
-   CARD
-========================================= */
-
-.online-users-card{
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(255,255,255,.04),
-            rgba(255,255,255,.02)
-        );
-
-    backdrop-filter:blur(12px);
-
-    border:
-        1px solid rgba(255,255,255,.06);
-
-    border-radius:22px;
-
-    overflow:hidden;
-
-    box-shadow:
-        0 10px 30px rgba(0,0,0,.22);
+.online-users-card {
+    position: relative;
+    overflow: visible;
+    background: linear-gradient(
+        135deg,
+        rgba(22, 32, 51, .95),
+        rgba(15, 23, 42, .84)
+    );
+    border: 1px solid var(--ui-border);
+    border-radius: .9rem;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, .24);
 }
 
-/* =========================================
-   HEADER
-========================================= */
-
-.online-users-header{
-
-    padding:1rem 1.25rem .75rem;
-
-    border-bottom:
-        1px solid rgba(255,255,255,.05);
+.online-users-card::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(
+        180deg,
+        var(--ui-accent),
+        var(--ui-accent-strong)
+    );
+    opacity: .9;
 }
 
-.online-icon{
-
-    width:34px;
-    height:34px;
-
-    border-radius:12px;
-
-    display:flex;
-
-    align-items:center;
-    justify-content:center;
-
-    background:
-        linear-gradient(
-            135deg,
-            #22c55e,
-            #16a34a
-        );
-
-    color:white;
-
-    font-size:.95rem;
-
-    box-shadow:
-        0 6px 18px rgba(34,197,94,.28);
+.online-users-header {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: .85rem 1rem;
+    background: transparent;
+    border-bottom: 1px solid var(--ui-border) !important;
 }
 
-.online-title{
-
-    color:#fff;
-
-    font-size:1rem;
-
-    font-weight:700;
+.online-icon {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: .65rem;
+    color: var(--ui-accent);
+    background: rgba(45, 212, 191, .08);
+    border: 1px solid rgba(45, 212, 191, .18);
+    font-size: 14px;
 }
 
-.online-count{
-
-    padding:3px 10px;
-
-    border-radius:999px;
-
-    background:
-        rgba(255,255,255,.06);
-
-    color:#cbd5e1;
-
-    font-size:.78rem;
-
-    font-weight:600;
+.online-header-content {
+    min-width: 0;
 }
 
-/* =========================================
-   LIVE DOT
-========================================= */
-
-.live-dot{
-
-    width:10px;
-    height:10px;
-
-    background:#22c55e;
-
-    border-radius:50%;
-
-    animation:pulse 2s infinite;
+.online-title {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.25;
 }
 
-@keyframes pulse {
+.online-count {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    margin-top: .15rem;
+    color: rgba(255, 255, 255, .58);
+    font-size: 13px;
+}
 
-    0%{
+.live-dot {
+    width: 7px;
+    height: 7px;
+    display: inline-block;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 8px rgba(34, 197, 94, .5);
+}
 
-        box-shadow:
-            0 0 0 0 rgba(34,197,94,.6);
+.online-users-body {
+    padding: 1rem;
+    background: transparent;
+}
+
+.online-users-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .45rem .65rem;
+}
+
+.online-user {
+    position: relative;
+}
+
+.online-user.extra-user {
+    display: none;
+}
+
+.online-user-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .35rem .55rem;
+    color: var(--user-color);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.2;
+    border: 1px solid rgba(255, 255, 255, .06);
+    border-radius: .55rem;
+    background: rgba(255, 255, 255, .025);
+    transition:
+        background .18s ease,
+        border-color .18s ease,
+        transform .18s ease;
+}
+
+.online-user-link:hover {
+    color: var(--user-color);
+    background: rgba(45, 212, 191, .07);
+    border-color: rgba(45, 212, 191, .2);
+    transform: translateY(-1px);
+}
+
+.online-user-dot {
+    width: 6px;
+    height: 6px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 7px rgba(34, 197, 94, .45);
+}
+
+.online-user-name {
+    color: inherit;
+}
+
+.online-warn-icon {
+    color: #f59e0b;
+    font-size: 11px;
+}
+
+.tooltip .tooltip-inner {
+    max-width: 280px;
+    padding: .6rem .75rem;
+    text-align: left;
+    font-size: 13px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, .8);
+    background: rgba(15, 23, 42, .98);
+    border: 1px solid var(--ui-border);
+    border-radius: .6rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, .35);
+}
+
+.tooltip.show {
+    opacity: 1;
+}
+
+.tooltip strong {
+    color: var(--ui-accent);
+    font-size: 14px;
+}
+
+.online-donor-icon {
+    color: #facc15;
+    font-size: 10px;
+}
+
+.empty-online-users {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .55rem;
+    min-height: 70px;
+    color: rgba(255, 255, 255, .55);
+    font-size: 14px;
+}
+
+.empty-online-users i {
+    color: var(--ui-accent);
+    font-size: 15px;
+}
+
+.online-show-more {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .4rem .7rem;
+    color: var(--ui-accent);
+    background: rgba(45, 212, 191, .05);
+    border: 1px solid var(--ui-border);
+    border-radius: .55rem;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+        background .18s ease,
+        border-color .18s ease,
+        transform .18s ease;
+}
+
+.online-show-more:hover {
+    color: var(--ui-accent-strong);
+    background: rgba(45, 212, 191, .09);
+    border-color: rgba(45, 212, 191, .25);
+    transform: translateY(-1px);
+}
+
+.online-show-more i {
+    font-size: 10px;
+    transition: transform .18s ease;
+}
+
+.online-users-legend {
+    padding: .75rem 1rem;
+    border-top: 1px solid var(--ui-border);
+    background: rgba(0, 0, 0, .08);
+}
+
+.legend-title {
+    margin-bottom: .5rem;
+    color: rgba(255, 255, 255, .55);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.legend-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem .75rem;
+}
+
+.legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    color: var(--legend-color);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.legend-dot {
+    width: 6px;
+    height: 6px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--legend-color);
+    box-shadow: 0 0 5px color-mix(
+        in srgb,
+        var(--legend-color) 40%,
+        transparent
+    );
+}
+
+.legend-name {
+    color: inherit;
+}
+
+@media (max-width: 576px) {
+
+    .online-users-header {
+        padding: .75rem;
     }
 
-    70%{
-
-        box-shadow:
-            0 0 0 8px rgba(34,197,94,0);
+    .online-users-body {
+        padding: .75rem;
     }
 
-    100%{
-
-        box-shadow:
-            0 0 0 0 rgba(34,197,94,0);
-    }
-}
-
-/* =========================================
-   BODY
-========================================= */
-
-.online-users-body{
-
-    padding:1rem 1.25rem 1.2rem;
-}
-
-.online-users-list{
-
-    line-height:2;
-
-    font-size:.95rem;
-}
-
-/* =========================================
-   USER LINKS
-========================================= */
-
-.online-user-link{
-
-    color:var(--user-color);
-
-    text-decoration:none;
-
-    font-size:.95rem;
-
-    font-weight:600;
-
-    position:relative;
-
-    transition:.2s ease;
-}
-
-.online-user-link:hover{
-
-    opacity:.95;
-
-    color:var(--user-color);
-}
-
-.online-user-link::after{
-
-    content:'';
-
-    position:absolute;
-
-    left:0;
-    bottom:-2px;
-
-    width:0%;
-
-    height:1px;
-
-    background:var(--user-color);
-
-    transition:width .2s ease;
-}
-
-.online-user-link:hover::after{
-
-    width:100%;
-}
-
-.comma{
-
-    color:
-        rgba(255,255,255,.25);
-
-    margin:
-        0 .35rem;
-}
-
-/* =========================================
-   EMPTY
-========================================= */
-
-.empty-online-users{
-
-    padding:1rem;
-
-    border-radius:14px;
-
-    background:
-        rgba(255,255,255,.03);
-
-    color:#9ca3af;
-
-    font-size:.92rem;
-}
-
-/* =========================================
-   LEGEND
-========================================= */
-
-.legend-section{
-
-    margin-top:1rem;
-
-    padding-top:1rem;
-
-    border-top:
-        1px solid rgba(255,255,255,.05);
-}
-
-.legend-wrapper{
-
-    display:flex;
-
-    flex-wrap:wrap;
-
-    gap:.7rem 1rem;
-}
-
-.legend-item{
-
-    color:var(--legend-color);
-
-    font-size:.8rem;
-
-    font-weight:600;
-
-    opacity:.9;
-}
-
-/* =========================================
-   BUTTON
-========================================= */
-
-#toggle-users-btn{
-
-    font-size:.82rem;
-
-    border-color:
-        rgba(59,130,246,.25);
-
-    color:#93c5fd;
-}
-
-#toggle-users-btn:hover{
-
-    background:
-        rgba(59,130,246,.15);
-
-    color:#fff;
-}
-
-/* =========================================
-   MOBILE
-========================================= */
-
-@media(max-width:768px){
-
-    .online-users-header{
-
-        padding:.9rem 1rem .7rem;
+    .online-user-link {
+        font-size: 14px;
     }
 
-    .online-users-body{
-
-        padding:1rem;
+    .online-users-legend {
+        padding: .7rem .75rem;
     }
 
-    .online-users-list{
-
-        line-height:1.9;
-
-        font-size:.9rem;
+    .legend-list {
+        gap: .35rem .65rem;
     }
 
-    .online-user-link{
-
-        font-size:.9rem;
+    .legend-item {
+        font-size: 13px;
     }
 
-    .legend-wrapper{
-
-        gap:.55rem .8rem;
-    }
-
-    .legend-item{
-
-        font-size:.75rem;
+    .online-user-tooltip {
+        display: none;
     }
 
 }
 
 </style>
 
+
 <script>
 
-document.getElementById('toggle-users-btn')?.addEventListener('click', function () {
+document.addEventListener("DOMContentLoaded", function () {
 
-    const extraUsers = document.querySelectorAll('.extra-user');
+    const list = document.getElementById("online-users-list");
+    const button = document.getElementById("toggle-users-btn");
 
-    const btnText = this.querySelector('.btn-text');
-
-    const icon = this.querySelector('i');
-
-    const isHidden = extraUsers[0]?.classList.contains('d-none');
-
-    extraUsers.forEach(el => el.classList.toggle('d-none'));
-
-    if (isHidden) {
-
-        btnText.textContent = "Show less";
-
-        icon.classList.remove('bi-chevron-down');
-
-        icon.classList.add('bi-chevron-up');
-
-    } else {
-
-        btnText.textContent = "Show more";
-
-        icon.classList.remove('bi-chevron-up');
-
-        icon.classList.add('bi-chevron-down');
-
+    if (!list || !button) {
+        return;
     }
+
+    const extraUsers = list.querySelectorAll(".extra-user");
+    const buttonText = button.querySelector("span");
+    const icon = button.querySelector("i");
+
+    button.addEventListener("click", function () {
+
+        const isExpanded = button.classList.toggle("expanded");
+
+        extraUsers.forEach(function (user) {
+            user.style.display = isExpanded ? "block" : "none";
+        });
+
+        if (isExpanded) {
+            buttonText.textContent = "Show less";
+            icon.classList.remove("fa-chevron-down");
+            icon.classList.add("fa-chevron-up");
+        } else {
+            buttonText.textContent = "Show more";
+            icon.classList.remove("fa-chevron-up");
+            icon.classList.add("fa-chevron-down");
+        }
+
+    });
 
 });
 

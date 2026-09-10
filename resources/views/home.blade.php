@@ -6,11 +6,6 @@
 
 <div class="row">
 
-  @if(Auth::user()->user_class < \App\Models\UserClass::VIP)
-
-
-@endif
-
     {{-- Main News Section --}}
     <div class="col-lg-7 col-md-5 col-sm-6">
         @include('partials.news')
@@ -20,12 +15,6 @@
     <div class="col-lg-5 col-md-7 col-sm-6">
         <x-poll-list :polls="$polls" />
     </div>
-
-
-
-@if(in_array(Auth::user()->id, [3, 5, 893]))
-
- @endif
 
  @include('partials.topUsers24h')
 

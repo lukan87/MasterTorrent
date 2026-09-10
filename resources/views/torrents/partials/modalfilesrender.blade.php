@@ -1,4 +1,5 @@
 @php
+
 function renderTree($tree, $level = 0) {
 
     echo '<ul class="' . ($level === 0 ? 'file-tree' : 'file-tree nested-tree') . '">';
@@ -6,11 +7,15 @@ function renderTree($tree, $level = 0) {
     foreach ($tree as $name => $subtree) {
 
         if ($name === '_size') {
+
             continue;
+
         }
 
         /* =====================================================
+
            📁 FOLDER
+
            ===================================================== */
 
         if (is_array($subtree) && count($subtree) > 0 && !isset($subtree['_size'])) {
@@ -18,128 +23,197 @@ function renderTree($tree, $level = 0) {
             $id = uniqid('folder_');
 
             echo '
+
             <li class="file-tree-item">
 
                 <div class="folder-row toggle-folder"
+
                      data-target="' . $id . '">
 
                     <span class="folder-chevron">
+
                         <i class="bi bi-chevron-right"></i>
+
                     </span>
 
                     <span class="folder-icon">
+
                         <i class="bi bi-folder-fill"></i>
+
                     </span>
 
                     <span class="folder-name">
+
                         ' . e($name) . '
+
                     </span>
 
                 </div>
 
                 <div id="' . $id . '" class="folder-children d-none">
+
             ';
 
             renderTree($subtree, $level + 1);
 
             echo '
+
                 </div>
 
             </li>
+
             ';
+
         }
 
         /* =====================================================
+
            📄 FILE
+
            ===================================================== */
 
         else {
 
             $size      = $subtree['_size'] ?? '';
+
             $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+
             $filename  = strtolower($name);
 
             /* =================================================
+
                FILE ICONS
+
                ================================================= */
 
             $icons = [
 
                 // Video
+
                 'mp4'  => 'bi bi-file-earmark-play-fill',
+
                 'mkv'  => 'bi bi-file-earmark-play-fill',
+
                 'avi'  => 'bi bi-file-earmark-play-fill',
+
                 'mov'  => 'bi bi-file-earmark-play-fill',
+
                 'wmv'  => 'bi bi-file-earmark-play-fill',
+
                 'flv'  => 'bi bi-file-earmark-play-fill',
+
                 'webm' => 'bi bi-file-earmark-play-fill',
 
                 // Audio
+
                 'mp3'  => 'bi bi-file-earmark-music-fill',
+
                 'flac' => 'bi bi-file-earmark-music-fill',
+
                 'wav'  => 'bi bi-file-earmark-music-fill',
+
                 'aac'  => 'bi bi-file-earmark-music-fill',
+
                 'ogg'  => 'bi bi-file-earmark-music-fill',
 
                 // Subtitles
+
                 'srt' => 'bi bi-file-earmark-text-fill',
+
                 'sub' => 'bi bi-file-earmark-text-fill',
+
                 'ass' => 'bi bi-file-earmark-text-fill',
 
                 // Images
+
                 'jpg'  => 'bi bi-file-earmark-image-fill',
+
                 'jpeg' => 'bi bi-file-earmark-image-fill',
+
                 'png'  => 'bi bi-file-earmark-image-fill',
+
                 'gif'  => 'bi bi-file-earmark-image-fill',
+
                 'webp' => 'bi bi-file-earmark-image-fill',
 
                 // Archives
+
                 'zip' => 'bi bi-file-earmark-zip-fill',
+
                 'rar' => 'bi bi-file-earmark-zip-fill',
+
                 '7z'  => 'bi bi-file-earmark-zip-fill',
+
                 'tar' => 'bi bi-file-earmark-zip-fill',
+
                 'gz'  => 'bi bi-file-earmark-zip-fill',
 
                 // Disc images
+
                 'iso' => 'bi bi-disc-fill',
+
                 'bin' => 'bi bi-disc-fill',
+
                 'img' => 'bi bi-disc-fill',
 
                 // Documents
+
                 'pdf'  => 'bi bi-file-earmark-pdf-fill',
+
                 'txt'  => 'bi bi-file-earmark-text-fill',
+
                 'nfo'  => 'bi bi-file-earmark-text-fill',
+
                 'doc'  => 'bi bi-file-earmark-word-fill',
+
                 'docx' => 'bi bi-file-earmark-word-fill',
 
                 // Executables
+
                 'exe' => 'bi bi-window-desktop',
+
                 'msi' => 'bi bi-window-desktop',
+
                 'apk' => 'bi bi-android2',
+
             ];
 
             $icon = $icons[$extension] ?? 'bi bi-file-earmark-fill';
 
 
+
             /* =================================================
+
                VIDEO DETECTION
+
                ================================================= */
 
             $videoExtensions = [
+
                 'mp4',
+
                 'mkv',
+
                 'avi',
+
                 'mov',
+
                 'wmv',
+
                 'flv',
+
                 'webm'
+
             ];
 
             $isVideo = in_array($extension, $videoExtensions);
 
 
+
             /* =================================================
+
                RESOLUTION
+
                ================================================= */
 
             $resolution = null;
@@ -147,9 +221,13 @@ function renderTree($tree, $level = 0) {
             if ($isVideo) {
 
                 if (
+
                     str_contains($filename, '2160p') ||
+
                     str_contains($filename, '4k') ||
+
                     str_contains($filename, 'uhd')
+
                 ) {
 
                     $resolution = '4K';
@@ -165,12 +243,17 @@ function renderTree($tree, $level = 0) {
                 } elseif (str_contains($filename, '480p')) {
 
                     $resolution = '480p';
+
                 }
+
             }
 
 
+
             /* =================================================
+
                CODEC
+
                ================================================= */
 
             $codec = null;
@@ -178,26 +261,39 @@ function renderTree($tree, $level = 0) {
             if ($isVideo) {
 
                 if (
+
                     str_contains($filename, 'x265') ||
+
                     str_contains($filename, 'h265') ||
+
                     str_contains($filename, 'hevc')
+
                 ) {
 
                     $codec = 'x265';
 
                 } elseif (
+
                     str_contains($filename, 'x264') ||
+
                     str_contains($filename, 'h264') ||
+
                     str_contains($filename, 'avc')
+
                 ) {
 
                     $codec = 'x264';
+
                 }
+
             }
 
 
+
             /* =================================================
+
                HDR
+
                ================================================= */
 
             $hdr = null;
@@ -205,9 +301,13 @@ function renderTree($tree, $level = 0) {
             if ($isVideo) {
 
                 if (
+
                     str_contains($filename, 'dolby.vision') ||
+
                     str_contains($filename, 'dolbyvision') ||
+
                     str_contains($filename, ' dv ')
+
                 ) {
 
                     if (str_contains($filename, 'fel')) {
@@ -225,6 +325,7 @@ function renderTree($tree, $level = 0) {
                     } else {
 
                         $hdr = 'DV';
+
                     }
 
                 } elseif (str_contains($filename, 'hdr10+')) {
@@ -242,15 +343,21 @@ function renderTree($tree, $level = 0) {
                 } elseif (str_contains($filename, ' hdr ')) {
 
                     $hdr = 'HDR';
+
                 }
+
             }
 
 
+
             /* =================================================
+
                AUDIO
+
                ================================================= */
 
             $audio = null;
+
             $audioChannels = null;
 
             if ($isVideo) {
@@ -264,8 +371,11 @@ function renderTree($tree, $level = 0) {
                     $audio = 'Atmos';
 
                 } elseif (
+
                     str_contains($filename, 'dts-hd') ||
+
                     str_contains($filename, 'dtshd')
+
                 ) {
 
                     $audio = 'DTS-HD';
@@ -275,8 +385,11 @@ function renderTree($tree, $level = 0) {
                     $audio = 'DTS';
 
                 } elseif (
+
                     str_contains($filename, 'eac3') ||
+
                     str_contains($filename, 'ddp')
+
                 ) {
 
                     $audio = 'DD+';
@@ -296,7 +409,9 @@ function renderTree($tree, $level = 0) {
                 } elseif (str_contains($filename, 'mp3')) {
 
                     $audio = 'MP3';
+
                 }
+
 
 
                 if (str_contains($filename, '7.1')) {
@@ -310,15 +425,21 @@ function renderTree($tree, $level = 0) {
                 } elseif (str_contains($filename, '2.0')) {
 
                     $audioChannels = '2.0';
+
                 }
+
             }
 
 
+
             /* =================================================
+
                FILE ROW
+
                ================================================= */
 
             echo '
+
             <li class="file-tree-item">
 
                 <div class="file-row">
@@ -326,68 +447,101 @@ function renderTree($tree, $level = 0) {
                     <div class="file-main">
 
                         <span class="file-type-icon">
+
                             <i class="' . $icon . '"></i>
+
                         </span>
 
                         <span class="file-name"
+
                               title="' . e($name) . '">
+
                             ' . e($name) . '
+
                         </span>
 
                         <div class="file-badges">
+
             ';
 
             if ($resolution) {
+
                 echo '<span class="file-badge badge-res">' . $resolution . '</span>';
+
             }
 
             if ($codec) {
+
                 echo '<span class="file-badge badge-codec">' . $codec . '</span>';
+
             }
 
             if ($hdr) {
+
                 echo '<span class="file-badge badge-hdr">' . $hdr . '</span>';
+
             }
 
             if ($audio) {
+
                 echo '<span class="file-badge badge-audio">' . $audio . '</span>';
+
             }
 
             if ($audioChannels) {
+
                 echo '<span class="file-badge badge-audio-ch">' . $audioChannels . '</span>';
+
             }
 
             echo '
+
                         </div>
 
                     </div>
 
 
+
                     <div class="file-size">
+
                         ' . e($size) . '
+
                     </div>
+
 
 
                     <div class="file-type">
+
                         ' . strtoupper($extension) . '
+
                     </div>
 
 
+
                     <div class="file-kind">
+
                         <i class="' . ($isVideo ? 'bi bi-camera-video-fill' : 'bi bi-file-earmark-fill') . '"></i>
+
                         <span>' . ($isVideo ? 'Video' : 'File') . '</span>
+
                     </div>
 
                 </div>
 
             </li>
+
             ';
+
         }
+
     }
 
     echo '</ul>';
+
 }
+
 @endphp
+
 
 
 @if(!empty($fileTree))
@@ -399,63 +553,89 @@ function renderTree($tree, $level = 0) {
         <div class="modal-content torrent-files-modal">
 
 
+
             {{-- HEADER --}}
+
             <div class="modal-header torrent-files-header">
 
                 <div>
 
                     <h5 class="modal-title">
+
                         <span class="files-title-icon">
+
                             <i class="bi bi-folder2-open"></i>
+
                         </span>
 
                         Torrent Files
+
                     </h5>
 
                     <small class="files-subtitle">
+
                         Browse files and folders
+
                     </small>
 
                 </div>
 
                 <button
+
                     type="button"
+
                     class="btn-close"
+
                     data-bs-dismiss="modal">
+
                 </button>
 
             </div>
 
 
+
             {{-- COLUMN HEADERS --}}
+
             <div class="files-column-header d-none d-md-grid">
 
                 <div>FILE</div>
+
                 <div>SIZE</div>
+
                 <div>TYPE</div>
+
                 <div>CONTENT</div>
 
             </div>
 
 
+
             {{-- FILE TREE --}}
+
             <div class="modal-body torrent-files-body">
 
                 @php
+
                     renderTree($fileTree);
+
                 @endphp
 
             </div>
 
 
+
             {{-- FOOTER --}}
+
             <div class="modal-footer torrent-files-footer">
 
                 <button
+
                     class="files-close-btn"
+
                     data-bs-dismiss="modal">
 
                     <i class="bi bi-x-lg me-1"></i>
+
                     Close
 
                 </button>
@@ -471,6 +651,7 @@ function renderTree($tree, $level = 0) {
 @endif
 
 
+
 @push('scripts')
 
 <script>
@@ -480,13 +661,17 @@ document.addEventListener('click', function (e) {
     const toggle = e.target.closest('.toggle-folder');
 
     if (!toggle) {
+
         return;
+
     }
 
     const target = document.getElementById(toggle.dataset.target);
 
     if (!target) {
+
         return;
+
     }
 
     const isOpen = !target.classList.contains('d-none');
@@ -502,609 +687,374 @@ document.addEventListener('click', function (e) {
 @endpush
 
 <style>
-
-
 /* =========================================================
-   TORRENT FILE MODAL
+   FILEIPLAY TORRENT FILES MODAL
+   Forum-style dark glass / teal accent
    ========================================================= */
 
 .torrent-files-modal {
     overflow: hidden;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(28,30,35,.98),
-            rgba(18,20,24,.98)
-        );
-
-    border: 1px solid rgba(255,255,255,.09);
-
-    border-radius: 16px;
-
-    box-shadow:
-        0 25px 70px rgba(0,0,0,.55);
+    background: linear-gradient(
+        135deg,
+        rgba(22, 32, 51, .98),
+        rgba(15, 23, 42, .96)
+    );
+    border: 1px solid var(--ui-border);
+    border-radius: .85rem;
+    box-shadow: 0 20px 50px rgba(0,0,0,.45);
+    color: #e5e7eb;
 }
-
-
-/* =========================================================
-   HEADER
-   ========================================================= */
 
 .torrent-files-header {
     padding: 16px 20px;
-
-    border-bottom: 1px solid rgba(255,255,255,.07);
+    border-bottom: 1px solid var(--ui-border);
+    background: rgba(255,255,255,.02);
 }
-
 
 .torrent-files-header .modal-title {
     display: flex;
-
     align-items: center;
-
     gap: 10px;
-
-    color: #f1f1f1;
-
-    font-size: 16px;
-
+    color: #fff;
+    font-size: 14px;
     font-weight: 700;
 }
-
 
 .files-title-icon {
     width: 34px;
     height: 34px;
-
     display: inline-flex;
-
     align-items: center;
     justify-content: center;
-
-    border-radius: 9px;
-
-    color: #9ab0ff;
-
-    background: rgba(100,130,255,.10);
-
-    border: 1px solid rgba(140,165,255,.14);
-
+    border-radius: .65rem;
+    color: var(--ui-accent);
+    background: rgba(45,212,191,.10);
+    border: 1px solid rgba(45,212,191,.20);
     font-size: 16px;
 }
 
-
 .files-subtitle {
     display: block;
-
     margin-top: 3px;
     margin-left: 44px;
-
-    color: #6f737b;
-
-    font-size: 10px;
+    color: rgba(255,255,255,.58);
+    font-size: 12px;
 }
-
-
-/* =========================================================
-   COLUMN HEADER
-   ========================================================= */
 
 .files-column-header {
     grid-template-columns: minmax(0, 1fr) 100px 90px 90px;
-
     gap: 10px;
-
-    padding: 8px 14px;
-
-    color: #666b73;
-
-    font-size: 9px;
-
+    padding: 9px 14px;
+    color: rgba(255,255,255,.48);
+    font-size: 10px;
     font-weight: 700;
-
-    letter-spacing: .6px;
-
-    border-bottom: 1px solid rgba(255,255,255,.045);
+    letter-spacing: .5px;
+    border-bottom: 1px solid rgba(255,255,255,.06);
 }
-
-
-/* =========================================================
-   BODY
-   ========================================================= */
 
 .torrent-files-body {
     padding: 10px 12px;
-
-    background:
-        radial-gradient(
-            circle at top,
-            rgba(100,120,255,.025),
-            transparent 45%
-        );
+    background: rgba(0,0,0,.08);
 }
-
-
-/* =========================================================
-   TREE
-   ========================================================= */
 
 .file-tree {
     list-style: none;
-
     margin: 0;
-
     padding: 0;
 }
 
-
 .nested-tree {
     margin-left: 20px;
-
     padding-left: 10px;
-
-    border-left: 1px solid rgba(255,255,255,.06);
+    border-left: 1px solid rgba(45,212,191,.14);
 }
-
 
 .file-tree-item {
     list-style: none;
-
     margin: 1px 0;
 }
 
-
-/* =========================================================
-   FOLDER
-   ========================================================= */
-
 .folder-row {
     display: flex;
-
     align-items: center;
-
     gap: 8px;
-
     min-height: 34px;
-
     padding: 5px 8px;
-
-    border-radius: 8px;
-
+    border-radius: .55rem;
     cursor: pointer;
-
-    color: #d2d5da;
-
-    transition:
-        background .15s ease,
-        color .15s ease;
+    color: #dbe4e8;
+    transition: background .15s ease, color .15s ease;
 }
 
-
 .folder-row:hover {
-    background: rgba(255,255,255,.055);
-
+    background: rgba(45,212,191,.07);
     color: #fff;
 }
 
-
 .folder-chevron {
     width: 16px;
-
     display: inline-flex;
-
     justify-content: center;
-
-    color: #666d78;
-
+    color: rgba(255,255,255,.42);
     font-size: 9px;
-
-    transition:
-        transform .18s ease,
-        color .18s ease;
+    transition: transform .18s ease, color .18s ease;
 }
-
 
 .folder-open .folder-chevron {
     transform: rotate(90deg);
-
-    color: #9ab0ff;
+    color: var(--ui-accent);
 }
-
 
 .folder-icon {
     width: 25px;
     height: 25px;
-
     display: inline-flex;
-
     align-items: center;
     justify-content: center;
-
-    border-radius: 6px;
-
-    color: #e3b85c;
-
-    background: rgba(227,184,92,.08);
-
+    border-radius: .5rem;
+    color: var(--ui-accent);
+    background: rgba(45,212,191,.10);
     font-size: 13px;
 }
 
-
 .folder-name {
     min-width: 0;
-
     overflow: hidden;
-
     text-overflow: ellipsis;
-
     white-space: nowrap;
-
-    font-size: 15px;
-
+    font-size: 14px;
     font-weight: 600;
 }
 
-
-/* =========================================================
-   FILE ROW
-   ========================================================= */
-
 .file-row {
     display: grid;
-
-    grid-template-columns:
-        minmax(0, 1fr)
-        100px
-        90px
-        90px;
-
+    grid-template-columns: minmax(0, 1fr) 100px 90px 90px;
     align-items: center;
-
     gap: 10px;
-
     min-height: 39px;
-
     padding: 5px 8px;
-
-    border-radius: 8px;
-
-    transition:
-        background .15s ease;
+    border-radius: .55rem;
+    transition: background .15s ease;
 }
-
 
 .file-row:hover {
-    background: rgba(255,255,255,.035);
+    background: rgba(45,212,191,.045);
 }
-
-
-/* =========================================================
-   FILE MAIN
-   ========================================================= */
 
 .file-main {
     min-width: 0;
-
     display: flex;
-
     align-items: center;
-
     gap: 8px;
 }
-
 
 .file-type-icon {
     width: 27px;
     height: 27px;
-
     flex-shrink: 0;
-
     display: inline-flex;
-
     align-items: center;
     justify-content: center;
-
-    border-radius: 7px;
-
-    color: #8e96a5;
-
+    border-radius: .5rem;
+    color: var(--ui-accent);
     background: rgba(255,255,255,.045);
-
     font-size: 13px;
 }
-
 
 .file-name {
     min-width: 0;
-
     overflow: hidden;
-
     text-overflow: ellipsis;
-
     white-space: nowrap;
-
-    color: #cfd2d7;
-
-    font-size: 13px;
-
+    color: #d8e0e4;
+    font-size: 14px;
     font-weight: 500;
 }
-
 
 .file-row:hover .file-name {
     color: #fff;
 }
 
-
-/* =========================================================
-   BADGES
-   ========================================================= */
-
 .file-badges {
     display: flex;
-
     align-items: center;
-
     gap: 3px;
-
     flex-shrink: 0;
 }
 
-
 .file-badge {
     display: inline-flex;
-
     align-items: center;
-
     justify-content: center;
-
-    min-height: 17px;
-
-    padding: 2px 5px;
-
-    border-radius: 5px;
-
+    min-height: 18px;
+    padding: 2px 6px;
+    border-radius: .35rem;
     font-size: 10px;
-
     line-height: 1;
-
     font-weight: 700;
-
     letter-spacing: .15px;
 }
 
-
 .badge-res {
-    color: #9ab0ff;
-
-    background: rgba(100,130,255,.10);
-
-    border: 1px solid rgba(130,155,255,.12);
+    color: var(--ui-accent);
+    background: rgba(45,212,191,.10);
+    border: 1px solid rgba(45,212,191,.18);
 }
-
 
 .badge-codec {
-    color: #8de0b0;
-
-    background: rgba(70,190,120,.08);
-
-    border: 1px solid rgba(100,210,145,.11);
+    color: #86efac;
+    background: rgba(34,197,94,.09);
+    border: 1px solid rgba(34,197,94,.15);
 }
-
 
 .badge-hdr {
-    color: #d9a7ff;
-
-    background: rgba(170,100,230,.09);
-
-    border: 1px solid rgba(190,125,245,.12);
+    color: #fbbf24;
+    background: rgba(245,158,11,.09);
+    border: 1px solid rgba(245,158,11,.15);
 }
-
 
 .badge-audio {
-    color: #ffb875;
-
-    background: rgba(230,140,60,.08);
-
-    border: 1px solid rgba(240,160,90,.11);
+    color: #fdba74;
+    background: rgba(249,115,22,.09);
+    border: 1px solid rgba(249,115,22,.15);
 }
-
 
 .badge-audio-ch {
-    color: #82d8e8;
-
-    background: rgba(50,180,200,.08);
-
-    border: 1px solid rgba(80,200,220,.11);
+    color: #67e8f9;
+    background: rgba(34,211,238,.08);
+    border: 1px solid rgba(34,211,238,.14);
 }
-
-
-/* =========================================================
-   SIZE / TYPE / KIND
-   ========================================================= */
 
 .file-size,
 .file-type,
 .file-kind {
-    color: #858a93;
-
-    font-size: 10px;
-
+    color: rgba(255,255,255,.55);
+    font-size: 12px;
     text-align: center;
 }
 
-
 .file-size {
-    color: #83b7d8;
-
+    color: #9bd8d1;
     font-weight: 600;
 }
-
 
 .file-type {
     font-weight: 600;
-
     letter-spacing: .3px;
 }
 
-
 .file-kind {
     display: flex;
-
     align-items: center;
-
     justify-content: center;
-
     gap: 5px;
 }
 
-
 .file-kind i {
-    font-size: 10px;
-
-    opacity: .65;
+    color: var(--ui-accent);
+    font-size: 11px;
+    opacity: .8;
 }
-
-
-/* =========================================================
-   FOOTER
-   ========================================================= */
 
 .torrent-files-footer {
     padding: 10px 16px;
-
-    border-top: 1px solid rgba(255,255,255,.06);
+    border-top: 1px solid var(--ui-border);
+    background: rgba(255,255,255,.02);
 }
-
 
 .files-close-btn {
     display: inline-flex;
-
     align-items: center;
-
-    padding: 6px 12px;
-
-    border-radius: 8px;
-
-    color: #aaa;
-
+    padding: 7px 13px;
+    border-radius: .55rem;
+    color: rgba(255,255,255,.72);
     background: rgba(255,255,255,.045);
-
-    border: 1px solid rgba(255,255,255,.08);
-
-    font-size: 10px;
-
-    transition:
-        background .15s ease,
-        color .15s ease;
+    border: 1px solid var(--ui-border);
+    font-size: 13px;
+    transition: background .15s ease, color .15s ease, border-color .15s ease;
 }
-
 
 .files-close-btn:hover {
     color: #fff;
-
-    background: rgba(255,255,255,.09);
+    background: rgba(45,212,191,.08);
+    border-color: rgba(45,212,191,.28);
 }
 
+.torrent-files-modal .btn-close {
+    filter: invert(1) grayscale(1);
+    opacity: .65;
+}
 
-/* =========================================================
-   MOBILE
-   ========================================================= */
+.torrent-files-modal .btn-close:hover {
+    opacity: 1;
+}
 
 @media (max-width: 767.98px) {
-
     .torrent-files-modal {
-        border-radius: 12px;
+        border-radius: .7rem;
     }
-
 
     .torrent-files-body {
         padding: 7px;
     }
 
-
     .nested-tree {
         margin-left: 12px;
-
         padding-left: 7px;
     }
 
-
     .folder-row {
         min-height: 32px;
-
         padding: 4px 6px;
     }
 
-
     .folder-name {
-        font-size: 13px;
+        font-size: 14px;
     }
-
 
     .file-row {
         display: flex;
-
         min-height: 37px;
-
         padding: 4px 6px;
     }
 
-
     .file-main {
         flex: 1;
-
         min-width: 0;
     }
 
-
     .file-name {
-        font-size: 12px;
+        font-size: 13px;
     }
 
-
-    .file-badges {
-        display: none;
-    }
-
-
-    .file-size {
-        display: none;
-    }
-
-
+    .file-badges,
+    .file-size,
     .file-type {
         display: none;
     }
 
-
     .file-kind {
         width: 45px;
-
         flex-shrink: 0;
-
-        font-size: 8px;
+        font-size: 9px;
     }
-
 
     .file-kind span {
         display: none;
     }
 
-
     .file-type-icon {
         width: 25px;
         height: 25px;
-
         font-size: 12px;
     }
-
 
     .torrent-files-header {
         padding: 13px 14px;
     }
 
+    .files-subtitle {
+        font-size: 11px;
+    }
 }
-
-    </style>
+</style>

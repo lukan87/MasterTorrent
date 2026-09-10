@@ -7,14 +7,19 @@
     <div class="container py-5">
 
         {{-- =========================================
+
             HERO HEADER
+
         ========================================= --}}
+
         <div class="request-hero mb-4">
 
             <div>
 
                 <div class="request-kicker">
+
                     COMMUNITY • REQUEST SYSTEM
+
                 </div>
 
                 <h1 class="request-title">
@@ -42,8 +47,11 @@
         </div>
 
         {{-- =========================================
+
             ERRORS
+
         ========================================= --}}
+
         @if ($errors->any())
 
             <div class="modern-alert modern-alert-danger mb-4">
@@ -61,8 +69,11 @@
         @endif
 
         {{-- =========================================
+
             FORM CARD
+
         ========================================= --}}
+
         <div class="modern-card">
 
             <div class="modern-card-header">
@@ -80,17 +91,21 @@
             <div class="modern-card-body">
 
                 <form action="{{ route('requests.store') }}"
+
                       method="POST">
 
                     @csrf
 
                     <input type="hidden"
+
                            name="requested_by"
+
                            value="{{ auth()->id() }}">
 
                     <div class="row g-4">
 
                         {{-- REQUEST NAME --}}
+
                         <div class="col-12">
 
                             <label class="modern-label">
@@ -100,16 +115,23 @@
                             </label>
 
                             <input type="text"
+
                                    name="name"
+
                                    id="name"
+
                                    class="form-control modern-input"
+
                                    value="{{ old('name') }}"
+
                                    placeholder="Movie / TV Show / Game name..."
+
                                    required>
 
                         </div>
 
                         {{-- CATEGORY --}}
+
                         <div class="col-md-6">
 
                             <label class="modern-label">
@@ -119,17 +141,23 @@
                             </label>
 
                             <select name="category_id"
+
                                     id="category_id"
+
                                     class="form-select modern-input"
+
                                     required>
 
                                 <option value="">
+
                                     Select Category
+
                                 </option>
 
                                 @foreach ($categories as $category)
 
                                     <option value="{{ $category->id }}"
+
                                         {{ old('category_id') == $category->id ? 'selected' : '' }}>
 
                                         {{ $category->name }}
@@ -143,6 +171,7 @@
                         </div>
 
                         {{-- IMAGE --}}
+
                         <div class="col-md-6">
 
                             <label class="modern-label">
@@ -152,16 +181,23 @@
                             </label>
 
                             <input type="url"
+
                                    name="image"
+
                                    id="image"
+
                                    class="form-control modern-input"
+
                                    value="{{ old('image') }}"
+
                                    placeholder="https://..."
+
                                    required>
 
                         </div>
 
                         {{-- IMDB --}}
+
                         <div class="col-md-4">
 
                             <label class="modern-label">
@@ -171,15 +207,21 @@
                             </label>
 
                             <input type="url"
+
                                    name="imdb_url"
+
                                    id="imdb_url"
+
                                    class="form-control modern-input"
+
                                    value="{{ old('imdb_url') }}"
+
                                    placeholder="https://imdb.com/title/...">
 
                         </div>
 
                         {{-- TMDB --}}
+
                         <div class="col-md-4">
 
                             <label class="modern-label">
@@ -189,15 +231,21 @@
                             </label>
 
                             <input type="url"
+
                                    name="tmdb_url"
+
                                    id="tmdb_url"
+
                                    class="form-control modern-input"
+
                                    value="{{ old('tmdb_url') }}"
+
                                    placeholder="https://themoviedb.org/...">
 
                         </div>
 
                         {{-- STEAM --}}
+
                         <div class="col-md-4">
 
                             <label class="modern-label">
@@ -207,15 +255,21 @@
                             </label>
 
                             <input type="url"
+
                                    name="steam_url"
+
                                    id="steam_url"
+
                                    class="form-control modern-input"
+
                                    value="{{ old('steam_url') }}"
+
                                    placeholder="https://store.steampowered.com/...">
 
                         </div>
 
                         {{-- DESCRIPTION --}}
+
                         <div class="col-12">
 
                             <label class="modern-label">
@@ -225,9 +279,13 @@
                             </label>
 
                             <textarea name="description"
+
                                       id="description"
+
                                       rows="7"
+
                                       class="form-control modern-input modern-textarea"
+
                                       placeholder="Add extra details about the request...">{{ old('description') }}</textarea>
 
                             <div class="input-hint">
@@ -241,9 +299,11 @@
                     </div>
 
                     {{-- SUBMIT --}}
+
                     <div class="text-center mt-5">
 
                         <button type="submit"
+
                                 class="btn modern-submit-btn">
 
                             <i class="bi bi-send-fill me-2"></i>
@@ -265,369 +325,270 @@
 </div>
 
 <style>
-
 /* =========================================
-   BACKGROUND
+   FILEIPLAY CREATE TORRENT REQUEST
+   DARK GLASS / TEAL FORUM STYLE
 ========================================= */
 
-body{
-
-    background:
-        radial-gradient(
-            circle at top,
-            #172033,
-            #0f172a 45%,
-            #020617
-        );
-
-    min-height:100vh;
+.request-page {
+    min-height: 100vh;
+    color: #e2e8f0;
 }
 
-/* =========================================
-   HERO
-========================================= */
-
-.request-hero{
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
-    gap:20px;
-
-    flex-wrap:wrap;
-
-    padding:34px;
-
-    border-radius:30px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(255,255,255,.07),
-            rgba(255,255,255,.03)
-        );
-
-    border:
-        1px solid rgba(255,255,255,.08);
-
-    backdrop-filter:blur(18px);
-
-    box-shadow:
-        0 25px 60px rgba(0,0,0,.45);
-
-    position:relative;
-
-    overflow:hidden;
+.request-hero,
+.modern-card {
+    border: 1px solid var(--ui-border, rgba(255,255,255,.08));
+    background: linear-gradient(
+        135deg,
+        rgba(22,32,51,.95),
+        rgba(15,23,42,.84)
+    );
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 10px 28px rgba(0,0,0,.18);
 }
 
-.request-hero::before{
-
-    content:'';
-
-    position:absolute;
-
-    top:-120px;
-    right:-120px;
-
-    width:280px;
-    height:280px;
-
-    background:
-        radial-gradient(
-            circle,
-            rgba(59,130,246,.22),
-            transparent 70%
-        );
-
-    pointer-events:none;
+.request-hero {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.1rem 1.2rem;
+    border-left: 3px solid var(--ui-accent, #22d3ee);
+    border-radius: .85rem;
 }
 
-.request-kicker{
-
-    color:#60a5fa;
-
-    font-size:.78rem;
-
-    font-weight:800;
-
-    letter-spacing:2px;
-
-    margin-bottom:10px;
+.request-hero::after {
+    content: "";
+    position: absolute;
+    top: -100px;
+    right: -100px;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    background: radial-gradient(
+        circle,
+        rgba(34,211,238,.10),
+        transparent 70%
+    );
+    pointer-events: none;
 }
 
-.request-title{
-
-    color:white;
-
-    font-size:2.4rem;
-
-    font-weight:900;
-
-    margin:0;
+.request-kicker {
+    margin-bottom: .35rem;
+    color: var(--ui-accent, #22d3ee);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
 }
 
-.request-subtitle{
-
-    margin-top:10px;
-
-    color:rgba(255,255,255,.65);
-
-    font-size:1rem;
+.request-title {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    color: #f8fafc;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.25;
 }
 
-.hero-icon{
+.request-subtitle {
+    position: relative;
+    z-index: 1;
+    margin-top: .4rem;
+    color: rgba(226,232,240,.62);
+    font-size: 13px;
+    line-height: 1.45;
+}
 
-    width:90px;
-    height:90px;
-
-    border-radius:24px;
-
-    display:flex;
-
-    align-items:center;
-    justify-content:center;
-
-    background:
-        linear-gradient(
-            135deg,
-            #2563eb,
-            #7c3aed
-        );
-
-    color:white;
-
-    font-size:2rem;
-
-    box-shadow:
-        0 15px 35px rgba(59,130,246,.35);
+.hero-icon {
+    position: relative;
+    z-index: 1;
+    width: 52px;
+    height: 52px;
+    flex: 0 0 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--ui-border, rgba(255,255,255,.08));
+    border-radius: .75rem;
+    background: rgba(34,211,238,.08);
+    color: var(--ui-accent, #22d3ee);
+    font-size: 1.25rem;
 }
 
 /* =========================================
    CARD
 ========================================= */
 
-.modern-card{
-
-    border-radius:28px;
-
-    overflow:hidden;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(255,255,255,.05),
-            rgba(255,255,255,.03)
-        );
-
-    border:
-        1px solid rgba(255,255,255,.06);
-
-    backdrop-filter:blur(16px);
-
-    box-shadow:
-        0 20px 50px rgba(0,0,0,.35);
+.modern-card {
+    overflow: hidden;
+    border-radius: .85rem;
 }
 
-.modern-card-header{
-
-    padding:22px 28px;
-
-    border-bottom:
-        1px solid rgba(255,255,255,.06);
-
-    color:white;
+.modern-card-header {
+    padding: .85rem 1rem;
+    border-bottom: 1px solid var(--ui-border, rgba(255,255,255,.08));
 }
 
-.modern-card-body{
-
-    padding:30px;
+.modern-card-header h5 {
+    margin: 0;
+    color: #f8fafc;
+    font-size: 14px;
+    font-weight: 700;
 }
 
-/* =========================================
-   LABELS
-========================================= */
-
-.modern-label{
-
-    display:block;
-
-    margin-bottom:10px;
-
-    color:#cbd5e1;
-
-    font-size:.78rem;
-
-    font-weight:800;
-
-    letter-spacing:1px;
-
-    text-transform:uppercase;
+.modern-card-header .text-info {
+    color: var(--ui-accent, #22d3ee) !important;
 }
 
-/* =========================================
-   INPUTS
-========================================= */
-
-.modern-input{
-
-    background:
-        rgba(255,255,255,.04) !important;
-
-    border:
-        1px solid rgba(255,255,255,.08) !important;
-
-    color:white !important;
-
-    border-radius:18px !important;
-
-    padding:14px 18px !important;
-
-    transition:.2s ease;
-}
-
-.modern-input:focus{
-
-    border-color:
-        rgba(59,130,246,.35) !important;
-
-    box-shadow:
-        0 0 0 4px rgba(59,130,246,.15) !important;
-
-    background:
-        rgba(255,255,255,.06) !important;
-}
-
-.modern-input::placeholder{
-
-    color:rgba(255,255,255,.35);
-}
-
-/* SELECT OPTIONS */
-select.modern-input option{
-
-    background:#111827;
-
-    color:white;
-}
-
-.modern-textarea{
-
-    min-height:180px;
-
-    resize:vertical;
-}
-
-/* =========================================
-   HINT
-========================================= */
-
-.input-hint{
-
-    margin-top:8px;
-
-    font-size:.8rem;
-
-    color:rgba(255,255,255,.45);
-}
-
-/* =========================================
-   BUTTON
-========================================= */
-
-.modern-submit-btn{
-
-    border:none;
-
-    padding:15px 32px;
-
-    border-radius:18px;
-
-    font-weight:800;
-
-    letter-spacing:.5px;
-
-    color:white;
-
-    background:
-        linear-gradient(
-            135deg,
-            #2563eb,
-            #7c3aed
-        );
-
-    box-shadow:
-        0 12px 30px rgba(59,130,246,.35);
-
-    transition:.25s ease;
-}
-
-.modern-submit-btn:hover{
-
-    transform:translateY(-3px);
-
-    color:white;
-
-    box-shadow:
-        0 18px 40px rgba(59,130,246,.45);
+.modern-card-body {
+    padding: 1rem;
 }
 
 /* =========================================
    ALERT
 ========================================= */
 
-.modern-alert{
-
-    padding:16px 18px;
-
-    border-radius:18px;
-
-    color:white;
-
-    backdrop-filter:blur(10px);
+.modern-alert {
+    padding: .75rem .9rem;
+    border-radius: .7rem;
+    font-size: 13px;
+    line-height: 1.45;
 }
 
-.modern-alert-danger{
+.modern-alert-danger {
+    border: 1px solid rgba(239,68,68,.22);
+    border-left: 3px solid rgba(239,68,68,.65);
+    background: rgba(239,68,68,.08);
+    color: #fecaca;
+}
 
-    background:
-        rgba(239,68,68,.14);
+/* =========================================
+   LABELS
+========================================= */
 
-    border:
-        1px solid rgba(239,68,68,.25);
+.modern-label {
+    display: block;
+    margin-bottom: .4rem;
+    color: #cbd5e1;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .4px;
+}
+
+/* =========================================
+   INPUTS
+========================================= */
+
+.modern-input {
+    min-height: 40px;
+    border: 1px solid var(--ui-border, rgba(255,255,255,.08)) !important;
+    border-radius: .6rem !important;
+    background: rgba(255,255,255,.035) !important;
+    color: #f8fafc !important;
+    font-size: 13px;
+    box-shadow: none !important;
+    transition: border-color .2s ease, background .2s ease, box-shadow .2s ease;
+}
+
+.modern-input:focus {
+    border-color: rgba(34,211,238,.45) !important;
+    background: rgba(34,211,238,.035) !important;
+    box-shadow: 0 0 0 3px rgba(34,211,238,.08) !important;
+}
+
+.modern-input::placeholder {
+    color: rgba(226,232,240,.36);
+}
+
+select.modern-input option {
+    background: #0f172a;
+    color: #f8fafc;
+}
+
+.modern-textarea {
+    min-height: 160px;
+    resize: vertical;
+    line-height: 1.5;
+}
+
+.input-hint {
+    margin-top: .35rem;
+    color: rgba(226,232,240,.45);
+    font-size: 12px;
+}
+
+/* =========================================
+   SUBMIT
+========================================= */
+
+.modern-submit-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: .55rem .9rem;
+    border: 1px solid rgba(34,211,238,.28);
+    border-radius: .55rem;
+    background: rgba(34,211,238,.10);
+    color: var(--ui-accent, #22d3ee);
+    font-size: 13px;
+    font-weight: 700;
+    transition: all .2s ease;
+}
+
+.modern-submit-btn:hover {
+    border-color: var(--ui-accent, #22d3ee);
+    background: rgba(34,211,238,.16);
+    color: #f8fafc;
+    transform: translateY(-1px);
+    box-shadow: 0 7px 18px rgba(0,0,0,.18);
 }
 
 /* =========================================
    MOBILE
 ========================================= */
 
-@media(max-width:768px){
-
-    .request-hero{
-
-        padding:24px;
+@media (max-width: 768px) {
+    .request-page .container {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
     }
 
-    .request-title{
-
-        font-size:1.8rem;
+    .request-hero {
+        padding: .9rem;
+        border-radius: .75rem;
     }
 
-    .hero-icon{
-
-        width:72px;
-        height:72px;
-
-        font-size:1.6rem;
+    .request-title {
+        font-size: 18px;
     }
 
-    .modern-card-body{
+    .request-subtitle {
+        font-size: 12px;
+    }
 
-        padding:22px;
+    .hero-icon {
+        width: 44px;
+        height: 44px;
+        flex-basis: 44px;
+        font-size: 1.1rem;
+    }
+
+    .modern-card-body {
+        padding: .85rem;
+    }
+
+    .modern-input {
+        font-size: 13px;
+    }
+
+    .modern-submit-btn {
+        font-size: 12px;
     }
 }
-
 </style>
 
 @endsection

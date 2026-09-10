@@ -2,20 +2,20 @@
 
 @section('content')
 
-<div class="my-5">
-    <div class="card glass shadow-lg border-0">
+<div class="my-5 rules-page">
+    <div class="card glass shadow-lg border-0 rules-card">
 
-        <div class="card-header bg-gradient-primary text-white text-center">
+        <div class="card-header text-white text-center rules-header">
             <h2 class="mb-0">{{ config('app.name') }}</h2>
             <p class="small fst-italic mt-1">
                 Private Tracker Rules • Read Carefully • Seed Generously
             </p>
         </div>
 
-        <div class="card-body">
+        <div class="card-body rules-body">
 
             {{-- Tabs --}}
-            <ul class="nav nav-tabs nav-justified" role="tablist">
+            <ul class="nav nav-tabs nav-justified rules-tabs" role="tablist">
                 <li class="nav-item">
                     <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#ro">
                         🇷🇴 RO
@@ -33,12 +33,12 @@
                 {{-- ===================== ROMANIAN TAB ===================== --}}
                 <div class="tab-pane fade show active" id="ro">
 
-                    <div class="accordion" id="rulesAccordionRo">
+                    <div class="accordion rules-accordion" id="rulesAccordionRo">
 
                         {{-- 1 General --}}
                         <div class="accordion-item bg-dark text-light border-secondary">
                             <h2 class="accordion-header">
-                                <button class="accordion-button bg-dark text-light"
+                                <button class="accordion-button"
                                         data-bs-toggle="collapse"
                                         data-bs-target="#roGeneral"
                                         aria-expanded="true">
@@ -65,7 +65,7 @@
                         {{-- 2 Seeding --}}
                         <div class="accordion-item bg-dark text-light border-secondary">
                             <h2 class="accordion-header">
-                                <button class="accordion-button collapsed bg-dark text-light"
+                                <button class="accordion-button collapsed"
                                         data-bs-toggle="collapse"
                                         data-bs-target="#roSeeding">
                                     ⬇ 2. Download & Seeding
@@ -89,7 +89,7 @@
                         {{-- 3 Forum --}}
                         <div class="accordion-item bg-dark text-light border-secondary">
                             <h2 class="accordion-header">
-                                <button class="accordion-button collapsed bg-dark text-light"
+                                <button class="accordion-button collapsed"
                                         data-bs-toggle="collapse"
                                         data-bs-target="#roForum">
                                     💬 3. Forum & Mesaje Private
@@ -112,7 +112,7 @@
                         {{-- 4 Classes --}}
                         <div class="accordion-item bg-black text-light border-warning">
                             <h2 class="accordion-header">
-                                <button class="accordion-button collapsed bg-black text-warning"
+                                <button class="accordion-button collapsed"
                                         data-bs-toggle="collapse"
                                         data-bs-target="#roClasses">
                                     🏆 4. Clase Utilizatori
@@ -169,12 +169,12 @@
                 {{-- ===================== ENGLISH TAB ===================== --}}
                 <div class="tab-pane fade" id="en">
 
-                    <div class="accordion" id="rulesAccordionEn">
+                    <div class="accordion rules-accordion" id="rulesAccordionEn">
 
                         {{-- 1 General --}}
                         <div class="accordion-item bg-dark text-light border-secondary">
                             <h2 class="accordion-header">
-                                <button class="accordion-button bg-dark text-light"
+                                <button class="accordion-button"
                                         data-bs-toggle="collapse"
                                         data-bs-target="#enGeneral"
                                         aria-expanded="true">
@@ -201,7 +201,7 @@
                         {{-- 2 Seeding --}}
                         <div class="accordion-item bg-dark text-light border-secondary">
                             <h2 class="accordion-header">
-                                <button class="accordion-button collapsed bg-dark text-light"
+                                <button class="accordion-button collapsed"
                                         data-bs-toggle="collapse"
                                         data-bs-target="#enSeeding">
                                     ⬇ 2. Downloading & Seeding
@@ -225,7 +225,7 @@
                         {{-- 3 Forum --}}
                         <div class="accordion-item bg-dark text-light border-secondary">
                             <h2 class="accordion-header">
-                                <button class="accordion-button collapsed bg-dark text-light"
+                                <button class="accordion-button collapsed"
                                         data-bs-toggle="collapse"
                                         data-bs-target="#enForum">
                                     💬 3. Forum & Private Messages
@@ -248,7 +248,7 @@
                         {{-- 4 Classes --}}
                         <div class="accordion-item bg-black text-light border-warning">
                             <h2 class="accordion-header">
-                                <button class="accordion-button collapsed bg-black text-warning"
+                                <button class="accordion-button collapsed"
                                         data-bs-toggle="collapse"
                                         data-bs-target="#enClasses">
                                     🏆 4. User Classes
@@ -305,7 +305,7 @@
             </div>
         </div>
 
-        <div class="card-footer text-center bg-secondary">
+        <div class="card-footer rules-footer">
             <small class="fst-italic">
                 {{ config('app.name') }} • Seed More Than You Take • Quality Over Quantity
             </small>
@@ -313,5 +313,240 @@
 
     </div>
 </div>
+
+<style>
+/* =========================================================
+   FILEIPLAY — RULES PAGE
+   Dark navy glass + teal forum style
+   ========================================================= */
+
+.rules-page {
+    margin-top: 28px;
+    margin-bottom: 28px;
+}
+
+.rules-card {
+    overflow: hidden;
+    background: linear-gradient(
+        135deg,
+        rgba(22, 32, 51, .96),
+        rgba(15, 23, 42, .88)
+    );
+    border: 1px solid var(--ui-border) !important;
+    border-radius: .85rem !important;
+    box-shadow: 0 18px 45px rgba(0,0,0,.32);
+    backdrop-filter: blur(14px);
+}
+
+.rules-header {
+    padding: 20px;
+    text-align: center;
+    background: rgba(45,212,191,.045);
+    border-bottom: 1px solid var(--ui-border);
+}
+
+.rules-header h2 {
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.rules-header p {
+    color: rgba(255,255,255,.48);
+    font-size: 12px;
+}
+
+.rules-body {
+    padding: 18px;
+}
+
+/* Language tabs */
+
+.rules-tabs {
+    border-bottom: 1px solid var(--ui-border);
+}
+
+.rules-tabs .nav-link {
+    color: rgba(255,255,255,.58);
+    background: transparent;
+    border: 1px solid transparent;
+    border-bottom: 2px solid transparent;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 12px;
+}
+
+.rules-tabs .nav-link:hover {
+    color: #fff;
+    border-color: transparent;
+    border-bottom-color: rgba(45,212,191,.35);
+}
+
+.rules-tabs .nav-link.active {
+    color: var(--ui-accent);
+    background: rgba(45,212,191,.045);
+    border-color: var(--ui-border) var(--ui-border) transparent;
+    border-bottom-color: var(--ui-accent);
+}
+
+/* Accordion */
+
+.rules-accordion .accordion-item {
+    margin-bottom: 8px;
+    overflow: hidden;
+
+    background: rgba(15,23,42,.72) !important;
+
+    border: 1px solid var(--ui-border) !important;
+    border-radius: .65rem !important;
+}
+
+.rules-accordion .accordion-header {
+    margin: 0;
+}
+
+.rules-accordion .accordion-button {
+    color: rgba(255,255,255,.82) !important;
+
+    background: rgba(22,32,51,.78) !important;
+
+    border: 0 !important;
+
+    box-shadow: none !important;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    padding: 12px 14px;
+}
+
+.rules-accordion .accordion-button:hover {
+    color: #fff !important;
+    background: rgba(45,212,191,.055) !important;
+}
+
+.rules-accordion .accordion-button:not(.collapsed) {
+    color: var(--ui-accent) !important;
+    background: rgba(45,212,191,.065) !important;
+    box-shadow: inset 3px 0 0 var(--ui-accent) !important;
+}
+
+.rules-accordion .accordion-button::after {
+    filter: invert(1);
+    opacity: .55;
+}
+
+.rules-accordion .accordion-button:not(.collapsed)::after {
+    opacity: .85;
+}
+
+.rules-accordion .accordion-body {
+    color: rgba(255,255,255,.67);
+
+    background: rgba(9,16,29,.48);
+
+    border-top: 1px solid rgba(255,255,255,.045);
+
+    padding: 14px 16px;
+
+    font-size: 13px;
+    line-height: 1.65;
+}
+
+.rules-accordion ul {
+    margin-bottom: 0;
+    padding-left: 19px;
+}
+
+.rules-accordion li {
+    margin-bottom: 6px;
+}
+
+.rules-accordion li:last-child {
+    margin-bottom: 0;
+}
+
+.rules-accordion strong {
+    color: rgba(255,255,255,.88);
+}
+
+.rules-accordion hr {
+    border-color: var(--ui-border);
+    opacity: 1;
+    margin: 16px 0;
+}
+
+.rules-accordion h6 {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+/* Keep the existing class colours, but make them readable */
+
+.rules-accordion .text-warning {
+    color: #fcd34d !important;
+}
+
+.rules-accordion .text-danger {
+    color: #fca5a5 !important;
+}
+
+/* Footer */
+
+.rules-footer {
+    padding: 11px 16px;
+    color: rgba(255,255,255,.42);
+    background: rgba(9,16,29,.55);
+    border-top: 1px solid var(--ui-border);
+    text-align: center;
+}
+
+.rules-footer small {
+    font-size: 11px;
+}
+
+/* Mobile */
+
+@media (max-width: 768px) {
+
+    .rules-page {
+        margin-top: 18px;
+        margin-bottom: 18px;
+    }
+
+    .rules-header {
+        padding: 16px 12px;
+    }
+
+    .rules-header h2 {
+        font-size: 16px;
+    }
+
+    .rules-body {
+        padding: 12px;
+    }
+
+    .rules-tabs .nav-link {
+        font-size: 12px;
+        padding: 8px 6px;
+    }
+
+    .rules-accordion .accordion-button {
+        font-size: 13px;
+        padding: 11px 12px;
+    }
+
+    .rules-accordion .accordion-body {
+        padding: 12px;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+    .rules-footer {
+        padding: 10px 12px;
+    }
+}
+</style>
 
 @endsection
