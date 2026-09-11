@@ -1,4 +1,3 @@
-```blade
 <!-- Premium Search Form -->
 
 <div class="torrent-search card border-0 mb-4 mt-5">
@@ -1515,4 +1514,4 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 </script>
-```
+

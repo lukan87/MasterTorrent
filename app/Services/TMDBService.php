@@ -473,7 +473,6 @@ if ($isMovie && !empty($tmdb['belongs_to_collection'])) {
 'season_details' => !$isMovie
     ? collect($tmdb['seasons'] ?? [])
         ->reject(fn ($s) => ($s['season_number'] ?? 0) === 0)
-        ->take(10)
         ->map(fn ($s) => [
             'season_number' => $s['season_number'],
             'name'          => $s['name'] ?? null,

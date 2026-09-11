@@ -244,20 +244,29 @@
 ========================= --}}
 @if(!empty($display['season_details']))
 
-    <div class="tv-seasons-section mt-5">
+    <div class="tv-seasons-section tv-episode-card mt-5">
 
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
-            <div>
-                <h3 class="cast-title mb-1">Seasons</h3>
-                <p class="cast-subtitle mb-0">All available seasons of this series</p>
-            </div>
-            <div class="cast-count-badge">
-                <i class="bi bi-collection-play"></i>
-                {{ count($display['season_details']) }} Seasons
-            </div>
+    <div class="episode-card-header">
+
+    <div class="episode-icon-box last-icon">
+        <i class="bi bi-collection-play"></i>
+    </div>
+
+    <div>
+        <h3 class="episode-card-title mb-0">Seasons</h3>
+        <div class="episode-card-subtitle">
+            All available seasons of this series
         </div>
+    </div>
 
-        <div class="tv-seasons-row">
+    <div class="ms-auto cast-count-badge">
+        <i class="bi bi-collection-play"></i>
+        {{ count($display['season_details']) }} Seasons
+    </div>
+
+</div>
+
+        <div class="tv-seasons-row {{ count($display['season_details']) > 10 ? 'seasons-scrollable' : '' }}">
 
             @foreach($display['season_details'] as $season)
 
@@ -415,7 +424,7 @@ body {
 }
 
 /* =========================================================
-   FILEIPLAY — FANART BACKGROUND
+   FILEIPLAY — TMDB BACKGROUND
    ========================================================= */
 
 html::before {
@@ -432,7 +441,7 @@ html::before {
             rgba(5, 10, 18, .40),
             rgba(5, 10, 18, .96)
         ),
-        url('{{ $fanartBackground ?? $torrent->background }}');
+        url('{{ $torrent->background }}');
 
     background-position: center top;
     background-size: cover;
@@ -846,6 +855,48 @@ html::after {
     gap: 12px;
 }
 
+/* More than 10 seasons */
+.tv-seasons-row.seasons-scrollable {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    gap: 12px;
+    padding-bottom: 12px;
+    scroll-behavior: smooth;
+}
+
+/* Fixed card width when scrolling */
+.tv-seasons-row.seasons-scrollable .season-card {
+    flex: 0 0 170px;
+    width: 170px;
+}
+
+/* Scrollbar */
+.tv-seasons-row.seasons-scrollable::-webkit-scrollbar {
+    height: 7px;
+}
+
+.tv-seasons-row.seasons-scrollable::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 10px;
+}
+
+.tv-seasons-row.seasons-scrollable::-webkit-scrollbar-thumb {
+    background: rgba(45, 212, 191, 0.45);
+    border-radius: 10px;
+}
+
+.tv-seasons-row.seasons-scrollable::-webkit-scrollbar-thumb:hover {
+    background: rgba(45, 212, 191, 0.7);
+}
+
+.tv-seasons-row.seasons-scrollable {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(45, 212, 191, 0.45)
+                     rgba(255, 255, 255, 0.04);
+}
+
 .season-card {
     overflow: hidden;
     border-radius: .7rem;
@@ -991,9 +1042,18 @@ html::after {
         height: auto;
     }
 
-    .tv-seasons-row {
+   .tv-seasons-row:not(.seasons-scrollable) {
         grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
         gap: 9px;
+    }
+
+    .tv-seasons-row.seasons-scrollable {
+        gap: 9px;
+    }
+
+    .tv-seasons-row.seasons-scrollable .season-card {
+        flex: 0 0 130px;
+        width: 130px;
     }
 }
 

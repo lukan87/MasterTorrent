@@ -4,56 +4,52 @@ namespace App\Services;
 
 use App\Models\Message;
 use App\Models\Conversation;
+use Illuminate\Support\Facades\Cache;
 
 class SystemMessageService
 {
+    /**
+     * Find (or create) the single private conversation between two users.
+     *
+     * Conversations always store the two participant ids in a normalized
+     * (smaller id first) order so that there is exactly one conversation per
+     * user pair.
+     */
+    public static function findOrCreate(
+        int $userOne,
+        int $userTwo,
+        string $subject = 'Conversation'
+    ): Conversation {
+        $min = min($userOne, $userTwo);
+        $max = max($userOne, $userTwo);
+
+        $conversation = Conversation::where('user_one', $min)
+            ->where('user_two', $max)
+            ->first();
+
+        if (!$conversation) {
+            $conversation = Conversation::create([
+                'user_one' => $min,
+                'user_two' => $max,
+                'subject' => $subject ?: 'Conversation',
+                'last_message_at' => now(),
+            ]);
+        }
+
+        return $conversation;
+    }
+
+    /**
+     * Send a private message, creating/updating the underlying conversation,
+     * and invalidate the cached unread counters for both participants.
+     */
     public static function send(
         int $senderId,
         int $receiverId,
         string $subject,
         string $body
     ): Message {
-
-        /*
-        |--------------------------------------------------------------------------
-        | Normalize user order
-        |--------------------------------------------------------------------------
-        */
-
-        $userOne = min($senderId, $receiverId);
-        $userTwo = max($senderId, $receiverId);
-
-        /*
-        |--------------------------------------------------------------------------
-        | Find conversation
-        |--------------------------------------------------------------------------
-        */
-
-        $conversation = Conversation::where('user_one', $userOne)
-            ->where('user_two', $userTwo)
-            ->first();
-
-        /*
-        |--------------------------------------------------------------------------
-        | Create conversation if missing
-        |--------------------------------------------------------------------------
-        */
-
-        if (!$conversation) {
-
-            $conversation = Conversation::create([
-                'user_one' => $userOne,
-                'user_two' => $userTwo,
-                'subject' => $subject ?: 'Conversation',
-                'last_message_at' => now(),
-            ]);
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Create message
-        |--------------------------------------------------------------------------
-        */
+        $conversation = self::findOrCreate($senderId, $receiverId, $subject);
 
         $message = Message::create([
             'conversation_id' => $conversation->id,
@@ -61,19 +57,25 @@ class SystemMessageService
             'receiver_id' => $receiverId,
             'subject' => $subject,
             'body' => $body,
-            'is_read' => 0
+            'is_read' => 0,
         ]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | Update conversation timestamp
-        |--------------------------------------------------------------------------
-        */
 
         $conversation->update([
-            'last_message_at' => now()
+            'last_message_at' => now(),
         ]);
 
+        self::forgetUserCache($senderId);
+        self::forgetUserCache($receiverId);
+
         return $message;
+    }
+
+    /**
+     * Drop the cached sidebar/preview + unread counter for a single user.
+     */
+    public static function forgetUserCache(int $userId): void
+    {
+        Cache::forget("user_unread_count_{$userId}");
+        Cache::forget("user_conversations_{$userId}");
     }
 }

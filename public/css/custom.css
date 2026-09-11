@@ -750,7 +750,6 @@ body.bg-body-tertiary {
     font-family: "Overpass", "Source Sans 3", system-ui, sans-serif;
 }
 
-.app-main { min-height: calc(100vh - 4rem); }
 .app-content { padding: 1.5rem 0 2.5rem; }
 .app-content > .container-fluid { max-width: 1680px; }
 

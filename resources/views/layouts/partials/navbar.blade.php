@@ -417,7 +417,7 @@
             @endphp
 
             @if($last)
-                <a href="{{ route('messages.show', $last->id) }}" class="dropdown-item">
+                <a href="{{ route('conversations.show', $conversation->id) }}" class="dropdown-item">
                     <div class="d-flex">
 
                         <div class="flex-shrink-0">
@@ -452,8 +452,8 @@
             @endif
         @endforeach
 
-        <a href="/messages/inbox" class="dropdown-item dropdown-footer">
-            See All Messages
+        <a href="{{ route('messages.index') }}" class="dropdown-item dropdown-footer text-center">
+            <i class="bi bi-chat-dots-fill me-1"></i>See All Messages
         </a>
     </div>
 </li>

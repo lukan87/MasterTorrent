@@ -921,21 +921,7 @@
 
                         </div>
 
-                        <div class="d-flex gap-2 mt-2 align-items-center">
-                            <button type="button"
-                                    class="forum-preview-btn"
-                                    id="forum-preview-btn">
-                                <i class="bi bi-eye me-1"></i>Preview
-                            </button>
-
-                            @auth
-                            <button type="button"
-                                    class="forum-preview-btn multiquote-btn"
-                                    id="forum-multiquote-toggle">
-                                <i class="bi bi-quote me-1"></i>Multi-quote
-                            </button>
-                            @endauth
-                        </div>
+                        
 
                         <div class="forum-post-preview-pane mt-2" style="display:none;" id="forum-reply-preview"></div>
 
@@ -954,15 +940,37 @@
                             </button>
                         </div>
 
+<div class="forum-form-actions mt-3">
 
-                        <button type="submit"
-                                class="btn forum-submit-btn">
+    <div class="forum-form-tools">
 
-                            <i class="bi bi-send-fill me-1"></i>
+        <button type="button"
+                class="forum-preview-btn"
+                id="forum-preview-btn">
+            <i class="bi bi-eye me-1"></i>
+            Preview
+        </button>
 
-                            Post Reply
+        @auth
+        <button type="button"
+                class="forum-preview-btn multiquote-btn"
+                id="forum-multiquote-toggle">
+            <i class="bi bi-quote me-1"></i>
+            Multi-quote
+        </button>
+        @endauth
 
-                        </button>
+    </div>
+
+    <button type="submit"
+            class="forum-submit-btn">
+        <i class="bi bi-send-fill me-2"></i>
+        Post Reply
+    </button>
+
+</div>
+
+                        
 
                     </form>
 

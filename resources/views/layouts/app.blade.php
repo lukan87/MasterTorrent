@@ -8,19 +8,11 @@
     <div class="app-wrapper"> 
 
     
-    @auth
+     @auth
 
-    @include('layouts.partials.navbar')
-
-
-
-
-
-    @include('layouts.partials.sidebar')
-
-
-
- @endauth
+      @include('layouts.partials.navbar')
+      @include('layouts.partials.sidebar')
+     @endauth
 
         <main class="app-main"> 
              
@@ -86,67 +78,85 @@ fetch('/announcements-unread-count')
         </main> 
         @auth
         
-<footer class="app-footer glass py-3 mb-1">
+<footer class="app-footer glass py-2">
     <div class="container-fluid">
 
-        <div class="row align-items-center">
+    <div class="row align-items-center">
 
-            <!-- Site name -->
-            <div class="col-md-4 text-center text-md-start fs-5">
-                <span class="text-info">
-                    <i class="bi bi-globe2 me-1"></i> {{ config('app.name') }}
-                </span>
-            </div>
-
-            <!-- Credits -->
-            <div class="col-md-4 text-center mt-2 mt-md-0">
-                <small class="text-muted">
-                    <i class="bi bi-code-slash text-danger me-1"></i>
-                    Built with Laravel
-                    <span class="mx-2">|</span>
-                    <i class="bi bi-filetype-php me-1"></i>
-                    Developed by <strong>lukan87</strong>
-                </small>
-            </div>
-
-            <!-- Browser + motto -->
-            <div class="col-md-4 text-center text-md-end mt-2 mt-md-0">
-                <small class="text-muted">
-                    <span class="me-2">Seed until you bleed</span>
-                    <span class="mx-2">|</span>
-                    Best viewed in
-                    <i class="bi bi-browser-chrome text-warning ms-1"></i>
-                    <i class="bi bi-browser-firefox text-danger ms-1"></i>
-                </small>
-            </div>
-
+        <!-- Site name -->
+        <div class="col-md-4 text-center text-md-start fs-5">
+            <span class="text-info">
+                <i class="bi bi-globe2 me-1"></i>
+                {{ config('app.name') }}
+            </span>
         </div>
 
-        <hr class="border-secondary opacity-25 my-2">
+        <!-- Credits -->
+        <div class="col-md-4 text-center mt-2 mt-md-0">
+            <small class="text-muted">
+                <i class="bi bi-code-slash text-danger me-1"></i>
+                Built with Laravel
+                <span class="mx-2">|</span>
+                <i class="bi bi-filetype-php me-1"></i>
+                Developed by <strong>lukan87</strong>
+            </small>
+        </div>
 
-        <!-- Copyright -->
-        <div class="row">
-            <div class="col-12 text-center">
-                <small class="text-muted">
-                    © {{ date('Y') }} {{ config('app.name') }} — All rights reserved
-                </small>
-            </div>
+        <!-- Browser + motto -->
+        <div class="col-md-4 text-center text-md-end mt-2 mt-md-0">
+            <small class="text-muted">
+                <span class="me-2">Seed until you bleed</span>
+                <span class="mx-2">|</span>
+                Best viewed in
+                <i class="bi bi-browser-chrome text-warning ms-1"></i>
+                <i class="bi bi-browser-firefox text-danger ms-1"></i>
+            </small>
         </div>
 
     </div>
-</footer>
-        
-        <style>
-        .app-footer {
-            border-top: 1px solid rgba(255,255,255,0.1);
-            transition: all 0.3s ease;
-            font-size: 0.9rem;
-        }
-        .app-footer a:hover {
-            color: #4da6ff !important;
-        }
 
-        </style>
+    <hr class="border-secondary opacity-25 my-2">
+
+    <!-- Copyright -->
+    <div class="row">
+        <div class="col-12 text-center">
+            <small class="text-muted">
+                © {{ date('Y') }} {{ config('app.name') }} — All rights reserved
+            </small>
+        </div>
+    </div>
+
+</div>
+
+
+</footer>
+
+<style>
+.app-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    margin: 0 !important;
+}
+
+/* Bootstrap-compatible: keep scrolling, hide scrollbar */
+.layout-fixed .app-main {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.layout-fixed .app-main::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+.app-footer a:hover {
+    color: #4da6ff !important;
+}
+
+
+</style>
         @endauth
     </div> 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

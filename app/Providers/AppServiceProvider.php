@@ -54,7 +54,6 @@ class AppServiceProvider extends ServiceProvider
             $seedingCount = 0;
             $leechingCount = 0;
 
-            $messages = collect();
             $conversations = collect();
 
             $unreadMessagesCount = 0;
@@ -85,18 +84,15 @@ class AppServiceProvider extends ServiceProvider
 
                 /*
                 |--------------------------------------------------------------------------
-                | Messages
+                | Messages (cached to avoid 3 queries on every request)
                 |--------------------------------------------------------------------------
                 */
 
-                $messages = Message::where('receiver_id', $user->id)
-                    ->latest()
-                    ->take(5)
-                    ->get();
-
-                $unreadMessagesCount = Message::where('receiver_id', $user->id)
-                    ->where('is_read', false)
-                    ->count();
+                $unreadMessagesCount = Cache::remember("user_unread_count_{$user->id}", 30, function () use ($user) {
+                    return Message::where('receiver_id', $user->id)
+                        ->where('is_read', false)
+                        ->count();
+                });
 
                 /*
                 |--------------------------------------------------------------------------
@@ -104,14 +100,16 @@ class AppServiceProvider extends ServiceProvider
                 |--------------------------------------------------------------------------
                 */
 
-                $conversations = Conversation::where(function ($q) use ($user) {
-                        $q->where('user_one', $user->id)
-                          ->orWhere('user_two', $user->id);
-                    })
-                    ->with(['lastMessage','userOne','userTwo'])
-                    ->orderByDesc('last_message_at')
-                    ->take(5)
-                    ->get();
+                $conversations = Cache::remember("user_conversations_{$user->id}", 30, function () use ($user) {
+                    return Conversation::where(function ($q) use ($user) {
+                            $q->where('user_one', $user->id)
+                              ->orWhere('user_two', $user->id);
+                        })
+                        ->with(['lastMessage', 'userOne', 'userTwo'])
+                        ->orderByDesc('last_message_at')
+                        ->take(5)
+                        ->get();
+                });
 
                 /*
                 |--------------------------------------------------------------------------
@@ -164,7 +162,6 @@ class AppServiceProvider extends ServiceProvider
             $view->with(compact(
                 'seedingCount',
                 'leechingCount',
-                'messages',
                 'conversations',
                 'unreadMessagesCount',
                 'globalPoll',

@@ -4,10 +4,17 @@
 
 <div class="container-fluid py-4">
 
-    <h1 class="fw-bold text-primary mb-4">
-        <i class="bi bi-envelope-fill me-2"></i>
-        User Messages
-    </h1>
+    <div class="glass p-3 px-4 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <h1 class="fw-bold text-white mb-0 fs-3">
+            <span class="me-2" style="color:var(--ui-accent)"><i class="bi bi-envelope-fill"></i></span>
+            User Messages
+        </h1>
+
+        <span class="badge text-white px-3 py-2"
+              style="background:rgba(99,210,198,.15);border:1px solid rgba(99,210,198,.3);color:var(--ui-accent)!important;">
+            <i class="bi bi-chat-square-text me-1"></i>{{ $messages->total() }} messages
+        </span>
+    </div>
 
 
     {{-- SUCCESS --}}
@@ -50,7 +57,8 @@
         </div>
 
         <div class="col-md-2">
-            <button class="btn btn-primary btn-lg w-100 shadow-sm">
+            <button class="btn w-100 shadow-sm fw-bold"
+                    style="background:rgba(99,210,198,.15);border:1px solid rgba(99,210,198,.35);color:var(--ui-accent);">
                 <i class="bi bi-funnel me-1"></i>
                 Filter
             </button>

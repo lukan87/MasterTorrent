@@ -1248,51 +1248,79 @@
 }
 
 
-/* =========================================================
-   SUBMIT
-   ========================================================= */
+/* =========================================
+   Forum Reply Form Actions
+   ========================================= */
+
+.forum-form-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 12px 0 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.forum-form-tools {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 18px;
+}
+
+/* Preview / Multi-quote */
+
+.forum-preview-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    background: rgba(255, 255, 255, 0.04);
+    color: #cbd5e1;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+}
+
+.forum-preview-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(114, 179, 170, 0.35);
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+/* Post Reply */
 
 .forum-submit-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-
-    min-height: 40px;
-
-    padding: .55rem .9rem;
-
-    color: #062523;
-
-    background:
-        linear-gradient(
-            135deg,
-            var(--ui-accent),
-            var(--ui-accent-strong)
-        );
-
-    border: 1px solid rgba(99, 210, 198, .3);
-
-    border-radius: .65rem;
-
-    font-size: .78rem;
-    font-weight: 750;
-
-    box-shadow: 0 7px 18px rgba(0, 0, 0, .16);
-
-    transition:
-        transform 160ms ease,
-        box-shadow 160ms ease,
-        filter 160ms ease;
+    min-height: 42px;
+    padding: 9px 20px;
+    border: 1px solid rgba(114, 179, 170, 0.35);
+    border-radius: 9px;
+    background: linear-gradient(
+        135deg,
+        rgba(76, 175, 160, 0.95),
+        rgba(45, 130, 120, 0.95)
+    );
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    transition: all 0.2s ease;
 }
 
 .forum-submit-btn:hover {
-    color: #031716;
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
 
-    filter: brightness(1.06);
-
-    transform: translateY(-2px);
-
-    box-shadow: 0 11px 24px rgba(0, 0, 0, .24);
+.forum-submit-btn:active {
+    transform: translateY(0);
 }
 
 

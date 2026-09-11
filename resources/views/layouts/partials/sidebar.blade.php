@@ -29,7 +29,7 @@
         </div>
         @endauth -->
 
-        <nav class="mt-1 fs-5">
+        <nav class="fs-5">
             <!--begin::Sidebar Menu-->
             <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu" data-accordion="false">
             <li class="nav-item">

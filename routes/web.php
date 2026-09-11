@@ -701,18 +701,14 @@ Route::delete('/shoutbox/{id}', [ShoutboxController::class, 'destroy'])->name('s
 Route::get('/shoutbox/{id}/reply', [ShoutboxController::class, 'showReplyForm'])->name('shoutbox.showReplyForm')->middleware('auth');
 Route::post('/shoutbox/{id}/reply', [ShoutboxController::class, 'reply'])->name('shoutbox.reply')->middleware('auth');
 
-// Private message routes
+// Private message routes — modern conversation messenger (single two-pane app)
 Route::middleware(['auth'])->group(function () {
-    Route::get('messages/inbox', [MessageController::class, 'inbox'])->name('messages.inbox');
-    Route::get('messages/outbox', [MessageController::class, 'outbox'])->name('messages.outbox');
+    Route::get('messages', [ConversationController::class, 'index'])->name('messages.index');
     Route::get('messages/create', [MessageController::class, 'create'])->name('messages.create');
     Route::post('messages', [MessageController::class, 'store'])->name('messages.store');
-    Route::get('messages/{message}', [MessageController::class, 'show'])->name('messages.show');
-    Route::delete('messages/{message}', [MessageController::class, 'destroy'])->name('messages.destroy');
-    Route::get('messages', [MessageController::class, 'index'])->name('messages.index');
-    Route::get('/messages/{message}/reply', [MessageController::class, 'reply'])->name('messages.reply');
-    Route::post('/messages/{message}/reply', [MessageController::class, 'storeReply'])->name('messages.storeReply');
-
+    Route::post('messages/{conversation}/reply', [MessageController::class, 'storeReply'])->name('messages.storeReply');
+    Route::get('messages/{conversation}', [ConversationController::class, 'show'])->name('conversations.show');
+    Route::delete('messages/{conversation}', [MessageController::class, 'destroyConversation'])->name('messages.destroyConversation');
 });
 
 // News routes
@@ -964,25 +960,11 @@ Route::middleware(['auth'])->group(function () {
 Route::post('/admin/users/mass-message/preview', [UserController::class, 'previewMassMessage'])
     ->name('admin.users.mass-message.preview');
 
-Route::middleware(['auth'])->group(function () {
-
-    Route::get('/conversations', [ConversationController::class, 'index'])
-        ->name('conversations.index');
-
-    Route::get('/conversations/{conversation}', [ConversationController::class, 'show'])
-        ->name('conversations.show');
-
-});
-
 Route::post('/messages/edit/{message}', [MessageController::class, 'edit'])
     ->name('messages.edit');
 
 Route::delete('/messages/delete/{message}', [MessageController::class, 'delete'])
     ->name('messages.delete');
-
-Route::delete('/messages/conversation/{conversation}',
-    [MessageController::class, 'destroyConversation']
-)->name('messages.destroyConversation');
 
 Route::middleware(['auth'])->group(function () {
 

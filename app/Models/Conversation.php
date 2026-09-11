@@ -42,6 +42,44 @@ class Conversation extends Model
 
     /*
     |--------------------------------------------------------------------------
+    | Unread / read helpers
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Number of unread messages inside this conversation that were addressed
+     * to the given user (i.e. that user has not read yet).
+     */
+    public function unreadCountFor(int $userId): int
+    {
+        return (int) $this->messages()
+            ->where('receiver_id', $userId)
+            ->where('is_read', 0)
+            ->count();
+    }
+
+    /**
+     * Whether the given user has any unread messages in this conversation.
+     */
+    public function hasUnreadFor(int $userId): bool
+    {
+        return $this->unreadCountFor($userId) > 0;
+    }
+
+    /**
+     * Mark every incoming message for the given user as read.
+     * Returns the number of messages that were updated.
+     */
+    public function markReadFor(int $userId): int
+    {
+        return $this->messages()
+            ->where('receiver_id', $userId)
+            ->where('is_read', 0)
+            ->update(['is_read' => 1]);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
     | Helpers
     |--------------------------------------------------------------------------
     */
