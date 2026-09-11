@@ -8,26 +8,19 @@
         : 'https://image.tmdb.org/t/p/original';
 @endphp
 
-<div class="container-fluid px-lg-5 px-3">
+<div class="container-fluid px-lg-4 px-3 series-page">
 
     {{-- HERO --}}
-    <div class="series-hero mb-5"
-         style="background-image:url('{{ $backdrop }}')">
-
+    <div class="series-hero mb-4" style="background-image:url('{{ $backdrop }}')">
         <div class="hero-overlay"></div>
 
         <div class="hero-content position-relative z-2">
-
             <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
 
                 <div>
-                    <span class="hero-badge">
-                        STREAMING COLLECTION
-                    </span>
+                    <span class="hero-badge">STREAMING COLLECTION</span>
 
-                    <h1 class="hero-title mt-3">
-                        Discover Amazing Series
-                    </h1>
+                    <h1 class="hero-title mt-3">Discover Amazing Series</h1>
 
                     <p class="hero-subtitle">
                         Browse, search and explore your TV collection.
@@ -35,9 +28,8 @@
                 </div>
 
                 @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::ADMIN)
-                    <a href="{{ route('series.create') }}"
-                       class="btn btn-modern">
-                        ➕ Add Series
+                    <a href="{{ route('series.create') }}" class="btn btn-modern">
+                        <i class="bi bi-plus-lg me-1"></i> Add Series
                     </a>
                 @endif
 
@@ -49,37 +41,31 @@
                     <h3>{{ $featured->name }}</h3>
                 </div>
             @endif
-
         </div>
     </div>
 
     {{-- SEARCH --}}
-    <div class="search-wrapper mb-5">
-
-        <form action="{{ route('series.search-series') }}"
-              method="POST">
+    <div class="search-wrapper mb-4">
+        <form action="{{ route('series.search-series') }}" method="POST">
             @csrf
 
             <div class="search-box">
+                <i class="bi bi-search search-icon"></i>
 
-                <div class="search-icon">
-                    🔍
-                </div>
-
-                <input type="text"
-                       name="name"
-                       id="name"
-                       class="search-input"
-                       placeholder="Search for a TV Series..."
-                       required>
+                <input
+                    type="text"
+                    name="name"
+                    id="name"
+                    class="search-input"
+                    placeholder="Search for a TV Series..."
+                    required
+                >
 
                 <button type="submit" class="search-btn">
-                    Search
+                    <i class="bi bi-search me-1"></i> Search
                 </button>
-
             </div>
         </form>
-
     </div>
 
     {{-- PAGINATION TOP --}}
@@ -88,7 +74,7 @@
     </div>
 
     {{-- GRID --}}
-    <div class="row g-4">
+    <div class="row g-3">
 
         @forelse ($series as $serie)
 
@@ -96,53 +82,52 @@
 
                 <div class="series-card">
 
-                    {{-- IMAGE --}}
                     <a href="{{ route('series.show', ['id' => $serie->id, 'slug' => $serie->slug]) }}">
-
-                        <img src="https://image.tmdb.org/t/p/w600_and_h900_bestv2{{ $serie->poster_path }}"
-                             alt="{{ $serie->name }}"
-                             class="series-poster">
-
+                        <img
+                            src="https://image.tmdb.org/t/p/w600_and_h900_bestv2{{ $serie->poster_path }}"
+                            alt="{{ $serie->name }}"
+                            class="series-poster"
+                        >
                     </a>
 
-                    {{-- OVERLAY --}}
                     <div class="series-overlay">
-
                         <div>
-                            <h5 class="series-title">
-                                {{ $serie->name }}
-                            </h5>
+                            <h5 class="series-title">{{ $serie->name }}</h5>
                         </div>
 
                         <div class="series-actions">
 
-                            <a href="{{ route('series.show', ['id' => $serie->id, 'slug' => $serie->slug]) }}"
-                               class="btn btn-watch">
-                                View
+                            <a
+                                href="{{ route('series.show', ['id' => $serie->id, 'slug' => $serie->slug]) }}"
+                                class="btn btn-watch"
+                            >
+                                <i class="bi bi-eye me-1"></i> View
                             </a>
 
                             @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::WEB_DEVELOPER)
 
-                                <form action="{{ route('series.destroy', $serie->id) }}"
-                                      method="POST"
-                                      onsubmit="return confirm('Delete {{ $serie->name }}?');">
-
+                                <form
+                                    action="{{ route('series.destroy', $serie->id) }}"
+                                    method="POST"
+                                    onsubmit="return confirm('Delete {{ $serie->name }}?');"
+                                >
                                     @csrf
                                     @method('DELETE')
 
-                                    <button type="submit"
-                                            class="btn btn-delete">
-                                        Delete
+                                    <button type="submit" class="btn btn-delete">
+                                        <i class="bi bi-trash me-1"></i> Delete
                                     </button>
-
                                 </form>
 
                             @endif
 
                         </div>
-
                     </div>
 
+                </div>
+
+                <div class="series-card-title">
+                    {{ $serie->name }}
                 </div>
 
             </div>
@@ -151,6 +136,7 @@
 
             <div class="col-12">
                 <div class="empty-state">
+                    <i class="bi bi-tv"></i>
                     <h3>No Series Found</h3>
                     <p>Try searching for another title.</p>
                 </div>
@@ -161,346 +147,439 @@
     </div>
 
     {{-- PAGINATION BOTTOM --}}
-    <div class="d-flex justify-content-center mt-5">
+    <div class="d-flex justify-content-center mt-4">
         {{ $series->links('pagination::bootstrap-5') }}
     </div>
 
 </div>
 
 <style>
-
-/* PAGE */
-body {
-    background: #0b0f19;
-}
-
-/* HERO */
-
-.series-hero {
-    position: relative;
-    min-height: 500px;
-    border-radius: 28px;
-    overflow: hidden;
-
-    background-size: cover;
-    background-position: center top;
-
-    display: flex;
-    align-items: flex-end;
-
-    box-shadow:
-        0 20px 60px rgba(0,0,0,0.7),
-        0 0 120px rgba(0,0,0,0.4);
-
-    margin-top: 20px;
-}
-
-.hero-overlay {
-    position: absolute;
-    inset: 0;
-
-    background:
-        linear-gradient(to top,
-            rgba(4,7,15,0.98) 0%,
-            rgba(4,7,15,0.85) 35%,
-            rgba(4,7,15,0.4) 70%,
-            rgba(4,7,15,0.15) 100%);
-}
-
-.hero-content {
-    width: 100%;
-    padding: 60px;
-}
-
-.hero-badge {
-    background: rgba(255,255,255,0.12);
-    border: 1px solid rgba(255,255,255,0.15);
-
-    padding: 8px 14px;
-    border-radius: 50px;
-
-    font-size: 0.8rem;
-    letter-spacing: 1px;
-    color: #fff;
-
-    backdrop-filter: blur(10px);
-}
-
-.hero-title {
-    font-size: 4rem;
-    font-weight: 800;
-    color: #fff;
-
-    line-height: 1.1;
-}
-
-.hero-subtitle {
-    color: rgba(255,255,255,0.75);
-    font-size: 1.1rem;
-    max-width: 600px;
-}
-
-/* FEATURED */
-
-.featured-box {
-    margin-top: 40px;
-
-    background: rgba(255,255,255,0.08);
-    backdrop-filter: blur(12px);
-
-    border: 1px solid rgba(255,255,255,0.08);
-
-    padding: 20px;
-    border-radius: 20px;
-
-    max-width: 380px;
-}
-
-.featured-label {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-
-    color: rgba(255,255,255,0.6);
-}
-
-.featured-box h3 {
-    color: #fff;
-    margin-top: 10px;
-    font-weight: 700;
-}
-
-/* BUTTONS */
-
-.btn-modern {
-    background: linear-gradient(135deg, #4f46e5, #7c3aed);
-    color: #fff;
-
-    border-radius: 14px;
-    padding: 12px 22px;
-
-    border: none;
-    font-weight: 600;
-
-    transition: 0.3s ease;
-}
-
-.btn-modern:hover {
-    transform: translateY(-2px);
-    color: #fff;
-
-    box-shadow: 0 12px 30px rgba(124,58,237,0.4);
-}
-
-/* SEARCH */
-
-.search-wrapper {
-    margin-top: -35px;
-    position: relative;
-    z-index: 10;
-}
-
-.search-box {
-    display: flex;
-    align-items: center;
-
-    background: rgba(18,24,38,0.85);
-
-    border: 1px solid rgba(255,255,255,0.08);
-
-    border-radius: 22px;
-
-    padding: 12px 14px;
-
-    backdrop-filter: blur(18px);
-
-    box-shadow:
-        0 10px 40px rgba(0,0,0,0.35);
-}
-
-.search-icon {
-    font-size: 1.2rem;
-    margin-right: 12px;
-}
-
-.search-input {
-    flex: 1;
-
-    background: transparent;
-    border: none;
-    outline: none;
-
-    color: #fff;
-    font-size: 1.05rem;
-}
-
-.search-input::placeholder {
-    color: rgba(255,255,255,0.45);
-}
-
-.search-btn {
-    background: linear-gradient(135deg, #2563eb, #7c3aed);
-
-    border: none;
-    color: #fff;
-
-    border-radius: 14px;
-
-    padding: 12px 24px;
-    font-weight: 600;
-
-    transition: 0.3s ease;
-}
-
-.search-btn:hover {
-    transform: scale(1.03);
-}
-
-/* SERIES CARDS */
-
-.series-card {
-    position: relative;
-
-    border-radius: 22px;
-    overflow: hidden;
-
-    transition: all 0.35s ease;
-
-    background: #111827;
-}
-
-.series-card:hover {
-    transform: translateY(-10px) scale(1.03);
-
-    box-shadow:
-        0 25px 50px rgba(0,0,0,0.5);
-}
-
-.series-poster {
-    width: 100%;
-    height: 100%;
-
-    object-fit: cover;
-
-    transition: transform 0.4s ease;
-}
-
-.series-card:hover .series-poster {
-    transform: scale(1.08);
-}
-
-/* OVERLAY */
-
-.series-overlay {
-    position: absolute;
-    inset: 0;
-
-    background:
-        linear-gradient(to top,
-            rgba(0,0,0,0.98),
-            rgba(0,0,0,0.15));
-
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-
-    padding: 18px;
-
-    opacity: 0;
-
-    transition: opacity 0.3s ease;
-}
-
-.series-card:hover .series-overlay {
-    opacity: 1;
-}
-
-.series-title {
-    color: #fff;
-    font-size: 1rem;
-    font-weight: 700;
-
-    margin-bottom: 15px;
-}
-
-/* ACTIONS */
-
-.series-actions {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.btn-watch {
-    background: #fff;
-    color: #111827;
-
-    border-radius: 12px;
-
-    font-weight: 600;
-    border: none;
-}
-
-.btn-delete {
-    background: rgba(239,68,68,0.95);
-    color: white;
-
-    border: none;
-    border-radius: 12px;
-
-    font-weight: 600;
-}
-
-/* EMPTY */
-
-.empty-state {
-    background: rgba(255,255,255,0.04);
-
-    border: 1px solid rgba(255,255,255,0.08);
-
-    padding: 60px 20px;
-
-    border-radius: 24px;
-
-    text-align: center;
-    color: #fff;
-}
-
-/* MOBILE */
-
-@media(max-width:768px) {
-
+    /* =========================================
+       FILEIPLAY SERIES PAGE
+       Dark glass + restrained teal accents
+    ========================================= */
+
+    .series-page {
+        max-width: 1600px;
+    }
+
+    /* HERO */
     .series-hero {
-        min-height: 380px;
-        border-radius: 20px;
+        position: relative;
+        min-height: 390px;
+        margin-top: .35rem;
+        overflow: hidden;
+        display: flex;
+        align-items: flex-end;
+        background-size: cover;
+        background-position: center top;
+        border: 1px solid var(--ui-border, rgba(148, 163, 184, .16));
+        border-radius: .9rem;
+        box-shadow: 0 16px 38px rgba(0, 0, 0, .32);
+    }
+
+    .series-hero::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-left: 3px solid var(--ui-accent, #22d3c5);
+        pointer-events: none;
+    }
+
+    .hero-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            to top,
+            rgba(5, 12, 22, .97) 0%,
+            rgba(5, 12, 22, .86) 40%,
+            rgba(5, 12, 22, .45) 72%,
+            rgba(5, 12, 22, .2) 100%
+        );
     }
 
     .hero-content {
-        padding: 30px;
+        width: 100%;
+        padding: 1.5rem;
+    }
+
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: .35rem .6rem;
+        color: var(--ui-accent, #22d3c5);
+        background: rgba(34, 211, 197, .08);
+        border: 1px solid rgba(34, 211, 197, .22);
+        border-radius: .5rem;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: .8px;
     }
 
     .hero-title {
-        font-size: 2.3rem;
+        margin-bottom: .35rem;
+        color: #f1f5f9;
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 1.3;
     }
 
     .hero-subtitle {
-        font-size: 1rem;
+        max-width: 600px;
+        margin-bottom: 0;
+        color: #cbd5e1;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    /* FEATURED */
+    .featured-box {
+        max-width: 380px;
+        margin-top: 1.1rem;
+        padding: .8rem .9rem;
+        background: rgba(15, 23, 42, .72);
+        border: 1px solid rgba(148, 163, 184, .18);
+        border-left: 2px solid var(--ui-accent, #22d3c5);
+        border-radius: .65rem;
+        backdrop-filter: blur(10px);
+    }
+
+    .featured-label {
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .featured-box h3 {
+        margin: .25rem 0 0;
+        color: #f1f5f9;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    /* BUTTON */
+    .btn-modern {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 38px;
+        padding: .45rem .8rem;
+        color: #061311;
+        background: var(--ui-accent, #22d3c5);
+        border: 1px solid var(--ui-accent, #22d3c5);
+        border-radius: .55rem;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all .18s ease;
+    }
+
+    .btn-modern:hover {
+        color: #061311;
+        filter: brightness(1.06);
+        transform: translateY(-1px);
+    }
+
+    /* SEARCH */
+    .search-wrapper {
+        position: relative;
+        z-index: 10;
+        margin-top: -1rem;
     }
 
     .search-box {
-        flex-direction: column;
-        gap: 12px;
+        display: flex;
+        align-items: center;
+        gap: .6rem;
+        min-height: 48px;
+        padding: .35rem .45rem .35rem .75rem;
+        background: linear-gradient(135deg, rgba(22, 32, 51, .97), rgba(15, 23, 42, .9));
+        border: 1px solid var(--ui-border, rgba(148, 163, 184, .16));
+        border-radius: .75rem;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, .28);
+    }
+
+    .search-box:focus-within {
+        border-color: var(--ui-accent, #22d3c5);
+        box-shadow: 0 0 0 2px rgba(34, 211, 197, .08), 0 10px 28px rgba(0, 0, 0, .28);
+    }
+
+    .search-icon {
+        flex: 0 0 auto;
+        color: var(--ui-accent, #22d3c5);
+        font-size: 14px;
+    }
+
+    .search-input {
+        flex: 1;
+        min-width: 0;
+        height: 40px;
+        padding: 0;
+        color: #e2e8f0;
+        background: transparent;
+        border: 0;
+        outline: 0;
+        font-size: 14px;
+    }
+
+    .search-input::placeholder {
+        color: #64748b;
     }
 
     .search-btn {
+        flex: 0 0 auto;
+        min-height: 36px;
+        padding: .4rem .75rem;
+        color: #061311;
+        background: var(--ui-accent, #22d3c5);
+        border: 1px solid var(--ui-accent, #22d3c5);
+        border-radius: .5rem;
+        font-size: 13px;
+        font-weight: 600;
+        transition: all .18s ease;
+    }
+
+    .search-btn:hover {
+        color: #061311;
+        filter: brightness(1.06);
+        transform: translateY(-1px);
+    }
+
+    /* SERIES CARD */
+    .series-card {
+        position: relative;
+        overflow: hidden;
+        background: #0f172a;
+        border: 1px solid rgba(148, 163, 184, .14);
+        border-radius: .7rem;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, .28);
+        transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+    }
+
+    .series-card:hover {
+        transform: translateY(-3px);
+        border-color: rgba(34, 211, 197, .28);
+        box-shadow: 0 16px 30px rgba(0, 0, 0, .36);
+    }
+
+    .series-card > a {
+        display: block;
+    }
+
+    .series-poster {
+        display: block;
         width: 100%;
+        aspect-ratio: 2 / 3;
+        object-fit: cover;
+        transition: transform .25s ease, filter .25s ease;
     }
 
-    .featured-box {
-        max-width: 100%;
+    .series-card:hover .series-poster {
+        transform: scale(1.035);
+        filter: brightness(.78);
     }
-}
 
+    /* OVERLAY */
+    .series-overlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding: .8rem;
+        background: linear-gradient(to top, rgba(5, 12, 22, .96), rgba(5, 12, 22, .08));
+        opacity: 0;
+        transition: opacity .2s ease;
+    }
+
+    .series-card:hover .series-overlay {
+        opacity: 1;
+    }
+
+    .series-title {
+        margin: 0 0 .65rem;
+        color: #f8fafc;
+        font-size: 13px;
+        font-weight: 700;
+        line-height: 1.35;
+    }
+
+    .series-actions {
+        display: flex;
+        gap: .4rem;
+        flex-wrap: wrap;
+    }
+
+    .series-actions .btn {
+        min-height: 32px;
+        padding: .35rem .6rem;
+        border-radius: .45rem;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .btn-watch {
+        color: #061311;
+        background: var(--ui-accent, #22d3c5);
+        border: 1px solid var(--ui-accent, #22d3c5);
+    }
+
+    .btn-watch:hover {
+        color: #061311;
+        filter: brightness(1.06);
+    }
+
+    .btn-delete {
+        color: #fecaca;
+        background: rgba(127, 29, 29, .72);
+        border: 1px solid rgba(248, 113, 113, .25);
+    }
+
+    .btn-delete:hover {
+        color: #fff;
+        background: rgba(153, 27, 27, .85);
+    }
+
+    .series-card-title {
+        display: -webkit-box;
+        overflow: hidden;
+        min-height: 35px;
+        padding: .45rem .15rem 0;
+        color: #e2e8f0;
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1.35;
+        text-overflow: ellipsis;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+
+    .series-card:hover + .series-card-title {
+        color: var(--ui-accent, #22d3c5);
+    }
+
+    /* EMPTY */
+    .empty-state {
+        position: relative;
+        overflow: hidden;
+        padding: 3rem 1.5rem;
+        text-align: center;
+        color: #94a3b8;
+        background: linear-gradient(135deg, rgba(22, 32, 51, .95), rgba(15, 23, 42, .84));
+        border: 1px solid var(--ui-border, rgba(148, 163, 184, .16));
+        border-radius: .85rem;
+    }
+
+    .empty-state::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: var(--ui-accent, #22d3c5);
+    }
+
+    .empty-state i {
+        display: block;
+        margin-bottom: .65rem;
+        color: var(--ui-accent, #22d3c5);
+        font-size: 38px;
+    }
+
+    .empty-state h3 {
+        margin: 0 0 .25rem;
+        color: #f1f5f9;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .empty-state p {
+        margin: 0;
+        color: #64748b;
+        font-size: 13px;
+    }
+
+    /* PAGINATION */
+    .series-page .pagination {
+        margin-bottom: 0;
+    }
+
+    .series-page .pagination .page-link {
+        min-width: 34px;
+        margin: 0 2px;
+        padding: .4rem .6rem;
+        color: #cbd5e1;
+        background: rgba(22, 32, 51, .82);
+        border: 1px solid var(--ui-border, rgba(148, 163, 184, .16));
+        border-radius: .5rem;
+        font-size: 13px;
+        text-align: center;
+        transition: all .18s ease;
+    }
+
+    .series-page .pagination .page-link:hover {
+        color: var(--ui-accent, #22d3c5);
+        background: rgba(34, 211, 197, .07);
+        border-color: rgba(34, 211, 197, .3);
+    }
+
+    .series-page .pagination .page-item.active .page-link {
+        color: #061311;
+        background: var(--ui-accent, #22d3c5);
+        border-color: var(--ui-accent, #22d3c5);
+    }
+
+    .series-page .pagination .page-item.disabled .page-link {
+        color: #475569;
+        background: rgba(15, 23, 42, .55);
+        border-color: rgba(148, 163, 184, .1);
+    }
+
+    /* MOBILE */
+    @media (max-width: 768px) {
+        .series-page {
+            padding-left: .5rem !important;
+            padding-right: .5rem !important;
+        }
+
+        .series-hero {
+            min-height: 340px;
+            border-radius: .75rem;
+        }
+
+        .hero-content {
+            padding: 1rem;
+        }
+
+        .search-wrapper {
+            margin-top: -.65rem;
+        }
+
+        .search-box {
+            gap: .45rem;
+        }
+
+        .search-btn {
+            padding: .4rem .6rem;
+        }
+    }
+
+    @media (max-width: 420px) {
+        .hero-content > .d-flex {
+            align-items: flex-start !important;
+        }
+
+        .btn-modern {
+            width: 100%;
+        }
+
+        .search-btn {
+            font-size: 12px;
+        }
+    }
 </style>
 
 @endsection

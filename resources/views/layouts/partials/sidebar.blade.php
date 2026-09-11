@@ -8,6 +8,27 @@
 
     <!--begin::Sidebar Wrapper-->
     <div class="sidebar-wrapper">
+        <!-- @auth
+        <div class="sidebar-user">
+            <img
+                class="sidebar-user-avatar"
+                src="{{ Auth::user()->profile_image ?? asset('images/default_avatar/default-avatar.jpg') }}"
+                alt="{{ Auth::user()->name }}">
+            <div class="sidebar-user-info min-w-0">
+                <div class="sidebar-user-name" style="color: {{ \App\Models\UserClass::getClassColor(Auth::user()->user_class) }}">
+                    {{ Auth::user()->name }}
+                </div>
+                <div class="sidebar-user-ratio">
+                    <i class="bi bi-arrow-up-short text-success"></i>
+                    {{ \App\Helpers\FormatHelper::formatSize(Auth::user()->uploaded) }}
+                    <span class="text-muted">·</span>
+                    <i class="bi bi-arrow-down-short text-danger"></i>
+                    {{ \App\Helpers\FormatHelper::formatSize(Auth::user()->downloaded) }}
+                </div>
+            </div>
+        </div>
+        @endauth -->
+
         <nav class="mt-1 fs-5">
             <!--begin::Sidebar Menu-->
             <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu" data-accordion="false">

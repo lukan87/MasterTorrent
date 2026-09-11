@@ -70,6 +70,12 @@ fetch('/announcements-unread-count')
                      {{-- @endif --}}
 
 
+                @hasSection('page-header')
+                    <div class="page-header-slot mb-4">
+                        @yield('page-header')
+                    </div>
+                @endif
+
                 @yield('content')
 
 

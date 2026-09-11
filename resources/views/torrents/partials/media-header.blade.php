@@ -109,6 +109,17 @@
 
                         </h1>
 
+                        {{-- ORIGINAL TITLE (foreign films) --}}
+                        @if(
+                            !empty($display['original_title']) &&
+                            $display['original_title'] !== $display['title']
+                        )
+                            <div class="original-title">
+                                <i class="bi bi-translate me-1"></i>
+                                {{ $display['original_title'] }}
+                            </div>
+                        @endif
+
                         @if($display['tagline'])
                             <p class="premium-tagline">
                                 {{ $display['tagline'] }}
@@ -120,12 +131,14 @@
                     {{-- META --}}
                     <div class="premium-meta-row">
 
-                        @if($display['ratings']['rated'])
+                        @if($display['ratings']['rated'] || $display['certification'])
+
+                            @php $ratingLabel = $display['ratings']['rated'] ?? $display['certification']; @endphp
 
                             <div class="meta-pill">
                                 {!! $display['type'] === 'tv'
-                                    ? getTVRatingBadge($display['ratings']['rated'])
-                                    : getRatingBadge($display['ratings']['rated']) !!}
+                                    ? getTVRatingBadge($ratingLabel)
+                                    : getRatingBadge($ratingLabel) !!}
                             </div>
 
                         @endif
@@ -169,7 +182,98 @@
 
                         @endif
 
+                        {{-- COUNTRIES --}}
+                        @php
+                            $allCountries = array_unique(array_merge(
+                                $display['countries'] ?? [],
+                                $display['origin_countries'] ?? []
+                            ));
+                        @endphp
+
+                        @if(!empty($allCountries))
+
+                            <div class="meta-pill">
+                                <i class="bi bi-globe2"></i>
+                                {{ implode(', ', array_slice($allCountries, 0, 3)) }}
+                            </div>
+
+                        @endif
+
+                        {{-- ORIGINAL LANGUAGE --}}
+                        @if($display['original_language'])
+
+                            <div class="meta-pill">
+                                <i class="bi bi-translate"></i>
+                                {{ strtoupper($display['original_language']) }}
+                            </div>
+
+                        @endif
+
+                        {{-- POPULARITY --}}
+                        @if($display['popularity'])
+
+                            <div class="meta-pill popularity-pill" data-bs-toggle="tooltip"
+                                 title="TMDB popularity score — higher is more trending">
+                                <i class="bi bi-fire"></i>
+                                {{ number_format($display['popularity'], 0) }}
+                            </div>
+
+                        @endif
+
+                        {{-- HOMEPAGE --}}
+                        @if($display['homepage'])
+
+                            <a href="{{ $display['homepage'] }}"
+                               target="_blank"
+                               rel="noreferrer"
+                               class="meta-pill homepage-pill">
+                                <i class="bi bi-globe"></i>
+                                Official Site
+                            </a>
+
+                        @endif
+
                     </div>
+
+                    {{-- EXTERNAL LINKS --}}
+                    @php
+                        $extLinks = [];
+                        if (!empty($display['external_ids']['imdb_id'])) {
+                            $extLinks[] = ['icon' => 'bi-film', 'label' => 'IMDb', 'url' => 'https://www.imdb.com/title/' . $display['external_ids']['imdb_id']];
+                        }
+                        if (!empty($display['external_ids']['facebook_id'])) {
+                            $extLinks[] = ['icon' => 'bi-facebook', 'label' => 'Facebook', 'url' => 'https://www.facebook.com/' . $display['external_ids']['facebook_id']];
+                        }
+                        if (!empty($display['external_ids']['twitter_id'])) {
+                            $extLinks[] = ['icon' => 'bi-twitter-x', 'label' => 'X', 'url' => 'https://x.com/' . $display['external_ids']['twitter_id']];
+                        }
+                        if (!empty($display['external_ids']['instagram_id'])) {
+                            $extLinks[] = ['icon' => 'bi-instagram', 'label' => 'Instagram', 'url' => 'https://www.instagram.com/' . $display['external_ids']['instagram_id']];
+                        }
+                    @endphp
+
+                    @if(!empty($extLinks))
+
+                        <div class="external-links-row">
+
+                            @foreach($extLinks as $link)
+
+                                <a href="{{ $link['url'] }}"
+                                   target="_blank"
+                                   rel="noreferrer"
+                                   class="external-link"
+                                   title="{{ $link['label'] }}">
+
+                                    <i class="bi {{ $link['icon'] }}"></i>
+                                    {{ $link['label'] }}
+
+                                </a>
+
+                            @endforeach
+
+                        </div>
+
+                    @endif
 
                     {{-- GENRES --}}
                     <div class="premium-genres">
@@ -186,6 +290,23 @@
                         @endforeach
 
                     </div>
+
+                    {{-- KEYWORDS --}}
+                    @if(!empty($display['keywords']))
+
+                        <div class="premium-keywords">
+
+                            @foreach($display['keywords'] as $kw)
+
+                                <span class="keyword-tag">
+                                    {{ $kw }}
+                                </span>
+
+                            @endforeach
+
+                        </div>
+
+                    @endif
 
                     {{-- RATINGS --}}
                     <div class="premium-ratings">
@@ -242,9 +363,23 @@
 
                         @endif
 
+                        {{-- VOTE COUNT --}}
+                        @if($display['vote_count'])
+
+                            <div class="rating-card votes-card">
+                                <div class="rating-value">
+                                    {{ number_format($display['vote_count']) }}
+                                </div>
+                                <div class="rating-source">
+                                    Votes
+                                </div>
+                            </div>
+
+                        @endif
+
                     </div>
 
-                    
+
 
                     {{-- OVERVIEW --}}
                     <div class="premium-overview">
@@ -290,6 +425,54 @@
 
                         @endif
 
+                        @if($display['type'] === 'movie' && $display['budget'])
+
+                            <div class="fact-box">
+
+                                <span class="fact-label">
+                                    Budget
+                                </span>
+
+                                <span class="fact-value">
+                                    ${{ number_format($display['budget']) }}
+                                </span>
+
+                            </div>
+
+                        @endif
+
+                        @if($display['type'] === 'movie' && $display['revenue'])
+
+                            <div class="fact-box">
+
+                                <span class="fact-label">
+                                    Revenue
+                                </span>
+
+                                <span class="fact-value">
+                                    ${{ number_format($display['revenue']) }}
+                                </span>
+
+                            </div>
+
+                        @endif
+
+                        @if(!empty($display['spoken_languages']))
+
+                            <div class="fact-box">
+
+                                <span class="fact-label">
+                                    Languages
+                                </span>
+
+                                <span class="fact-value">
+                                    {{ implode(', ', $display['spoken_languages']) }}
+                                </span>
+
+                            </div>
+
+                        @endif
+
                     </div>
 
                     {{-- NETWORKS --}}
@@ -328,6 +511,81 @@
                                 @endforeach
 
                             </div>
+
+                        </div>
+
+                    @endif
+
+                    {{-- =========================
+                        WATCH PROVIDERS (Streaming)
+                    ========================= --}}
+                    @if(!empty($display['watch_providers']))
+
+                        <div class="premium-watch-section mt-3">
+
+                            <div class="network-title">
+                                <i class="bi bi-play-btn"></i>
+                                Where to Watch
+                            </div>
+
+                            @php
+                                $grouped = collect($display['watch_providers'])
+                                    ->groupBy('type');
+                                $typeLabels = [
+                                    'flatrate' => ['Stream', 'bi-play-circle'],
+                                    'free'     => ['Free', 'bi-gift'],
+                                    'ads'      => ['With Ads', 'bi-megaphone'],
+                                    'rent'     => ['Rent', 'bi-laptop'],
+                                    'buy'      => ['Buy', 'bi-cart2'],
+                                ];
+                            @endphp
+
+                            @foreach($typeLabels as $typeKey => $meta)
+
+                                @if($grouped->has($typeKey))
+
+                                    <div class="watch-group">
+
+                                        <div class="watch-type-label">
+                                            <i class="bi {{ $meta[1] }}"></i>
+                                            {{ $meta[0] }}
+                                        </div>
+
+                                        <div class="network-grid">
+
+                                            @foreach($grouped->get($typeKey) as $p)
+
+                                                @if($p['logo'])
+
+                                                    <div class="network-logo-card watch-provider-card"
+                                                         data-bs-toggle="tooltip"
+                                                         title="{{ $p['name'] }} — {{ $meta[0] }}">
+
+                                                        <img
+                                                            src="{{ $p['logo'] }}"
+                                                            class="network-logo"
+                                                            alt="{{ $p['name'] }}"
+                                                        >
+
+                                                    </div>
+
+                                                @else
+
+                                                    <span class="watch-provider-name">
+                                                        {{ $p['name'] }}
+                                                    </span>
+
+                                                @endif
+
+                                            @endforeach
+
+                                        </div>
+
+                                    </div>
+
+                                @endif
+
+                            @endforeach
 
                         </div>
 
@@ -679,6 +937,193 @@
     object-fit: contain;
 }
 
+/* =========================================================
+   KEYWORDS
+   ========================================================= */
+
+.premium-keywords {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.keyword-tag {
+    padding: 4px 9px;
+    border-radius: .45rem;
+    background: rgba(148,163,184,.07);
+    border: 1px solid rgba(148,163,184,.14);
+    color: rgba(255,255,255,.58);
+    font-size: 11px;
+    font-weight: 600;
+    transition: background .15s ease, color .15s ease;
+}
+
+.keyword-tag:hover {
+    background: rgba(45,212,191,.09);
+    color: var(--ui-accent);
+    border-color: rgba(45,212,191,.22);
+}
+
+/* =========================================================
+   VOTES CARD
+   ========================================================= */
+
+.votes-card {
+    background: rgba(148,163,184,.06) !important;
+    border-color: rgba(148,163,184,.16) !important;
+}
+
+.votes-card .rating-value {
+    color: rgba(255,255,255,.72);
+}
+
+.votes-card .rating-source {
+    color: rgba(255,255,255,.42);
+}
+
+/* =========================================================
+   ORIGINAL TITLE (foreign films)
+   ========================================================= */
+
+.original-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+    padding: 3px 9px;
+    border-radius: .45rem;
+    background: rgba(148,163,184,.07);
+    border: 1px solid rgba(148,163,184,.14);
+    color: rgba(255,255,255,.55);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.original-title i {
+    color: var(--ui-accent);
+    font-size: 11px;
+}
+
+/* =========================================================
+   POPULARITY PILL
+   ========================================================= */
+
+.popularity-pill {
+    color: #fbbf24;
+    border-color: rgba(251,191,36,.22);
+    background: rgba(251,191,36,.06);
+}
+
+.popularity-pill i {
+    color: #fbbf24;
+}
+
+/* =========================================================
+   HOMEPAGE PILL
+   ========================================================= */
+
+.homepage-pill {
+    text-decoration: none;
+    color: var(--ui-accent);
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+
+.homepage-pill:hover {
+    color: #fff;
+    background: rgba(45,212,191,.12);
+    border-color: rgba(45,212,191,.30);
+}
+
+/* =========================================================
+   EXTERNAL LINKS
+   ========================================================= */
+
+.external-links-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-bottom: 16px;
+}
+
+.external-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: .5rem;
+    background: rgba(255,255,255,.04);
+    border: 1px solid var(--ui-border);
+    color: rgba(255,255,255,.72);
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background .15s ease, border-color .15s ease, color .15s ease, transform .15s ease;
+}
+
+.external-link:hover {
+    color: var(--ui-accent);
+    border-color: rgba(45,212,191,.26);
+    background: rgba(45,212,191,.06);
+    transform: translateY(-1px);
+}
+
+.external-link i {
+    font-size: 13px;
+}
+
+/* =========================================================
+   WATCH PROVIDERS (Streaming)
+   ========================================================= */
+
+.premium-watch-section {
+    margin-top: 14px;
+}
+
+.watch-group {
+    margin-bottom: 10px;
+}
+
+.watch-type-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 7px;
+    padding: 3px 8px;
+    border-radius: .4rem;
+    background: rgba(45,212,191,.06);
+    border: 1px solid rgba(45,212,191,.14);
+    color: var(--ui-accent);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+}
+
+.watch-type-label i {
+    font-size: 11px;
+}
+
+.watch-provider-card {
+    padding: 6px;
+    transition: transform .15s ease, border-color .15s ease;
+}
+
+.watch-provider-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(45,212,191,.30);
+}
+
+.watch-provider-name {
+    padding: 6px 10px;
+    border-radius: .5rem;
+    background: rgba(255,255,255,.035);
+    border: 1px solid var(--ui-border);
+    color: rgba(255,255,255,.62);
+    font-size: 12px;
+    font-weight: 600;
+}
+
 @media (max-width: 768px) {
     .premium-media-card {
         padding: 16px;
@@ -704,6 +1149,7 @@
 
     .premium-meta-row,
     .premium-genres,
+    .premium-keywords,
     .premium-ratings,
     .premium-facts {
         justify-content: flex-start;

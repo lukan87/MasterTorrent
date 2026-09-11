@@ -14,7 +14,7 @@
     line-height: 1;
 }
 
-.nav-link {
+.app-header .nav-link {
     padding: 0.4rem 0.6rem;
 }
 
@@ -24,6 +24,201 @@
     border-radius:50%;
     border:2px solid rgba(255,255,255,.15);
     object-fit:cover;
+}
+
+/* -------- Profile dropdown -------- */
+.profile-dropdown {
+    min-width: 380px !important;
+    max-width: 94vw;
+    padding: 0 !important;
+    overflow: hidden;
+    border-radius: 1rem !important;
+    border: 1px solid var(--ui-border) !important;
+    background: linear-gradient(160deg, rgba(22, 32, 51, 0.98), rgba(9, 14, 24, 0.98)) !important;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55) !important;
+}
+
+.profile-cover {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem 1.25rem 1.1rem;
+    border-bottom: 1px solid var(--ui-border);
+    background:
+        radial-gradient(120% 130% at 90% -20%, rgba(99, 210, 198, 0.2), transparent 55%),
+        radial-gradient(120% 150% at -10% 120%, rgba(99, 210, 198, 0.1), transparent 50%);
+}
+
+.profile-cover-avatar {
+    flex: 0 0 auto;
+    width: 4.2rem;
+    height: 4.2rem;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid rgba(99, 210, 198, 0.45);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+    background: #1e293b;
+}
+
+.profile-cover-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.profile-cover-role {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.15rem;
+    font-size: 0.78rem;
+    color: #9fb0c6;
+}
+
+.profile-status-dot {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.15rem 0.55rem;
+    border-radius: 2rem;
+    font-size: 0.68rem;
+    font-weight: 600;
+}
+
+.profile-status-ok {
+    color: #6ee7b7;
+    background: rgba(16, 185, 129, 0.14);
+    border: 1px solid rgba(52, 211, 153, 0.25);
+}
+
+.profile-status-bad {
+    color: #fca5a5;
+    background: rgba(239, 68, 68, 0.14);
+    border: 1px solid rgba(248, 113, 113, 0.25);
+}
+
+.profile-cover-member {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-top: 0.35rem;
+    font-size: 0.72rem;
+    color: #6b7c93;
+}
+
+/* Stats */
+.profile-stats {
+    padding: 0.9rem 1rem 0.5rem;
+    border-bottom: 1px solid var(--ui-border);
+}
+
+.profile-stat {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0.6rem;
+    border: 1px solid var(--ui-border);
+    border-radius: 0.8rem;
+    background: rgba(15, 23, 42, 0.55);
+    min-height: 3.3rem;
+    transition: background-color 120ms ease, border-color 120ms ease, transform 120ms ease;
+}
+
+.profile-stat:hover,
+.profile-stat:focus {
+    background: rgba(99, 210, 198, 0.09);
+    border-color: rgba(99, 210, 198, 0.25);
+    transform: translateY(-1px);
+    text-decoration: none;
+}
+
+.profile-stat-icon {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.55rem;
+    font-size: 1.05rem;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid var(--ui-border);
+}
+
+.profile-stat-value {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #e8eef7;
+}
+
+.profile-stat-label {
+    display: block;
+    font-size: 0.64rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: #8194ab;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Quick links */
+.profile-links {
+    padding: 0.6rem 1rem 0.9rem;
+    border-bottom: 1px solid var(--ui-border);
+}
+
+.profile-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.55rem 0.25rem;
+    border-radius: 0.7rem;
+    color: #cbd5e1;
+    font-size: 0.72rem;
+    font-weight: 500;
+    text-decoration: none !important;
+    transition: background-color 120ms ease, color 120ms ease, transform 120ms ease;
+}
+
+.profile-link i {
+    font-size: 1.05rem;
+}
+
+.profile-link:hover,
+.profile-link:focus {
+    background: rgba(99, 210, 198, 0.1);
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+/* Footer */
+.profile-footer {
+    display: flex;
+    gap: 0.6rem;
+    padding: 0.85rem 1rem;
+    background: rgba(9, 14, 24, 0.6);
+}
+
+.profile-btn {
+    flex: 1;
+    border-radius: 0.65rem;
+    font-weight: 600;
+    text-decoration: none !important;
+}
+
+@media (max-width: 575.98px) {
+    .profile-dropdown {
+        min-width: 92vw !important;
+        max-width: 92vw;
+    }
 }
 </style>
 
@@ -37,6 +232,22 @@
         </a>
     </li>
 </ul>
+
+{{-- Live torrent search --}}
+<form class="d-none d-lg-flex ms-lg-3 me-3" action="{{ route('torrents.index') }}" method="GET" role="search">
+    <div class="input-group input-group-sm header-search">
+        <span class="input-group-text" aria-hidden="true">
+            <i class="bi bi-search"></i>
+        </span>
+        <input
+            type="text"
+            name="keyword"
+            class="form-control"
+            placeholder="Search torrents…"
+            value="{{ request('keyword') }}"
+            aria-label="Search torrents">
+    </div>
+</form>
 
 <ul class="navbar-nav ms-auto">
 
@@ -249,7 +460,7 @@
 
 @endauth
 
-{{-- PROFILE (UNCHANGED) --}}
+{{-- PROFILE DROPDOWN --}}
 <li class="nav-item dropdown user-menu">
     <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
         <img src="{{ Auth::user()->profile_image ?? asset('images/default_avatar/default-avatar.jpg') }}" class="user-image rounded-circle shadow">
@@ -257,98 +468,135 @@
             <span style="color: {{ \App\Models\UserClass::getClassColor(Auth::user()->user_class) }}">
                 {{ Auth::user()->name }} {{ auth()->user()->seeder_icon }}
             </span>
-                         @if(Auth::user()->warned)
-                        <i class="bi bi-exclamation-triangle-fill text-danger" data-bs-toggle="tooltip" title=" Warned Until: {{ Auth::user()->warned_until->format('Y-m-d H:i') }}"></i>
-                         @endif
-                         @if(Auth::user()->donor === 'yes')
-                        <i class="bi bi-star-fill text-success" data-bs-toggle="tooltip" title="Donor"></i>
-                         @endif
+            @if(Auth::user()->warned)
+                <i class="bi bi-exclamation-triangle-fill text-danger" data-bs-toggle="tooltip" title="Warned Until: {{ optional(Auth::user()->warned_until)->format('Y-m-d H:i') }}"></i>
+            @endif
+            @if(Auth::user()->donor === 'yes')
+                <i class="bi bi-star-fill text-warning" data-bs-toggle="tooltip" title="Donor"></i>
+            @endif
+        </span>
+    </a>
 
-                    </span> </a>
-                        <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end" style="min-width: 400px;"> <!--begin::User Image-->
-                            <li class="user-header"> <img src="{{ Auth::user()->profile_image ?? asset('images/default_avatar/default-avatar.jpg') }}" class="user-image rounded-circle shadow" alt="User Avatar">
-                                <p>
-                                {{ Auth::user()->name }} - {{ Auth::user()->role_name }}
-                                    <small>Member since {{ Auth::user()->created_at }}</small>
-                                    @if(Auth::user()->warned_until)
-                                    <br>
-                                    <small class="text-info">
-                                        <i class="bi bi-exclamation-triangle-fill"></i> Warned Until: {{ Auth::user()->warned_until->format('Y-m-d H:i') }}
-                                    </small>
+    <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end profile-dropdown">
+        {{-- Cover: avatar, name, role, connection status --}}
+        <li class="profile-cover">
+            <img
+                class="profile-cover-avatar"
+                src="{{ Auth::user()->profile_image ?? asset('images/default_avatar/default-avatar.jpg') }}"
+                alt="{{ Auth::user()->name }}">
+            <div class="min-w-0">
+                <div class="profile-cover-name" style="color: {{ \App\Models\UserClass::getClassColor(Auth::user()->user_class) }}">
+                    {{ Auth::user()->name }}
+                    @if(Auth::user()->donor === 'yes')
+                        <i class="bi bi-star-fill text-warning" data-bs-toggle="tooltip" title="Donor"></i>
+                    @endif
+                </div>
+                <div class="profile-cover-role">
+                    <span>{{ Auth::user()->role_name }}</span>
+                    <!-- <span class="profile-status-dot {{ $connectable ? 'profile-status-ok' : 'profile-status-bad' }}" data-bs-toggle="tooltip" title="{{ $connectable ? 'Port open — you are connectable' : 'Port closed — not connectable' }}">
+                        <i class="bi {{ $connectable ? 'bi-check-circle-fill' : 'bi-x-circle-fill' }}"></i>
+                        {{ $connectable ? 'Connectable' : 'Not Connectable' }}
+                    </span> -->
+                </div>
+                <div class="profile-cover-member">
+                    <i class="bi bi-calendar3"></i>
+                    Member since {{ Auth::user()->created_at->format('M Y') }}
+                    @if(Auth::user()->warned)
+                        <span class="badge text-bg-danger ms-1" data-bs-toggle="tooltip" title="Warned until {{ optional(Auth::user()->warned_until)->format('Y-m-d H:i') }}">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i>Warned
+                        </span>
+                    @endif
+                </div>
+            </div>
+        </li>
+
+        {{-- Quick stats --}}
+        <li class="profile-stats">
+            <div class="row g-2">
+                <div class="col-6">
+                    <a class="profile-stat" href="{{ route('snatch.seeding') }}" data-bs-toggle="tooltip" title="Uploaded traffic">
+                        <span class="profile-stat-icon text-success"><i class="bi bi-cloud-arrow-up-fill"></i></span>
+                        <span><span class="profile-stat-value">{{ \App\Helpers\FormatHelper::formatSize(Auth::user()->uploaded) }}</span><span class="profile-stat-label">Uploaded</span></span>
+                    </a>
+                </div>
+                <div class="col-6">
+                    <a class="profile-stat" href="{{ route('snatch.leeching') }}" data-bs-toggle="tooltip" title="Downloaded traffic">
+                        <span class="profile-stat-icon text-info"><i class="bi bi-cloud-arrow-down-fill"></i></span>
+                        <span><span class="profile-stat-value">{{ \App\Helpers\FormatHelper::formatSize(Auth::user()->downloaded) }}</span><span class="profile-stat-label">Downloaded</span></span>
+                    </a>
+                </div>
+                <div class="col-6">
+                    <a class="profile-stat" href="{{ route('snatch.snatchlist') }}" data-bs-toggle="tooltip" title="Upload / Download ratio">
+                        <span class="profile-stat-icon text-primary"><i class="bi bi-speedometer2"></i></span>
+                        <span>
+                            <span class="profile-stat-value">
+                                @if(Auth::user()->downloaded > 0)
+                                    {{ number_format(Auth::user()->uploaded / Auth::user()->downloaded, 2) }}
+                                @else
+                                    &#8734;
                                 @endif
+                            </span><span class="profile-stat-label">Ratio</span>
+                        </span>
+                    </a>
+                </div>
+                <div class="col-6">
+                    <a class="profile-stat" href="{{ route('shop') }}" data-bs-toggle="tooltip" title="Seedbonus shop">
+                        <span class="profile-stat-icon text-warning"><i class="bi bi-piggy-bank"></i></span>
+                        <span><span class="profile-stat-value">{{ number_format(Auth::user()->seedbonus) }}</span><span class="profile-stat-label">Seedbonus</span></span>
+                    </a>
+                </div>
+                <div class="col-6">
+                    <a class="profile-stat" href="{{ route('snatch.seeding') }}" data-bs-toggle="tooltip" title="Torrents you are seeding">
+                        <span class="profile-stat-icon text-success"><i class="bi bi-arrow-up-circle-fill"></i></span>
+                        <span><span class="profile-stat-value">{{ $seedingCount }}</span><span class="profile-stat-label">Seeding</span></span>
+                    </a>
+                </div>
+                <div class="col-6">
+                    <a class="profile-stat" href="{{ route('snatch.leeching') }}" data-bs-toggle="tooltip" title="Torrents you are leeching">
+                        <span class="profile-stat-icon text-danger"><i class="bi bi-arrow-down-circle-fill"></i></span>
+                        <span><span class="profile-stat-value">{{ $leechingCount }}</span><span class="profile-stat-label">Leeching</span></span>
+                    </a>
+                </div>
+            </div>
+        </li>
 
-                                </p>
-                            </li> <!--end::User Image--> <!--begin::Menu Body-->
-                            <li class="user-body"> <!--begin::Row-->
-                                <div class="row">
-                                    <div class="col-4 text-center fs-5" data-bs-toggle="tooltip" title="Uploaded"> <small><a href="#"><i class="bi bi-file-arrow-up text-success"></i> {{ \App\Helpers\FormatHelper::formatSize(Auth::user()->uploaded) }}</a></small> </div>
-                                    <div class="col-4 text-center fs-5" data-bs-toggle="tooltip" title="Downloaded"> <small><a href="#"><i class="bi bi-file-arrow-down text-info"></i> {{ \App\Helpers\FormatHelper::formatSize(Auth::user()->downloaded) }}</a></small> </div>
-                                    <div class="col-4 text-center fs-5">
-                                        <small>
-                                            <a href="/shop" data-bs-toggle="tooltip" title="Seedbonus">
-                                            <i class="bi bi-piggy-bank fs-5 text-warning"></i>
-                                             {{ Auth::user()->seedbonus }}
-                                            </a>
-                                        </small>
-                                    </div>
-                                </div> <!--end::Row-->
-                                <div class="row">
-                                <div class="col-4 text-center fs-5" data-bs-toggle="tooltip" title="Upload/Download Ratio">
-                                     <small>
-                                          <i class="bi bi-speedometer2"></i>
-                                            @if(Auth::user()->downloaded > 0)
-                                               {{ number_format(Auth::user()->uploaded / Auth::user()->downloaded, 2) }}
-                                            @else
-                                               &#8734; <!-- Displays infinity symbol if downloaded is 0 -->
-                                            @endif
-                                     </small>
-                                </div>
-                                <div class="col-4 text-center fs-5" data-bs-toggle="tooltip" title="Seeding">
-                                <a href="{{ route('snatch.seeding') }}">
-                                <i class="bi bi-cloud-arrow-up-fill text-success"></i>
-                                     <small>
-                                     {{ $seedingCount }}
-                                     </small>
-                                </a>
-                                </div>
-                                <div class="col-4 text-center fs-5" data-bs-toggle="tooltip" title="Leeching">
-                                <a href="{{ route('snatch.leeching') }}">
-                                <i class="bi bi-cloud-arrow-down-fill text-danger"></i>
-                                     <small>
-                                     {{ $leechingCount }}
-                                     </small>
-                                </a>
-                                </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-4 text-center fs-5"> <small><a href="{{ route('snatch.needToSeed') }}" data-bs-toggle="tooltip" title="Need to seed"><i class="bi bi-exclamation-triangle-fill" style="color: red;"></i> Need to Seed</a></small> </div>
-                                    <div class="col-4 text-center fs-5"> <small><a href="{{ route('snatch.snatchlist') }}" data-bs-toggle="tooltip" title="Snatchlist"><i class="bi bi-file-arrow-down text-info fs-5"></i> Snatch List</a></small> </div>
-                                    <div class="col-4 text-center fs-5">
-                                        <small>
-                                            <a href="{{ route('snatch.hitAndRun') }}" data-bs-toggle="tooltip" title="Hit&Run's">
-                                            <i class="bi bi-person-exclamation" style="color: red;"></i>
-                                             HNR's: {{ Auth::user()->hit_and_run_count }}
-                                            </a>
-                                        </small>
-                                    </div>
-                                </div> <!--end::Row-->
-                            </li> <!--end::Menu Body--> <!--begin::Menu Footer-->
-                            <li class="user-footer">
-                            <a href="{{ route('profile.show', ['id' => Auth::user()->id, 'name' => Auth::user()->name]) }}" class="btn btn-default btn-flat">Profile</a>
+        {{-- Quick links --}}
+        <li class="profile-links">
+            <div class="row g-1">
+                <div class="col-4">
+                    <a class="profile-link" href="{{ route('invites.index') }}">
+                        <i class="bi bi-envelope-plus-fill"></i><span>Invites ({{ Auth::user()->invites }})</span>
+                    </a>
+                </div>
+                <div class="col-4">
+                    <a class="profile-link" href="{{ route('snatch.hitAndRun') }}">
+                        <i class="bi bi-person-exclamation"></i><span>Hit &amp; Runs ({{ Auth::user()->hit_and_run_count }})</span>
+                    </a>
+                </div>
+                <div class="col-4">
+                    <a class="profile-link" href="{{ route('snatch.needToSeed') }}">
+                        <i class="bi bi-hourglass-split"></i><span>Needs Seed</span>
+                    </a>
+                </div>
+            </div>
+        </li>
 
-                            <a class="btn btn-default btn-flat float-end" href="{{ route('logout') }}"
-                   onclick="event.preventDefault();
-                                 document.getElementById('logout-form').submit();">
-                    {{ __('Logout') }}
-                            </a>
+        {{-- Footer --}}
+        <li class="profile-footer">
+            <a href="{{ route('profile.show', ['id' => Auth::user()->id, 'name' => Auth::user()->name]) }}" class="btn btn-outline-info btn-sm profile-btn">
+                <i class="bi bi-person-fill me-1"></i>View Profile
+            </a>
+            <a href="{{ route('logout') }}" class="btn btn-outline-danger btn-sm profile-btn"
+               onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                <i class="bi bi-box-arrow-right me-1"></i>Logout
+            </a>
+        </li>
+    </ul>
 
-                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                    @csrf
-                </form>
-
-                           </li> <!--end::Menu Footer-->
-                        </ul>
-                    </li> <!--end::User Menu Dropdown-->
+    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+        @csrf
+    </form>
+</li>
                 </ul> <!--end::End Navbar Links-->
             </div> <!--end::Container-->
         </nav> <!--end::Header--> <!--begin::Sidebar-->

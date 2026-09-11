@@ -84,7 +84,7 @@ class TMDBService
      */
   public function fetchTMDBData(int $tmdbId, string $type): ?array
 {
-    $cacheKey = "tmdb_{$type}_{$tmdbId}";
+    $cacheKey = "tmdb_v2_{$type}_{$tmdbId}";
 
     return Cache::remember($cacheKey, now()->addDays(30), function () use ($tmdbId, $type) {
         $endpoint = $type === 'movie' ? 'movie' : 'tv';
@@ -98,7 +98,11 @@ class TMDBService
                 'images',
                 'keywords',
                 'similar',          
-                'recommendations'   
+                'recommendations',
+                'watch_providers',
+                'external_ids',
+                'release_dates',
+                'content_ratings',
             ]),
         ]);
 
@@ -324,6 +328,9 @@ if ($isMovie && !empty($tmdb['belongs_to_collection'])) {
             'rated'=> $omdb['Rated'] ?? null,
         ],
 
+        // CERTIFICATION (from TMDB — richer than OMDB)
+        'certification' => $this->extractCertification($tmdb, $isMovie),
+
         // CAST
         'cast' => collect($tmdb['credits']['cast'] ?? [])
             ->take(9)
@@ -365,6 +372,148 @@ if ($isMovie && !empty($tmdb['belongs_to_collection'])) {
 'collection' => $collection,
 'collection_movies' => $collectionMovies,
 
+// NETWORKS (TV)
+'networks' => collect($tmdb['networks'] ?? [])
+    ->map(fn ($n) => [
+        'name' => $n['name'],
+        'logo' => $n['logo_path']
+            ? "https://image.tmdb.org/t/p/w92{$n['logo_path']}"
+            : null,
+    ])
+    ->all(),
+
+// COUNTRIES
+'countries' => collect($tmdb['production_countries'] ?? [])
+    ->pluck('iso_3166_1')
+    ->all(),
+
+'origin_countries' => $isMovie ? [] : ($tmdb['origin_country'] ?? []),
+
+// LANGUAGES
+'original_language' => $tmdb['original_language'] ?? null,
+'spoken_languages' => collect($tmdb['spoken_languages'] ?? [])
+    ->pluck('english_name')
+    ->filter()
+    ->take(5)
+    ->values()
+    ->all(),
+
+// KEYWORDS
+'keywords' => collect($isMovie
+        ? ($tmdb['keywords']['keywords'] ?? [])
+        : ($tmdb['keywords']['results'] ?? [])
+    )
+    ->pluck('name')
+    ->filter()
+    ->take(12)
+    ->values()
+    ->all(),
+
+// FINANCIALS (movies)
+'budget'   => $isMovie && !empty($tmdb['budget']) ? $tmdb['budget'] : null,
+'revenue'  => $isMovie && !empty($tmdb['revenue']) ? $tmdb['revenue'] : null,
+
+// VOTE COUNT
+'vote_count' => $tmdb['vote_count'] ?? null,
+
+// POPULARITY
+'popularity' => $tmdb['popularity'] ?? null,
+
+// HOMEPAGE
+'homepage' => $tmdb['homepage'] ?? null,
+
+// ORIGINAL TITLE (for foreign films)
+'original_title' => $isMovie
+    ? ($tmdb['original_title'] ?? null)
+    : ($tmdb['original_name'] ?? null),
+
+// EXTERNAL IDS
+'external_ids' => [
+    'imdb_id'     => $tmdb['external_ids']['imdb_id'] ?? null,
+    'facebook_id' => $tmdb['external_ids']['facebook_id'] ?? null,
+    'twitter_id'  => $tmdb['external_ids']['twitter_id'] ?? null,
+    'instagram_id'=> $tmdb['external_ids']['instagram_id'] ?? null,
+    'wikipedia_id'=> $tmdb['external_ids']['wikidata_id'] ?? null,
+],
+
+// WATCH PROVIDERS (streaming availability)
+'watch_providers' => $this->extractWatchProviders($tmdb),
+
+// TV — NEXT EPISODE TO AIR
+'next_episode_to_air' => !$isMovie && !empty($tmdb['next_episode_to_air'])
+    ? [
+        'name'              => $tmdb['next_episode_to_air']['name'] ?? null,
+        'overview'          => $tmdb['next_episode_to_air']['overview'] ?? null,
+        'season_number'     => $tmdb['next_episode_to_air']['season_number'] ?? null,
+        'episode_number'    => $tmdb['next_episode_to_air']['episode_number'] ?? null,
+        'air_date'          => $tmdb['next_episode_to_air']['air_date'] ?? null,
+        'still_path'        => $tmdb['next_episode_to_air']['still_path']
+            ? "https://image.tmdb.org/t/p/w780{$tmdb['next_episode_to_air']['still_path']}"
+            : null,
+        'vote_average'      => $tmdb['next_episode_to_air']['vote_average'] ?? null,
+    ]
+    : null,
+
+// TV — LAST EPISODE TO AIR
+'last_episode_to_air' => !$isMovie && !empty($tmdb['last_episode_to_air'])
+    ? [
+        'name'              => $tmdb['last_episode_to_air']['name'] ?? null,
+        'overview'          => $tmdb['last_episode_to_air']['overview'] ?? null,
+        'season_number'     => $tmdb['last_episode_to_air']['season_number'] ?? null,
+        'episode_number'    => $tmdb['last_episode_to_air']['episode_number'] ?? null,
+        'air_date'          => $tmdb['last_episode_to_air']['air_date'] ?? null,
+        'still_path'        => $tmdb['last_episode_to_air']['still_path']
+            ? "https://image.tmdb.org/t/p/w780{$tmdb['last_episode_to_air']['still_path']}"
+            : null,
+        'vote_average'      => $tmdb['last_episode_to_air']['vote_average'] ?? null,
+    ]
+    : null,
+
+// TV — SEASON DETAILS
+'season_details' => !$isMovie
+    ? collect($tmdb['seasons'] ?? [])
+        ->reject(fn ($s) => ($s['season_number'] ?? 0) === 0)
+        ->take(10)
+        ->map(fn ($s) => [
+            'season_number' => $s['season_number'],
+            'name'          => $s['name'] ?? null,
+            'overview'      => $s['overview'] ?? null,
+            'air_date'      => $s['air_date'] ?? null,
+            'episode_count' => $s['episode_count'] ?? 0,
+            'vote_average'  => $s['vote_average'] ?? null,
+            'poster'        => $s['poster_path']
+                ? "https://image.tmdb.org/t/p/w300{$s['poster_path']}"
+                : null,
+        ])
+        ->all()
+    : [],
+
+// SIMILAR / RECOMMENDATIONS (from TMDB)
+'similar' => collect($tmdb['similar']['results'] ?? [])
+    ->take(6)
+    ->map(fn ($s) => [
+        'id'     => $s['id'],
+        'title'  => $s['title'] ?? $s['name'] ?? null,
+        'poster' => isset($s['poster_path'])
+            ? "https://image.tmdb.org/t/p/w185{$s['poster_path']}"
+            : null,
+        'rating' => $s['vote_average'] ?? null,
+        'year'   => substr($s['release_date'] ?? $s['first_air_date'] ?? '', 0, 4),
+    ])
+    ->all(),
+
+'recommendations' => collect($tmdb['recommendations']['results'] ?? [])
+    ->take(6)
+    ->map(fn ($r) => [
+        'id'     => $r['id'],
+        'title'  => $r['title'] ?? $r['name'] ?? null,
+        'poster' => isset($r['poster_path'])
+            ? "https://image.tmdb.org/t/p/w185{$r['poster_path']}"
+            : null,
+        'rating' => $r['vote_average'] ?? null,
+        'year'   => substr($r['release_date'] ?? $r['first_air_date'] ?? '', 0, 4),
+    ])
+    ->all(),
 
 
    ]);
@@ -381,6 +530,79 @@ public function fetchCollection(int $collectionId): ?array
 }
 
 
+/**
+ * Extract watch/providers data from TMDB response, filtered by US region.
+ */
+private function extractWatchProviders(array $tmdb): array
+{
+    $raw = $tmdb['watch_providers']['results'] ?? [];
+
+    // Try US first, fall back to first available region
+    $region = $raw['US'] ?? reset($raw) ?: null;
+
+    if (!$region) {
+        return [];
+    }
+
+    $providers = [];
+
+    foreach (['flatrate', 'rent', 'buy', 'free', 'ads'] as $type) {
+        if (!empty($region[$type])) {
+            foreach ($region[$type] as $p) {
+                $providers[] = [
+                    'type'  => $type,
+                    'name'  => $p['provider_name'] ?? null,
+                    'logo'  => isset($p['provider_path'])
+                        ? "https://image.tmdb.org/t/p/w92{$p['provider_path']}"
+                        : null,
+                ];
+            }
+        }
+    }
+
+    return $providers;
+}
+
+
+/**
+ * Extract US certification from release_dates (movie) or content_ratings (TV).
+ */
+private function extractCertification(array $tmdb, bool $isMovie): ?string
+{
+    if ($isMovie) {
+        $releases = $tmdb['release_dates']['results'] ?? [];
+
+        // Try US first
+        foreach ($releases as $country) {
+            if (($country['iso_3166_1'] ?? '') === 'US') {
+                $first = collect($country['release_dates'] ?? [])
+                    ->firstWhere('certification', fn ($c) => !empty($c));
+                if ($first) return $first['certification'];
+            }
+        }
+
+        // Fall back to first non-empty certification
+        foreach ($releases as $country) {
+            $cert = collect($country['release_dates'] ?? [])
+                ->firstWhere('certification', fn ($c) => !empty($c));
+            if ($cert) return $cert['certification'];
+        }
+    } else {
+        $ratings = $tmdb['content_ratings']['results'] ?? [];
+
+        foreach ($ratings as $country) {
+            if (($country['iso_3166_1'] ?? '') === 'US') {
+                if (!empty($country['rating'])) return $country['rating'];
+            }
+        }
+
+        foreach ($ratings as $country) {
+            if (!empty($country['rating'])) return $country['rating'];
+        }
+    }
+
+    return null;
+}
 private function normalizeDisplay(array $display): array
 {
     return array_replace_recursive([
@@ -413,9 +635,19 @@ private function normalizeDisplay(array $display): array
         'production_companies' => [],
         'networks'             => [],
         'countries'            => [],
+        'origin_countries'     => [],
         'language'             => null,
+        'original_language'    => null,
+        'spoken_languages'     => [],
         'release_date'         => null,
         'certification_country'=> null,
+
+        // KEYWORDS
+        'keywords' => [],
+
+        // FINANCIALS
+        'budget'  => null,
+        'revenue' => null,
 
         // RATINGS
         'ratings' => [
@@ -426,12 +658,48 @@ private function normalizeDisplay(array $display): array
             'votes' => null,
         ],
 
+        // CERTIFICATION
+        'certification' => null,
+
+        'vote_count' => null,
+
         // CAST
         'cast' => [],
+
+        // SIMILAR / RECOMMENDATIONS
+        'similar'         => [],
+        'recommendations' => [],
 
         // TV INTELLIGENCE
         'is_miniseries' => false,
         'in_production' => false,
+
+        // POPULARITY
+        'popularity' => null,
+
+        // HOMEPAGE
+        'homepage' => null,
+
+        // ORIGINAL TITLE
+        'original_title' => null,
+
+        // EXTERNAL IDS
+        'external_ids' => [
+            'imdb_id'      => null,
+            'facebook_id'  => null,
+            'twitter_id'   => null,
+            'instagram_id' => null,
+            'wikipedia_id' => null,
+        ],
+
+        // WATCH PROVIDERS
+        'watch_providers' => [],
+
+        // TV EPISODES
+        'next_episode_to_air' => null,
+        'last_episode_to_air' => null,
+        'season_details'      => [],
+
     ], $display);
 }
 

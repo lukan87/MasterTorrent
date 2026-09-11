@@ -940,3 +940,117 @@ body.bg-body-tertiary {
     color: var(--ui-accent);
     font-size: 14px;
 }
+/* ============================================================
+   Dashboard polish – page headings, navbar search, sidebar user
+   ============================================================ */
+
+/* Page heading (used via <x-page-header />) */
+.page-heading {
+    padding: 0.9rem 1rem 0.9rem 1.15rem;
+    background: linear-gradient(135deg, rgba(99, 210, 198, 0.07), rgba(20, 31, 52, 0.55));
+    border: 1px solid var(--ui-border);
+    border-left: 3px solid var(--ui-accent);
+    border-radius: 1.1rem;
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.18);
+}
+
+.page-heading-icon {
+    flex: 0 0 auto;
+    width: 3rem;
+    height: 3rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.9rem;
+    font-size: 1.35rem;
+    color: var(--ui-accent);
+    background: rgba(99, 210, 198, 0.13);
+    border: 1px solid rgba(99, 210, 198, 0.25);
+}
+
+.page-heading-title {
+    font-size: 1.3rem;
+    line-height: 1.2;
+    font-weight: 600;
+    color: #f1f5f9;
+    margin-bottom: 0.2rem;
+}
+
+.page-heading-subtitle {
+    font-size: 0.88rem;
+    line-height: 1.4;
+    color: var(--ui-text-muted);
+}
+
+/* Search field in the top navigation */
+.header-search {
+    max-width: 340px;
+}
+
+.header-search .input-group-text,
+.header-search .form-control {
+    background: rgba(15, 23, 42, 0.72);
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    color: #cbd5e1;
+}
+
+.header-search .input-group-text {
+    border-right: 0;
+    border-top-left-radius: 0.8rem;
+    border-bottom-left-radius: 0.8rem;
+    color: var(--ui-accent);
+}
+
+.header-search .form-control {
+    border-left: 0;
+    border-top-right-radius: 0.8rem;
+    border-bottom-right-radius: 0.8rem;
+    font-size: 0.875rem;
+}
+
+.header-search .form-control::placeholder {
+    color: #7c8ba1;
+}
+
+.header-search .form-control:focus {
+    border-color: var(--ui-accent);
+    box-shadow: 0 0 0 0.2rem rgba(99, 210, 198, 0.15);
+}
+
+/* Sidebar user card (avatar + name + ratio under the brand) */
+.sidebar-user {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    margin: 0.75rem 0.75rem 0.25rem;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid var(--ui-border);
+    border-radius: 0.9rem;
+    background: linear-gradient(135deg, rgba(99, 210, 198, 0.08), rgba(30, 41, 59, 0.5));
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+}
+
+.sidebar-user-avatar {
+    flex: 0 0 auto;
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(99, 210, 198, 0.4);
+}
+
+.sidebar-user-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: #f1f5f9;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sidebar-user-ratio {
+    font-size: 0.72rem;
+    line-height: 1.35;
+    color: #9fb0c6;
+}

@@ -89,6 +89,237 @@
 
 @endif
 
+{{-- =========================
+     NEXT EPISODE TO AIR
+========================= --}}
+@if(!empty($display['next_episode_to_air']))
+
+    @php
+        $nextEp = $display['next_episode_to_air'];
+    @endphp
+
+    <div class="tv-episode-card next-episode mt-5">
+
+        <div class="episode-card-header">
+            <div class="episode-icon-box next-icon">
+                <i class="bi bi-calendar2-event"></i>
+            </div>
+            <div>
+                <h3 class="episode-card-title mb-0">Next Episode</h3>
+                <div class="episode-card-subtitle">Airing soon</div>
+            </div>
+        </div>
+
+        <div class="episode-card-body">
+
+            @if($nextEp['still_path'])
+                <img src="{{ $nextEp['still_path'] }}"
+                     alt="{{ $nextEp['name'] }}"
+                     class="episode-still"
+                     loading="lazy">
+            @endif
+
+            <div class="episode-info">
+
+                <div class="episode-title">
+                    {{ $nextEp['name'] ?? 'Episode ' . $nextEp['episode_number'] }}
+                </div>
+
+                <div class="episode-meta">
+
+                    @if($nextEp['season_number'])
+                        <span class="episode-meta-pill">
+                            <i class="bi bi-collection-play"></i>
+                            S{{ $nextEp['season_number'] }}E{{ $nextEp['episode_number'] }}
+                        </span>
+                    @endif
+
+                    @if($nextEp['air_date'])
+                        <span class="episode-meta-pill">
+                            <i class="bi bi-calendar"></i>
+                            {{ \Carbon\Carbon::parse($nextEp['air_date'])->format('M d, Y') }}
+                        </span>
+                    @endif
+
+                    @if($nextEp['vote_average'])
+                        <span class="episode-meta-pill">
+                            <i class="bi bi-star-fill"></i>
+                            {{ number_format($nextEp['vote_average'], 1) }}
+                        </span>
+                    @endif
+
+                </div>
+
+                @if($nextEp['overview'])
+                    <div class="episode-overview">
+                        {{ $nextEp['overview'] }}
+                    </div>
+                @endif
+
+            </div>
+
+        </div>
+
+    </div>
+
+@endif
+
+{{-- =========================
+     LAST EPISODE TO AIR
+========================= --}}
+@if(!empty($display['last_episode_to_air']))
+
+    @php
+        $lastEp = $display['last_episode_to_air'];
+    @endphp
+
+    <div class="tv-episode-card last-episode mt-4">
+
+        <div class="episode-card-header">
+            <div class="episode-icon-box last-icon">
+                <i class="bi bi-tv"></i>
+            </div>
+            <div>
+                <h3 class="episode-card-title mb-0">Last Episode</h3>
+                <div class="episode-card-subtitle">Most recently aired</div>
+            </div>
+        </div>
+
+        <div class="episode-card-body">
+
+            @if($lastEp['still_path'])
+                <img src="{{ $lastEp['still_path'] }}"
+                     alt="{{ $lastEp['name'] }}"
+                     class="episode-still"
+                     loading="lazy">
+            @endif
+
+            <div class="episode-info">
+
+                <div class="episode-title">
+                    {{ $lastEp['name'] ?? 'Episode ' . $lastEp['episode_number'] }}
+                </div>
+
+                <div class="episode-meta">
+
+                    @if($lastEp['season_number'])
+                        <span class="episode-meta-pill">
+                            <i class="bi bi-collection-play"></i>
+                            S{{ $lastEp['season_number'] }}E{{ $lastEp['episode_number'] }}
+                        </span>
+                    @endif
+
+                    @if($lastEp['air_date'])
+                        <span class="episode-meta-pill">
+                            <i class="bi bi-calendar"></i>
+                            {{ \Carbon\Carbon::parse($lastEp['air_date'])->format('M d, Y') }}
+                        </span>
+                    @endif
+
+                    @if($lastEp['vote_average'])
+                        <span class="episode-meta-pill">
+                            <i class="bi bi-star-fill"></i>
+                            {{ number_format($lastEp['vote_average'], 1) }}
+                        </span>
+                    @endif
+
+                </div>
+
+                @if($lastEp['overview'])
+                    <div class="episode-overview">
+                        {{ $lastEp['overview'] }}
+                    </div>
+                @endif
+
+            </div>
+
+        </div>
+
+    </div>
+
+@endif
+
+{{-- =========================
+     SEASON DETAILS
+========================= --}}
+@if(!empty($display['season_details']))
+
+    <div class="tv-seasons-section mt-5">
+
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+            <div>
+                <h3 class="cast-title mb-1">Seasons</h3>
+                <p class="cast-subtitle mb-0">All available seasons of this series</p>
+            </div>
+            <div class="cast-count-badge">
+                <i class="bi bi-collection-play"></i>
+                {{ count($display['season_details']) }} Seasons
+            </div>
+        </div>
+
+        <div class="tv-seasons-row">
+
+            @foreach($display['season_details'] as $season)
+
+                <div class="season-card">
+
+                    <div class="season-poster-wrap">
+                        <img
+                            src="{{ $season['poster'] ?? '/images/noposter.jpg' }}"
+                            loading="lazy"
+                            class="season-poster"
+                            alt="{{ $season['name'] }}"
+                        >
+                        @if($season['vote_average'])
+                            <span class="season-rating">
+                                <i class="bi bi-star-fill"></i>
+                                {{ number_format($season['vote_average'], 1) }}
+                            </span>
+                        @endif
+                    </div>
+
+                    <div class="season-info">
+
+                        <div class="season-name">
+                            {{ $season['name'] ?? 'Season ' . $season['season_number'] }}
+                        </div>
+
+                        <div class="season-meta">
+
+                            @if($season['episode_count'])
+                                <span>
+                                    <i class="bi bi-tv"></i>
+                                    {{ $season['episode_count'] }} Episodes
+                                </span>
+                            @endif
+
+                            @if($season['air_date'])
+                                <span>
+                                    <i class="bi bi-calendar"></i>
+                                    {{ \Carbon\Carbon::parse($season['air_date'])->format('Y') }}
+                                </span>
+                            @endif
+
+                        </div>
+
+                        @if($season['overview'])
+                            <div class="season-overview">
+                                {{ $season['overview'] }}
+                            </div>
+                        @endif
+
+                    </div>
+
+                </div>
+
+            @endforeach
+
+        </div>
+
+    </div>
+
+@endif
+
 @includeWhen(
     $display['type'] === 'movie',
     'torrents.partials.collection'
@@ -485,6 +716,223 @@ html::after {
 }
 
 /* =========================================================
+   TV EPISODE CARDS (Next / Last to Air)
+   ========================================================= */
+
+.tv-episode-card {
+    overflow: hidden;
+    border-radius: .85rem;
+    background: linear-gradient(
+        135deg,
+        rgba(22, 32, 51, .95),
+        rgba(15, 23, 42, .84)
+    );
+    border: 1px solid var(--ui-border);
+    box-shadow: 0 14px 36px rgba(0, 0, 0, .28);
+    backdrop-filter: blur(14px);
+}
+
+.episode-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--ui-border);
+    background: rgba(45, 212, 191, .045);
+}
+
+.episode-icon-box {
+    width: 38px;
+    height: 38px;
+    border-radius: .55rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 16px;
+}
+
+.next-icon {
+    background: rgba(45, 212, 191, .16);
+    color: var(--ui-accent);
+}
+
+.last-icon {
+    background: rgba(148, 163, 184, .16);
+    color: #94a3b8;
+}
+
+.episode-card-title {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.episode-card-subtitle {
+    color: rgba(255, 255, 255, .42);
+    font-size: 12px;
+}
+
+.episode-card-body {
+    display: flex;
+    gap: 14px;
+    padding: 16px;
+}
+
+.episode-still {
+    width: 160px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: .55rem;
+    flex: 0 0 auto;
+    border: 1px solid rgba(255, 255, 255, .07);
+}
+
+.episode-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.episode-title {
+    color: rgba(255, 255, 255, .92);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.episode-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 7px;
+}
+
+.episode-meta-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 8px;
+    border-radius: .45rem;
+    background: rgba(255, 255, 255, .04);
+    border: 1px solid var(--ui-border);
+    color: rgba(255, 255, 255, .68);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.episode-meta-pill i {
+    color: var(--ui-accent);
+    font-size: 10px;
+}
+
+.episode-overview {
+    margin-top: 9px;
+    color: rgba(255, 255, 255, .55);
+    font-size: 12px;
+    line-height: 1.55;
+
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* =========================================================
+   TV SEASONS
+   ========================================================= */
+
+.tv-seasons-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 12px;
+}
+
+.season-card {
+    overflow: hidden;
+    border-radius: .7rem;
+    background: rgba(9, 16, 29, .48);
+    border: 1px solid rgba(255, 255, 255, .055);
+    transition:
+        transform .18s ease,
+        border-color .18s ease;
+}
+
+.season-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(45, 212, 191, .28);
+}
+
+.season-poster-wrap {
+    position: relative;
+    aspect-ratio: 2 / 3;
+    overflow: hidden;
+    background: #0f172a;
+}
+
+.season-poster {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .25s ease;
+}
+
+.season-card:hover .season-poster {
+    transform: scale(1.04);
+}
+
+.season-rating {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 3px 6px;
+    border-radius: .4rem;
+    background: rgba(5, 10, 18, .82);
+    color: #facc15;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.season-info {
+    padding: 10px;
+}
+
+.season-name {
+    color: rgba(255, 255, 255, .85);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.season-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+    color: rgba(255, 255, 255, .48);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.season-meta i {
+    color: var(--ui-accent);
+    font-size: 10px;
+}
+
+.season-overview {
+    margin-top: 7px;
+    color: rgba(255, 255, 255, .52);
+    font-size: 11px;
+    line-height: 1.5;
+
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* =========================================================
    MOBILE
    ========================================================= */
 
@@ -532,6 +980,20 @@ html::after {
 
     .actor-character {
         font-size: 11px;
+    }
+
+    .episode-card-body {
+        flex-direction: column;
+    }
+
+    .episode-still {
+        width: 100%;
+        height: auto;
+    }
+
+    .tv-seasons-row {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 9px;
     }
 }
 

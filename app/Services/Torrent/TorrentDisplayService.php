@@ -35,7 +35,7 @@ protected function getTmdbDisplay(Torrent $torrent)
     }
 
     $display = Cache::remember(
-        "torrent_display_{$torrent->tmdbid}",
+        "torrent_display_v2_{$torrent->tmdbid}",
         now()->addMinutes(10),
         fn () => (new TMDBService())->getDisplayPayload(
             $torrent->tmdbid,

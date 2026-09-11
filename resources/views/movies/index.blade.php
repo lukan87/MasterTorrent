@@ -2,137 +2,79 @@
 
 @section('content')
 
-<div class="container-fluid py-4 movie-page">
+<div class="container-fluid py-3 movie-page">
 
-    {{-- HEADER --}}
     <div class="movies-header mb-4">
-
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-
             <div>
                 <h1 class="movies-title mb-1">
                     <i class="bi bi-film me-2"></i>Movies
                 </h1>
-
-                <p class="movies-subtitle mb-0">
-                    Browse and discover your movie collection
-                </p>
+                <p class="movies-subtitle mb-0">Browse and discover your movie collection</p>
             </div>
 
             @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::ADMIN)
-                <a href="{{ route('movies.create') }}"
-                   class="btn btn-add-movie">
-                    <i class="bi bi-plus-lg me-1"></i>
-                    Add Movie
+                <a href="{{ route('movies.create') }}" class="btn btn-add-movie">
+                    <i class="bi bi-plus-lg me-1"></i> Add Movie
                 </a>
             @endif
-
         </div>
-
     </div>
 
-    {{-- SEARCH --}}
-    <div class="search-card mb-5">
-
+    <div class="search-card mb-4">
         <form action="{{ route('movies.search-movie') }}" method="POST">
             @csrf
-
             <div class="search-wrapper">
-
                 <i class="bi bi-search search-icon"></i>
-
-                <input type="text"
-                       name="name"
-                       id="name"
-                       class="movie-search-input"
-                       required
-                       placeholder="Search for a movie...">
-
+                <input type="text" name="name" id="name" class="movie-search-input" required placeholder="Search for a movie...">
                 <button type="submit" class="search-btn">
-                    Search
+                    <i class="bi bi-search me-1"></i>Search
                 </button>
-
             </div>
-
         </form>
-
     </div>
 
-    {{-- TOP PAGINATION --}}
     <div class="d-flex justify-content-center mb-4">
         {{ $movies->links('pagination::bootstrap-5') }}
     </div>
 
-    {{-- MOVIES GRID --}}
-    <div class="row g-4">
-
+    <div class="row g-3">
         @forelse ($movies as $movie)
-
             <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-
                 <div class="movie-card">
-
-                    <a href="{{ route('movies.show', ['id' => $movie->id, 'slug' => $movie->slug]) }}"
-                       class="movie-poster-link">
-
+                    <a href="{{ route('movies.show', ['id' => $movie->id, 'slug' => $movie->slug]) }}" class="movie-poster-link">
                         <img src="https://www.themoviedb.org/t/p/w600_and_h900_bestv2{{ $movie->poster_path }}"
                              class="movie-poster"
                              alt="{{ $movie->name }}">
-
                         <div class="movie-overlay">
-
                             <div class="movie-overlay-content">
-
                                 <i class="bi bi-play-circle-fill"></i>
-
                                 <span>View Movie</span>
-
                             </div>
-
                         </div>
-
                     </a>
 
                     <div class="movie-info">
-
-                        <h5 class="movie-title">
-                            {{ $movie->name }}
-                        </h5>
-
+                        <h5 class="movie-title">{{ $movie->name }}</h5>
                     </div>
-
                 </div>
-
             </div>
-
         @empty
-
             <div class="col-12">
-
                 <div class="empty-movies">
-
                     <i class="bi bi-film"></i>
-
                     <h4>No movies found</h4>
-
                     <p>Try searching for another title.</p>
-
                 </div>
-
             </div>
-
         @endforelse
-
     </div>
 
-    {{-- BOTTOM PAGINATION --}}
-    <div class="d-flex justify-content-center mt-5">
+    <div class="d-flex justify-content-center mt-4">
         {{ $movies->links('pagination::bootstrap-5') }}
     </div>
-
 </div>
 
-{{-- ALERTS --}}
 @if(session('status'))
 <script>
 swal({
@@ -156,404 +98,96 @@ swal({
 @endif
 
 <style>
+.movie-page{max-width:1600px}
+.movies-header{padding:.35rem .15rem}
+.movies-title{color:#f1f5f9;font-size:14px;font-weight:700;line-height:1.3}
+.movies-title i{color:var(--ui-accent,#22d3c5)}
+.movies-subtitle{color:#94a3b8;font-size:13px;line-height:1.4}
 
-/* =========================================
-   PAGE
-========================================= */
-
-.movie-page{
-    max-width:1600px;
+.btn-add-movie,.search-btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:.25rem;
+    color:#061311;background:var(--ui-accent,#22d3c5);
+    border:1px solid var(--ui-accent,#22d3c5);border-radius:.55rem;
+    font-size:13px;font-weight:600;text-decoration:none;transition:all .18s ease
 }
+.btn-add-movie{min-height:38px;padding:.45rem .8rem}
+.btn-add-movie:hover,.search-btn:hover{color:#061311;filter:brightness(1.06);transform:translateY(-1px)}
 
-/* =========================================
-   HEADER
-========================================= */
-
-.movies-header{
-    padding:12px 4px;
+.search-card,.empty-movies{
+    position:relative;overflow:hidden;
+    background:linear-gradient(135deg,rgba(22,32,51,.95),rgba(15,23,42,.84));
+    border:1px solid var(--ui-border,rgba(148,163,184,.16));
+    border-radius:.85rem;box-shadow:0 10px 28px rgba(0,0,0,.22)
 }
-
-.movies-title{
-    font-size:2.2rem;
-    font-weight:800;
-    letter-spacing:-1px;
-    color:#fff;
+.search-card{padding:.8rem}
+.search-card:before,.empty-movies:before{
+    content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
+    background:var(--ui-accent,#22d3c5)
 }
-
-.movies-title i{
-    color:#ff4d6d;
-}
-
-.movies-subtitle{
-    color:rgba(255,255,255,.55);
-    font-size:.95rem;
-}
-
-/* =========================================
-   ADD BUTTON
-========================================= */
-
-.btn-add-movie{
-
-    background:
-        linear-gradient(
-            135deg,
-            #ff4d6d,
-            #ff758f
-        );
-
-    border:none;
-
-    color:#fff;
-
-    border-radius:14px;
-
-    padding:.8rem 1.2rem;
-
-    font-weight:700;
-
-    transition:.18s ease;
-
-    box-shadow:
-        0 10px 30px rgba(255,77,109,.25);
-}
-
-.btn-add-movie:hover{
-
-    transform:
-        translateY(-2px);
-
-    color:#fff;
-
-    box-shadow:
-        0 16px 40px rgba(255,77,109,.35);
-}
-
-/* =========================================
-   SEARCH
-========================================= */
-
-.search-card{
-
-    background:
-        linear-gradient(
-            180deg,
-            rgba(20,20,22,.96),
-            rgba(12,12,14,.98)
-        );
-
-    border:
-        1px solid rgba(255,255,255,.05);
-
-    border-radius:
-        24px;
-
-    padding:
-        1rem;
-
-    box-shadow:
-        0 20px 50px rgba(0,0,0,.35);
-}
-
 .search-wrapper{
-
-    display:flex;
-    align-items:center;
-
-    background:
-        rgba(255,255,255,.03);
-
-    border:
-        1px solid rgba(255,255,255,.06);
-
-    border-radius:
-        18px;
-
-    padding:
-        0 18px;
-
-    min-height:
-        62px;
-
-    transition:
-        .2s ease;
+    display:flex;align-items:center;gap:.6rem;min-height:42px;padding:0 .7rem;
+    background:rgba(15,23,42,.72);border:1px solid rgba(148,163,184,.17);
+    border-radius:.6rem;transition:border-color .18s ease,box-shadow .18s ease
 }
+.search-wrapper:focus-within{border-color:var(--ui-accent,#22d3c5);box-shadow:0 0 0 2px rgba(34,211,197,.08)}
+.search-icon{color:var(--ui-accent,#22d3c5);font-size:14px}
+.movie-search-input{flex:1;min-width:0;height:40px;padding:0;color:#e2e8f0;background:transparent;border:0;outline:0;font-size:14px}
+.movie-search-input::placeholder{color:#64748b}
+.search-btn{flex:0 0 auto;min-height:34px;padding:.4rem .75rem}
 
-.search-wrapper:focus-within{
-
-    border-color:#ff4d6d;
-
-    box-shadow:
-        0 0 0 4px rgba(255,77,109,.12);
-}
-
-.search-icon{
-    color:#ff758f;
-    font-size:1rem;
-    margin-right:12px;
-}
-
-.movie-search-input{
-
-    flex:1;
-
-    background:transparent;
-
-    border:none;
-
-    color:#fff;
-
-    font-size:1rem;
-}
-
-.movie-search-input:focus{
-    outline:none;
-}
-
-.movie-search-input::placeholder{
-    color:rgba(255,255,255,.35);
-}
-
-.search-btn{
-
-    background:
-        linear-gradient(
-            135deg,
-            #ff4d6d,
-            #ff758f
-        );
-
-    border:none;
-
-    color:#fff;
-
-    border-radius:12px;
-
-    padding:.75rem 1.2rem;
-
-    font-weight:700;
-
-    transition:.18s ease;
-}
-
-.search-btn:hover{
-
-    transform:
-        translateY(-1px);
-
-    box-shadow:
-        0 10px 25px rgba(255,77,109,.25);
-}
-
-/* =========================================
-   MOVIE CARD
-========================================= */
-
-.movie-card{
-    position:relative;
-    transition:.22s ease;
-}
-
-.movie-card:hover{
-    transform:translateY(-6px) scale(1.02);
-}
-
-/* =========================================
-   POSTER
-========================================= */
-
+.movie-card{position:relative;height:100%;transition:transform .2s ease}
+.movie-card:hover{transform:translateY(-3px)}
 .movie-poster-link{
-    display:block;
-    position:relative;
-    overflow:hidden;
-    border-radius:20px;
+    position:relative;display:block;overflow:hidden;background:#0f172a;
+    border:1px solid rgba(148,163,184,.13);border-radius:.7rem;
+    box-shadow:0 10px 24px rgba(0,0,0,.28)
 }
-
-.movie-poster{
-
-    width:100%;
-    aspect-ratio:2/3;
-
-    object-fit:cover;
-
-    border-radius:20px;
-
-    transition:
-        transform .3s ease;
-
-    box-shadow:
-        0 18px 40px rgba(0,0,0,.35);
-}
-
-.movie-card:hover .movie-poster{
-    transform:scale(1.05);
-}
-
-/* =========================================
-   OVERLAY
-========================================= */
-
+.movie-poster{display:block;width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:.65rem;transition:transform .25s ease,filter .25s ease}
+.movie-card:hover .movie-poster{transform:scale(1.035);filter:brightness(.82)}
 .movie-overlay{
-
-    position:absolute;
-    inset:0;
-
-    background:
-        linear-gradient(
-            to top,
-            rgba(0,0,0,.85),
-            rgba(0,0,0,.15)
-        );
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    opacity:0;
-
-    transition:.25s ease;
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(to top,rgba(5,12,22,.82),rgba(5,12,22,.12));
+    opacity:0;transition:opacity .2s ease
 }
-
-.movie-card:hover .movie-overlay{
-    opacity:1;
-}
-
+.movie-card:hover .movie-overlay{opacity:1}
 .movie-overlay-content{
-
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:10px;
-
-    color:#fff;
-
-    transform:translateY(10px);
-
-    transition:.25s ease;
+    display:flex;flex-direction:column;align-items:center;gap:.35rem;
+    color:#f8fafc;font-size:13px;font-weight:600;transform:translateY(5px);transition:transform .2s ease
 }
-
-.movie-card:hover .movie-overlay-content{
-    transform:translateY(0);
-}
-
-.movie-overlay-content i{
-    font-size:3rem;
-}
-
-.movie-overlay-content span{
-    font-weight:700;
-}
-
-/* =========================================
-   INFO
-========================================= */
-
-.movie-info{
-    padding-top:14px;
-}
-
+.movie-card:hover .movie-overlay-content{transform:translateY(0)}
+.movie-overlay-content i{color:var(--ui-accent,#22d3c5);font-size:28px}
+.movie-info{padding:.45rem .15rem 0}
 .movie-title{
-
-    font-size:.95rem;
-
-    font-weight:700;
-
-    line-height:1.35;
-
-    color:#fff;
-
-    margin:0;
-
-    display:-webkit-box;
-
-    -webkit-line-clamp:2;
-    -webkit-box-orient:vertical;
-
-    overflow:hidden;
+    display:-webkit-box;overflow:hidden;margin:0;color:#e2e8f0;font-size:13px;font-weight:600;
+    line-height:1.35;text-overflow:ellipsis;-webkit-line-clamp:2;-webkit-box-orient:vertical
 }
+.movie-card:hover .movie-title{color:var(--ui-accent,#22d3c5)}
 
-/* =========================================
-   EMPTY
-========================================= */
+.empty-movies{padding:3rem 1.5rem;text-align:center;color:#94a3b8}
+.empty-movies i{display:block;margin-bottom:.65rem;color:var(--ui-accent,#22d3c5);font-size:38px}
+.empty-movies h4{margin:0 0 .25rem;color:#f1f5f9;font-size:14px;font-weight:700}
+.empty-movies p{margin:0;color:#64748b;font-size:13px}
 
-.empty-movies{
-
-    background:
-        rgba(255,255,255,.03);
-
-    border:
-        1px solid rgba(255,255,255,.05);
-
-    border-radius:
-        24px;
-
-    padding:
-        4rem 2rem;
-
-    text-align:center;
-
-    color:
-        rgba(255,255,255,.6);
+.movie-page .pagination{margin-bottom:0}
+.movie-page .pagination .page-link{
+    min-width:34px;margin:0 2px;padding:.4rem .6rem;color:#cbd5e1;
+    background:rgba(22,32,51,.82);border:1px solid var(--ui-border,rgba(148,163,184,.16));
+    border-radius:.5rem;font-size:13px;text-align:center;transition:all .18s ease
 }
-
-.empty-movies i{
-    font-size:4rem;
-    margin-bottom:1rem;
-}
-
-/* =========================================
-   PAGINATION
-========================================= */
-
-.pagination .page-link{
-
-    background:
-        rgba(255,255,255,.04);
-
-    border:
-        1px solid rgba(255,255,255,.06);
-
-    color:#ddd;
-
-    margin:0 4px;
-
-    border-radius:12px;
-
-    min-width:42px;
-
-    text-align:center;
-}
-
-.pagination .page-link:hover{
-    background:rgba(255,255,255,.08);
-}
-
-.pagination .page-item.active .page-link{
-
-    background:#ff4d6d;
-    border-color:#ff4d6d;
-}
-
-/* =========================================
-   MOBILE
-========================================= */
+.movie-page .pagination .page-link:hover{color:var(--ui-accent,#22d3c5);background:rgba(34,211,197,.07);border-color:rgba(34,211,197,.3)}
+.movie-page .pagination .page-item.active .page-link{color:#061311;background:var(--ui-accent,#22d3c5);border-color:var(--ui-accent,#22d3c5)}
+.movie-page .pagination .page-item.disabled .page-link{color:#475569;background:rgba(15,23,42,.55);border-color:rgba(148,163,184,.1)}
 
 @media(max-width:768px){
-
-    .movies-title{
-        font-size:1.7rem;
-    }
-
-    .search-wrapper{
-        padding:0 12px;
-    }
-
-    .search-btn{
-        padding:.65rem 1rem;
-    }
-
+    .movie-page{padding-left:.5rem!important;padding-right:.5rem!important}
+    .search-wrapper{gap:.45rem;padding:0 .55rem}
+    .search-btn{padding:.4rem .6rem}
 }
-
+@media(max-width:420px){
+    .movies-header .d-flex{align-items:flex-start!important}
+    .btn-add-movie{width:100%}
+    .search-btn{font-size:12px}
+}
 </style>
 
 @endsection
