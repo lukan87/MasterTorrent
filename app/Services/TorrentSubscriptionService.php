@@ -94,6 +94,37 @@ class TorrentSubscriptionService
     }
 
     /**
+     * All distinct users subscribed to the title identified by the given ids.
+     * A user matches if any of their subscriptions carries the same imdbid OR tmdbid.
+     *
+     * @param string|null $imdbid
+     * @param string|null $tmdbid
+     * @return \Illuminate\Support\Collection<int, User>
+     */
+    public function subscribers(?string $imdbid = null, ?string $tmdbid = null): \Illuminate\Support\Collection
+    {
+        if (!$this->hasSubscribeableId($imdbid, $tmdbid)) {
+            return collect();
+        }
+
+        $imdbid = $imdbid ? trim($imdbid) : null;
+        $tmdbid = $tmdbid ? trim($tmdbid) : null;
+
+        return User::whereIn('id', function ($q) use ($imdbid, $tmdbid) {
+            $q->select('user_id')
+                ->from((new TorrentSubscription())->getTable())
+                ->where(function ($w) use ($imdbid, $tmdbid) {
+                    if ($imdbid !== null) {
+                        $w->orWhere('imdbid', $imdbid);
+                    }
+                    if ($tmdbid !== null) {
+                        $w->orWhere('tmdbid', $tmdbid);
+                    }
+                });
+        })->select(['id', 'name'])->get();
+    }
+
+    /**
      * Can this torrent be subscribed to? Requires at least one of imdbid/tmdbid.
      */
     public function canSubscribe(Torrent $torrent): bool

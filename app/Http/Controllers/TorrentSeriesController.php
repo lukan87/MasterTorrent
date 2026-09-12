@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Torrent;
 use App\Models\TorrentSeries;
 use App\Services\TorrentSubscriptionService;
+use App\Services\TMDBService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -100,6 +101,16 @@ class TorrentSeriesController extends Controller
             ->orderByDesc('seeders')
             ->get();
 
+        // Build the rich premium header payload (same as the torrent detail page).
+        $firstTorrent = $torrents->first();
+        $display = $firstTorrent
+            ? app(TMDBService::class)->getDisplayPayload(
+                (int) $tmdbid,
+                'tv',
+                $firstTorrent->imdbid
+            )
+            : null;
+
         $movie = cache()->remember("tmdb_series_v2_{$tmdbid}", 86400, function () use ($tmdbid) {
             return Http::get("https://api.themoviedb.org/3/tv/{$tmdbid}", [
                 'api_key' => config('services.tmdb.key'),
@@ -140,7 +151,67 @@ class TorrentSeriesController extends Controller
                 ->isSubscribedByTmdb(Auth::user(), (string) $tmdbid);
         }
 
-        return view('library.series.show', compact('movie', 'torrents', 'tmdbid', 'isSubscribed', 'recommendations'));
+        // Subscribers for this title (count + names shown beside the button)
+        $subscribers = app(TorrentSubscriptionService::class)
+            ->subscribers($firstTorrent?->imdbid, (string) $tmdbid);
+
+        return view('library.series.show', compact('movie', 'torrents', 'tmdbid', 'isSubscribed', 'subscribers', 'recommendations', 'display'));
+    }
+
+    /**
+     * JSON payload for the season modal — fetched on-demand when a user
+     * clicks a season on the library series page.
+     */
+    public function season($tmdbid, $season)
+    {
+        $seasonData = cache()->remember(
+            "tmdb_series_season_{$tmdbid}_v2_{$season}",
+            86400,
+            function () use ($tmdbid, $season) {
+                return Http::get(
+                    "https://api.themoviedb.org/3/tv/{$tmdbid}/season/{$season}",
+                    [
+                        'api_key'             => config('services.tmdb.key'),
+                        'language'            => 'en-US',
+                        'append_to_response'  => 'credits',
+                    ]
+                )->json();
+            }
+        );
+
+        $payload = [
+            'name'        => $seasonData['name'] ?? ('Season ' . $season),
+            'season_number' => $seasonData['season_number'] ?? (int) $season,
+            'overview'    => $seasonData['overview'] ?? null,
+            'air_date'    => $seasonData['air_date'] ?? null,
+            'poster'      => ! empty($seasonData['poster_path'])
+                ? "https://image.tmdb.org/t/p/w342" . $seasonData['poster_path']
+                : null,
+            'episodes'    => collect($seasonData['episodes'] ?? [])
+                ->map(fn ($e) => [
+                    'episode_number' => $e['episode_number'] ?? null,
+                    'name'           => $e['name'] ?? null,
+                    'overview'       => $e['overview'] ?? null,
+                    'air_date'       => $e['air_date'] ?? null,
+                    'rating'         => isset($e['vote_average']) ? round($e['vote_average'], 1) : null,
+                    'still'          => ! empty($e['still_path'])
+                        ? "https://image.tmdb.org/t/p/w780" . $e['still_path']
+                        : null,
+                ])
+                ->all(),
+            'cast'        => collect($seasonData['credits']['cast'] ?? [])
+                ->take(12)
+                ->map(fn ($c) => [
+                    'name'      => $c['name'] ?? null,
+                    'character' => $c['character'] ?? null,
+                    'photo'     => ! empty($c['profile_path'])
+                        ? "https://image.tmdb.org/t/p/w185" . $c['profile_path']
+                        : null,
+                ])
+                ->all(),
+        ];
+
+        return response()->json($payload);
     }
 
     public function subscribe($tmdbid, TorrentSubscriptionService $service)

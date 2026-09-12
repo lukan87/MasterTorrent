@@ -539,6 +539,7 @@ $thankTooltip = match (true) {
 $subscriptionService = app(\App\Services\TorrentSubscriptionService::class);
 $subscribeAvailable = $subscriptionService->canSubscribe($torrent);
 $isSubscribed       = $subscribeAvailable && $subscriptionService->isSubscribed(Auth::user(), $torrent);
+$subscribers        = $subscriptionService->subscribers($torrent->imdbid, $torrent->tmdbid);
 
 
 
@@ -564,7 +565,8 @@ $isSubscribed       = $subscribeAvailable && $subscriptionService->isSubscribed(
     'fanartBanner',
     'externalSubtitles',
     'isSubscribed',
-    'subscribeAvailable'
+    'subscribeAvailable',
+    'subscribers'
 
 ));
 

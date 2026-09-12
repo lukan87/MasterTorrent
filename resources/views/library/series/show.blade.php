@@ -2,88 +2,63 @@
 
 @section('content')
 
-{{-- 📺 HERO BANNER --}}
-<div class="hero">
+{{-- =========================================================
+    PREMIUM HEADER — reuses the exact torrent detail header
+========================================================= --}}
+@if(!empty($display) && $torrents->isNotEmpty())
 
-    {{-- Background --}}
-    <div class="hero-bg"
-        style="background-image: url('{{ $movie['backdrop_path']
-            ? 'https://image.tmdb.org/t/p/original/' . $movie['backdrop_path']
-            : '' }}')">
-    </div>
+    @include('torrents.partials.media-header', [
+        'torrent' => $torrents->first(),
+        'display' => $display,
+    ])
 
-    {{-- Overlay --}}
-    <div class="hero-overlay"></div>
+    {{-- Subscribe control (preserved from the previous hero) --}}
+    <div class="container px-xl-5 px-lg-4 px-3">
+        <div class="library-subscribe-row">
+            @if(Auth::check())
+                @if($isSubscribed)
+                    <form action="{{ route('library.series.unsubscribe', $tmdbid) }}" method="POST">
+                        @csrf
+                        <button type="submit" class="btn subscribe-btn">
+                            <i class="bi bi-bell-fill me-1"></i> Unsubscribe
+                        </button>
+                    </form>
+                @else
+                    <form action="{{ route('library.series.subscribe', $tmdbid) }}" method="POST">
+                        @csrf
+                        <button type="submit" class="btn subscribe-btn">
+                            <i class="bi bi-bell me-1"></i> Subscribe
+                        </button>
+                    </form>
+                @endif
+            @endif
 
-    {{-- Content --}}
-    <div class="container hero-content">
-
-        <div class="row align-items-center">
-
-            {{-- Poster --}}
-            <div class="col-md-3 text-center mb-4 mb-md-0">
-                <img class="poster shadow"
-                     src="{{ $movie['poster_path']
-                        ? 'https://image.tmdb.org/t/p/w500/' . $movie['poster_path']
-                        : asset('images/no-poster.png') }}">
-            </div>
-
-            {{-- Info --}}
-            <div class="col-md-9 text-white">
-
-                <h1 class="mb-2">
-                    {{ $movie['name'] }}
-                    @if(!empty($movie['first_air_date']))
-                        <span class="year">
-                            ({{ substr($movie['first_air_date'], 0, 4) }})
-                        </span>
-                    @endif
-                </h1>
-
-                <div class="meta mb-3">
-                    @if(!empty($movie['vote_average']))
-                        <span class="badge-rating">
-                            ⭐ {{ number_format($movie['vote_average'], 1) }}
-                        </span>
-                    @endif
-
-                    @if(!empty($movie['first_air_date']))
-                        <span class="badge-meta">
-                            {{ $movie['first_air_date'] }}
-                        </span>
-                    @endif
-
-                    @if(Auth::check())
-                        <span class="subscribe-wrap">
-                            @if($isSubscribed)
-                                <form action="{{ route('library.series.unsubscribe', $tmdbid) }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="btn subscribe-btn">
-                                        <i class="bi bi-bell-fill me-1"></i> Unsubscribe
-                                    </button>
-                                </form>
-                            @else
-                                <form action="{{ route('library.series.subscribe', $tmdbid) }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="btn subscribe-btn">
-                                        <i class="bi bi-bell me-1"></i> Subscribe
-                                    </button>
-                                </form>
-                            @endif
-                        </span>
-                    @endif
-                </div>
-
-                <p class="overview">
-                    {{ $movie['overview'] ?? 'No description available.' }}
-                </p>
-
-            </div>
-
+            {{-- Subscribers (count + names) beside the subscribe button --}}
+            @include('torrents.partials._subscribers-label', ['subscribers' => $subscribers ?? collect()])
         </div>
-
     </div>
-</div>
+
+@else
+
+    {{-- Fallback (no torrent / no display data) — simple title --}}
+    <div class="hero">
+        <div class="hero-overlay"></div>
+        <div class="container hero-content">
+            <div class="row align-items-center">
+                <div class="col-12 text-white">
+                    <h1 class="mb-2">
+                        {{ $movie['name'] ?? 'Series' }}
+                        @if(!empty($movie['first_air_date']))
+                            <span class="year">({{ substr($movie['first_air_date'], 0, 4) }})</span>
+                        @endif
+                    </h1>
+                    <p class="overview">{{ $movie['overview'] ?? 'No description available.' }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+@endif
 
 {{-- 📦 TORRENTS SECTION --}}
 <div class="container py-5">
@@ -236,7 +211,10 @@
 
                 @foreach($seasonDetails as $season)
 
-                    <div class="season-card">
+                    <div class="season-card"
+                         role="button"
+                         data-season-url="{{ route('library.series.season', [$tmdbid, $season['season_number']]) }}"
+                         aria-label="View {{ $season['name'] }} episodes">
 
                         <div class="season-poster-wrap">
                             <img
@@ -245,6 +223,10 @@
                                 class="season-poster"
                                 alt="{{ $season['name'] }}"
                             >
+                            <div class="season-view-overlay">
+                                <i class="bi bi-collection-play"></i>
+                                View Episodes
+                            </div>
                             @if(!empty($season['vote_average']))
                                 <span class="season-rating">
                                     <i class="bi bi-star-fill"></i>
@@ -882,6 +864,440 @@ background: rgba(255,255,255,0.15);
         max-width: 118px;
     }
 }
+/* =========================================================
+   LIBRARY SUBSCRIBE ROW
+========================================================= */
+.library-subscribe-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    margin-top: 14px;
+    border-radius: .8rem;
+    background: rgba(9, 16, 29, .55);
+    border: 1px solid var(--ui-border);
+}
+.library-subscribe-row .subscribe-btn {
+    background: rgba(45, 212, 191, .08);
+    border: 1px solid rgba(45, 212, 191, .22);
+    color: var(--ui-accent);
+    font-weight: 600;
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+.library-subscribe-row .subscribe-btn:hover {
+    background: rgba(45, 212, 191, .16);
+    border-color: rgba(45, 212, 191, .38);
+    color: var(--ui-accent);
+}
+
+/* Season card "view episodes" overlay */
+.season-view-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    background: rgba(5, 10, 18, .72);
+    opacity: 0;
+    transition: opacity .18s ease;
+    pointer-events: none;
+}
+.season-card:hover .season-view-overlay {
+    opacity: 1;
+}
+.season-view-overlay i {
+    font-size: 20px;
+    color: var(--ui-accent);
+}
+
+/* =========================================================
+   SEASON MODAL
+========================================================= */
+.season-modal-content {
+    background: linear-gradient(150deg, #101a2c, #0b1120);
+    border: 1px solid var(--ui-border);
+    border-radius: .9rem;
+    color: rgba(255, 255, 255, .88);
+}
+.season-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border-bottom: 1px solid var(--ui-border);
+    background: rgba(45, 212, 191, .04);
+}
+.season-modal-poster {
+    width: 64px;
+    height: 92px;
+    object-fit: cover;
+    border-radius: .5rem;
+    border: 1px solid var(--ui-border);
+    background: #0f172a;
+}
+.season-modal-subtitle {
+    color: rgba(255, 255, 255, .55);
+    font-size: 13px;
+    margin-top: 3px;
+}
+.season-modal-body {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+.season-modal-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: rgba(255, 255, 255, .6);
+    padding: 40px 0;
+}
+.season-modal-overview {
+    color: rgba(255, 255, 255, .78);
+    font-size: 14px;
+    line-height: 1.6;
+}
+.season-modal-section-title {
+    margin: 18px 0 10px;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--ui-accent);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Episode list */
+.season-episodes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.season-episode {
+    display: flex;
+    gap: 12px;
+    padding: 10px;
+    border-radius: .6rem;
+    background: rgba(255, 255, 255, .03);
+    border: 1px solid var(--ui-border);
+}
+.season-episode-num {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    min-height: 44px;
+    padding: 0 8px;
+    border-radius: .5rem;
+    background: rgba(45, 212, 191, .08);
+    border: 1px solid rgba(45, 212, 191, .18);
+    color: var(--ui-accent);
+    font-size: 12px;
+    font-weight: 700;
+    align-self: flex-start;
+}
+.season-episode-still {
+    flex: 0 0 auto;
+    width: 130px;
+    height: 74px;
+    object-fit: cover;
+    border-radius: .45rem;
+    border: 1px solid var(--ui-border);
+    background: #0f172a;
+}
+.season-episode-nostill {
+    flex: 0 0 auto;
+    width: 130px;
+    height: 74px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: .45rem;
+    background: #0f172a;
+    border: 1px solid var(--ui-border);
+    color: rgba(255, 255, 255, .25);
+    font-size: 22px;
+}
+.season-episode-info { min-width: 0; }
+.season-episode-title {
+    color: rgba(255, 255, 255, .9);
+    font-size: 14px;
+    font-weight: 700;
+}
+.season-episode-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 4px;
+    color: rgba(255, 255, 255, .5);
+    font-size: 12px;
+}
+.season-episode-meta i { color: var(--ui-accent); }
+.season-episode-overview {
+    margin-top: 6px;
+    color: rgba(255, 255, 255, .62);
+    font-size: 13px;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Cast row */
+.season-cast-row {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 3px 2px 8px;
+    scrollbar-width: none;
+}
+.season-cast-row::-webkit-scrollbar { display: none; }
+.season-cast-card {
+    flex: 0 0 96px;
+    width: 96px;
+    text-align: center;
+    padding: 8px;
+    border-radius: .6rem;
+    background: rgba(255, 255, 255, .03);
+    border: 1px solid var(--ui-border);
+}
+.season-cast-photo {
+    width: 78px;
+    height: 78px;
+    margin: 0 auto 6px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0f172a;
+    border: 1px solid var(--ui-border);
+    color: rgba(255, 255, 255, .25);
+    font-size: 24px;
+}
+.season-cast-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.season-cast-name {
+    color: rgba(255, 255, 255, .85);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.season-cast-character {
+    color: rgba(255, 255, 255, .45);
+    font-size: 11px;
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (max-width: 576px) {
+    .season-episode-still,
+    .season-episode-nostill {
+        width: 96px;
+        height: 56px;
+    }
+}
+
+/* Subscriber count + names next to subscribe button */
+.subscribers-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    font-size: 12.5px;
+    color: var(--ui-text-muted);
+    line-height: 1.3;
+}
+.subscribers-label i { color: var(--ui-accent); }
+.subscribers-label .subscribers-count { font-weight: 700; color: var(--ui-accent-strong); white-space: nowrap; }
+.subscribers-label .subscribers-names { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 260px; }
+.subscribers-label .subscribers-more { color: var(--ui-accent); font-weight: 700; }
 </style>
+
+{{-- =========================================================
+    SEASON MODAL
+========================================================== --}}
+<div class="modal fade" id="seasonModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content season-modal-content">
+            <div class="modal-header season-modal-header">
+                <div class="d-flex align-items-center gap-3">
+                    <img class="season-modal-poster" id="seasonModalPoster" src="/images/noposter.jpg" alt="">
+                    <div>
+                        <h5 class="modal-title mb-0 text-white" id="seasonModalTitle">Loading…</h5>
+                        <div class="season-modal-subtitle" id="seasonModalMeta"></div>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body season-modal-body">
+                <div id="seasonModalLoading" class="season-modal-loading">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    Loading season…
+                </div>
+                <div id="seasonModalContent" class="season-modal-content-inner d-none">
+                    <p class="season-modal-overview" id="seasonModalOverview"></p>
+
+                    <h6 class="season-modal-section-title">
+                        <i class="bi bi-collection-play"></i> Episodes
+                    </h6>
+                    <div class="season-episodes-list" id="seasonModalEpisodes"></div>
+
+                    <h6 class="season-modal-section-title">
+                        <i class="bi bi-people"></i> Cast
+                    </h6>
+                    <div class="season-cast-row" id="seasonModalCast"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const modalEl = document.getElementById('seasonModal');
+    if (!modalEl) return;
+
+    const modal = new bootstrap.Modal(modalEl);
+
+    document.querySelectorAll('[data-season-url]').forEach(function (card) {
+        card.addEventListener('click', function () {
+            openSeason(card.getAttribute('data-season-url'));
+        });
+    });
+
+    async function openSeason(url) {
+        document.getElementById('seasonModalLoading').classList.remove('d-none');
+        document.getElementById('seasonModalContent').classList.add('d-none');
+        document.getElementById('seasonModalTitle').textContent = 'Season';
+        document.getElementById('seasonModalMeta').textContent = '';
+        document.getElementById('seasonModalPoster').src = '/images/noposter.jpg';
+        modal.show();
+
+        try {
+            const res = await fetch(url, {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            if (!res.ok) throw new Error('request failed');
+            renderSeason(await res.json());
+        } catch (e) {
+            document.getElementById('seasonModalLoading').classList.add('d-none');
+            document.getElementById('seasonModalContent').classList.remove('d-none');
+            document.getElementById('seasonModalTitle').textContent = 'Unable to load season';
+            document.getElementById('seasonModalOverview').textContent =
+                'There was a problem loading this season. Please try again.';
+        }
+    }
+
+    function renderSeason(data) {
+        document.getElementById('seasonModalLoading').classList.add('d-none');
+        document.getElementById('seasonModalContent').classList.remove('d-none');
+
+        document.getElementById('seasonModalTitle').textContent = data.name || 'Season';
+        document.getElementById('seasonModalPoster').src = data.poster || '/images/noposter.jpg';
+
+        const meta = [];
+        if (data.air_date) meta.push(formatDate(data.air_date));
+        if (data.episodes) meta.push(data.episodes.length + ' Episodes');
+        document.getElementById('seasonModalMeta').textContent = meta.join('  ·  ');
+        document.getElementById('seasonModalOverview').textContent =
+            data.overview || 'No description available.';
+
+        const epWrap = document.getElementById('seasonModalEpisodes');
+        epWrap.innerHTML = '';
+        if (data.episodes && data.episodes.length) {
+            data.episodes.forEach(function (e) { epWrap.appendChild(episodeRow(e)); });
+        } else {
+            epWrap.innerHTML = '<div class="text-muted">No episode information available.</div>';
+        }
+
+        const castWrap = document.getElementById('seasonModalCast');
+        castWrap.innerHTML = '';
+        if (data.cast && data.cast.length) {
+            data.cast.forEach(function (a) { castWrap.appendChild(actorCard(a)); });
+        } else {
+            castWrap.innerHTML = '<div class="text-muted">No cast information available.</div>';
+        }
+
+        if (typeof bootstrap !== 'undefined') {
+            modalEl.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
+                if (!el._bsTooltip) new bootstrap.Tooltip(el);
+            });
+        }
+    }
+
+    function episodeRow(e) {
+        const row = document.createElement('div');
+        row.className = 'season-episode';
+        const still = e.still
+            ? '<img class="season-episode-still" src="' + e.still + '" loading="lazy" alt="' + esc(e.name || '') + '">'
+            : '<div class="season-episode-nostill"><i class="bi bi-film"></i></div>';
+        row.innerHTML =
+            '<div class="season-episode-num">E' + (e.episode_number || '?') + '</div>' +
+            still +
+            '<div class="season-episode-info">' +
+                '<div class="season-episode-title">' + esc(e.name || ('Episode ' + (e.episode_number || ''))) + '</div>' +
+                '<div class="season-episode-meta">' +
+                    (e.air_date ? '<span><i class="bi bi-calendar"></i> ' + formatDate(e.air_date) + '</span>' : '') +
+                    (e.rating ? '<span><i class="bi bi-star-fill"></i> ' + e.rating + '</span>' : '') +
+                '</div>' +
+                (e.overview ? '<div class="season-episode-overview">' + esc(e.overview) + '</div>' : '') +
+            '</div>';
+        return row;
+    }
+
+    function actorCard(a) {
+        const card = document.createElement('div');
+        card.className = 'season-cast-card';
+        const photo = a.photo
+            ? '<img src="' + a.photo + '" loading="lazy" alt="' + esc(a.name || '') + '">'
+            : '<i class="bi bi-person"></i>';
+        card.innerHTML =
+            '<div class="season-cast-photo">' + photo + '</div>' +
+            '<div class="season-cast-name">' + esc(a.name || 'Unknown') + '</div>' +
+            '<div class="season-cast-character">' + esc(a.character || '') + '</div>';
+        return card;
+    }
+
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const parts = dateStr.split('-');
+        if (parts.length !== 3) return dateStr;
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const m = months[parseInt(parts[1], 10) - 1];
+        if (!m) return dateStr;
+        return m + ' ' + parseInt(parts[2], 10) + ', ' + parts[0];
+    }
+
+    function esc(str) {
+        const d = document.createElement('div');
+        d.textContent = str == null ? '' : String(str);
+        return d.innerHTML;
+    }
+});
+</script>
+@endpush
 
 @endsection

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use App\Models\TorrentMovie;
 use App\Services\TorrentSubscriptionService;
+use App\Services\TMDBService;
 use Illuminate\Support\Facades\Auth;
 
 class TorrentMovieController extends Controller
@@ -97,6 +98,16 @@ public function show($tmdbid, $slug = null)
         ->orderByDesc('seeders')
         ->get();
 
+    // Build the rich premium header payload (same as the torrent detail page).
+    $firstTorrent = $torrents->first();
+    $display = $firstTorrent
+        ? app(TMDBService::class)->getDisplayPayload(
+            (int) $tmdbid,
+            'movie',
+            $firstTorrent->imdbid
+        )
+        : null;
+
     $movie = cache()->remember("tmdb_movie_v2_{$tmdbid}", 86400, function () use ($tmdbid) {
         return Http::get("https://api.themoviedb.org/3/movie/{$tmdbid}", [
            'api_key' => config('services.tmdb.key'),
@@ -137,7 +148,11 @@ public function show($tmdbid, $slug = null)
             ->isSubscribedByTmdb(Auth::user(), (string) $tmdbid);
     }
 
-    return view('library.movies.show', compact('movie', 'torrents', 'tmdbid', 'isSubscribed', 'recommendations'));
+    // Subscribers for this title (count + names shown beside the button)
+    $subscribers = app(TorrentSubscriptionService::class)
+        ->subscribers($firstTorrent?->imdbid, (string) $tmdbid);
+
+    return view('library.movies.show', compact('movie', 'torrents', 'tmdbid', 'isSubscribed', 'subscribers', 'recommendations', 'display'));
 }
 
 public function subscribe($tmdbid, TorrentSubscriptionService $service)

@@ -1044,6 +1044,7 @@ Route::prefix('library')->group(function () {
     });
 
     Route::get('/series', [TorrentSeriesController::class, 'index'])->name('library.series.index');
+    Route::get('/series/{tmdbid}/season/{season}', [TorrentSeriesController::class, 'season'])->name('library.series.season');
     Route::get('/series/{tmdbid}/{slug?}', [TorrentSeriesController::class, 'show'])->name('library.series.show');
 });
 

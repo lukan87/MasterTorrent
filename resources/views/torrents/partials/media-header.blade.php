@@ -2,6 +2,8 @@
     PREMIUM FANART HEADER
 ========================= --}}
 
+@include('torrents.partials._display-helpers')
+
 <div class="container px-xl-5 px-lg-4 px-3">
 
     <div class="premium-media-card">
@@ -1179,5 +1181,35 @@
     .rating-card {
         min-width: 68px;
     }
+}
+/* =========================================================
+   TV RATING BADGES (self-contained so the header can be
+   reused on library pages that do not load tv/movie partials)
+   ========================================================= */
+
+.tv-y-rating,
+.tv-y7-rating,
+.tv-g-rating {
+    color: #86efac;
+    border-color: rgba(134, 239, 172, .20);
+    background: rgba(134, 239, 172, .06);
+}
+
+.tv-pg-rating {
+    color: #fde68a;
+    border-color: rgba(253, 230, 138, .20);
+    background: rgba(253, 230, 138, .06);
+}
+
+.tv-14-rating {
+    color: #fdba74;
+    border-color: rgba(253, 186, 116, .20);
+    background: rgba(253, 186, 116, .06);
+}
+
+.tv-ma-rating {
+    color: #fca5a5;
+    border-color: rgba(252, 165, 165, .20);
+    background: rgba(252, 165, 165, .06);
 }
 </style>

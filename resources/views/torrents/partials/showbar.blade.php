@@ -407,6 +407,12 @@
 
             @endif
 
+            {{-- SUBSCRIBERS (count + names beside the subscribe button).
+                 Only shown when the torrent carries a TMDB id. --}}
+            @if(!empty($torrent->tmdbid))
+                @include('torrents.partials._subscribers-label', ['subscribers' => $subscribers ?? collect()])
+            @endif
+
         </div>
         <div class="modern-stats-wrap ms-md-auto">
 
@@ -549,5 +555,11 @@ html,body{overflow-x:hidden!important}.modern-showbar{border-radius:.75rem}.mode
 .modern-showbar-body>div:first-child{width:100%;min-width:0;display:flex;flex-wrap:wrap;gap:7px}.modern-download-btn,.modern-action-btn{font-size:12px;padding:8px 10px}
 .modern-dropdown-menu{max-width:calc(100vw - 28px)}
 }
+/* Subscriber count + names next to subscribe button */
+.subscribers-label{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12.5px;color:var(--ui-text-muted);line-height:1.3;padding:2px 0}
+.subscribers-label i{color:var(--ui-accent)}
+.subscribers-label .subscribers-count{font-weight:700;color:#f1f5f9;white-space:nowrap}
+.subscribers-label .subscribers-names{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:260px}
+.subscribers-label .subscribers-more{color:var(--ui-accent);font-weight:700}
 </style>
 

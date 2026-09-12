@@ -2,88 +2,64 @@
 
 @section('content')
 
-{{-- 🎬 HERO BANNER --}}
-<div class="hero">
+{{-- =========================================================
+    PREMIUM HEADER — reuses the exact torrent detail header
+========================================================= --}}
+@if(!empty($display) && $torrents->isNotEmpty())
 
-    {{-- Background --}}
-    <div class="hero-bg"
-        style="background-image: url('{{ $movie['backdrop_path'] 
-            ? 'https://image.tmdb.org/t/p/original/' . $movie['backdrop_path'] 
-            : '' }}')">
-    </div>
+    @include('torrents.partials.media-header', [
+        'torrent' => $torrents->first(),
+        'display' => $display,
+    ])
 
-    {{-- Overlay --}}
-    <div class="hero-overlay"></div>
+    {{-- Subscribe control (preserved from the previous hero) --}}
+    <div class="container px-xl-5 px-lg-4 px-3">
+        <div class="library-subscribe-row">
+            @if(Auth::check())
+                @if($isSubscribed)
+                    <form action="{{ route('library.movies.unsubscribe', $tmdbid) }}" method="POST">
+                        @csrf
+                        <button type="submit" class="btn subscribe-btn">
+                            <i class="bi bi-bell-fill me-1"></i> Unsubscribe
+                        </button>
+                    </form>
+                @else
+                    <form action="{{ route('library.movies.subscribe', $tmdbid) }}" method="POST">
+                        @csrf
+                        <button type="submit" class="btn subscribe-btn">
+                            <i class="bi bi-bell me-1"></i> Subscribe
+                        </button>
+                    </form>
+                @endif
+            @endif
 
-    {{-- Content --}}
-    <div class="container hero-content">
-
-        <div class="row align-items-center">
-
-            {{-- Poster --}}
-            <div class="col-md-3 text-center mb-4 mb-md-0">
-                <img class="poster shadow"
-                     src="{{ $movie['poster_path'] 
-                        ? 'https://image.tmdb.org/t/p/w500/' . $movie['poster_path'] 
-                        : asset('images/no-poster.png') }}">
-            </div>
-
-            {{-- Info --}}
-            <div class="col-md-9 text-white">
-
-                <h1 class="mb-2">
-                    {{ $movie['title'] }}
-                    @if(!empty($movie['release_date']))
-                        <span class="year">
-                            ({{ substr($movie['release_date'], 0, 4) }})
-                        </span>
-                    @endif
-                </h1>
-
-                <div class="meta mb-3">
-                    @if(!empty($movie['vote_average']))
-                        <span class="badge-rating">
-                            ⭐ {{ number_format($movie['vote_average'], 1) }}
-                        </span>
-                    @endif
-
-                    @if(!empty($movie['release_date']))
-                        <span class="badge-meta">
-                            {{ $movie['release_date'] }}
-                        </span>
-                    @endif
-
-                    @if(Auth::check())
-                        <span class="subscribe-wrap">
-                            @if($isSubscribed)
-                                <form action="{{ route('library.movies.unsubscribe', $tmdbid) }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="btn subscribe-btn">
-                                        <i class="bi bi-bell-fill me-1"></i> Unsubscribe
-                                    </button>
-                                </form>
-                            @else
-                                <form action="{{ route('library.movies.subscribe', $tmdbid) }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="btn subscribe-btn">
-                                        <i class="bi bi-bell me-1"></i> Subscribe
-                                    </button>
-                                </form>
-                            @endif
-                        </span>
-                    @endif
-                </div>
-
-                <p class="overview">
-                    {{ $movie['overview'] ?? 'No description available.' }}
-                </p>
-
-            </div>
-
+            {{-- Subscribers (count + names) beside the subscribe button --}}
+            @include('torrents.partials._subscribers-label', ['subscribers' => $subscribers ?? collect()])
         </div>
-
     </div>
-</div>
+
+@else
+
+    {{-- Fallback (no torrent / no display data) — simple title --}}
+    <div class="hero">
+        <div class="hero-overlay"></div>
+        <div class="container hero-content">
+            <div class="row align-items-center">
+                <div class="col-12 text-white">
+                    <h1 class="mb-2">
+                        {{ $movie['title'] ?? 'Movie' }}
+                        @if(!empty($movie['release_date']))
+                            <span class="year">({{ substr($movie['release_date'], 0, 4) }})</span>
+                        @endif
+                    </h1>
+                    <p class="overview">{{ $movie['overview'] ?? 'No description available.' }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+@endif
+
 
 {{-- 📦 TORRENTS SECTION --}}
 <div class="container py-5">
@@ -499,6 +475,47 @@ background: rgba(255,255,255,0.15);
         max-width: 118px;
     }
 }
+/* =========================================================
+   LIBRARY SUBSCRIBE ROW
+========================================================= */
+.library-subscribe-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    margin-top: 14px;
+    border-radius: .8rem;
+    background: rgba(9, 16, 29, .55);
+    border: 1px solid var(--ui-border);
+}
+.library-subscribe-row .subscribe-btn {
+    background: rgba(45, 212, 191, .08);
+    border: 1px solid rgba(45, 212, 191, .22);
+    color: var(--ui-accent);
+    font-weight: 600;
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+.library-subscribe-row .subscribe-btn:hover {
+    background: rgba(45, 212, 191, .16);
+    border-color: rgba(45, 212, 191, .38);
+    color: var(--ui-accent);
+}
+
+/* Subscriber count + names next to subscribe button */
+.subscribers-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    font-size: 12.5px;
+    color: var(--ui-text-muted);
+    line-height: 1.3;
+}
+.subscribers-label i { color: var(--ui-accent); }
+.subscribers-label .subscribers-count { font-weight: 700; color: var(--ui-accent-strong); white-space: nowrap; }
+.subscribers-label .subscribers-names { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 260px; }
+.subscribers-label .subscribers-more { color: var(--ui-accent); font-weight: 700; }
 </style>
 
 @endsection
