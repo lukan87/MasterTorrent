@@ -7,20 +7,11 @@
 {{-- BREADCRUMB --}}
 <div class="elite-breadcrumb mb-4">
 
-    <a href="{{ url('/') }}" class="breadcrumb-item">
-        <i class="bi bi-house-door"></i>
-        Home
-    </a>
-
-    <span class="breadcrumb-separator">
-        <i class="bi bi-chevron-right"></i>
-    </span>
-
     <a href="{{ route('profile.show', ['id'=>$user->id,'name'=>$user->name]) }}"
        class="breadcrumb-item">
 
         <i class="bi bi-person-circle"></i>
-        {{ $user->name }}
+        My Profile
 
     </a>
 

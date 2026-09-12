@@ -16,6 +16,8 @@ class TorrentSubscription extends Model
         'imdbid',
         'tmdbid',
         'source_torrent_id',
+        'title',
+        'type',
     ];
 
     /**

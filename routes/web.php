@@ -48,6 +48,7 @@ use App\Http\Controllers\TopicSubscriptionController;
 use App\Http\Controllers\TorrentController;
 use App\Http\Controllers\TorrentHistoryController;
 use App\Http\Controllers\TorrentMovieController;
+use App\Http\Controllers\TorrentSeriesController;
 use App\Http\Controllers\TorrentRequestController;
 use App\Http\Controllers\UploadApplicationCommentController;
 use App\Http\Controllers\UploadApplicationController;
@@ -1033,6 +1034,17 @@ Route::middleware('auth')->group(function () {
 Route::prefix('library')->group(function () {
     Route::get('/movies', [TorrentMovieController::class, 'index'])->name('library.movies.index');
     Route::get('/movies/{tmdbid}/{slug?}', [TorrentMovieController::class, 'show'])->name('library.movies.show');
+
+    // Library subscribe/unsubscribe by TMDB title (authenticated only)
+    Route::middleware('auth')->group(function () {
+        Route::post('/movies/{tmdbid}/subscribe', [TorrentMovieController::class, 'subscribe'])->name('library.movies.subscribe');
+        Route::post('/movies/{tmdbid}/unsubscribe', [TorrentMovieController::class, 'unsubscribe'])->name('library.movies.unsubscribe');
+        Route::post('/series/{tmdbid}/subscribe', [TorrentSeriesController::class, 'subscribe'])->name('library.series.subscribe');
+        Route::post('/series/{tmdbid}/unsubscribe', [TorrentSeriesController::class, 'unsubscribe'])->name('library.series.unsubscribe');
+    });
+
+    Route::get('/series', [TorrentSeriesController::class, 'index'])->name('library.series.index');
+    Route::get('/series/{tmdbid}/{slug?}', [TorrentSeriesController::class, 'show'])->name('library.series.show');
 });
 
 // Postmark webhook route

@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use App\Models\TorrentMovie;
+use App\Services\TorrentSubscriptionService;
+use Illuminate\Support\Facades\Auth;
 
 class TorrentMovieController extends Controller
 {
@@ -95,11 +97,27 @@ public function show($tmdbid, $slug = null)
         ->orderByDesc('seeders')
         ->get();
 
-    $movie = cache()->remember("tmdb_movie_{$tmdbid}", 86400, function () use ($tmdbid) {
+    $movie = cache()->remember("tmdb_movie_v2_{$tmdbid}", 86400, function () use ($tmdbid) {
         return Http::get("https://api.themoviedb.org/3/movie/{$tmdbid}", [
            'api_key' => config('services.tmdb.key'),
+           'append_to_response' => 'recommendations',
+           'language' => 'en-US',
         ])->json();
     });
+
+    // Build "You Might Like" recommendations from TMDB
+    $recommendations = collect($movie['recommendations']['results'] ?? [])
+        ->take(8)
+        ->map(fn ($r) => [
+            'id'     => $r['id'],
+            'title'  => $r['title'] ?? $r['name'] ?? null,
+            'poster' => isset($r['poster_path'])
+                ? "https://image.tmdb.org/t/p/w185{$r['poster_path']}"
+                : null,
+            'rating' => $r['vote_average'] ?? null,
+            'year'   => substr($r['release_date'] ?? $r['first_air_date'] ?? '', 0, 4),
+        ])
+        ->all();
 
     // Generate correct slug
     $correctSlug = Str::slug($movie['title'] ?? 'movie');
@@ -112,7 +130,60 @@ public function show($tmdbid, $slug = null)
         ]);
     }
 
-    return view('library.movies.show', compact('movie', 'torrents'));
+    // Subscription state (library subscribe button uses the TMDB name)
+    $isSubscribed = false;
+    if (Auth::check()) {
+        $isSubscribed = app(TorrentSubscriptionService::class)
+            ->isSubscribedByTmdb(Auth::user(), (string) $tmdbid);
+    }
+
+    return view('library.movies.show', compact('movie', 'torrents', 'tmdbid', 'isSubscribed', 'recommendations'));
+}
+
+public function subscribe($tmdbid, TorrentSubscriptionService $service)
+{
+    $tmdb = TorrentMovie::where('tmdbid', $tmdbid)->first();
+    if (! $tmdb) {
+        abort(404);
+    }
+
+    $user = Auth::user();
+
+    $source = Torrent::where('tmdbid', $tmdbid)
+        ->where('tmdb_type', 'movie')
+        ->whereNull('deleted_at')
+        ->orderByDesc('id')
+        ->first();
+
+    $ok = $service->subscribeToTitle(
+        $user,
+        (string) $tmdbid,
+        $tmdb->title,
+        'movie',
+        $source ? (int) $source->id : null,
+        $source ? $source->imdbid : null
+    );
+
+    if (! $ok) {
+        return redirect()->route('library.movies.show', [$tmdbid, $tmdb->slug])
+            ->with('info', 'You are already subscribed to this movie.');
+    }
+
+    return redirect()->route('library.movies.show', [$tmdbid, $tmdb->slug])
+        ->with('success', "Subscribed to \"{$tmdb->title}\"! You will be notified whenever a new version is uploaded.");
+}
+
+public function unsubscribe($tmdbid, TorrentSubscriptionService $service)
+{
+    $tmdb = TorrentMovie::where('tmdbid', $tmdbid)->first();
+    if (! $tmdb) {
+        abort(404);
+    }
+
+    $service->unsubscribeByTmdb(Auth::user(), (string) $tmdbid);
+
+    return redirect()->route('library.movies.show', [$tmdbid, $tmdb->slug])
+        ->with('success', 'Subscription removed. You will no longer receive notifications for this movie.');
 }
 
 

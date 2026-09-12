@@ -378,7 +378,7 @@
 </li>
 
 {{-- Tokens --}}
-<li class="nav-item position-relative">
+<!-- <li class="nav-item position-relative">
     <a class="nav-link position-relative"
        href="{{ route('profile.tokens', ['id' => Auth::user()->id, 'name' => Auth::user()->name]) }}">
 
@@ -388,7 +388,7 @@
             {{ Auth::user()->slots }}
         </span>
     </a>
-</li>
+</li> -->
 
 {{-- Announcements --}}
 <li class="nav-item position-relative">
@@ -555,6 +555,14 @@
                     <a class="profile-stat" href="{{ route('snatch.leeching') }}" data-bs-toggle="tooltip" title="Torrents you are leeching">
                         <span class="profile-stat-icon text-danger"><i class="bi bi-arrow-down-circle-fill"></i></span>
                         <span><span class="profile-stat-value">{{ $leechingCount }}</span><span class="profile-stat-label">Leeching</span></span>
+                    </a>
+                </div>
+                <div class="col-6">
+                    <a class="profile-stat" href="{{ route('profile.tokens', ['id' => Auth::user()->id, 'name' => Auth::user()->name]) }}" data-bs-toggle="tooltip" title="Freeleech Tokens">
+                        <span class="profile-stat-icon text-info"><i class="bi bi-grid-1x2"></i></span>
+                        <span><span class="profile-stat-value {{ Auth::user()->slots }}">
+            {{ Auth::user()->slots }}
+        </span><span class="profile-stat-label">Freeleech Tokens</span></span>
                     </a>
                 </div>
             </div>

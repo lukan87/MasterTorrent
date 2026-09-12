@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use App\Models\TorrentMovie;
+use App\Models\TorrentSeries;
 use App\Services\TorrentSubscriptionService;
 use Illuminate\Support\Facades\Http;
 
@@ -98,6 +99,8 @@ if (Torrent::where('info_hash', $infoHash)->exists()) {
     ]);
 
     $this->syncTorrentMovie($torrent);
+
+    $this->syncTorrentSeries($torrent);
 
     // 🔒 Hybrid torrents cannot be free or double
     if ($torrent->external) {
@@ -215,6 +218,52 @@ private function syncTorrentMovie(Torrent $torrent): void
         'rating'        => $tmdb['vote_average'] ?? null,
         'year'          => isset($tmdb['release_date'])
             ? substr($tmdb['release_date'], 0, 4)
+            : null,
+    ]);
+}
+
+/**
+ * Sync TV-series TMDB metadata into the torrent_series table whenever a TV
+ * torrent is uploaded. This keeps the series library populated automatically.
+ */
+private function syncTorrentSeries(Torrent $torrent): void
+{
+    // 🚫 skip if not a TV/series torrent
+    if (!$torrent->tmdbid || $torrent->tmdb_type !== 'tv') {
+        return;
+    }
+
+    // 🚫 skip if already exists
+    if (TorrentSeries::where('tmdbid', $torrent->tmdbid)->exists()) {
+        return;
+    }
+
+    $response = Http::get("https://api.themoviedb.org/3/tv/{$torrent->tmdbid}", [
+        'api_key' => config('services.tmdb.key'),
+    ]);
+
+    if (!$response->successful()) {
+        return;
+    }
+
+    $tmdb = $response->json();
+
+    // extra safety
+    if (!isset($tmdb['name'])) {
+        return;
+    }
+
+    $title = $tmdb['name'];
+
+    TorrentSeries::create([
+        'tmdbid'        => $torrent->tmdbid,
+        'title'         => $title,
+        'slug'          => \Str::slug($title),
+        'poster_path'   => $tmdb['poster_path'] ?? null,
+        'backdrop_path' => $tmdb['backdrop_path'] ?? null,
+        'rating'        => $tmdb['vote_average'] ?? null,
+        'year'          => isset($tmdb['first_air_date'])
+            ? substr($tmdb['first_air_date'], 0, 4)
             : null,
     ]);
 }

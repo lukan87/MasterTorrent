@@ -627,6 +627,95 @@ $minutes = $seedtime->minutes;
 
     </div>
 
+    <div class="accordion-item elite-card border-0">
+
+        <h2 class="accordion-header" id="headingSubscriptions">
+
+            <button class="accordion-button collapsed bg-transparent text-white shadow-none"
+
+                    type="button"
+
+                    data-bs-toggle="collapse"
+
+                    data-bs-target="#collapseSubscriptions"
+
+                    aria-expanded="false"
+
+                    aria-controls="collapseSubscriptions">
+
+                <i class="bi bi-bell me-2 text-warning"></i>
+
+                Subscribed Torrents
+
+                <span class="badge text-bg-warning rounded-pill ms-2">{{ count($subscribedTorrents) }}</span>
+
+            </button>
+
+        </h2>
+
+        <div id="collapseSubscriptions"
+
+             class="accordion-collapse collapse"
+
+             aria-labelledby="headingSubscriptions"
+
+             data-bs-parent="#seederRankAccordion">
+
+            <div class="accordion-body p-4">
+
+                <p class="text-muted small mb-3">
+
+                    Titles you are subscribed to. When a new upload matches one of these,
+
+                    you'll be notified by private message.
+
+                </p>
+
+                @forelse($subscribedTorrents as $subTorrent)
+                    @php
+                        // Link to the library show page for this TMDB id so the user
+                        // can browse every uploaded torrent for the title.
+                        $libraryRoute = ! empty($subTorrent->tmdbid) && ! empty($subTorrent->library_type)
+                            ? ($subTorrent->library_type === 'series'
+                                ? 'library.series.show'
+                                : 'library.movies.show')
+                            : null;
+                        $libraryHref  = $libraryRoute
+                            ? route($libraryRoute, [
+                                'tmdbid' => $subTorrent->tmdbid,
+                                'slug'   => $subTorrent->library_slug,
+                            ])
+                            : route('torrents.show', ['id' => $subTorrent->id, 'slug' => $subTorrent->slug]);
+                    @endphp
+                    <a href="{{ $libraryHref }}"
+                       class="sub-torrent-row">
+                        <img class="subscribed-poster"
+                             src="{{ $subTorrent->poster ?: asset('images/noposter.jpg') }}"
+                             alt=""
+                             loading="lazy">
+                        <div class="subscribed-info">
+                            <span class="subscribed-name">{{ \Illuminate\Support\Str::limit($subTorrent->name, 60) }}</span>
+                            <div class="subscribed-meta">
+                                <span title="Seeders"><i class="bi bi-arrow-up-circle-fill text-success"></i> {{ $subTorrent->seeders ?? 0 }}</span>
+                                <span class="ms-2" title="Leechers"><i class="bi bi-arrow-down-circle-fill text-danger"></i> {{ $subTorrent->leechers ?? 0 }}</span>
+                                <span class="ms-2" title="Times completed"><i class="bi bi-check-circle-fill text-info"></i> {{ $subTorrent->times_completed ?? 0 }}</span>
+                            </div>
+                        </div>
+                        <i class="bi bi-chevron-right text-muted ms-auto"></i>
+                    </a>
+                @empty
+                    <div class="subscribed-empty">
+                        <i class="bi bi-bell-slash text-muted"></i>
+                        You haven't subscribed to any titles yet.
+                    </div>
+                @endforelse
+
+            </div>
+
+        </div>
+
+    </div>
+
 </div>
 
 {{-- Uploaded --}}
@@ -2546,5 +2635,71 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 @endpush
+<style>
+    .sub-torrent-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 12px;
+        border-radius: .6rem;
+        color: #e2e8f0;
+        text-decoration: none;
+        transition: background .15s ease;
+    }
+
+    .sub-torrent-row:hover {
+        background: rgba(77, 163, 255, .12);
+        color: #ffffff;
+    }
+
+    .sub-torrent-row + .sub-torrent-row {
+        margin-top: 6px;
+    }
+
+    .subscribed-poster {
+        width: 40px;
+        height: 56px;
+        object-fit: cover;
+        border-radius: .35rem;
+        flex-shrink: 0;
+        background: #1e293b;
+    }
+
+    .subscribed-info {
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .subscribed-name {
+        font-size: 13.5px;
+        font-weight: 600;
+        line-height: 1.25;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+
+    .subscribed-meta {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        font-size: 12px;
+        color: #94a3b8;
+    }
+
+    .subscribed-meta span {
+        white-space: nowrap;
+    }
+
+    .subscribed-empty {
+        padding: 22px 12px;
+        text-align: center;
+        font-size: 13px;
+        color: #94a3b8;
+    }
+</style>
 
 @endsection

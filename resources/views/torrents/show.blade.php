@@ -676,7 +676,6 @@
 
     @if(!$torrent->trashed())
         @include('torrents.partials.similar')
-        @include('torrents.partials.tmdb-recommendations')
     @endif
 
 

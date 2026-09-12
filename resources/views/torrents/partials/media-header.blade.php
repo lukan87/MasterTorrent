@@ -97,9 +97,25 @@
                     {{-- TITLE --}}
                     <div class="title-block">
 
+                        @php
+                            $libraryUrl = null;
+                            if (!empty($torrent->tmdbid)) {
+                                $libSlug = \Illuminate\Support\Str::slug($display['title']);
+                                $libraryUrl = $display['type'] === 'tv'
+                                    ? route('library.series.show', [$torrent->tmdbid, $libSlug])
+                                    : route('library.movies.show', [$torrent->tmdbid, $libSlug]);
+                            }
+                        @endphp
+
                         <h1 class="premium-title">
 
-                            {{ $display['title'] }}
+                            @if($libraryUrl)
+                                <a href="{{ $libraryUrl }}" class="text-decoration-none" style="color: inherit;">
+                                    {{ $display['title'] }}
+                                </a>
+                            @else
+                                {{ $display['title'] }}
+                            @endif
 
                             @if($display['year'])
                                 <span class="release-year">
