@@ -194,7 +194,7 @@
 <style>
 body:has(.messenger-app) .app-main{min-height:auto}
 body:has(.messenger-app) .app-content{padding-top:1rem;padding-bottom:1rem}
-.messenger-app{display:grid;grid-template-columns:340px 1fr;height:calc(100vh - 12rem);min-height:420px;background:var(--ui-surface);border:1px solid var(--ui-border);border-radius:16px;overflow:hidden;box-shadow:var(--ui-shadow)}
+.messenger-app{display:grid;grid-template-columns:340px 1fr;height:calc(95vh - 12rem);min-height:420px;background:var(--ui-surface);border:1px solid var(--ui-border);border-radius:16px;overflow:hidden;box-shadow:var(--ui-shadow)}
 .messenger-sidebar{display:flex;flex-direction:column;background:var(--ui-surface-raised);border-right:1px solid var(--ui-border);overflow:hidden}
 .ms-sidebar-header{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 10px}
 .ms-title{color:#e5edf7;font-weight:700;font-size:1.05rem;margin:0}
@@ -298,25 +298,38 @@ document.addEventListener("DOMContentLoaded", function(){
         toggle.addEventListener("click", function(){ panel.classList.toggle("d-none"); });
     }
     var chat = document.getElementById("chatBody");
+    if(!chat) return;
+    // Scroll to the last message when the conversation opens, even if
+    // media/images are still loading (which grows chat.scrollHeight).
+    function jumpToBottom(){ chat.scrollTop = chat.scrollHeight; }
+    window.addEventListener("load", jumpToBottom);
+    window.addEventListener("resize", jumpToBottom);
+    // Re-scroll once each image inside the conversation finishes loading,
+    // since those have no fixed height and expand the scroll area.
+    chat.querySelectorAll("img").forEach(function(img){
+        if(img.complete){ jumpToBottom(); }
+        else img.addEventListener("load", jumpToBottom);
+    });
+    jumpToBottom();
+    // Extra safety retries in case anything loads late.
+    setTimeout(jumpToBottom, 300);
+    setTimeout(jumpToBottom, 1000);
+    setTimeout(jumpToBottom, 2000);
+    // Textarea listeners only exist in replyable conversations.
     var textarea = document.getElementById("body");
     var form = document.getElementById("chatForm");
-    if(!chat || !textarea || !form) return;
-    var shouldScroll = true;
-    chat.addEventListener("scroll", function(){
-        shouldScroll = (chat.scrollHeight - chat.scrollTop - chat.clientHeight) < 50;
-    });
-    function scrollToBottom(){ if(shouldScroll) chat.scrollTop = chat.scrollHeight; }
-    scrollToBottom();
-    textarea.addEventListener("input", function(){
-        this.style.height = "auto";
-        this.style.height = this.scrollHeight + "px";
-    });
-    textarea.addEventListener("keydown", function(e){
-        if(e.key === "Enter" && !e.shiftKey){
-            e.preventDefault();
-            if(textarea.value.trim() !== "") form.submit();
-        }
-    });
+    if(textarea && form){
+        textarea.addEventListener("input", function(){
+            this.style.height = "auto";
+            this.style.height = this.scrollHeight + "px";
+        });
+        textarea.addEventListener("keydown", function(e){
+            if(e.key === "Enter" && !e.shiftKey){
+                e.preventDefault();
+                if(textarea.value.trim() !== "") form.submit();
+            }
+        });
+    }
     document.querySelectorAll(".edit-msg").forEach(function(btn){
         btn.addEventListener("click", function(){
             var id = this.dataset.id;

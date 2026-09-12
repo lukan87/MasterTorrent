@@ -240,9 +240,9 @@ $timeline = $user->timeline()->latest()->get();
     */
 
     $rules = [
-        'profile_image_url' => 'nullable|url|max:2048',
-        'cover'             => 'nullable|url|starts_with:https://|max:2048',
-        'background'        => 'nullable|url|starts_with:https://|max:2048',
+        'profile_image_url' => 'nullable|url|max:255',
+        'cover'             => 'nullable|url|starts_with:https://|max:255',
+        'background'        => 'nullable|url|starts_with:https://|max:255',
         'info'              => 'nullable|string',
         'timezone'          => 'nullable|timezone',
         'recovery_code'     => 'nullable|string|min:6',

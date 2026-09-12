@@ -630,6 +630,15 @@ Route::middleware('auth')->group(function () {
     Route::post('torrents/{id}/thank', [TorrentController::class, 'thank'])
         ->name('torrents.thank');
 
+    // ---------------------------------
+    // Subscribe / Unsubscribe (by title)
+    // ---------------------------------
+    Route::post('torrents/{id}/subscribe', [TorrentController::class, 'subscribe'])
+        ->name('torrents.subscribe');
+
+    Route::post('torrents/{id}/unsubscribe', [TorrentController::class, 'unsubscribe'])
+        ->name('torrents.unsubscribe');
+
     Route::post('/slots/renew/{slotId}', [TorrentController::class, 'renewSlot'])
         ->name('slots.renew');
 

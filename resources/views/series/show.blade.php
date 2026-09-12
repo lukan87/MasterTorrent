@@ -160,6 +160,20 @@
                                 </div>
                             @endif
 
+                            @if(($series->views ?? 0) > 0)
+                                <div class="meta-card">
+
+                                    <span class="meta-label">
+                                        Views
+                                    </span>
+
+                                    <span class="meta-value">
+                                        <i class="bi bi-eye"></i> {{ number_format($series->views) }}
+                                    </span>
+
+                                </div>
+                            @endif
+
                         </div>
 
                         {{-- TRAILERS --}}
@@ -238,6 +252,39 @@
             </div>
 
         </div>
+
+        {{-- SIMILAR SERIES --}}
+        @if(isset($similar) && $similar->isNotEmpty())
+            <div class="cast-section similar-section">
+
+                <div class="section-header">
+                    <h2>You May Also Like</h2>
+                </div>
+
+                <div class="cast-slider">
+                    @foreach($similar as $sim)
+                        <a href="https://www.themoviedb.org/search/tv?query={{ urlencode($sim['name']) }}{{ $sim['year'] ? '&first_air_date_year='.$sim['year'] : '' }}"
+                           target="_blank"
+                           class="cast-card text-decoration-none">
+                            <div class="cast-image-wrapper">
+                                <img src="{{ $sim['poster'] }}"
+                                     class="cast-image"
+                                     loading="lazy"
+                                     alt="{{ $sim['name'] }}">
+                            </div>
+                            <div class="cast-info">
+                                <h6>{{ $sim['name'] }}</h6>
+                                <p>
+                                    <i class="bi bi-star-fill text-warning"></i> {{ $sim['rating'] }}
+                                    @if($sim['year']) · {{ $sim['year'] }} @endif
+                                </p>
+                            </div>
+                        </a>
+                    @endforeach
+                </div>
+
+            </div>
+        @endif
 
         {{-- SEASONS --}}
         @include('series.seasons')

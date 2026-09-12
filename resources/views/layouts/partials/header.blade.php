@@ -100,7 +100,7 @@ html::after {
 <style>
     /* Make sidebar scrollable on mobile */
 .sidebar-wrapper {
-    max-height: 100vh; /* Full height of the viewport */
+    max-height: 90vh; /* Full height of the viewport */
     overflow-y: auto;
 }
 

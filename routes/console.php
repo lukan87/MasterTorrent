@@ -94,3 +94,6 @@ Schedule::command('tracker:check-connectable')->everyMinute()->withoutOverlappin
 
 // Movie metadata synchronization
 Schedule::command('torrent:sync-movies')->hourly()->withoutOverlapping();
+
+//Online Movies&Series metadata backfill (ratings, genres, dates)
+Schedule::command('media:backfill')->weeklyOn(0, '03:00');

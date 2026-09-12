@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use App\Models\TorrentMovie;
+use App\Services\TorrentSubscriptionService;
 use Illuminate\Support\Facades\Http;
 
 
@@ -120,6 +121,9 @@ if (Torrent::where('info_hash', $infoHash)->exists()) {
     'action'     => 'uploaded',
     'description' => 'Uploaded torrent "' . $torrent->name . '" (ID: ' . $torrent->id . ')',
 ]);
+
+    // 🔔 Notify subscribers whenever the torrent carries an IMDb/TMDB id
+    app(\App\Services\TorrentSubscriptionService::class)->notifyUpload($torrent);
 
     return [
         'torrent' => $torrent,

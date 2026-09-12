@@ -1383,6 +1383,31 @@
     font-size: .72rem;
 }
 
+/* Forum-blocked variant (amber/orange) */
+.forum-blocked-box {
+    color: #ffd599;
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255, 170, 51, .09),
+            rgba(80, 60, 17, .12)
+        );
+    border-color: rgba(255, 170, 51, .17);
+}
+
+.forum-blocked-box > i {
+    color: #ffb347;
+    background: rgba(255, 170, 51, .09);
+}
+
+.forum-blocked-box strong {
+    color: #ffe0a8;
+}
+
+.forum-blocked-box div div {
+    color: #b89a6e;
+}
+
 
 /* =========================================================
    PAGINATION

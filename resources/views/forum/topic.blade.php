@@ -998,6 +998,26 @@
 
             </div>
 
+        @elseif(auth()->user()->forumblock)
+
+            <div class="forum-locked-box forum-blocked-box mt-5">
+
+                <i class="bi bi-slash-circle-fill"></i>
+
+                <div>
+
+                    <strong>
+                        Forum posting is disabled
+                    </strong>
+
+                    <div>
+                        Your forum posting permissions have been restricted. You can still read topics, but you cannot reply or create new ones.
+                    </div>
+
+                </div>
+
+            </div>
+
         @endif
 
     @endauth

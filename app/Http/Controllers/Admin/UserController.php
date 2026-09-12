@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use App\Jobs\SendMassMessageJob;
+use App\Services\SystemMessageService;
 use Notification;
 use Illuminate\Notifications\DatabaseNotification;
 
@@ -179,41 +180,12 @@ public function update(Request $request, $id)
         };
 
         $notify = function ($subject, $body) use ($user) {
-
-            $systemId = 2;
-
-            $conversation = Conversation::where(function ($q) use ($systemId, $user) {
-                $q->where('user_one', $systemId)
-                  ->where('user_two', $user->id);
-            })
-            ->orWhere(function ($q) use ($systemId, $user) {
-                $q->where('user_one', $user->id)
-                  ->where('user_two', $systemId);
-            })
-            ->first();
-
-            if (!$conversation) {
-                $conversation = Conversation::create([
-                    'user_one'        => $systemId,
-                    'user_two'        => $user->id,
-                    'subject'         => 'System Notifications',
-                    'last_message_at' => now(),
-                ]);
-            }
-
-            Message::create([
-                'conversation_id' => $conversation->id,
-                'sender_id'       => $systemId,
-                'receiver_id'     => $user->id,
-                'subject'         => $subject,
-                'body'            => $body,
-                'is_read'         => false,
-            ]);
-
-            $conversation->update([
-                'last_message_at' => now()
-            ]);
+            SystemMessageService::send(2, $user->id, $subject, $body);
         };
+
+        // Track whether basic profile fields changed so a user is notified
+        // even when the change is only informational (no specific rule fired).
+        $profileChanged = false;
 
         /*
         |--------------------------------------------------------------------------
@@ -224,11 +196,13 @@ public function update(Request $request, $id)
         if ($user->name !== $request->name) {
             $log("✏️ Username changed from {$user->name} to {$request->name}");
             $user->name = $request->name;
+            $profileChanged = true;
         }
 
         if ($user->email !== $request->email) {
             $log("📧 Email changed from {$user->email} to {$request->email}");
             $user->email = $request->email;
+            $profileChanged = true;
         }
 
         if ($request->has('info') && $user->info !== $request->info) {
@@ -236,6 +210,7 @@ public function update(Request $request, $id)
             $newInfo = filled($request->info) ? $request->info : '[empty]';
             $log("📝 Profile information changed from {$oldInfo} to {$newInfo}");
             $user->info = $request->info;
+            $profileChanged = true;
         }
 
         if ($request->has('profile_image') && $user->profile_image !== $request->profile_image) {
@@ -243,6 +218,7 @@ public function update(Request $request, $id)
             $newImage = filled($request->profile_image) ? $request->profile_image : '[empty]';
             $log("🖼️ Profile image changed from {$oldImage} to {$newImage}");
             $user->profile_image = $request->profile_image;
+            $profileChanged = true;
         }
 
         if ($request->filled('recovery_code')) {
@@ -293,6 +269,11 @@ public function update(Request $request, $id)
                 $log("⚙️ {$meta['label']} changed from {$oldValue} to {$newValue}");
 
                 $user->$field = $request->$field;
+
+                $notify(
+                    "Account privileges updated",
+                    "{$meta['label']} changed from {$oldValue} to {$newValue} by {$staff->name}."
+                );
             }
         }
 
@@ -644,6 +625,13 @@ if ($request->has('downloaded')) {
         | Save
         |--------------------------------------------------------------------------
         */
+
+        if ($profileChanged) {
+            $notify(
+                "Account Updated",
+                "Your account details have been updated by an administrator."
+            );
+        }
 
         $user->save();
     });

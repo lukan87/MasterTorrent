@@ -7,303 +7,263 @@ use App\Models\Movie;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Log; // Add this line
-
-
-
-
-
-
+use Illuminate\Support\Facades\Log;
 
 class MovieController extends Controller
 {
-    // TMDB API key
     private $apiKey;
+    private $omdbKey;
 
     public function __construct()
     {
-        // Get API key from config file
-        $this->apiKey = config('app.tmdb_api_key');
+        // Config-driven keys (never hardcoded credentials in source).
+        $this->apiKey  = config('services.tmdb.key') ?: config('app.tmdb_api_key');
+        $this->omdbKey = config('services.omdb.key') ?: env('OMDB_API_KEY');
     }
 
-    public function index()
+    /**
+     * Safe TMDB GET helper: returns decoded JSON or null (never throws).
+     */
+    private function tmdb(string $endpoint, array $params = [])
     {
-        // Fetch movies from the database
-        $movies = Movie::latest()->paginate(12);
+        try {
+            $params['api_key'] = $this->apiKey;
+            $response = Http::timeout(10)->get("https://api.themoviedb.org/3/{$endpoint}", $params);
+            return $response->successful() ? $response->json() : null;
+        } catch (\Exception $e) {
+            Log::error("TMDB request failed: " . $e->getMessage());
+            return null;
+        }
+    }
 
-        return view('movies.index', compact('movies'))->with('links', 'vendor.pagination.bootstrap-5');
+    /**
+     * Safe OMDB GET helper for extra scores.
+     */
+    private function omdb(?string $imdb)
+    {
+        if (!$imdb) return [];
+        try {
+            $response = Http::timeout(10)->get("http://www.omdbapi.com", [
+                'apikey' => $this->omdbKey,
+                'i'      => $imdb,
+                'plot'   => 'full',
+            ]);
+            return $response->successful() ? ($response->json() ?: []) : [];
+        } catch (\Exception $e) {
+            Log::error("OMDB request failed: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    public function index(Request $request)
+    {
+        $sort = $request->get('sort', 'latest');
+
+        $query = Movie::query();
+        switch ($sort) {
+            case 'rating': $query->orderByDesc('vote_average'); break;
+            case 'views':  $query->orderByDesc('views'); break;
+            default:       $query->latest();
+        }
+
+        $movies  = $query->paginate(12)->withQueryString();
+        $featured = Movie::whereNotNull('backdrop_path')->where('views', '>', 0)
+            ->orderByDesc('views')->orderByDesc('vote_average')->first()
+            ?? Movie::whereNotNull('backdrop_path')->inRandomOrder()->first();
+
+        return view('movies.index', compact('movies', 'featured', 'sort'))
+            ->with('links', 'vendor.pagination.bootstrap-5');
     }
 
     public function search(Request $request)
     {
-        // Validate the incoming request
         $request->validate(['movie_name' => 'required|string|max:255']);
 
-        // Get the search query
-        $movieName = $request->movie_name;
+        $data = $this->tmdb('search/movie', ['query' => $request->movie_name]);
+        $movies = collect($data['results'] ?? []);
 
-
-
-        // Make an API call to TMDB to search for the movie
-        $searchResponse = Http::get("https://api.themoviedb.org/3/search/movie", [
-            'api_key' => $this->apiKey,
-            'query' => $movieName
-        ]);
-
-        // Decode the JSON response and convert to a collection
-        $movies = collect($searchResponse->json()['results'] ?? []);
-
-        // Return a view with the list of movies
         return view('movies.search_results', compact('movies'));
     }
 
     public function selectMovie($tmdb_id)
     {
-        // Check if the movie already exists in the database
         if (Movie::where('tmdb_id', $tmdb_id)->exists()) {
             return redirect()->route('movies.create')->with('error', 'Movie already exists in the database.');
         }
 
-        // Fetch movie details by TMDB ID
-        $response = Http::get("https://api.themoviedb.org/3/movie/{$tmdb_id}", [
-            'api_key' => '325f0b42fccd356be82ede4d2be6312c'
-        ]);
+        $data = $this->tmdb("movie/{$tmdb_id}", ['append_to_response' => 'external_ids']);
+        if (!$data || empty($data['id'])) {
+            return redirect()->route('movies.create')->with('error', 'Could not fetch this movie from TMDB.');
+        }
 
-        $data = $response->json();
-
-        // Create a new movie entry using the private method
         $this->createMovie($data);
 
-
-        // Redirect to the newly created movie's show page
         return redirect()->route('movies.show', $data['id'])->with('status', 'Movie added successfully!');
     }
 
     public function show($id, $slug = null)
     {
-        // Fetch the movie by ID
         $movie = Movie::findOrFail($id);
 
-        // If the slug is not provided, redirect to the URL with the slug
-        if ($slug === null) {
+        if ($slug === null || $slug !== $movie->slug) {
             return redirect()->route('movies.show', ['id' => $id, 'slug' => $movie->slug]);
         }
 
-        // If slug is provided, make sure the slug matches the one in the database
-        if ($slug !== $movie->slug) {
-            return redirect()->route('movies.show', ['id' => $id, 'slug' => $movie->slug]);
+        // Track a view once per session so refreshes don't inflate the counter.
+        $viewKey = "movie_viewed_{$movie->id}";
+        if (!session()->has($viewKey)) {
+            session([$viewKey => true]);
+            $movie->recordView();
         }
 
-        // Cache key based on movie TMDB ID
-        $cacheKey = 'movie_' . $movie->tmdb_id . '_details';
+        $detailsCacheKey = 'movie_' . $movie->tmdb_id . '_details';
+        $movieDetails = cache()->remember($detailsCacheKey, now()->addWeek(), function () use ($movie) {
+            $data = $this->tmdb("movie/{$movie->tmdb_id}", [
+                'language'            => 'en-US',
+                'append_to_response' => 'credits,videos,images,external_ids',
+            ]) ?: [];
 
-        $comments = $movie->comments()->with('user')->get(); // Eager load users
+            $data['title']              = $data['title'] ?? $movie->name ?? 'Unknown Movie';
+            $data['genres']             = $data['genres'] ?? [];
+            $data['videos']['results']  = $data['videos']['results'] ?? [];
+            $data['credits']['cast']    = $data['credits']['cast'] ?? [];
+            return $data;
+        });
 
-        // Check if movie details are cached
-       $movieDetails = cache()->remember($cacheKey, now()->addWeek(), function () use ($movie) {
+        $movieOm = cache()->remember('movie_' . $movie->imdb_id . '_omdb', now()->addWeek(), fn() => $this->omdb($movie->imdb_id));
 
-    $response = Http::get("https://api.themoviedb.org/3/movie/{$movie->tmdb_id}", [
-        'api_key' => '325f0b42fccd356be82ede4d2be6312c',
-        'language' => 'en-US',
-        'append_to_response' => 'credits,videos,images,external_ids'
-    ]);
+        $similar = cache()->remember('movie_similar_' . $movie->tmdb_id, now()->addWeek(), function () use ($movie) {
+            $data = $this->tmdb("movie/{$movie->tmdb_id}/similar");
+            return collect($data['results'] ?? [])->take(10)->map(fn($item) => [
+                'name'   => $item['title'] ?? 'Unknown',
+                'poster' => ($item['poster_path'] ?? null)
+                    ? 'https://image.tmdb.org/t/p/w500' . $item['poster_path']
+                    : '/images/noposter.jpg',
+                'year'   => !empty($item['release_date'])
+                    ? \Carbon\Carbon::parse($item['release_date'])->format('Y')
+                    : null,
+                'rating' => number_format($item['vote_average'] ?? 0, 1),
+            ]);
+        });
 
-    $data = $response->json();
+        $torrents = $movie->torrents()->latest()->get();
+        $comments = $movie->comments()->with('user')->get();
 
-    // Prevent Blade errors
-    $data['title'] = $data['title'] ?? $movie->name ?? 'Unknown Movie';
-    $data['genres'] = $data['genres'] ?? [];
-    $data['videos']['results'] = $data['videos']['results'] ?? [];
-    $data['credits']['cast'] = $data['credits']['cast'] ?? [];
-
-    return $data;
-});
-
-        // Cache OMDB data
-        $omdbCacheKey = 'movie_' . $movie->imdb_id . '_omdb';
-       $movieOm = cache()->remember($omdbCacheKey, now()->addWeek(), function () use ($movie) {
-
-    $response = Http::get("http://www.omdbapi.com", [
-        'apikey' => 'd3eb5201',
-        'i' => $movie->imdb_id,
-        'plot' => 'full'
-    ]);
-
-    $data = $response->json();
-
-    return $data ?: [];
-});
-
-        // Return the view with the movie data
-        return view('movies.show', compact('movieDetails', 'movieOm', 'movie', 'comments'));
+        return view('movies.show', compact('movieDetails', 'movieOm', 'movie', 'comments', 'similar', 'torrents'));
     }
-
-
 
     public function create()
     {
-        // Check if the user is authorized (is Owner)
         if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::ADMIN) {
-            return view('movies.create'); // return the create view
+            return view('movies.create');
         }
-
-        // If not authorized, redirect with an error message
         return redirect()->route('movies.index')->with('error', 'Unauthorized access.');
     }
 
     public function store(Request $request)
-{
-    // Validate the request data
-    $request->validate(['tmdb_id' => 'required|string|max:255']);
+    {
+        $request->validate(['tmdb_id' => 'required|string|max:255']);
 
-    // Check if the movie with the same TMDB ID already exists
-    if (Movie::where('tmdb_id', $request->tmdb_id)->exists()) {
-        return redirect()->route('movies.create')->with('error', 'Movie already exists in the database.');
-    }
+        if (Movie::where('tmdb_id', $request->tmdb_id)->exists()) {
+            return redirect()->route('movies.create')->with('error', 'Movie already exists in the database.');
+        }
 
-    // Create the movie from TMDB data
-    $url = "https://api.themoviedb.org/3/movie/{$request->tmdb_id}?api_key=325f0b42fccd356be82ede4d2be6312c&language=en-US&append_to_response=credits,videos,images,keywords,external_ids";
+        $data = $this->tmdb("movie/{$request->tmdb_id}", [
+            'language'            => 'en-US',
+            'append_to_response' => 'credits,videos,images,keywords,external_ids',
+        ]);
 
-    try {
-        // Make the GET request to TMDB API
-        $response = Http::get($url);
-        $data = $response->json();
-
-        // Check if the response contains an error
-        if (isset($data['success']) && !$data['success']) {
+        if (!$data || empty($data['id'])) {
             return redirect()->route('movies.create')->with('error', 'Movie not found on TMDB. Please check the TMDB ID.');
         }
 
-        // Create a new movie entry using the private method
         $this->createMovie($data);
 
-        // Redirect to the movies index with a success message
         return redirect()->route('movies.index')->with('status', 'Movie created successfully!');
-    } catch (\Exception $e) {
-        // Handle the error if the API request fails
-        return redirect()->route('movies.create')->with('error', 'Error fetching data from TMDB API: ' . $e->getMessage());
-    }
-}
-
-public function bulkSelect(Request $request)
-{
-    // Log the incoming request for debugging
-    Log::info('Incoming request to bulkSelect:', $request->all());
-
-    // Validate the incoming request
-    $request->validate([
-        'movies' => 'required|array',
-        'movies.*' => 'integer|distinct'
-    ]);
-
-    // Check if movies were selected
-    if (empty($request->movies)) {
-        Log::info('No movies selected, redirecting with error message.');
-        return redirect()->route('movies.index')->with('error', 'Please select at least one movie to add.');
     }
 
-    // Loop through selected movie IDs and add them to the database
-    foreach ($request->movies as $tmdb_id) {
-        if (!Movie::where('tmdb_id', $tmdb_id)->exists()) {
-            // Fetch movie details by TMDB ID
-            $response = Http::get("https://api.themoviedb.org/3/movie/{$tmdb_id}", [
-                'api_key' => '325f0b42fccd356be82ede4d2be6312c'
-            ]);
-            $data = $response->json();
+    public function bulkSelect(Request $request)
+    {
+        $request->validate(['movies' => 'required|array', 'movies.*' => 'integer|distinct']);
 
-            // Create a new movie entry using the private method
-            $this->createMovie($data);
+        foreach ($request->movies as $tmdb_id) {
+            if (Movie::where('tmdb_id', $tmdb_id)->exists()) {
+                continue;
+            }
+            $data = $this->tmdb("movie/{$tmdb_id}", ['append_to_response' => 'external_ids']);
+            if ($data && !empty($data['id'])) {
+                $this->createMovie($data);
+            }
         }
+
+        return redirect()->route('movies.index')->with('status', 'Operation was successful!');
     }
-    // After performing some action
-
-
-
-    return redirect()->route('movies.index')->with('success', 'Operation was successful!');
-}
-
 
     public function searchMovie(Request $request)
     {
-        // Get the search term from the request
         $searchTerm = $request->input('name');
-
-        // Check if the search term is empty
         if (empty($searchTerm)) {
             return redirect()->route('movies.index');
         }
 
-        // Fetch movies matching the search term
-        $movies = Movie::where('name', 'LIKE', "%{$searchTerm}%")->paginate(12);
+        $movies = Movie::where('name', 'LIKE', "%{$searchTerm}%")->paginate(12)->withQueryString();
+        $featured = $movies->first();
+        $sort = 'latest';
 
-
-
-        // Return the search results to the view
-        return view('movies.index', compact('movies'));
+        return view('movies.index', compact('movies', 'featured', 'sort'));
     }
 
-    // Private method to create a movie entry
     private function createMovie(array $data)
-{
-    $uniqueName = $this->generateUniqueName($data['title'], $data['release_date']);
+    {
+        $uniqueName = $this->generateUniqueName($data['title'], $data['release_date'] ?? null);
+        $genres = array_map(fn($g) => $g['name'] ?? '', $data['genres'] ?? []);
 
-    return Movie::create([
-        'name' => $uniqueName,
-        'tmdb_id' => $data['id'],
-        'imdb_id' => $data['imdb_id'] ?? null,
-        'poster_path' => $data['poster_path'] ?? null,
-        'collection_id' => $data['belongs_to_collection']['id'] ?? null,
-        'collection_name' => $data['belongs_to_collection']['name'] ?? null,
-        'overview' => $data['overview'] ?? null,
-        'backdrop_path' => $data['backdrop_path'] ?? null,
-        'slug' => $this->generateUniqueSlug($uniqueName, $data['release_date']),
-    ]);
-}
-
-private function generateUniqueName($title, $releaseDate)
-{
-    // Parse the release date and extract the year
-    $year = \Carbon\Carbon::parse($releaseDate)->format('Y');
-
-    // Check if a movie with the same name exists
-    if (Movie::where('name', $title)->exists()) {
-        // If it exists, append the year to the name
-        return $title . ' (' . $year . ')';
+        return Movie::create([
+            'name'            => $uniqueName,
+            'tmdb_id'         => $data['id'],
+            'imdb_id'         => $data['imdb_id'] ?? $data['external_ids']['imdb_id'] ?? null,
+            'poster_path'     => $data['poster_path'] ?? null,
+            'collection_id'   => $data['belongs_to_collection']['id'] ?? null,
+            'collection_name' => $data['belongs_to_collection']['name'] ?? null,
+            'overview'        => $data['overview'] ?? null,
+            'backdrop_path'   => $data['backdrop_path'] ?? null,
+            'release_date'    => !empty($data['release_date']) ? \Carbon\Carbon::parse($data['release_date'])->format('Y-m-d') : null,
+            'runtime'         => $data['runtime'] ?? null,
+            'vote_average'    => $data['vote_average'] ?? null,
+            'vote_count'      => $data['vote_count'] ?? 0,
+            'tagline'         => $data['tagline'] ?? null,
+            'status'          => $data['status'] ?? null,
+            'genres'          => array_values(array_filter($genres)),
+            'slug'            => $this->generateUniqueSlug($uniqueName, $data['release_date'] ?? null),
+        ]);
     }
 
-    // If no conflict, return the original name
-    return $title;
-}
-
-private function generateUniqueSlug($title, $releaseDate)
-{
-    // Parse the release date and extract the year
-    $year = \Carbon\Carbon::parse($releaseDate)->format('Y');
-
-    // Generate the base slug
-    $slug = Str::slug($title);
-    $originalSlug = $slug;
-    $counter = 1;
-
-    // Check for slug uniqueness
-    while (Movie::where('slug', $slug)->exists()) {
-        if ($counter === 1) {
-            // Append the year to the title on the first conflict
-            $slug = Str::slug($title . ' ' . $year);
-            $originalSlug = $slug; // Update the original slug base
-        } else {
-            // Add a counter for further conflicts
-            $slug = $originalSlug . '-' . $counter;
+    private function generateUniqueName($title, $releaseDate)
+    {
+        $year = $releaseDate ? \Carbon\Carbon::parse($releaseDate)->format('Y') : null;
+        if ($year && Movie::where('name', $title)->exists()) {
+            return $title . ' (' . $year . ')';
         }
-        $counter++;
+        return $title;
     }
 
-    return $slug;
-}
+    private function generateUniqueSlug($title, $releaseDate)
+    {
+        $year = $releaseDate ? \Carbon\Carbon::parse($releaseDate)->format('Y') : null;
+        $slug = Str::slug($title);
+        $originalSlug = $slug;
+        $counter = 1;
 
+        while (Movie::where('slug', $slug)->exists()) {
+            if ($counter === 1 && $year) {
+                $slug = Str::slug($title . ' ' . $year);
+                $originalSlug = $slug;
+            } else {
+                $slug = $originalSlug . '-' . $counter;
+            }
+            $counter++;
+        }
 
-
-
-
-
+        return $slug;
+    }
 }

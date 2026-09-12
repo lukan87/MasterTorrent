@@ -32,6 +32,7 @@ use App\Services\Torrent\MovieOfTheDayService;
 use App\Services\Torrent\TorrentBrowseService;
 use App\Services\Torrent\TorrentDisplayService;
 use App\Services\Subtitle\SubsRoService;
+use App\Services\TorrentSubscriptionService;
 
 
 
@@ -535,6 +536,10 @@ $thankTooltip = match (true) {
     default          => implode(', ', $names) . ' thanked',
 };
 
+$subscriptionService = app(\App\Services\TorrentSubscriptionService::class);
+$subscribeAvailable = $subscriptionService->canSubscribe($torrent);
+$isSubscribed       = $subscribeAvailable && $subscriptionService->isSubscribed(Auth::user(), $torrent);
+
 
 
            
@@ -557,7 +562,9 @@ $thankTooltip = match (true) {
     'fanartPoster',
     'fanartLogo',
     'fanartBanner',
-    'externalSubtitles'
+    'externalSubtitles',
+    'isSubscribed',
+    'subscribeAvailable'
 
 ));
 
@@ -614,6 +621,39 @@ $user->save();
         ->with('success', 'Your thanks has been registered! You received 0.5 seedbonus points!');
 }
 
+/*
+    |--------------------------------------------------------------------------
+    | Subscribe / Unsubscribe
+    |--------------------------------------------------------------------------
+    */
+
+    public function subscribe($id, TorrentSubscriptionService $service)
+    {
+        $torrent = Torrent::findOrFail($id);
+        $user = Auth::user();
+
+        if (!$service->subscribe($user, $torrent)) {
+            return redirect()->route('torrents.show', ['id' => $torrent->id, 'slug' => $torrent->slug])
+                ->with('info', 'You are already subscribed to this title, or there is no IMDb/TMDB id to subscribe to.');
+        }
+
+        return redirect()->route('torrents.show', ['id' => $torrent->id, 'slug' => $torrent->slug])
+            ->with('success', 'Subscribed! You will be notified when a new version of this title is uploaded.');
+    }
+
+    public function unsubscribe($id, TorrentSubscriptionService $service)
+    {
+        $torrent = Torrent::findOrFail($id);
+        $user = Auth::user();
+
+        if (!$service->unsubscribe($user, $torrent)) {
+            return redirect()->route('torrents.show', ['id' => $torrent->id, 'slug' => $torrent->slug])
+                ->with('info', 'You were not subscribed to this title.');
+        }
+
+        return redirect()->route('torrents.show', ['id' => $torrent->id, 'slug' => $torrent->slug])
+            ->with('success', 'Subscription removed. You will no longer receive notifications for this title.');
+    }
 
 
    

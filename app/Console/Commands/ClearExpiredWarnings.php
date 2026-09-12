@@ -8,6 +8,7 @@ use App\Models\Message;
 use App\Models\Conversation;
 use App\Models\UserTimeline;
 use Carbon\Carbon;
+use App\Services\SystemMessageService;
 
 class ClearExpiredWarnings extends Command
 {
@@ -94,40 +95,6 @@ Best of luck!
     {
         $systemId = 2;
 
-        $conversation = Conversation::where(function ($q) use ($systemId, $userId) {
-
-            $q->where('user_one', $systemId)
-              ->where('user_two', $userId);
-
-        })->orWhere(function ($q) use ($systemId, $userId) {
-
-            $q->where('user_one', $userId)
-              ->where('user_two', $systemId);
-
-        })->first();
-
-        if (!$conversation) {
-
-            $conversation = Conversation::create([
-                'user_one' => $systemId,
-                'user_two' => $userId,
-                'subject' => 'System Notifications',
-                'last_message_at' => now(),
-            ]);
-
-        }
-
-        Message::create([
-            'conversation_id' => $conversation->id,
-            'sender_id' => $systemId,
-            'receiver_id' => $userId,
-            'subject' => $subject,
-            'body' => $body,
-            'is_read' => 0
-        ]);
-
-        $conversation->update([
-            'last_message_at' => now()
-        ]);
+        SystemMessageService::send($systemId, $userId, $subject, $body);
     }
 }

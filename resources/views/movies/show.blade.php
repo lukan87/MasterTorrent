@@ -101,6 +101,14 @@
 
                             @endif
 
+                            @if(($movie->views ?? 0) > 0)
+
+                                <span class="movie-rating-pill movie-views-pill">
+                                    <i class="bi bi-eye"></i> {{ number_format($movie->views) }}
+                                </span>
+
+                            @endif
+
                         </div>
 
                         {{-- GENRES --}}
@@ -252,7 +260,7 @@
                         <div class="watch-actions">
 
                             @php
-                                $userClass = auth()->user()->user_class;
+                                $userClass = optional(auth()->user())->user_class ?? 0;
                             @endphp
 
                             @if($userClass >= \App\Models\UserClass::USER)
@@ -340,6 +348,85 @@
             </div>
 
         </div>
+
+        {{-- SIMILAR MOVIES --}}
+        @if(isset($similar) && $similar->isNotEmpty())
+            <div class="movie-cast-section similar-section">
+
+                <div class="movie-section-header">
+                    <h2>You May Also Like</h2>
+                </div>
+
+                <div class="movie-cast-slider">
+                    @foreach($similar as $sim)
+                        <div class="movie-cast-card similar-card">
+                            <a href="https://www.themoviedb.org/search?query={{ urlencode($sim['name']) }}{{ $sim['year'] ? '&year='.$sim['year'] : '' }}"
+                               target="_blank"
+                               class="movie-cast-image-wrapper d-block">
+                                <img src="{{ $sim['poster'] }}"
+                                     class="movie-cast-image"
+                                     loading="lazy"
+                                     alt="{{ $sim['name'] }}">
+                            </a>
+                            <div class="movie-cast-info">
+                                <h6>{{ $sim['name'] }}</h6>
+                                <p>
+                                    <i class="bi bi-star-fill text-warning"></i> {{ $sim['rating'] }}
+                                    @if($sim['year']) · {{ $sim['year'] }} @endif
+                                </p>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+            </div>
+        @endif
+
+        {{-- AVAILABLE TORRENTS --}}
+        @if(isset($torrents) && $torrents->isNotEmpty())
+            <div class="movie-cast-section torrent-section">
+
+                <div class="movie-section-header d-flex align-items-center justify-content-between">
+                    <h2>
+                        Available Torrents
+                        <span class="results-count">{{ $torrents->count() }}</span>
+                    </h2>
+                    <a href="{{ route('torrents.index') }}?tmdbid={{ $movie->tmdb_id }}"
+                       class="btn btn-more-torrents">
+                        View All <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="torrent-list">
+                    @foreach($torrents as $torrent)
+                        @php
+                            $sz = $torrent->size ?? 0;
+                            $fsize = $sz >= 1073741824
+                                ? round($sz / 1073741824, 1) . ' GB'
+                                : ($sz >= 1048576
+                                    ? round($sz / 1048576, 1) . ' MB'
+                                    : round($sz / 1024, 1) . ' KB');
+                        @endphp
+                        <a href="{{ route('torrents.show', $torrent->id) }}"
+                           class="torrent-row">
+                            <div class="torrent-row-main">
+                                <strong>{{ $torrent->name }}</strong>
+                                <small class="text-muted">
+                                    @if($torrent->category_id) {{ $torrent->category->name ?? '' }} · @endif
+                                    {{ $fsize }}
+                                </small>
+                            </div>
+                            <div class="torrent-row-meta">
+                                <span class="seeders"><i class="bi bi-arrow-up-circle"></i> {{ $torrent->seeders ?? 0 }}</span>
+                                <span class="leechers"><i class="bi bi-arrow-down-circle"></i> {{ $torrent->leechers ?? 0 }}</span>
+                                <i class="bi bi-chevron-right"></i>
+                            </div>
+                        </a>
+                    @endforeach
+                </div>
+
+            </div>
+        @endif
 
         {{-- COMMENTS --}}
         <div class="comments-modern-wrapper">
@@ -447,7 +534,6 @@
 
 </div>
 
-@endsection
 
 <style>
 
@@ -1300,5 +1386,112 @@
         padding: 20px;
     }
 }
+<style>
+
+/* SECTION HEADER COUNT */
+.results-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    height: 20px;
+    padding: 0 7px;
+    margin-left: 8px;
+    font-size: 12px;
+    font-weight: 800;
+    color: #061311;
+    background: #22d3c5;
+    border-radius: 999px;
+    vertical-align: middle;
+}
+
+/* SIMILAR */
+.similar-section { margin-top: 8px; }
+.similar-card { display: block; }
+.similar-card .movie-cast-image-wrapper { height: 250px; overflow: hidden; }
+
+/* VIEWS PILL */
+.movie-views-pill i { margin-right: 4px; }
+
+/* TORRENTS LIST */
+.torrent-section { margin-bottom: 40px; }
+
+.btn-more-torrents {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 14px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    background: rgba(255,255,255,0.06);
+    transition: 0.3s ease;
+}
+.btn-more-torrents:hover {
+    color: #061311;
+    background: #22d3c5;
+    border-color: #22d3c5;
+}
+
+.torrent-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.torrent-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 18px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.07);
+    color: #fff;
+    text-decoration: none;
+    transition: 0.25s ease;
+}
+.torrent-row:hover {
+    background: rgba(124,58,237,0.18);
+    border-color: rgba(124,58,237,0.45);
+    transform: translateY(-2px);
+}
+
+.torrent-row-main {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+.torrent-row-main strong {
+    color: #fff;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.torrent-row-main small { font-size: 12px; }
+
+.torrent-row-meta {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex: 0 0 auto;
+    font-size: 13px;
+    font-weight: 700;
+}
+.torrent-row-meta i.bi-chevron-right { color: rgba(255,255,255,0.5); }
+.torrent-row-meta .seeders { color: #4ade80; }
+.torrent-row-meta .leechers { color: #f87171; }
+
+@media (max-width: 768px) {
+    .torrent-row { align-items: flex-start; flex-direction: column; }
+    .torrent-row-meta { width: 100%; justify-content: space-between; }
+}
+</style>
+
 
 </style>
+@endsection

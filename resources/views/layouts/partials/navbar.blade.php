@@ -384,7 +384,7 @@
 
         <i class="bi bi-grid-1x2 fs-4" data-bs-toggle="tooltip" title="Tokens"></i>
 
-        <span class="nav-badge badge {{ Auth::user()->slots > 0 ? 'bg-success' : 'bg-danger' }}">
+        <span class="nav-badge badge {{ Auth::user()->slots > 0 ? 'bg-success' : 'bg-info' }}">
             {{ Auth::user()->slots }}
         </span>
     </a>

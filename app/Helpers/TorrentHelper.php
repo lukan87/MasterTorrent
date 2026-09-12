@@ -66,6 +66,11 @@ private static function sanitizeSort(?string $column, ?string $direction): array
             }
         }
 
+        // TMDB link filter (from movie/series "View all torrents" links)
+        if ($request->filled('tmdbid') && is_numeric($request->tmdbid)) {
+            $query->where('tmdbid', (int) $request->tmdbid);
+        }
+
         // Genre
         if ($request->filled('genre') && is_numeric($request->genre)) {
             $query->whereHas('genres', function ($q) use ($request) {

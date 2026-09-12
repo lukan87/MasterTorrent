@@ -39,6 +39,10 @@ return [
     'key' => env('TMDB_API_KEY'),
     ],
 
+    'omdb' => [
+    'key' => env('OMDB_API_KEY'),
+    ],
+
     'fanart' => [
     'key' => env('FANART_API_KEY'),
     ],

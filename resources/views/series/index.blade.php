@@ -2,45 +2,66 @@
 
 @section('content')
 
-@php
-    $backdrop = $featured && $featured->backdrop_path
-        ? 'https://image.tmdb.org/t/p/original' . $featured->backdrop_path
-        : 'https://image.tmdb.org/t/p/original';
-@endphp
-
-<div class="container-fluid px-lg-4 px-3 series-page">
+<div class="container-fluid py-3 px-lg-4 px-3 series-page">
 
     {{-- HERO --}}
-    <div class="series-hero mb-4" style="background-image:url('{{ $backdrop }}')">
-        <div class="hero-overlay"></div>
+    @if(isset($featured) && $featured)
+        <div class="series-hero mb-4" style="background-image:url('{{ $featured->backdrop_url }}')">
+            <div class="hero-overlay"></div>
 
-        <div class="hero-content position-relative z-2">
-            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div class="hero-content position-relative z-2">
+                <span class="hero-badge">FEATURED SERIES</span>
 
-                <div>
-                    <span class="hero-badge">STREAMING COLLECTION</span>
+                <h1 class="hero-title mt-3">{{ $featured->name }}</h1>
 
-                    <h1 class="hero-title mt-3">Discover Amazing Series</h1>
+                <p class="hero-subtitle">
+                    <i class="bi bi-star-fill text-warning"></i> {{ number_format($featured->vote_average ?? 0, 1) }}
+                    @if($featured->genres)
+                        &nbsp;&bull;&nbsp; {{ collect($featured->genres)->take(3)->implode(' / ') }}
+                    @endif
+                    @if($featured->year)
+                        &nbsp;&bull;&nbsp; {{ $featured->year }}
+                    @endif
+                    @if($featured->status)
+                        &nbsp;&bull;&nbsp; {{ $featured->status === 'Ended' ? 'Completed' : $featured->status }}
+                    @endif
+                </p>
 
-                    <p class="hero-subtitle">
-                        Browse, search and explore your TV collection.
-                    </p>
-                </div>
+                <a href="{{ route('series.show', ['id'=>$featured->id,'slug'=>$featured->slug]) }}" class="btn btn-hero">
+                    <i class="bi bi-play-circle me-1"></i> View Details
+                </a>
+            </div>
+        </div>
+    @endif
+
+    {{-- HEADER --}}
+    <div class="series-header mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1 class="series-page-title mb-1">
+                    <i class="bi bi-tv me-2"></i>Series
+                </h1>
+                <p class="series-page-subtitle mb-0">Browse and discover your TV collection</p>
+            </div>
+
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <form action="{{ route('series.index') }}" method="GET" class="sort-form">
+                    <div class="sort-wrapper">
+                        <i class="bi bi-sort-down"></i>
+                        <select name="sort" id="seriesSort" class="sort-select">
+                            <option value="latest" @selected(($sort ?? 'latest') === 'latest')>Newest</option>
+                            <option value="rating" @selected(($sort ?? '') === 'rating')>Top Rated</option>
+                            <option value="views"  @selected(($sort ?? '') === 'views')>Most Viewed</option>
+                        </select>
+                    </div>
+                </form>
 
                 @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::ADMIN)
                     <a href="{{ route('series.create') }}" class="btn btn-modern">
                         <i class="bi bi-plus-lg me-1"></i> Add Series
                     </a>
                 @endif
-
             </div>
-
-            @if(isset($featured) && $featured)
-                <div class="featured-box">
-                    <span class="featured-label">Featured Series</span>
-                    <h3>{{ $featured->name }}</h3>
-                </div>
-            @endif
         </div>
     </div>
 
@@ -84,25 +105,39 @@
 
                     <a href="{{ route('series.show', ['id' => $serie->id, 'slug' => $serie->slug]) }}">
                         <img
-                            src="https://image.tmdb.org/t/p/w600_and_h900_bestv2{{ $serie->poster_path }}"
+                            src="{{ $serie->poster_path ? 'https://image.tmdb.org/t/p/w600_and_h900_bestv2'.$serie->poster_path : '/images/noposter.jpg' }}"
+                            loading="lazy"
                             alt="{{ $serie->name }}"
                             class="series-poster"
                         >
                     </a>
 
+                    @if($serie->vote_average)
+                        <span class="series-badge rating-badge">
+                            <i class="bi bi-star-fill"></i> {{ number_format($serie->vote_average, 1) }}
+                        </span>
+                    @endif
+
+                    @if($serie->year)
+                        <span class="series-badge year-badge">{{ $serie->year }}</span>
+                    @endif
+
                     <div class="series-overlay">
                         <div>
                             <h5 class="series-title">{{ $serie->name }}</h5>
+                            @if($serie->status)
+                                <span class="series-status-chip">{{ ucwords(str_replace('_', ' ', $serie->status)) }}</span>
+                            @endif
                         </div>
 
                         <div class="series-actions">
 
-                            <a
+                            <!-- <a
                                 href="{{ route('series.show', ['id' => $serie->id, 'slug' => $serie->slug]) }}"
                                 class="btn btn-watch"
                             >
                                 <i class="bi bi-eye me-1"></i> View
-                            </a>
+                            </a> -->
 
                             @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::WEB_DEVELOPER)
 
@@ -130,6 +165,10 @@
                     {{ $serie->name }}
                 </div>
 
+                <div class="series-views">
+                    <i class="bi bi-eye"></i> {{ number_format($serie->views ?? 0) }} views
+                </div>
+
             </div>
 
         @empty
@@ -153,6 +192,12 @@
 
 </div>
 
+<script>
+    document.getElementById('seriesSort').addEventListener('change', function () {
+        this.closest('form').submit();
+    });
+</script>
+
 <style>
     /* =========================================
        FILEIPLAY SERIES PAGE
@@ -161,18 +206,20 @@
 
     .series-page {
         max-width: 1600px;
+        margin: 0 auto;
     }
 
     /* HERO */
     .series-hero {
         position: relative;
-        min-height: 390px;
+        min-height: 370px;
         margin-top: .35rem;
         overflow: hidden;
         display: flex;
         align-items: flex-end;
         background-size: cover;
         background-position: center top;
+        background-color: #0f172a;
         border: 1px solid var(--ui-border, rgba(148, 163, 184, .16));
         border-radius: .9rem;
         box-shadow: 0 16px 38px rgba(0, 0, 0, .32);
@@ -200,63 +247,69 @@
 
     .hero-content {
         width: 100%;
-        padding: 1.5rem;
+        padding: 1.1rem 1.5rem 1.5rem;
+        max-width: 720px;
     }
 
     .hero-badge {
-        display: inline-flex;
-        align-items: center;
-        padding: .35rem .6rem;
-        color: var(--ui-accent, #22d3c5);
-        background: rgba(34, 211, 197, .08);
-        border: 1px solid rgba(34, 211, 197, .22);
-        border-radius: .5rem;
-        font-size: 12px;
-        font-weight: 700;
-        letter-spacing: .8px;
+        display: inline-block;
+        padding: .28rem .7rem;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 2px;
+        color: #061311;
+        background: var(--ui-accent, #22d3c5);
     }
 
     .hero-title {
-        margin-bottom: .35rem;
         color: #f1f5f9;
-        font-size: 14px;
-        font-weight: 700;
-        line-height: 1.3;
+        font-size: 2rem;
+        font-weight: 800;
+        line-height: 1.15;
+        margin-bottom: .35rem;
     }
 
     .hero-subtitle {
         max-width: 600px;
-        margin-bottom: 0;
+        margin-bottom: 1rem;
         color: #cbd5e1;
-        font-size: 13px;
+        font-size: 14px;
         line-height: 1.5;
     }
 
-    /* FEATURED */
-    .featured-box {
-        max-width: 380px;
-        margin-top: 1.1rem;
-        padding: .8rem .9rem;
-        background: rgba(15, 23, 42, .72);
-        border: 1px solid rgba(148, 163, 184, .18);
-        border-left: 2px solid var(--ui-accent, #22d3c5);
-        border-radius: .65rem;
-        backdrop-filter: blur(10px);
-    }
-
-    .featured-label {
-        color: #64748b;
-        font-size: 11px;
+    .btn-hero {
+        display: inline-flex;
+        align-items: center;
+        gap: .4rem;
+        padding: .55rem 1.1rem;
+        border-radius: .6rem;
         font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1px;
+        color: #061311;
+        background: var(--ui-accent, #22d3c5);
+        border: 0;
     }
 
-    .featured-box h3 {
-        margin: .25rem 0 0;
+    .btn-hero:hover {
+        color: #061311;
+        filter: brightness(1.08);
+    }
+
+    /* HEADER */
+    .series-page-title {
         color: #f1f5f9;
+        font-size: 26px;
+        font-weight: 800;
+        line-height: 1.2;
+    }
+
+    .series-page-title i {
+        color: var(--ui-accent, #22d3c5);
+    }
+
+    .series-page-subtitle {
+        color: #94a3b8;
         font-size: 14px;
-        font-weight: 700;
     }
 
     /* BUTTON */
@@ -391,7 +444,14 @@
         padding: .8rem;
         background: linear-gradient(to top, rgba(5, 12, 22, .96), rgba(5, 12, 22, .08));
         opacity: 0;
+        pointer-events: none; /* let clicks reach the poster link underneath */
         transition: opacity .2s ease;
+    }
+
+    /* The overlay's own actions (View / Delete) stay clickable */
+    .series-overlay a,
+    .series-overlay button {
+        pointer-events: auto;
     }
 
     .series-card:hover .series-overlay {
@@ -568,8 +628,8 @@
     }
 
     @media (max-width: 420px) {
-        .hero-content > .d-flex {
-            align-items: flex-start !important;
+        .hero-title {
+            font-size: 1.5rem;
         }
 
         .btn-modern {
@@ -579,6 +639,89 @@
         .search-btn {
             font-size: 12px;
         }
+    }
+
+    /* SORT */
+    .sort-form {
+        margin: 0;
+    }
+
+    .sort-wrapper {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+        height: 42px;
+        padding: 0 .6rem;
+        background: rgba(15, 23, 42, .72);
+        border: 1px solid rgba(148, 163, 184, .17);
+        border-radius: .6rem;
+        color: var(--ui-accent, #22d3c5);
+    }
+
+    .sort-select {
+        background: transparent;
+        border: 0;
+        outline: 0;
+        color: #e2e8f0;
+        font-size: 13px;
+        cursor: pointer;
+    }
+
+    .sort-select option {
+        background: #0f172a;
+        color: #e2e8f0;
+    }
+
+    /* CARD BADGES */
+    .series-badge {
+        position: absolute;
+        z-index: 3;
+        padding: .22rem .5rem;
+        border-radius: .4rem;
+        font-size: 11px;
+        font-weight: 800;
+        line-height: 1;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, .35);
+    }
+
+    .series-badge.rating-badge {
+        top: 8px;
+        left: 8px;
+        color: #061311;
+        background: var(--ui-accent, #22d3c5);
+    }
+
+    .series-badge.rating-badge i {
+        color: #061311;
+    }
+
+    .series-badge.year-badge {
+        top: 8px;
+        right: 8px;
+        color: #f8fafc;
+        background: rgba(5, 12, 22, .72);
+        backdrop-filter: blur(4px);
+    }
+
+    .series-status-chip {
+        display: inline-block;
+        padding: .16rem .5rem;
+        font-size: 10px;
+        font-weight: 700;
+        color: #f8fafc;
+        background: rgba(34, 211, 197, .18);
+        border: 1px solid rgba(34, 211, 197, .3);
+        border-radius: 999px;
+    }
+
+    .series-views {
+        margin-top: .3rem;
+        color: #64748b;
+        font-size: 11px;
+    }
+
+    .series-views i {
+        color: var(--ui-accent, #22d3c5);
     }
 </style>
 

@@ -360,9 +360,54 @@
 
             @endif
 
-        </div>
+            {{-- SUBSCRIBE --}}
+            @if($subscribeAvailable)
 
-        {{-- RIGHT STATS --}}
+                @if($isSubscribed)
+
+                    <form action="{{ route('torrents.unsubscribe', $torrent->id) }}"
+                          method="POST">
+
+                        @csrf
+
+                        <button type="submit"
+                                class="btn modern-action-btn unsubscribe-btn"
+                                data-bs-toggle="tooltip"
+                                title="Stop receiving notifications when a new version of this title is uploaded">
+
+                            <i class="bi bi-bell-fill me-1"></i>
+
+                            Subscribed
+
+                        </button>
+
+                    </form>
+
+                @else
+
+                    <form action="{{ route('torrents.subscribe', $torrent->id) }}"
+                          method="POST">
+
+                        @csrf
+
+                        <button type="submit"
+                                class="btn modern-action-btn subscribe-btn"
+                                data-bs-toggle="tooltip"
+                                title="Get notified whenever a new version of this title is uploaded">
+
+                            <i class="bi bi-bell me-1"></i>
+
+                            Subscribe
+
+                        </button>
+
+                    </form>
+
+                @endif
+
+            @endif
+
+        </div>
         <div class="modern-stats-wrap ms-md-auto">
 
             <span class="modern-stat-badge category-badge"
@@ -486,7 +531,7 @@
 .modern-download-btn{background:rgba(45,212,191,.12);border-color:rgba(45,212,191,.28);color:var(--ui-accent)}
 .modern-download-btn:hover{background:rgba(45,212,191,.18);border-color:rgba(45,212,191,.42);color:#b8fff5;transform:translateY(-1px)}
 .modern-action-btn:hover{background:rgba(45,212,191,.09);border-color:rgba(45,212,191,.25);color:var(--ui-accent);transform:translateY(-1px)}
-.info-btn{color:#8fd5ff;background:rgba(59,130,246,.08)}.success-btn{color:#70e0a1;background:rgba(34,197,94,.08)}.thank-btn{color:#8fd5ff;background:rgba(59,130,246,.08)}.thanked-btn{color:#70e0a1;background:rgba(34,197,94,.10)}
+.info-btn{color:#8fd5ff;background:rgba(59,130,246,.08)}.success-btn{color:#70e0a1;background:rgba(34,197,94,.08)}.thank-btn{color:#8fd5ff;background:rgba(59,130,246,.08)}.thanked-btn{color:#70e0a1;background:rgba(34,197,94,.10)}.subscribe-btn{color:#8fd5ff;background:rgba(59,130,246,.08)}.unsubscribe-btn{color:#ff8f8f;background:rgba(239,68,68,.10)}
 .modern-action-btn.disabled,.modern-action-btn:disabled{opacity:.55!important;cursor:not-allowed;transform:none!important}
 .modern-dropdown-menu{min-width:250px;padding:7px;background:rgba(15,23,42,.98);border:1px solid var(--ui-border);border-radius:.7rem;box-shadow:0 14px 35px rgba(0,0,0,.35)!important}
 .modern-dropdown-item{padding:8px 10px;border-radius:.45rem;font-size:13px;color:#d8e2eb;transition:background .15s ease,color .15s ease}
