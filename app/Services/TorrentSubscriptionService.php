@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\TorrentMovie;
 use App\Models\TorrentSeries;
 use App\Models\TorrentSubscription;
+use App\Notifications\TorrentUpdatedNotification;
 use App\Helpers\FormatHelper;
 
 /**
@@ -235,14 +236,14 @@ class TorrentSubscriptionService
             return 0;
         }
 
-        $senderId = (int) $torrent->owner;
+        $systemId = 2; // System user (same id used across the app for system messages)
         $subject  = 'New upload: ' . $torrent->name;
 
         $viewUrl = route('torrents.show', ['id' => $torrent->id, 'slug' => $torrent->slug]);
 
         foreach ($subscriptions as $sub) {
             SystemMessageService::send(
-                $senderId,
+                $systemId,
                 (int) $sub->user_id,
                 $subject,
                 $this->buildMessageBody($torrent, $viewUrl)
@@ -250,6 +251,51 @@ class TorrentSubscriptionService
         }
 
         return count($subscriptions);
+    }
+
+    /**
+     * Notify every subscriber whose saved imdbid/tmdbid matches the given
+     * torrent that it was updated. Returns the number of notifications sent.
+     * The updater (and the torrent owner) are skipped so nobody notifies
+     * themselves about their own edit.
+     */
+    public function notifyUpdate(Torrent $torrent, ?User $updatedBy = null): int
+    {
+        $imdbid = $torrent->imdbid ? trim((string) $torrent->imdbid) : null;
+        $tmdbid = $torrent->tmdbid ? trim((string) $torrent->tmdbid) : null;
+
+        if (!$this->hasSubscribeableId($imdbid, $tmdbid)) {
+            return 0;
+        }
+
+        $skipUserId = (int) ($updatedBy->id ?? $torrent->owner);
+
+        $subscriptions = TorrentSubscription::query()
+            ->where(function ($q) use ($imdbid, $tmdbid) {
+                if ($imdbid !== null && $imdbid !== '') {
+                    $q->orWhere('imdbid', $imdbid);
+                }
+                if ($tmdbid !== null && $tmdbid !== '') {
+                    $q->orWhere('tmdbid', $tmdbid);
+                }
+            })
+            ->where('user_id', '!=', $skipUserId)
+            ->with('user')
+            ->get();
+
+        if ($subscriptions->isEmpty()) {
+            return 0;
+        }
+
+        $sent = 0;
+        foreach ($subscriptions as $sub) {
+            if ($sub->user) {
+                $sub->user->notify(new TorrentUpdatedNotification($torrent));
+                $sent++;
+            }
+        }
+
+        return $sent;
     }
 
     /**
@@ -261,7 +307,6 @@ class TorrentSubscriptionService
         $lines[] = 'A torrent matching a title you are subscribed to has just been uploaded.';
         $lines[] = '';
         $lines[] = 'Title  : ' . $torrent->name;
-        $lines[] = 'Uploader: ' . ($torrent->uploader->name ?? 'N/A');
 
         if ($torrent->category) {
             $lines[] = 'Category: ' . $torrent->category->name;

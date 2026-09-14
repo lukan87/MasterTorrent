@@ -52,29 +52,6 @@ class TorrentController extends Controller
         $this->service = $service;
     }
 
-// public function apiUpload(Request $request)
-// {
-//     $request->validate([
-//         'name' => 'required|string',
-//         'description' => 'required|string',
-//         'torrent' => 'required|file',
-//     ]);
-
-//     $torrentPath = $request->file('torrent')->store('torrents');
-
-//     // Example: Save torrent record
-//     Torrent::create([
-//         'user_id' => auth()->id(),
-//         'name' => $request->name,
-//         'description' => $request->description,
-//         'torrent_file' => $torrentPath,
-//     ]);
-
-//     return response()->json([
-//         'success' => true,
-//         'message' => 'Torrent uploaded successfully'
-//     ]);
-// }
 
  public function index(Request $request)
 {
@@ -288,6 +265,19 @@ public function deleted(Request $request)
 
 public function sendToSeedbox(Request $request, Torrent $torrent)
 {
+    $json = $request->expectsJson();
+
+    $respond = function ($message, $kind = 'error') use ($json): \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse {
+        if ($json) {
+            return response()->json([
+                'success' => $kind === 'success',
+                'message' => $message,
+            ], $kind === 'success' ? 200 : 422);
+        }
+
+        return redirect()->back()->with($kind, $message);
+    };
+
     try {
         $authUser = auth()->user();
 
@@ -298,15 +288,13 @@ public function sendToSeedbox(Request $request, Torrent $torrent)
         $path = public_path('files/torrents/' . $torrent->file_name);
 
         if (!file_exists($path) || !is_readable($path)) {
-            return redirect()->back()
-                ->with('error', 'Torrent file not found.');
+            return $respond('Torrent file not found.');
         }
 
         $dict = Bencode::bdecode(file_get_contents($path));
 
         if (!$dict) {
-            return redirect()->back()
-                ->with('error', 'Invalid torrent file.');
+            return $respond('Invalid torrent file.');
         }
 
         // FileIplay tracker
@@ -338,8 +326,7 @@ public function sendToSeedbox(Request $request, Torrent $torrent)
         if (!$seedbox) {
             @unlink($tmpPath);
 
-            return redirect()->back()
-                ->with('error', 'Seedbox not found.');
+            return $respond('Seedbox not found.');
         }
 
         $service = new SeedboxService(
@@ -354,17 +341,14 @@ public function sendToSeedbox(Request $request, Torrent $torrent)
         @unlink($tmpPath);
 
         if (isset($result['error'])) {
-            return redirect()->back()
-                ->with('error', $result['error']);
+            return $respond($result['error']);
         }
 
-        return redirect()->back()
-            ->with('success', "Torrent sent to {$seedbox->name}.");
+        return $respond("Torrent sent to {$seedbox->name}.", 'success');
 
     } catch (\Throwable $e) {
 
-        return redirect()->back()
-            ->with('error', $e->getMessage());
+        return $respond($e->getMessage());
     }
 }
     

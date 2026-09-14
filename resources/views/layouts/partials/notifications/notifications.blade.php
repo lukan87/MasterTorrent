@@ -32,6 +32,18 @@
                     replied to your post
 
                 {{-- Forum Reply (OLD STYLE WITHOUT TYPE) --}}
+                @elseif($type === 'torrent_updated')
+                    <i class="bi bi-pencil-square text-primary me-1"></i>
+                    Subscribed torrent
+                    <strong>{{ $data['torrent_name'] ?? 'Unknown' }}</strong>
+                    was updated
+
+                    @if(!empty($data['updated_by']))
+                        <div class="small text-muted mt-1">
+                            Updated by {{ $data['updated_by'] }}
+                        </div>
+                    @endif
+
                 @elseif(isset($data['author']) && isset($data['topic_title']))
                     <i class="bi bi-chat-dots-fill text-info me-1"></i>
                     <strong>{{ $data['author'] }}</strong>

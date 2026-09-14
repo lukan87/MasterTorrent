@@ -59,67 +59,52 @@
 
 
 
-<div class="card rounded-lg shadow-sm">
-<div class="card-body p-0">
+<div class="torrent-list">
 
 {{-- ROWS --}}
 @forelse($torrents as $torrent)
-<div class="row g-0 align-items-center border-bottom py-3 tx-list-row {{ $torrent->sticky ? 'torrent-sticky' : '' }}">
+<div class="torrent-card {{ $torrent->sticky ? 'torrent-sticky' : '' }}">
 
-    {{-- TORRENT INFO --}}
-    <div class="col-12 col-md-6 d-flex px-3">
-   @include('torrents.partials.index.namecat')
+    <div class="torrent-card-head">
+        <div class="torrent-info">
+            @include('torrents.partials.index.namecat')
+        </div>
+
+        <div class="tx-actions">
+            @include('torrents.partials.index.actions')
+        </div>
     </div>
 
-    {{-- AGE --}}
-    <div class="d-none d-md-block col-md-1 text-center small fw-bold">
-        <span class="stat-chip chip-muted" data-bs-toggle="tooltip" title="Uploaded">
-        {{ $torrent->created_at->format('M d, Y') }}
+    <div class="torrent-chips">
+        <span class="stat-chip chip-muted" title="Uploaded {{ $torrent->created_at->format('M d, Y') }}">
+            <i class="bi bi-clock"></i>{{ $torrent->created_at->format('d M, Y') }}
         </span>
-    </div>
-
-    {{-- SIZE --}}
-    <div class="d-none d-md-block col-md-1 text-center small text-info fw-bold">
-        <span class="stat-chip chip-info" data-bs-toggle="tooltip" title="Size">
-        {{ App\Helpers\FormatHelper::formatSize($torrent->size) }}
+        <span class="stat-chip chip-info" title="Size">
+            <i class="bi bi-hdd-stack"></i>{{ App\Helpers\FormatHelper::formatSize($torrent->size) }}
         </span>
-    </div>
-
-    {{-- SEED / LEECH --}}
-    <div class="col-6 col-md-1 text-center">
-        <span class="stat-chip chip-seed" data-bs-toggle="tooltip" title="Seeders">
+        <span class="stat-chip chip-seed" title="Seeders">
             <i class="bi bi-arrow-up"></i>{{ $torrent->seeders }}
         </span>
-        <span class="stat-chip chip-leech" data-bs-toggle="tooltip" title="Leechers">
+        <span class="stat-chip chip-leech" title="Leechers">
             <i class="bi bi-arrow-down"></i>{{ $torrent->leechers }}
         </span>
-    </div>
-
-      {{-- COMPLETED --}}
-    <div class="d-none d-md-block col-md-1 text-center text-success fw-bold">
-        
-        <span class="stat-chip chip-ok" data-bs-toggle="tooltip" title="Times completed">
+        <span class="stat-chip chip-ok" title="Times completed">
             <i class="bi bi-check2-circle"></i>{{ $torrent->times_completed }}
         </span>
-    </div>
 
-  {{-- UPLOADER --}}
-<div class="col-6 col-md-1 text-center small">
-@include('torrents.partials.index.uploaders')
-</div>
-
-    {{-- ACTIONS --}}
-     
-    <div class="col-12 col-md-1 px-1 tx-actions">
-   @include('torrents.partials.index.actions')
+        <span class="torrent-uploader">
+            @include('torrents.partials.index.uploaders')
+        </span>
     </div>
 
 </div>
 @empty
-<div class="text-center py-5 text-muted">No torrents found.</div>
+<div class="torrent-empty">
+    <i class="bi bi-inbox"></i>
+    <p class="mb-0">No torrents found.</p>
+</div>
 @endforelse
 
-</div>
 </div>
 
 <div class="d-flex justify-content-center mt-4">
@@ -705,9 +690,112 @@ html::after {
 
 .tx-sort-arrow { font-size: 10px; }
 
-/* ---------- Row polish (original column layout kept) ---------- */
-.tx-list-row:hover {
-    background: rgba(99, 210, 198, .045);
+/* ---------- Torrent cards ---------- */
+.torrent-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 4px;
+}
+
+.torrent-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    padding: 16px 18px;
+
+    border-radius: 16px;
+
+    background: var(--ui-surface);
+    border: 1px solid var(--ui-border);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, .16);
+
+    transition: border-color .15s ease, transform .15s ease;
+}
+
+.torrent-card:hover {
+    border-color: rgba(99, 210, 198, .35);
+}
+
+.torrent-card:hover {
+    transform: translateY(-1px);
+}
+
+.torrent-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.torrent-info {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.torrent-chips {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, .06);
+}
+
+/* ---------- Stat chips (horizontal pills) ---------- */
+.stat-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    padding: 6px 12px;
+
+    border-radius: 999px;
+
+    background: rgba(255, 255, 255, .05);
+    border: 1px solid var(--ui-border);
+
+    font-size: 12px;
+    font-weight: 600;
+
+    color: var(--ui-text-muted);
+    white-space: nowrap;
+}
+
+.stat-chip i {
+    font-size: 13px;
+    line-height: 1;
+}
+
+.chip-muted { color: var(--ui-text-muted); }
+.chip-info  { color: #7dd3fc; border-color: rgba(125, 211, 252, .2); }
+.chip-seed  { color: #34d399; border-color: rgba(52, 211, 153, .22); }
+.chip-leech { color: #f87171; border-color: rgba(248, 113, 113, .22); }
+.chip-ok    { color: #a5b4fc; border-color: rgba(165, 180, 252, .22); }
+
+.torrent-uploader {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--ui-text-muted);
+}
+
+.torrent-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 48px 16px;
+    color: var(--ui-text-muted);
+    background: var(--ui-surface);
+    border: 1px dashed var(--ui-border);
+    border-radius: 16px;
+}
+
+.torrent-empty i {
+    font-size: 32px;
+    opacity: .5;
 }
 
 /* ---------- Action buttons ---------- */
@@ -723,7 +811,6 @@ html::after {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 8px;
 }
 
 .tx-actions .btn-group .btn {
@@ -805,66 +892,26 @@ html::after {
         flex-direction: column;
         align-items: flex-start;
     }
+
+    .torrent-card-head {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .tx-actions {
+        justify-content: flex-end;
+        flex-wrap: wrap;
+    }
+
+    .torrent-uploader {
+        margin-left: 0;
+    }
 }
-
-/* ---------- Stat chips (horizontal pills) ---------- */
-.stat-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-
-    padding: 6px 12px;
-
-    border-radius: 999px;
-
-    background: rgba(255, 255, 255, .05);
-    border: 1px solid var(--ui-border);
-
-    font-size: 12px;
-    font-weight: 600;
-
-    color: var(--ui-text-muted);
-    white-space: nowrap;
-}
-
-.stat-chip i {
-    font-size: 13px;
-    line-height: 1;
-}
-
-.chip-muted { color: var(--ui-text-muted); }
-.chip-info  { color: #7dd3fc; border-color: rgba(125, 211, 252, .2); }
-.chip-seed  { color: #34d399; border-color: rgba(52, 211, 153, .22); }
-.chip-leech { color: #f87171; border-color: rgba(248, 113, 113, .22); }
-.chip-ok    { color: #a5b4fc; border-color: rgba(165, 180, 252, .22); }
 
 </style>
 
 <script>
-document.querySelectorAll('.seedbox-send-btn').forEach(btn => {
-    btn.addEventListener('click', function (e) {
-        e.preventDefault();
-
-        fetch("{{ route('torrents.sendToSeedbox', '__ID__') }}".replace('__ID__', this.dataset.torrent), {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                seedbox_id: this.dataset.seedbox
-            })
-        })
-        .then(r => r.json())
-        .then(data => {
-            showToast(data.message || 'Sent to seedbox');
-        })
-        .catch(() => showToast('Seedbox error', 'danger'));
-    });
-});
-
- function swalSuccess(message) {
+function swalSuccess(message) {
     Swal.fire({
         icon: 'success',
         title: 'Success',

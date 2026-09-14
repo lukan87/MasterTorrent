@@ -5,6 +5,7 @@ namespace App\Services\Torrent;
 
 use App\Models\Torrent;
 use App\Models\TorrentLog;
+use App\Services\TorrentSubscriptionService;
 use Illuminate\Http\Request;
 
 class TorrentUpdateService
@@ -127,6 +128,12 @@ if (!empty($fields)) {
         'description'=> implode(', ', $fields),
     ]);
 }
+
+        // Notify subscribers when the torrent actually changed
+        if (!empty($fields)) {
+            app(TorrentSubscriptionService::class)
+                ->notifyUpdate($torrent, auth()->user());
+        }
 
         return $torrent;
     }

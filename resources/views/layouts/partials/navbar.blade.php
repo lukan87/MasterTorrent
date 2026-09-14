@@ -26,12 +26,57 @@
     object-fit:cover;
 }
 
+/* -------- Library offcanvas (mobile) -------- */
+#libraryOffcanvas {
+    background: linear-gradient(160deg, rgba(22, 32, 51, 0.98), rgba(9, 14, 24, 0.98)) !important;
+    border-right: 1px solid var(--ui-border) !important;
+}
+#libraryOffcanvas .offcanvas-header {
+    border-bottom: 1px solid var(--ui-border);
+    padding: 1rem 1.25rem;
+}
+#libraryOffcanvas .offcanvas-body {
+    padding: 0.75rem 0;
+}
+#libraryOffcanvas .offcanvas-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #94a3b8;
+}
+#libraryOffcanvas .library-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1.25rem;
+    color: #e2e8f0;
+    font-weight: 500;
+    border-radius: 0;
+    transition: background-color 120ms ease, color 120ms ease;
+}
+#libraryOffcanvas .library-link:hover,
+#libraryOffcanvas .library-link:focus {
+    background: rgba(99, 210, 198, 0.1);
+    color: #fff;
+}
+#libraryOffcanvas .library-link i {
+    font-size: 1.2rem;
+    width: 1.4rem;
+    text-align: center;
+    color: #63d2c6;
+}
+
 /* -------- Profile dropdown -------- */
 .profile-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    left: auto;
+    margin-top: 0.125rem;
     min-width: 380px !important;
     max-width: 94vw;
     padding: 0 !important;
-    overflow: hidden;
     border-radius: 1rem !important;
     border: 1px solid var(--ui-border) !important;
     background: linear-gradient(160deg, rgba(22, 32, 51, 0.98), rgba(9, 14, 24, 0.98)) !important;
@@ -214,6 +259,26 @@
     text-decoration: none !important;
 }
 
+/* Slide the profile panel in from the side (right) */
+.profile-dropdown {
+    transform-origin: top right;
+}
+
+.profile-dropdown.show {
+    animation: profileDropdownIn 0.28s cubic-bezier(0.22, 0.9, 0.25, 1);
+}
+
+@keyframes profileDropdownIn {
+    from {
+        opacity: 0;
+        transform: translateX(24px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
 @media (max-width: 575.98px) {
     .profile-dropdown {
         min-width: 92vw !important;
@@ -249,7 +314,42 @@
     </div>
 </form>
 
+{{-- Library (desktop lg+: icon + text) --}}
+<ul class="navbar-nav d-none d-lg-flex flex-row ms-2">
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('library.movies.index') }}">
+            <i class="bi bi-film me-1"></i>Movies
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('library.series.index') }}">
+            <i class="bi bi-tv me-1"></i>Series
+        </a>
+    </li>
+</ul>
+
+{{-- Library (medium md–lg: icons only) --}}
+<ul class="navbar-nav d-none d-md-flex d-lg-none flex-row ms-2">
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('library.movies.index') }}" data-bs-toggle="tooltip" title="Movies">
+            <i class="bi bi-film fs-4"></i>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('library.series.index') }}" data-bs-toggle="tooltip" title="Series">
+            <i class="bi bi-tv fs-4"></i>
+        </a>
+    </li>
+</ul>
+
 <ul class="navbar-nav ms-auto">
+
+{{-- Library (mobile <md: offcanvas trigger) --}}
+<li class="nav-item d-md-none">
+    <a class="nav-link" href="#" data-bs-toggle="offcanvas" data-bs-target="#libraryOffcanvas">
+        <i class="bi bi-collection-play fs-4" data-bs-toggle="tooltip" title="Library"></i>
+    </a>
+</li>
 
 {{-- Facebook --}}
 <li class="nav-item">
@@ -301,6 +401,25 @@
                         @if(!empty($notification->data['reason']))
                             <div class="small text-danger">
                                 {{ $notification->data['reason'] }}
+                            </div>
+                        @endif
+
+                        <div class="small text-muted">
+                            {{ $notification->created_at->diffForHumans() }}
+                        </div>
+                    </div>
+
+                @elseif($type === 'torrent_updated')
+
+                    <div class="dropdown-item text-light">
+                        <div class="fw-semibold">
+                            <i class="bi bi-pencil-square text-primary me-1"></i>
+                            Subscribed torrent <strong>{{ $notification->data['torrent_name'] }}</strong> was updated
+                        </div>
+
+                        @if(!empty($notification->data['updated_by']))
+                            <div class="small text-muted">
+                                Updated by {{ $notification->data['updated_by'] }}
                             </div>
                         @endif
 
@@ -462,7 +581,7 @@
 
 {{-- PROFILE DROPDOWN --}}
 <li class="nav-item dropdown user-menu">
-    <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+    <a href="#" class="nav-link dropdown-toggle" id="userMenuToggle">
         <img src="{{ Auth::user()->profile_image ?? asset('images/default_avatar/default-avatar.jpg') }}" class="user-image rounded-circle shadow">
         <span class="d-none d-md-inline">
             <span style="color: {{ \App\Models\UserClass::getClassColor(Auth::user()->user_class) }}">
@@ -608,3 +727,49 @@
                 </ul> <!--end::End Navbar Links-->
             </div> <!--end::Container-->
         </nav> <!--end::Header--> <!--begin::Sidebar-->
+
+{{-- Library offcanvas (mobile) --}}
+<div class="offcanvas offcanvas-start" tabindex="-1" id="libraryOffcanvas" aria-labelledby="libraryOffcanvasLabel" data-bs-theme="dark">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="libraryOffcanvasLabel">
+            <i class="bi bi-collection-play me-1"></i>Library
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body p-0">
+        <a href="{{ route('library.movies.index') }}" class="library-link">
+            <i class="bi bi-film"></i>
+            <span>Online Movies</span>
+        </a>
+        <a href="{{ route('library.series.index') }}" class="library-link">
+            <i class="bi bi-tv"></i>
+            <span>Online Series</span>
+        </a>
+    </div>
+</div>
+
+<script>
+(function () {
+    const toggle = document.getElementById('userMenuToggle');
+    const menu   = toggle?.closest('.user-menu')?.querySelector('.profile-dropdown');
+    if (!toggle || !menu) return;
+
+    let openTimer, closeTimer;
+    const OPEN_DELAY  = 140;
+    const CLOSE_DELAY = 220;
+
+    function open()  { clearTimeout(closeTimer); openTimer  = setTimeout(() => menu.classList.add('show'), OPEN_DELAY); }
+    function close() { clearTimeout(openTimer);  closeTimer = setTimeout(() => menu.classList.remove('show'), CLOSE_DELAY); }
+
+    toggle.addEventListener('mouseenter', open);
+    toggle.addEventListener('mouseleave', close);
+    menu.addEventListener('mouseenter', () => clearTimeout(closeTimer));
+    menu.addEventListener('mouseleave', close);
+
+    toggle.addEventListener('click', e => { e.preventDefault(); menu.classList.toggle('show'); });
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') menu.classList.remove('show'); });
+    document.addEventListener('click', e => { if (!toggle.contains(e.target) && !menu.contains(e.target)) menu.classList.remove('show'); });
+})();
+</script>
+

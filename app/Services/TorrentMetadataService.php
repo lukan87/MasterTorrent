@@ -27,12 +27,14 @@ class TorrentMetadataService
 
         $clean = preg_replace('/\b(?:DDP?|DTS(?:-HD)?(?:\sMA)?|AAC|TrueHD)(?:\+)?\s?\d(?:[\.\s]\d)?\b/i','',$clean);
         $clean = preg_replace('/\bAtmos\b/i','',$clean);
-        $clean = preg_replace('/\b(2160p|1080p|720p|480p|WEB[- ]DL|WEB-DL|WEBRip|HDRip|HDTV|BluRay|BDRip|REMUX|DVD|DTS|HDDVD|x264|x265|AAC|HQ|SDR|RoSubbed|BLOOM|CONDITION|PLEX|-HD|-MA|E-AC3-|HDR10|5|1|S|h\.?264|h\.?265|h[\.\s]?264|h[\.\s]?265|hevc|avc|proper|repack|8bit|10bit|12bit)\b/i','',$clean);
-        $clean = preg_replace('/\b(English|TELESYNC|WEB)\b/i','',$clean);
+        $clean = preg_replace('/\b(2160p|1080p|720p|480p|WEB[- ]DL|-FZHD|-PSYCHD|-BYNDR|HDR|RoSub|DoVi|-playWEB|-F1|WEB-DL|WEBRip|HDRip|-Joy|HDTV|BluRay|BDRip|REMUX|DVD|DTS|HDDVD|x264|x265|AAC|HQ|SDR|RoSubbed|BLOOM|CONDITION|-KyoGo|-SPWEB|PLEX|-HD|-MA|E-AC3-|HDR10|5|1|S|h\.?264|h\.?265|h[\.\s]?264|h[\.\s]?265|hevc|avc|proper|repack|8bit|10bit|12bit|-Fr334ALL)\b/i','',$clean);
+        $clean = preg_replace('/\b(English|TELESYNC|WEB|Fr334ALL|DL|DDP|COMPLETE|Series|)\b/i','',$clean);
         $clean = preg_replace('/\b(AMZN|NF|NETFLIX|HULU|DSNP|HBO|MAX|Ghost|QxR|VOYO|Dual|Panda|Msubs|GTM|HMAX|2CH)\b/i','',$clean);
         $clean = preg_replace('/\b\d{1,2}\s?\d{2}\s?[AP]\s?M\b/i','',$clean);
 
         $clean = str_replace(['.', '_'], ' ', $clean);
+
+        //dd($clean);
 
         preg_match('/\b(19|20)\d{2}\b/', $clean, $yearMatch);
         $year = $yearMatch[0] ?? null;
