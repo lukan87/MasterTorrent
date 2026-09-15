@@ -79,10 +79,61 @@ class MovieController extends Controller
     {
         $request->validate(['movie_name' => 'required|string|max:255']);
 
-        $data = $this->tmdb('search/movie', ['query' => $request->movie_name]);
+        $query = trim($request->movie_name);
+
+        $data = $this->tmdb('search/movie', ['query' => $query, 'include_adult' => false]);
         $movies = collect($data['results'] ?? []);
 
-        return view('movies.search_results', compact('movies'));
+        // Partition search results into those already in our DB and those we can add.
+        $dbIds = Movie::whereIn('tmdb_id', $movies->pluck('id'))->pluck('tmdb_id')->flip();
+        $existingMovies = $movies->filter(fn($m) => isset($dbIds[$m['id']]))->values();
+        $newMovies     = $movies->filter(fn($m) => !isset($dbIds[$m['id']]))->values();
+
+        // The /search/movie endpoint does not include an imdb_id, so fetch it
+        // per candidate. Titles that genuinely have no IMDb ID are hidden from
+        // the "New Movies to Add" list so they can never be added.
+        $noImdbCount = 0;
+        $newMovies = $newMovies->filter(function ($m) use (&$noImdbCount) {
+            if (empty($m['id'])) {
+                $noImdbCount++;
+                return false;
+            }
+            $ext = $this->tmdb("movie/{$m['id']}/external_ids");
+            $imdb = $ext['imdb_id'] ?? null;
+            if (empty($imdb)) {
+                $noImdbCount++;
+                return false;
+            }
+            return true;
+        })->values();
+
+        // Use the best search hit as the anchor for similar + recommended rows.
+        $similarMovies     = collect();
+        $recommendedMovies = collect();
+        $reference = $movies
+            ->filter(fn($m) => !empty($m['poster_path']))
+            ->first() ?? $movies->first();
+
+        if ($reference && !empty($reference['id'])) {
+            $refId = $reference['id'];
+
+            $similarData = $this->tmdb("movie/{$refId}/similar", ['include_adult' => false]);
+            $recomData   = $this->tmdb("movie/{$refId}/recommendations", ['include_adult' => false]);
+
+            $similarMovies     = collect($similarData['results'] ?? [])->take(10)->values();
+            $recommendedMovies = collect($recomData['results'] ?? [])->take(10)->values();
+
+            // Batch-mark DB status so we don't query per row.
+            $relatedIds = $similarMovies->pluck('id')->merge($recommendedMovies->pluck('id'))->unique();
+            $relatedDb  = Movie::whereIn('tmdb_id', $relatedIds)->pluck('tmdb_id')->flip();
+
+            $similarMovies     = $similarMovies->map(fn($m) => ['movie' => $m, 'exists' => isset($relatedDb[$m['id']])]);
+            $recommendedMovies = $recommendedMovies->map(fn($m) => ['movie' => $m, 'exists' => isset($relatedDb[$m['id']])]);
+        }
+
+        return view('movies.search_results', compact(
+            'query', 'movies', 'existingMovies', 'newMovies', 'similarMovies', 'recommendedMovies', 'noImdbCount'
+        ));
     }
 
     public function selectMovie($tmdb_id)
@@ -132,9 +183,10 @@ class MovieController extends Controller
 
         $movieOm = cache()->remember('movie_' . $movie->imdb_id . '_omdb', now()->addWeek(), fn() => $this->omdb($movie->imdb_id));
 
-        $similar = cache()->remember('movie_similar_' . $movie->tmdb_id, now()->addWeek(), function () use ($movie) {
+        $similar = cache()->remember('movie_similar_v2_' . $movie->tmdb_id, now()->addWeek(), function () use ($movie) {
             $data = $this->tmdb("movie/{$movie->tmdb_id}/similar");
             return collect($data['results'] ?? [])->take(10)->map(fn($item) => [
+                'tmdb_id' => $item['id'] ?? null,
                 'name'   => $item['title'] ?? 'Unknown',
                 'poster' => ($item['poster_path'] ?? null)
                     ? 'https://image.tmdb.org/t/p/w500' . $item['poster_path']
@@ -144,6 +196,21 @@ class MovieController extends Controller
                     : null,
                 'rating' => number_format($item['vote_average'] ?? 0, 1),
             ]);
+        });
+
+        // Resolve whether each similar movie already exists in the DB (fresh lookup,
+        // not cached, so newly added movies show up as linkable immediately).
+        $existingSim = \App\Models\Movie::whereIn('tmdb_id', $similar->pluck('tmdb_id')->filter())
+            ->get()
+            ->keyBy('tmdb_id');
+
+        $similar = $similar->map(function ($item) use ($existingSim) {
+            $dbMovie = ($item['tmdb_id'] ?? null) ? $existingSim->get($item['tmdb_id']) : null;
+            $item['in_library'] = (bool) $dbMovie;
+            $item['db_url'] = $dbMovie
+                ? route('movies.show', [$dbMovie->id, $dbMovie->slug])
+                : null;
+            return $item;
         });
 
         $torrents = $movie->torrents()->latest()->get();
@@ -186,17 +253,49 @@ class MovieController extends Controller
     {
         $request->validate(['movies' => 'required|array', 'movies.*' => 'integer|distinct']);
 
+        $added = 0;
         foreach ($request->movies as $tmdb_id) {
             if (Movie::where('tmdb_id', $tmdb_id)->exists()) {
                 continue;
             }
             $data = $this->tmdb("movie/{$tmdb_id}", ['append_to_response' => 'external_ids']);
-            if ($data && !empty($data['id'])) {
-                $this->createMovie($data);
+            if (!$data || empty($data['id'])) {
+                continue;
             }
+            // Never add titles without an IMDb ID.
+            $imdb = $data['imdb_id'] ?? $data['external_ids']['imdb_id'] ?? null;
+            if (empty($imdb)) {
+                continue;
+            }
+            $this->createMovie($data);
+            $added++;
         }
 
-        return redirect()->route('movies.index')->with('status', 'Operation was successful!');
+        return redirect()->route('movies.index')->with(
+            'status',
+            $added > 0 ? "{$added} movie(s) added successfully!" : 'No movies were added (titles missing an IMDb ID were skipped).'
+        );
+    }
+
+    /**
+     * Delete a movie from the online catalogue (admins only, from the show page).
+     */
+    public function destroy($id)
+    {
+        if (!Auth::check() || Auth::user()->user_class < \App\Models\UserClass::ADMIN) {
+            return redirect()->route('movies.index')->with('error', 'Unauthorized.');
+        }
+
+        $movie = Movie::findOrFail($id);
+
+        // Clear dependent records so nothing is orphaned.
+        $movie->comments()->delete();
+        $movie->torrents()->delete();
+        \App\Models\TorrentMovie::where('tmdbid', $movie->tmdb_id)->delete();
+
+        $movie->delete();
+
+        return redirect()->route('movies.index')->with('status', "Movie \"{$movie->name}\" deleted successfully.");
     }
 
     public function searchMovie(Request $request)
@@ -218,7 +317,7 @@ class MovieController extends Controller
         $uniqueName = $this->generateUniqueName($data['title'], $data['release_date'] ?? null);
         $genres = array_map(fn($g) => $g['name'] ?? '', $data['genres'] ?? []);
 
-        return Movie::create([
+        $movie = Movie::create([
             'name'            => $uniqueName,
             'tmdb_id'         => $data['id'],
             'imdb_id'         => $data['imdb_id'] ?? $data['external_ids']['imdb_id'] ?? null,
@@ -236,6 +335,30 @@ class MovieController extends Controller
             'genres'          => array_values(array_filter($genres)),
             'slug'            => $this->generateUniqueSlug($uniqueName, $data['release_date'] ?? null),
         ]);
+
+        // Also sync to the torrent library so it shows in the library section
+        $this->syncToTorrentLibrary($movie);
+
+        return $movie;
+    }
+
+    /**
+     * Create or update a TorrentMovie entry so the library stays in sync
+     * with the online movie catalogue.
+     */
+    private function syncToTorrentLibrary(Movie $movie): void
+    {
+        \App\Models\TorrentMovie::updateOrCreate(
+            ['tmdbid' => $movie->tmdb_id],
+            [
+                'title'         => $movie->name,
+                'slug'          => $movie->slug,
+                'poster_path'   => $movie->poster_path,
+                'backdrop_path' => $movie->backdrop_path,
+                'rating'        => $movie->vote_average,
+                'year'          => $movie->release_date ? $movie->release_date->format('Y') : null,
+            ]
+        );
     }
 
     private function generateUniqueName($title, $releaseDate)

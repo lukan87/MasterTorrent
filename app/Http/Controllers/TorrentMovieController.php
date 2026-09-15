@@ -14,146 +14,135 @@ use Illuminate\Support\Facades\Auth;
 class TorrentMovieController extends Controller
 {
 
-public function index()
-{
-    $query = request('q');
+    /**
+     * Library index — shows EVERY movie in the torrent_movies table,
+     * not just those with active seeders.
+     */
+    public function index()
+    {
+        $query = request('q');
 
-    $movies = Torrent::query()
-        ->select(
-            'torrents.tmdbid',
-            DB::raw('MAX(torrents.name) as name'),
-            DB::raw('MAX(torrents.created_at) as latest_created_at'),
-            DB::raw('MAX(torrents.seeders) as max_seeders')
-        )
-        ->join('torrent_movies', 'torrent_movies.tmdbid', '=', 'torrents.tmdbid')
-        ->whereNotNull('torrents.tmdbid')
-        ->where('torrents.tmdb_type', 'movie')
+        // ── Seeder health map (one query, cached per request) ──
+        $health = Torrent::query()
+            ->where('tmdb_type', 'movie')
+            ->whereNotNull('tmdbid')
+            ->select('tmdbid', DB::raw('MAX(seeders) as max_seeders'))
+            ->groupBy('tmdbid')
+            ->get()
+            ->keyBy(fn ($t) => (int) $t->tmdbid);
 
-        // 🔍 REAL SEARCH (TMDB title)
-        ->when($query, function ($q) use ($query) {
-            $q->where('torrent_movies.title', 'like', "%{$query}%");
-        })
+        // ── All library movies ──
+        $movies = TorrentMovie::query()
+            ->when($query, fn ($q) => $q->where('title', 'like', "%{$query}%"))
+            ->orderByDesc('created_at')
+            ->paginate(24)
+            ->withQueryString();
 
-        ->groupBy('torrents.tmdbid')
-        ->havingRaw('MAX(torrents.seeders) > 0')
-        ->orderByDesc('latest_created_at')
-        ->paginate(24)
-        ->withQueryString();
+        // Attach fields the Blade cards expect
+        $movies->getCollection()->transform(function ($movie) use ($health) {
+            $t = $health->get((int) $movie->tmdbid);
+            $movie->poster      = $movie->poster_path;
+            $movie->background  = $movie->backdrop_path;
+            $movie->max_seeders = $t?->max_seeders ?? 0;
+            return $movie;
+        });
 
-    // ✅ Attach cached DB data (NO API calls here)
-    $movies->getCollection()->transform(function ($movie) {
+        // ── Featured row (hero + cards) ──
+        $featured = TorrentMovie::query()
+            ->whereNotNull('backdrop_path')
+            ->orderByDesc('created_at')
+            ->take(25)
+            ->get()
+            ->map(function ($m) use ($health) {
+                $m->seeders = $health->get((int) $m->tmdbid)?->max_seeders ?? 0;
+                $m->backdrop = $m->backdrop_path;
+                return $m;
+            })
+            ->sortByDesc('seeders')
+            ->values();
 
-        $tmdb = TorrentMovie::where('tmdbid', $movie->tmdbid)->first();
+        return view('library.movies.index', compact('movies', 'query', 'featured'));
+    }
 
-        if ($tmdb) {
-            $movie->title = $tmdb->title;
-            $movie->poster = $tmdb->poster_path;
-            $movie->background = $tmdb->backdrop_path;
-            $movie->slug = $tmdb->slug;
-            $movie->rating = $tmdb->rating;
-            $movie->year = $tmdb->year;
-        } else {
-            // ⚠️ fallback (rare case)
-            $movie->title = $movie->name;
-            $movie->poster = null;
-            $movie->background = null;
-            $movie->slug = \Str::slug($movie->name);
-            $movie->rating = null;
-            $movie->year = null;
+    /**
+     * Show a single library movie.
+     * Works even when no torrent has been uploaded for the title yet.
+     */
+    public function show($tmdbid, $slug = null)
+    {
+        $torrents = Torrent::where('tmdbid', $tmdbid)
+            ->orderByDesc('seeders')
+            ->get();
+
+        // Build the rich premium header payload (same as the torrent detail page).
+        $firstTorrent = $torrents->first();
+        $display = $firstTorrent
+            ? app(TMDBService::class)->getDisplayPayload(
+                (int) $tmdbid,
+                'movie',
+                $firstTorrent->imdbid
+            )
+            : null;
+
+        // Try the local library record first; fall back to TMDB API.
+        $libraryEntry = TorrentMovie::where('tmdbid', $tmdbid)->first();
+
+        $movie = cache()->remember("tmdb_movie_v2_{$tmdbid}", 86400, function () use ($tmdbid) {
+            return Http::get("https://api.themoviedb.org/3/movie/{$tmdbid}", [
+               'api_key' => config('services.tmdb.key'),
+               'append_to_response' => 'recommendations',
+               'language' => 'en-US',
+            ])->json();
+        });
+
+        // Build "You Might Like" recommendations from TMDB
+        $recommendations = collect($movie['recommendations']['results'] ?? [])
+            ->take(8)
+            ->map(fn ($r) => [
+                'id'     => $r['id'],
+                'title'  => $r['title'] ?? $r['name'] ?? null,
+                'poster' => isset($r['poster_path'])
+                    ? "https://image.tmdb.org/t/p/w185{$r['poster_path']}"
+                    : null,
+                'rating' => $r['vote_average'] ?? null,
+                'year'   => substr($r['release_date'] ?? $r['first_air_date'] ?? '', 0, 4),
+            ])
+            ->all();
+
+        // Generate correct slug
+        $correctSlug = Str::slug($movie['title'] ?? 'movie');
+
+        // Optional: redirect if slug is wrong
+        if ($slug !== $correctSlug) {
+            return redirect()->route('library.movies.show', [
+                'tmdbid' => $tmdbid,
+                'slug' => $correctSlug
+            ]);
         }
 
-        return $movie;
-    });
+        // Subscription state (library subscribe button uses the TMDB name)
+        $isSubscribed = false;
+        if (Auth::check()) {
+            $isSubscribed = app(TorrentSubscriptionService::class)
+                ->isSubscribedByTmdb(Auth::user(), (string) $tmdbid);
+        }
 
-    $featured = Torrent::select(
-        'torrents.tmdbid',
-        DB::raw('MAX(torrents.seeders) as seeders')
-    )
-    ->join('torrent_movies', 'torrent_movies.tmdbid', '=', 'torrents.tmdbid')
-    ->where('torrents.tmdb_type', 'movie')
-    ->groupBy('torrents.tmdbid')
-    ->havingRaw('MAX(torrents.seeders) > 0')
-    ->orderByDesc('seeders')
-    ->take(25)
-    ->get()
-    ->map(function ($movie) {
-        $tmdb = TorrentMovie::where('tmdbid', $movie->tmdbid)->first();
+        // Subscribers for this title (count + names shown beside the button)
+        $subscribers = app(TorrentSubscriptionService::class)
+            ->subscribers($firstTorrent?->imdbid, (string) $tmdbid);
 
-        $movie->title = $tmdb->title ?? '';
-        $movie->backdrop = $tmdb->backdrop_path;
-        $movie->poster = $tmdb->poster_path;
-        $movie->slug = $tmdb->slug;
-        $movie->rating = $tmdb->rating;
-        $movie->year = $tmdb->year;
+        // "Watch online" link — only when the movie exists in the online catalogue
+        // (movies table). The movies.show route is keyed on the DB primary id + slug.
+        $watchMovie = \App\Models\Movie::where('tmdb_id', $tmdbid)->first();
+        $watchUrl = $watchMovie
+            ? route('movies.show', [$watchMovie->id, $watchMovie->slug])
+            : null;
 
-        return $movie;
-    });
-
-   return view('library.movies.index', compact('movies', 'query', 'featured'));
-}
-
-public function show($tmdbid, $slug = null)
-{
-    $torrents = Torrent::where('tmdbid', $tmdbid)
-        ->orderByDesc('seeders')
-        ->get();
-
-    // Build the rich premium header payload (same as the torrent detail page).
-    $firstTorrent = $torrents->first();
-    $display = $firstTorrent
-        ? app(TMDBService::class)->getDisplayPayload(
-            (int) $tmdbid,
-            'movie',
-            $firstTorrent->imdbid
-        )
-        : null;
-
-    $movie = cache()->remember("tmdb_movie_v2_{$tmdbid}", 86400, function () use ($tmdbid) {
-        return Http::get("https://api.themoviedb.org/3/movie/{$tmdbid}", [
-           'api_key' => config('services.tmdb.key'),
-           'append_to_response' => 'recommendations',
-           'language' => 'en-US',
-        ])->json();
-    });
-
-    // Build "You Might Like" recommendations from TMDB
-    $recommendations = collect($movie['recommendations']['results'] ?? [])
-        ->take(8)
-        ->map(fn ($r) => [
-            'id'     => $r['id'],
-            'title'  => $r['title'] ?? $r['name'] ?? null,
-            'poster' => isset($r['poster_path'])
-                ? "https://image.tmdb.org/t/p/w185{$r['poster_path']}"
-                : null,
-            'rating' => $r['vote_average'] ?? null,
-            'year'   => substr($r['release_date'] ?? $r['first_air_date'] ?? '', 0, 4),
-        ])
-        ->all();
-
-    // Generate correct slug
-    $correctSlug = Str::slug($movie['title'] ?? 'movie');
-
-    // Optional: redirect if slug is wrong
-    if ($slug !== $correctSlug) {
-        return redirect()->route('library.movies.show', [
-            'tmdbid' => $tmdbid,
-            'slug' => $correctSlug
-        ]);
+        return view('library.movies.show', compact(
+            'movie', 'torrents', 'tmdbid', 'isSubscribed',
+            'subscribers', 'recommendations', 'display', 'libraryEntry', 'watchUrl'
+        ));
     }
-
-    // Subscription state (library subscribe button uses the TMDB name)
-    $isSubscribed = false;
-    if (Auth::check()) {
-        $isSubscribed = app(TorrentSubscriptionService::class)
-            ->isSubscribedByTmdb(Auth::user(), (string) $tmdbid);
-    }
-
-    // Subscribers for this title (count + names shown beside the button)
-    $subscribers = app(TorrentSubscriptionService::class)
-        ->subscribers($firstTorrent?->imdbid, (string) $tmdbid);
-
-    return view('library.movies.show', compact('movie', 'torrents', 'tmdbid', 'isSubscribed', 'subscribers', 'recommendations', 'display'));
-}
 
 public function subscribe($tmdbid, TorrentSubscriptionService $service)
 {

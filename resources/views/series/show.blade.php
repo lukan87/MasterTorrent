@@ -203,6 +203,25 @@
 
                         </div>
 
+                        {{-- ACTIONS (ADMIN DELETE) --}}
+                        <div class="watch-actions">
+
+                            @php
+                                $userClass = optional(auth()->user())->user_class ?? 0;
+                            @endphp
+
+                            @if($userClass >= \App\Models\UserClass::ADMIN)
+                                <form action="{{ route('series.delete', $series->id) }}" method="POST" style="display:inline" onsubmit="return confirm('Delete &quot;{{ addslashes($series->name) }}&quot; permanently? This also removes its comments, torrents and torrent-library entry.')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="watch-delete-btn">
+                                        <i class="bi bi-trash3"></i> Delete
+                                    </button>
+                                </form>
+                            @endif
+
+                        </div>
+
                     </div>
 
                 </div>
@@ -263,14 +282,22 @@
 
                 <div class="cast-slider">
                     @foreach($similar as $sim)
-                        <a href="https://www.themoviedb.org/search/tv?query={{ urlencode($sim['name']) }}{{ $sim['year'] ? '&first_air_date_year='.$sim['year'] : '' }}"
-                           target="_blank"
+                        @php
+                            $simHref = $sim['in_library']
+                                ? $sim['db_url']
+                                : 'https://www.themoviedb.org/search/tv?query=' . urlencode($sim['name']) . ($sim['year'] ? '&first_air_date_year='.$sim['year'] : '');
+                        @endphp
+                        <a href="{{ $simHref }}"
+                           {{ $sim['in_library'] ? '' : 'target="_blank"' }}
                            class="cast-card text-decoration-none">
                             <div class="cast-image-wrapper">
                                 <img src="{{ $sim['poster'] }}"
                                      class="cast-image"
                                      loading="lazy"
                                      alt="{{ $sim['name'] }}">
+                                @if($sim['in_library'])
+                                    <span class="in-library-badge"><i class="bi bi-check2-circle"></i> Online</span>
+                                @endif
                             </div>
                             <div class="cast-info">
                                 <h6>{{ $sim['name'] }}</h6>
@@ -533,4 +560,56 @@
     font-size:.75rem;
     text-align:center;
 }
+.watch-actions{
+        margin-top:18px;
+        display:flex;
+        align-items:center;
+        gap:10px;
+        flex-wrap:wrap;
+    }
+
+    .watch-delete-btn{
+        display:inline-flex;
+        align-items:center;
+        gap:7px;
+        padding:.55rem .85rem;
+        border-radius:.5rem;
+        background:rgba(239,68,68,.10);
+        border:1px solid rgba(239,68,68,.30);
+        color:#fca5a5;
+        font-size:.78rem;
+        font-weight:600;
+        cursor:pointer;
+        text-decoration:none;
+        transition:.2s ease;
+        font-family:inherit;
+    }
+
+    .watch-delete-btn:hover{
+        color:#fff;
+        background:#ef4444;
+        border-color:#ef4444;
+        transform:translateY(-1px);
+    }
+
+    .cast-image-wrapper{position:relative}
+
+    .in-library-badge{
+        position:absolute;
+        top:8px;
+        left:8px;
+        z-index:3;
+        display:inline-flex;
+        align-items:center;
+        gap:4px;
+        padding:.22rem .5rem;
+        border-radius:999px;
+        background:rgba(45,212,191,.92);
+        color:#06291f;
+        font-size:.62rem;
+        font-weight:700;
+        line-height:1;
+        box-shadow:0 3px 8px rgba(0,0,0,.35);
+        pointer-events:none;
+    }
 </style>

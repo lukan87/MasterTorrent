@@ -125,6 +125,7 @@
 
                     @if($slots > 0 || $hasSeedboxes)
 
+@include('partials._watch-online-btn', ['watchUrl' => $watchUrl ?? null])
                         <div class="btn-group">
 
                             <a href="{{ route('torrents.download', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}"
@@ -536,6 +537,7 @@
 .modern-download-btn,.modern-action-btn{border:1px solid var(--ui-border);color:#dce7ef;background:rgba(255,255,255,.045);padding:8px 12px;border-radius:.55rem;font-size:13px;font-weight:600;transition:background .15s ease,border-color .15s ease,color .15s ease,transform .15s ease}
 .modern-download-btn{background:rgba(45,212,191,.12);border-color:rgba(45,212,191,.28);color:var(--ui-accent)}
 .modern-download-btn:hover{background:rgba(45,212,191,.18);border-color:rgba(45,212,191,.42);color:#b8fff5;transform:translateY(-1px)}
+.watch-online-btn{display:inline-flex;align-items:center;gap:4px;background:rgba(34,197,94,.10);border:1px solid rgba(34,197,94,.28);color:#4ade80;padding:8px 12px;border-radius:.55rem;font-size:13px;font-weight:700;text-decoration:none;transition:background .15s ease,border-color .15s ease,color .15s ease,transform .15s ease}.watch-online-btn:hover{background:rgba(34,197,94,.18);border-color:rgba(34,197,94,.42);color:#bbf7d0;transform:translateY(-1px)}.watch-online-btn i{font-size:14px}
 .modern-action-btn:hover{background:rgba(45,212,191,.09);border-color:rgba(45,212,191,.25);color:var(--ui-accent);transform:translateY(-1px)}
 .info-btn{color:#8fd5ff;background:rgba(59,130,246,.08)}.success-btn{color:#70e0a1;background:rgba(34,197,94,.08)}.thank-btn{color:#8fd5ff;background:rgba(59,130,246,.08)}.thanked-btn{color:#70e0a1;background:rgba(34,197,94,.10)}.subscribe-btn{color:#8fd5ff;background:rgba(59,130,246,.08)}.unsubscribe-btn{color:#ff8f8f;background:rgba(239,68,68,.10)}
 .modern-action-btn.disabled,.modern-action-btn:disabled{opacity:.55!important;cursor:not-allowed;transform:none!important}

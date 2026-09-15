@@ -1218,8 +1218,6 @@ $progress = $user->seeder_rank_progress ?? 0;
 
 </div>
 
-</div>
-
 
 
      <div class="container py-4">

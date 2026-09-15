@@ -524,6 +524,20 @@ $subscriptionService = app(\App\Services\TorrentSubscriptionService::class);
 $subscribeAvailable = $subscriptionService->canSubscribe($torrent);
 $isSubscribed       = $subscribeAvailable && $subscriptionService->isSubscribed(Auth::user(), $torrent);
 $subscribers        = $subscriptionService->subscribers($torrent->imdbid, $torrent->tmdbid);
+// "Watch online" link — shown only when the movie/series exists in the
+// online catalogue (movies / series tables). Keyed by TMDB id.
+$watchUrl = null;
+if ($torrent->tmdb_type === 'movie' && $torrent->tmdbid) {
+    $watchMovie = \App\Models\Movie::where('tmdb_id', $torrent->tmdbid)->first();
+    $watchUrl = $watchMovie
+        ? route('movies.show', [$watchMovie->id, $watchMovie->slug])
+        : null;
+} elseif ($torrent->tmdb_type === 'tv' && $torrent->tmdbid) {
+    $watchSeries = \App\Models\Series::where('tmdb_id', $torrent->tmdbid)->first();
+    $watchUrl = $watchSeries
+        ? route('series.show', [$watchSeries->id, $watchSeries->slug])
+        : null;
+}
 
 
 
@@ -550,7 +564,8 @@ $subscribers        = $subscriptionService->subscribers($torrent->imdbid, $torre
     'externalSubtitles',
     'isSubscribed',
     'subscribeAvailable',
-    'subscribers'
+    'subscribers',
+    'watchUrl'
 
 ));
 

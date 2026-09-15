@@ -34,7 +34,7 @@
                     <i class="bi bi-film me-2"></i>Movies
                 </h1>
                 <p class="lib-page-sub mb-0">
-                    Torrents with active seeders &middot; {{ $movies->total() }} titles
+                    All titles in your library &middot; {{ $movies->total() }} titles
                 </p>
             </div>
         </div>

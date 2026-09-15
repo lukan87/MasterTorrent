@@ -2,6 +2,8 @@
 
 @section('content')
 
+@php $defaults = $defaults ?? []; @endphp
+
 <div class="request-page">
 
     <div class="container py-5">
@@ -122,7 +124,7 @@
 
                                    class="form-control modern-input"
 
-                                   value="{{ old('name') }}"
+                                   value="{{ old('name', $defaults['name'] ?? null) }}"
 
                                    placeholder="Movie / TV Show / Game name..."
 
@@ -148,7 +150,9 @@
 
                                     required>
 
-                                <option value="">
+                                <option value=""
+
+                                    >
 
                                     Select Category
 
@@ -158,7 +162,7 @@
 
                                     <option value="{{ $category->id }}"
 
-                                        {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                        {{ old('category_id', $defaults['category_id'] ?? null) == $category->id ? 'selected' : '' }}>
 
                                         {{ $category->name }}
 
@@ -188,7 +192,7 @@
 
                                    class="form-control modern-input"
 
-                                   value="{{ old('image') }}"
+                                   value="{{ old('image', $defaults['image'] ?? null) }}"
 
                                    placeholder="https://..."
 
@@ -214,7 +218,7 @@
 
                                    class="form-control modern-input"
 
-                                   value="{{ old('imdb_url') }}"
+                                   value="{{ old('imdb_url', $defaults['imdb_url'] ?? null) }}"
 
                                    placeholder="https://imdb.com/title/...">
 
@@ -238,7 +242,7 @@
 
                                    class="form-control modern-input"
 
-                                   value="{{ old('tmdb_url') }}"
+                                   value="{{ old('tmdb_url', $defaults['tmdb_url'] ?? null) }}"
 
                                    placeholder="https://themoviedb.org/...">
 

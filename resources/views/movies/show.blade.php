@@ -287,6 +287,16 @@
 
                             @endif
 
+                            @if($userClass >= \App\Models\UserClass::ADMIN)
+                                <form action="{{ route('movies.delete', $movie->id) }}" method="POST" style="display:inline" onsubmit="return confirm('Delete &quot;{{ addslashes($movie->name) }}&quot; permanently? This also removes its comments and torrents.')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="watch-delete-btn">
+                                        <i class="bi bi-trash3"></i> Delete
+                                    </button>
+                                </form>
+                            @endif
+
                         </div>
 
                     </div>
@@ -360,16 +370,25 @@
                 <div class="movie-cast-slider">
                     @foreach($similar as $sim)
                         <div class="movie-cast-card similar-card">
-                            <a href="https://www.themoviedb.org/search?query={{ urlencode($sim['name']) }}{{ $sim['year'] ? '&year='.$sim['year'] : '' }}"
-                               target="_blank"
+                            <a href="{{ $sim['in_library'] ? $sim['db_url'] : 'https://www.themoviedb.org/search?query=' . urlencode($sim['name']) . ($sim['year'] ? '&year='.$sim['year'] : '') }}"
+                               {{ $sim['in_library'] ? '' : 'target="_blank"' }}
                                class="movie-cast-image-wrapper d-block">
                                 <img src="{{ $sim['poster'] }}"
                                      class="movie-cast-image"
                                      loading="lazy"
                                      alt="{{ $sim['name'] }}">
+                                @if($sim['in_library'])
+                                    <span class="in-library-badge"><i class="bi bi-check2-circle"></i> Online</span>
+                                @endif
                             </a>
                             <div class="movie-cast-info">
-                                <h6>{{ $sim['name'] }}</h6>
+                                <h6>
+                                    @if($sim['in_library'])
+                                        <a href="{{ $sim['db_url'] }}" class="similar-title-link">{{ $sim['name'] }}</a>
+                                    @else
+                                        {{ $sim['name'] }}
+                                    @endif
+                                </h6>
                                 <p>
                                     <i class="bi bi-star-fill text-warning"></i> {{ $sim['rating'] }}
                                     @if($sim['year']) · {{ $sim['year'] }} @endif
@@ -881,6 +900,30 @@
     transform:translateY(-1px);
 }
 
+.watch-delete-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    padding:.55rem .85rem;
+    border-radius:.5rem;
+    background:rgba(239,68,68,.10);
+    border:1px solid rgba(239,68,68,.30);
+    color:#fca5a5;
+    font-size:.78rem;
+    font-weight:600;
+    cursor:pointer;
+    text-decoration:none;
+    transition:.2s ease;
+    font-family:inherit;
+}
+
+.watch-delete-btn:hover{
+    color:#fff;
+    background:#ef4444;
+    border-color:#ef4444;
+    transform:translateY(-1px);
+}
+
 .vip-required-box{
     display:inline-flex;
     align-items:center;
@@ -1356,6 +1399,35 @@
         width:100%;
         justify-content:space-between;
     }
+}
+.movie-cast-image-wrapper{position:relative}
+
+.in-library-badge{
+    position:absolute;
+    top:8px;
+    left:8px;
+    z-index:3;
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    padding:.22rem .5rem;
+    border-radius:999px;
+    background:rgba(45,212,191,.92);
+    color:#06291f;
+    font-size:.62rem;
+    font-weight:700;
+    line-height:1;
+    box-shadow:0 3px 8px rgba(0,0,0,.35);
+    pointer-events:none;
+}
+
+.similar-title-link{
+    color:#8ff5e6;
+    text-decoration:none;
+}
+.similar-title-link:hover{
+    color:#fff;
+    text-decoration:underline;
 }
 </style>
 

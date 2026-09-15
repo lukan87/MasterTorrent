@@ -190,391 +190,251 @@
 </div>
 
 <style>
-
 /* =========================================
-   PAGE
-========================================= */
+   FILEIPLAY NEWS CREATE — FORUM STYLE
+   ========================================= */
 
-body{
-
-    background:
-        radial-gradient(
-            circle at top,
-            #172033,
-            #0f172a 45%,
-            #020617
-        );
-
-    min-height:100vh;
+.news-create-page {
+    color: #e5e7eb;
 }
 
-/* =========================================
-   HERO
-========================================= */
-
-.news-create-hero{
-
-    position:relative;
-
-    overflow:hidden;
-
-    padding:42px;
-
-    border-radius:30px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(255,255,255,.06),
-            rgba(255,255,255,.02)
-        );
-
-    border:
-        1px solid rgba(255,255,255,.08);
-
-    backdrop-filter:blur(18px);
-
-    box-shadow:
-        0 20px 50px rgba(0,0,0,.35);
+.news-create-hero,
+.news-form-card {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, rgba(22,32,51,.96), rgba(15,23,42,.88));
+    border: 1px solid var(--ui-border, rgba(148,163,184,.16));
+    border-radius: .75rem;
+    box-shadow: 0 14px 34px rgba(0,0,0,.28);
 }
 
-.hero-glow{
-
-    position:absolute;
-
-    top:-120px;
-    right:-120px;
-
-    width:320px;
-    height:320px;
-
-    border-radius:50%;
-
-    background:
-        radial-gradient(
-            circle,
-            rgba(59,130,246,.22),
-            transparent 70%
-        );
+.news-create-hero {
+    padding: 28px 30px;
 }
 
-.hero-badge{
-
-    display:inline-flex;
-
-    align-items:center;
-
-    padding:10px 16px;
-
-    border-radius:999px;
-
-    background:
-        rgba(59,130,246,.14);
-
-    border:
-        1px solid rgba(59,130,246,.2);
-
-    color:#93c5fd;
-
-    font-size:.82rem;
-
-    font-weight:800;
-
-    letter-spacing:1px;
-
-    margin-bottom:20px;
+.news-form-card {
+    padding: 28px 30px;
 }
 
-.hero-title{
-
-    color:white;
-
-    font-size:clamp(2rem,5vw,3.2rem);
-
-    font-weight:900;
-
-    margin-bottom:12px;
+.hero-glow,
+.form-glow {
+    position: absolute;
+    pointer-events: none;
+    border-radius: 50%;
+    filter: blur(8px);
 }
 
-.hero-subtitle{
-
-    color:rgba(255,255,255,.65);
-
-    font-size:1rem;
-
-    margin:0;
+.hero-glow {
+    width: 260px;
+    height: 260px;
+    top: -150px;
+    right: -110px;
+    background: radial-gradient(circle, rgba(20,184,166,.12), transparent 68%);
 }
 
-/* =========================================
-   FORM CARD
-========================================= */
-
-.news-form-card{
-
-    position:relative;
-
-    overflow:hidden;
-
-    padding:38px;
-
-    border-radius:30px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(255,255,255,.05),
-            rgba(255,255,255,.02)
-        );
-
-    border:
-        1px solid rgba(255,255,255,.06);
-
-    backdrop-filter:blur(16px);
-
-    box-shadow:
-        0 20px 50px rgba(0,0,0,.3);
+.form-glow {
+    width: 240px;
+    height: 240px;
+    bottom: -150px;
+    left: -120px;
+    background: radial-gradient(circle, rgba(20,184,166,.08), transparent 68%);
 }
 
-.form-glow{
-
-    position:absolute;
-
-    bottom:-140px;
-    left:-140px;
-
-    width:320px;
-    height:320px;
-
-    border-radius:50%;
-
-    background:
-        radial-gradient(
-            circle,
-            rgba(124,58,237,.16),
-            transparent 70%
-        );
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: .42rem .7rem;
+    margin-bottom: .8rem;
+    border-radius: .5rem;
+    background: rgba(20,184,166,.09);
+    border: 1px solid rgba(20,184,166,.22);
+    color: #67e8df;
+    font-size: .72rem;
+    font-weight: 800;
+    letter-spacing: .7px;
 }
 
-/* =========================================
-   LABELS
-========================================= */
-
-.modern-label{
-
-    display:flex;
-
-    align-items:center;
-
-    margin-bottom:12px;
-
-    color:#dbeafe;
-
-    font-size:.85rem;
-
-    font-weight:800;
-
-    text-transform:uppercase;
-
-    letter-spacing:1px;
+.hero-title {
+    margin: 0 0 .45rem;
+    color: #f8fafc;
+    font-size: clamp(1.7rem, 3vw, 2.35rem);
+    line-height: 1.15;
+    font-weight: 800;
 }
 
-/* =========================================
-   INPUTS
-========================================= */
+.hero-subtitle {
+    margin: 0;
+    color: #94a3b8;
+    font-size: .9rem;
+}
+
+/* FORM */
+
+.modern-label {
+    display: flex;
+    align-items: center;
+    margin-bottom: .55rem;
+    color: #cbd5e1;
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .35px;
+}
+
+.modern-label i {
+    color: #67e8df;
+}
 
 .modern-input,
-.modern-textarea{
-
-    background:
-        rgba(15,23,42,.75) !important;
-
-    border:
-        1px solid rgba(255,255,255,.08) !important;
-
-    color:white !important;
-
-    border-radius:18px;
-
-    padding:16px 18px;
-
-    box-shadow:none !important;
+.modern-textarea {
+    background: rgba(2,6,23,.58) !important;
+    border: 1px solid rgba(148,163,184,.18) !important;
+    border-radius: .55rem;
+    color: #f8fafc !important;
+    padding: .72rem .85rem;
+    box-shadow: none !important;
+    font-size: .9rem;
 }
 
 .modern-input::placeholder,
-.modern-textarea::placeholder{
-
-    color:rgba(255,255,255,.4);
+.modern-textarea::placeholder {
+    color: #64748b;
 }
 
 .modern-input:focus,
-.modern-textarea:focus{
-
-    border-color:
-        rgba(59,130,246,.45) !important;
-
-    box-shadow:
-        0 0 0 4px rgba(59,130,246,.12) !important;
+.modern-textarea:focus {
+    border-color: rgba(20,184,166,.55) !important;
+    box-shadow: 0 0 0 .18rem rgba(20,184,166,.10) !important;
 }
 
-.modern-textarea{
-
-    min-height:320px;
-
-    resize:vertical;
-
-    line-height:1.7;
+.modern-textarea {
+    min-height: 280px;
+    resize: vertical;
+    line-height: 1.65;
 }
 
-/* =========================================
-   TOOLBAR
-========================================= */
+/* TOOLBAR */
 
-.editor-toolbar{
-
-    display:flex;
-
-    flex-wrap:wrap;
-
-    gap:10px;
-
-    margin-bottom:14px;
+.editor-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem;
+    margin-bottom: .65rem;
 }
 
-.toolbar-btn{
-
-    width:44px;
-    height:44px;
-
-    border:none;
-
-    border-radius:14px;
-
-    background:
-        rgba(255,255,255,.06);
-
-    color:white;
-
-    transition:.25s ease;
+.toolbar-btn {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(148,163,184,.16);
+    border-radius: .5rem;
+    background: rgba(30,41,59,.72);
+    color: #cbd5e1;
+    transition: background .18s ease, border-color .18s ease, color .18s ease, transform .18s ease;
 }
 
-.toolbar-btn:hover{
-
-    transform:translateY(-2px);
-
-    background:
-        rgba(59,130,246,.18);
-
-    color:#93c5fd;
+.toolbar-btn:hover {
+    transform: translateY(-1px);
+    background: rgba(20,184,166,.12);
+    border-color: rgba(20,184,166,.32);
+    color: #67e8df;
 }
 
-.danger-btn:hover{
-
-    background:
-        rgba(220,38,38,.18);
-
-    color:#f87171;
+.danger-btn:hover {
+    background: rgba(239,68,68,.11);
+    border-color: rgba(239,68,68,.28);
+    color: #fca5a5;
 }
 
-.success-btn:hover{
-
-    background:
-        rgba(34,197,94,.18);
-
-    color:#4ade80;
+.success-btn:hover {
+    background: rgba(34,197,94,.11);
+    border-color: rgba(34,197,94,.28);
+    color: #86efac;
 }
 
-/* =========================================
-   BUTTONS
-========================================= */
+/* ACTIONS */
 
-.publish-btn{
-
-    border:none;
-
-    padding:14px 24px;
-
-    border-radius:18px;
-
-    background:
-        linear-gradient(
-            135deg,
-            #2563eb,
-            #7c3aed
-        );
-
-    color:white;
-
-    font-weight:800;
-
-    transition:.25s ease;
-
-    box-shadow:
-        0 16px 35px rgba(59,130,246,.28);
+.publish-btn,
+.cancel-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: .62rem 1rem;
+    border-radius: .55rem;
+    font-size: .84rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: transform .18s ease, background .18s ease, border-color .18s ease;
 }
 
-.publish-btn:hover{
-
-    transform:translateY(-3px);
+.publish-btn {
+    border: 1px solid rgba(20,184,166,.35);
+    background: rgba(20,184,166,.14);
+    color: #67e8df;
 }
 
-.cancel-btn{
-
-    display:inline-flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    padding:14px 22px;
-
-    border-radius:18px;
-
-    text-decoration:none;
-
-    background:
-        rgba(255,255,255,.06);
-
-    border:
-        1px solid rgba(255,255,255,.08);
-
-    color:white;
-
-    font-weight:700;
-
-    transition:.25s ease;
+.publish-btn:hover {
+    transform: translateY(-1px);
+    background: rgba(20,184,166,.22);
+    border-color: rgba(20,184,166,.5);
+    color: #99f6ef;
 }
 
-.cancel-btn:hover{
-
-    color:white;
-
-    transform:translateY(-3px);
+.cancel-btn {
+    border: 1px solid rgba(148,163,184,.18);
+    background: rgba(30,41,59,.65);
+    color: #cbd5e1;
 }
 
-/* =========================================
-   MOBILE
-========================================= */
+.cancel-btn:hover {
+    transform: translateY(-1px);
+    background: rgba(51,65,85,.8);
+    border-color: rgba(148,163,184,.3);
+    color: #f8fafc;
+}
 
-@media(max-width:768px){
+/* MOBILE */
 
-    .news-create-hero,
-    .news-form-card{
-
-        padding:24px;
+@media (max-width: 768px) {
+    .news-create-page {
+        padding-top: 1.25rem !important;
+        padding-bottom: 1.25rem !important;
     }
 
-    .hero-title{
+    .news-create-hero,
+    .news-form-card {
+        padding: 20px;
+        border-radius: .65rem;
+    }
 
-        font-size:2rem;
+    .hero-title {
+        font-size: 1.7rem;
+    }
+
+    .hero-subtitle {
+        font-size: .84rem;
+    }
+
+    .modern-textarea {
+        min-height: 240px;
     }
 
     .publish-btn,
-    .cancel-btn{
-
-        width:100%;
+    .cancel-btn {
+        width: 100%;
     }
 }
 
+@media (prefers-reduced-motion: reduce) {
+    .toolbar-btn,
+    .publish-btn,
+    .cancel-btn {
+        transition: none;
+    }
+}
 </style>
 
 <script>

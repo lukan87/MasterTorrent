@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Auth;
 
 class SeriesController extends Controller
 {
@@ -72,10 +73,61 @@ class SeriesController extends Controller
     {
         $request->validate(['series_name' => 'required|string|max:255']);
 
-        $data = $this->tmdb('search/tv', ['query' => $request->series_name]);
+        $query = trim($request->series_name);
+
+        $data = $this->tmdb('search/tv', ['query' => $query, 'include_adult' => false]);
         $series = collect($data['results'] ?? []);
 
-        return view('series.search_results', compact('series'));
+        // Partition search results into those already in our DB and those we can add.
+        $dbIds = Series::whereIn('tmdb_id', $series->pluck('id'))->pluck('tmdb_id')->flip();
+        $existingSeries = $series->filter(fn($s) => isset($dbIds[$s['id']]))->values();
+        $newSeries      = $series->filter(fn($s) => !isset($dbIds[$s['id']]))->values();
+
+        // The /search/tv endpoint does not include an imdb_id, so fetch it
+        // per candidate. Titles that genuinely have no IMDb ID are hidden from
+        // the "New Series to Add" list so they can never be added.
+        $noImdbCount = 0;
+        $newSeries = $newSeries->filter(function ($s) use (&$noImdbCount) {
+            if (empty($s['id'])) {
+                $noImdbCount++;
+                return false;
+            }
+            $ext = $this->tmdb("tv/{$s['id']}/external_ids");
+            $imdb = $ext['imdb_id'] ?? null;
+            if (empty($imdb)) {
+                $noImdbCount++;
+                return false;
+            }
+            return true;
+        })->values();
+
+        // Use the best search hit as the anchor for similar + recommended rows.
+        $similarSeries     = collect();
+        $recommendedSeries = collect();
+        $reference = $series
+            ->filter(fn($s) => !empty($s['poster_path']))
+            ->first() ?? $series->first();
+
+        if ($reference && !empty($reference['id'])) {
+            $refId = $reference['id'];
+
+            $similarData = $this->tmdb("tv/{$refId}/similar", ['include_adult' => false]);
+            $recomData   = $this->tmdb("tv/{$refId}/recommendations", ['include_adult' => false]);
+
+            $similarSeries     = collect($similarData['results'] ?? [])->take(10)->values();
+            $recommendedSeries = collect($recomData['results'] ?? [])->take(10)->values();
+
+            // Batch-mark DB status so we don't query per row.
+            $relatedIds = $similarSeries->pluck('id')->merge($recommendedSeries->pluck('id'))->unique();
+            $relatedDb  = Series::whereIn('tmdb_id', $relatedIds)->pluck('tmdb_id')->flip();
+
+            $similarSeries     = $similarSeries->map(fn($s) => ['series' => $s, 'exists' => isset($relatedDb[$s['id']])]);
+            $recommendedSeries = $recommendedSeries->map(fn($s) => ['series' => $s, 'exists' => isset($relatedDb[$s['id']])]);
+        }
+
+        return view('series.search_results', compact(
+            'query', 'series', 'existingSeries', 'newSeries', 'similarSeries', 'recommendedSeries', 'noImdbCount'
+        ));
     }
 
     public function selectSeries($tmdb_id)
@@ -147,9 +199,10 @@ class SeriesController extends Controller
         });
 
         // Similar series (TMDB).
-        $similar = Cache::remember("series_similar_{$series->tmdb_id}", now()->addMonth(), function () use ($series) {
+        $similar = Cache::remember("series_similar_v2_{$series->tmdb_id}", now()->addMonth(), function () use ($series) {
             $data = $this->tmdb("tv/{$series->tmdb_id}/similar");
             return collect($data['results'] ?? [])->take(10)->map(fn($item) => [
+                'tmdb_id' => $item['id'] ?? null,
                 'name'   => $item['name'] ?? 'Unknown',
                 'poster' => ($item['poster_path'] ?? null)
                     ? 'https://image.tmdb.org/t/p/w500' . $item['poster_path']
@@ -159,6 +212,21 @@ class SeriesController extends Controller
                     : null,
                 'rating' => number_format($item['vote_average'] ?? 0, 1),
             ]);
+        });
+
+        // Resolve whether each similar series already exists in the DB (fresh lookup,
+        // not cached, so newly added titles become linkable immediately).
+        $existingSim = \App\Models\Series::whereIn('tmdb_id', $similar->pluck('tmdb_id')->filter())
+            ->get()
+            ->keyBy('tmdb_id');
+
+        $similar = $similar->map(function ($item) use ($existingSim) {
+            $dbSeries = ($item['tmdb_id'] ?? null) ? $existingSim->get($item['tmdb_id']) : null;
+            $item['in_library'] = (bool) $dbSeries;
+            $item['db_url'] = $dbSeries
+                ? route('series.show', [$dbSeries->id, $dbSeries->slug])
+                : null;
+            return $item;
         });
 
         // Track a view once per session.
@@ -206,17 +274,28 @@ class SeriesController extends Controller
     {
         $request->validate(['series' => 'required|array', 'series.*' => 'integer|distinct']);
 
+        $added = 0;
         foreach ($request->series as $tmdb_id) {
             if (Series::where('tmdb_id', $tmdb_id)->exists()) {
                 continue;
             }
             $data = $this->tmdb("tv/{$tmdb_id}", ['append_to_response' => 'external_ids']);
-            if ($data && !empty($data['id'])) {
-                $this->createSeries($data);
+            if (!$data || empty($data['id'])) {
+                continue;
             }
+            // Never add titles without an IMDb ID.
+            $imdb = $data['imdb_id'] ?? $data['external_ids']['imdb_id'] ?? null;
+            if (empty($imdb)) {
+                continue;
+            }
+            $this->createSeries($data);
+            $added++;
         }
 
-        return redirect()->route('series.index')->with('status', 'Series added successfully!');
+        return redirect()->route('series.index')->with(
+            'status',
+            $added > 0 ? "{$added} series added successfully!" : 'No series were added (titles missing an IMDb ID were skipped).'
+        );
     }
 
     public function searchSeries(Request $request)
@@ -233,11 +312,26 @@ class SeriesController extends Controller
         return view('series.index', compact('series', 'featured', 'sort'));
     }
 
+    /**
+     * Delete a series from the online catalogue (admins only, from the show page).
+     */
     public function destroy($id)
     {
+        if (!Auth::check() || Auth::user()->user_class < \App\Models\UserClass::ADMIN) {
+            return redirect()->route('series.index')->with('error', 'Unauthorized.');
+        }
+
         try {
-            Series::findOrFail($id)->delete();
-            return redirect()->route('series.index')->with('status', 'Series deleted successfully!');
+            $series = Series::findOrFail($id);
+
+            // Clear dependent records so nothing is orphaned.
+            $series->comments()->delete();
+            $series->torrents()->delete();
+            \App\Models\TorrentSeries::where('tmdbid', $series->tmdb_id)->delete();
+
+            $series->delete();
+
+            return redirect()->route('series.index')->with('status', "Series \"{$series->name}\" deleted successfully.");
         } catch (\Exception $e) {
             Log::error("Error deleting series: " . $e->getMessage());
             return redirect()->route('series.index')->with('error', 'Error deleting series!');
@@ -268,7 +362,7 @@ class SeriesController extends Controller
     {
         $genres = array_map(fn($g) => $g['name'] ?? '', $data['genres'] ?? []);
 
-        return Series::create([
+        $series = Series::create([
             'name'               => $data['name'],
             'tmdb_id'            => $data['id'],
             'imdb_id'            => $data['imdb_id'] ?? $data['external_ids']['imdb_id'] ?? null,
@@ -285,6 +379,30 @@ class SeriesController extends Controller
             'genres'             => array_values(array_filter($genres)),
             'slug'               => $this->generateUniqueSlug($data['name']),
         ]);
+
+        // Also sync to the torrent library so it shows in the library section
+        $this->syncToTorrentLibrary($series);
+
+        return $series;
+    }
+
+    /**
+     * Create or update a TorrentSeries entry so the library stays in sync
+     * with the online series catalogue.
+     */
+    private function syncToTorrentLibrary(Series $series): void
+    {
+        \App\Models\TorrentSeries::updateOrCreate(
+            ['tmdbid' => $series->tmdb_id],
+            [
+                'title'         => $series->name,
+                'slug'          => $series->slug,
+                'poster_path'   => $series->poster_path,
+                'backdrop_path' => $series->backdrop_path,
+                'rating'        => $series->vote_average,
+                'year'          => $series->first_air_date ? $series->first_air_date->format('Y') : null,
+            ]
+        );
     }
 
     private function generateUniqueSlug($title)

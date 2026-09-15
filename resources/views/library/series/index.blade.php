@@ -34,7 +34,7 @@
                     <i class="bi bi-tv me-2"></i>Series
                 </h1>
                 <p class="lib-page-sub mb-0">
-                    Torrents with active seeders &middot; {{ $series->total() }} titles
+                    All titles in your library &middot; {{ $series->total() }} titles
                 </p>
             </div>
         </div>

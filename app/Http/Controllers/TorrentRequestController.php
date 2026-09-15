@@ -26,7 +26,18 @@ class TorrentRequestController extends Controller
     public function create()
     {
         $categories = Category::all();
-        return view('requests.create', compact('categories'));
+
+        // Allow pre-filling from the query string
+        // (e.g. the library "Make a Request" button passes name/tmdb_url/imdb_url/image)
+        $defaults = [
+            'name'     => request('name'),
+            'tmdb_url' => request('tmdb_url'),
+            'imdb_url' => request('imdb_url'),
+            'image'    => request('image'),
+            'category_id' => request('category_id'),
+        ];
+
+        return view('requests.create', compact('categories', 'defaults'));
     }
 
     // Store a new torrent request

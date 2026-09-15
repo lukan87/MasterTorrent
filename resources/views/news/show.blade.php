@@ -2,491 +2,57 @@
 
 @section('content')
 
-<div class="container py-5 news-show-page">
-
-    {{-- =========================================
-        HERO HEADER
-    ========================================= --}}
-    <div class="news-show-hero mb-4">
-
-        <div class="hero-glow"></div>
-
-        <div class="position-relative">
-
-            <div class="news-badge">
-
-                <i class="bi bi-newspaper me-2"></i>
-
-                FileIplay NEWS
-
-            </div>
-
-            <h1 class="news-title">
-
-                {{ $news->title }}
-
-            </h1>
-
-            <div class="news-meta">
-
-                <span>
-
-                    <i class="bi bi-person-circle"></i>
-
-                    {{ $news->user->name }}
-
-                </span>
-
-                <span>
-
-                    <i class="bi bi-calendar3"></i>
-
-                    {{ $news->created_at->format('F d, Y') }}
-
-                </span>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    {{-- =========================================
-        ARTICLE CONTENT
-    ========================================= --}}
-    <div class="news-article-card mb-4">
-
-        <div class="article-glow"></div>
-
-        <div class="news-content">
-
-            {!! convertCustomTagsToHtml($news->content) !!}
-
-        </div>
-
-    </div>
-
-    {{-- =========================================
-        FOOTER ACTIONS
-    ========================================= --}}
-    <div class="news-actions">
-
-        <a href="{{ route('news.index') }}"
-           class="modern-btn secondary-btn">
-
-            <i class="bi bi-arrow-left-circle me-2"></i>
-
-            Back to News
-
-        </a>
-
-        @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::ADMIN)
-
-            <a href="{{ route('news.edit', $news) }}"
-               class="modern-btn edit-btn">
-
-                <i class="bi bi-pencil-square me-2"></i>
-
-                Edit Article
-
-            </a>
-
-        @endif
-
-    </div>
-
-</div>
-
 <style>
-
-/* =========================================
-   BACKGROUND
-========================================= */
-
-body{
-
-    background:
-        radial-gradient(
-            circle at top,
-            #172033,
-            #0f172a 45%,
-            #020617
-        );
-
-    min-height:100vh;
-}
-
-/* =========================================
-   HERO
-========================================= */
-
-.news-show-hero{
-
-    position:relative;
-
-    overflow:hidden;
-
-    padding:42px;
-
-    border-radius:30px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(255,255,255,.06),
-            rgba(255,255,255,.02)
-        );
-
-    border:
-        1px solid rgba(255,255,255,.08);
-
-    backdrop-filter:blur(16px);
-
-    box-shadow:
-        0 25px 60px rgba(0,0,0,.35);
-}
-
-.hero-glow{
-
-    position:absolute;
-
-    top:-120px;
-    right:-120px;
-
-    width:320px;
-    height:320px;
-
-    border-radius:50%;
-
-    background:
-        radial-gradient(
-            circle,
-            rgba(59,130,246,.22),
-            transparent 70%
-        );
-}
-
-.news-badge{
-
-    display:inline-flex;
-
-    align-items:center;
-
-    padding:10px 16px;
-
-    border-radius:999px;
-
-    background:
-        rgba(59,130,246,.12);
-
-    border:
-        1px solid rgba(59,130,246,.18);
-
-    color:#93c5fd;
-
-    font-size:.82rem;
-
-    font-weight:800;
-
-    letter-spacing:1px;
-
-    margin-bottom:20px;
-}
-
-.news-title{
-
-    color:white;
-
-    font-size:clamp(2rem,5vw,3.5rem);
-
-    line-height:1.15;
-
-    font-weight:900;
-
-    margin-bottom:20px;
-
-    overflow-wrap:anywhere;
-}
-
-.news-meta{
-
-    display:flex;
-
-    flex-wrap:wrap;
-
-    gap:18px;
-
-    color:rgba(255,255,255,.6);
-
-    font-size:.95rem;
-}
-
-.news-meta span{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:8px;
-}
-
-/* =========================================
-   ARTICLE CARD
-========================================= */
-
-.news-article-card{
-
-    position:relative;
-
-    overflow:hidden;
-
-    border-radius:30px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(255,255,255,.05),
-            rgba(255,255,255,.02)
-        );
-
-    border:
-        1px solid rgba(255,255,255,.06);
-
-    backdrop-filter:blur(16px);
-
-    box-shadow:
-        0 20px 50px rgba(0,0,0,.3);
-}
-
-.article-glow{
-
-    position:absolute;
-
-    bottom:-120px;
-    left:-120px;
-
-    width:260px;
-    height:260px;
-
-    border-radius:50%;
-
-    background:
-        radial-gradient(
-            circle,
-            rgba(124,58,237,.18),
-            transparent 70%
-        );
-}
-
-/* =========================================
-   CONTENT
-========================================= */
-
-.news-content{
-
-    position:relative;
-
-    z-index:2;
-
-    padding:42px;
-
-    color:rgba(255,255,255,.88);
-
-    font-size:1rem;
-
-    line-height:1.9;
-
-    overflow-wrap:anywhere;
-}
-
-/* TYPOGRAPHY */
-
-.news-content h1,
-.news-content h2,
-.news-content h3,
-.news-content h4,
-.news-content h5,
-.news-content h6{
-
-    color:white;
-
-    margin-top:32px;
-    margin-bottom:18px;
-
-    font-weight:800;
-}
-
-.news-content p{
-
-    margin-bottom:22px;
-}
-
-.news-content img{
-
-    max-width:100%;
-
-    height:auto;
-
-    border-radius:18px;
-
-    margin:20px 0;
-
-    box-shadow:
-        0 10px 30px rgba(0,0,0,.35);
-}
-
-.news-content a{
-
-    color:#60a5fa;
-
-    text-decoration:none;
-}
-
-.news-content a:hover{
-
-    color:#93c5fd;
-
-    text-decoration:underline;
-}
-
-.news-content blockquote{
-
-    margin:24px 0;
-
-    padding:18px 24px;
-
-    border-left:4px solid #3b82f6;
-
-    background:
-        rgba(255,255,255,.04);
-
-    border-radius:14px;
-
-    color:rgba(255,255,255,.78);
-
-    font-style:italic;
-}
-
-.news-content code{
-
-    background:
-        rgba(255,255,255,.08);
-
-    padding:2px 8px;
-
-    border-radius:8px;
-
-    color:#93c5fd;
-}
-
-.news-content pre{
-
-    background:
-        rgba(0,0,0,.4);
-
-    padding:20px;
-
-    border-radius:18px;
-
-    overflow:auto;
-
-    border:
-        1px solid rgba(255,255,255,.06);
-}
-
-/* =========================================
-   ACTIONS
-========================================= */
-
-.news-actions{
-
-    display:flex;
-
-    flex-wrap:wrap;
-
-    gap:14px;
-}
-
-.modern-btn{
-
-    display:inline-flex;
-
-    align-items:center;
-    justify-content:center;
-
-    padding:14px 22px;
-
-    border-radius:18px;
-
-    text-decoration:none;
-
-    font-weight:700;
-
-    transition:.25s ease;
-}
-
-.secondary-btn{
-
-    background:
-        rgba(255,255,255,.06);
-
-    border:
-        1px solid rgba(255,255,255,.08);
-
-    color:white;
-}
-
-.edit-btn{
-
-    background:
-        linear-gradient(
-            135deg,
-            #2563eb,
-            #7c3aed
-        );
-
-    color:white;
-
-    box-shadow:
-        0 14px 30px rgba(59,130,246,.3);
-}
-
-.modern-btn:hover{
-
-    transform:translateY(-3px);
-
-    color:white;
-}
-
-/* =========================================
-   MOBILE
-========================================= */
-
-@media(max-width:768px){
-
-    .news-show-hero{
-
-        padding:28px 24px;
-    }
-
-    .news-content{
-
-        padding:28px 22px;
-
-        font-size:.96rem;
-    }
-
-    .news-actions{
-
-        flex-direction:column;
-    }
-
-    .modern-btn{
-
-        width:100%;
-    }
-}
-
+.news-show-page{color:#e5e7eb}
+.news-show-hero{position:relative;overflow:hidden;padding:28px 30px;margin-bottom:18px;border-radius:.75rem;background:linear-gradient(135deg,rgba(22,32,51,.97),rgba(15,23,42,.91));border:1px solid var(--ui-border,rgba(255,255,255,.08));box-shadow:0 14px 36px rgba(0,0,0,.28)}
+.hero-glow{position:absolute;top:-110px;right:-100px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(34,211,201,.12),transparent 70%);pointer-events:none}
+.news-badge{display:inline-flex;align-items:center;padding:5px 9px;margin-bottom:12px;border-radius:.45rem;background:rgba(34,211,201,.08);border:1px solid rgba(34,211,201,.16);color:#67e8df;font-size:.68rem;font-weight:800;letter-spacing:.65px}
+.news-title{position:relative;margin:0 0 13px;color:#f8fafc;font-size:clamp(1.65rem,4vw,2.5rem);line-height:1.2;font-weight:750;overflow-wrap:anywhere}
+.news-meta{display:flex;flex-wrap:wrap;gap:14px 20px;color:rgba(226,232,240,.58);font-size:.78rem}
+.news-meta span{display:inline-flex;align-items:center;gap:6px}.news-meta i{color:#5eead4}
+.news-article-card{position:relative;overflow:hidden;border-radius:.75rem;background:linear-gradient(135deg,rgba(22,32,51,.94),rgba(15,23,42,.88));border:1px solid var(--ui-border,rgba(255,255,255,.07));box-shadow:0 12px 32px rgba(0,0,0,.24)}
+.article-glow{position:absolute;bottom:-120px;left:-100px;width:230px;height:230px;border-radius:50%;background:radial-gradient(circle,rgba(34,211,201,.07),transparent 70%);pointer-events:none}
+.news-content{position:relative;z-index:2;padding:30px;color:rgba(226,232,240,.82);font-size:.9rem;line-height:1.75;overflow-wrap:anywhere}
+.news-content h1,.news-content h2,.news-content h3,.news-content h4,.news-content h5,.news-content h6{color:#f8fafc;margin-top:28px;margin-bottom:12px;font-weight:700;line-height:1.3}
+.news-content h1:first-child,.news-content h2:first-child,.news-content h3:first-child,.news-content h4:first-child,.news-content h5:first-child,.news-content h6:first-child{margin-top:0}
+.news-content p{margin-bottom:16px}.news-content ul,.news-content ol{margin-bottom:16px;padding-left:1.4rem}.news-content li{margin-bottom:5px}
+.news-content img{display:block;max-width:100%;height:auto;border-radius:.65rem;margin:18px auto;border:1px solid rgba(255,255,255,.07);box-shadow:0 8px 24px rgba(0,0,0,.28)}
+.news-content a{color:#5eead4;text-decoration:none}.news-content a:hover{color:#99f6e4;text-decoration:underline}
+.news-content blockquote{margin:20px 0;padding:12px 17px;border-left:3px solid #14b8a6;background:rgba(34,211,201,.05);border-radius:.45rem;color:rgba(226,232,240,.72)}
+.news-content code{background:rgba(255,255,255,.07);padding:2px 6px;border-radius:.3rem;color:#99f6e4;font-size:.84em}
+.news-content pre{margin:18px 0;padding:14px;overflow-x:auto;border-radius:.55rem;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.06);color:#d1d5db}
+.news-content table{width:100%;margin:18px 0;border-collapse:collapse}.news-content th,.news-content td{padding:8px 10px;border:1px solid rgba(255,255,255,.07)}.news-content th{background:rgba(34,211,201,.06);color:#f8fafc}
+.news-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px}.modern-btn{display:inline-flex;align-items:center;justify-content:center;padding:8px 13px;border-radius:.5rem;text-decoration:none;font-size:.78rem;font-weight:700;transition:all .2s ease}
+.secondary-btn{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);color:#dbe4ee}.secondary-btn:hover{background:rgba(255,255,255,.09);border-color:rgba(34,211,201,.2);color:#67e8df}
+.edit-btn{background:rgba(34,211,201,.1);border:1px solid rgba(34,211,201,.22);color:#67e8df}.edit-btn:hover{background:#14b8a6;border-color:#14b8a6;color:#061311;box-shadow:0 5px 16px rgba(20,184,166,.18)}
+.modern-btn:hover{transform:translateY(-1px)}
+@media(max-width:768px){.news-show-page{padding-left:12px;padding-right:12px}.news-show-hero{padding:22px 18px}.news-title{font-size:1.55rem}.news-content{padding:22px 18px;font-size:.86rem}.news-actions{flex-direction:column}.modern-btn{width:100%}}
 </style>
+
+<div class="container py-4 news-show-page">
+    <div class="news-show-hero">
+        <div class="hero-glow"></div>
+        <div class="position-relative">
+            <div class="news-badge"><i class="bi bi-newspaper me-2"></i>FileIplay NEWS</div>
+            <h1 class="news-title">{{ $news->title }}</h1>
+            <div class="news-meta">
+                <span><i class="bi bi-person-circle"></i>{{ $news->user->name }}</span>
+                <span><i class="bi bi-calendar3"></i>{{ $news->created_at->format('F d, Y') }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="news-article-card">
+        <div class="article-glow"></div>
+        <div class="news-content">{!! convertCustomTagsToHtml($news->content) !!}</div>
+    </div>
+
+    <div class="news-actions">
+        <a href="{{ route('news.index') }}" class="modern-btn secondary-btn"><i class="bi bi-arrow-left-circle me-2"></i>Back to News</a>
+        @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::ADMIN)
+            <a href="{{ route('news.edit', $news) }}" class="modern-btn edit-btn"><i class="bi bi-pencil-square me-2"></i>Edit Article</a>
+        @endif
+    </div>
+</div>
 
 @endsection

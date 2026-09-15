@@ -139,7 +139,7 @@
                                 <i class="bi bi-eye me-1"></i> View
                             </a> -->
 
-                            @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::WEB_DEVELOPER)
+                            <!-- @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::WEB_DEVELOPER)
 
                                 <form
                                     action="{{ route('series.destroy', $serie->id) }}"
@@ -154,7 +154,7 @@
                                     </button>
                                 </form>
 
-                            @endif
+                            @endif -->
 
                         </div>
                     </div>

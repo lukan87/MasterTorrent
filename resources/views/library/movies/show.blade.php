@@ -40,18 +40,45 @@
 
 @else
 
-    {{-- Fallback (no torrent / no display data) — simple title --}}
+    {{-- Fallback (no torrent / no display data) — rich hero from TMDB/library data --}}
+    @php
+        $fbPoster = !empty($movie['poster_path'])
+            ? 'https://image.tmdb.org/t/p/w342'.$movie['poster_path']
+            : (!empty($libraryEntry?->poster_path) ? 'https://image.tmdb.org/t/p/w342'.$libraryEntry->poster_path : '/images/noposter.jpg');
+        $fbBackdrop = !empty($movie['backdrop_path'])
+            ? 'https://image.tmdb.org/t/p/w1280'.$movie['backdrop_path']
+            : (!empty($libraryEntry?->backdrop_path) ? 'https://image.tmdb.org/t/p/w1280'.$libraryEntry->backdrop_path : null);
+        $fbRating = (!empty($movie['vote_average']) ? $movie['vote_average'] : ($libraryEntry->rating ?? null));
+        $fbYear = !empty($movie['release_date']) ? substr($movie['release_date'], 0, 4) : null;
+        $fbGenres = collect($movie['genres'] ?? [])->pluck('name')->take(3)->implode(' · ');
+    @endphp
     <div class="hero">
+        @if($fbBackdrop)
+            <div class="hero-bg" style="background-image:url('{{ $fbBackdrop }}')"></div>
+        @endif
         <div class="hero-overlay"></div>
         <div class="container hero-content">
-            <div class="row align-items-center">
-                <div class="col-12 text-white">
+            <div class="row align-items-center g-4">
+                <div class="col-md-3 col-sm-4 col-5 text-center">
+                    <img src="{{ $fbPoster }}" class="poster shadow-lg" alt="{{ $movie['title'] ?? 'Movie' }}">
+                </div>
+                <div class="col-md-9 col-sm-8 col-7 text-white">
                     <h1 class="mb-2">
                         {{ $movie['title'] ?? 'Movie' }}
-                        @if(!empty($movie['release_date']))
-                            <span class="year">({{ substr($movie['release_date'], 0, 4) }})</span>
+                        @if($fbYear)
+                            <span class="year">({{ $fbYear }})</span>
                         @endif
                     </h1>
+                    @if($fbRating || $fbGenres)
+                        <div class="meta mb-3">
+                            @if($fbRating)
+                                <span class="badge-rating"><i class="bi bi-star-fill me-1"></i>{{ number_format($fbRating, 1) }}</span>
+                            @endif
+                            @if($fbGenres)
+                                <span class="badge-meta">{{ $fbGenres }}</span>
+                            @endif
+                        </div>
+                    @endif
                     <p class="overview">{{ $movie['overview'] ?? 'No description available.' }}</p>
                 </div>
             </div>
@@ -64,33 +91,91 @@
 {{-- 📦 TORRENTS SECTION --}}
 <div class="container py-5">
 
-    <h4 class="text-white mb-4">📥 Available Torrents</h4>
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+        <h4 class="text-white mb-0">📥 Available Torrents</h4>
+        @include('partials._watch-online-btn', ['watchUrl' => $watchUrl ?? null])
+    </div>
 
-    <div class="torrent-list">
+        @if($torrents->isNotEmpty())
+        @php
+            $resGroups = $torrents
+                ->groupBy(fn ($t) => $t->resolution_label)
+                ->map(fn ($g) => $g->sortByDesc('seeders')->values())
+                ->sortBy(fn ($g) => $g->first()->resolution_order)
+                ->values();
+        @endphp
 
-        @forelse($torrents as $torrent)
-            <div class="torrent-item">
+        <div class="res-panels">
+            @foreach($resGroups as $group)
+                @php
+                    $panelId = 'movie-res-'.Str::slug($group->first()->resolution_label);
+                    $isFirst = $loop->first;
+                @endphp
+                <div class="res-panel">
+                    <button class="res-panel-header {{ $isFirst ? 'is-open' : '' }}"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#{{ $panelId }}"
+                            aria-expanded="{{ $isFirst ? 'true' : 'false' }}">
+                        <span class="res-label">{{ $group->first()->resolution_label }}</span>
+                        <span class="res-count">{{ $group->count() }}</span>
+                        <i class="bi bi-chevron-down res-chevron"></i>
+                    </button>
 
-                <div class="torrent-main">
-                    <div class="torrent-name">
-                        <a href="{{ route('torrents.show', [$torrent->id, $torrent->slug]) }}" 
-   class="torrent-item text-decoration-none">
-                        {{ $torrent->name }}
-                        </a>
-                    </div>
-
-                    <div class="torrent-meta">
-                        <span>💾 {{ number_format($torrent->size / 1073741824, 2) }} GB</span>
-                        <span class="seeders">🌱 {{ $torrent->seeders }}</span>
+                    <div id="{{ $panelId }}" class="collapse {{ $isFirst ? 'show' : '' }}">
+                        <div class="res-panel-body">
+                            @foreach($group as $torrent)
+                                <div class="torrent-item">
+                                    <div class="torrent-main">
+                                        <div class="torrent-name">
+                                            <a href="{{ route('torrents.show', [$torrent->id, $torrent->slug]) }}"
+                                               class="torrent-link text-decoration-none">
+                                                {{ $torrent->name }}
+                                            </a>
+                                        </div>
+                                        <div class="torrent-meta">
+                                            <span class="torrent-size">💾 {{ number_format($torrent->size / 1073741824, 2) }} GB</span>
+                                            <span class="seeders">🌱 {{ $torrent->seeders }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
                 </div>
+            @endforeach
+        </div>
+    @else
+        <div class="torrent-empty">
+            <i class="bi bi-box-seam"></i>
+            <h4>This title is not in our torrent database yet</h4>
+            <p>
+                This movie is in your library, but no torrent has been uploaded for it yet.
+                If you would like to watch it, please submit a request and an uploader may fill it.
+            </p>
 
-            </div>
-        @empty
-            <div class="text-muted">No torrents available.</div>
-        @endforelse
+            @php
+                $reqName = $movie['title'] ?? ($libraryEntry->title ?? 'This movie');
+                $reqTmdb = 'https://www.themoviedb.org/movie/'.$tmdbid;
+                $reqImdb = !empty($movie['imdb_id'])
+                    ? 'https://www.imdb.com/title/'.$movie['imdb_id'].'/'
+                    : null;
+                $reqImage = ! empty($movie['poster_path'])
+                    ? 'https://image.tmdb.org/t/p/w500'.$movie['poster_path']
+                    : ($libraryEntry->poster_path ? 'https://image.tmdb.org/t/p/w500'.$libraryEntry->poster_path : null);
+            @endphp
 
-    </div>
+            <a class="btn request-btn"
+               href="{{ route('requests.create', array_filter([
+                   'name'     => $reqName,
+                   'tmdb_url' => $reqTmdb,
+                   'imdb_url' => $reqImdb,
+                   'image'    => $reqImage,
+               ])) }}">
+                <i class="bi bi-megaphone me-1"></i> Make a Request
+            </a>
+        </div>
+    @endif
 
 {{-- =========================
          YOU MIGHT ALSO LIKE
@@ -278,43 +363,180 @@ background: rgba(255,255,255,0.15);
 }
 
 /* TORRENTS */
-.torrent-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
 .torrent-item {
     background: #111;
+    border: 1px solid rgba(255, 255, 255, .05);
     border-radius: 10px;
-    padding: 15px;
+    padding: 13px 15px;
     transition: 0.2s ease;
 }
 
 .torrent-item:hover {
     background: #1a1a1a;
+    border-color: rgba(59, 130, 246, .25);
 }
 
 .torrent-main {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 15px;
 }
 
 .torrent-name {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.torrent-link {
     font-weight: 600;
     color: #fff;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.torrent-link:hover {
+    color: #60a5fa;
 }
 
 .torrent-meta {
     display: flex;
     gap: 15px;
     color: #aaa;
+    flex-shrink: 0;
 }
 
 .seeders {
     color: #4caf50;
     font-weight: 600;
+}
+
+/* Resolution panels */
+.res-panels {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.res-panel {
+    border: 1px solid rgba(255, 255, 255, .07);
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(9, 16, 29, .45);
+}
+
+.res-panel-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: transparent;
+    border: none;
+    padding: 14px 18px;
+    cursor: pointer;
+    text-align: left;
+    transition: background .15s ease;
+}
+
+.res-panel-header:hover {
+    background: rgba(45, 212, 191, .05);
+}
+
+.res-panel-header .res-label {
+    font-size: 15px;
+    font-weight: 700;
+    color: #f1f5f9;
+    letter-spacing: .2px;
+}
+
+.res-panel-header .res-count {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: rgba(45, 212, 191, .12);
+    color: var(--ui-accent);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.res-panel-header .res-chevron {
+    margin-left: auto;
+    color: #64748b;
+    transition: transform .2s ease;
+}
+
+.res-panel-header.is-open .res-chevron {
+    transform: rotate(180deg);
+}
+
+.res-panel-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 4px 14px 14px;
+}
+
+@media (max-width: 575px) {
+    .torrent-main {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    .torrent-meta {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .torrent-link {
+        white-space: normal;
+    }
+}
+
+/* ── TORRENT EMPTY STATE (no uploads yet) ────────────────────── */
+.torrent-empty {
+    text-align: center;
+    padding: 2.5rem 1.5rem;
+    background: rgba(15, 23, 42, .55);
+    border: 1px solid rgba(255, 255, 255, .06);
+    border-radius: .85rem;
+}
+.torrent-empty i {
+    font-size: 42px;
+    color: var(--ui-accent);
+    opacity: .55;
+    display: block;
+    margin-bottom: .75rem;
+}
+.torrent-empty h4 {
+    color: #f1f5f9;
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0 0 .5rem;
+}
+.torrent-empty p {
+    color: #64748b;
+    font-size: 13px;
+    max-width: 480px;
+    margin: 0 auto 1.1rem;
+}
+.torrent-empty .request-btn {
+    background: rgba(45, 212, 191, .10);
+    border: 1px solid rgba(45, 212, 191, .25);
+    color: var(--ui-accent);
+    font-weight: 600;
+    border-radius: .55rem;
+    padding: .45rem 1.1rem;
+    font-size: 13px;
+    transition: background .15s, border-color .15s;
+}
+.torrent-empty .request-btn:hover {
+    background: rgba(45, 212, 191, .20);
+    border-color: rgba(45, 212, 191, .45);
+    color: var(--ui-accent);
 }
 
 /* =========================
@@ -516,6 +738,29 @@ background: rgba(255,255,255,0.15);
 .subscribers-label .subscribers-count { font-weight: 700; color: var(--ui-accent-strong); white-space: nowrap; }
 .subscribers-label .subscribers-names { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 260px; }
 .subscribers-label .subscribers-more { color: var(--ui-accent); font-weight: 700; }
+/* "Watch online" button (shown when the title is in the online catalogue) */
+.watch-online-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(34,197,94,.10);
+    border: 1px solid rgba(34,197,94,.30);
+    color: #4ade80;
+    padding: 8px 14px;
+    border-radius: .6rem;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background .15s ease, border-color .15s ease, color .15s ease, transform .15s ease;
+}
+.watch-online-btn:hover {
+    background: rgba(34,197,94,.18);
+    border-color: rgba(34,197,94,.44);
+    color: #bbf7d0;
+    transform: translateY(-1px);
+}
+.watch-online-btn i { font-size: 15px; }
 </style>
 
 @endsection

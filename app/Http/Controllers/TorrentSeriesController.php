@@ -14,87 +14,59 @@ use Illuminate\Support\Str;
 class TorrentSeriesController extends Controller
 {
     /**
-     * Series library - every title that has at least one live TV torrent.
-     * Ordered by most recent upload so the newest addition is shown first.
+     * Series library — shows every title in the torrent_series table,
+     * not just those with active seeders.
      */
     public function index()
     {
         $query = request('q');
 
-        $series = Torrent::query()
-            ->select(
-                'torrents.tmdbid',
-                DB::raw('MAX(torrents.name) as name'),
-                DB::raw('MAX(torrents.created_at) as latest_created_at'),
-                DB::raw('MAX(torrents.seeders) as max_seeders')
-            )
-            ->join('torrent_series', 'torrent_series.tmdbid', '=', 'torrents.tmdbid')
-            ->whereNotNull('torrents.tmdbid')
-            ->where('torrents.tmdb_type', 'tv')
+        // ── Seeder health map (one query, cached per request) ──
+        $health = Torrent::query()
+            ->where('tmdb_type', 'tv')
+            ->whereNotNull('tmdbid')
+            ->select('tmdbid', DB::raw('MAX(seeders) as max_seeders'))
+            ->groupBy('tmdbid')
+            ->get()
+            ->keyBy(fn ($t) => (int) $t->tmdbid);
 
-            // 🔍 REAL SEARCH (TMDB title)
-            ->when($query, function ($q) use ($query) {
-                $q->where('torrent_series.title', 'like', "%{$query}%");
-            })
-
-            ->groupBy('torrents.tmdbid')
-            ->havingRaw('MAX(torrents.seeders) > 0')
-            ->orderByDesc('latest_created_at')
+        // ── All library series ──
+        $series = TorrentSeries::query()
+            ->when($query, fn ($q) => $q->where('title', 'like', "%{$query}%"))
+            ->orderByDesc('created_at')
             ->paginate(24)
             ->withQueryString();
 
-        // ✅ Attach cached DB data (NO API calls here)
-        $series->getCollection()->transform(function ($item) {
-
-            $tmdb = TorrentSeries::where('tmdbid', $item->tmdbid)->first();
-
-            if ($tmdb) {
-                $item->title = $tmdb->title;
-                $item->poster = $tmdb->poster_path;
-                $item->background = $tmdb->backdrop_path;
-                $item->slug = $tmdb->slug;
-                $item->rating = $tmdb->rating;
-                $item->year = $tmdb->year;
-            } else {
-                // ⚠️ fallback (rare case)
-                $item->title = $item->name;
-                $item->poster = null;
-                $item->background = null;
-                $item->slug = Str::slug($item->name);
-                $item->rating = null;
-                $item->year = null;
-            }
-
+        // Attach fields the Blade cards expect
+        $series->getCollection()->transform(function ($item) use ($health) {
+            $t = $health->get((int) $item->tmdbid);
+            $item->poster      = $item->poster_path;
+            $item->background  = $item->backdrop_path;
+            $item->max_seeders = $t?->max_seeders ?? 0;
             return $item;
         });
 
-        $featured = Torrent::select(
-            'torrents.tmdbid',
-            DB::raw('MAX(torrents.seeders) as seeders')
-        )
-        ->join('torrent_series', 'torrent_series.tmdbid', '=', 'torrents.tmdbid')
-        ->where('torrents.tmdb_type', 'tv')
-        ->groupBy('torrents.tmdbid')
-        ->havingRaw('MAX(torrents.seeders) > 0')
-        ->orderByDesc('seeders')
-        ->take(25)
-        ->get()
-        ->map(function ($item) {
-            $tmdb = TorrentSeries::where('tmdbid', $item->tmdbid)->first();
-
-            $item->title = $tmdb->title ?? '';
-            $item->backdrop = $tmdb->backdrop_path;
-            $item->poster = $tmdb->poster_path;
-            $item->slug = $tmdb->slug;
-            $item->rating = $tmdb->rating;
-            $item->year = $tmdb->year;
-
-            return $item;
-        });
+        // ── Featured row (hero + cards) ──
+        $featured = TorrentSeries::query()
+            ->whereNotNull('backdrop_path')
+            ->orderByDesc('created_at')
+            ->take(25)
+            ->get()
+            ->map(function ($m) use ($health) {
+                $m->seeders = $health->get((int) $m->tmdbid)?->max_seeders ?? 0;
+                $m->backdrop = $m->backdrop_path;
+                return $m;
+            })
+            ->sortByDesc('seeders')
+            ->values();
 
         return view('library.series.index', compact('series', 'query', 'featured'));
     }
 
+    /**
+     * Show a single library series.
+     * Works even when no torrent has been uploaded for the title yet.
+     */
     public function show($tmdbid, $slug = null)
     {
         $torrents = Torrent::where('tmdbid', $tmdbid)
@@ -110,6 +82,9 @@ class TorrentSeriesController extends Controller
                 $firstTorrent->imdbid
             )
             : null;
+
+        // Local library record (used for the request prompt when no torrents exist)
+        $libraryEntry = TorrentSeries::where('tmdbid', $tmdbid)->first();
 
         $movie = cache()->remember("tmdb_series_v2_{$tmdbid}", 86400, function () use ($tmdbid) {
             return Http::get("https://api.themoviedb.org/3/tv/{$tmdbid}", [
@@ -155,7 +130,17 @@ class TorrentSeriesController extends Controller
         $subscribers = app(TorrentSubscriptionService::class)
             ->subscribers($firstTorrent?->imdbid, (string) $tmdbid);
 
-        return view('library.series.show', compact('movie', 'torrents', 'tmdbid', 'isSubscribed', 'subscribers', 'recommendations', 'display'));
+        // "Watch online" link — only when the series exists in the online catalogue
+        // (series table). The series.show route is keyed on the DB primary id + slug.
+        $watchSeries = \App\Models\Series::where('tmdb_id', $tmdbid)->first();
+        $watchUrl = $watchSeries
+            ? route('series.show', [$watchSeries->id, $watchSeries->slug])
+            : null;
+
+        return view('library.series.show', compact(
+            'movie', 'torrents', 'tmdbid', 'isSubscribed',
+            'subscribers', 'recommendations', 'display', 'libraryEntry', 'watchUrl'
+        ));
     }
 
     /**

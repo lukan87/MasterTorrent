@@ -466,6 +466,10 @@ Route::post('/movies/search-movie', [MovieController::class, 'searchMovie'])
     ->name('movies.search-movie')
     ->middleware('auth');
 
+Route::delete('/movies/{id}/delete', [MovieController::class, 'destroy'])
+    ->name('movies.delete')
+    ->middleware('auth');
+
 // Series
 Route::resource('series', SeriesController::class)
     ->middleware('auth')
@@ -490,6 +494,10 @@ Route::post('/series/bulk-select', [SeriesController::class, 'bulkSelect'])
 
 Route::post('/series/search-movie', [SeriesController::class, 'searchSeries'])
     ->name('series.search-series')
+    ->middleware('auth');
+
+Route::delete('/series/{id}/delete', [SeriesController::class, 'destroy'])
+    ->name('series.delete')
     ->middleware('auth');
 
 // Collections

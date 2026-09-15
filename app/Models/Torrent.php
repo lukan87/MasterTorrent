@@ -229,6 +229,87 @@ class Torrent extends Model
         return $this->thanks()->count();
     }
 
+    /**
+     * Parsed display resolution label derived from the torrent name.
+     * Used by the library movie/series show pages to group torrents.
+     */
+    public function getResolutionLabelAttribute(): string
+    {
+        $u = strtoupper($this->name ?? '');
+
+        if (preg_match('/\b(2160P|4K|UHD)\b/', $u)) {
+            return '4K';
+        }
+        if (preg_match('/\b1080[PI]\b/', $u)) {
+            return '1080p';
+        }
+        if (preg_match('/\b720[PI]\b/', $u)) {
+            return '720p';
+        }
+        if (preg_match('/\b(480P|576P|SD)\b/', $u)) {
+            return 'SD';
+        }
+
+        return 'Other';
+    }
+
+    /**
+     * Sort weight for a resolution group (lower = shown first).
+     */
+    public function getResolutionOrderAttribute(): int
+    {
+        return match ($this->resolution_label) {
+            '4K'     => 1,
+            '1080p'  => 2,
+            '720p'   => 3,
+            'SD'     => 4,
+            default  => 5,
+        };
+    }
+
+    /**
+     * Parsed display label describing what a TV torrent contains:
+     * a full season, a single episode, a range of seasons, etc.
+     * Only meaningful for series torrents.
+     */
+    public function getEpisodeLabelAttribute(): string
+    {
+        $u = strtoupper($this->name ?? '');
+
+        // Complete series / all seasons pack
+        if (preg_match('/\b(COMPLETE(?: SERIES)?|FULL SERIES|ALL SEASONS|COMPLETE BLURAY)\b/', $u)) {
+            return 'Full Series';
+        }
+
+        // Season range pack — Scene style: S01-S04  or  S01.S02
+        if (preg_match('/\bS(\d{1,2})[^A-Z0-9]S(\d{1,2})\b|\bS(\d{1,2})(?:\-|\.)S(\d{1,2})\b/', $u, $m)) {
+            $a = $m[1] ?? $m[3];
+            $b = $m[2] ?? $m[4];
+            return 'Seasons '.intval($a).'-'.intval($b);
+        }
+
+        // Season range pack — "Season 1.2" / "Season 1-2" / "Season1-2"
+        if (preg_match('/\bSEASON\s?(\d{1,2})(?:[\-\.]|\s[\-\.]?\s)(\d{1,2})\b/', $u, $m)) {
+            return 'Seasons '.intval($m[1]).'-'.intval($m[2]);
+        }
+
+        // Single episode — S01E05
+        if (preg_match('/\bS(\d{1,2})E(\d{1,2})\b/', $u, $m)) {
+            return 'S'.str_pad($m[1], 2, '0', STR_PAD_LEFT)
+                 .'E'.str_pad($m[2], 2, '0', STR_PAD_LEFT);
+        }
+
+        // Full single season — S13 / Season 1 / Season1 / S1
+        if (preg_match('/\bS(\d{1,2})\b/', $u, $m)) {
+            return 'Full Season · S'.str_pad($m[1], 2, '0', STR_PAD_LEFT);
+        }
+        if (preg_match('/\bSEASON\s?(\d{1,2})\b/', $u, $m)) {
+            return 'Full Season · S'.str_pad($m[1], 2, '0', STR_PAD_LEFT);
+        }
+
+        return 'Episode';
+    }
+
 
 public function purge(): void
 {

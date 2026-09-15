@@ -8,6 +8,8 @@ use App\Models\Torrent;
 use App\Models\Poll;
 use App\Models\HappyHour;
 use App\Models\Shoutbox;
+use App\Models\Movie;
+use App\Models\Series;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
@@ -143,6 +145,30 @@ class HomeService
             ->orderByDesc('seed_count')
             ->limit($limit)
             ->get();
+    }
+
+/**
+     * Returns up to $limit random titles from the movies or series table,
+     * mapped to the poster/URL format the view needs.
+     */
+    private function getRandomOnlineTitles(string $type, int $limit = 6): \Illuminate\Support\Collection
+    {
+        $model = $type === 'series' ? new Series : new Movie;
+
+        return $model->inRandomOrder()
+            ->take($limit)
+            ->get()
+            ->map(function ($item) use ($type) {
+                $routeName = $type === 'series' ? 'series.show' : 'movies.show';
+
+                return [
+                    'title'  => $item->name,
+                    'poster' => $item->poster_url,
+                    'year'   => $item->year,
+                    'rating' => number_format($item->vote_average ?? 0, 1),
+                    'url'    => route($routeName, [$item->id, $item->slug]),
+                ];
+            });
     }
 
     public function getDashboardData(): array
@@ -403,6 +429,8 @@ if ($uploadMovement !== null) {
 
             'currentHappyHour' => $this->getCurrentHappyHour(),
             'trendingTorrents' => $this->cacheQuery('trending_torrents', fn() => $this->getTrendingTorrents(12)),
+            'randomOnlineMovies' => $this->getRandomOnlineTitles('movie'),
+            'randomOnlineSeries' => $this->getRandomOnlineTitles('series'),
             'messages' => $this->cacheQuery('home_shoutbox_messages', fn() => $this->getShoutboxMessages(30)),
 
             'topUploaders24h' => $this->cacheQuery('top_uploaders_24h', fn() => $this->getTopUploaders24h()),

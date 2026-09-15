@@ -21,6 +21,21 @@
  
  @include('partials.trendingtorrents')
 
+ <div class="row g-3 mt-1">
+    @include('partials.randomonline', [
+        'randomIcon' => 'bi-film',
+        'randomTitle' => 'Random Movies',
+        'randomSubtitle' => 'Randomly selected movies – watch online',
+        'randomItems' => $randomOnlineMovies,
+    ])
+    @include('partials.randomonline', [
+        'randomIcon' => 'bi-tv',
+        'randomTitle' => 'Random Series',
+        'randomSubtitle' => 'Randomly selected series – watch online',
+        'randomItems' => $randomOnlineSeries,
+    ])
+</div>
+
     @include('partials.shoutbox')
 
     {{-- Top Torrents Section --}}
