@@ -809,26 +809,22 @@ html::after {
 
 /* ---------- Stat chips (horizontal pills) ---------- */
 .stat-chip {
-    display: inline-flex;
+   display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 7px;
+    padding: 7px 11px;
+    border-radius: .55rem;
 
-    padding: 6px 12px;
+    background: rgba(45,212,191,.06);
+    border: 1px solid rgba(45,212,191,.18);
 
-    border-radius: 999px;
-
-    background: rgba(255, 255, 255, .05);
-    border: 1px solid var(--ui-border);
-
-    font-size: 12px;
-    font-weight: 600;
-
-    color: var(--ui-text-muted);
-    white-space: nowrap;
+    color: var(--ui-accent);
+    font-size: 11px;
+    font-weight: 700;
 }
 
 .stat-chip i {
-    font-size: 13px;
+    font-size: 10px;
     line-height: 1;
 }
 

@@ -337,26 +337,62 @@
                 })->join('<br>');
             @endphp
 
-            <span class="d-inline-block" data-bs-toggle="tooltip" data-bs-html="true" title="{!! $tooltipContent !!}">
+            <span class="d-inline-block" id="reaction-tooltip-wrap" data-bs-toggle="tooltip" data-bs-html="true" title="{!! $tooltipContent !!}">
                 <div class="dropdown reaction-dropdown">
                     <button class="btn modern-action-btn dropdown-toggle" type="button" id="reactionDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                        {{ $activeReaction }} <span class="badge">{{ $totalReactions }}</span>
+                        <span id="active-reaction">{{ $activeReaction }}</span> <span class="badge" id="total-reactions">{{ $totalReactions }}</span>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-dark p-1" aria-labelledby="reactionDropdown">
+                    <ul class="dropdown-menu dropdown-menu-dark p-2" aria-labelledby="reactionDropdown">
                     <li class="d-flex gap-1">
                         @foreach(['👍', '😂', '😮', '😢', '😎', '💖', '🥱', '😤'] as $r)
-                            <form action="{{ route('torrents.react', $torrent->id) }}" method="POST" class="m-0">
-                                @csrf
-                                <input type="hidden" name="reaction" value="{{ $r }}">
-                                <button type="submit" class="btn btn-sm" style="font-size: 1.2rem;">
-                                    {{ $r }}
-                                </button>
-                            </form>
+                            <button type="button"
+                                    class="btn btn-sm btn-reaction reaction-btn {{ ($userReaction && $userReaction->reaction === $r) ? 'active' : '' }}"
+                                    data-reaction="{{ $r }}"
+                                    data-torrent-id="{{ $torrent->id }}"
+                                    title="{{ $r }}">
+                                {{ $r }}
+                            </button>
                         @endforeach
                     </li>
                 </ul>
             </div>
             </span>
+            <script>
+                document.querySelectorAll('.reaction-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const reaction = this.dataset.reaction;
+                        const torrentId = this.dataset.torrentId;
+
+                        fetch(`{{ route('torrents.react', $torrent->id) }}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({ reaction: reaction })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                document.getElementById('active-reaction').innerText = data.activeReaction;
+                                document.getElementById('total-reactions').innerText = data.totalReactions;
+                                document.querySelectorAll('.reaction-btn').forEach(b => {
+                                    b.classList.remove('active');
+                                    if (b.dataset.reaction === data.activeReaction) {
+                                        b.classList.add('active');
+                                    }
+                                });
+                                // Note: Tooltip content update would require more complex JS to refresh.
+                                // For now, we leave it as is or could reload it if needed.
+                            } else {
+                                alert(data.message || 'Error occurred');
+                            }
+                        })
+                        .catch(error => console.error('Error:', error));
+                    });
+                });
+            </script>
 
             {{-- SUBSCRIBE --}}
             @if($subscribeAvailable)
@@ -542,6 +578,20 @@
 .modern-dropdown-item{padding:8px 10px;border-radius:.45rem;font-size:13px;color:#d8e2eb;transition:background .15s ease,color .15s ease}
 .modern-dropdown-item:hover{background:rgba(45,212,191,.09);color:var(--ui-accent);transform:none}
 .modern-dropdown-menu .dropdown-header{font-size:12px;color:var(--ui-accent)!important}.modern-dropdown-menu .dropdown-divider{border-color:var(--ui-border)}
+.btn-reaction {
+    font-size: 1.4rem;
+    padding: 4px 8px;
+    transition: transform 0.2s ease, background 0.2s ease;
+    border-radius: 0.4rem;
+}
+.btn-reaction:hover {
+    transform: scale(1.2);
+    background: rgba(255, 255, 255, 0.1);
+}
+.btn-reaction.active {
+    background: rgba(45, 212, 191, 0.2);
+    border: 1px solid rgba(45, 212, 191, 0.5);
+}
 .modern-alert-danger{background:rgba(220,38,38,.09);border:1px solid rgba(220,38,38,.22);color:#f4a0a0;padding:9px 12px;border-radius:.6rem;font-size:13px;font-weight:600}
 .category-badge{background:rgba(148,163,184,.08);color:#c6d0da}.files-badge{background:rgba(250,204,21,.08);color:#e8cf6d}.seeders-badge{background:rgba(34,197,94,.08);color:#70e0a1}.leechers-badge{background:rgba(239,68,68,.08);color:#f58b8b}.completed-badge{background:rgba(59,130,246,.08);color:#8fc8f5}.size-badge{background:rgba(6,182,212,.08);color:#67dce9}
 .modern-stat-badge.text-decoration-none:hover{text-decoration:none!important;border-color:rgba(45,212,191,.25)}

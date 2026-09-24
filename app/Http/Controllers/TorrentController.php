@@ -677,6 +677,19 @@ public function react(Request $request, Torrent $torrent)
         ]);
     }
 
+    if ($request->expectsJson()) {
+        $reactions = TorrentReaction::where('torrent_id', $torrent->id)->with('user:id,name')->get();
+        $reactionCounts = $reactions->groupBy('reaction')->map->count();
+        $userReaction = Auth::check() ? $reactions->where('user_id', Auth::id())->first() : null;
+
+        return response()->json([
+            'success' => true,
+            'activeReaction' => $userReaction ? $userReaction->reaction : '👍',
+            'totalReactions' => $reactions->count(),
+            'counts' => $reactionCounts,
+        ]);
+    }
+
     return redirect()->back();
 }
 

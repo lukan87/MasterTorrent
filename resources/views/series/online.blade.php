@@ -238,7 +238,7 @@
 
                             </button>
 
-                            @if(auth()->user()->user_class >= \App\Models\UserClass::VIP)
+                            @if(auth()->user()->user_class >= \App\Models\UserClass::USER)
 
                                 <button id="watchBtn"
 
