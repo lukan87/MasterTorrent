@@ -3,355 +3,408 @@
 @section('content')
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Inter:wght@400;500&display=swap');
+html,
+body {
+    min-height: 100%;
+    max-width: 100%;
+    overflow-x: hidden !important;
+}
 
 body {
     margin: 0;
-    min-height: 100vh; /* allow growth */
-    background: #030303;
-    overflow-x: hidden;
-    overflow-y: auto; /* enable vertical scroll */
-    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at 50% 0%, rgba(66, 217, 208, .07), transparent 34%),
+        linear-gradient(135deg, #0b1220 0%, #0f172a 55%, #0a111d 100%);
+    color: #e7edf5;
+}
+
+.register-page {
+    width: 100%;
+    min-height: calc(100vh - 70px);
     display: flex;
     justify-content: center;
     align-items: center;
-    color: #e6edf3;
-}
-
-/* Dropping Dots */
-#dots {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 0;
+    padding: 2rem 1rem;
+    box-sizing: border-box;
 }
 
 .auth-wrapper {
     position: relative;
     z-index: 2;
     width: 100%;
-    padding: 1rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    perspective: 1200px;
-}
-
-/* Mobile fix */
-@media (max-width: 768px) {
-    .auth-wrapper {
-        align-items: flex-start; /* stack from top */
-        padding-top: 2rem;
-        padding-bottom: 2rem;
-    }
-}
-
-.glass-card {
-    background: rgba(10, 10, 10, 0.9);
-    border: 1px solid rgba(0, 191, 255, 0.15);
-    border-radius: 25px;
-    padding: 3rem;
-    width: 100%;
     max-width: 650px;
-    backdrop-filter: blur(25px);
-    box-shadow:
-        0 40px 100px rgba(0,0,0,1),
-        0 0 40px rgba(0, 120, 255, 0.15);
-    transition: transform 0.2s ease, box-shadow 0.3s ease;
-    transform-style: preserve-3d;
 }
 
 .glass-card {
-    padding: 3rem;
+    width: 100%;
+    padding: 2rem;
+    box-sizing: border-box;
+    background: linear-gradient(135deg, rgba(22, 32, 51, .97), rgba(15, 23, 42, .94));
+    border: 1px solid rgba(148, 163, 184, .16);
+    border-radius: .85rem;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, .3);
 }
 
-/* Tablet */
-@media (max-width: 768px) {
-    .glass-card {
-        padding: 2rem;
-        border-radius: 20px;
-    }
-}
-
-/* Mobile */
-@media (max-width: 480px) {
-    .glass-card {
-        padding: 1.5rem;
-        border-radius: 18px;
-    }
-}
-
-.glass-card:hover {
-    box-shadow:
-        0 50px 120px rgba(0,0,0,1),
-        0 0 60px rgba(0,150,255,0.35);
-}
-
-/* Logo */
 .logo-wrapper {
     position: relative;
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1.6rem;
 }
 
 .app-logo {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 2.3rem;
-    letter-spacing: 4px;
-    color: #00bfff;
-    z-index: 2;
-    position: relative;
-    text-shadow:
-        0 0 10px rgba(0,191,255,0.8),
-        0 0 25px rgba(0,191,255,0.6);
+    color: #42d9d0;
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-shadow: 0 0 18px rgba(66, 217, 208, .18);
 }
 
-.lightning {
-    position: absolute;
-    top: -40px;
-    left: 50%;
-    width: 220px;
-    height: 220px;
-    transform: translateX(-50%);
-    background: radial-gradient(circle, rgba(0,191,255,0.4) 0%, transparent 70%);
-    animation: lightningPulse 2s infinite alternate;
-    filter: blur(30px);
+.logo-subtitle {
+    margin-top: .4rem;
+    color: #94a3b8;
+    font-size: .88rem;
 }
 
-.lightning {
-    pointer-events: none;
+.form-label {
+    color: #cbd5e1;
+    font-size: .88rem;
+    font-weight: 600;
+    margin-bottom: .4rem;
 }
 
-@keyframes lightningPulse {
-    from { opacity: 0.3; transform: translateX(-50%) scale(0.9); }
-    to { opacity: 0.9; transform: translateX(-50%) scale(1.25); }
-}
-
-/* Inputs */
 .form-control,
 .form-select {
-    background: rgba(255,255,255,0.02) !important;
-    border: 1px solid rgba(0,191,255,0.15) !important;
-    border-radius: 12px !important;
-    color: #fff !important;
-    padding: 0.9rem 1rem !important;
-    transition: 0.3s ease;
+    width: 100%;
+    min-height: 46px;
+    box-sizing: border-box;
+    color: #e2e8f0 !important;
+    background: rgba(15, 23, 42, .78) !important;
+    border: 1px solid rgba(148, 163, 184, .2) !important;
+    border-radius: .55rem !important;
+    padding: .65rem .85rem !important;
+    font-size: .94rem;
+    box-shadow: none !important;
+    transition: border-color .18s ease, box-shadow .18s ease;
 }
 
 .form-control:focus,
 .form-select:focus {
-    border-color: #00bfff !important;
-    box-shadow: 0 0 20px rgba(0,191,255,0.5) !important;
+    color: #fff !important;
+    border-color: rgba(66, 217, 208, .58) !important;
+    box-shadow: 0 0 0 .2rem rgba(66, 217, 208, .08) !important;
     outline: none !important;
 }
 
-.form-label {
-    color: #aaa;
-}
-
-/* Buttons */
-.btn-register {
-    background: linear-gradient(90deg, #003366, #00bfff);
-    border: none;
-    border-radius: 30px;
-    padding: 0.8rem 2rem;
-    font-weight: 600;
-    color: #fff;
-    transition: 0.3s ease;
-    box-shadow: 0 0 20px rgba(0,191,255,0.4);
-}
-
-.btn-register:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 0 35px rgba(0,191,255,0.8);
-}
-
-.btn-back {
-    background: #111;
-    border: 1px solid rgba(0,191,255,0.2);
-    border-radius: 30px;
-    padding: 0.8rem 2rem;
-    color: #00bfff;
-}
-
-.btn-back:hover {
-    background: rgba(0,191,255,0.1);
-}
-
-.form-select {
-    background-color: rgba(255,255,255,0.02) !important;
-    color: #fff !important;
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
+.form-control::placeholder {
+    color: #64748b;
 }
 
 .form-select option {
-    background-color: #111;
-    color: #fff;
+    color: #e2e8f0;
+    background: #0f172a;
+}
+
+.text-muted {
+    color: #94a3b8 !important;
+}
+
+.text-info {
+    color: #42d9d0 !important;
+}
+
+.invalid-feedback {
+    color: #fca5a5;
+}
+
+.btn-register,
+.btn-back {
+    min-height: 43px;
+    padding: .55rem 1rem;
+    border-radius: .55rem;
+    font-size: .9rem;
+    font-weight: 700;
+    transition: all .18s ease;
+}
+
+.btn-register {
+    color: #062a2b;
+    background: #42d9d0;
+    border: 1px solid #42d9d0;
+    box-shadow: 0 5px 16px rgba(66, 217, 208, .12);
+}
+
+.btn-register:hover,
+.btn-register:focus {
+    color: #031b1c;
+    background: #67e3dc;
+    border-color: #67e3dc;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(66, 217, 208, .18);
+}
+
+.btn-register:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #cbd5e1;
+    background: rgba(15, 23, 42, .65);
+    border: 1px solid rgba(148, 163, 184, .2);
+    text-decoration: none;
+}
+
+.btn-back:hover {
+    color: #42d9d0;
+    background: rgba(66, 217, 208, .07);
+    border-color: rgba(66, 217, 208, .3);
+}
+
+.form-check-input {
+    background-color: #0f172a;
+    border-color: rgba(148, 163, 184, .3);
+}
+
+.form-check-input:checked {
+    background-color: #42d9d0;
+    border-color: #42d9d0;
+}
+
+.register-error {
+    color: #fecaca;
+    background: rgba(239, 68, 68, .1);
+    border: 1px solid rgba(239, 68, 68, .22);
+    border-radius: .55rem;
+    padding: .8rem 1rem;
+    margin-bottom: 1rem;
+    font-size: .88rem;
+}
+
+.live-error {
+    color: #fca5a5;
+    font-size: .82rem;
+    margin-top: .35rem;
+}
+
+.live-success {
+    color: #86efac;
+    font-size: .82rem;
+    margin-top: .35rem;
+}
+
+@media (max-width: 768px) {
+    .register-page {
+        align-items: flex-start;
+        padding: 1.25rem .65rem 2rem;
+    }
+
+    .glass-card {
+        padding: 1.35rem;
+        border-radius: .7rem;
+    }
+
+    .app-logo {
+        font-size: 1.65rem;
+    }
 }
 
 @media (max-width: 480px) {
-    .d-flex.gap-3 {
-        flex-direction: column;
+    .register-page {
+        padding: 1rem .45rem 1.5rem;
+    }
+
+    .glass-card {
+        padding: 1rem;
+    }
+
+    .app-logo {
+        font-size: 1.5rem;
     }
 
     .btn-register,
     .btn-back {
         width: 100%;
-        text-align: center;
     }
 }
 
+@media (prefers-reduced-motion: reduce) {
+    .btn-register,
+    .btn-back,
+    .form-control,
+    .form-select {
+        transition: none !important;
+    }
+}
 </style>
 
+<div class="register-page">
 
+    <div class="auth-wrapper">
 
-<canvas id="dots"></canvas>
+        <div class="glass-card" id="tilt-card">
 
-<div class="auth-wrapper">
-<div class="glass-card" id="tilt-card">
+            @if ($errors->any())
+                <div class="register-error">
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
-
-@if ($errors->any())
-    <div style="
-        background:#2a0d0d;
-        border:1px solid #ff4d4d;
-        color:#ffb3b3;
-        padding:12px;
-        border-radius:10px;
-        margin-bottom:15px;
-        font-size:14px;
-    ">
-        <ul style="margin:0; padding-left:18px;">
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
-
-<div class="logo-wrapper">
-    <div class="lightning"></div>
-    <div class="app-logo">{{ config('app.name') }}</div>
-</div>
-
-<form method="POST" action="{{ route('register') }}">
-@csrf
-
-<div class="mb-3">
-<label class="form-label">Name</label>
-<input 
-    type="text" 
-    name="name" 
-    class="form-control @error('name') is-invalid @enderror"
-    value="{{ old('name') }}"
-    required
->
-
-@error('name')
-    <div style="color:#ff6b6b; font-size:13px; margin-top:5px;">
-        {{ $message }}
-    </div>
-@enderror
-</div>
-
-<div class="mb-3">
-<label class="form-label">Email</label>
-<input 
-    type="email" 
-    name="email" 
-    class="form-control" 
-    required 
-    value="{{ old('email') }}"
->
-</div>
-
-<div class="mb-3">
-<label class="form-label">Password</label>
-<input type="password" name="password" class="form-control" required>
-</div>
-
-<div class="mb-3">
-<label class="form-label">Confirm Password</label>
-<input type="password" name="password_confirmation" class="form-control" required>
-</div>
-
-<div class="mb-3">
-<label class="form-label">Recovery Code</label>
-<input type="text" name="recovery_code" class="form-control" required>
-<small class="text-muted">Write this down safely.</small>
-</div>
-
-@php $timezones = \DateTimeZone::listIdentifiers(); @endphp
-
-<div class="mb-3">
-    <label class="form-label">Timezone</label>
-
-    <select name="timezone" id="timezone" class="form-select" required>
-      <option disabled selected>Select timezone</option>
-        @foreach($timezones as $timezone)
-            <option value="{{ $timezone }}">{{ $timezone }}</option>
-        @endforeach
-    </select>
-
-    <!-- Detected timezone display -->
-    <small id="detected-timezone" class="text-info d-block mt-2" style="opacity:0.8;"></small>
-
-    <!-- Use my timezone button -->
-    <button type="button" id="use-my-timezone" 
-        class="btn btn-sm btn-back mt-2">
-        Use My Timezone
-    </button>
-
-    <!-- Hidden detected value -->
-    <input type="hidden" name="detected_timezone" id="detected_timezone">
-</div>
-
-
-@if(config('app.invite_only'))
-<div class="mb-3">
-<label class="form-label">Invite Code</label>
-<input type="text" name="invite_code" class="form-control" required>
-</div>
-@endif
-
-<div class="mb-4">
-    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-
-        <div>
-            <label class="form-label mb-0">Email Notifications</label>
-            <div class="small text-muted">
-                Receive login reminders and important updates
+            <div class="logo-wrapper">
+                <div class="app-logo">{{ config('app.name') }}</div>
+                <div class="logo-subtitle">Create your FileIplay account</div>
             </div>
-        </div>
 
-        <div class="form-check form-switch m-0">
-            <input 
-                class="form-check-input"
-                type="checkbox"
-                name="subscribed"
-                value="1"
-                checked
-            >
+            <form method="POST" action="{{ route('register') }}">
+                @csrf
+
+                <div class="mb-3">
+                    <label class="form-label">Name</label>
+                    <input
+                        type="text"
+                        name="name"
+                        class="form-control @error('name') is-invalid @enderror"
+                        value="{{ old('name') }}"
+                        required
+                        autocomplete="username"
+                    >
+
+                    @error('name')
+                        <div class="live-error">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input
+                        type="email"
+                        name="email"
+                        class="form-control"
+                        required
+                        value="{{ old('email') }}"
+                        autocomplete="email"
+                    >
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <input
+                        type="password"
+                        name="password"
+                        class="form-control"
+                        required
+                        autocomplete="new-password"
+                    >
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Confirm Password</label>
+                    <input
+                        type="password"
+                        name="password_confirmation"
+                        class="form-control"
+                        required
+                        autocomplete="new-password"
+                    >
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Recovery Code</label>
+                    <input
+                        type="text"
+                        name="recovery_code"
+                        class="form-control"
+                        required
+                    >
+                    <small class="text-muted">Write this down safely.</small>
+                </div>
+
+                @php $timezones = \DateTimeZone::listIdentifiers(); @endphp
+
+                <div class="mb-3">
+                    <label class="form-label">Timezone</label>
+
+                    <select name="timezone" id="timezone" class="form-select" required>
+                        <option disabled selected>Select timezone</option>
+
+                        @foreach($timezones as $timezone)
+                            <option value="{{ $timezone }}">{{ $timezone }}</option>
+                        @endforeach
+                    </select>
+
+                    <small id="detected-timezone"
+                           class="text-info d-block mt-2"
+                           style="opacity:0.8;"></small>
+
+                    <button type="button"
+                            id="use-my-timezone"
+                            class="btn btn-sm btn-back mt-2">
+                        Use My Timezone
+                    </button>
+
+                    <input type="hidden"
+                           name="detected_timezone"
+                           id="detected_timezone">
+                </div>
+
+                @if(config('app.invite_only'))
+                    <div class="mb-3">
+                        <label class="form-label">Invite Code</label>
+                        <input type="text" name="invite_code" class="form-control" required>
+                    </div>
+                @endif
+
+                <div class="mb-4">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+
+                        <div>
+                            <label class="form-label mb-0">Email Notifications</label>
+                            <div class="small text-muted">
+                                Receive login reminders and important updates
+                            </div>
+                        </div>
+
+                        <div class="form-check form-switch m-0">
+                            <input
+                                class="form-check-input"
+                                type="checkbox"
+                                name="subscribed"
+                                value="1"
+                                checked
+                            >
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="d-flex gap-3 mt-3 flex-wrap">
+                    <button type="submit" class="btn btn-register">
+                        REGISTER
+                    </button>
+
+                    <a href="{{ route('login') }}" class="btn btn-back">
+                        Back To Login
+                    </a>
+                </div>
+
+            </form>
+
         </div>
 
     </div>
-</div>
 
-<div class="d-flex gap-3 mt-3 flex-wrap">
-<button type="submit" class="btn btn-register">REGISTER</button>
-<a href="{{ route('login') }}" class="btn btn-back">Back To Login</a>
-</div>
-
-</form>
-
-</div>
 </div>
 
 <script>
-
-    document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
 
     const timezoneSelect = document.getElementById("timezone");
     const detectedText = document.getElementById("detected-timezone");
@@ -364,7 +417,9 @@ body {
         detectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
         if (detectedTimezone) {
-            detectedText.innerHTML = "Detected timezone: <strong>" + detectedTimezone + "</strong>";
+            detectedText.innerHTML =
+                "Detected timezone: <strong>" + detectedTimezone + "</strong>";
+
             hiddenInput.value = detectedTimezone;
         }
 
@@ -372,7 +427,6 @@ body {
         detectedText.textContent = "Could not detect timezone.";
     }
 
-    // Button to apply detected timezone
     useBtn.addEventListener("click", function () {
         if (!detectedTimezone) return;
 
@@ -386,177 +440,98 @@ body {
     });
 
 });
-/* Dropping Dots */
-const canvas = document.getElementById("dots");
-const ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-let dots = [];
-for (let i = 0; i < 333; i++) {
-    dots.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        r: Math.random() * 3,
-        speed: Math.random() * 1.5 + 0.5
-    });
-}
-
-function drawDots() {
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.fillStyle="rgba(0,191,255,0.7)";
-    ctx.beginPath();
-    dots.forEach(d=>{
-        ctx.moveTo(d.x,d.y);
-        ctx.arc(d.x,d.y,d.r,0,Math.PI*2);
-        d.y+=d.speed;
-        if(d.y>canvas.height){
-            d.y=0;
-            d.x=Math.random()*canvas.width;
-        }
-    });
-    ctx.fill();
-    requestAnimationFrame(drawDots);
-}
-drawDots();
-
-/* 3D Tilt */
-const card = document.getElementById("tilt-card");
-let isInteracting = false;
-
-/* Disable tilt when interacting with form fields */
-card.querySelectorAll("input, select, textarea, button").forEach(el => {
-    el.addEventListener("focus", () => isInteracting = true);
-    el.addEventListener("blur", () => isInteracting = false);
-});
-
-/* Softer 3D tilt */
-card.addEventListener("mousemove", (e) => {
-
-    if (isInteracting) return; // stop tilt when typing
-
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-
-    const rotateX = (y - centerY) / 30;   // reduced intensity
-    const rotateY = (centerX - x) / 30;
-
-    card.style.transform = `
-        rotateX(${rotateX}deg)
-        rotateY(${rotateY}deg)
-        translateZ(5px)
-    `;
-});
-
-/* Smooth reset */
-card.addEventListener("mouseleave", () => {
-    card.style.transition = "transform 0.4s ease";
-    card.style.transform = "rotateX(0) rotateY(0)";
-});
-
-/* Restore instant movement after reset */
-card.addEventListener("mouseenter", () => {
-    card.style.transition = "transform 0.1s ease";
-});
-
-function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-}
-
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
 </script>
 
 <script>
-
 const nameInput = document.querySelector('input[name="name"]');
 const registerBtn = document.querySelector('.btn-register');
 
-// Remove message while typing
-nameInput.addEventListener('input', function () {
-    let existing = document.getElementById('name-error-live');
-    if (existing) existing.remove();
-    registerBtn.disabled = false;
-});
+if (nameInput && registerBtn) {
 
-// Check on blur
-nameInput.addEventListener('blur', function () {
+    nameInput.addEventListener('input', function () {
+        let existing = document.getElementById('name-error-live');
 
-    if (!this.value) return;
+        if (existing) existing.remove();
 
-    fetch(`/check-username?name=${encodeURIComponent(this.value)}`)
-        .then(res => res.json())
-        .then(data => {
+        registerBtn.disabled = false;
+    });
 
-            let existing = document.getElementById('name-error-live');
-            if (existing) existing.remove();
+    nameInput.addEventListener('blur', function () {
 
-            const div = document.createElement('div');
-            div.id = 'name-error-live';
-            div.style.fontSize = '13px';
-            div.style.marginTop = '5px';
+        if (!this.value) return;
 
-            if (data.exists) {
-                div.style.color = '#ff6b6b';
-                div.innerText = 'Username already taken';
-                registerBtn.disabled = true;
-            } else {
-                div.style.color = '#4dff88';
-                div.innerText = 'Username available';
-            }
+        fetch(`/check-username?name=${encodeURIComponent(this.value)}`)
+            .then(res => res.json())
+            .then(data => {
 
-            nameInput.parentNode.appendChild(div);
-        });
-});
+                let existing = document.getElementById('name-error-live');
+
+                if (existing) existing.remove();
+
+                const div = document.createElement('div');
+                div.id = 'name-error-live';
+                div.style.fontSize = '13px';
+                div.style.marginTop = '5px';
+
+                if (data.exists) {
+                    div.className = 'live-error';
+                    div.innerText = 'Username already taken';
+                    registerBtn.disabled = true;
+                } else {
+                    div.className = 'live-success';
+                    div.innerText = 'Username available';
+                }
+
+                nameInput.parentNode.appendChild(div);
+            });
+    });
+}
 </script>
-
-
 
 <script>
 const emailInput = document.querySelector('input[name="email"]');
 const registerBtnEmail = document.querySelector('.btn-register');
 
-// Remove message while typing
-emailInput.addEventListener('input', function () {
-    let existing = document.getElementById('email-error-live');
-    if (existing) existing.remove();
-    registerBtnEmail.disabled = false;
-});
+if (emailInput && registerBtnEmail) {
 
-// Check on blur
-emailInput.addEventListener('blur', function () {
+    emailInput.addEventListener('input', function () {
+        let existing = document.getElementById('email-error-live');
 
-    if (!this.value) return;
+        if (existing) existing.remove();
 
-    fetch(`/check-email?email=${encodeURIComponent(this.value)}`)
-        .then(res => res.json())
-        .then(data => {
+        registerBtnEmail.disabled = false;
+    });
 
-            let existing = document.getElementById('email-error-live');
-            if (existing) existing.remove();
+    emailInput.addEventListener('blur', function () {
 
-            const div = document.createElement('div');
-            div.id = 'email-error-live';
-            div.style.fontSize = '13px';
-            div.style.marginTop = '5px';
+        if (!this.value) return;
 
-            if (data.exists) {
-                div.style.color = '#ff6b6b';
-                div.innerText = 'Email already registered';
-                registerBtnEmail.disabled = true;
-            } else {
-                div.style.color = '#4dff88';
-                div.innerText = 'Email available';
-            }
+        fetch(`/check-email?email=${encodeURIComponent(this.value)}`)
+            .then(res => res.json())
+            .then(data => {
 
-            emailInput.parentNode.appendChild(div);
-        });
-});
+                let existing = document.getElementById('email-error-live');
+
+                if (existing) existing.remove();
+
+                const div = document.createElement('div');
+                div.id = 'email-error-live';
+                div.style.fontSize = '13px';
+                div.style.marginTop = '5px';
+
+                if (data.exists) {
+                    div.className = 'live-error';
+                    div.innerText = 'Email already registered';
+                    registerBtnEmail.disabled = true;
+                } else {
+                    div.className = 'live-success';
+                    div.innerText = 'Email available';
+                }
+
+                emailInput.parentNode.appendChild(div);
+            });
+    });
+}
 </script>
 
 @endsection

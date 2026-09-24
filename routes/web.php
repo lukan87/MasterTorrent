@@ -47,6 +47,7 @@ use App\Http\Controllers\TicketDashboardController;
 use App\Http\Controllers\TicketReplyController;
 use App\Http\Controllers\TopicSubscriptionController;
 use App\Http\Controllers\TorrentController;
+use App\Http\Controllers\ExternalUploadController;
 use App\Http\Controllers\TorrentHistoryController;
 use App\Http\Controllers\TorrentMovieController;
 use App\Http\Controllers\TorrentSeriesController;
@@ -672,6 +673,12 @@ Route::middleware('auth')->group(function () {
     Route::delete('/torrents/bulk-delete', [TorrentController::class, 'bulkDelete'])
         ->name('torrents.bulkDelete');
 
+});
+
+// External Torrent routes
+Route::middleware('auth')->group(function () {
+    Route::get('external-torrents/create', [ExternalUploadController::class, 'create'])->name('external-torrents.create');
+    Route::post('external-torrents', [ExternalUploadController::class, 'store'])->name('external-torrents.store');
 });
 
 // ---------------------------------

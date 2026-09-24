@@ -50,7 +50,24 @@ class RssFeedController extends Controller
 
     // Get the most recent 20 torrents
     // $torrents = $query->orderBy('created_at', 'desc')->limit(20)->get();
-    $torrents = $query->with('category')->orderBy('created_at', 'desc')->limit(15)->get();
+   $torrents = $query
+    ->with('category')
+    ->orderBy('created_at', 'desc')
+    ->limit(15)
+    ->get()
+    ->map(function ($torrent) {
+
+        $description = $torrent->description ?? '';
+
+        // Extract poster URL from [img]...[/img]
+        preg_match('/\[img\](.*?)\[\/img\]/is', $description, $matches);
+
+        $torrent->rss_image = !empty($matches[1])
+            ? trim($matches[1])
+            : null;
+
+        return $torrent;
+    });
 
     // Debugging: Uncomment to check the selected categories and torrents fetched
     // dd([
@@ -59,13 +76,14 @@ class RssFeedController extends Controller
     // ]);
 
    // Add the XSLT reference to your feed content
-$content = '<?xml version="1.0" encoding="UTF-8" ?>' .
-'<?xml-stylesheet type="text/xsl" href="' . asset('rss-style.xsl') . '" ?>' .
-view('rss.feed', compact('torrents', 'passkey'))->render();
+$content = '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL .
+    '<?xml-stylesheet type="text/xsl" href="' . asset('rss.xsl') . '"?>' . PHP_EOL .
+    view('rss.feed', compact('torrents', 'passkey'))->render();
 
     // Return RSS feed with appropriate headers
     return response($content, 200)
-    ->header('Content-Type', 'application/rss+xml; charset=UTF-8');
+    ->header('Content-Type', 'text/xml; charset=UTF-8')
+    ->header('Cache-Control', 'no-cache, no-store, must-revalidate');
 }
 
 

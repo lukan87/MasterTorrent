@@ -3,377 +3,316 @@
 @section('content')
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Inter:wght@400;500&display=swap');
+html,
+body {
+    min-height: 100%;
+    max-width: 100%;
+    overflow-x: hidden !important;
+}
 
 body {
     margin: 0;
-    height: 100vh;
-    background: #030303;
-    overflow: hidden;
-    font-family: 'Inter', sans-serif;
+    background:
+        radial-gradient(circle at 50% 0%, rgba(66, 217, 208, .07), transparent 32%),
+        linear-gradient(135deg, #0b1220 0%, #0f172a 55%, #0a111d 100%);
+    color: #e7edf5;
+}
+
+.fileiplay-login-page {
+    min-height: calc(100vh - 70px);
+    width: 100%;
     display: flex;
-    justify-content: center;
     align-items: center;
-    color: #e6edf3;
+    justify-content: center;
+    padding: 2.5rem 1rem;
+    box-sizing: border-box;
 }
 
-/* MATRIX CANVAS */
-#matrix {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 0;
-}
-
-/* Wrapper */
 .auth-wrapper {
     position: relative;
     z-index: 2;
     width: 100%;
-    padding: 1rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    perspective: 1200px;
+    max-width: 460px;
 }
 
-/* Glass Card */
 .glass-card {
-    background: rgba(10, 10, 10, 0.85);
-    border: 1px solid rgba(0, 150, 255, 0.15);
-    border-radius: 25px;
-    padding: 2.5rem;
     width: 100%;
-    max-width: 480px;
-    backdrop-filter: blur(25px);
-    box-shadow:
-        0 40px 100px rgba(0,0,0,1),
-        0 0 40px rgba(0, 120, 255, 0.15);
-    transition: transform 0.2s ease, box-shadow 0.3s ease;
-    transform-style: preserve-3d;
-    margin-top: 00px;
+    padding: 2rem;
+    box-sizing: border-box;
+    background: linear-gradient(135deg, rgba(22, 32, 51, .97), rgba(15, 23, 42, .94));
+    border: 1px solid rgba(148, 163, 184, .16);
+    border-radius: .85rem;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, .3);
 }
 
-.glass-card:hover {
-    box-shadow:
-        0 50px 120px rgba(0,0,0,1),
-        0 0 60px rgba(0, 150, 255, 0.35);
-}
-
-/* Logo Area */
 .logo-wrapper {
-    position: relative;
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1.7rem;
 }
 
 .app-logo {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 2.3rem;
-    letter-spacing: 4px;
-    color: #00bfff;
-    position: relative;
-    z-index: 2;
-    text-shadow:
-        0 0 10px rgba(69, 133, 155, 0.8),
-        0 0 25px rgba(0,191,255,0.6);
+    color: #42d9d0;
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-shadow: 0 0 18px rgba(66, 217, 208, .18);
 }
 
-/* Blue Lightning */
-.lightning {
-    position: absolute;
-    top: -40px;
-    left: 50%;
-    width: 200px;
-    height: 200px;
-    transform: translateX(-50%);
-    background: radial-gradient(circle, rgba(0,191,255,0.4) 0%, transparent 70%);
-    animation: lightningPulse 1.8s infinite alternate;
-    filter: blur(25px);
+.logo-subtitle {
+    margin-top: .4rem;
+    color: #94a3b8;
+    font-size: .88rem;
 }
 
-@keyframes lightningPulse {
-    from { opacity: 0.3; transform: translateX(-50%) scale(0.9); }
-    to { opacity: 0.8; transform: translateX(-50%) scale(1.2); }
-}
-
-/* Inputs */
 .form-group {
     position: relative;
-    margin-bottom: 1.8rem;
+    margin-bottom: 1rem;
 }
 
 .form-control {
     width: 100%;
-    padding: 1rem 1rem 0.6rem;
-    border-radius: 12px;
-    border: 1px solid rgba(0, 191, 255, 0.15);
-    background: rgba(255,255,255,0.02);
-    color: #fff;
-    font-size: 0.95rem;
-    transition: 0.3s ease;
+    min-height: 48px;
+    padding: .75rem .9rem;
+    box-sizing: border-box;
+    color: #e2e8f0 !important;
+    background: rgba(15, 23, 42, .78) !important;
+    border: 1px solid rgba(148, 163, 184, .2) !important;
+    border-radius: .55rem;
+    font-size: .95rem;
+    box-shadow: none !important;
+    transition: border-color .18s ease, box-shadow .18s ease;
 }
 
 .form-control:focus {
-    border-color: #00bfff;
-    box-shadow: 0 0 20px rgba(0,191,255,0.5);
+    border-color: rgba(66, 217, 208, .58) !important;
+    box-shadow: 0 0 0 .2rem rgba(66, 217, 208, .08) !important;
     outline: none;
 }
 
 .form-label {
-    position: absolute;
-    top: 1rem;
-    left: 1rem;
-    font-size: 0.85rem;
-    color: #888;
-    pointer-events: none;
-    transition: 0.3s ease;
+    display: block;
+    position: static;
+    margin-bottom: .4rem;
+    color: #cbd5e1;
+    font-size: .88rem;
+    font-weight: 600;
 }
 
-.form-control:focus + .form-label,
-.form-control:not(:placeholder-shown) + .form-label {
-    top: 0.4rem;
-    font-size: 0.7rem;
-    color: #00bfff;
-}
-
-/* Button */
 .btn-elite {
     width: 100%;
-    background: linear-gradient(90deg, #003366, #0c5b75);
-    border: none;
-    border-radius: 30px;
-    padding: 0.8rem;
+    min-height: 46px;
+    margin-top: .35rem;
+    padding: .65rem 1rem;
+    color: #062a2b;
+    background: #42d9d0;
+    border: 1px solid #42d9d0;
+    border-radius: .55rem;
+    font-size: .95rem;
+    font-weight: 700;
+    box-shadow: 0 5px 16px rgba(66, 217, 208, .12);
+    transition: all .18s ease;
+}
+
+.btn-elite:hover,
+.btn-elite:focus {
+    color: #031b1c;
+    background: #67e3dc;
+    border-color: #67e3dc;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(66, 217, 208, .18);
+}
+
+.alert {
+    border-radius: .55rem;
+    font-size: .88rem;
+    margin-bottom: 1rem;
+}
+
+.alert-success {
+    color: #bbf7d0;
+    background: rgba(34, 197, 94, .1);
+    border: 1px solid rgba(34, 197, 94, .2);
+}
+
+.alert-danger {
+    color: #fecaca;
+    background: rgba(239, 68, 68, .1);
+    border: 1px solid rgba(239, 68, 68, .2);
+}
+
+.alert ul {
+    padding-left: 1.2rem;
+}
+
+.help-card {
+    margin-top: .9rem;
+    padding: 1.25rem 1.5rem;
+}
+
+.help-title {
+    margin-bottom: 1rem;
+    color: #e2e8f0;
+    font-size: .95rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+}
+
+.help-links {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: .55rem;
+}
+
+.help-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: .55rem .75rem;
+    color: #cbd5e1;
+    background: rgba(15, 23, 42, .6);
+    border: 1px solid rgba(148, 163, 184, .16);
+    border-radius: .5rem;
+    font-size: .86rem;
     font-weight: 600;
-    color: #fff;
-    transition: 0.3s ease;
-    box-shadow: 0 0 20px rgba(0,191,255,0.4);
-}
-
-.btn-elite:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 0 35px rgba(0, 255, 238, 0.8);
-}
-
-.links {
-    margin-top: 1rem;
-    text-align: center;
-    font-size: 0.85rem;
-}
-
-.links a {
-    color: #00bfff;
     text-decoration: none;
-    margin: 0 8px;
-    transition: 0.3s;
+    transition: all .18s ease;
 }
 
-.links a:hover {
-    color: #fff;
-}
-</style>
-
-<canvas id="matrix"></canvas>
-
-<div class="auth-wrapper">
-    <div class="glass-card" id="tilt-card">
-
-        <div class="logo-wrapper">
-            <div class="lightning"></div>
-            <div class="app-logo">
-                {{ config('app.name') }}
-            </div>
-        </div>
-
-        @if(session('status')) <div class="alert alert-success">{{ session('status') }}</div> @endif @if($errors->any()) <div class="alert alert-danger"> <ul class="mb-0"> @foreach ($errors->all() as $error) <li>{{ $error }}</li> @endforeach </ul> </div> @endif
-
-        <form method="POST" action="{{ route('login') }}">
-            @csrf
-
-            <div class="form-group">
-                <input type="text" name="name" required placeholder=" " class="form-control">
-                <label class="form-label">Username</label>
-            </div>
-
-            <div class="form-group">
-                <input type="password" name="password" required placeholder=" " class="form-control">
-                <label class="form-label">Password</label>
-            </div>
-
-            <button type="submit" class="btn btn-elite">
-                ACCESS LastFiles
-            </button>
-
-        </form>
-
-    </div>
-
-</div>
-
-<!-- ACTION LINKS CARD -->
-
-<div class="glass-card help-card text-center">
-
-    <h6 class="help-title">
-        Need Help?
-    </h6>
-
-    <div class="help-links">
-
-        <a href="{{ route('custom.password.recover') }}" class="help-btn">
-            🔑 Forgot Password
-        </a>
-
-        <a href="{{ route('register') }}" class="help-btn">
-            🧾 Create Account
-        </a>
-
-        <a href="{{ route('contact.create') }}" class="help-btn help-btn-danger">
-            💬 Contact Staff
-        </a>
-
-    </div>
-
-</div>
-
-   <style>
-
-/* HELP CARD */
-
-.help-card{
-    padding:2rem;
+.help-btn:hover {
+    color: #42d9d0;
+    background: rgba(66, 217, 208, .07);
+    border-color: rgba(66, 217, 208, .3);
+    transform: translateY(-1px);
 }
 
-/* Title */
-
-.help-title{
-    letter-spacing:3px;
-    color:#00bfff;
-    font-family:'Orbitron', sans-serif;
-    margin-bottom:1.5rem;
+.help-btn-danger:hover {
+    color: #fca5a5;
+    background: rgba(239, 68, 68, .07);
+    border-color: rgba(239, 68, 68, .3);
 }
 
-/* Links container */
+@media (max-width: 575.98px) {
+    .fileiplay-login-page {
+        align-items: flex-start;
+        padding: 1.25rem .65rem;
+    }
 
-.help-links{
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-}
+    .auth-wrapper {
+        max-width: 100%;
+    }
 
-/* Buttons */
+    .glass-card {
+        padding: 1.35rem;
+        border-radius: .7rem;
+    }
 
-.help-btn{
+    .app-logo {
+        font-size: 1.65rem;
+    }
 
-    display:block;
+    .logo-wrapper {
+        margin-bottom: 1.35rem;
+    }
 
-    padding:12px;
-
-    border-radius:12px;
-
-    text-decoration:none;
-
-    font-weight:500;
-
-    background:rgba(255,255,255,0.03);
-
-    border:1px solid rgba(0,191,255,0.2);
-
-    color:#e6edf3;
-
-    transition:0.25s ease;
-
-}
-
-/* Hover effect */
-
-.help-btn:hover{
-
-    transform:translateY(-3px);
-
-    background:rgba(0,191,255,0.08);
-
-    box-shadow:0 0 15px rgba(0,191,255,0.4);
-
-    color:#fff;
-
-}
-
-/* Contact staff highlight */
-
-.help-btn-danger{
-
-    border:1px solid rgba(0,255,180,0.3);
-
-}
-
-.help-btn-danger:hover{
-
-    background:rgba(0,255,180,0.08);
-
-    box-shadow:0 0 18px rgba(0,255,180,0.5);
-
-}
-
-   </style>
-
-
-<script>
-/* ================= MATRIX EFFECT ================= */
-const canvas = document.getElementById("matrix");
-const ctx = canvas.getContext("2d");
-
-canvas.height = window.innerHeight;
-canvas.width = window.innerWidth;
-
-const letters = "01アァカサタナハマヤャラワ0123456789";
-const fontSize = 14;
-const columns = canvas.width / fontSize;
-const drops = [];
-
-for (let x = 0; x < columns; x++)
-    drops[x] = 1;
-
-function drawMatrix() {
-    ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    ctx.fillStyle = "#00ff66";
-    ctx.font = fontSize + "px monospace";
-
-    for (let i = 0; i < drops.length; i++) {
-        const text = letters.charAt(Math.floor(Math.random() * letters.length));
-        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975)
-            drops[i] = 0;
-
-        drops[i]++;
+    .help-card {
+        padding: 1.1rem;
     }
 }
 
-setInterval(drawMatrix, 33);
+@media (prefers-reduced-motion: reduce) {
+    .btn-elite,
+    .help-btn,
+    .form-control {
+        transition: none !important;
+    }
+}
+</style>
 
-/* ================= 3D TILT ================= */
-const card = document.getElementById("tilt-card");
+<div class="fileiplay-login-page">
 
-card.addEventListener("mousemove", (e) => {
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    <div class="auth-wrapper">
 
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
+        <div class="glass-card" id="tilt-card">
 
-    const rotateX = ((y - centerY) / 25);
-    const rotateY = ((centerX - x) / 25);
+            <div class="logo-wrapper">
+                <div class="app-logo">
+                    {{ config('app.name') }}
+                </div>
+                <div class="logo-subtitle">
+                    Sign in to your FileIplay account
+                </div>
+            </div>
 
-    card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-});
+            @if(session('status'))
+                <div class="alert alert-success">{{ session('status') }}</div>
+            @endif
 
-card.addEventListener("mouseleave", () => {
-    card.style.transform = "rotateX(0) rotateY(0)";
-});
-</script>
+            @if($errors->any())
+                <div class="alert alert-danger">
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <form method="POST" action="{{ route('login') }}">
+                @csrf
+
+                <div class="form-group">
+                    <label for="login-name" class="form-label">Username</label>
+                    <input type="text"
+                           id="login-name"
+                           name="name"
+                           required
+                           autocomplete="username"
+                           class="form-control"
+                           value="{{ old('name') }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="login-password" class="form-label">Password</label>
+                    <input type="password"
+                           id="login-password"
+                           name="password"
+                           required
+                           autocomplete="current-password"
+                           class="form-control">
+                </div>
+
+                <button type="submit" class="btn btn-elite">
+                    ACCESS FileIplay
+                </button>
+            </form>
+
+        </div>
+
+        <div class="glass-card help-card text-center">
+
+            <h6 class="help-title">Need Help?</h6>
+
+            <div class="help-links">
+
+                <a href="{{ route('custom.password.recover') }}" class="help-btn">
+                    🔑 Forgot Password
+                </a>
+
+                <a href="{{ route('register') }}" class="help-btn">
+                    🧾 Create Account
+                </a>
+
+                <a href="{{ route('contact.create') }}" class="help-btn help-btn-danger">
+                    💬 Contact Staff
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 
 @endsection

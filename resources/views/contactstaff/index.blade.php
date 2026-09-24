@@ -3,240 +3,193 @@
 @section('content')
 
 <style>
-
-.contact-panel{
-    max-width:1500px;
-    margin:auto;
-}
-
-/* Glass card */
-
-.contact-card{
-
-    background: rgba(10,10,10,0.90);
-    border:1px solid rgba(0,150,255,0.15);
-    border-radius:18px;
-
-    backdrop-filter: blur(18px);
-
-    padding:1.5rem;
-    margin-bottom:1rem;
-
-    transition:.25s;
-
-    box-shadow:
-        0 15px 45px rgba(0,0,0,0.9),
-        inset 0 0 10px rgba(0,191,255,0.05);
-
-}
-
-.contact-card:hover{
-
-    transform:translateY(-3px);
-    border-color:rgba(0,191,255,0.35);
-
-    box-shadow:
-        0 25px 60px rgba(0,0,0,1),
-        0 0 20px rgba(0,191,255,0.25);
-
-}
-
-/* Header */
-
-.contact-title{
-
-    font-family:'Orbitron', sans-serif;
-    color:#00bfff;
-    letter-spacing:3px;
-    margin-bottom:2rem;
-
-}
-
-/* Status */
-
-.badge-open{
-
-    background:#ff3b3b;
-    padding:6px 12px;
-    border-radius:8px;
-    font-size:0.75rem;
-    font-weight:600;
-
-}
-
-.badge-answered{
-
-    background:#00c97f;
-    padding:6px 12px;
-    border-radius:8px;
-    font-size:0.75rem;
-    font-weight:600;
-
-}
-
-/* Button */
-
-.open-btn{
-
-    padding:6px 16px;
-    border-radius:20px;
-    border:none;
+/* FileIplay Contact Staff Requests — forum style */
+.contact-requests-page {
     width: 100%;
-
-    background:linear-gradient(90deg,#003366,#0c5b75);
-
-    color:white;
-    font-size:0.8rem;
-    text-decoration:none;
-
-    transition:0.25s;
-
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 2rem 1rem 3rem;
 }
 
-.open-btn:hover{
-
-    transform:translateY(-2px);
-    box-shadow:0 0 15px rgba(0,191,255,0.6);
-
+.contact-requests-title {
+    color: #f8fafc;
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin: 0 0 1.25rem;
 }
 
-/* Labels */
-
-.contact-label{
-
-    font-size:0.75rem;
-    text-transform:uppercase;
-    letter-spacing:1px;
-    color:#777;
-
+.contact-card {
+    background: linear-gradient(135deg, rgba(22,32,51,.96), rgba(15,23,42,.92));
+    border: 1px solid rgba(148,163,184,.18);
+    border-radius: .75rem;
+    box-shadow: 0 12px 30px rgba(0,0,0,.22);
+    padding: 1rem;
+    margin-bottom: .85rem;
+    transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
 }
 
-/* Meta */
-
-.contact-meta{
-
-    font-size:0.85rem;
-    color:#aaa;
-
+.contact-card:hover {
+    border-color: rgba(45,212,191,.25);
+    box-shadow: 0 16px 35px rgba(0,0,0,.28);
+    transform: translateY(-1px);
 }
 
-/* Unread indicator */
-
-.unread-dot{
-
-    width:8px;
-    height:8px;
-    background:#00bfff;
-    border-radius:50%;
-    display:inline-block;
-    margin-right:6px;
-
+.contact-label {
+    display: block;
+    margin-bottom: .3rem;
+    color: #64748b;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .65px;
+    text-transform: uppercase;
 }
 
+.contact-value {
+    color: #e2e8f0;
+    font-size: .9rem;
+    overflow-wrap: anywhere;
+}
+
+.contact-value strong {
+    color: #f8fafc;
+}
+
+.contact-value a {
+    color: #2dd4bf;
+    text-decoration: none;
+    transition: color .18s ease;
+}
+
+.contact-value a:hover {
+    color: #5eead4;
+    text-decoration: underline;
+}
+
+.contact-meta {
+    color: #94a3b8;
+    font-size: .82rem;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: .32rem .62rem;
+    border-radius: .45rem;
+    font-size: .75rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.badge-open {
+    color: #fecaca;
+    background: rgba(127,29,29,.38);
+    border: 1px solid rgba(248,113,113,.25);
+}
+
+.badge-answered {
+    color: #a7f3d0;
+    background: rgba(6,78,59,.42);
+    border: 1px solid rgba(45,212,191,.25);
+}
+
+@media (max-width: 767.98px) {
+    .contact-requests-page {
+        padding: 1rem .75rem 2rem;
+    }
+
+    .contact-requests-title {
+        font-size: 1.2rem;
+    }
+
+    .contact-card {
+        padding: .85rem;
+    }
+
+    .contact-label {
+        font-size: .68rem;
+    }
+
+    .contact-value {
+        font-size: .9rem;
+    }
+}
 </style>
 
+<div class="contact-requests-page">
 
-<div class="container-fluid glass contact-panel mt-5">
+    <h4 class="contact-requests-title">
+        📨 Contact Staff Requests
+    </h4>
 
-<h4 class="contact-title mt-3">
-📨 Contact Staff Requests
-</h4>
+    @foreach($contacts as $c)
 
-@foreach($contacts as $c)
+        <div class="contact-card">
 
-<div class="contact-card">
+            <div class="row align-items-center gy-3">
 
-<div class="row align-items-center gy-3">
+                {{-- ID --}}
+                <div class="col-6 col-md-1">
+                    <span class="contact-label">Ticket</span>
+                    <div class="contact-value">
+                        <strong>#{{ $c->id }}</strong>
+                    </div>
+                </div>
 
-<!-- ID -->
+                {{-- EMAIL --}}
+                <div class="col-12 col-md-3">
+                    <span class="contact-label">Email</span>
+                    <div class="contact-value">
+                        {{ $c->email }}
+                    </div>
+                </div>
 
-<div class="col-6 col-md-1">
+                {{-- SUBJECT --}}
+                <div class="col-12 col-md-2">
+                    <span class="contact-label">Subject</span>
+                    <div class="contact-value">
+                        <strong>
+                            <a href="{{ route('contactstaff.show',$c->id) }}">
+                                {{ $c->subject }}
+                            </a>
+                        </strong>
+                    </div>
+                </div>
 
-<div class="contact-label">Ticket</div>
+                {{-- CREATED --}}
+                <div class="col-6 col-md-1">
+                    <span class="contact-label">Created</span>
+                    <div class="contact-meta">
+                        {{ $c->created_at->diffForHumans() }}
+                    </div>
+                </div>
 
-<strong>#{{ $c->id }}</strong>
+                {{-- IP --}}
+                <div class="col-6 col-md-3">
+                    <span class="contact-label">IP</span>
+                    <div class="contact-meta">
+                        {{ $c->ip ?? '-' }}
+                    </div>
+                </div>
 
-</div>
+                {{-- STATUS --}}
+                <div class="col-6 col-md-2 text-md-end">
+                    @if($c->resolved)
+                        <span class="status-badge badge-answered">
+                            ✔ Resolved
+                        </span>
+                    @else
+                        <span class="status-badge badge-open">
+                            ● Open
+                        </span>
+                    @endif
+                </div>
 
+            </div>
 
-<!-- EMAIL -->
+        </div>
 
-<div class="col-12 col-md-3">
-
-<div class="contact-label">Email</div>
-
-<div>{{ $c->email }}</div>
-
-</div>
-
-
-<!-- SUBJECT -->
-
-<div class="col-12 col-md-2">
-
-<div class="contact-label">Subject</div>
-
-<strong><a href="{{ route('contactstaff.show',$c->id) }}">{{ $c->subject }}</a></strong>
-
-</div>
-
-
-<!-- CREATED -->
-
-<div class="col-6 col-md-1">
-
-<div class="contact-label">Created</div>
-
-<div class="contact-meta">
-
-{{ $c->created_at->diffForHumans() }}
-
-</div>
-
-</div>
-
-
-<!-- IP -->
-
-<div class="col-6 col-md-3">
-
-<div class="contact-label">IP</div>
-
-<div class="contact-meta">
-
-{{ $c->ip ?? '-' }}
-
-</div>
-
-</div>
-
-
-<!-- STATUS -->
-
-<div class="col-6 col-md-2 text-end">
-
-@if($c->resolved)
-
-<span class="badge-answered">
-✔ Resolved
-</span>
-
-@else
-
-<span class="badge-open">
-● Open
-</span>
-
-@endif
-
-</div>
-
-
-</div>
-
-</div>
-
-@endforeach
+    @endforeach
 
 </div>
 

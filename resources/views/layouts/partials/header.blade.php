@@ -4,7 +4,8 @@
     <title>@yield('title', 'FileIplay')</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="author" content="lukan87">
-    
+    <meta name="description" content="FileIplay is a torrent tracker for movies, TV series, music, games, software, documentaries and more. Discover and browse torrents in one place.">
+    <link rel="canonical" href="https://fileiplay.org/">
    <!-- Favicon link -->
    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
 
