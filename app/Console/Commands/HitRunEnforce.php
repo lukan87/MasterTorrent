@@ -4,12 +4,13 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\History;
-use App\Models\Message;
-use App\Models\Conversation;
 use App\Services\SystemMessageService;
+use App\Traits\WarnsForHitRun;
 
 class HitRunEnforce extends Command
 {
+    use WarnsForHitRun;
+
     protected $signature = 'hitrun:enforce';
     protected $description = 'Apply Hit & Run after 7 days if requirements are not met';
 
@@ -28,33 +29,44 @@ class HitRunEnforce extends Command
             ->where('left',0)
             ->where('active',0)
             ->whereNotNull('completed_at')
-            ->where('completed_at','<',now()->subDays(7))
-            ->where('updated_at','<',now()->subHours(48))
+            ->where('completed_at','<',now()->subDays((int) config('hitrun.enforce_days', 7)))
+
+            // "Haven't been in the client" — last_event_at is only stamped by the announce
+            // pipeline, unlike updated_at which refreshes on every Eloquent write.
+            ->where(function ($q) {
+                $q->where('last_event_at','<',now()->subHours(48))
+                  ->orWhereNull('last_event_at');
+            })
 
             ->whereHas('user', function ($q) {
                 $q->whereIn('user_class',[1,2])
                   ->where('enabled','yes');
             })
 
-            ->limit(500)
             ->chunkById(100,function($rows) use ($requiredSeedTime){
 
                 foreach($rows as $row){
 
-                    if(!$row->torrent){
+                    if (!$row->torrent) {
                         continue;
                     }
 
-                    $ratio = $row->downloaded > 0
-                        ? $row->uploaded / $row->downloaded
-                        : 0;
+                    // Skip torrents the user barely downloaded (< download_threshold % of
+                    // the size). Not their fault — torrent may have run out of seeders,
+                    // they changed their mind, or found a better one.
+                    if ($row->downloadPercent() < (float) config('hitrun.download_threshold', 25)) {
+                        continue;
+                    }
+
+                    $ratio = $row->effectiveRatio();
 
                     if($ratio >= 1 || $row->seedtime >= $requiredSeedTime){
                         continue;
                     }
 
                     $row->update([
-                        'hitrun'=>1
+                        'hitrun'           => 1,
+                        'hitrun_warned_at' => now(),
                     ]);
 
                     $row->user->increment('hit_and_run_count');
@@ -64,36 +76,13 @@ class HitRunEnforce extends Command
 
                     /*
                     |--------------------------------------------------------------------------
-                    | Warning at 10 H&R
+                    | Warn on every H&R: 14 days, or +3 days if already warned
                     |--------------------------------------------------------------------------
                     */
 
-                    if ($hnrCount >= 10 && $user->warned == 0) {
+                    $warnResult = $this->applyHitRunWarning($user, $row, $requiredSeedTime, $ratio);
 
-                        $user->update([
-                            'warned' => 1,
-                            'warned_until' => now()->addDays(14),
-                            'warned_reason' => 'You have more than 10 hit and runs!'
-                        ]);
-
-                        $this->sendSystemMessage(
-                            $user->id,
-                            'Warning: Too Many Hit & Runs',
-                            "
-[b][color=orange]WARNING[/color][/b]
-
-You currently have {$hnrCount} Hit & Runs.
-
-If you reach 20 Hit & Runs your download privileges will be restricted.
-
-Please reseed your torrents to remove the Hit & Runs.
-
-This warning will expire in 14 days.
-"
-                        );
-
-                        $this->warn("User {$user->id} received a warning for H&R.");
-                    }
+                    $this->warn("User {$user->id} {$warnResult}.");
 
                     /*
                     |--------------------------------------------------------------------------
@@ -123,23 +112,6 @@ To restore downloading ability you must reseed torrents and reduce your Hit & Ru
 
                         $this->error("User {$user->id} downloads restricted.");
                     }
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | Hit & Run message
-                    |--------------------------------------------------------------------------
-                    */
-
-                    $torrentLink = route('torrents.show',[
-                        'id'=>$row->torrent->id,
-                        'slug'=>$row->torrent->slug
-                    ]);
-
-                    $this->sendSystemMessage(
-                        $row->user_id,
-                        'Hit & Run Issued',
-                        "You received a Hit & Run for torrent: [url={$torrentLink}]{$row->torrent->name}[/url]"
-                    );
 
                     $this->info("H&R applied → {$row->torrent->name}");
                 }

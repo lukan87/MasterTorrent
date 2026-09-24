@@ -27,7 +27,7 @@ class AwardSeedBonus extends Command
                             ->latest('start_at')
                             ->first();
 
-            $baseBonus = 0.15;
+            $baseBonus = config('seedbonus.points_per_hour', 0.15);
             $multiplier = 1;
 
             if ($happyHour) {
@@ -40,7 +40,7 @@ class AwardSeedBonus extends Command
                 // Optional: extra bonus for free download
                 if ($happyHour->free_download) {
                     $this->info("💎 Free Download bonus applied!");
-                    $multiplier += 0.1; // add 0.1 bonus points
+                    $multiplier += config('seedbonus.happy_hour_free_download_extra', 0.10); // extra points
                 }
             }
 
@@ -78,7 +78,7 @@ class AwardSeedBonus extends Command
 
                         // Award seedbonus
                        $bonus = round($effectiveBonus, 2);
-$maxSeedbonus = 999999.99;
+$maxSeedbonus = config('seedbonus.cap', 999999.99);
 
 if ($user->seedbonus + $bonus > $maxSeedbonus) {
     Log::info("Skipping user {$user->id}: seedbonus limit reached ({$user->seedbonus}).");

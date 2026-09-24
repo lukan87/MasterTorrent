@@ -50,6 +50,7 @@ class User extends Authenticatable
         'user_class',
         'warned',
         'warned_until',
+        'warned_reason',
         'invites',
         'invited_by',
         'invite_code',
@@ -67,6 +68,7 @@ class User extends Authenticatable
         'rank_rewarded',
         'is_immune',
         'is_freeleech',
+        'hit_and_run_count',
     ];
 
 
@@ -254,8 +256,8 @@ public function getSeedbonusPerHourAttribute()
         ->distinct('peers.torrent_id')
         ->count('peers.torrent_id');
 
-    // Define how many points per torrent per hour
-    $pointsPerTorrent = 0.15;
+    // Define how many points per torrent per hour (centralized in config/seedbonus.php)
+    $pointsPerTorrent = config('seedbonus.points_per_hour', 0.15);
 
     // Total points earned per hour
     return $seedingCount * $pointsPerTorrent;

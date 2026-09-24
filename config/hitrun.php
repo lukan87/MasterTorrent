@@ -22,6 +22,10 @@ return [
     */
     'seedtime' => 43200, // 12 hours in seconds
 
+    /* H&R timeline (stages)                                  */
+    'warn_days'    => 5, // after N days from completion, send the seeding warning if not met
+    'enforce_days' => 7, // after N days from completion, apply the Hit & Run if not met & not restarted
+
     /*
     |--------------------------------------------------------------------------
     | Max Warnings

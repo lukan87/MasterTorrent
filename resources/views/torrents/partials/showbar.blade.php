@@ -1,5 +1,4 @@
 
-
 <div class="showbar-card modern-showbar mb-4 mt-4">
 
     {{-- HEADER --}}
@@ -325,41 +324,39 @@
 
             @endif
 
-            {{-- THANK --}}
-            @if(Auth::check() && !$hasThanked)
+            {{-- REACTIONS --}}
+            @php
+                $activeReaction = $userReaction ? $userReaction->reaction : '👍';
+                $totalReactions = $reactions->count();
 
-                <form action="{{ route('torrents.thank', $torrent->id) }}"
-                      method="POST">
+                // Prepare tooltip text: group by reaction, list names
+                $tooltipContent = $reactions->groupBy('reaction')->map(function ($items, $reaction) {
+                    $names = $items->pluck('user.name')->take(3)->join(', ');
+                    if($items->count() > 3) $names .= '...';
+                    return "<strong>$reaction</strong>: $names";
+                })->join('<br>');
+            @endphp
 
-                    @csrf
-
-                    <button type="submit"
-                            class="btn modern-action-btn thank-btn"
-                            data-bs-toggle="tooltip"
-                            title="{{ $thankTooltip }}">
-
-                        {{ $thankCount }}
-
-                        <i class="bi bi-hand-thumbs-up"></i>
-
+            <span class="d-inline-block" data-bs-toggle="tooltip" data-bs-html="true" title="{!! $tooltipContent !!}">
+                <div class="dropdown reaction-dropdown">
+                    <button class="btn modern-action-btn dropdown-toggle" type="button" id="reactionDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        {{ $activeReaction }} <span class="badge">{{ $totalReactions }}</span>
                     </button>
-
-                </form>
-
-            @else
-
-                <button type="button"
-                        class="btn modern-action-btn thanked-btn"
-                        data-bs-toggle="tooltip"
-                        title="{{ $thankTooltip }}">
-
-                    {{ $thankCount }}
-
-                    <i class="bi bi-hand-thumbs-up-fill"></i>
-
-                </button>
-
-            @endif
+                    <ul class="dropdown-menu dropdown-menu-dark p-1" aria-labelledby="reactionDropdown">
+                    <li class="d-flex gap-1">
+                        @foreach(['👍', '😂', '😮', '😢', '😎', '💖', '🥱', '😤'] as $r)
+                            <form action="{{ route('torrents.react', $torrent->id) }}" method="POST" class="m-0">
+                                @csrf
+                                <input type="hidden" name="reaction" value="{{ $r }}">
+                                <button type="submit" class="btn btn-sm" style="font-size: 1.2rem;">
+                                    {{ $r }}
+                                </button>
+                            </form>
+                        @endforeach
+                    </li>
+                </ul>
+            </div>
+            </span>
 
             {{-- SUBSCRIBE --}}
             @if($subscribeAvailable)
@@ -564,4 +561,3 @@ html,body{overflow-x:hidden!important}.modern-showbar{border-radius:.75rem}.mode
 .subscribers-label .subscribers-names{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:260px}
 .subscribers-label .subscribers-more{color:var(--ui-accent);font-weight:700}
 </style>
-

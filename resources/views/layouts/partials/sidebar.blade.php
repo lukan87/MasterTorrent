@@ -102,12 +102,12 @@
                         <p>Forums</p>
                     </a>
                 </li>
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a href="{{ route('shop') }}" class="{{ request()->routeIs('shop') ? 'active' : '' }} nav-link">
                         <i class="bi bi-cart-plus"></i>
                         <p>Shop</p>
                     </a>
-                </li>
+                </li> -->
                 <!-- <li class="nav-item">
                     <a href="{{ route('donate') }}" class="{{ request()->routeIs('donate') ? 'active' : '' }} nav-link">
                         <i class="bi bi-cash-coin"></i>

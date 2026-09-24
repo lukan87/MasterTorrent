@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\UserTimeline;
 use App\Models\Message;
 use App\Models\History;
+use App\Services\HitRun\HitRunAmnestyService;
 
 
 class BonusController extends Controller
@@ -36,22 +37,15 @@ class BonusController extends Controller
 
         $amount = $request->input('amount');
 
-        switch ($amount) {
-            case '10':
-                $cost = 500; 
-                $uploadAmount = 10 * 1024 * 1024 * 1024; 
-                break;
-            case '25':
-                $cost = 1000; 
-                $uploadAmount = 25 * 1024 * 1024 * 1024; 
-                break;
-            case '100':
-                $cost = 5000; 
-                $uploadAmount = 100 * 1024 * 1024 * 1024; 
-                break;
-            default:
-                return redirect()->back()->with('error', 'Invalid selection.');
+        // Prices are defined centrally in config/seedbonus.php
+        $uploadPricing = config('seedbonus.shop.upload');
+        $cost = $uploadPricing[$amount] ?? null;
+
+        if ($cost === null) {
+            return redirect()->back()->with('error', 'Invalid selection.');
         }
+
+        $uploadAmount = $amount * 1024 * 1024 * 1024;
 
         if ($user->seedbonus < $cost) {
             return redirect()->back()->with('error', 'Not enough points.');
@@ -75,7 +69,7 @@ class BonusController extends Controller
     public function buyVip(Request $request)
 {
     $user = Auth::user();
-    $cost = 50000; 
+    $cost = config('seedbonus.shop.vip', 30000);
     if ($user->seedbonus < $cost) {
         return redirect()->back()->with('error', 'Not enough points.');
     }
@@ -92,8 +86,8 @@ class BonusController extends Controller
 
     
     $user->user_class = 3;
-    $user->slots += 10;
-    $user->invites += 5;
+    $user->slots += config('seedbonus.shop.vip_slots', 10);
+    $user->invites += config('seedbonus.shop.vip_invites', 5);
     $user->hit_and_run_count = 0;
 
     $user->save();
@@ -122,8 +116,8 @@ public function buySeedtime(Request $request)
     }
 
     $torrentId = $request->input('torrent_id');
-    $seedtimeCost = 1000; 
-    $additionalSeedtime = 86400; 
+    $seedtimeCost = config("seedbonus.shop.seedtime", 1000); 
+    $additionalSeedtime = config("seedbonus.shop.seedtime_added", 86400); 
 
     
     if ($user->seedbonus < $seedtimeCost) {
@@ -140,6 +134,10 @@ public function buySeedtime(Request $request)
         return redirect()->back()->with('error', 'Torrent history record not found.');
     }
 
+    // Remember whether this purchase is clearing an already-flagged Hit & Run
+    // so we can keep the per-user counter (and the 20 limit) in sync.
+    $wasHitRun = !empty($history->hitrun);
+
     
     $user->seedbonus -= $seedtimeCost;
     $user->save();
@@ -150,10 +148,20 @@ public function buySeedtime(Request $request)
             'prewarned_at' => NULL,
             'seedtime' => $additionalSeedtime, 
             'hitrun' => false,
+            'hitrun_removed_at' => $wasHitRun ? now() : ($history->hitrun_removed_at ?? null),
             'updated_at' => now(),
         ]);
 
-        
+    // If this purchase cleared an already-flagged Hit & Run, decrement the user's
+    // counter exactly like the other clear paths so they can get under the 20 limit
+    // and have their downloads restored.
+    if ($wasHitRun) {
+        $freshUser = $user->fresh();
+        if ($freshUser && $freshUser->hit_and_run_count > 0) {
+            $freshUser->decrement('hit_and_run_count');
+        }
+    }
+
     UserTimeline::create([
         'user_id' => $user->id,
         'staff_id' => '2',
@@ -172,7 +180,7 @@ public function removeHNR(Request $request)
     }
 
     $torrentId = $request->input('torrent_id');
-    $seedtimeCost = 5000; 
+    $seedtimeCost = config("seedbonus.shop.remove_hnr", 5000); 
     if ($user->seedbonus < $seedtimeCost) {
         return redirect()->back()->with('error', 'Not enough points.');
     }
@@ -234,7 +242,7 @@ public function buyInvites(Request $request)
     $user = Auth::user();
 
   
-    $cost = 1500; 
+    $cost = config("seedbonus.shop.invite", 1500); 
     if ($user->seedbonus < $cost) {
         return redirect()->back()->with('error', 'Not enough points to buy an invite.');
     }
@@ -258,7 +266,7 @@ public function buySlots(Request $request)
     $user = Auth::user();
 
     
-    $cost = 1000; 
+    $cost = config("seedbonus.shop.slot", 1000); 
 
     
     if ($user->seedbonus < $cost) {
@@ -285,7 +293,7 @@ public function buySurprise(Request $request)
     $user = Auth::user();
 
 
-    $cost = 15000;
+    $cost = config("seedbonus.shop.surprise", 15000);
 
   
     if ($user->seedbonus < $cost) {
@@ -358,5 +366,89 @@ public function buySurprise(Request $request)
 
 
 
-}
 
+    /**
+     * Clear the user's OLDEST hit & run. Applies the same 1:1 ratio logic as
+     * the amnesty (credits the shortfall) and decreases the H&R counter.
+     */
+    public function clearOneHnr(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'You must be logged in to clear a hit&run.');
+        }
+
+        // Charge only if there is actually something to clear.
+        $hasHnr = History::where('user_id', $user->id)
+            ->where('hitrun', 1)
+            ->exists();
+
+        if (!$hasHnr) {
+            return redirect()->back()->with('info', 'You have no hit & runs to clear.');
+        }
+
+        $cost = config('seedbonus.shop.clear_hnr', 7500);
+
+        if ($user->seedbonus < $cost) {
+            return redirect()->back()->with('error', 'Not enough points to clear a hit & run.');
+        }
+
+        $user->seedbonus -= $cost;
+        $user->save();
+
+        $result = (new HitRunAmnestyService)->clearOldestForUser($user);
+
+        UserTimeline::create([
+            'user_id' => $user->id,
+            'staff_id' => '2',
+            'comment' => "Cleared the oldest hit&run at the cost of {$cost} seedbonus points (upload credited: {$result['shortfall']} bytes).",
+        ]);
+
+        if ($result['shortfall'] > 0) {
+            Message::create([
+                'sender_id' => 2,
+                'receiver_id' => $user->id,
+                'subject' => 'Hit & Run cleared',
+                'body' => "You cleared your oldest hit & run. Your upload was topped up by {$result['shortfall']} bytes so that torrent now counts as a 1:1 ratio!",
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Your oldest hit & run was cleared and your ratio restored to 1:1 on that torrent!');
+    }
+
+    /**
+     * Remove an active warning from the user's account (H&R/reseed related).
+     */
+    public function buyResetWarning(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'You must be logged in to reset your warning.');
+        }
+
+        if ($user->warned != 1) {
+            return redirect()->back()->with('info', 'You have no active warning to reset.');
+        }
+
+        $cost = config('seedbonus.shop.reset_warning', 5000);
+
+        if ($user->seedbonus < $cost) {
+            return redirect()->back()->with('error', 'Not enough points to reset your warning.');
+        }
+
+        $user->seedbonus -= $cost;
+        $user->warned = 0;
+        $user->warned_until = null;
+        $user->save();
+
+        UserTimeline::create([
+            'user_id' => $user->id,
+            'staff_id' => '2',
+            'comment' => "Reset their active warning at the cost of {$cost} seedbonus points.",
+        ]);
+
+        return redirect()->back()->with('success', 'Your warning has been reset. Enjoy your clean slate!');
+    }
+}

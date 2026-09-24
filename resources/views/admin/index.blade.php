@@ -242,7 +242,7 @@
 
         @auth
 
-            @if(Auth::user()->user_class >= 8)
+            @if(Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::ADMIN)
 
                 <div class="col-md-6">
 
@@ -331,6 +331,38 @@
                             <a href="{{ route('admin.torrent_logs.index') }}" class="admin-primary-btn">
                                 <i class="bi bi-journal-text"></i>
                                 View Logs
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            @endif
+
+            @if(Auth::user()->user_class >= \App\Models\UserClass::ADMIN)
+
+                <div class="col-md-6">
+
+                    <div class="admin-action-card h-100">
+
+                        <div class="admin-action-card-header">
+                            <div class="admin-section-icon">
+                                <i class="bi bi-gear-wide-connected"></i>
+                            </div>
+
+                            <div>
+                                <h5>Hit&run's</h5>
+                                <p>Track All Hit&run's on site</p>
+                            </div>
+                        </div>
+
+                        <div class="admin-card-actions">
+
+                            <a href="{{ route('admin.hitrun_amnesty.index') }}" class="admin-primary-btn">
+                                <i class="bi bi-tools"></i>
+                                Hit & Run Amnesty
                             </a>
 
                         </div>

@@ -183,6 +183,11 @@ class Torrent extends Model
         return $this->hasMany(TorrentThank::class, 'torrent_id');
     }
 
+    public function reactions()
+    {
+        return $this->hasMany(TorrentReaction::class, 'torrent_id');
+    }
+
     public function images()
     {
         return $this->hasMany(TorrentImage::class);

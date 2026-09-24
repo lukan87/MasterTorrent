@@ -12,7 +12,7 @@ use App\Services\SystemMessageService;
 class HitRunReminder extends Command
 {
     protected $signature = 'hitrun:reminder';
-    protected $description = 'Send reminder after 48h if torrent stopped before meeting requirements';
+    protected $description = 'Send seeding warning after warn_days if the torrent was stopped before meeting requirements';
 
     public function handle()
     {
@@ -30,8 +30,14 @@ class HitRunReminder extends Command
             ->where('left',0)
             ->where('active',0)
             ->where('seedtime','<',$requiredSeedTime)
-            ->where('completed_at','<', now()->subHours(48))
-            ->where('updated_at','<', now()->subHours(48))
+            ->where('completed_at','<', now()->subDays((int) config('hitrun.warn_days', 5)))
+
+            // Only warn users who have actually stopped (client not announcing for 48h).
+            // last_event_at is only refreshed by the announce pipeline.
+            ->where(function ($q) {
+                $q->where('last_event_at','<', now()->subHours(48))
+                  ->orWhereNull('last_event_at');
+            })
 
             ->whereHas('user', function ($q) {
                 $q->whereIn('user_class', [
@@ -48,17 +54,15 @@ class HitRunReminder extends Command
                         continue;
                     }
 
-                    $downloadPercent = $row->torrent->size > 0
-                        ? $row->downloaded / $row->torrent->size
-                        : 0;
-
-                    if($downloadPercent < 0.25){
+                    // Skip torrents the user barely downloaded (< download_threshold % of
+                    // the size). Not their fault — the torrent may have run out of seeders,
+                    // they changed their mind, or found a better one. Use the same config
+                    // threshold as the enforcement stage.
+                    if ($row->downloadPercent() < (float) config('hitrun.download_threshold', 25)) {
                         continue;
                     }
 
-                    $ratio = $row->downloaded > 0
-                        ? $row->uploaded / $row->downloaded
-                        : 0;
+                    $ratio = $row->effectiveRatio();
 
                     if($ratio >= 1){
                         continue;

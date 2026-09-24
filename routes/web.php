@@ -13,6 +13,7 @@ use App\Http\Controllers\AnnounceController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\Auth\ResetPasswordController as AuthResetPasswordController;
 use App\Http\Controllers\BonusController;
+use App\Http\Controllers\Admin\HitRunAmnestyController;
 use App\Http\Controllers\CollectionController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ContactController;
@@ -369,6 +370,12 @@ Route::get('/verify/{token}', function ($token) {
 Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/torrent-logs', [TorrentLogController::class, 'index'])->name('admin.torrent_logs.index');
     Route::get('/torrent-logs/{id}', [TorrentLogController::class, 'show'])->name('admin.torrent_logs.show');
+
+    // Hit & Run Amnesty
+    Route::get('/hitrun-amnesty', [HitRunAmnestyController::class, 'index'])
+        ->name('admin.hitrun_amnesty.index');
+    Route::post('/hitrun-amnesty', [HitRunAmnestyController::class, 'run'])
+        ->name('admin.hitrun_amnesty.run');
 });
 
 // Hit and run routes
@@ -384,6 +391,8 @@ Route::post('/remove-hnr', [BonusController::class, 'removeHNR'])->name('bonus.r
 Route::post('/buy-invites', [BonusController::class, 'buyInvites'])->name('buy.invites')->middleware('auth');
 Route::post('/buy-slots', [BonusController::class, 'buySlots'])->name('buy.slots')->middleware('auth');
 Route::post('/bonus/surprise', [BonusController::class, 'buySurprise'])->name('bonus.surprise')->middleware('auth');
+Route::post('/bonus/buy-clear-hnr', [BonusController::class, 'clearOneHnr'])->name('bonus.clearHnr')->middleware('auth');
+Route::post('/bonus/buy-reset-warning', [BonusController::class, 'buyResetWarning'])->name('bonus.resetWarning')->middleware('auth');
 
 // Team route
 Route::get('/team', [TeamController::class, 'index'])->name('team.index')->middleware('auth');
@@ -638,6 +647,9 @@ Route::middleware('auth')->group(function () {
     // ---------------------------------
     Route::post('torrents/{id}/thank', [TorrentController::class, 'thank'])
         ->name('torrents.thank');
+
+    Route::post('torrents/{torrent}/react', [TorrentController::class, 'react'])
+        ->name('torrents.react');
 
     // ---------------------------------
     // Subscribe / Unsubscribe (by title)

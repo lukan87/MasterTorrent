@@ -188,7 +188,7 @@ stroke-width="3"
 <button type="submit"
 class="btn btn-primary btn-sm"
 data-bs-toggle="tooltip"
-title="Remove H&R for 5000 seedbonus">
+title="Remove H&R for {{ config('seedbonus.shop.remove_hnr') }} seedbonus">
 
 <i class="bi bi-cash-coin"></i>
 

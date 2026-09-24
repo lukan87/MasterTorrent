@@ -190,7 +190,11 @@ fetch('/announcements-unread-count')
             icon: 'success',
             title: 'Success',
             text: @json(session('success')),
-            showConfirmButton: true,
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 5000,
+            timerProgressBar: true,
         });
     </script>
 @endif
@@ -201,7 +205,11 @@ fetch('/announcements-unread-count')
             icon: 'warning',
             title: 'Warning',
             text: @json(session('warning')),
-            showConfirmButton: true,
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 5000,
+            timerProgressBar: true,
         });
     </script>
 @endif
@@ -212,7 +220,11 @@ fetch('/announcements-unread-count')
             icon: 'info',
             title: 'Information',
             text: @json(session('info')),
-            showConfirmButton: true,
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 5000,
+            timerProgressBar: true,
         });
     </script>
 @endif
@@ -223,7 +235,11 @@ fetch('/announcements-unread-count')
             icon: 'error',
             title: 'Error',
             text: @json(session('error')),
-            showConfirmButton: true,
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 5000,
+            timerProgressBar: true,
         });
     </script>
 @endif

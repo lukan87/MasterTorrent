@@ -81,6 +81,7 @@
     border: 1px solid var(--ui-border) !important;
     background: linear-gradient(160deg, rgba(22, 32, 51, 0.98), rgba(9, 14, 24, 0.98)) !important;
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55) !important;
+    overflow: hidden;
 }
 
 .profile-cover {
@@ -352,11 +353,11 @@
 </li>
 
 {{-- Facebook --}}
-<li class="nav-item">
+<!-- <li class="nav-item">
     <a class="nav-link" href="https://www.facebook.com/" target="_blank">
         <i class="bi bi-facebook fs-4" data-bs-toggle="tooltip" title="Facebook"></i>
     </a>
-</li>
+</li> -->
 
 {{-- RSS --}}
 <li class="nav-item">

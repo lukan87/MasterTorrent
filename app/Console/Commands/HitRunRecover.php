@@ -31,7 +31,7 @@ class HitRunRecover extends Command
             ->where(function ($q) use ($requiredSeedTime) {
 
                 $q->where('seedtime','>=',$requiredSeedTime)
-                  ->orWhereRaw('uploaded >= downloaded');
+                  ->orWhereRaw("uploaded >= CASE WHEN downloaded > 0 THEN downloaded ELSE actual_downloaded END");
 
             })
             ->chunkById(200,function ($rows) use ($requiredSeedTime,&$totalRecovered) {
@@ -43,9 +43,7 @@ class HitRunRecover extends Command
                         continue;
                     }
 
-                    $ratio = $row->downloaded > 0
-                        ? $row->uploaded / $row->downloaded
-                        : 0;
+                    $ratio = $row->effectiveRatio();
 
                     $this->line(
                         "Checking history {$row->id} | ".
@@ -66,7 +64,8 @@ class HitRunRecover extends Command
 
                         $row->update([
                             'hitrun' => 0,
-                            'hitrun_removed_at' => now()
+                            'hitrun_removed_at' => now(),
+                            'hitrun_warned_at' => null,
                         ]);
 
                         /*

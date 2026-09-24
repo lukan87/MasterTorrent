@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use App\Models\Message;
 use Illuminate\Support\Facades\Auth;
 use App\Models\TorrentThank;
+use App\Models\TorrentReaction;
 use App\Models\TorrentImage;
 use App\Models\UserSlot;
 use Carbon\Carbon;
@@ -520,6 +521,16 @@ $thankTooltip = match (true) {
     default          => implode(', ', $names) . ' thanked',
 };
 
+$reactions = \App\Models\TorrentReaction::where('torrent_id', $torrent->id)
+    ->with('user:id,name')
+    ->get();
+
+$reactionCounts = $reactions->groupBy('reaction')->map->count();
+
+$userReaction = Auth::check()
+    ? $reactions->where('user_id', Auth::id())->first()
+    : null;
+
 $subscriptionService = app(\App\Services\TorrentSubscriptionService::class);
 $subscribeAvailable = $subscriptionService->canSubscribe($torrent);
 $isSubscribed       = $subscribeAvailable && $subscriptionService->isSubscribed(Auth::user(), $torrent);
@@ -556,6 +567,9 @@ if ($torrent->tmdb_type === 'movie' && $torrent->tmdbid) {
     'thankUsers',
     'thankTooltip',
     'thankCount',
+    'reactions',
+    'reactionCounts',
+    'userReaction',
     'fileTree',
     'fanartBackground',
     'fanartPoster',
@@ -620,6 +634,50 @@ $user->save();
     
     return redirect()->route('torrents.show', ['id' => $torrent->id, 'slug' => $torrent->slug])
         ->with('success', 'Your thanks has been registered! You received 0.5 seedbonus points!');
+}
+
+public function react(Request $request, Torrent $torrent)
+{
+    $request->validate([
+        'reaction' => 'required|string',
+    ]);
+
+    $reaction = $request->input('reaction');
+
+    // Check if user is the owner
+    if ($torrent->owner === Auth::id()) {
+        return redirect()->back()->with('error', 'You cannot react to your own torrent.');
+    }
+
+    // Only allow specified reactions
+    $allowedReactions = ['👍', '😂', '😮', '😢', '😎', '💖', '🥱', '😤'];
+    if (!in_array($reaction, $allowedReactions)) {
+        return redirect()->back()->with('error', 'Invalid reaction.');
+    }
+
+    // Check if user already reacted
+    $existing = TorrentReaction::where('torrent_id', $torrent->id)
+        ->where('user_id', Auth::id())
+        ->first();
+
+    if ($existing) {
+        if ($existing->reaction === $reaction) {
+            // Remove reaction if same
+            $existing->delete();
+        } else {
+            // Update reaction
+            $existing->update(['reaction' => $reaction]);
+        }
+    } else {
+        // Create reaction
+        TorrentReaction::create([
+            'torrent_id' => $torrent->id,
+            'user_id' => Auth::id(),
+            'reaction' => $reaction,
+        ]);
+    }
+
+    return redirect()->back();
 }
 
 /*

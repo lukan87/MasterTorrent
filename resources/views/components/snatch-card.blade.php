@@ -286,6 +286,21 @@ You have until
 
 @endif
 
+@if($type=='snatchlist' && !$hasMetRequirements)
+<div class="mt-2">
+    <form action="{{ route('bonus.buySeedtime') }}" method="POST" class="d-inline">
+        @csrf
+        <input type="hidden" name="torrent_id" value="{{ $history->torrent_id }}">
+        <button type="submit"
+            class="btn btn-primary btn-sm"
+            data-bs-toggle="tooltip"
+            title="Buy seedtime ({{ config('seedbonus.shop.seedtime', 1000) }} seedbonus)">
+            <i class="bi bi-coin"></i> Buy seedtime
+        </button>
+    </form>
+</div>
+@endif
+
 
 
 {{-- SEED PROGRESS --}}

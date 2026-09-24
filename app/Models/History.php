@@ -24,10 +24,14 @@ class History extends Model
         'immune',
         'hitrun',
         'hitrun_removed_at',
+        'hitrun_warned_at',
         'prewarn',
         'prewarned_at',
         'ip',
-        'last_awarded', 
+        'last_awarded',
+        'uploaded',
+        'actual_uploaded',
+        'seedtime',
     ];
 
     protected $casts = [
@@ -37,6 +41,7 @@ class History extends Model
         'prewarn' => 'boolean',
         'last_awarded' => 'datetime', 
         'hitrun_removed_at' => 'datetime',
+        'hitrun_warned_at' => 'datetime',
         'last_event_at' => 'datetime',
     ];
 
@@ -67,5 +72,47 @@ public function torrent()
 {
     return $this->belongsTo(Warning::class, 'torrent_id', 'torrent_id');
 }
+
+    /**
+     * The download basis used for Hit & Run ratio calculations.
+     *
+     * Uses the credited `downloaded` where possible, but falls back to
+     * `actual_downloaded` when nothing was credited (e.g. freeleech) so a 1:1
+     * ratio comparison is still meaningful.
+     */
+    public function effectiveDownload()
+    {
+        return $this->downloaded > 0 ? $this->downloaded : $this->actual_downloaded;
+    }
+
+    /**
+     * Ratio as credited upload over the effective download basis.
+     */
+    public function effectiveRatio(): float
+    {
+        $download = $this->effectiveDownload();
+
+        if ($download <= 0) {
+            return 0.0;
+        }
+
+        return $this->uploaded / $download;
+    }
+
+    /**
+     * Percentage of the torrent actually downloaded (0-100).
+     *
+     * Uses effectiveDownload() so freeleech torrents (credited download = 0)
+     * are still measured against the real bytes transferred. Returns 0 when
+     * the torrent size is unknown so the download-threshold skip applies.
+     */
+    public function downloadPercent(): float
+    {
+        if (!$this->torrent || $this->torrent->size <= 0) {
+            return 0.0;
+        }
+
+        return $this->effectiveDownload() / $this->torrent->size * 100;
+    }
 
 }
