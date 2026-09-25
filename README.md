@@ -1,53 +1,316 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
-
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+<a href="https://laravel.com" target="_blank">
+<img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo">
+</a>
 </p>
 
-## About Laravel
+<p align="center">
+<a href="https://github.com/laravel/framework/actions">
+<img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status">
+</a>
+<a href="https://packagist.org/packages/laravel/framework">
+<img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads">
+</a>
+<a href="https://packagist.org/packages/laravel/framework">
+<img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version">
+</a>
+<a href="https://packagist.org/packages/laravel/framework">
+<img src="https://img.shields.io/packagist/l/laravel/framework" alt="License">
+</a>
+</p>
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+# 🎬 Torrent Tracker — Laravel 12
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+A modern, feature-rich **private torrent tracker and media platform** built with **Laravel 12** and **PHP 8.4**.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+The project combines a powerful torrent management system with a growing media library, community features, user management, rewards, messaging, chat, seedbox integration, and online media functionality.
 
-## New Tracker Designed in Laravel 12
+The goal is to create more than just a traditional torrent tracker — it is designed as a complete **torrent, media, and community platform**.
 
-This project is a **torrent tracker** built using Laravel 12, offering a modern, efficient, and feature-rich platform for torrent management. Some of its key features include:
+---
 
-- **PHP 8.4:** Using latest php.
-- **User Management:** Users are grouped into different classes with automatic promotion/demotion based on upload/download ratio, registration time, and activity.
-- **Torrent System:** Tracks multi-file and single-file torrents with detailed statistics such as seeders, leechers, and completion counts.
-- **Bonus System:** Users earn seed bonus points for seeding torrents, limited to a configurable number of torrents.
-- **Free or Double upload torrent:** Users can download torrents as free download or double upload - fully functional.
-- **Invite System:** Fully functional invite system. This can be enable/disabled. 
-- **Snatch List:** Displays torrents a user has downloaded, is currently seeding, or needs to reseed.
-- **HAPPY HOUR SYSTEM:** For a chosen period of time, during the day, the torrents upload can be recorded up 8x. Also the seedbonuspoints also can multiplied by 8x.
-- **Custom Announce System:** A dedicated announce system for tracking peers efficiently - fully functional.
+## 🚀 Main Features
 
-This tracker is designed to be **fast, scalable, and secure**, utilizing Laravel's powerful framework to handle high traffic and large datasets.
+### 🧲 Torrent System
 
+A complete torrent management system supporting both single-file and multi-file torrents.
 
-If you want to contribute, feel free. If you want to install this on your server, please contact me at luci_calapodescu@yahoo.com
+* Single-file and multi-file torrents
+* Torrent uploading and publishing
+* Torrent categories
+* Torrent descriptions
+* Torrent file management
+* Seeder and leecher statistics
+* Completed/download statistics
+* Torrent comments and discussions
+* Torrent search and filtering
+* Torrent browsing and sorting
+* User upload/download statistics
+* Custom torrent announce system
+* Peer tracking
 
+### ⚡ Freeleech & Double Upload
 
-Screen 1
-![Image](https://github.com/user-attachments/assets/56d2f5c1-0d2e-4ea1-aedd-9ae97b954bdc)
+The tracker supports special torrent modes designed to reward users and encourage seeding.
 
-Screen 2 
-![Image](https://github.com/user-attachments/assets/cf0642d4-b110-49df-92bd-6942af5f31ba)
+* **Freeleech** — downloads do not count toward a user's download amount
+* **Double Upload** — uploaded amount can be counted at 2×
+* Ability to apply special torrent statuses
+* Fully integrated with the tracker statistics
 
+These features can be used for special releases, promotions, events, or selected torrents.
 
-## License
+### 🏆 Seed Bonus System
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Users can earn **Seed Bonus Points** by keeping torrents seeded.
+
+The bonus system is configurable and can limit the number of torrents that generate bonus points.
+
+This encourages users to keep torrents active and contribute back to the community.
+
+### 🎉 Happy Hour System
+
+The tracker includes a configurable **Happy Hour** system.
+
+During a selected period, torrent activity can receive increased rewards.
+
+Depending on the configuration:
+
+* Upload credit can be multiplied up to **8×**
+* Seed Bonus Points can be multiplied up to **8×**
+* The system operates automatically during the configured period
+
+This provides additional incentives for users to seed during selected times.
+
+### 🎁 Invite System
+
+A fully functional **user invitation system** allows members to invite trusted users to the tracker.
+
+The invite system can be enabled or disabled by administrators.
+
+Features include:
+
+* User invitations
+* Invite codes
+* Invite tracking
+* Controlled registration
+* Invite management
+
+### 👤 User Management
+
+Users can belong to different classes or ranks based on configurable criteria.
+
+The tracker can automatically manage user classes based on factors such as:
+
+* Upload/download ratio
+* Account age
+* User activity
+* Community participation
+
+This provides a flexible foundation for creating different user levels and permissions.
+
+### 📋 Snatch List
+
+The **Snatch List** gives users an overview of their torrent activity.
+
+It can show torrents that a user:
+
+* Has downloaded
+* Is currently seeding
+* Has previously seeded
+* Needs to reseed
+
+This makes it easier for users to manage their torrent history and maintain their seeding activity.
+
+### 📡 Custom Announce System
+
+The tracker includes a dedicated **custom announce system** designed specifically for the application.
+
+It handles peer communication and torrent activity while allowing the tracker to maintain detailed information about torrent and user activity.
+
+### 💬 Private Messaging
+
+Users can communicate privately using the built-in **messaging system**.
+
+Private messages can be used for:
+
+* Talking with other members
+* Discussing releases
+* Requesting help
+* Community communication
+* General conversations
+
+### 💭 Community Chat
+
+The tracker also provides a **community chat system**, allowing users to communicate directly within the website.
+
+Chat can be used for:
+
+* General discussion
+* Release discussions
+* Help and support
+* Community interaction
+* Real-time conversations
+
+### 📦 Seedbox System
+
+Users can connect their own **seedboxes** to the tracker.
+
+The seedbox system is designed to make it easier for users to manage their torrent activity directly from the tracker.
+
+Depending on the configured integration, users can:
+
+* Connect a seedbox
+* Manage connected seedboxes
+* Send torrents to their seedbox
+* Monitor torrent activity
+* Manage seeding
+* Keep torrents seeding automatically
+
+### 🎬 Movies & Series Library
+
+The tracker includes a dedicated **Movies & Series library** for browsing and discovering media.
+
+Users can explore:
+
+* 🎬 Movies
+* 📺 TV Series
+* 📀 Seasons
+* 🎞️ Episodes
+* 🎭 Genres
+* 🖼️ Posters and artwork
+* ℹ️ Media information
+* 🔎 Search and filtering
+
+The library provides a more visual experience than a traditional torrent index.
+
+### ▶️ Online Movies & Series
+
+The platform also supports **online media functionality**, allowing supported movies and series to be viewed directly through the website.
+
+This creates a combined experience where users can:
+
+**Discover → Download → Seed → Watch**
+
+all from the same platform.
+
+### 👥 User Profiles
+
+Each member has their own profile containing information about their account and activity.
+
+Depending on the user's permissions and configuration, profiles can display:
+
+* Username
+* Profile image
+* Registration date
+* Last activity
+* Upload statistics
+* Download statistics
+* Share ratio
+* Seeding activity
+* Account information
+
+### 📊 User Statistics
+
+The tracker keeps detailed statistics about user activity.
+
+Statistics can include:
+
+* Total uploaded
+* Total downloaded
+* Share ratio
+* Seeded torrents
+* Active torrents
+* Completed torrents
+* Seed Bonus Points
+* Torrent activity
+
+---
+
+# 🛠️ Built With Laravel
+
+This project is built using **Laravel 12**, providing a modern and powerful foundation for the tracker.
+
+Laravel provides the project with features such as:
+
+* MVC architecture
+* Authentication
+* Routing
+* Middleware
+* Eloquent ORM
+* Database migrations
+* Queues and background jobs
+* Events
+* Notifications
+* Blade templates
+* Artisan commands
+* Task scheduling
+* Cache and session management
+
+Laravel allows the tracker to remain organised, maintainable, and easy to expand as new features are developed.
+
+---
+
+# ⚙️ Technology
+
+* **Laravel 12**
+* **PHP 8.4**
+* **MySQL**
+* **Blade**
+* **Bootstrap**
+* **JavaScript**
+* **Laravel Artisan**
+* **Laravel Scheduler**
+* **Custom Torrent Announce System**
+
+---
+
+# 🎯 Project Goals
+
+The goal of this project is to build a complete **torrent and media community platform**, rather than simply providing a torrent index.
+
+The platform brings together:
+
+> **Torrents + Media Library + Online Viewing + Seedboxes + Community + Messaging + Chat + Rewards**
+
+The project is continuously evolving, with new features, improvements, optimisations, and integrations being added over time.
+
+---
+
+# 🤝 Contributing
+
+If you would like to contribute to the project, improvements, bug fixes, feature suggestions, and pull requests are welcome.
+
+Feel free to explore the project and contribute where you can.
+
+---
+
+# 💻 Installation & Hosting
+
+The project is designed to run on a server capable of supporting Laravel 12 and PHP 8.4.
+
+If you are interested in installing this tracker on your own server, please contact:
+
+**📧 [luci_calapodescu@yahoo.com](mailto:luci_calapodescu@yahoo.com)**
+
+---
+
+# 📸 Screenshots
+
+## 🏠 Tracker
+
+![Tracker Screenshot](https://github.com/user-attachments/assets/56d2f5c1-0d2e-4ea1-aedd-9ae97b954bdc)
+
+## 🎬 Media / Torrent Interface
+
+![Media Screenshot](https://github.com/user-attachments/assets/cf0642d4-b110-49df-92bd-6942af5f31ba)
+
+More screenshots will be added as the project continues to evolve.
+
+---
+
+# 📜 License
+
+The Laravel framework is open-source software licensed under the [MIT License](https://opensource.org/licenses/MIT).
+
+The licensing terms of this project and its individual components may differ from those of the Laravel framework. Please check the repository for the applicable project license and third-party dependencies.
