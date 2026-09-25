@@ -289,7 +289,7 @@ Feel free to explore the project and contribute where you can.
 
 The project is designed to run on a server capable of supporting Laravel 12 and PHP 8.4.
 
-If you are interested in installing this tracker on your own server, please contact:
+If you are interested in installing this tracker on your own server or to help with its development, please contact:
 
 **📧 [luci_calapodescu@yahoo.com](mailto:luci_calapodescu@yahoo.com)**
 
