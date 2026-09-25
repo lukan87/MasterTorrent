@@ -966,6 +966,16 @@ public function checkImdbUrl(Request $request)
     return response()->json(['exists' => false]);
 }
 
+public function getLatest()
+{
+    $torrent = Torrent::latest()->first();
+    if (!$torrent) return response()->json(null);
+    return response()->json([
+        'name' => $torrent->name,
+        'url' => route('torrents.show', [$torrent->id, $torrent->slug])
+    ]);
+}
+
 
 
 

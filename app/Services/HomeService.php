@@ -63,7 +63,8 @@ class HomeService
     {
         return Shoutbox::with(['user', 'replies.user'])
             ->whereNull('parent_id')
-            ->latest()
+            ->orderBy('sticky', 'desc')
+            ->orderBy('created_at', 'desc')
             ->take($limit)
             ->get();
     }
@@ -151,7 +152,7 @@ class HomeService
      * Returns up to $limit random titles from the movies or series table,
      * mapped to the poster/URL format the view needs.
      */
-    private function getRandomOnlineTitles(string $type, int $limit = 6): \Illuminate\Support\Collection
+    private function getRandomOnlineTitles(string $type, int $limit = 10): \Illuminate\Support\Collection
     {
         $model = $type === 'series' ? new Series : new Movie;
 

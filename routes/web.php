@@ -315,6 +315,10 @@ Route::post('/torrents/{torrent}/send-to-seedbox', [TorrentController::class, 's
     ->name('torrents.sendToSeedbox')
     ->middleware('auth');
 
+Route::get('/api/latest-torrent', [TorrentController::class, 'getLatest'])
+    ->name('api.latest-torrent')
+    ->middleware('auth');
+
 Route::post('seedboxes/{seedbox}/import/{hash}', [SeedboxController::class, 'importTorrent'])
     ->name('seedboxes.import')
     ->middleware('auth');
@@ -737,6 +741,7 @@ Route::put('/shoutbox/{id}', [ShoutboxController::class, 'update'])->name('shout
 Route::delete('/shoutbox/{id}', [ShoutboxController::class, 'destroy'])->name('shoutbox.destroy')->middleware('auth');
 Route::get('/shoutbox/{id}/reply', [ShoutboxController::class, 'showReplyForm'])->name('shoutbox.showReplyForm')->middleware('auth');
 Route::post('/shoutbox/{id}/reply', [ShoutboxController::class, 'reply'])->name('shoutbox.reply')->middleware('auth');
+Route::post('/shoutbox/{id}/sticky', [ShoutboxController::class, 'toggleSticky'])->name('shoutbox.sticky')->middleware(['auth', 'admin']);
 
 // Private message routes — modern conversation messenger (single two-pane app)
 Route::middleware(['auth'])->group(function () {

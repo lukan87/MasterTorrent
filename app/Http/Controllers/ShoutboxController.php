@@ -71,6 +71,7 @@ public function iframe()
 
     $message = $user->shoutbox()->create([
         'message' => $request->input('content'),
+        'sticky' => $user->user_class >= \App\Models\UserClass::ADMIN && $request->has('sticky'),
     ]);
 
     // 🔥 If request comes from AJAX (home page)
@@ -160,6 +161,21 @@ return redirect()
     ->route('shoutbox.index')
     ->with('success', 'Message deleted successfully!');
 
+}
+
+public function toggleSticky($id)
+{
+    if (auth()->user()->user_class < \App\Models\UserClass::ADMIN) {
+        abort(403);
+    }
+
+    $message = Shoutbox::findOrFail($id);
+    $message->sticky = !$message->sticky;
+    $message->save();
+
+    Cache::forget('home_shoutbox_messages');
+
+    return redirect()->back()->with('success', 'Message sticky status toggled.');
 }
 
 

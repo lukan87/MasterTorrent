@@ -1,127 +1,231 @@
-<div class="container-fluid mt-4 tt-wrapper">
+<div class="container-fluid mt-4">
 
-    <div class="modern-trending-wrapper">
+```
+<div class="modern-trending-wrapper">
 
-        {{-- HEADER --}}
-        <div class="modern-trending-header">
+    {{-- =========================================================
+         HEADER
+    ========================================================== --}}
+    <div class="modern-trending-header">
 
-            <div class="d-flex align-items-center gap-3">
+        <div class="modern-trending-heading">
 
-                <div class="modern-trending-icon">
+            {{-- Fire icon --}}
+            <div class="modern-trending-icon">
+                <i class="bi bi-fire"></i>
+            </div>
 
-                    <i class="bi bi-fire"></i>
+            {{-- Heading text --}}
+            <div class="modern-trending-heading-text">
 
-                </div>
+                <h4 class="modern-trending-title">
+                    Trending Torrents
+                </h4>
 
-                <div>
-
-                    <h4 class="modern-trending-title">
-
-                        Trending Torrents
-
-                    </h4>
-
-                    <div class="modern-trending-subtitle">
-
-                        Most active torrents right now
-
-                    </div>
-
+                <div class="modern-trending-subtitle">
+                    Most active torrents right now
                 </div>
 
             </div>
 
-            <button class="modern-trending-toggle"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#ttTrending"
-                    aria-expanded="true">
-
-                <i class="bi bi-chevron-down"></i>
-
-            </button>
-
         </div>
 
-        {{-- BODY --}}
-        <div id="ttTrending"
-             class="collapse show">
+        {{-- Collapse button --}}
+        <button
+            class="modern-trending-toggle"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#ttTrending"
+            aria-expanded="true"
+            aria-controls="ttTrending"
+            aria-label="Toggle trending torrents"
+        >
+            <i class="bi bi-chevron-down"></i>
+        </button>
 
-            <div class="modern-trending-body">
+    </div>
 
-                <div class="row g-3 tt-row @if($trendingTorrents->count() > 6) tt-scroll @endif">
 
-                    @foreach($trendingTorrents as $index => $torrent)
+    {{-- =========================================================
+         BODY
+    ========================================================== --}}
+    <div id="ttTrending" class="collapse show">
 
-                        @php
+        <div class="modern-trending-body">
 
-                            $cinemaCategories = [
-                                1,2,5,6,9,10,11,12,16,17,18,19,24,25,31,32,54,55,81,82,
-                                13,14,20,21
-                            ];
+            {{-- =================================================
+                 MORE THAN 10 TORRENTS = HORIZONTAL SCROLL
+            ================================================== --}}
+            <div class="tt-row @if($trendingTorrents->count() > 10) tt-scroll @endif">
 
-                            $image = in_array($torrent->category_id, $cinemaCategories)
-                                ? $torrent->background
-                                : $torrent->poster;
+                @foreach($trendingTorrents as $index => $torrent)
 
-                        @endphp
+                    @php
 
-                        <div class="col-xl-2 col-lg-3 col-md-4 col-6">
+                        /*
+                         * Categories that use the background image
+                         * instead of the poster.
+                         */
+                        $cinemaCategories = [
+                            1, 2, 5, 6, 9, 10, 11, 12,
+                            16, 17, 18, 19, 24, 25, 31, 32,
+                            54, 55, 81, 82,
+                            13, 14, 20, 21
+                        ];
 
-                            <a href="{{ route('torrents.show', $torrent->id) }}"
-                               class="text-decoration-none">
+                        /*
+                         * Select image.
+                         */
+                        $image = in_array(
+                            $torrent->category_id,
+                            $cinemaCategories
+                        )
+                            ? $torrent->poster
+                            : $torrent->poster;
 
-                                <div class="modern-tt-card">
+                        /*
+                         * Ranking.
+                         */
+                        $rank = $index + 1;
 
-                                    {{-- Poster with info overlay --}}
-                                    <div class="modern-tt-image-wrap">
+                        /*
+                         * Special class for top 3.
+                         */
+                        $rankClass = match ($rank) {
+                            1 => 'rank-gold',
+                            2 => 'rank-silver',
+                            3 => 'rank-bronze',
+                            default => ''
+                        };
 
-                                        <img src="{{ $image ?? '/images/noimage.jpg' }}"
-                                             class="modern-tt-poster"
-                                             loading="lazy"
-                                             alt="{{ $torrent->name }}">
+                    @endphp
 
-                                        {{-- Rank --}}
-                                        <div class="modern-tt-rank">
 
-                                            #{{ $index + 1 }}
+                    {{-- =================================================
+                         TORRENT
+                    ================================================== --}}
+                    <div class="tt-col">
 
-                                        </div>
+                        <a
+                            href="{{ route('torrents.show', $torrent->id) }}"
+                            class="modern-tt-link"
+                            aria-label="{{ $torrent->name }}"
+                        >
 
-                                        {{-- Info overlay --}}
-                                        <div class="modern-tt-overlay">
+                            <article class="modern-tt-card">
 
-                                            <div class="modern-tt-title">{{ $torrent->name }}</div>
 
-                                            <div class="modern-tt-stats">
+                                {{-- =====================================
+                                     POSTER
+                                ====================================== --}}
+                                <div class="modern-tt-image-wrap">
 
-                                                <span class="modern-tt-seeders">
+                                    <img
+                                        src="{{ $image ?? '/images/noimage.jpg' }}"
+                                        class="modern-tt-poster"
+                                        loading="lazy"
+                                        alt="{{ $torrent->name }}"
+                                    >
 
-                                                    <i class="bi bi-arrow-up-circle-fill"></i> {{ $torrent->seeders }}
 
-                                                </span>
+                                    {{-- Poster gradient --}}
+                                    <div class="modern-tt-gradient"></div>
 
-                                                <span class="modern-tt-leechers">
 
-                                                    <i class="bi bi-arrow-down-circle-fill"></i> {{ $torrent->leechers }}
+                                    {{-- Ranking badge --}}
+                                    <div class="modern-tt-rank {{ $rankClass }}">
 
-                                                </span>
+                                        @if($rank === 1)
 
-                                            </div>
+                                            <i class="bi bi-trophy-fill"></i>
 
+                                        @elseif($rank === 2)
+
+                                            <i class="bi bi-award-fill"></i>
+
+                                        @elseif($rank === 3)
+
+                                            <i class="bi bi-award-fill"></i>
+
+                                        @else
+
+                                            #
+
+                                        @endif
+
+                                        {{ $rank }}
+
+                                    </div>
+
+
+                                    {{-- =================================
+                                         TORRENT NAME
+                                         Hidden until hover
+                                    ================================== --}}
+                                    <div class="modern-tt-image-title">
+
+                                        <div class="modern-tt-name">
+                                            {{ $torrent->name }}
                                         </div>
 
                                     </div>
 
                                 </div>
 
-                            </a>
 
-                        </div>
+                                {{-- =====================================
+                                     STATS
+                                ====================================== --}}
+                                <div class="modern-tt-info">
 
-                    @endforeach
+                                    <div class="modern-tt-stats">
 
-                </div>
+
+                                        {{-- Seeders --}}
+                                        <span
+                                            class="modern-tt-stat modern-tt-seeders"
+                                            title="Seeders"
+                                        >
+
+                                            <span class="modern-tt-stat-icon">
+                                                <i class="bi bi-arrow-up"></i>
+                                            </span>
+
+                                            <span class="modern-tt-stat-number">
+                                                {{ $torrent->seeders }}
+                                            </span>
+
+                                        </span>
+
+
+                                        {{-- Leechers --}}
+                                        <span
+                                            class="modern-tt-stat modern-tt-leechers"
+                                            title="Leechers"
+                                        >
+
+                                            <span class="modern-tt-stat-icon">
+                                                <i class="bi bi-arrow-down"></i>
+                                            </span>
+
+                                            <span class="modern-tt-stat-number">
+                                                {{ $torrent->leechers }}
+                                            </span>
+
+                                        </span>
+
+
+                                    </div>
+
+                                </div>
+
+                            </article>
+
+                        </a>
+
+                    </div>
+
+                @endforeach
 
             </div>
 
@@ -130,297 +234,1309 @@
     </div>
 
 </div>
+```
+
+</div>
 
 <style>
-/* =========================================================
-   FILEIPLAY TRENDING TORRENTS
-   Matches the News / Poll visual language
-   Maximum font size: 14px
-========================================================= */
+
+/* ================================================================
+   FILEIPLAY — TRENDING TORRENTS
+   ================================================================ */
+
+
+/* ================================================================
+   MAIN WRAPPER
+   ================================================================ */
 
 .modern-trending-wrapper {
+
+    width: 100%;
+    max-width: 1700px;
+
+    margin-left: auto;
+    margin-right: auto;
+
+    position: relative;
+
     overflow: hidden;
-    border: 1px solid var(--ui-border);
-    border-radius: 1rem;
-    background: linear-gradient(
-        135deg,
-        rgba(22, 32, 51, .95),
-        rgba(15, 23, 42, .84)
-    );
-    box-shadow: 0 10px 30px rgba(0, 0, 0, .22);
+
+    border: 1px solid rgba(148, 163, 184, .12);
+
+    border-radius: 18px;
+
+    background:
+        radial-gradient(
+            circle at 0% 0%,
+            rgba(20, 184, 166, .08),
+            transparent 30%
+        ),
+        radial-gradient(
+            circle at 100% 100%,
+            rgba(59, 130, 246, .06),
+            transparent 35%
+        ),
+        linear-gradient(
+            135deg,
+            rgba(15, 23, 42, .98),
+            rgba(9, 15, 28, .98)
+        );
+
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, .25),
+        inset 0 1px 0 rgba(255, 255, 255, .025);
+
 }
 
-/* Header */
-.modern-trending-header {
-    padding: 1rem 1.15rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid var(--ui-border);
+
+/* ================================================================
+   TOP ACCENT
+   ================================================================ */
+
+.modern-trending-wrapper::before {
+
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: 8%;
+    right: 8%;
+
+    height: 1px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(20, 184, 166, .7),
+            transparent
+        );
+
+    opacity: .8;
+
 }
+
+
+/* ================================================================
+   HEADER
+   ================================================================ */
+
+.modern-trending-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 1rem;
+
+    padding: 1rem 1.2rem;
+
+    border-bottom:
+        1px solid rgba(148, 163, 184, .09);
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255, 255, 255, .025),
+            transparent
+        );
+
+}
+
+
+/* ================================================================
+   HEADER LEFT
+   ================================================================ */
+
+.modern-trending-heading {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: .8rem;
+
+    min-width: 0;
+
+}
+
+
+/* ================================================================
+   FIRE ICON
+   ================================================================ */
 
 .modern-trending-icon {
-    width: 40px;
-    height: 40px;
-    flex: 0 0 40px;
-    border-radius: .7rem;
+
+    width: 42px;
+    height: 42px;
+
+    flex: 0 0 42px;
+
     display: flex;
+
     align-items: center;
     justify-content: center;
-    background: rgba(20, 184, 166, .10);
-    border: 1px solid rgba(20, 184, 166, .28);
-    color: var(--ui-accent);
-    font-size: 14px;
+
+    position: relative;
+
+    border-radius: 12px;
+
+    color: #f97316;
+
+    font-size: 18px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(249, 115, 22, .16),
+            rgba(239, 68, 68, .08)
+        );
+
+    border:
+        1px solid rgba(249, 115, 22, .25);
+
+    box-shadow:
+        0 0 25px rgba(249, 115, 22, .08);
+
 }
+
+
+/* Fire glow */
+
+.modern-trending-icon::after {
+
+    content: "";
+
+    position: absolute;
+
+    inset: -5px;
+
+    border-radius: 15px;
+
+    border:
+        1px solid rgba(249, 115, 22, .08);
+
+    animation:
+        trendingPulse 2.5s ease-in-out infinite;
+
+}
+
+
+@keyframes trendingPulse {
+
+    0%,
+    100% {
+
+        opacity: .35;
+
+        transform: scale(.98);
+
+    }
+
+    50% {
+
+        opacity: 1;
+
+        transform: scale(1.04);
+
+    }
+
+}
+
+
+/* ================================================================
+   HEADING TEXT
+   ================================================================ */
+
+.modern-trending-heading-text {
+
+    min-width: 0;
+
+}
+
 
 .modern-trending-title {
+
     margin: 0;
-    color: #f1f5f9;
-    font-size: 14px;
-    font-weight: 700;
-    line-height: 1.35;
+
+    color: #f8fafc;
+
+    font-size: 15px;
+
+    font-weight: 800;
+
+    line-height: 1.2;
+
+    letter-spacing: -.15px;
+
 }
+
 
 .modern-trending-subtitle {
-    margin-top: 2px;
-    color: #94a3b8;
-    font-size: 12px;
-    line-height: 1.4;
+
+    margin-top: 4px;
+
+    color: #64748b;
+
+    font-size: 11px;
+
+    font-weight: 500;
+
+    line-height: 1.3;
+
 }
+
+
+/* ================================================================
+   COLLAPSE BUTTON
+   ================================================================ */
 
 .modern-trending-toggle {
-    width: 32px;
-    height: 32px;
-    flex: 0 0 32px;
-    border: 1px solid var(--ui-border);
-    border-radius: .6rem;
-    background: rgba(255, 255, 255, .035);
-    color: #94a3b8;
-    transition: .2s ease;
-}
 
-.modern-trending-toggle:hover,
-.modern-trending-toggle:focus {
-    background: rgba(20, 184, 166, .10);
-    border-color: var(--ui-accent);
-    color: var(--ui-accent);
-}
+    width: 34px;
+    height: 34px;
 
-/* Body */
-.modern-trending-body {
-    padding: 1rem;
-}
+    flex: 0 0 34px;
 
-/* Torrent card */
-.modern-tt-card {
-    position: relative;
-    overflow: hidden;
-    aspect-ratio: 2 / 3;
-    border: 1px solid var(--ui-border);
-    border-radius: .85rem;
-    background: rgba(15, 23, 42, .55);
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border:
+        1px solid rgba(148, 163, 184, .12);
+
+    border-radius: 10px;
+
+    background:
+        rgba(255, 255, 255, .025);
+
+    color: #64748b;
+
+    cursor: pointer;
+
     transition:
-        transform .2s ease,
+        background .2s ease,
         border-color .2s ease,
-        box-shadow .2s ease;
+        color .2s ease;
+
 }
+
+
+.modern-trending-toggle i {
+
+    transition:
+        transform .3s ease;
+
+}
+
+
+.modern-trending-toggle:hover {
+
+    color: #5eead4;
+
+    background:
+        rgba(20, 184, 166, .08);
+
+    border-color:
+        rgba(20, 184, 166, .25);
+
+}
+
+
+.modern-trending-toggle[aria-expanded="false"] i {
+
+    transform: rotate(-90deg);
+
+}
+
+
+/* ================================================================
+   BODY
+   ================================================================ */
+
+.modern-trending-body {
+
+    padding: 1rem;
+
+}
+
+
+/* ================================================================
+   ROW
+   ================================================================ */
+
+.tt-row {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: .6rem;
+
+    margin: 0;
+
+}
+
+
+/* ================================================================
+   10 OR FEWER TORRENTS
+   ORIGINAL CARD SIZING
+   ================================================================ */
+
+.tt-row:not(.tt-scroll) > .tt-col {
+
+    flex: 0 0 auto;
+
+    width:
+        calc(
+            (100% - (9 * .6rem)) / 10
+        );
+
+    max-width:
+        calc(
+            (100% - (9 * .6rem)) / 10
+        );
+
+}
+
+
+/* ================================================================
+   MORE THAN 10 TORRENTS
+
+   IMPORTANT:
+   Keep the SAME card width as the normal layout.
+
+   Do NOT use a fixed 112px width.
+
+   The cards keep their normal size and the row
+   becomes horizontally scrollable.
+   ================================================================ */
+
+.tt-row.tt-scroll {
+
+    flex-wrap: nowrap;
+
+    width: 100%;
+
+    overflow-x: auto;
+
+    overflow-y: hidden;
+
+    padding-bottom: 9px;
+
+    scroll-snap-type: x proximity;
+
+    -webkit-overflow-scrolling: touch;
+
+    scrollbar-width: thin;
+
+    scrollbar-color:
+        rgba(20, 184, 166, .45)
+        transparent;
+
+}
+
+
+/* Keep original desktop card width */
+
+.tt-row.tt-scroll > .tt-col {
+
+    flex: 0 0 calc(
+        (100% - (9 * .6rem)) / 10
+    );
+
+    width: calc(
+        (100% - (9 * .6rem)) / 10
+    );
+
+    max-width: calc(
+        (100% - (9 * .6rem)) / 10
+    );
+
+    scroll-snap-align: start;
+
+}
+
+
+/* ================================================================
+   CARD
+   ================================================================ */
+
+.modern-tt-card {
+
+    display: flex;
+
+    flex-direction: column;
+
+    width: 100%;
+
+    height: 100%;
+
+    overflow: hidden;
+
+    border:
+        1px solid rgba(148, 163, 184, .11);
+
+    border-radius: 10px;
+
+    background:
+        rgba(15, 23, 42, .9);
+
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, .16);
+
+    transition:
+        transform .28s cubic-bezier(.2, .8, .2, 1),
+        border-color .28s ease,
+        box-shadow .28s ease;
+
+}
+
 
 .modern-tt-card:hover {
-    transform: translateY(-3px);
-    border-color: rgba(20, 184, 166, .35);
-    box-shadow: 0 10px 24px rgba(0, 0, 0, .25);
+
+    transform:
+        translateY(-5px);
+
+    border-color:
+        rgba(20, 184, 166, .38);
+
+    box-shadow:
+        0 16px 32px rgba(0, 0, 0, .38),
+        0 0 0 1px rgba(20, 184, 166, .05);
+
 }
 
-/* Poster */
-.modern-tt-image-wrap {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    background: #0f172a;
-}
 
-.modern-tt-poster {
+/* ================================================================
+   LINK
+   ================================================================ */
+
+.modern-tt-link {
+
     display: block;
+
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    object-position: center center;
-    transition: transform .25s ease;
+
+    color: inherit;
+
+    text-decoration: none;
+
 }
+
+
+/* ================================================================
+   POSTER
+   ================================================================ */
+
+.modern-tt-image-wrap {
+
+    position: relative;
+
+    width: 100%;
+
+    aspect-ratio: 2 / 3;
+
+    overflow: hidden;
+
+    background:
+        #020617;
+
+}
+
+
+.modern-tt-poster {
+
+    display: block;
+
+    width: 100%;
+
+    height: 100%;
+
+    object-fit: cover;
+
+    object-position: center top;
+
+    transition:
+        transform .5s cubic-bezier(.2, .8, .2, 1),
+        filter .35s ease;
+
+}
+
+
+/* Poster zoom */
 
 .modern-tt-card:hover .modern-tt-poster {
-    transform: scale(1.04);
+
+    transform:
+        scale(1.07);
+
+    filter:
+        brightness(.72);
+
 }
 
-/* Rank */
-.modern-tt-rank {
-    position: absolute;
-    top: 9px;
-    left: 9px;
-    padding: 3px 7px;
-    border: 1px solid var(--ui-border);
-    border-radius: .5rem;
-    background: rgba(15, 23, 42, .90);
-    color: var(--ui-accent);
-    font-size: 12px;
-    font-weight: 700;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, .25);
-}
 
-/* Info overlay */
-.modern-tt-overlay {
+/* ================================================================
+   POSTER GRADIENT
+   ================================================================ */
+
+.modern-tt-gradient {
+
     position: absolute;
+
     inset: 0;
-    background: linear-gradient(
-        to top,
-        rgba(0, 0, 0, .82),
-        rgba(0, 0, 0, .18) 55%,
-        rgba(0, 0, 0, .15) 72%,
-        transparent
-    );
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    align-items: flex-start;
-    padding: .55rem .6rem;
+
     pointer-events: none;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(0, 0, 0, .38) 0%,
+            transparent 28%,
+            transparent 55%,
+            rgba(0, 0, 0, .88) 100%
+        );
+
 }
 
-.modern-tt-title {
-    color: #fff;
-    font-size: .8rem;
-    font-weight: 700;
-    line-height: 1.2;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, .6);
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
+
+/* ================================================================
+   RANK
+   ================================================================ */
+
+.modern-tt-rank {
+
+    position: absolute;
+
+    top: 7px;
+    right: 7px;
+
+    min-width: 27px;
+
+    height: 22px;
+
+    padding:
+        0 6px;
+
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 3px;
+
+    border-radius: 7px;
+
+    background:
+        rgba(2, 6, 23, .82);
+
+    border:
+        1px solid rgba(255, 255, 255, .09);
+
+    backdrop-filter:
+        blur(8px);
+
+    -webkit-backdrop-filter:
+        blur(8px);
+
+    color: #e2e8f0;
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    line-height: 1;
+
+    box-shadow:
+        0 4px 10px rgba(0, 0, 0, .25);
+
 }
+
+
+.modern-tt-rank i {
+
+    font-size: 9px;
+
+}
+
+
+/* Gold */
+
+.modern-tt-rank.rank-gold {
+
+    color: #fbbf24;
+
+    border-color:
+        rgba(251, 191, 36, .28);
+
+    background:
+        rgba(120, 70, 0, .72);
+
+}
+
+
+/* Silver */
+
+.modern-tt-rank.rank-silver {
+
+    color: #e2e8f0;
+
+}
+
+
+/* Bronze */
+
+.modern-tt-rank.rank-bronze {
+
+    color: #fb923c;
+
+}
+
+
+/* ================================================================
+   TORRENT NAME
+   Hidden by default
+   ================================================================ */
+
+.modern-tt-image-title {
+
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    padding:
+        2.5rem .65rem .7rem;
+
+    opacity: 0;
+
+    transform:
+        translateY(8px);
+
+    pointer-events: none;
+
+    background:
+        linear-gradient(
+            180deg,
+            transparent 0%,
+            rgba(0, 0, 0, .9) 100%
+        );
+
+    transition:
+        opacity .25s ease,
+        transform .25s ease;
+
+}
+
+
+/* Show title on hover */
+
+.modern-tt-card:hover .modern-tt-image-title {
+
+    opacity: 1;
+
+    transform:
+        translateY(0);
+
+}
+
+
+/* Title text */
+
+.modern-tt-name {
+
+    color: #ffffff;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    line-height: 1.3;
+
+    text-align: left;
+
+    overflow: hidden;
+
+    display: -webkit-box;
+
+    -webkit-line-clamp: 2;
+
+    -webkit-box-orient: vertical;
+
+    text-overflow: ellipsis;
+
+    text-shadow:
+        0 2px 8px rgba(0, 0, 0, .95);
+
+}
+
+
+/* ================================================================
+   INFO BAR
+   ================================================================ */
+
+.modern-tt-info {
+
+    padding:
+        .48rem .55rem;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(15, 23, 42, .98),
+            rgba(9, 15, 28, .98)
+        );
+
+    border-top:
+        1px solid rgba(148, 163, 184, .07);
+
+}
+
+
+/* ================================================================
+   STATS
+   ================================================================ */
 
 .modern-tt-stats {
+
     display: flex;
+
     align-items: center;
-    gap: 12px;
-    margin-top: 4px;
-    font-size: 11.5px;
-    font-weight: 600;
+
+    gap: .55rem;
+
+    min-width: 0;
+
 }
+
+
+.modern-tt-stat {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 4px;
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    line-height: 1;
+
+}
+
+
+/* ================================================================
+   STAT ICON
+   ================================================================ */
+
+.modern-tt-stat-icon {
+
+    width: 17px;
+    height: 17px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 5px;
+
+    font-size: 8px;
+
+}
+
+
+/* ================================================================
+   SEEDERS
+   ================================================================ */
 
 .modern-tt-seeders {
+
     color: #4ade80;
+
 }
+
+
+.modern-tt-seeders .modern-tt-stat-icon {
+
+    background:
+        rgba(74, 222, 128, .1);
+
+}
+
+
+/* ================================================================
+   LEECHERS
+   ================================================================ */
 
 .modern-tt-leechers {
-    color: #f87171;
+
+    color: #fb7185;
+
 }
 
-/* Desktop: horizontal scroll when more than 6 items */
-.tt-scroll {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(20, 184, 166, .25) transparent;
-    margin-left: 0;
-    margin-right: 0;
-    padding-bottom: 8px;
-}
-.tt-scroll::-webkit-scrollbar {
-    height: 6px;
-}
-.tt-scroll::-webkit-scrollbar-thumb {
-    background: rgba(20, 184, 166, .22);
-    border-radius: 10px;
-}
-.tt-scroll > [class*="col-"] {
-    flex: 0 0 calc(100% / 6);
-    width: calc(100% / 6);
-    max-width: calc(100% / 6);
-    scroll-snap-align: start;
+
+.modern-tt-leechers .modern-tt-stat-icon {
+
+    background:
+        rgba(251, 113, 133, .1);
+
 }
 
-/* Mobile */
-@media (max-width: 768px) {
-    .modern-trending-header {
-        padding: .85rem;
+
+/* ================================================================
+   SCROLLBAR
+   ================================================================ */
+
+.tt-row.tt-scroll::-webkit-scrollbar {
+
+    height: 7px;
+
+}
+
+
+.tt-row.tt-scroll::-webkit-scrollbar-track {
+
+    background:
+        rgba(255, 255, 255, .025);
+
+    border-radius:
+        999px;
+
+}
+
+
+.tt-row.tt-scroll::-webkit-scrollbar-thumb {
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(20, 184, 166, .25),
+            rgba(20, 184, 166, .55)
+        );
+
+    border-radius:
+        999px;
+
+}
+
+
+.tt-row.tt-scroll::-webkit-scrollbar-thumb:hover {
+
+    background:
+        rgba(20, 184, 166, .75);
+
+}
+
+
+/* ================================================================
+   TABLET / SMALL DESKTOP
+   Keep original responsive sizing
+   ================================================================ */
+
+@media (max-width: 1300px) {
+
+    .tt-row:not(.tt-scroll) > .tt-col {
+
+        width:
+            calc(
+                (100% - (7 * .6rem)) / 8
+            );
+
+        max-width:
+            calc(
+                (100% - (7 * .6rem)) / 8
+            );
+
     }
+
+
+    .tt-row.tt-scroll > .tt-col {
+
+        flex-basis:
+            calc(
+                (100% - (7 * .6rem)) / 8
+            );
+
+        width:
+            calc(
+                (100% - (7 * .6rem)) / 8
+            );
+
+        max-width:
+            calc(
+                (100% - (7 * .6rem)) / 8
+            );
+
+    }
+
+}
+
+
+@media (max-width: 1100px) {
+
+    .tt-row:not(.tt-scroll) > .tt-col {
+
+        width:
+            calc(
+                (100% - (5 * .6rem)) / 6
+            );
+
+        max-width:
+            calc(
+                (100% - (5 * .6rem)) / 6
+            );
+
+    }
+
+
+    .tt-row.tt-scroll > .tt-col {
+
+        flex-basis:
+            calc(
+                (100% - (5 * .6rem)) / 6
+            );
+
+        width:
+            calc(
+                (100% - (5 * .6rem)) / 6
+            );
+
+        max-width:
+            calc(
+                (100% - (5 * .6rem)) / 6
+            );
+
+    }
+
+}
+
+
+@media (max-width: 900px) {
+
+    .tt-row:not(.tt-scroll) > .tt-col {
+
+        width:
+            calc(
+                (100% - (4 * .6rem)) / 5
+            );
+
+        max-width:
+            calc(
+                (100% - (4 * .6rem)) / 5
+            );
+
+    }
+
+
+    .tt-row.tt-scroll > .tt-col {
+
+        flex-basis:
+            calc(
+                (100% - (4 * .6rem)) / 5
+            );
+
+        width:
+            calc(
+                (100% - (4 * .6rem)) / 5
+            );
+
+        max-width:
+            calc(
+                (100% - (4 * .6rem)) / 5
+            );
+
+    }
+
+}
+
+
+/* ================================================================
+   MOBILE
+   ================================================================ */
+
+@media (max-width: 768px) {
+
+    .modern-trending-wrapper {
+
+        border-radius:
+            14px;
+
+    }
+
+
+    .modern-trending-header {
+
+        padding:
+            .8rem .85rem;
+
+    }
+
 
     .modern-trending-body {
-        padding: .75rem;
+
+        padding:
+            .7rem;
+
     }
+
 
     .modern-trending-icon {
+
         width: 36px;
         height: 36px;
+
         flex-basis: 36px;
-    }
 
-    .modern-tt-title {
-        font-size: .78rem;
-    }
-
-    .modern-tt-stats {
-        font-size: 11px;
-    }
-
-    /* Horizontal scroll row (mirrors the Random Online panels) */
-    .tt-row {
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: thin;
-        scrollbar-color: rgba(20, 184, 166, .25) transparent;
-        margin-left: 0;
-        margin-right: 0;
-        padding-bottom: 6px;
-    }
-
-    .tt-row::-webkit-scrollbar {
-        height: 5px;
-    }
-
-    .tt-row::-webkit-scrollbar-thumb {
-        background: rgba(20, 184, 166, .22);
         border-radius: 10px;
+
+        font-size: 15px;
+
     }
 
-    .tt-row > [class*="col-"] {
-        flex: 0 0 130px;
-        width: 130px;
-        max-width: 130px;
-        scroll-snap-align: start;
+
+    .modern-trending-title {
+
+        font-size: 14px;
+
     }
+
+
+    .modern-trending-subtitle {
+
+        font-size: 10px;
+
+    }
+
+
+    /*
+     * On mobile always use horizontal scrolling.
+     * This prevents tiny posters.
+     */
+
+    .tt-row {
+
+        flex-wrap: nowrap;
+
+        overflow-x: auto;
+
+        overflow-y: hidden;
+
+        gap: .55rem;
+
+        padding-bottom: 7px;
+
+        scroll-snap-type: x proximity;
+
+        -webkit-overflow-scrolling: touch;
+
+    }
+
+
+    .tt-row > .tt-col,
+    .tt-row.tt-scroll > .tt-col {
+
+        flex: 0 0 105px;
+
+        width: 105px;
+
+        max-width: 105px;
+
+        scroll-snap-align: start;
+
+    }
+
+
+    .modern-tt-card:hover {
+
+        transform:
+            translateY(-3px);
+
+    }
+
+
+    .modern-tt-name {
+
+        font-size: 9px;
+
+    }
+
+
+    .modern-tt-stat {
+
+        font-size: 8px;
+
+    }
+
 }
+
+
+/* ================================================================
+   SMALL MOBILE
+   ================================================================ */
+
+@media (max-width: 420px) {
+
+    .tt-row > .tt-col,
+    .tt-row.tt-scroll > .tt-col {
+
+        flex-basis: 96px;
+
+        width: 96px;
+
+        max-width: 96px;
+
+    }
+
+
+    .modern-trending-header {
+
+        padding:
+            .7rem;
+
+    }
+
+
+    .modern-trending-body {
+
+        padding:
+            .55rem;
+
+    }
+
+}
+
+
+/* ================================================================
+   ACCESSIBILITY
+   ================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .modern-trending-icon::after {
+
+        animation:
+            none;
+
+    }
+
+
+    .modern-tt-card,
+    .modern-tt-poster,
+    .modern-tt-image-title {
+
+        transition:
+            none;
+
+    }
+
+}
+
 </style>
 
 <script>
 
-document.addEventListener("DOMContentLoaded", function(){
+document.addEventListener("DOMContentLoaded", function () {
 
     const key = "trendingAccordionState";
 
-    const collapse = document.getElementById("ttTrending");
+    const collapse =
+        document.getElementById("ttTrending");
 
-    if(localStorage.getItem(key) === "closed"){
+    const toggle =
+        document.querySelector(
+            '[data-bs-target="#ttTrending"]'
+        );
 
-        collapse.classList.remove("show");
+
+    if (!collapse) {
+
+        return;
 
     }
 
-    collapse.addEventListener("shown.bs.collapse", function(){
 
-        localStorage.setItem(key,"open");
+    /* =========================================================
+       RESTORE SAVED COLLAPSE STATE
+    ========================================================== */
 
-    });
+    if (
+        localStorage.getItem(key) === "closed"
+    ) {
 
-    collapse.addEventListener("hidden.bs.collapse", function(){
+        collapse.classList.remove("show");
 
-        localStorage.setItem(key,"closed");
+        if (toggle) {
 
-    });
+            toggle.setAttribute(
+                "aria-expanded",
+                "false"
+            );
+
+        }
+
+    }
+
+
+    /* =========================================================
+       OPEN
+    ========================================================== */
+
+    collapse.addEventListener(
+        "shown.bs.collapse",
+        function () {
+
+            localStorage.setItem(
+                key,
+                "open"
+            );
+
+            if (toggle) {
+
+                toggle.setAttribute(
+                    "aria-expanded",
+                    "true"
+                );
+
+            }
+
+        }
+    );
+
+
+    /* =========================================================
+       CLOSED
+    ========================================================== */
+
+    collapse.addEventListener(
+        "hidden.bs.collapse",
+        function () {
+
+            localStorage.setItem(
+                key,
+                "closed"
+            );
+
+            if (toggle) {
+
+                toggle.setAttribute(
+                    "aria-expanded",
+                    "false"
+                );
+
+            }
+
+        }
+    );
 
 });
 

@@ -644,18 +644,18 @@
     width:100%;
     height:100%;
     object-fit:cover;
-    filter:blur(5px) brightness(.28) saturate(.72);
+    filter:blur(1px) brightness(.28) saturate(.72);
     transform:scale(1.04);
 }
 
 .movie-backdrop-overlay{
     position:absolute;
     inset:0;
-    z-index:2;
+    z-index:1;
     background:linear-gradient(
         to bottom,
-        rgba(7,11,20,.38),
-        rgba(7,11,20,.78) 48%,
+        rgba(220, 225, 241, 0),
+        rgba(62, 71, 93, 0.49) 48%,
         #070b14 90%,
         #070b14 100%
     );
@@ -675,13 +675,13 @@
     padding:26px;
     background:linear-gradient(
         135deg,
-        rgba(22,32,51,.95),
-        rgba(15,23,42,.88)
+        rgba(64, 76, 101, 0.2),
+        rgba(3, 6, 12, 0.56)
     );
     border:1px solid rgba(255,255,255,.08);
     border-radius:.8rem;
     box-shadow:0 18px 50px rgba(0,0,0,.42);
-    backdrop-filter:blur(16px);
+    backdrop-filter:blur(1px);
 }
 
 .movie-poster-container{

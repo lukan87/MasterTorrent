@@ -205,9 +205,23 @@ $isSystem = $message->user_id == 2;
 
                 </button>
 
-                {{-- Delete --}}
+                 {{-- Sticky (ADMIN+) --}}
+                 @if(Auth::user()->user_class >= \App\Models\UserClass::ADMIN)
+                 <form action="{{ route('shoutbox.sticky', $message->id) }}"
+                       method="POST"
+                       class="d-inline">
+                     @csrf
+                     <button class="btn-icon {{ $message->sticky ? 'text-warning' : 'text-muted' }}"
+                             data-bs-toggle="tooltip"
+                             title="{{ $message->sticky ? 'Unstick' : 'Sticky' }}">
+                         <i class="bi bi-pin-fill fs-5"></i>
+                     </button>
+                 </form>
+                 @endif
 
-                <form action="{{ route('shoutbox.destroy', $message->id) }}"
+                 {{-- Delete --}}
+
+                 <form action="{{ route('shoutbox.destroy', $message->id) }}"
 
                       method="POST"
 
@@ -811,7 +825,14 @@ $isSystem = $message->user_id == 2;
 
     <span class="chat-hint">Say something nice… 👋</span>
 
-
+    @if(auth()->user()->user_class >= \App\Models\UserClass::ADMIN)
+    <div class="form-check mt-2">
+        <input class="form-check-input" type="checkbox" name="sticky" id="sticky-checkbox">
+        <label class="form-check-label text-light" for="sticky-checkbox">
+            <i class="bi bi-pin-fill"></i> Sticky
+        </label>
+    </div>
+    @endif
 
     <div id="char-counter" class="char-counter">
 

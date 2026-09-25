@@ -46,6 +46,12 @@
     </a>
 </div>
 
+<!-- <div id="latest-torrent-alert" class="container alert alert-success d-none mt-5 mb-3 text-center">
+    <a href="#" id="latest-torrent-link">
+        🚀 New Upload: <span id="latest-torrent-name"></span>
+    </a>
+</div>
+
 <script>
 fetch('/announcements-unread-count')
     .then(res => res.json())
@@ -54,7 +60,29 @@ fetch('/announcements-unread-count')
             document.getElementById('announcement-alert').classList.remove('d-none');
         }
     });
-</script>
+
+const fetchLatestTorrent = () => {
+    fetch('{{ route('api.latest-torrent') }}')
+        .then(res => res.json())
+        .then(data => {
+            if (data && data.name) {
+                const alert = document.getElementById('latest-torrent-alert');
+                const link = document.getElementById('latest-torrent-link');
+                const name = document.getElementById('latest-torrent-name');
+                
+                // Only update if it's new
+                if (name.textContent !== data.name) {
+                    link.href = data.url;
+                    name.textContent = data.name;
+                    alert.classList.remove('d-none');
+                }
+            }
+        });
+};
+
+fetchLatestTorrent();
+setInterval(fetchLatestTorrent, 5000); // Check every 5 seconds
+</script> -->
 @endif
                         {{-- Happy Hour alert --}}
                          @include('layouts.partials.alerts.happyhour')

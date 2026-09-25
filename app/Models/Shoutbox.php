@@ -9,7 +9,7 @@ class Shoutbox extends Model
 {
     use HasFactory;
     protected $table = 'shoutbox';  // Specify the table name
-    protected $fillable = ['user_id', 'message', 'parent_id'];
+    protected $fillable = ['user_id', 'message', 'parent_id', 'sticky'];
 
     public function user()
     {

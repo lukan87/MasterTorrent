@@ -35,6 +35,8 @@
 
             </div>
 
+            @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::ADMIN)
+
             <a href="{{ route('news.create') }}"
                class="create-news-btn">
 
@@ -43,42 +45,11 @@
                 Create News
 
             </a>
+            @endif
 
         </div>
 
     </div>
-
-    {{-- =========================================
-        SUCCESS ALERT
-    ========================================= --}}
-    @if(session('success'))
-
-        <div class="modern-alert success-alert mb-4">
-
-            <div class="d-flex align-items-center gap-3">
-
-                <div class="alert-icon">
-
-                    <i class="bi bi-check-circle-fill"></i>
-
-                </div>
-
-                <div>
-
-                    {{ session('success') }}
-
-                </div>
-
-            </div>
-
-            <button type="button"
-                    class="btn-close btn-close-white"
-                    data-bs-dismiss="alert">
-            </button>
-
-        </div>
-
-    @endif
 
     {{-- =========================================
         NEWS LIST
