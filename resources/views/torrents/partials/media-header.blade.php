@@ -21,7 +21,6 @@
                 <div class="premium-poster-wrapper {{ $torrent->trashed() ? 'deleted-poster' : '' }}">
 
                     <img
-                        {{-- src="{{ $display['fanart']['poster'] ?? $display['poster'] ?? $torrent->poster }}" --}}
                         src="{{ $torrent->poster }}"
                         loading="lazy"
                         class="premium-poster"
@@ -256,9 +255,7 @@
                     {{-- EXTERNAL LINKS --}}
                     @php
                         $extLinks = [];
-                        if (!empty($display['external_ids']['imdb_id'])) {
-                            $extLinks[] = ['icon' => 'bi-film', 'label' => 'IMDb', 'url' => 'https://www.imdb.com/title/' . $display['external_ids']['imdb_id']];
-                        }
+                        
                         if (!empty($display['external_ids']['facebook_id'])) {
                             $extLinks[] = ['icon' => 'bi-facebook', 'label' => 'Facebook', 'url' => 'https://www.facebook.com/' . $display['external_ids']['facebook_id']];
                         }

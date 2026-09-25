@@ -62,9 +62,13 @@ class SeriesController extends Controller
         }
 
         $series = $query->paginate(12)->withQueryString();
-        $featured = Series::whereNotNull('backdrop_path')->where('views', '>', 0)
-            ->orderByDesc('views')->orderByDesc('vote_average')->first()
-            ?? Series::whereNotNull('backdrop_path')->inRandomOrder()->first();
+        $featured = Series::whereNotNull('backdrop_path')
+    ->where('views', '>', 0)
+    ->orderByRaw('RAND() * views DESC')
+    ->first()
+    ?? Series::whereNotNull('backdrop_path')
+        ->inRandomOrder()
+        ->first();
 
         return view('series.index', compact('series', 'featured', 'sort'))->with('links', 'vendor.pagination.bootstrap-5');
     }
@@ -199,20 +203,42 @@ class SeriesController extends Controller
         });
 
         // Similar series (TMDB).
-        $similar = Cache::remember("series_similar_v2_{$series->tmdb_id}", now()->addMonth(), function () use ($series) {
-            $data = $this->tmdb("tv/{$series->tmdb_id}/similar");
-            return collect($data['results'] ?? [])->take(10)->map(fn($item) => [
+$similarData = cache()->remember(
+    'series_similar_v3_' . $series->tmdb_id,
+    now()->addWeek(),
+    function () use ($series) {
+        $data = $this->tmdb("tv/{$series->tmdb_id}/similar");
+
+        return collect($data['results'] ?? [])
+            ->map(fn ($item) => [
                 'tmdb_id' => $item['id'] ?? null,
-                'name'   => $item['name'] ?? 'Unknown',
-                'poster' => ($item['poster_path'] ?? null)
+                'name'    => $item['name'] ?? 'Unknown',
+                'poster'  => !empty($item['poster_path'])
                     ? 'https://image.tmdb.org/t/p/w500' . $item['poster_path']
-                    : '/images/noposter.jpg',
-                'year'   => !empty($item['first_air_date'])
-                    ? \Carbon\Carbon::parse($item['first_air_date'])->format('Y')
                     : null,
-                'rating' => number_format($item['vote_average'] ?? 0, 1),
-            ]);
-        });
+                'year'    => !empty($item['first_air_date'])
+                    ? substr($item['first_air_date'], 0, 4)
+                    : null,
+                'rating'  => number_format($item['vote_average'] ?? 0, 1),
+            ])
+            ->values();
+    }
+);
+
+/*
+|--------------------------------------------------------------------------
+| Filter and randomise AFTER the cached TMDB data
+|--------------------------------------------------------------------------
+*/
+$similar = $similarData
+    ->filter(function ($item) {
+        return !empty($item['poster'])
+            && !empty($item['year'])
+            && (int) $item['year'] >= 1990;
+    })
+    ->shuffle()
+    ->take(10)
+    ->values();
 
         // Resolve whether each similar series already exists in the DB (fresh lookup,
         // not cached, so newly added titles become linkable immediately).

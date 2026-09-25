@@ -165,7 +165,6 @@ fetch('/announcements-unread-count')
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha256-YMa+wAM6QkVyz999odX7lPRxkoYAan8suedu4k2Zur8=" crossorigin="anonymous"></script> 
     <script src="{{ asset('dist/js/adminlte.js') }}"></script> 
  
-    {{-- <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.37.1/dist/apexcharts.min.js" integrity="sha256-+vh8GkaU7C9/wbSLIcwq82tQ2wTf44aOHA8HlBMwRI8=" crossorigin="anonymous"></script> --}}
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
 
@@ -184,63 +183,90 @@ fetch('/announcements-unread-count')
 
 
 
+<script>
+window.showNotification = function(type, message) {
+
+    const settings = {
+        success: {
+            title: 'Success',
+            icon: '✓'
+        },
+        warning: {
+            title: 'Warning',
+            icon: '!'
+        },
+        info: {
+            title: 'Information',
+            icon: 'i'
+        },
+        error: {
+            title: 'Error',
+            icon: '×'
+        }
+    };
+
+    const config = settings[type] || settings.info;
+
+    Swal.fire({
+        toast: true,
+        position: 'top-end',
+
+        html: `
+            <div class="fileiplay-notification">
+                
+                <div class="fileiplay-notification-icon">
+                    ${config.icon}
+                </div>
+
+                <div class="fileiplay-notification-content">
+                    <div class="fileiplay-notification-title">
+                        ${config.title}
+                    </div>
+
+                    <div class="fileiplay-notification-message">
+                        ${message}
+                    </div>
+                </div>
+
+            </div>
+        `,
+
+        showConfirmButton: false,
+        showCloseButton: true,
+
+        timer: 5000,
+        timerProgressBar: true,
+
+        customClass: {
+            popup: `fileiplay-toast fileiplay-toast-${type}`,
+            closeButton: 'fileiplay-toast-close',
+            timerProgressBar: 'fileiplay-toast-progress'
+        }
+    });
+};
+</script>
+
 @if(session('success'))
     <script>
-        Swal.fire({
-            icon: 'success',
-            title: 'Success',
-            text: @json(session('success')),
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 5000,
-            timerProgressBar: true,
-        });
+        showNotification('success', @json(session('success')));
     </script>
 @endif
 
 @if(session('warning'))
     <script>
-        Swal.fire({
-            icon: 'warning',
-            title: 'Warning',
-            text: @json(session('warning')),
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 5000,
-            timerProgressBar: true,
-        });
+        showNotification('warning', @json(session('warning')));
     </script>
 @endif
 
 @if(session('info'))
     <script>
-        Swal.fire({
-            icon: 'info',
-            title: 'Information',
-            text: @json(session('info')),
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 5000,
-            timerProgressBar: true,
-        });
+        showNotification('info', @json(session('info')));
     </script>
 @endif
 
 @if(session('error'))
     <script>
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: @json(session('error')),
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 5000,
-            timerProgressBar: true,
-        });
+        showNotification('error', @json(session('error')));
     </script>
 @endif
 

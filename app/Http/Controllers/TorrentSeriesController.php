@@ -50,11 +50,12 @@ class TorrentSeriesController extends Controller
         $featured = TorrentSeries::query()
             ->whereNotNull('backdrop_path')
             ->orderByDesc('created_at')
-            ->take(25)
+            
             ->get()
             ->map(function ($m) use ($health) {
                 $m->seeders = $health->get((int) $m->tmdbid)?->max_seeders ?? 0;
                 $m->backdrop = $m->backdrop_path;
+                $m->poster    = $m->poster_path;
                 return $m;
             })
             ->sortByDesc('seeders')
@@ -94,19 +95,54 @@ class TorrentSeriesController extends Controller
             ])->json();
         });
 
-        // Build "You Might Like" recommendations from TMDB
-        $recommendations = collect($movie['recommendations']['results'] ?? [])
-            ->take(8)
-            ->map(fn ($r) => [
-                'id'     => $r['id'],
-                'title'  => $r['name'] ?? $r['title'] ?? null,
-                'poster' => isset($r['poster_path'])
-                    ? "https://image.tmdb.org/t/p/w185{$r['poster_path']}"
-                    : null,
-                'rating' => $r['vote_average'] ?? null,
-                'year'   => substr($r['first_air_date'] ?? $r['release_date'] ?? '', 0, 4),
-            ])
-            ->all();
+       // Build "You Might Like" recommendations from TMDB,
+// then check which recommendations exist in our online database.
+$recommendationIds = collect($movie['recommendations']['results'] ?? [])
+    ->take(8)
+    ->pluck('id')
+    ->filter()
+    ->values();
+
+// Find matching series already available in our database.
+$databaseSeries = \App\Models\Series::whereIn('tmdb_id', $recommendationIds)
+    ->get()
+    ->keyBy(fn ($series) => (int) $series->tmdb_id);
+
+$recommendations = collect($movie['recommendations']['results'] ?? [])
+    ->take(8)
+    ->map(function ($r) use ($databaseSeries) {
+
+        $databaseSeriesEntry = $databaseSeries->get((int) $r['id']);
+
+        return [
+            'id'       => $r['id'],
+            'title'    => $r['name'] ?? $r['title'] ?? null,
+
+            'poster'   => isset($r['poster_path'])
+                ? "https://image.tmdb.org/t/p/w342{$r['poster_path']}"
+                : null,
+
+            'rating'   => $r['vote_average'] ?? null,
+
+            'year'     => substr(
+                $r['first_air_date'] ?? $r['release_date'] ?? '',
+                0,
+                4
+            ),
+
+            // Database availability
+            'in_database' => $databaseSeriesEntry !== null,
+
+            // Internal series page
+            'url' => $databaseSeriesEntry
+                ? route('series.show', [
+                    $databaseSeriesEntry->id,
+                    $databaseSeriesEntry->slug
+                ])
+                : null,
+        ];
+    })
+    ->all();
 
         // Generate correct slug
         $correctSlug = Str::slug($movie['name'] ?? 'series');

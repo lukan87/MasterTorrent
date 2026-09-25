@@ -357,42 +357,339 @@
                 </ul>
             </div>
             </span>
-            <script>
-                document.querySelectorAll('.reaction-btn').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const reaction = this.dataset.reaction;
-                        const torrentId = this.dataset.torrentId;
+<script>
+document.addEventListener('DOMContentLoaded', function () {
 
-                        fetch(`{{ route('torrents.react', $torrent->id) }}`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                'Accept': 'application/json'
-                            },
-                            body: JSON.stringify({ reaction: reaction })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                document.getElementById('active-reaction').innerText = data.activeReaction;
-                                document.getElementById('total-reactions').innerText = data.totalReactions;
-                                document.querySelectorAll('.reaction-btn').forEach(b => {
-                                    b.classList.remove('active');
-                                    if (b.dataset.reaction === data.activeReaction) {
-                                        b.classList.add('active');
-                                    }
-                                });
-                                // Note: Tooltip content update would require more complex JS to refresh.
-                                // For now, we leave it as is or could reload it if needed.
-                            } else {
-                                alert(data.message || 'Error occurred');
-                            }
-                        })
-                        .catch(error => console.error('Error:', error));
-                    });
+    /*
+    |--------------------------------------------------------------------------
+    | Bootstrap Tooltip
+    |--------------------------------------------------------------------------
+    */
+
+    const tooltipElement = document.getElementById('reaction-tooltip-wrap');
+
+    let reactionTooltip = null;
+
+    if (tooltipElement) {
+        reactionTooltip = new bootstrap.Tooltip(tooltipElement, {
+            html: true,
+            placement: 'top',
+            trigger: 'hover',
+            container: 'body'
+        });
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Build Tooltip
+    |--------------------------------------------------------------------------
+    */
+
+    function buildReactionTooltip(tooltipData) {
+
+        if (!tooltipData || tooltipData.length === 0) {
+            return 'No reactions yet';
+        }
+
+        return tooltipData.map(item => {
+
+            let users = item.users || [];
+
+            let names = users.join(', ');
+
+            if (item.count > 3) {
+                names += '...';
+            }
+
+            return `
+                <div class="reaction-tooltip-row">
+                    <span class="reaction-tooltip-emoji">
+                        ${item.reaction}
+                    </span>
+
+                    <strong>${item.count}</strong>
+
+                    <span class="reaction-tooltip-users">
+                        ${names}
+                    </span>
+                </div>
+            `;
+
+        }).join('');
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Update Tooltip
+    |--------------------------------------------------------------------------
+    */
+
+    function updateReactionTooltip(tooltipData) {
+
+        if (!tooltipElement) {
+            return;
+        }
+
+        const newContent = buildReactionTooltip(tooltipData);
+
+        /*
+         * Dispose of the old Bootstrap tooltip.
+         */
+        if (reactionTooltip) {
+            reactionTooltip.dispose();
+        }
+
+        /*
+         * Update the title and Bootstrap data attribute.
+         */
+        tooltipElement.setAttribute('title', newContent);
+        tooltipElement.setAttribute('data-bs-original-title', newContent);
+
+        /*
+         * Create a fresh tooltip.
+         */
+        reactionTooltip = new bootstrap.Tooltip(tooltipElement, {
+            html: true,
+            placement: 'top',
+            trigger: 'hover',
+            container: 'body'
+        });
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Reaction Buttons
+    |--------------------------------------------------------------------------
+    */
+
+    document.querySelectorAll('.reaction-btn').forEach(btn => {
+
+        btn.addEventListener('click', function () {
+
+            const reaction = this.dataset.reaction;
+
+            fetch(`{{ route('torrents.react', $torrent->id) }}`, {
+
+                method: 'POST',
+
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+
+                body: JSON.stringify({
+                    reaction: reaction
+                })
+
+            })
+
+            .then(async response => {
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.message || 'Something went wrong.'
+                    );
+                }
+
+                return data;
+
+            })
+
+            .then(data => {
+
+                if (!data.success) {
+
+                    showReactionToast(
+                        data.message || 'Something went wrong.',
+                        'error'
+                    );
+
+                    return;
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Update Active Reaction
+                |--------------------------------------------------------------------------
+                */
+
+                document.getElementById('active-reaction').innerText =
+                    data.activeReaction;
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Update Total Reaction Count
+                |--------------------------------------------------------------------------
+                */
+
+                document.getElementById('total-reactions').innerText =
+                    data.totalReactions;
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Update Active Reaction Button
+                |--------------------------------------------------------------------------
+                */
+
+                document.querySelectorAll('.reaction-btn').forEach(button => {
+
+                    button.classList.remove('active');
+
+                    if (
+                        data.activeReaction &&
+                        button.dataset.reaction === data.activeReaction
+                    ) {
+                        button.classList.add('active');
+                    }
+
                 });
-            </script>
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Update Tooltip
+                |--------------------------------------------------------------------------
+                */
+
+                updateReactionTooltip(data.tooltip);
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Success Toast
+                |--------------------------------------------------------------------------
+                */
+
+                showReactionToast(
+                    'Reaction updated successfully.',
+                    'success'
+                );
+
+            })
+
+            .catch(error => {
+
+                showReactionToast(
+                    error.message || 'Something went wrong.',
+                    'error'
+                );
+
+            });
+
+        });
+
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Toast
+    |--------------------------------------------------------------------------
+    */
+
+    window.showReactionToast = function (message, type = 'success') {
+
+        const existingToast =
+            document.getElementById('reaction-toast');
+
+        if (existingToast) {
+            existingToast.remove();
+        }
+
+
+        const toast = document.createElement('div');
+
+        toast.id = 'reaction-toast';
+
+        toast.className =
+            `reaction-toast reaction-toast-${type}`;
+
+
+        toast.innerHTML = `
+            <div class="reaction-toast-icon">
+                ${type === 'success' ? '✓' : '⚠'}
+            </div>
+
+            <div class="reaction-toast-message">
+                ${message}
+            </div>
+
+            <button type="button"
+                    class="reaction-toast-close"
+                    aria-label="Close">
+                &times;
+            </button>
+        `;
+
+
+        document.body.appendChild(toast);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Close button
+        |--------------------------------------------------------------------------
+        */
+
+        toast.querySelector('.reaction-toast-close')
+            .addEventListener('click', function () {
+
+                toast.classList.remove('show');
+
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+
+            });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Animate in
+        |--------------------------------------------------------------------------
+        */
+
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 10);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Automatically close
+        |--------------------------------------------------------------------------
+        */
+
+        setTimeout(() => {
+
+            if (!toast.isConnected) {
+                return;
+            }
+
+            toast.classList.remove('show');
+
+            setTimeout(() => {
+
+                if (toast.isConnected) {
+                    toast.remove();
+                }
+
+            }, 300);
+
+        }, 3000);
+    };
+
+});
+</script>
 
             {{-- SUBSCRIBE --}}
             @if($subscribeAvailable)
@@ -610,4 +907,133 @@ html,body{overflow-x:hidden!important}.modern-showbar{border-radius:.75rem}.mode
 .subscribers-label .subscribers-count{font-weight:700;color:#f1f5f9;white-space:nowrap}
 .subscribers-label .subscribers-names{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:260px}
 .subscribers-label .subscribers-more{color:var(--ui-accent);font-weight:700}
+
+/* Reaction Toast */
+.reaction-toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 99999;
+
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    min-width: 280px;
+    max-width: 420px;
+
+    padding: 14px 16px;
+
+    background: #212529;
+    color: #fff;
+
+    border-radius: 12px;
+
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.35);
+
+    opacity: 0;
+    transform: translateY(-15px) translateX(20px);
+
+    transition:
+        opacity 0.3s ease,
+        transform 0.3s ease;
+}
+
+.reaction-toast.show {
+    opacity: 1;
+    transform: translateY(0) translateX(0);
+}
+
+.reaction-toast-success {
+    border-left: 4px solid #20c997;
+}
+
+.reaction-toast-error {
+    border-left: 4px solid #dc3545;
+}
+
+.reaction-toast-icon {
+    width: 30px;
+    height: 30px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border-radius: 50%;
+
+    font-size: 16px;
+    font-weight: bold;
+
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.reaction-toast-success .reaction-toast-icon {
+    color: #20c997;
+}
+
+.reaction-toast-error .reaction-toast-icon {
+    color: #dc3545;
+}
+
+.reaction-toast-message {
+    flex: 1;
+
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.reaction-toast-close {
+    border: 0;
+    background: transparent;
+
+    color: rgba(255, 255, 255, 0.6);
+
+    font-size: 22px;
+    line-height: 1;
+
+    cursor: pointer;
+
+    padding: 0;
+}
+
+.reaction-toast-close:hover {
+    color: #fff;
+}
+
+@media (max-width: 576px) {
+    .reaction-toast {
+        top: 15px;
+        left: 15px;
+        right: 15px;
+
+        min-width: auto;
+        max-width: none;
+    }
+}
+
+/* Reaction Tooltip */
+.reaction-tooltip-row {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 3px 0;
+    white-space: nowrap;
+}
+
+.reaction-tooltip-emoji {
+    font-size: 18px;
+}
+
+.reaction-tooltip-row strong {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.reaction-tooltip-users {
+    font-size: 12px;
+    opacity: 0.9;
+}
 </style>

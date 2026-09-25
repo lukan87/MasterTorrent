@@ -282,32 +282,98 @@
 
                 <div class="cast-slider">
                     @foreach($similar as $sim)
-                        @php
-                            $simHref = $sim['in_library']
-                                ? $sim['db_url']
-                                : 'https://www.themoviedb.org/search/tv?query=' . urlencode($sim['name']) . ($sim['year'] ? '&first_air_date_year='.$sim['year'] : '');
-                        @endphp
-                        <a href="{{ $simHref }}"
-                           {{ $sim['in_library'] ? '' : 'target="_blank"' }}
-                           class="cast-card text-decoration-none">
-                            <div class="cast-image-wrapper">
-                                <img src="{{ $sim['poster'] }}"
-                                     class="cast-image"
-                                     loading="lazy"
-                                     alt="{{ $sim['name'] }}">
-                                @if($sim['in_library'])
-                                    <span class="in-library-badge"><i class="bi bi-check2-circle"></i> Online</span>
-                                @endif
-                            </div>
-                            <div class="cast-info">
-                                <h6>{{ $sim['name'] }}</h6>
-                                <p>
-                                    <i class="bi bi-star-fill text-warning"></i> {{ $sim['rating'] }}
-                                    @if($sim['year']) · {{ $sim['year'] }} @endif
-                                </p>
-                            </div>
-                        </a>
-                    @endforeach
+
+    <div class="cast-card similar-series-card {{ $sim['in_library'] ? 'similar-series-available' : 'similar-series-unavailable' }}">
+
+        {{-- POSTER --}}
+        @if($sim['in_library'])
+
+            <a href="{{ $sim['db_url'] }}"
+               class="cast-image-wrapper similar-series-poster-link"
+               data-bs-toggle="tooltip"
+               data-bs-placement="top"
+               title="View online">
+
+        @else
+
+            <div class="cast-image-wrapper similar-series-poster-link"
+                 data-bs-toggle="tooltip"
+                 data-bs-placement="top"
+                 title="Not in database yet">
+
+        @endif
+
+                <img src="{{ $sim['poster'] }}"
+                     class="cast-image {{ !$sim['in_library'] ? 'similar-series-poster-unavailable' : '' }}"
+                     loading="lazy"
+                     alt="{{ $sim['name'] }}">
+
+                {{-- STATUS ICON --}}
+                <span class="similar-series-status {{ $sim['in_library'] ? 'similar-series-status-online' : 'similar-series-status-missing' }}">
+
+                    @if($sim['in_library'])
+                        <i class="bi bi-play-circle-fill"></i>
+                    @else
+                        <i class="bi bi-database-x"></i>
+                    @endif
+
+                </span>
+
+                {{-- ONLINE BADGE --}}
+                @if($sim['in_library'])
+                    <span class="in-library-badge">
+                        <i class="bi bi-check2-circle"></i>
+                        Online
+                    </span>
+                @endif
+
+        @if($sim['in_library'])
+            </a>
+        @else
+            </div>
+        @endif
+
+
+        {{-- SERIES INFO --}}
+        <div class="cast-info">
+
+            <h6>
+                @if($sim['in_library'])
+
+                    <a href="{{ $sim['db_url'] }}"
+                       class="similar-series-title-link"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="top"
+                       title="View online">
+                        {{ $sim['name'] }}
+                    </a>
+
+                @else
+
+                    <span class="similar-series-title-unavailable"
+                          data-bs-toggle="tooltip"
+                          data-bs-placement="top"
+                          title="Not in database yet">
+                        {{ $sim['name'] }}
+                    </span>
+
+                @endif
+            </h6>
+
+            <p>
+                <i class="bi bi-star-fill text-warning"></i>
+                {{ $sim['rating'] }}
+
+                @if($sim['year'])
+                    · {{ $sim['year'] }}
+                @endif
+            </p>
+
+        </div>
+
+    </div>
+
+@endforeach
                 </div>
 
             </div>
@@ -612,4 +678,123 @@
         box-shadow:0 3px 8px rgba(0,0,0,.35);
         pointer-events:none;
     }
+
+    /* =========================================================
+   SIMILAR SERIES — DATABASE STATUS
+   ========================================================= */
+
+.similar-series-card {
+    position: relative;
+}
+
+/* Available in our database */
+.similar-series-available {
+    cursor: pointer;
+}
+
+/* Not available in our database */
+.similar-series-unavailable {
+    cursor: default;
+    opacity: .78;
+}
+
+/* Make unavailable posters grayscale */
+.similar-series-poster-unavailable {
+    filter: grayscale(100%);
+    opacity: .60;
+    transition:
+        filter .25s ease,
+        opacity .25s ease,
+        transform .25s ease;
+}
+
+/* Available poster */
+.similar-series-available .cast-image {
+    filter: none;
+    opacity: 1;
+}
+
+/* Available hover */
+.similar-series-available:hover {
+    transform: translateY(-3px);
+}
+
+/* Don't lift unavailable cards */
+.similar-series-unavailable:hover {
+    transform: none;
+}
+
+/* Slight hover effect on unavailable poster */
+.similar-series-unavailable:hover .similar-series-poster-unavailable {
+    filter: grayscale(100%);
+    opacity: .72;
+    transform: scale(1.02);
+}
+
+
+/* =========================================================
+   STATUS ICON
+   ========================================================= */
+
+.similar-series-status {
+    position: absolute;
+
+    top: 8px;
+    right: 8px;
+
+    width: 28px;
+    height: 28px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: rgba(5, 10, 18, .88);
+    backdrop-filter: blur(6px);
+
+    font-size: 13px;
+
+    z-index: 4;
+
+    pointer-events: none;
+
+    box-shadow: 0 4px 10px rgba(0, 0, 0, .35);
+}
+
+
+/* Online */
+.similar-series-status-online {
+    color: #4ade80;
+    border: 1px solid rgba(74, 222, 128, .35);
+}
+
+
+/* Not in database */
+.similar-series-status-missing {
+    color: rgba(255, 255, 255, .45);
+    border: 1px solid rgba(255, 255, 255, .12);
+}
+
+
+/* =========================================================
+   TITLES
+   ========================================================= */
+
+.similar-series-title-link {
+    color: #8ff5e6;
+    text-decoration: none;
+    transition: color .2s ease;
+}
+
+.similar-series-title-link:hover {
+    color: #fff;
+    text-decoration: underline;
+}
+
+.similar-series-title-unavailable {
+    color: rgba(232, 240, 247, .58);
+    cursor: default;
+}
 </style>

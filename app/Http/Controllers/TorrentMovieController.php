@@ -49,17 +49,17 @@ class TorrentMovieController extends Controller
 
         // ── Featured row (hero + cards) ──
         $featured = TorrentMovie::query()
-            ->whereNotNull('backdrop_path')
-            ->orderByDesc('created_at')
-            ->take(25)
-            ->get()
-            ->map(function ($m) use ($health) {
-                $m->seeders = $health->get((int) $m->tmdbid)?->max_seeders ?? 0;
-                $m->backdrop = $m->backdrop_path;
-                return $m;
-            })
-            ->sortByDesc('seeders')
-            ->values();
+    ->whereNotNull('backdrop_path')
+    ->orderByDesc('created_at')
+    
+    ->get()
+    ->map(function ($m) use ($health) {
+        $m->seeders = $health->get((int) $m->tmdbid)?->max_seeders ?? 0;
+        $m->backdrop = $m->backdrop_path;
+        return $m;
+    })
+    ->sortByDesc('seeders')
+    ->values();
 
         return view('library.movies.index', compact('movies', 'query', 'featured'));
     }
@@ -95,19 +95,55 @@ class TorrentMovieController extends Controller
             ])->json();
         });
 
-        // Build "You Might Like" recommendations from TMDB
-        $recommendations = collect($movie['recommendations']['results'] ?? [])
-            ->take(8)
-            ->map(fn ($r) => [
-                'id'     => $r['id'],
-                'title'  => $r['title'] ?? $r['name'] ?? null,
-                'poster' => isset($r['poster_path'])
-                    ? "https://image.tmdb.org/t/p/w185{$r['poster_path']}"
-                    : null,
-                'rating' => $r['vote_average'] ?? null,
-                'year'   => substr($r['release_date'] ?? $r['first_air_date'] ?? '', 0, 4),
-            ])
-            ->all();
+        // Build "You Might Like" recommendations from TMDB,
+// then check which recommendations exist in our online database.
+$recommendationIds = collect($movie['recommendations']['results'] ?? [])
+    ->take(8)
+    ->pluck('id')
+    ->filter()
+    ->values();
+
+// Find matching movies already available in our database.
+$databaseMovies = \App\Models\Movie::whereIn('tmdb_id', $recommendationIds)
+    ->get()
+    ->keyBy(fn ($movie) => (int) $movie->tmdb_id);
+
+$recommendations = collect($movie['recommendations']['results'] ?? [])
+    ->take(8)
+    ->map(function ($r) use ($databaseMovies) {
+
+        $databaseMovie = $databaseMovies->get((int) $r['id']);
+
+        return [
+            'id'    => $r['id'],
+
+            'title' => $r['title'] ?? $r['name'] ?? null,
+
+            'poster' => isset($r['poster_path'])
+                ? "https://image.tmdb.org/t/p/w342{$r['poster_path']}"
+                : null,
+
+            'rating' => $r['vote_average'] ?? null,
+
+            'year' => substr(
+                $r['release_date'] ?? $r['first_air_date'] ?? '',
+                0,
+                4
+            ),
+
+            // Is this movie available on our website?
+            'in_database' => $databaseMovie !== null,
+
+            // Our internal movie page
+            'url' => $databaseMovie
+                ? route('movies.show', [
+                    $databaseMovie->id,
+                    $databaseMovie->slug
+                ])
+                : null,
+        ];
+    })
+    ->all();
 
         // Generate correct slug
         $correctSlug = Str::slug($movie['title'] ?? 'movie');

@@ -193,7 +193,7 @@
                     </h5>
 
                     <div class="tmdb-recs-subtitle">
-                        Recommendations from The Movie Database
+                        Recommendations from The Movie Database That You Can Watch Online
                     </div>
                 </div>
 
@@ -215,50 +215,83 @@
 
                     @foreach($recommendations as $rec)
 
-                        <a href="https://www.themoviedb.org/movie/{{ $rec['id'] }}"
-                           target="_blank"
-                           rel="noreferrer"
-                           class="tmdb-recs-card text-decoration-none">
+    @if($rec['in_database'])
 
-                            <div class="tmdb-recs-poster-wrap">
+        {{-- Movie is available on our website --}}
+        <a
+            href="{{ $rec['url'] }}"
+            class="tmdb-recs-card tmdb-recs-card-available text-decoration-none"
+            data-bs-toggle="tooltip"
+            data-bs-placement="top"
+            title="View online"
+        >
 
-                                <img
-                                    src="{{ $rec['poster'] ?? '/images/not-found.jpg' }}"
-                                    loading="lazy"
-                                    class="tmdb-recs-poster"
-                                    alt="{{ $rec['title'] }}"
-                                >
+    @else
 
-                                @if(!empty($rec['rating']))
+        {{-- Movie is not in our database --}}
+        <div
+            class="tmdb-recs-card tmdb-recs-card-unavailable"
+            data-bs-toggle="tooltip"
+            data-bs-placement="top"
+            title="Not in database yet"
+        >
 
-                                    <span class="tmdb-recs-rating">
-                                        <i class="bi bi-star-fill"></i>
-                                        {{ number_format($rec['rating'], 1) }}
-                                    </span>
+    @endif
 
-                                @endif
+            <div class="tmdb-recs-poster-wrap">
 
-                            </div>
+                <img
+                    src="{{ $rec['poster'] ?? '/images/not-found.jpg' }}"
+                    loading="lazy"
+                    class="tmdb-recs-poster {{ !$rec['in_database'] ? 'tmdb-recs-poster-unavailable' : '' }}"
+                    alt="{{ $rec['title'] }}"
+                >
 
-                            <div class="tmdb-recs-info">
+                {{-- Database status --}}
+                <span class="tmdb-recs-status {{ $rec['in_database'] ? 'tmdb-recs-status-online' : 'tmdb-recs-status-missing' }}">
 
-                                <div class="tmdb-recs-name">
-                                    {{ $rec['title'] }}
-                                </div>
+                    @if($rec['in_database'])
+                        <i class="bi bi-play-circle-fill"></i>
+                    @else
+                        <i class="bi bi-database-x"></i>
+                    @endif
 
-                                @if(!empty($rec['year']))
+                </span>
 
-                                    <div class="tmdb-recs-year">
-                                        {{ $rec['year'] }}
-                                    </div>
+                @if(!empty($rec['rating']))
+                    <span class="tmdb-recs-rating">
+                        <i class="bi bi-star-fill"></i>
+                        {{ number_format($rec['rating'], 1) }}
+                    </span>
+                @endif
 
-                                @endif
+            </div>
 
-                            </div>
+            <div class="tmdb-recs-info">
 
-                        </a>
+                <div class="tmdb-recs-name">
+                    {{ $rec['title'] }}
+                </div>
 
-                    @endforeach
+                @if(!empty($rec['year']))
+                    <div class="tmdb-recs-year">
+                        {{ $rec['year'] }}
+                    </div>
+                @endif
+
+            </div>
+
+    @if($rec['in_database'])
+
+        </a>
+
+    @else
+
+        </div>
+
+    @endif
+
+@endforeach
 
                 </div>
 
@@ -761,6 +794,73 @@ background: rgba(255,255,255,0.15);
     transform: translateY(-1px);
 }
 .watch-online-btn i { font-size: 15px; }
+
+/* =========================================================
+   RECOMMENDATION DATABASE STATUS
+   ========================================================= */
+
+.tmdb-recs-card-available {
+    cursor: pointer;
+}
+
+.tmdb-recs-card-unavailable {
+    cursor: default;
+    opacity: .72;
+}
+
+/* Black & white poster when movie isn't in database */
+.tmdb-recs-poster-unavailable {
+    filter: grayscale(100%);
+    opacity: .62;
+    transition:
+        filter .25s ease,
+        opacity .25s ease,
+        transform .3s ease;
+}
+
+.tmdb-recs-card-unavailable:hover {
+    background: rgba(9, 16, 29, .48);
+    border-color: rgba(255, 255, 255, .055);
+    transform: none;
+}
+
+.tmdb-recs-card-unavailable:hover .tmdb-recs-poster-unavailable {
+    filter: grayscale(100%);
+    opacity: .72;
+    transform: scale(1.02);
+}
+
+/* Database status icon */
+.tmdb-recs-status {
+    position: absolute;
+    left: 6px;
+    top: 6px;
+
+    width: 26px;
+    height: 26px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: rgba(5, 10, 18, .86);
+    backdrop-filter: blur(5px);
+
+    font-size: 12px;
+    z-index: 3;
+}
+
+.tmdb-recs-status-online {
+    color: #4ade80;
+    border: 1px solid rgba(74, 222, 128, .3);
+}
+
+.tmdb-recs-status-missing {
+    color: rgba(255, 255, 255, .45);
+    border: 1px solid rgba(255, 255, 255, .12);
+}
 </style>
 
 @endsection

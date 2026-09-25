@@ -644,15 +644,26 @@ public function react(Request $request, Torrent $torrent)
 
     $reaction = $request->input('reaction');
 
-    // Check if user is the owner
-    if ($torrent->owner === Auth::id()) {
-        return redirect()->back()->with('error', 'You cannot react to your own torrent.');
-    }
+    // Helper for both JSON and normal responses
+    $errorResponse = function ($message) use ($request) {
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => $message,
+            ], 422);
+        }
+        return redirect()->back()->with('error', $message);
+    };
+
+    // Owner check
+if ($torrent->owner === Auth::id()) {
+    return $errorResponse('You cannot react to your own torrent.');
+}
 
     // Only allow specified reactions
     $allowedReactions = ['👍', '😂', '😮', '😢', '😎', '💖', '🥱', '😤'];
     if (!in_array($reaction, $allowedReactions)) {
-        return redirect()->back()->with('error', 'Invalid reaction.');
+        return $errorResponse('Invalid reaction.');
     }
 
     // Check if user already reacted
@@ -662,14 +673,11 @@ public function react(Request $request, Torrent $torrent)
 
     if ($existing) {
         if ($existing->reaction === $reaction) {
-            // Remove reaction if same
             $existing->delete();
         } else {
-            // Update reaction
             $existing->update(['reaction' => $reaction]);
         }
     } else {
-        // Create reaction
         TorrentReaction::create([
             'torrent_id' => $torrent->id,
             'user_id' => Auth::id(),
@@ -678,17 +686,43 @@ public function react(Request $request, Torrent $torrent)
     }
 
     if ($request->expectsJson()) {
-        $reactions = TorrentReaction::where('torrent_id', $torrent->id)->with('user:id,name')->get();
-        $reactionCounts = $reactions->groupBy('reaction')->map->count();
-        $userReaction = Auth::check() ? $reactions->where('user_id', Auth::id())->first() : null;
+    $reactions = TorrentReaction::where('torrent_id', $torrent->id)
+        ->with('user:id,name')
+        ->get();
 
-        return response()->json([
-            'success' => true,
-            'activeReaction' => $userReaction ? $userReaction->reaction : '👍',
-            'totalReactions' => $reactions->count(),
-            'counts' => $reactionCounts,
-        ]);
-    }
+    $reactionCounts = $reactions
+        ->groupBy('reaction')
+        ->map->count();
+
+    $userReaction = Auth::check()
+        ? $reactions->where('user_id', Auth::id())->first()
+        : null;
+
+    // Prepare tooltip data
+    $tooltip = $reactions
+        ->groupBy('reaction')
+        ->map(function ($items, $reaction) {
+            return [
+                'reaction' => $reaction,
+                'count' => $items->count(),
+                'users' => $items
+                    ->map(fn ($item) => $item->user?->name)
+                    ->filter()
+                    ->take(3)
+                    ->values()
+                    ->toArray(),
+            ];
+        })
+        ->values();
+
+    return response()->json([
+        'success' => true,
+        'activeReaction' => $userReaction ? $userReaction->reaction : '👍',
+        'totalReactions' => $reactions->count(),
+        'counts' => $reactionCounts,
+        'tooltip' => $tooltip,
+    ]);
+}
 
     return redirect()->back();
 }

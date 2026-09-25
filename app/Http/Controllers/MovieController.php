@@ -67,9 +67,13 @@ class MovieController extends Controller
         }
 
         $movies  = $query->paginate(12)->withQueryString();
-        $featured = Movie::whereNotNull('backdrop_path')->where('views', '>', 0)
-            ->orderByDesc('views')->orderByDesc('vote_average')->first()
-            ?? Movie::whereNotNull('backdrop_path')->inRandomOrder()->first();
+        $featured = Movie::whereNotNull('backdrop_path')
+    ->where('views', '>', 0)
+    ->orderByRaw('RAND() * views DESC')
+    ->first()
+    ?? Movie::whereNotNull('backdrop_path')
+        ->inRandomOrder()
+        ->first();
 
         return view('movies.index', compact('movies', 'featured', 'sort'))
             ->with('links', 'vendor.pagination.bootstrap-5');
@@ -183,20 +187,42 @@ class MovieController extends Controller
 
         $movieOm = cache()->remember('movie_' . $movie->imdb_id . '_omdb', now()->addWeek(), fn() => $this->omdb($movie->imdb_id));
 
-        $similar = cache()->remember('movie_similar_v2_' . $movie->tmdb_id, now()->addWeek(), function () use ($movie) {
-            $data = $this->tmdb("movie/{$movie->tmdb_id}/similar");
-            return collect($data['results'] ?? [])->take(10)->map(fn($item) => [
+      $similarData = cache()->remember(
+    'movie_similar_v3_' . $movie->tmdb_id,
+    now()->addWeek(),
+    function () use ($movie) {
+        $data = $this->tmdb("movie/{$movie->tmdb_id}/similar");
+
+        return collect($data['results'] ?? [])
+            ->map(fn ($item) => [
                 'tmdb_id' => $item['id'] ?? null,
-                'name'   => $item['title'] ?? 'Unknown',
-                'poster' => ($item['poster_path'] ?? null)
+                'name'    => $item['title'] ?? 'Unknown',
+                'poster'  => !empty($item['poster_path'])
                     ? 'https://image.tmdb.org/t/p/w500' . $item['poster_path']
-                    : '/images/noposter.jpg',
-                'year'   => !empty($item['release_date'])
-                    ? \Carbon\Carbon::parse($item['release_date'])->format('Y')
                     : null,
-                'rating' => number_format($item['vote_average'] ?? 0, 1),
-            ]);
-        });
+                'year'    => !empty($item['release_date'])
+                    ? substr($item['release_date'], 0, 4)
+                    : null,
+                'rating'  => number_format($item['vote_average'] ?? 0, 1),
+            ])
+            ->values();
+    }
+);
+
+/*
+|--------------------------------------------------------------------------
+| Filter and randomise AFTER the cached TMDB data
+|--------------------------------------------------------------------------
+*/
+$similar = $similarData
+    ->filter(function ($item) {
+        return !empty($item['poster'])
+            && !empty($item['year'])
+            && (int) $item['year'] >= 1990;
+    })
+    ->shuffle()
+    ->take(10)
+    ->values();
 
         // Resolve whether each similar movie already exists in the DB (fresh lookup,
         // not cached, so newly added movies show up as linkable immediately).

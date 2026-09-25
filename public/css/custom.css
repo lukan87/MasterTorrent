@@ -1053,3 +1053,264 @@ body.bg-body-tertiary {
     line-height: 1.35;
     color: #9fb0c6;
 }
+
+
+/*SweetAlert2 Customization*/
+/* =========================================================
+   FILEIPLAY GLOBAL SWEETALERT TOAST
+   ========================================================= */
+
+   /* =========================================================
+   FILEIPLAY GLOBAL NOTIFICATIONS
+   ========================================================= */
+
+.fileiplay-toast {
+    width: 350px !important;
+    max-width: calc(100vw - 30px) !important;
+
+    min-height: 72px !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+    background: #191d23 !important;
+
+    border: 1px solid rgba(255, 255, 255, 0.10) !important;
+    border-radius: 14px !important;
+
+    box-shadow:
+        0 12px 35px rgba(0, 0, 0, 0.45),
+        0 4px 12px rgba(0, 0, 0, 0.25) !important;
+
+    overflow: hidden !important;
+
+    color: #fff !important;
+}
+
+
+/* =========================================================
+   OUR NOTIFICATION CONTENT
+   ========================================================= */
+
+.fileiplay-notification {
+    width: 100%;
+
+    min-height: 72px;
+
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+
+    padding: 14px 42px 14px 16px;
+
+    text-align: left;
+}
+
+
+/* =========================================================
+   ICON
+   ========================================================= */
+
+.fileiplay-notification-icon {
+    width: 36px;
+    height: 36px;
+
+    min-width: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-right: 12px;
+
+    border-radius: 50%;
+
+    box-sizing: border-box;
+
+    font-size: 20px;
+    font-weight: 700;
+
+    line-height: 1;
+}
+
+
+/* =========================================================
+   CONTENT
+   ========================================================= */
+
+.fileiplay-notification-content {
+    min-width: 0;
+
+    flex: 1;
+}
+
+
+.fileiplay-notification-title {
+    margin: 0 0 3px 0;
+
+    color: #fff;
+
+    font-size: 15px;
+    font-weight: 700;
+
+    line-height: 1.2;
+}
+
+
+.fileiplay-notification-message {
+    margin: 0;
+
+    color: rgba(255, 255, 255, 0.78);
+
+    font-size: 13px;
+    font-weight: 500;
+
+    line-height: 1.4;
+
+    overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   SUCCESS
+   ========================================================= */
+
+.fileiplay-toast-success {
+    border-left: 4px solid #78c66a !important;
+}
+
+.fileiplay-toast-success .fileiplay-notification-icon {
+    color: #78c66a;
+
+    background: rgba(120, 198, 106, 0.14);
+
+    border: 1px solid rgba(120, 198, 106, 0.35);
+}
+
+
+/* =========================================================
+   ERROR
+   ========================================================= */
+
+.fileiplay-toast-error {
+    border-left: 4px solid #dc3545 !important;
+}
+
+.fileiplay-toast-error .fileiplay-notification-icon {
+    color: #dc3545;
+
+    background: rgba(220, 53, 69, 0.14);
+
+    border: 1px solid rgba(220, 53, 69, 0.35);
+}
+
+
+/* =========================================================
+   WARNING
+   ========================================================= */
+
+.fileiplay-toast-warning {
+    border-left: 4px solid #ffc107 !important;
+}
+
+.fileiplay-toast-warning .fileiplay-notification-icon {
+    color: #ffc107;
+
+    background: rgba(255, 193, 7, 0.14);
+
+    border: 1px solid rgba(255, 193, 7, 0.35);
+}
+
+
+/* =========================================================
+   INFO
+   ========================================================= */
+
+.fileiplay-toast-info {
+    border-left: 4px solid #0dcaf0 !important;
+}
+
+.fileiplay-toast-info .fileiplay-notification-icon {
+    color: #0dcaf0;
+
+    background: rgba(13, 202, 240, 0.14);
+
+    border: 1px solid rgba(13, 202, 240, 0.35);
+}
+
+
+/* =========================================================
+   CLOSE BUTTON
+   ========================================================= */
+
+.fileiplay-toast .fileiplay-toast-close {
+    position: absolute !important;
+
+    top: 7px !important;
+    right: 8px !important;
+
+    width: 25px !important;
+    height: 25px !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    background: transparent !important;
+
+    border: 0 !important;
+
+    color: rgba(255, 255, 255, 0.45) !important;
+
+    font-size: 21px !important;
+    font-weight: 400 !important;
+
+    line-height: 1 !important;
+
+    z-index: 20 !important;
+
+    transition: all 0.2s ease !important;
+}
+
+.fileiplay-toast .fileiplay-toast-close:hover {
+    color: #fff !important;
+
+    transform: scale(1.1);
+}
+
+
+/* =========================================================
+   PROGRESS BAR
+   ========================================================= */
+
+.fileiplay-toast .fileiplay-toast-progress {
+    height: 3px !important;
+
+    background: rgba(255, 255, 255, 0.25) !important;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 576px) {
+
+    .fileiplay-toast {
+        width: calc(100vw - 150px) !important;
+        max-width: none !important;
+    }
+
+    .fileiplay-notification {
+        padding-left: 14px;
+        padding-right: 38px;
+    }
+}
+
+/* =========================================================
+   END OF FILEIPLAY GLOBAL SWEETALERT TOAST
+   ========================================================= */
