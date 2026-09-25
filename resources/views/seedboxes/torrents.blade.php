@@ -2,9 +2,9 @@
 
 @section('content')
 
-@error('torrent')
+@error('torrent_file')
 
-    <div class="modern-alert modern-alert-danger mb-4">
+    <div role="alert" class="alert modern-alert modern-alert-danger mb-4">
 
         <i class="bi bi-exclamation-triangle-fill me-2"></i>
 
@@ -52,11 +52,7 @@
 
             <div class="d-flex align-items-center gap-2 flex-wrap">
 
-                @php
 
-                    $isConnected = isset($torrents) && $torrents->count() > 0;
-
-                @endphp
 
                 <span class="connection-badge {{ $isConnected ? 'online' : 'offline' }}">
 
@@ -92,13 +88,13 @@
 
         @if(session('success'))
 
-            <div class="modern-alert modern-alert-success">
+            <div role="alert" class="alert modern-alert modern-alert-success">
 
                 <div>
 
                     <i class="bi bi-check-circle-fill me-2"></i>
 
-                    {!! session('success') !!}
+                    {{ session('success') }}
 
                 </div>
 
@@ -112,13 +108,13 @@
 
         @if(session('error'))
 
-            <div class="modern-alert modern-alert-danger">
+            <div role="alert" class="alert modern-alert modern-alert-danger">
 
                 <div>
 
                     <i class="bi bi-exclamation-triangle-fill me-2"></i>
 
-                    {!! session('error') !!}
+                    {{ session('error') }}
 
                 </div>
 
@@ -136,6 +132,9 @@
 
         ========================================= --}}
 
+        @if($connectionError)
+            <div class="alert modern-alert modern-alert-danger" role="alert">{{ $connectionError }}</div>
+        @endif
         <div class="stats-grid mb-4">
 
             <div class="modern-stat-card">
@@ -362,7 +361,7 @@
 
                         <input type="text"
 
-                               name="search"
+                               name="search" aria-label="Search torrents by name"
 
                                class="modern-search-input"
 
@@ -426,7 +425,7 @@
 
                         <tbody>
 
-                        @foreach($torrentItems as $hash => $torrent)
+                        @forelse($torrentItems as $hash => $torrent)
 
                             @php
 
@@ -440,7 +439,7 @@
 
                                 $uploaded = $torrent[9] ?? 0;
 
-                                $progress = $size > 0 ? round(($downloaded / $size) * 100, 2) : 0;
+                                $progress = $size > 0 ? min(100, max(0, round(($downloaded / $size) * 100, 2))) : 0;
 
                                 $state = $torrent[28] ?? 0;
 
@@ -510,7 +509,7 @@
 
                                 <td class="progress-column">
 
-                                    <div class="modern-progress">
+                                    <div class="modern-progress" role="progressbar" aria-label="Download progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ $progress }}">
 
                                         <div class="progress-bar {{ $color }}"
 
@@ -654,15 +653,10 @@
 
                                                   style="display:none;">
 
-                                                <a href="{{ route('seedboxes.downloadRebuiltTorrent', [$seedbox, $hash]) }}"
-
-                                                   class="action-btn action-btn-info"
-
-                                                   title="Upload to {{ config('app.name') }}">
-
-                                                    <i class="bi bi-cloud-arrow-up-fill"></i>
-
-                                                </a>
+                                                <form method="POST" action="{{ route('seedboxes.downloadRebuiltTorrent', [$seedbox, $hash]) }}">
+                                                    @csrf
+                                                    <button class="action-btn action-btn-info" aria-label="Upload to {{ config('app.name') }}" title="Upload to {{ config('app.name') }}"><i class="bi bi-cloud-arrow-up-fill"></i></button>
+                                                </form>
 
                                             </span>
 
@@ -674,7 +668,12 @@
 
                             </tr>
 
-                        @endforeach
+                        @empty
+                            <tr><td colspan="3" class="text-center py-5">
+                                <i class="bi bi-inbox d-block fs-3 mb-2 text-info"></i>
+                                {{ !$isConnected ? 'Unable to load torrents. Check your connection and try again.' : (request('search') ? 'No torrents match your search.' : 'No torrents yet. Add a torrent file to get started.') }}
+                            </td></tr>
+                        @endforelse
 
                         </tbody>
 
@@ -708,7 +707,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const refreshInterval = 20000;
 
+    let refreshing = false;
     function refreshTorrents() {
+        if (refreshing || document.hidden || document.querySelector('.torrent-actions :focus')) return;
+        refreshing = true;
 
         fetch(window.location.href, {
 
@@ -720,7 +722,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         })
 
-        .then(response => response.text())
+        .then(response => { if (!response.ok) throw new Error('Refresh failed'); return response.text(); })
 
         .then(html => {
 
@@ -728,9 +730,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const doc = parser.parseFromString(html, 'text/html');
 
-            const newTable = doc.querySelector('.table-responsive');
+            const newTable = doc.querySelector('.seedbox-page .table-responsive');
 
-            const oldTable = document.querySelector('.table-responsive');
+            const oldTable = document.querySelector('.seedbox-page .table-responsive');
 
             if (newTable && oldTable) {
 
@@ -738,11 +740,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
             }
 
-            document.querySelectorAll('.torrent-trackers').forEach(td => {
+            ['.stats-grid', '.connection-badge', '.torrent-count'].forEach(selector => {
+                const current = document.querySelector('.seedbox-page ' + selector);
+                const updated = doc.querySelector('.seedbox-page ' + selector);
+                if (current && updated) current.replaceWith(updated);
+            });
+            return Promise.all(Array.from(document.querySelectorAll('.torrent-trackers')).map(td => {
 
                 const hash = td.dataset.hash;
 
-                fetch(`/seedboxes/{{ $seedbox->id }}/torrent/${hash}/trackers`)
+                return fetch(`/seedboxes/{{ $seedbox->id }}/torrent/${hash}/trackers`)
 
                 .then(res => res.json())
 
@@ -783,9 +790,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         const hasInternalTracker = hosts.some(host =>
 
-                            host.includes('fileiplay.org') ||
-
-                            host.includes('fileiplay.ro')
+                            host === 'fileiplay.org' || host.endsWith('.fileiplay.org') ||
+                            host === 'fileiplay.ro' || host.endsWith('.fileiplay.ro')
 
                         );
 
@@ -799,13 +805,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 })
 
-                .catch(() => td.textContent = 'Error');
+                .catch(() => td.textContent = 'Unavailable');
 
-            });
+            }));
 
         })
 
-        .catch(err => console.error('Failed to refresh torrents:', err));
+        .catch(err => console.error('Failed to refresh torrents:', err))
+        .finally(() => { refreshing = false; });
 
     }
 

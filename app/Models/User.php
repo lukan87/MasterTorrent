@@ -368,7 +368,12 @@ public function invitesUsed()
 
 public function inviter()
 {
-    return $this->belongsTo(User::class, 'invited_by');
+    return $this->belongsTo(User::class, 'invited_by')->withTrashed();
+}
+
+public function invitees()
+{
+    return $this->hasMany(User::class, 'invited_by')->withTrashed();
 }
 
 public function slots()

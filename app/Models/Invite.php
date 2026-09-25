@@ -9,37 +9,35 @@ class Invite extends Model
 {
     use HasFactory;
 
-    // Define the table name (optional, Laravel will guess this based on the model name)
-    protected $table = 'invites';
+    public const VALID_DAYS = 14;
 
-    // Define the fillable attributes
-    protected $fillable = [
-        'inviter_id', 'invite_code', 'is_used', 'is_expired', 
-    ];
+    protected $fillable = ['inviter_id', 'user_id', 'invite_code', 'is_used', 'is_expired'];
 
-    // If you're using timestamps
-    public $timestamps = true;
+    protected $casts = ['is_used' => 'boolean', 'is_expired' => 'boolean'];
 
-    // Define the relationship with the User model   // Define the inverse of the relationship
-    public function inviter()
+    public function getExpiresAtAttribute()
     {
-        return $this->belongsTo(User::class, 'inviter_id'); // The person who created the invite
+        return $this->created_at->copy()->addDays(self::VALID_DAYS);
     }
 
-    public function invites()
+    public function getExpiredAttribute(): bool
     {
-        return $this->hasMany(Invite::class, 'inviter_id');  // 'inviter_id' is the foreign key
+        return $this->is_expired || $this->expires_at->lte(now());
+    }
+
+    public function inviter()
+    {
+        return $this->belongsTo(User::class, 'inviter_id');
     }
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id')->withTrashed();
     }
- 
-public function usedBy()
-{
-    return $this->hasOne(User::class, 'invite_code', 'invite_code');
-}
 
-
+    // Retain code-based lookup for invitations redeemed before user_id was populated.
+    public function usedBy()
+    {
+        return $this->hasOne(User::class, 'invite_code', 'invite_code')->withTrashed();
+    }
 }

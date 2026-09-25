@@ -59,7 +59,7 @@
 
             @if(session($msg))
 
-                <div class="modern-alert {{ $msg === 'success'
+                <div role="alert" class="alert modern-alert {{ $msg === 'success'
                     ? 'modern-alert-success'
                     : 'modern-alert-danger' }}">
 
@@ -578,28 +578,6 @@
 }
 </style>
 
-<script>
 
-function togglePassword(id){
-
-    const input = document.getElementById('password-' + id);
-
-    const button = input.nextElementSibling;
-
-    if(input.type === 'password'){
-
-        input.type = 'text';
-
-        button.textContent = 'Hide';
-
-    }else{
-
-        input.type = 'password';
-
-        button.textContent = 'Show';
-    }
-}
-
-</script>
 
 @endsection

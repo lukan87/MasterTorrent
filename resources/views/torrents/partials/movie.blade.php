@@ -41,6 +41,7 @@
             <div class="select text-center">
 
                 <div class="actor-image-wrapper">
+                    @if(!empty($actor['id']))<a href="{{ route('actors.show', $actor['id']) }}" class="d-block w-100 h-100" aria-label="View {{ $actor['name'] }}'s profile">@endif
 
                     <img
                         src="{{ $actor['photo'] ?? '/images/not-found.jpg' }}"
@@ -48,6 +49,7 @@
                         class="actor-image"
                         alt="{{ $actor['name'] }}"
                     >
+                    @if(!empty($actor['id']))</a>@endif
 
                 </div>
 
@@ -55,11 +57,9 @@
 
                     <h6 class="actor-name">
 
-                        @if($actor['id'])
+                        @if(!empty($actor['id']))
 
-                            <a href="https://www.themoviedb.org/person/{{ $actor['id'] }}"
-                               target="_blank"
-                               rel="noreferrer">
+                            <a href="{{ route('actors.show', $actor['id']) }}">
 
                                 <b>{{ $actor['name'] }}</b>
 

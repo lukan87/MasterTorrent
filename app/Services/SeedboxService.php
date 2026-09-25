@@ -30,7 +30,7 @@ class SeedboxService
             $this->rpcClient = new Client($this->url);
             $this->rpcClient->setSSLVerifyPeer(false);
             $this->rpcClient->setSSLVerifyHost(0);
-            $this->rpcClient->setCredentials($this->username, $this->password);
+            $this->rpcClient->setCredentials($this->username, $this->password, $this->authType === 'digest' ? CURLAUTH_DIGEST : CURLAUTH_BASIC);
         }
     }
 
@@ -50,7 +50,7 @@ class SeedboxService
         }
 
         $request = new Request($method, $xmlParams);
-        $response = $this->rpcClient->send($request);
+        $response = $this->rpcClient->send($request, 30);
 
         if ($response->faultCode()) {
             Log::error('XML-RPC Error', [
@@ -61,7 +61,7 @@ class SeedboxService
             return ['error' => $response->faultString()];
         }
 
-        return $response->value();
+        return $encoder->decode($response->value());
     }
 
     /**
@@ -69,17 +69,22 @@ class SeedboxService
      */
     protected function request(array $params): array
     {
-        $http = Http::withOptions(['verify' => false]);
+        $http = Http::withOptions(['verify' => false])->connectTimeout(10)->timeout(30);
 
         $http = ($this->authType === 'basic') ? $http->withBasicAuth($this->username, $this->password) : $http->withDigestAuth($this->username, $this->password);
 
-        $response = $http->asForm()->post($this->url, $params);
+        try {
+            $response = $http->asForm()->post($this->url, $params);
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            return ['error' => 'Could not reach the seedbox. Check its address and try again.'];
+        }
 
         if ($response->failed()) {
             return ['error' => 'Request failed: ' . $response->status()];
         }
 
-        return $response->json() ?? ['error' => 'Invalid response'];
+        $data = $response->json();
+        return is_array($data) ? $data : ['error' => 'Invalid response'];
     }
 
     /**
@@ -137,7 +142,11 @@ public function listTorrents(): array
         return $this->decodeValue($result);
     }
 
-    return $this->request(['mode' => 'list']);
+    $result = $this->request(['mode' => 'list']);
+    if (!isset($result['error']) && (!isset($result['t']) || !is_array($result['t']))) {
+        return ['error' => 'The seedbox returned an invalid torrent list. Check the endpoint address.'];
+    }
+    return $result;
 }
 
 
@@ -150,7 +159,8 @@ public function listTorrents(): array
     public function startTorrent(string $hash): array
     {
         if ($this->useRpc) {
-            return $this->rpcCall('d.start', [$hash]);
+            $result = $this->rpcCall('d.start', [$hash]);
+            return is_array($result) && isset($result['error']) ? $result : ['success' => true];
         }
         return $this->request(['mode' => 'start', 'hash' => $hash]);
     }
@@ -158,7 +168,8 @@ public function listTorrents(): array
     public function pauseTorrent(string $hash): array
     {
         if ($this->useRpc) {
-            return $this->rpcCall('d.stop', [$hash]);
+            $result = $this->rpcCall('d.stop', [$hash]);
+            return is_array($result) && isset($result['error']) ? $result : ['success' => true];
         }
         return $this->request(['mode' => 'pause', 'hash' => $hash]);
     }
@@ -166,7 +177,9 @@ public function listTorrents(): array
     public function deleteTorrent(string $hash, bool $deleteData = false)
     {
         if ($this->useRpc) {
-            return $this->rpcCall('d.erase', [$hash]);
+            if ($deleteData) return ['error' => 'Deleting files is not supported over XML-RPC.'];
+            $result = $this->rpcCall('d.erase', [$hash]);
+            return is_array($result) && isset($result['error']) ? $result : ['success' => true];
         }
 
         return $this->request([
@@ -182,7 +195,7 @@ public function listTorrents(): array
         }
 
         try {
-            $http = Http::withOptions(['verify' => false]);
+            $http = Http::withOptions(['verify' => false])->connectTimeout(10)->timeout(30);
             $http = $this->authType === 'basic'
                 ? $http->withBasicAuth($this->username, $this->password)
                 : $http->withDigestAuth($this->username, $this->password);
@@ -209,21 +222,24 @@ public function listTorrents(): array
         $url = "{$this->url}?mode=download&id=$hash";
         $curl = curl_init($url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 10);
+        curl_setopt($curl, CURLOPT_TIMEOUT, 30);
         curl_setopt($curl, CURLOPT_USERPWD, "{$this->username}:{$this->password}");
         curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
         $content = curl_exec($curl);
         curl_close($curl);
 
-        return $content;
+        return is_string($content) ? $content : '';
     }
 
     public function addTorrentFile(string $filePath): array
     {
         if ($this->useRpc) {
             $torrent = file_get_contents($filePath);
-            $torrentBase64 = base64_encode($torrent);
-            return $this->rpcCall('load.raw_start', [$torrentBase64]);
+            if ($torrent === false) return ['error' => 'Unable to read torrent file'];
+            $result = $this->rpcCall('load.raw_start', ['', new Value($torrent, 'base64')]);
+            return is_array($result) && isset($result['error']) ? $result : ['success' => true];
         }
 
         return $this->uploadTorrentCurl($filePath);
@@ -250,6 +266,8 @@ public function listTorrents(): array
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $uploadUrl);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 10);
+        curl_setopt($curl, CURLOPT_TIMEOUT, 30);
         curl_setopt($curl, CURLOPT_POST, true);
         curl_setopt($curl, CURLOPT_POSTFIELDS, [
             'torrent_file' => curl_file_create($filePath),
@@ -284,7 +302,7 @@ public function testRpcSessionPath(string $hash): array
         $dirReq = new Request('d.directory', [
             new Value($hash, 'string'),
         ]);
-        $dirRes = $this->rpcClient->send($dirReq);
+        $dirRes = $this->rpcClient->send($dirReq, 30);
 
         if ($dirRes->faultCode()) {
             return ['error' => $dirRes->faultString()];
@@ -299,7 +317,7 @@ public function testRpcSessionPath(string $hash): array
         $tiedReq = new Request('d.tied_to_file', [
             new Value($hash, 'string'),
         ]);
-        $tiedRes = $this->rpcClient->send($tiedReq);
+        $tiedRes = $this->rpcClient->send($tiedReq, 30);
 
         if (!$tiedRes->faultCode()) {
             $torrentFile = trim($tiedRes->value()->scalarval());
@@ -310,7 +328,7 @@ public function testRpcSessionPath(string $hash): array
         if ($torrentFile === '') {
 
             $sessReq = new Request('session.path', []);
-            $sessRes = $this->rpcClient->send($sessReq);
+            $sessRes = $this->rpcClient->send($sessReq, 30);
 
             if ($sessRes->faultCode()) {
                 return ['error' => 'Unable to resolve torrent file location'];
@@ -329,7 +347,7 @@ public function testRpcSessionPath(string $hash): array
 
         $torrentContent = $this->executeRemoteCommand(
             $this->rpcClient,
-            'cat "' . str_replace('"', '\\"', $torrentFile) . '"'
+            'cat -- ' . escapeshellarg($torrentFile)
         );
 
         if (!$torrentContent) {
@@ -362,13 +380,13 @@ public function executeRemoteCommand(Client $client, string $command): ?string
     $args = array_map(fn($item) => $encoder->encode($item), $args);
 
     $req = new Request('execute.capture', $args);
-    $response = $client->send($req);
+    $response = $client->send($req, 30);
 
     if ($response->faultCode() !== 0) {
         return null;
     }
 
-    return base64_decode($encoder->decode($response->value()));
+    return base64_decode($encoder->decode($response->value()), true) ?: null;
 }
 
 
@@ -380,7 +398,7 @@ public function executeRemoteCommand(Client $client, string $command): ?string
     }
 
     // Execute mediainfo command on remote
-    $command = 'mediainfo "' . str_replace('"', '\\"', $filePath) . '"';
+    $command = 'mediainfo ' . escapeshellarg($filePath);
     return $this->executeRemoteCommand($this->rpcClient, $command);
 }
 
@@ -411,12 +429,14 @@ public function extractMediaInfoFromTorrent(array $torrentDecoded, string $baseP
 
 public function getDuration(string $filePath): ?float
 {
+    if (!$this->useRpc || !$this->rpcClient) return null;
+
     $cmd = sprintf(
-        'ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "%s"',
-        str_replace('"', '\\"', $filePath)
+        'ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 %s',
+        escapeshellarg($filePath)
     );
 
-    $out = trim($this->executeRemoteCommand($this->rpcClient, $cmd));
+    $out = trim($this->executeRemoteCommand($this->rpcClient, $cmd) ?? '');
 
     return is_numeric($out) ? (float)$out : null;
 }
@@ -447,12 +467,12 @@ public function generateScreenshots(string $filePath): array
     foreach ($positions as $seconds) {
         // Generate screenshot via ffmpeg and output to stdout, then base64
         $cmd = sprintf(
-            'ffmpeg -y -ss %d -i "%s" -frames:v 1 -q:v 2 -f image2pipe pipe:1 | base64',
+            'ffmpeg -y -ss %d -i %s -frames:v 1 -q:v 2 -f image2pipe pipe:1 | base64',
             $seconds,
-            str_replace('"', '\\"', $filePath)
+            escapeshellarg($filePath)
         );
 
-        $base64 = trim($this->executeRemoteCommand($this->rpcClient, $cmd));
+        $base64 = trim($this->executeRemoteCommand($this->rpcClient, $cmd) ?? '');
 
         if (!empty($base64)) {
             $shots[] = $base64; // store base64 string
@@ -473,7 +493,7 @@ public function downloadRemoteFile(string $remotePath): ?string
     }
 
     // Use `base64 -w 0` to avoid line breaks (important!)
-    $cmd = sprintf('base64 -w 0 "%s"', str_replace('"', '\\"', $remotePath));
+    $cmd = sprintf('base64 -w 0 %s', escapeshellarg($remotePath));
     $base64 = $this->executeRemoteCommand($this->rpcClient, $cmd);
 
     if (!$base64) return null;
@@ -487,20 +507,12 @@ public function findPrimaryVideoFile(string $basePath): ?string
         return null;
     }
 
-    $cmd = sprintf(
-        'find "%s" -type f \\( -iname "*.mkv" -o -iname "*.mp4" -o -iname "*.avi" -o -iname "*.mov" \\ )
-         ! -iname "*sample*"
-         ! -path "*/extras/*"
-         ! -path "*/subs/*"
-         ! -path "*/subtitles/*"
-         -exec stat -c "%%s|%%n" {} + 2>/dev/null
-         | sort -nr
-         | head -n 1
-         | cut -d"|" -f2',
-        str_replace('"', '\\"', $basePath)
-    );
+    $cmd = 'find ' . escapeshellarg($basePath)
+        . ' -type f \( -iname "*.mkv" -o -iname "*.mp4" -o -iname "*.avi" -o -iname "*.mov" \)'
+        . ' ! -iname "*sample*" ! -path "*/extras/*" ! -path "*/subs/*" ! -path "*/subtitles/*"'
+        . ' -printf "%s|%p\n" 2>/dev/null | sort -nr | head -n 1 | cut -d"|" -f2-';
 
-    $out = trim($this->executeRemoteCommand($this->rpcClient, $cmd));
+    $out = trim($this->executeRemoteCommand($this->rpcClient, $cmd) ?? '');
 
     return $out !== '' ? $out : null;
 }
@@ -522,10 +534,10 @@ public function guessPrimaryVideoFile(string $basePath): ?string
 
         $ok = $this->executeRemoteCommand(
             $this->rpcClient,
-            'test -f "' . str_replace('"', '\\"', $candidate) . '" && echo OK'
+            'test -f ' . escapeshellarg($candidate) . ' && echo OK'
         );
 
-        if (trim($ok) === 'OK') {
+        if (trim($ok ?? '') === 'OK') {
             return $candidate;
         }
     }
@@ -537,10 +549,10 @@ public function guessPrimaryVideoFile(string $basePath): ?string
 
         $ok = $this->executeRemoteCommand(
             $this->rpcClient,
-            'test -f "' . str_replace('"', '\\"', $candidate) . '" && echo OK'
+            'test -f ' . escapeshellarg($candidate) . ' && echo OK'
         );
 
-        if (trim($ok) === 'OK') {
+        if (trim($ok ?? '') === 'OK') {
             return $candidate;
         }
     }
@@ -554,9 +566,9 @@ public function findTvEpisodeFile(string $basePath): ?array
         return null;
     }
 
-    $escaped = str_replace('"', '\\"', $basePath);
+    $escaped = escapeshellarg($basePath);
 
-    $cmd = 'find "' . $escaped . '" -type f -iname "*.mkv" ! -iname "*sample*"';
+    $cmd = 'find ' . $escaped . ' -type f -iname "*.mkv" ! -iname "*sample*"';
     $output = $this->executeRemoteCommand($this->rpcClient, $cmd);
 
     if (!$output) return null;
@@ -595,7 +607,7 @@ public function findTvEpisodeFile(string $basePath): ?array
     $largestSize = 0;
 
     foreach ($episodes as $epFile) {
-        $sizeCmd = 'stat -c %s "' . str_replace('"', '\\"', $epFile) . '"';
+        $sizeCmd = 'stat -c %s -- ' . escapeshellarg($epFile);
         $size = $this->executeRemoteCommand($this->rpcClient, $sizeCmd);
 
         if (is_numeric($size) && (int)$size > $largestSize) {
@@ -625,19 +637,7 @@ public function findPrimaryVideoRecursive(string $basePath): ?string
         return null;
     }
 
-    // SIMPLE + RELIABLE
-    $cmd = sprintf(
-        'find "%s" -type f \\( -iname "*.mkv" -o -iname "*.mp4" -o -iname "*.avi" -o -iname "*.mov" \\ )
-         ! -iname "*sample*"
-         ! -path "*/subs/*"
-         ! -path "*/subtitles/*"
-         | head -n 1',
-        str_replace('"', '\\"', $basePath)
-    );
-
-    $out = trim($this->executeRemoteCommand($this->rpcClient, $cmd));
-
-    return $out !== '' ? $out : null;
+    return $this->findPrimaryVideoFile($basePath);
 }
 
 

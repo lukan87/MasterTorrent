@@ -19,6 +19,8 @@ class Seedbox extends Model
         'password',
     ];
 
+    protected $hidden = ['password'];
+
     // Relationship: a seedbox belongs to a user
     public function user()
     {

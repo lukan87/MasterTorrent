@@ -273,7 +273,7 @@ Route::get('/seedboxes/{seedbox}/test-rpc/{hash}', [SeedboxController::class, 't
 
 Route::get('/seedboxes/{seedbox}/torrent/{hash}/download', [SeedboxController::class, 'downloadTorrent'])->name('seedboxes.downloadTorrent');
 
-Route::get('seedboxes/{seedbox}/torrent/{hash}/download-rebuilt', [SeedboxController::class, 'downloadRebuiltTorrent'])
+Route::post('seedboxes/{seedbox}/torrent/{hash}/download-rebuilt', [SeedboxController::class, 'downloadRebuiltTorrent'])
     ->name('seedboxes.downloadRebuiltTorrent');
 
 // Happy hour administration routes
@@ -403,6 +403,10 @@ Route::post('/bonus/buy-reset-warning', [BonusController::class, 'buyResetWarnin
 Route::get('/team', [TeamController::class, 'index'])->name('team.index')->middleware('auth');
 
 Auth::routes();
+
+// Legacy invitation links use the same validation and registration flow.
+Route::post('/invite/use', [App\Http\Controllers\Auth\RegisterController::class, 'register'])
+    ->middleware('guest')->name('invite.use');
 // Home and password recovery routes
 Route::get('/', [HomeController::class, 'index'])->name('home')->middleware('last_activity')->middleware('auth');
 Route::get('/recover-password', [AuthResetPasswordController::class, 'showRecoveryForm'])->name('password.recover');
@@ -842,7 +846,6 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware('auth')->group(function () {
 
     Route::post('/invites/create', [InviteController::class, 'createInvite'])->name('invites.create'); // To create an invite
-    Route::post('/invite/use', [InviteController::class, 'useInvite'])->name('invite.use'); // To use an invite code
     Route::get('/invites', [InviteController::class, 'showInvites'])->name('invites.index'); // To show all invites
     Route::delete('/invites/{invite}', [InviteController::class, 'deleteInvite'])->name('invites.delete');
 
@@ -1061,6 +1064,10 @@ Route::middleware('auth')->group(function () {
     Route::delete('/announcements/{id}/force-delete', [AnnouncementController::class, 'forceDelete'])
         ->name('announcements.forceDelete');
 });
+
+// Actor profiles
+Route::get('/actors/{actor}', [\App\Http\Controllers\ActorsController::class, 'show'])
+    ->where('actor', '[1-9][0-9]{0,9}')->middleware('auth')->name('actors.show');
 
 // Library routes
 Route::prefix('library')->group(function () {

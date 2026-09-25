@@ -81,7 +81,8 @@ class ProfileController extends Controller
 public function show($id, $name = null)
 {
    $user = User::withTrashed()
-    ->with('timeline.staff')
+    ->with(['timeline.staff', 'inviter'])
+    ->withCount('invitees')
     ->findOrFail($id);
 
     if ($name === null || $name !== $user->name) {
@@ -90,6 +91,8 @@ public function show($id, $name = null)
             'name' => $user->name
         ]);
     }
+
+    $inviteTreeMembers = $user->invitees()->orderBy('id')->paginate(20, ['id', 'name', 'invited_by', 'deleted_at'], 'invitees_page');
 
     /*
 |--------------------------------------------------------------------------
@@ -327,6 +330,7 @@ $timeline = $user->timeline()->latest()->get();
 
 
     return view('profile.show', compact(
+        'inviteTreeMembers',
         'user',
         'activeSeeds',
         'totalSeedSize',

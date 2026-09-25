@@ -355,12 +355,14 @@ body {
                            id="detected_timezone">
                 </div>
 
-                @if(config('app.invite_only'))
-                    <div class="mb-3">
-                        <label class="form-label">Invite Code</label>
-                        <input type="text" name="invite_code" class="form-control" required>
-                    </div>
-                @endif
+                <div class="mb-3">
+                    <label for="invite_code" class="form-label">Invite Code {{ config('app.invite_only') ? '' : '(optional)' }}</label>
+                    <input id="invite_code" type="text" name="invite_code" maxlength="255"
+                           value="{{ old('invite_code', request('invite_code')) }}"
+                           class="form-control @error('invite_code') is-invalid @enderror"
+                           @required(config('app.invite_only'))>
+                    @error('invite_code') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
 
                 <div class="mb-4">
                     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">

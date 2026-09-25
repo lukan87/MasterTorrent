@@ -7,10 +7,13 @@
     $userClass = Auth::user()->user_class ?? 0;
 
     $usedInvites = $invites->where('is_used', true)->count();
-    $activeInvites = $invites->where('is_used', false)->where('is_expired', false)->count();
+    $activeInvites = $invites->filter(fn ($invite) => !$invite->is_used && !$invite->expired)->count();
 @endphp
 
 <div class="container mt-4">
+    @if(session('success')) <div class="alert alert-success">{{ session('success') }}</div> @endif
+    @if($errors->any()) <div class="alert alert-danger">{{ $errors->first() }}</div> @endif
+    <p class="text-muted">Codes expire after 14 days. Revoking an active, unused code returns one invite to your balance. You will receive a private message when someone joins using your code.</p>
 
     {{-- Header --}}
     <div class="d-flex align-items-center justify-content-between mb-4">
@@ -80,7 +83,7 @@
 
                     <form action="{{ route('invites.create') }}" method="POST">
                         @csrf
-                        <button type="submit" class="btn btn-success">
+                        <button type="submit" class="btn btn-success" @disabled($inviteCount <= 0)>
                             <i class="bi bi-plus-circle me-1"></i>
                             Create New Invite
                         </button>
@@ -92,7 +95,7 @@
 
                         <form action="{{ route('invites.create') }}" method="POST">
                             @csrf
-                            <button type="submit" class="btn btn-success">
+                            <button type="submit" class="btn btn-success" @disabled($inviteCount <= 0)>
                                 <i class="bi bi-plus-circle me-1"></i>
                                 Create New Invite
                             </button>
@@ -145,7 +148,7 @@
 
 <div class="invite-code d-flex align-items-center gap-2">
 
-@if($invite->is_used)
+@if($invite->is_used || $invite->expired)
 
     <code class="px-2 py-1 rounded text-decoration-line-through text-muted">
         {{ $invite->invite_code }}
@@ -172,6 +175,12 @@
 
 <div class="small text-muted">
 Created {{ $invite->created_at->diffForHumans() }}
+@if(!$invite->is_used)
+    <br>{{ $invite->expired ? 'Expired' : 'Expires' }} {{ $invite->expires_at->utc()->format('M j, Y H:i') }} UTC
+@endif
+@if(!$invite->is_used && !$invite->expired)
+    <br><a href="{{ route('register', ['invite_code' => $invite->invite_code]) }}">Registration link</a>
+@endif
 </div>
 
 </div>
@@ -187,7 +196,7 @@ Created {{ $invite->created_at->diffForHumans() }}
 Used
 </span>
 
-@else
+@elseif(!$invite->expired)
 
 <span class="badge bg-warning text-dark">
 Pending
@@ -195,7 +204,7 @@ Pending
 
 @endif
 
-@if($invite->is_expired)
+@if(!$invite->is_used && $invite->expired)
 
 <span class="badge bg-danger ms-1">
 Expired
@@ -279,18 +288,18 @@ Joined {{ $invite->usedBy->created_at->diffForHumans() }}
 {{-- Action --}}
 <div class="col-md-1 text-end">
 
-@if(!$invite->is_used && !$invite->is_expired)
+@if(!$invite->is_used && !$invite->expired)
 
 <form action="{{ route('invites.delete', $invite->id) }}"
 method="POST"
-onsubmit="return confirm('Delete this invite?');">
+onsubmit="return confirm('Revoke this invite and return one invite to your balance?');">
 
 @csrf
 @method('DELETE')
 
 <button class="btn btn-sm btn-outline-danger"
 data-bs-toggle="tooltip"
-title="Delete invite">
+title="Revoke invite">
 
 <i class="bi bi-trash"></i>
 

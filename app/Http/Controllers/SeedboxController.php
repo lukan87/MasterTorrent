@@ -16,6 +16,24 @@ use Storage;
 
 class SeedboxController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware(function ($request, $next) {
+            $seedbox = $request->route('seedbox');
+            if ($seedbox !== null) {
+                $seedbox = $seedbox instanceof Seedbox ? $seedbox : Seedbox::findOrFail($seedbox);
+                abort_unless(
+                    (int) $seedbox->user_id === (int) $request->user()->id ||
+                    (int) $request->user()->user_class === \App\Models\UserClass::WEB_DEVELOPER,
+                    403
+                );
+            }
+
+            return $next($request);
+        });
+    }
+
     private function seedboxService(Seedbox $seedbox): SeedboxService
     {
         return new SeedboxService(
@@ -28,7 +46,10 @@ class SeedboxController extends Controller
 
     public function index()
     {
-        $seedboxes = Seedbox::with('user')->get();
+        $seedboxes = Seedbox::with('user')
+            ->when((int) Auth::user()->user_class !== \App\Models\UserClass::WEB_DEVELOPER,
+                fn ($query) => $query->where('user_id', Auth::id()))
+            ->orderBy('name')->get();
         return view('seedboxes.index', compact('seedboxes'));
     }
 
@@ -41,7 +62,7 @@ class SeedboxController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'address' => 'required|url',
+            'address' => 'required|url:http,https|max:2048',
             'username' => 'required|string|max:255',
             'password' => 'required|string|max:255',
             'auth_type' => 'required|in:basic,digest',
@@ -66,15 +87,18 @@ class SeedboxController extends Controller
 
     public function update(Request $request, Seedbox $seedbox)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'address' => 'required|url',
+            'address' => 'required|url:http,https|max:2048',
             'username' => 'required|string|max:255',
-            'password' => 'required|string|max:255',
+            'password' => 'nullable|string|max:255',
             'auth_type' => 'required|in:basic,digest',
         ]);
 
-        $seedbox->update($request->only(['name', 'address', 'username', 'password', 'auth_type']));
+        if (!$request->filled('password')) {
+            unset($validated['password']);
+        }
+        $seedbox->update($validated);
 
         return redirect()->route('seedboxes.index')->with('success', 'Seedbox updated successfully!');
     }
@@ -117,7 +141,11 @@ class SeedboxController extends Controller
    public function showTorrents(Seedbox $seedbox, Request $request)
 {
     $service = $this->seedboxService($seedbox);
-    $allTorrents = $service->getTorrents()['t'] ?? [];
+    $request->validate(['search' => 'nullable|string|max:255']);
+    $result = $service->getTorrents();
+    $connectionError = $result['error'] ?? null;
+    $isConnected = $connectionError === null;
+    $allTorrents = $result['t'] ?? [];
 
     // Sorting
     uasort($allTorrents, fn($a, $b) => ($b[21] ?? 0) <=> ($a[21] ?? 0));
@@ -153,7 +181,7 @@ class SeedboxController extends Controller
         'paused' => count(array_filter($allTorrents, fn($t) => ($t[28] ?? 0) == 0)),
     ];
 
-    return view('seedboxes.torrents', compact('seedbox', 'torrents', 'service', 'stats'));
+    return view('seedboxes.torrents', compact('seedbox', 'torrents', 'stats', 'isConnected', 'connectionError'));
 }
 
 
@@ -193,7 +221,7 @@ class SeedboxController extends Controller
     public function delete(Seedbox $seedbox, string $hash, Request $request)
     {
         $service = $this->seedboxService($seedbox);
-        $deleteData = $request->input('delete_data', false);
+        $deleteData = $request->boolean('delete_data');
         $result = $service->deleteTorrent($hash, $deleteData);
 
         $success = !isset($result['error']);
@@ -246,6 +274,7 @@ public function downloadRebuiltTorrent($seedboxId, $hash)
 {
     $seedbox = Seedbox::findOrFail($seedboxId);
     $user = Auth::user();
+    abort_unless($user->user_class >= \App\Models\UserClass::UPLOADER || $user->uploadpos === 'yes', 403);
 
     if (!$user || !$user->passkey) {
         return back()->with('error', 'You do not have a passkey.');
@@ -255,7 +284,7 @@ public function downloadRebuiltTorrent($seedboxId, $hash)
         $seedbox->address,
         $seedbox->username,
         $seedbox->password,
-        'basic',
+        $seedbox->auth_type,
         true
     );
 

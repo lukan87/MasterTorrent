@@ -473,6 +473,8 @@ $minutes = $seedtime->minutes;
 
 
 
+@include('profile.partials.invite-tree')
+
 <div class="row g-3 align-items-stretch elite-stats-grid">
 
 <div class="accordion mt-4" id="seederRankAccordion">

@@ -76,12 +76,12 @@
                         Password
                     </label>
                     <input
-                        type="text"
+                        type="password"
                         name="password"
                         id="password"
                         class="form-control seedbox-input"
-                        value="{{ old('password', $seedbox->password) }}"
-                        required
+                        autocomplete="new-password"
+                        placeholder="Leave blank to keep the current password"
                     >
                 </div>
 
