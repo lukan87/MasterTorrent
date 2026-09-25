@@ -297,13 +297,13 @@ If you are interested in installing this tracker on your own server, please cont
 
 # 📸 Screenshots
 
-## 🏠 Tracker
-
-![Tracker Screenshot](https://github.com/user-attachments/assets/56d2f5c1-0d2e-4ea1-aedd-9ae97b954bdc)
-
-## 🎬 Media / Torrent Interface
-
-![Media Screenshot](https://github.com/user-attachments/assets/cf0642d4-b110-49df-92bd-6942af5f31ba)
+<img width="1642" height="860" alt="Trending and online" src="https://github.com/user-attachments/assets/46b818b9-b44a-43bf-ba1e-dd9cfd3652f3" />
+<img width="1664" height="851" alt="Torrent details" src="https://github.com/user-attachments/assets/32f372ec-73af-439a-acc1-95112c017403" />
+<img width="1970" height="886" alt="RSS" src="https://github.com/user-attachments/assets/163cd4a3-1a8e-4f39-9137-33ef0a8c02a1" />
+<img width="1640" height="855" alt="profile" src="https://github.com/user-attachments/assets/2d417ab3-d4ea-4b62-ab61-c9155ebb3473" />
+<img width="1650" height="724" alt="News and Poll section" src="https://github.com/user-attachments/assets/f1a2f14c-85e9-43b4-95c2-77dd100b81b8" />
+<img width="1497" height="734" alt="forum" src="https://github.com/user-attachments/assets/0f01eaa9-cc2e-4a6d-b1d5-946cfb32fe79" />
+<img width="1657" height="734" alt="Chat and online users" src="https://github.com/user-attachments/assets/fd089bc5-6d5a-4908-b920-30a231843c16" />
 
 More screenshots will be added as the project continues to evolve.
 
