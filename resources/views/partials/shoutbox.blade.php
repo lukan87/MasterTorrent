@@ -1,4 +1,6 @@
-<div class="shoutbox-shell my-4">
+<div class="shoutbox-shell my-4" id="community-chat" data-user="{{ auth()->id() }}"
+     data-poll-url="{{ url('/shoutbox/poll') }}" data-typing-url="{{ url('/shoutbox/typing') }}"
+     data-stop-url="{{ url('/shoutbox/typing-stop') }}" data-typing-users-url="{{ url('/shoutbox/typing-users') }}">
 
     <div class="shoutbox-card glass shadow-lg">
 
@@ -24,667 +26,38 @@
 
     </div>
 
+    @if(!auth()->user()->chatblock)
+    <div class="shoutbox-tools mb-3">
+        <label class="flex-grow-1"> <span class="visually-hidden">Search loaded messages and members</span>
+            <input id="chat-search" type="search" class="form-control form-control-sm" placeholder="Search loaded messages or members…" maxlength="100">
+        </label>
+        <select id="chat-filter" class="form-select form-select-sm" aria-label="Filter loaded chat">
+            <option value="all">All messages</option>
+            <option value="mine">My conversations</option>
+            <option value="pinned">Pinned messages</option>
+        </select>
+        <button id="chat-expand" type="button" class="btn btn-sm btn-outline-secondary" aria-pressed="false">Expand</button>
+        <span id="chat-connection" class="small text-muted" role="status">Connecting…</span>
+    </div>
+    <p id="chat-no-results" class="small text-muted" hidden>No loaded messages match this filter.</p>
+    @endif
+    <div id="chat-feedback" class="small mb-2" role="status" aria-live="polite"></div>
     {{-- Messages --}}
 
+    <div id="shoutbox-pinned">
+        @include('partials.shoutbox-pinned')
+    </div>
     <div class="shoutbox-container-wrap">
 
     <div class="shoutbox-container glass p-3 mb-3" id="shoutbox-container">
 
        <div id="shoutbox-messages">
 
-@if(auth()->check() && auth()->user()->chatblock)
-
-@php
-
-    $systemUser = \App\Models\User::find(2);
-
-    $classColor = \App\Models\UserClass::getClassColor($systemUser->user_class ?? 0);
-
-@endphp
-
-<div class="message system" data-id="system">
-
-    <img class="avatar"
-
-         src="{{ $systemUser->profile_image ?? asset('images/default_avatar/default-avatar.jpg') }}">
-
-    <div class="bubble" style="--accent: {{ $classColor }}">
-
-        <div class="header d-flex align-items-center justify-content-between">
-
-            <div class="d-flex align-items-center gap-2">
-
-                <span class="username"
-
-                      style="color: {{ $classColor }}">
-
-                    {{ $systemUser->name ?? 'System' }}
-
-                </span>
-
-            </div>
-
-            <span class="badge time-badge">
-
-                <i class="bi bi-shield-lock me-1"></i>
-
-                System
-
-            </span>
+@include('partials.shoutbox-messages', ['messages' => $messages->where('sticky', false)])
 
         </div>
 
-        <div class="content fs-5">
-
-            ⚠️ Unable to post or see chat messages.  
-
-            Your chat access has been restricted by staff.
-
-        </div>
-
-    </div>
-
-</div>
-
-@else
-
-{{-- NORMAL CHAT MESSAGES --}}
-
-@php $prevUserId = null; @endphp
-
-@forelse($messages as $message)
-
-            @php
-
-                $classColor = \App\Models\UserClass::getClassColor($message->user->user_class);
-                $grouped = ($prevUserId === $message->user_id && $message->user_id != 2);
-
-            @endphp
-
-
-
-              <div class="message {{ auth()->id() === $message->user_id ? 'own' : '' }}{{ $grouped ? ' grouped' : '' }}" data-id="{{ $message->id }}">
-
-                <img class="avatar"
-
-                     src="{{ $message->user->profile_image ?? asset('images/default_avatar/default-avatar.jpg') }}">
-
-                <div class="bubble" style="--accent: {{ $classColor }}">
-
-                   <div class="header d-flex align-items-center justify-content-between">
-
-                {{-- LEFT SIDE: Username + Actions --}}
-
-               <div class="d-flex align-items-center gap-2">
-
-           {{-- Username --}}
-
-           <a href="{{ route('profile.show', $message->user->id) }}"
-
-           class="username d-inline-flex align-items-center gap-2"
-
-           style="color: {{ $classColor }}"
-
-           data-bs-toggle="tooltip"
-
-           title="{{ $message->user->role_name }}">
-
-            <span>{{ $message->user->name }}</span>
-
-            <span class="role-badge role-{{ Str::slug($message->user->role_name) }}">
-
-                @switch($message->user->role_name)
-
-                    @case('Web Developer') <i class="bi bi-code-slash fs-5"></i> @break
-
-                    @case('Owner') <i class="bi bi-emoji-sunglasses-fill"></i> @break
-
-                    @case('Admin') <i class="bi bi-shield-fill-check"></i> @break
-
-                    @case('Moderator') <i class="bi bi-shield-lock-fill"></i> @break
-
-                    @case('VIP') <i class="bi bi-gem"></i> @break
-
-                    @case('Elite User') <i class="bi bi-stars"></i> @break
-
-                    @case('Special User') <i class="bi bi-lightning-fill"></i> @break
-
-                    @case('Uploader') <i class="bi bi-cloud-arrow-up-fill"></i> @break
-
-                    @default <i class="bi bi-person-fill"></i>
-
-                @endswitch
-
-            </span>
-
-         </a>
-
-          {{-- Actions (NOW INLINE) --}}
-
-          <div class="actions-inline d-flex align-items-center gap-1">
-
-            {{-- Reply --}}
-
-            @php
-
-$isSystem = $message->user_id == 2;
-
-@endphp
-
-@if(!$isSystem)
-
-<button class="btn-icon"
-
-        onclick="toggleReplyForm({{ $message->id }})"
-
-        data-bs-toggle="tooltip"
-
-        title="Reply">
-
-    <i class="bi bi-reply fs-5"></i>
-
-</button>
-
-@endif
-
-            @if(auth()->id() === $message->user_id || Auth::user()->user_class >= \App\Models\UserClass::ADMIN)
-
-                {{-- Edit --}}
-
-                <button type="button"
-
-                        class="btn-icon warn"
-
-                        data-bs-toggle="tooltip"
-
-                        title="Edit"
-
-                        onclick="openEdit({{ $message->id }})">
-
-                    <i class="bi bi-pencil fs-5"></i>
-
-                </button>
-
-                 {{-- Sticky (ADMIN+) --}}
-                 @if(Auth::user()->user_class >= \App\Models\UserClass::ADMIN)
-                 <form action="{{ route('shoutbox.sticky', $message->id) }}"
-                       method="POST"
-                       class="d-inline">
-                     @csrf
-                     <button class="btn-icon {{ $message->sticky ? 'text-warning' : 'text-muted' }}"
-                             data-bs-toggle="tooltip"
-                             title="{{ $message->sticky ? 'Unstick' : 'Sticky' }}">
-                         <i class="bi bi-pin-fill fs-5"></i>
-                     </button>
-                 </form>
-                 @endif
-
-                 {{-- Delete --}}
-
-                 <form action="{{ route('shoutbox.destroy', $message->id) }}"
-
-                      method="POST"
-
-                      class="shoutbox-delete-form d-inline"
-
-                      data-id="{{ $message->id }}">
-
-                    @csrf
-
-                    @method('DELETE')
-
-                    <button class="btn-icon danger fs-5"
-
-                            data-bs-toggle="tooltip"
-
-                            title="Delete"
-
-                            onclick="return confirm('Delete this shout?')">
-
-                        <i class="bi bi-trash"></i>
-
-                    </button>
-
-                </form>
-
-            @endif
-
-              </div>
-
-            </div>
-
-                 {{-- RIGHT SIDE: Time --}}
-
-               <span class="badge time-badge">
-
-               <i class="bi bi-clock me-1 fs-6"></i>
-
-              <time class="ts" datetime="{{ $message->created_at->toIso8601String() }}" title="{{ $message->created_at->format('Y-m-d H:i') }}">
-
-                     {{ \App\Helpers\FormatHelper::shortRelativeTime($message->created_at) }}
-
-                    </time>
-
-                </span>
-
-                    </div>
-
-                    <div class="content fs-6">
-
-                        {!! convertCustomTagsToHtml($message->message) !!}
-
-                    </div>
-
-                                  {{-- EDIT FORM (MESSAGE) --}}
-
-                        <div class="edit-form mt-2" id="edit-form-{{ $message->id }}" style="display:none;">
-
-                      <form class="shoutbox-edit-form"
-
-                        data-id="{{ $message->id }}"
-
-                            action="{{ route('shoutbox.update', $message->id) }}"
-
-                     method="POST">
-
-                       @csrf
-
-                     @method('PUT')
-
-                     <textarea name="content"
-
-                  class="edit-textarea"
-
-                  rows="3"
-
-                  required>{{ $message->message }}</textarea>
-
-                <div class="d-flex gap-2 mt-2">
-
-                     <button class="btn btn-sm btn-success">Save</button>
-
-                       <button type="button"
-
-                    class="btn btn-sm btn-secondary"
-
-                    onclick="closeEdit({{ $message->id }})">
-
-                Cancel
-
-                  </button>
-
-                </div>
-
-                 </form>
-
-               </div>
-
-
-
-{{-- Reply form --}}
-
-<form id="reply-form-{{ $message->id }}"
-
-      action="{{ route('shoutbox.reply', $message->id) }}"
-
-      method="POST"
-
-      class="reply-form shoutbox-reply-form"
-
-      data-parent="{{ $message->id }}"
-
-      style="display: none;">
-
-    @csrf
-
-    <textarea name="content"
-
-              class="reply-textarea"
-
-              placeholder="Reply..."
-
-              required></textarea>
-
-    <div class="reply-actions">
-
-        <button type="submit" class="btn btn-sm btn-success">
-
-            <i class="bi bi-send me-1"></i> Send
-
-        </button>
-
-        <button type="button"
-
-                class="btn btn-sm btn-outline-light"
-
-                onclick="toggleReplyForm({{ $message->id }})">
-
-            Cancel
-
-        </button>
-
-    </div>
-
-</form>
-
-
-
-
-
-                    {{-- Replies --}}
-
-                    @if($message->replies->count())
-
-                        <div class="replies mt-3">
-
-                            @foreach($message->replies->sortByDesc('created_at') as $reply)
-
-                                @php
-
-                                    $replyColor = \App\Models\UserClass::getClassColor($reply->user->user_class);
-
-                                @endphp
-
-                                <div class="reply-card">
-
-                                    <img class="avatar-sm"
-
-                                         src="{{ $reply->user->profile_image ?? asset('images/default_avatar/default-avatar.jpg') }}">
-
-                                    <div class="reply-bubble glass" style="--accent: {{ $replyColor }}">
-
-                                       <div class="reply-header d-flex align-items-center justify-content-between">
-
-    {{-- Left: username + role --}}
-
-<strong class="reply-username d-inline-flex align-items-center gap-2">
-
-    <a href="{{ route('profile.show', $reply->user->id) }}"
-
-       class="d-inline-flex align-items-center gap-2 text-decoration-none"
-
-       style="color: {{ $replyColor }}"
-
-       data-bs-toggle="tooltip"
-
-       title="{{ $reply->user->role_name }}">
-
-        {{-- Username --}}
-
-        <span>{{ $reply->user->name }}</span>
-
-        {{-- Role badge --}}
-
-        <span class="role-badge role-{{ Str::slug($reply->user->role_name) }}">
-
-            @switch($reply->user->role_name)
-
-                @case('Owner')
-
-                    <i class="bi bi-emoji-sunglasses-fill"></i>
-
-                    @break
-
-                @case('Admin')
-
-                    <i class="bi bi-shield-fill-check"></i>
-
-                    @break
-
-                @case('Web Developer')
-
-                    <i class="bi bi-code-slash"></i>
-
-                    @break
-
-                @case('Moderator')
-
-                    <i class="bi bi-shield-lock-fill"></i>
-
-                    @break
-
-                @case('VIP')
-
-                    <i class="bi bi-gem"></i>
-
-                    @break
-
-                @case('Elite User')
-
-                    <i class="bi bi-stars"></i>
-
-                    @break
-
-                @case('Special User')
-
-                    <i class="bi bi-lightning-fill"></i>
-
-                    @break
-
-                @case('Uploader')
-
-                    <i class="bi bi-cloud-arrow-up-fill"></i>
-
-                    @break
-
-                @default
-
-                    <i class="bi bi-person-fill"></i>
-
-            @endswitch
-
-        </span>
-
-    </a>
-
-</strong>
-
-
-
-    {{-- Right: meta + actions --}}
-
-    <div class="reply-meta d-flex align-items-center gap-2">
-
-<span class="badge time-badge time-badge-sm">
-
-    <time class="ts" datetime="{{ $reply->created_at->toIso8601String() }}" title="{{ $reply->created_at->format('Y-m-d H:i') }}">
-
-        {{ \App\Helpers\FormatHelper::shortRelativeTime($reply->created_at) }}
-
-    </time>
-
-    @if(
-
-        auth()->user()->user_class >= \App\Models\UserClass::MODERATOR &&
-
-        $reply->updated_at &&
-
-        $reply->updated_at->gt($reply->created_at)
-
-    )
-
-        <span class="edited-badge ms-1"
-
-              data-bs-toggle="tooltip"
-
-              title="Edited at {{ $reply->updated_at->format('Y-m-d H:i') }}">
-
-            (edited)
-
-        </span>
-
-    @elseif(auth()->user()->user_class >= \App\Models\UserClass::MODERATOR)
-
-        <span class="edited-badge ms-1 d-none"
-
-              data-bs-toggle="tooltip">
-
-            (edited)
-
-        </span>
-
-    @endif
-
-</span>
-
-
-
-
-
-
-
-        {{-- Edit --}}
-
-        @if(
-
-            auth()->id() === $reply->user_id ||
-
-            Auth::user()->user_class >= \App\Models\UserClass::MODERATOR
-
-        )
-
-            <button type="button"
-
-        class="btn-icon warn"
-
-        data-bs-toggle="tooltip"
-
-        title="Edit reply"
-
-        onclick="openReplyEdit({{ $reply->id }})">
-
-    <i class="bi bi-pencil"></i>
-
-</button>
-
-        @endif
-
-        {{-- Delete --}}
-
-        @if(Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
-
-           <form action="{{ route('shoutbox.destroy', $reply->id) }}"
-
-      method="POST"
-
-      class="reply-delete-form d-inline"
-
-      data-bs-toggle="tooltip" title="Delete message"
-
-      data-id="{{ $reply->id }}">
-
-    @csrf
-
-    @method('DELETE')
-
-    <button type="button"
-
-            class="btn-icon danger"
-
-            title="Delete reply"
-
-            onclick="handleReplyDelete(event, this.form)">
-
-        <i class="bi bi-trash"></i>
-
-    </button>
-
-</form>
-
-        @endif
-
-    </div>
-
-</div>
-
-
-
-                                        <div class="reply-content-wrapper" data-id="{{ $reply->id }}">
-
-    {{-- DISPLAY --}}
-
-    <div class="reply-content">
-
-        {!! convertCustomTagsToHtml($reply->message) !!}
-
-    </div>
-
-    {{-- EDIT FORM (SAME CLASS AS MESSAGE EDIT) --}}
-
-    <div class="edit-form mt-2" id="reply-edit-form-{{ $reply->id }}" style="display:none;">
-
-        <form class="shoutbox-edit-form"
-
-              data-id="{{ $reply->id }}"
-
-              action="{{ route('shoutbox.update', $reply->id) }}"
-
-              method="POST">
-
-            @csrf
-
-            @method('PUT')
-
-            <textarea name="content"
-
-                      class="edit-textarea"
-
-                      rows="3"
-
-                      required>{{ $reply->message }}</textarea>
-
-            <div class="d-flex gap-2 mt-2">
-
-                <button class="btn btn-sm btn-success">Save</button>
-
-                <button type="button"
-
-                        class="btn btn-sm btn-secondary"
-
-                        onclick="closeReplyEdit({{ $reply->id }})">
-
-                    Cancel
-
-                </button>
-
-            </div>
-
-        </form>
-
-    </div>
-
-</div>
-
-                                    </div>
-
-                                </div>
-
-                            @endforeach
-
-                        </div>
-
-                    @endif
-
-                </div>
-
-            </div>
-
-        @php $prevUserId = $message->user_id; @endphp
-
-        @empty
-
-            <div class="shoutbox-empty">
-                <i class="bi bi-chat-dots" style="font-size:2.5rem;opacity:.35;"></i>
-                <p style="margin:0;opacity:.55;font-size:14px;">No messages yet. Be the first to say hello! &#x1F44B;</p>
-            </div>
-
-        @endforelse
-
-        @endif
-
-        </div>
-
-            <button id="shoutbox-jump-bottom" class="shoutbox-jump-bottom" data-bs-toggle="tooltip"  title="Scroll to last message" style="display:none;">
+            <button id="shoutbox-jump-bottom" class="shoutbox-jump-bottom" data-bs-toggle="tooltip"  title="Show latest messages" aria-label="Show latest messages" style="display:none;">
             <i class="bi bi-chevron-double-down"></i>
             <span id="shoutbox-jump-count" class="jump-count"></span>
         </button>
@@ -709,7 +82,7 @@ $isSystem = $message->user_id == 2;
 
           class="chat-input glass"
 
-           @if(Route::is('home')) onsubmit="return false;" @endif>
+>
 
         @csrf
 
@@ -813,20 +186,25 @@ $isSystem = $message->user_id == 2;
 
     </div>
 
+    <div class="chat-compose-field">
     <textarea id="content"
 
-              name="content"
+              name="content" placeholder="Write a message…"
 
               rows="1"
 
-              maxlength="1000"
+              aria-label="Your chat message" aria-describedby="chat-compose-hint" maxlength="1000"
 
               required></textarea>
+        <button type="submit" id="chat-send" class="btn btn-success" aria-label="Send message" title="Send message" hidden disabled>
+            <i class="bi bi-send-fill" aria-hidden="true"></i>
+        </button>
+    </div>
 
-    <span class="chat-hint">Say something nice… 👋</span>
+    <span class="chat-hint visually-hidden" aria-hidden="true">Say something nice… 👋</span>
 
     @if(auth()->user()->user_class >= \App\Models\UserClass::ADMIN)
-    <div class="form-check mt-2">
+    <div class="form-check mt-2 chat-sticky-control">
         <input class="form-check-input" type="checkbox" name="sticky" id="sticky-checkbox">
         <label class="form-check-label text-light" for="sticky-checkbox">
             <i class="bi bi-pin-fill"></i> Sticky
@@ -834,11 +212,6 @@ $isSystem = $message->user_id == 2;
     </div>
     @endif
 
-    <div id="char-counter" class="char-counter">
-
-        <span id="char-count">0</span> / <span id="char-max">1000</span>
-
-    </div>
 
 </div>
 
@@ -846,6 +219,15 @@ $isSystem = $message->user_id == 2;
 
 
 
+        <div class="chat-compose-actions">
+            <small id="chat-compose-hint" class="text-muted">Enter to send · Shift+Enter for a new line</small>
+            <span id="chat-draft-status" class="small text-muted" role="status"></span>
+<div id="char-counter" class="char-counter">
+
+        <span id="char-count">0</span> / <span id="char-max">1000</span>
+
+    </div>
+        </div>
     </form>
 
     @endif
@@ -888,7 +270,7 @@ $isSystem = $message->user_id == 2;
     let index;
     do { index = Math.floor(Math.random() * messages.length); } while (index === lastIndex);
     lastIndex = index;
-    hint.textContent = messages[index];
+    textarea.placeholder = messages[index];
 
     textarea.addEventListener('focus', () => hint.classList.add('active'));
     textarea.addEventListener('blur', () => { if (!textarea.value.trim()) hint.classList.remove('active'); });
@@ -943,6 +325,7 @@ function wrapText(before, after) {
     }
     textarea.focus();
     textarea.scrollTop = textarea.scrollHeight;
+    textarea.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
 /* --- Emoji Insert --- */
@@ -955,57 +338,9 @@ function addEmoji(emoji) {
     textarea.selectionStart = cursor;
     textarea.selectionEnd = cursor;
     textarea.focus();
+    textarea.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
-/* --- Jump-to-Bottom Button --- */
-(() => {
-    const container = document.getElementById('shoutbox-container');
-    const jumpBtn = document.getElementById('shoutbox-jump-bottom');
-    const jumpCount = document.getElementById('shoutbox-jump-count');
-    if (!container || !jumpBtn) return;
-
-    let newCount = 0;
-
-    container.addEventListener('scroll', () => {
-        const distFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
-        if (distFromBottom > 150) {
-            jumpBtn.style.display = 'flex';
-        } else {
-            jumpBtn.style.display = 'none';
-            newCount = 0;
-            jumpBtn.classList.remove('has-count');
-        }
-    });
-
-    jumpBtn.addEventListener('click', () => {
-        container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
-        newCount = 0;
-        jumpBtn.classList.remove('has-count');
-        if (window._shoutboxOnJumpToBottom) window._shoutboxOnJumpToBottom();
-    });
-
-    window._shoutboxNewMessages = function(count) {
-        newCount += count;
-        if (newCount > 0) {
-            jumpBtn.classList.add('has-count');
-            jumpCount.textContent = newCount > 99 ? '99+' : newCount;
-            if (jumpBtn.style.display === 'none') jumpBtn.style.display = 'flex';
-        }
-    };
-})();
-
-/* --- Scroll to Bottom Helper --- */
-function shoutboxScrollToBottom() {
-    const c = document.getElementById('shoutbox-container');
-    if (c) c.scrollTop = c.scrollHeight;
-}
-
-/* --- Near-Bottom Helper (used by polling) --- */
-window._shoutboxIsNearBottom = function() {
-    const c = document.getElementById('shoutbox-container');
-    if (!c) return true;
-    return (c.scrollHeight - c.scrollTop - c.clientHeight) < 150;
-};
 </script>
 
 
@@ -2929,300 +2264,156 @@ body {
     padding: 0;
     margin: 0;
 }
+#shoutbox-pinned:empty { display:none; }
+#shoutbox-pinned .shoutbox-pinned-panel { max-height:240px; max-height:min(30vh, 240px); overflow-y:auto; margin-bottom:12px; padding:12px; border:1px solid var(--ui-accent); border-radius:.8rem; background:rgba(15,23,42,.95); }
+#shoutbox-pinned .message:last-child { margin-bottom:0; }
+#shoutbox-container { overflow-anchor:none; }
+/* Additional controls follow the existing chat palette. */
+.shoutbox-tools, .chat-compose-actions { display:flex; align-items:center; flex-wrap:wrap; gap:.65rem; }
+.shoutbox-tools select { width:auto; }
+.chat-compose-actions { padding:.75rem; }
+#community-chat.chat-expanded .shoutbox-container { height:75vh; max-height:75vh; }
+#community-chat .message[hidden] { display:none !important; }
+#community-chat .message:focus-within .actions-inline,
+#community-chat .message.grouped .actions-inline { display:flex; opacity:1; }
+#community-chat .message.grouped .header .username { display:inline-flex; }
+#community-chat .message.grouped .time-badge { opacity:1; }
+@media (hover:none) { #community-chat .actions-inline { opacity:1; } }
+@media (max-width:576px) { .shoutbox-tools label { flex-basis:100%; } }
+/* Conversation bubbles: incoming on the left, your messages on the right. */
+#shoutbox-messages > .message {
+    width: fit-content;
+    max-width: 82%;
+    margin-right: auto;
+    align-items: flex-start;
+}
+#shoutbox-messages > .message.own {
+    flex-direction: row-reverse;
+    margin-left: auto;
+    margin-right: 0;
+}
+#shoutbox-messages > .message::before,
+#shoutbox-messages > .message > .bubble::after {
+    display: none;
+}
+#shoutbox-messages > .message > .bubble {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: auto;
+    border-radius: 4px 16px 16px 16px !important;
+    overflow-wrap: anywhere;
+}
+#shoutbox-messages > .message.own > .bubble {
+    background: linear-gradient(135deg, #164c48, #123b38) !important;
+    border-radius: 16px 4px 16px 16px !important;
+}
+#shoutbox-messages .header,
+#shoutbox-messages .header > .d-flex,
+#shoutbox-messages .reply-header,
+#shoutbox-messages .reply-meta {
+    flex-wrap: wrap;
+    gap: .4rem;
+    min-width: 0;
+}
+#shoutbox-messages .content img,
+#shoutbox-messages .reply-content img {
+    max-width: 100%;
+    height: auto;
+}
+#shoutbox-messages .content pre,
+#shoutbox-messages .reply-content pre {
+    max-width: 100%;
+    overflow-x: auto;
+}
+@media (max-width: 576px) {
+    #shoutbox-messages > .message { max-width: 94%; gap: 6px; }
+    #shoutbox-messages > .message > .avatar { width: 28px; height: 28px; }
+    #shoutbox-messages > .message > .bubble { padding: 10px; }
+}
+/* Keep the composer quiet until the member starts writing. */
+#shoutbox-form { padding: 10px; }
+#shoutbox-form .chat-toolbar,
+#shoutbox-form .chat-compose-actions,
+#shoutbox-form .chat-sticky-control { display: none; }
+#shoutbox-form:focus-within .chat-toolbar { display: flex; }
+#shoutbox-form:focus-within .chat-compose-actions { display: flex; }
+#shoutbox-form:focus-within .chat-sticky-control { display: block; }
+#shoutbox-form .chat-toolbar { flex-wrap: nowrap; gap: 8px; margin-bottom: 8px; }
+#shoutbox-form .bbcode-buttons { display: flex; flex-shrink: 0; gap: 3px; }
+#shoutbox-form .bbcode-buttons button { margin: 0; }
+#shoutbox-form .emoji-bar { min-width: 0; margin: 0; padding: 2px; gap: 3px; }
+#shoutbox-form .emoji-btn { flex-shrink: 0; }
+#shoutbox-form .bbcode-buttons button,
+#shoutbox-form .emoji-btn { padding: 4px 6px; font-size: 1rem; }
+#shoutbox-form .chat-compose-field { position: relative; }
+#shoutbox-form #content { display: block; min-height: 44px; max-height: 180px; padding: 10px 12px; overflow-y: auto; }
+#shoutbox-form.has-draft #content { padding-right: 58px; }
+#shoutbox-form #chat-send {
+    position: absolute; right: 6px; bottom: 5px;
+    width: 34px; height: 34px; padding: 0; border-radius: 50%;
+    display: grid; place-items: center;
+}
+#shoutbox-form #chat-send[hidden] { display: none !important; }
+#shoutbox-form .chat-compose-actions { padding: 6px 2px 0; gap: 6px 12px; }
+#shoutbox-form .char-counter { position: static; margin-left: auto; transform: none; }
+#shoutbox-form #chat-draft-status:empty { display: none; }
+/* Replies form a chronological thread inside each conversation bubble. */
+#community-chat .reply-timeline-heading {
+    display: flex; align-items: center; gap: 6px;
+    padding-top: 10px; margin-bottom: 12px;
+    border-top: 1px solid rgba(255,255,255,.1);
+    color: #aeb8c4; font-size: 12px; font-weight: 600;
+}
+#community-chat .reply-timeline {
+    gap: 14px;
+    margin-left: 5px;
+    padding-left: 18px;
+    border-left: 2px solid rgba(148,163,184,.3) !important;
+}
+#community-chat .reply-timeline > .reply-card {
+    position: relative;
+    display: flex; flex-direction: row; align-items: flex-start;
+    width: 100%; max-width: 100%; margin: 0; gap: 8px;
+}
+#community-chat .reply-timeline > .reply-card::before {
+    content: ''; display: block; position: absolute;
+    left: -24px; top: 10px; width: 10px; height: 10px;
+    border: 2px solid var(--reply-accent, var(--ui-accent));
+    border-radius: 50%; background: #142330 !important;
+    box-shadow: 0 0 0 3px rgba(15,23,42,.65);
+}
+#community-chat .reply-timeline > .reply-card.own::before {
+    background: var(--ui-accent) !important;
+    border-color: var(--ui-accent);
+}
+#community-chat .reply-timeline .avatar-sm {
+    width: 26px; height: 26px; object-fit: cover; margin-top: 2px;
+}
+#community-chat .reply-timeline .reply-bubble {
+    flex: 1; min-width: 0; padding: 7px 10px;
+    background: rgba(8,15,28,.3) !important;
+    border: 1px solid rgba(255,255,255,.06) !important;
+    border-radius: 6px !important; box-shadow: none !important;
+    backdrop-filter: none; overflow-wrap: anywhere;
+}
+#community-chat .reply-timeline .reply-bubble:hover { transform: none; }
+#community-chat .reply-timeline .reply-header,
+#community-chat .reply-timeline .reply-meta { flex-wrap: wrap; gap: 4px 8px; }
+#community-chat .reply-timeline .reply-content { margin-top: 5px; }
+#community-chat .reply-you-label {
+    font-size: 10px; font-weight: 600; color: var(--ui-accent);
+    padding: 1px 5px; border-radius: 4px; background: rgba(45,212,191,.1);
+}
+@media (max-width: 576px) {
+    #community-chat .reply-timeline { padding-left: 13px; }
+    #community-chat .reply-timeline > .reply-card { gap: 5px; }
+    #community-chat .reply-timeline > .reply-card::before { left: -19px; }
+    #community-chat .reply-timeline .avatar-sm { width: 22px; height: 22px; }
+    #community-chat .reply-timeline .reply-bubble { padding: 6px 8px; }
+}
 </style>
 
 
-{{-- Scripts --}}
-
-@if(Route::is('home'))
-
 @push('scripts')
-
-<script>
-
-document.addEventListener('DOMContentLoaded', () => {
-
-    const form = document.getElementById('shoutbox-form');
-    const textarea = document.getElementById('content');
-    const messagesBox = document.getElementById('shoutbox-messages');
-
-    if (!form || !textarea || !messagesBox) return;
-
-    let typingTimeout;
-    let lastMessageId = 0;
-
-    // Track last message ID from initial load
-    function updateLastId() {
-        const msgs = messagesBox.querySelectorAll('.message[data-id]');
-        msgs.forEach(m => {
-            const id = parseInt(m.dataset.id);
-            if (id > lastMessageId) lastMessageId = id;
-        });
-    }
-    updateLastId();
-
-    /* === SEND MESSAGE (ENTER) === */
-    textarea.addEventListener('keydown', e => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            if (!textarea.value.trim()) return;
-
-            fetch(form.action, {
-                method: 'POST',
-                body: new FormData(form),
-                headers: {'X-Requested-With': 'XMLHttpRequest'}
-            })
-            .then(() => {
-                textarea.value = '';
-                textarea.style.height = 'auto';
-                reloadMessages();
-            })
-            .catch(console.error);
-        }
-    });
-
-    /* === TYPING INDICATOR === */
-    textarea.addEventListener('input', () => {
-        fetch('/shoutbox/typing', {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('input[name=_token]').value,
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        });
-        clearTimeout(typingTimeout);
-        typingTimeout = setTimeout(() => {
-            fetch('/shoutbox/typing-stop', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('input[name=_token]').value,
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            });
-        }, 2000);
-    });
-
-    /* === OPTIMIZED POLLING via /shoutbox/poll === */
-    function reloadMessages() {
-        fetch('/shoutbox/poll?after=' + lastMessageId)
-        .then(r => r.json())
-        .then(data => {
-            if (!data.messages || !data.messages.length) return;
-
-            // If the user is near the bottom, reload and scroll (feels live).
-            // Otherwise, don't yank them - show the jump-to-bottom badge instead.
-            const nearBottom = window._shoutboxIsNearBottom ? window._shoutboxIsNearBottom() : true;
-
-            if (nearBottom) {
-                fullReload();
-            } else {
-                if (window._shoutboxNewMessages) {
-                    window._shoutboxNewMessages(data.messages.length);
-                }
-                lastMessageId = data.messages[data.messages.length - 1].id;
-            }
-        })
-        .catch(console.error);
-    }
-
-    function fullReload() {
-        fetch(window.location.href)
-        .then(r => r.text())
-        .then(html => {
-            const dom = new DOMParser().parseFromString(html, 'text/html');
-            const fresh = dom.querySelector('#shoutbox-messages');
-            if (!fresh) return;
-            messagesBox.innerHTML = fresh.innerHTML;
-            updateLastId();
-            shoutboxScrollToBottom();
-        })
-        .catch(console.error);
-    }
-
-    // When the user clicks the jump-to-bottom button after new messages arrived,
-    // reload the messages then scroll to bottom.
-    window._shoutboxOnJumpToBottom = function() {
-        if (!messagesBox.querySelector('.message[data-id="' + lastMessageId + '"]')) {
-            fullReload();
-        }
-        shoutboxScrollToBottom();
-    };
-
-    // Poll every 4 seconds using the lightweight endpoint
-    setInterval(reloadMessages, 4000);
-
-});
-
-
-/* === DELETE MESSAGE === */
-document.addEventListener('click', e => {
-    const form = e.target.closest('.shoutbox-delete-form');
-    if (!form) return;
-    e.preventDefault();
-    if (!confirm('Delete this shout?')) return;
-    fetch(form.action, {
-        method: 'POST',
-        body: new FormData(form),
-        headers: {'X-Requested-With': 'XMLHttpRequest'}
-    })
-    .then(() => form.closest('.message')?.remove())
-    .catch(console.error);
-});
-
-/* === ESC CLOSE EDIT === */
-document.addEventListener('keydown', e => {
-    if (e.key !== 'Escape') return;
-    const openForm = document.querySelector('.edit-form[style*="block"]');
-    if (!openForm) return;
-    const id = openForm.id.replace('edit-form-', '');
-    closeEdit(id);
-});
-
-/* === REPLY SUBMIT === */
-document.addEventListener('submit', e => {
-    const form = e.target.closest('.shoutbox-reply-form');
-    if (!form) return;
-    e.preventDefault();
-    fetch(form.action, {
-        method: 'POST',
-        body: new FormData(form),
-        headers: {'X-Requested-With': 'XMLHttpRequest'}
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (!data.html) return;
-        const bubble = form.closest('.bubble');
-        let replies = bubble.querySelector('.replies');
-        if (!replies) {
-            replies = document.createElement('div');
-            replies.className = 'replies mt-3';
-            bubble.appendChild(replies);
-        }
-        replies.insertAdjacentHTML('afterbegin', data.html);
-        form.querySelector('textarea').value = '';
-        form.style.display = 'none';
-    })
-    .catch(console.error);
-});
-
-/* === DELETE REPLY === */
-function handleReplyDelete(e, form) {
-    e.preventDefault();
-    if (!confirm('Delete this reply?')) return;
-    fetch(form.action, {
-        method: 'POST',
-        body: new FormData(form),
-        headers: {'X-Requested-With': 'XMLHttpRequest'}
-    })
-    .then(() => {
-        const card = form.closest('.reply-card');
-        if (!card) return;
-        card.style.opacity = '0';
-        setTimeout(() => card.remove(), 200);
-    })
-    .catch(console.error);
-}
-
-/* === EDIT MESSAGE === */
-function openEdit(id) {
-    const wrapper = document.querySelector('.message[data-id="' + id + '"]');
-    if (!wrapper) return;
-    const content = wrapper.querySelector('.content');
-    const form = wrapper.querySelector('#edit-form-' + id);
-    if (!form || !content) return;
-    content.style.display = 'none';
-    form.style.display = 'block';
-    const textarea = form.querySelector('.edit-textarea');
-    if (textarea) {
-        textarea.focus();
-        textarea.style.height = 'auto';
-        textarea.style.height = textarea.scrollHeight + 'px';
-    }
-}
-
-function closeEdit(id) {
-    const wrapper = document.querySelector('.message[data-id="' + id + '"]');
-    if (!wrapper) return;
-    const content = wrapper.querySelector('.content');
-    const form = wrapper.querySelector('#edit-form-' + id);
-    if (!form || !content) return;
-    form.style.display = 'none';
-    content.style.display = 'block';
-}
-
-/* === AUTO EXPAND EDIT TEXTAREA === */
-document.addEventListener('input', e => {
-    if (!e.target.classList.contains('edit-textarea')) return;
-    e.target.style.height = 'auto';
-    e.target.style.height = e.target.scrollHeight + 'px';
-});
-
-/* === EDIT SUBMIT === */
-document.addEventListener('submit', e => {
-    const form = e.target.closest('.shoutbox-edit-form');
-    if (!form) return;
-    e.preventDefault();
-    fetch(form.action, {
-        method: 'POST',
-        body: new FormData(form),
-        headers: {'X-Requested-With': 'XMLHttpRequest'}
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (!data.message) return;
-        const id = data.message.id;
-        const content = document.querySelector('.message[data-id="' + id + '"] .content');
-        if (content) {
-            content.innerHTML = data.message.message;
-            closeEdit(id);
-        }
-    })
-    .catch(console.error);
-});
-
-/* === REPLY EDIT === */
-function openReplyEdit(id) {
-    document.getElementById('reply-edit-form-' + id).style.display = 'block';
-}
-function closeReplyEdit(id) {
-    document.getElementById('reply-edit-form-' + id).style.display = 'none';
-}
-
-/* === TOGGLE REPLY FORM === */
-function toggleReplyForm(id) {
-    const form = document.getElementById('reply-form-' + id);
-    if (!form) return;
-    const open = form.style.display === 'block';
-    document.querySelectorAll('.reply-form').forEach(f => f.style.display = 'none');
-    if (!open) {
-        form.style.display = 'block';
-        form.querySelector('textarea')?.focus();
-    }
-}
-
-/* === TYPING USERS POLLING === */
-function loadTypingUsers() {
-    fetch('/shoutbox/typing-users')
-    .then(r => r.json())
-    .then(users => {
-        const box = document.getElementById('typing-users');
-        const indicator = document.getElementById('typing-indicator');
-        if (!users.length) {
-            box.innerHTML = '';
-            indicator.style.opacity = '0';
-            return;
-        }
-        indicator.style.opacity = '1';
-        box.innerHTML = users.length === 1
-            ? users[0] + ' is typing'
-            : users.join(', ') + ' are typing';
-    });
-}
-setInterval(loadTypingUsers, 2000);
-
-</script>
-
+<script src="{{ asset('js/shoutbox.js') }}?v=3" defer></script>
 @endpush
-
-@endif
-

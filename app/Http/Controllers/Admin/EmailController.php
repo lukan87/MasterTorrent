@@ -13,18 +13,16 @@ use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 
 class EmailController extends Controller
 {
-
     public function index()
     {
         $emails = EmailLog::with('user')
             ->latest('sent_at')
             ->paginate(50);
 
-        $subscribedCount = User::where('subscribed', true)->count();
+        $subscribedCount = User::where('subscribed', true)->where('is_junk', false)->count();
 
-    return view('admin.emails.index', compact('emails', 'subscribedCount'));
-}
-
+        return view('admin.emails.index', compact('emails', 'subscribedCount'));
+    }
 
     public function create()
     {
@@ -34,138 +32,111 @@ class EmailController extends Controller
         return view('admin.emails.create', compact('templates', 'classes'));
     }
 
-
-public function send(Request $request)
-{
-    $request->validate([
-        'subject' => 'required',
-        'body' => 'required',
-        'target' => 'required|in:subscribed,inactive'
-    ]);
-
-    $query = User::query()
-        ->where('is_junk', false);
-
-
-    if ($request->target === 'subscribed') {
-        $query->where('subscribed', true);
-    }
-    elseif ($request->target === 'inactive') {
-        $query->whereBetween('last_activity', [
-            now()->subDays(90),
-            now()->subDays(60),
-        ]);
-    }
-
-
-    if ($request->filled('user_class')) {
-        $query->whereIn('user_class', $request->user_class);
-    }
-
-    $users = $query->get();
-
-    // 🚨 safety checks
-    if ($users->count() === 0) {
-        return back()->withErrors('No users match your filters.');
-    }
-
-    if ($users->count() > 5000) {
-        return back()->withErrors('Too many users selected.');
-    }
-
-    if ($users->count() > 1000 && $request->confirm !== 'SEND') {
-        return back()->withErrors('You must confirm large sends.');
-    }
-
- foreach ($users as $user) {
-
-    try {
-       
-       $body = $this->parse($request->body, $user);
-       $subject = trim($this->parse($request->subject, $user));
-
-      // dd($request->subject, $subject);
-
-
-        Mail::raw($body, function ($message) use ($user, $subject) {
-            $message->to($user->email)
-                    ->subject($subject);
-        });
-
-       
-        EmailLog::create([
-            'user_id' => $user->id,
-            'subject' => $subject,
-            'body' => $body,
-            'sent_at' => now(),
+    public function send(Request $request)
+    {
+        $request->validate([
+            'subject' => 'required|string|max:255',
+            'body' => 'required|string|max:100000',
+            'target' => 'required|in:subscribed,inactive',
         ]);
 
-    } catch (TransportExceptionInterface $e) {
+        $query = $this->recipients($request);
 
-        $user->update(['is_junk' => true]);
+        $users = $query->limit(5001)->get();
 
-        \Log::warning("Marked as junk: {$user->email}");
+        // 🚨 safety checks
+        if ($users->count() === 0) {
+            return back()->withInput()->withErrors('No users match your filters.');
+        }
 
-        continue;
+        if ($users->count() > 5000) {
+            return back()->withInput()->withErrors('Too many users selected.');
+        }
+
+        if ($users->count() > 1000 && $request->confirm !== 'SEND') {
+            return back()->withInput()->withErrors('You must confirm large sends.');
+        }
+
+        $sent = 0;
+        $failed = 0;
+        foreach ($users as $user) {
+
+            try {
+
+                $body = $this->parse($request->body, $user);
+                $subject = trim($this->parse($request->subject, $user));
+
+                // dd($request->subject, $subject);
+
+                Mail::raw($body, function ($message) use ($user, $subject) {
+                    $message->to($user->email)
+                        ->subject($subject);
+                });
+
+                EmailLog::create([
+                    'user_id' => $user->id,
+                    'subject' => $subject,
+                    'body' => $body,
+                    'sent_at' => now(),
+                ]);
+
+                $sent++;
+            } catch (TransportExceptionInterface $e) {
+
+                $failed++;
+                report($e);
+
+                continue;
+            }
+        }
+
+        return redirect()->route('admin.emails.index')
+            ->with($failed ? 'error' : 'success', "Sent {$sent} email(s); {$failed} failed.");
     }
-}
 
-    return redirect()->route('admin.emails.index')
-        ->with('success', 'Emails sent!');
-}
-
-private function parse($text, $user)
-{
-    return str_replace(
-        ['{name}', '{ name }', '{Name}', '{NAME}', '{email}', '{ email }'],
-        [$user->name, $user->name, $user->name, $user->name, $user->email, $user->email],
-        $text
-    );
-}
-
-public function count(Request $request)
-{
-    if (!$request->target && empty($request->user_class)) {
-        return response()->json(['count' => 0]);
+    private function parse($text, $user)
+    {
+        return str_replace(
+            ['{name}', '{ name }', '{Name}', '{NAME}', '{email}', '{ email }'],
+            [$user->name, $user->name, $user->name, $user->name, $user->email, $user->email],
+            $text
+        );
     }
 
-    $query = User::query();
-
-    if ($request->target === 'subscribed') {
-        $query->where('subscribed', true);
+    public function count(Request $request)
+    {
+        return response()->json(['count' => $this->recipients($request)->count()]);
     }
 
-   if ($request->target === 'inactive') {
-    $query->whereBetween('last_activity', [
-        now()->subDays(90),
-        now()->subDays(60),
-    ]);
-}
+    private function recipients(Request $request)
+    {
+        $request->validate([
+            'target' => 'required|in:subscribed,inactive',
+            'user_class' => 'nullable|array',
+            'user_class.*' => 'integer|distinct|in:'.implode(',', array_keys(UserClass::getClasses())),
+        ]);
 
-    if (!empty($request->user_class)) {
-        $query->whereIn('user_class', $request->user_class);
+        return User::query()->where('is_junk', false)
+            ->when($request->target === 'subscribed', fn ($query) => $query->where('subscribed', true))
+            ->when($request->target === 'inactive', fn ($query) => $query->whereBetween('last_activity', [now()->subDays(90), now()->subDays(60)]))
+            ->when($request->filled('user_class'), fn ($query) => $query->whereIn('user_class', $request->input('user_class')));
     }
 
-    return response()->json([
-        'count' => $query->count()
-    ]);
-}
+    public function destroy(EmailLog $email)
+    {
+        $email->delete();
 
-public function destroy(EmailLog $email)
-{
-    $email->delete();
+        return back()->with('success', 'Email log deleted.');
+    }
 
-    return back()->with('success', 'Email log deleted.');
-}
+    public function deleteOld(Request $request)
+    {
+        $request->validate([
+            'days' => 'required|integer|min:1',
+        ]);
 
-public function deleteOld(Request $request)
-{
-    $request->validate([
-        'days' => 'required|integer|min:1'
-    ]);
+        $count = EmailLog::where('sent_at', '<', now()->subDays($request->days))->delete();
 
-    $count = EmailLog::where('sent_at', '<', now()->subDays($request->days))->delete();
-
-    return back()->with('success', "$count old emails deleted.");
-}
+        return back()->with('success', "$count old emails deleted.");
+    }
 }

@@ -1,6 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
-@section('content')
+@section('admin-content')
 <div class="container-fluid py-3 torrent-log-details-page">
 
     <div class="log-details-header mb-3">

@@ -36,19 +36,14 @@
     ])
 </div>
 
+    
     @include('partials.shoutbox')
-
-    {{-- Top Torrents Section --}}
-    {{-- @include('partials.toptorrents') --}}
-    
-    {{-- @include('partials.topusers') --}}
-    
-
+    @include('partials.onlineusers')
 
     {{-- VIP-only Sections --}}
     @auth
         @if(Auth::user()->user_class >= \App\Models\UserClass::VIP)
-            @include('partials.onlineusers')
+            
             @include('partials.stats')
         @endif
     @endauth

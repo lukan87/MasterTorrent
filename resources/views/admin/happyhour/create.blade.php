@@ -1,6 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
-@section('content')
+@section('admin-content')
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-lg-8 col-md-10">

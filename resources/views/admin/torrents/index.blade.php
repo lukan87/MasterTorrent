@@ -1,6 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
-@section('content')
+@section('admin-content')
 
 @php
 
@@ -42,7 +42,7 @@ $status = request('status', 'active');
 
             type="text"
 
-            name="search"
+            name="search" aria-label="Torrent name"
 
             class="form-control premium-input-combined"
 
@@ -64,7 +64,7 @@ $status = request('status', 'active');
 
             type="text"
 
-            name="uploader"
+            name="uploader" aria-label="Uploader"
 
             class="form-control premium-input-combined"
 
@@ -82,8 +82,9 @@ $status = request('status', 'active');
 
         <i class="bi bi-activity me-1 search-icon"></i>
 
-        <select name="status" class="premium-select">
+        <select name="status" aria-label="Torrent status" class="premium-select">
 
+            <option value="all" @selected(request('status') === 'all')>All undeleted torrents</option>
             <option value="active" {{ request('status', 'active') == 'active' ? 'selected' : '' }}>
 
             Active
@@ -114,7 +115,7 @@ $status = request('status', 'active');
 
         <i class="bi bi-gem me-1 search-icon"></i>
 
-        <select name="free" class="premium-select">
+        <select name="free" aria-label="Freeleech status" class="premium-select">
 
             <option value="">All</option>
 
@@ -130,11 +131,11 @@ $status = request('status', 'active');
 
     <!-- DATE -->
 
-    <input type="date" name="from" class="premium-date" value="{{ request('from') }}">
+    <input type="date" name="from" aria-label="Uploaded on or after" class="premium-date" value="{{ request('from') }}">
 
     <span class="text-muted small">→</span>
 
-    <input type="date" name="to" class="premium-date" value="{{ request('to') }}">
+    <input type="date" name="to" aria-label="Uploaded on or before" class="premium-date" value="{{ request('to') }}">
 
     <div class="search-divider"></div>
 
@@ -148,7 +149,7 @@ $status = request('status', 'active');
 
 </button>
 
-<a href="{{ route('admin.torrents.index') }}" class="premium-reset-btn">
+<a href="{{ route('admin.torrents.index') }}" class="premium-reset-btn" aria-label="Reset torrent filters">
 
     <i class="bi bi-arrow-counterclockwise"></i>
 
@@ -498,7 +499,7 @@ Are you sure you want to delete
 
 </p>
 
-<label class="form-label">Reason</label>
+<label for="reasonSelect" class="form-label">Reason</label>
 
 <select name="deletion_reason" class="form-select" id="reasonSelect">
 

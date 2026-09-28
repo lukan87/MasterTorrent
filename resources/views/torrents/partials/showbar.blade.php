@@ -38,6 +38,20 @@
         {{-- TAGS --}}
         <div class="modern-tags-wrap ms-md-auto">
 
+            <span class="modern-badge"
+                  data-bs-toggle="tooltip"
+                  title="Total Uploaded Traffic made by this torrent">
+                <i class="bi bi-cloud-arrow-up"></i>
+                {{ \App\Helpers\FormatHelper::formatSize($traffic->total_uploaded ?? 0) }}
+            </span>
+
+            <span class="modern-badge"
+                  data-bs-toggle="tooltip"
+                  title="Total Downloaded Traffic made by this torrent">
+                <i class="bi bi-cloud-arrow-down"></i>
+                {{ \App\Helpers\FormatHelper::formatSize($traffic->total_downloaded ?? 0) }}
+            </span>
+
             @if($torrent->free)
                 <span class="modern-badge free-badge"
                       data-bs-toggle="tooltip"
@@ -241,23 +255,24 @@
             @endif
 
             {{-- SUBTITLE --}}
-            @php
-                $allowedCategoryIds = [1,5,9,11,13,18,20,24,31,54,56,82];
-            @endphp
+@php
+    $allowedCategoryIds = [1, 5, 9, 11, 13, 18, 20, 24, 31, 54, 56, 82];
+    $uploadSubtitleModalId = 'uploadSubtitleModal-' . $torrent->id;
+@endphp
 
-            @if(in_array($torrent->category_id, $allowedCategoryIds))
+@if(in_array($torrent->category_id, $allowedCategoryIds))
 
-                <button class="btn modern-action-btn"
-                        data-bs-toggle="modal"
-                        data-bs-target="#uploadSubtitleModal">
+    <button type="button"
+            class="btn modern-action-btn"
+            data-bs-toggle="modal"
+            data-bs-target="#{{ $uploadSubtitleModalId }}">
 
-                    <i class="bi bi-badge-cc-fill me-1"></i>
+        <i class="bi bi-badge-cc-fill me-1"></i>
+        Subtitle
 
-                    Subtitle
+    </button>
 
-                </button>
-
-            @endif
+@endif
 
             {{-- EDIT --}}
             @if (Auth::check() && (Auth::user()->user_class >= \App\Models\UserClass::MODERATOR || Auth::id() === $torrent->owner))
@@ -848,6 +863,8 @@ document.addEventListener('DOMContentLoaded', function () {
     </div>
 
 </div>
+
+@include('torrents.partials.subtitles')
 
 
 <style>

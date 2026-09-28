@@ -1,23 +1,24 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
-@section('content')
+@section('admin-content')
 <div class="container">
-    <h1>Edit Movie: {{ $movie->name }}</h1>
+    <h1>Edit Movie: {{ old('name', $movie->name) }}</h1>
 
     <form action="{{ route('admin.movies.update', $movie->id) }}" method="POST">
         @csrf
         @method('PUT') <!-- This ensures the request uses the PUT method -->
         <div class="form-group">
-            <label for="title">Title</label>
-            <input type="text" name="name" class="form-control" value="{{ $movie->name }}">
+            <label for="name">Title</label>
+            <input type="text" id="name" name="name" required maxlength="255" class="form-control" value="{{ old('name', $movie->name) }}">
         </div>
 
         <div class="form-group">
-            <label for="description">Plot</label>
-            <textarea name="overview" class="form-control">{{ $movie->overview }}</textarea>
+            <label for="overview">Plot</label>
+            <textarea id="overview" name="overview" class="form-control">{{ old('overview', $movie->overview) }}</textarea>
         </div>
 
         <button type="submit" class="btn btn-success">Update</button>
+    <a class="btn btn-secondary" href="{{ route('admin.movies.index') }}">Cancel</a>
     </form>
     </div>
 @endsection

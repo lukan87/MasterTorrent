@@ -1,6 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
-@section('content')
+@section('admin-content')
     <div class="container">
         <h2>History for: {{ $user->name }} with ID: {{ $user->id }}</h2>
         <table class="table table-striped">

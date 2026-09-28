@@ -3,242 +3,129 @@
 namespace App\Http\Controllers;
 
 use App\Models\Ticket;
-use App\Models\TicketResponse;
 use App\Models\TicketAttachment;
-use App\Models\Message;
-use App\Models\User;
 use App\Models\TicketEvent;
+use App\Models\User;
 use App\Services\SystemMessageService;
-use Cache;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class TicketReplyController extends Controller
 {
-
-  public function store(Request $request, $ticketId)
-{
-
-    $request->validate([
-        'message' => 'required',
-        'attachment' => 'nullable',
-        'attachment.*' => 'file|mimes:jpg,jpeg,png,gif,webp,pdf,zip,rar,txt,log|max:10240'
-    ]);
-
-    $ticket = Ticket::findOrFail($ticketId);
-
-    $response = TicketResponse::create([
-        'ticket_id' => $ticket->id,
-        'user_id' => Auth::id(),
-        'message' => $request->message,
-        'is_staff_note' => $request->has('staff_note')
-    ]);
-
-    /*
-    |--------------------------------------------------------------------------
-    | Auto claim ticket when staff replies
-    |--------------------------------------------------------------------------
-    */
-
-    if(Auth::user()->user_class > 5 && !$ticket->claimed_by){
-
-        $ticket->update([
-            'claimed_by' => Auth::id()
+    public function store(Request $request, $ticketId)
+    {
+        $ticket = $this->accessibleTicket($ticketId);
+        abort_if($ticket->is_locked, 403, 'Unlock this ticket before replying.');
+        $isStaff = Auth::user()->user_class > 5;
+        abort_if(! $isStaff && in_array($ticket->status, ['Resolved', 'Closed'], true), 403, 'This ticket is resolved or closed. Please create a new ticket for further help.');
+        abort_if(! $isStaff && $request->boolean('staff_note'), 403);
+        $data = $request->validate([
+            'message' => 'required|string|max:20000',
+            'staff_note' => 'sometimes|boolean',
+            'attachment' => 'nullable|array|max:5',
+            'attachment.*' => 'file|mimes:jpg,jpeg,png,gif,webp,pdf,zip,rar,txt,log|max:10240',
         ]);
-
-        TicketEvent::create([
-            'ticket_id' => $ticket->id,
-            'user_id' => Auth::id(),
-            'event' => 'automatically claimed the ticket'
-        ]);
-    }
-
-    TicketEvent::create([
-        'ticket_id' => $ticket->id,
-        'user_id' => Auth::id(),
-        'event' => 'replied to the ticket'
-    ]);
-
-    /*
-    |--------------------------------------------------------------------------
-    | STAFF REPLIED → notify user
-    |--------------------------------------------------------------------------
-    */
-
-    if(Auth::user()->user_class > 5){
-
-SystemMessageService::send(
-    Auth::id(),
-    $ticket->user_id,
-    'Staff replied to your ticket',
-    'A staff member replied to your ticket:<br>
-    <a href="'.route('tickets.show',[
-        'id'=>$ticket->id,
-        'slug'=>$ticket->slug
-    ]).'">'.$ticket->title.'</a>'
-);
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | USER REPLIED → notify staff
-    |--------------------------------------------------------------------------
-    */
-
-    if(Auth::user()->user_class <= 5){
-
-        $staffMembers = User::where('user_class','>',5)->get();
-
-        foreach ($staffMembers as $staff) {
-
-SystemMessageService::send(
-    Auth::id(),
-    $staff->id,
-    'User replied to ticket',
-    'User replied to ticket:<br>
-    <a href="'.route('tickets.show',[
-        'id'=>$ticket->id,
-        'slug'=>$ticket->slug
-    ]).'">'.$ticket->title.'</a>'
-);
-        }
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Attachments
-    |--------------------------------------------------------------------------
-    */
-
-    if ($request->hasFile('attachment')) {
-
-        $files = $request->file('attachment');
-
-        if (!is_array($files)) {
-            $files = [$files];
+        $isNote = $isStaff && $request->boolean('staff_note');
+        $paths = [];
+        try {
+            DB::transaction(function () use ($ticketId, $request, $data, $isStaff, $isNote, &$paths) {
+                $ticket = Ticket::lockForUpdate()->findOrFail($ticketId);
+                abort_if($ticket->is_locked, 403, 'Unlock this ticket before replying.');
+                abort_if(! $isStaff && in_array($ticket->status, ['Resolved', 'Closed'], true), 403, 'This ticket is resolved or closed. Please create a new ticket for further help.');
+                $response = $ticket->responses()->create([
+                    'user_id' => Auth::id(), 'message' => $data['message'], 'is_staff_note' => $isNote,
+                ]);
+                foreach ($request->file('attachment', []) as $file) {
+                    $path = $file->store('ticket_attachments/'.$ticket->id, 'local');
+                    if (! $path) {
+                        throw new \RuntimeException('Unable to save the attachment.');
+                    }
+                    $paths[] = $path;
+                    $response->attachments()->create(['file_path' => $path, 'file_name' => $file->getClientOriginalName()]);
+                }
+                if ($isNote) {
+                    // Internal discussion does not notify the requester or change the public status.
+                    return;
+                }
+                if ($isStaff && ! $ticket->claimed_by && ! $ticket->assigned_to) {
+                    $ticket->claimed_by = Auth::id();
+                }
+                $ticket->fill([
+                    'last_replied_at' => now(), 'last_replier_id' => Auth::id(),
+                    'status' => in_array($ticket->status, ['Resolved', 'Closed'], true) ? $ticket->status : ($isStaff ? 'Waiting User' : 'Waiting Staff'),
+                ])->save();
+                TicketEvent::create(['ticket_id' => $ticket->id, 'user_id' => Auth::id(), 'event' => 'replied to the ticket']);
+                $recipients = $isStaff ? collect([$ticket->user_id])
+                    : (($ticket->assigned_to || $ticket->claimed_by)
+                        ? collect([$ticket->assigned_to, $ticket->claimed_by])->filter()->unique()
+                        : User::where('user_class', '>', 5)->pluck('id'));
+                foreach ($recipients as $recipient) {
+                    if ($recipient == Auth::id()) {
+                        continue;
+                    }
+                    SystemMessageService::send(Auth::id(), $recipient, 'New reply to support ticket',
+                        'There is a new reply to ticket #'.$ticket->id.': <a href="'.route('tickets.show', ['id' => $ticket->id, 'slug' => $ticket->slug]).'">'.e($ticket->title).'</a>');
+                }
+            });
+        } catch (\Throwable $exception) {
+            Storage::disk('local')->delete($paths);
+            throw $exception;
         }
 
-        foreach ($files as $file) {
-
-            $filename = time().'_'.uniqid().'_'.$file->getClientOriginalName();
-
-            $folder = 'ticket_attachments/'.$ticket->id;
-
-            Storage::putFileAs($folder, $file, $filename);
-
-            TicketAttachment::create([
-                'ticket_response_id' => $response->id,
-                'file_path' => $folder.'/'.$filename,
-                'file_name' => $file->getClientOriginalName()
-            ]);
-        }
+        return back()->with('success', $isNote ? 'Internal note added. Only staff can see it.' : 'Your reply has been sent.');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Update ticket
-    |--------------------------------------------------------------------------
-    */
+    public function fetch($ticketId)
+    {
+        $ticket = $this->accessibleTicket($ticketId);
+        $responses = $ticket->responses()->visibleTo(Auth::user())->with(['user', 'attachments'])->orderBy('id')->get();
 
-    $ticket->update([
-        'last_replied_at' => now(),
-        'last_replier_id' => Auth::id(),
-        'status' => Auth::user()->user_class > 5
-            ? 'Waiting User'
-            : 'Waiting Staff'
-    ]);
-
-    return back();
-}
-
-/*
-|--------------------------------------------------------------------------
-| Conversation message helper
-|--------------------------------------------------------------------------
-*/
-
-// private function sendConversationMessage($senderId,$receiverId,$subject,$body)
-// {
-
-//     $conversation = Conversation::where(function ($q) use ($senderId,$receiverId){
-
-//         $q->where('user_one',$senderId)
-//           ->where('user_two',$receiverId);
-
-//     })->orWhere(function ($q) use ($senderId,$receiverId){
-
-//         $q->where('user_one',$receiverId)
-//           ->where('user_two',$senderId);
-
-//     })->first();
-
-//     if (!$conversation) {
-
-//         $conversation = Conversation::create([
-//             'user_one'=>$senderId,
-//             'user_two'=>$receiverId,
-//             'subject'=>'Support Notifications',
-//             'last_message_at'=>now(),
-//         ]);
-//     }
-
-//     Message::create([
-//         'conversation_id'=>$conversation->id,
-//         'receiver_id'=>$receiverId,
-//         'sender_id'=>$senderId,
-//         'subject'=>$subject,
-//         'body'=>$body,
-//         'is_read'=>0
-//     ]);
-
-//     $conversation->update([
-//         'last_message_at'=>now()
-//     ]);
-// }
-
-public function fetch($ticketId)
-{
-    $ticket = Ticket::with([
-        'responses.user',
-        'responses.attachments'
-    ])->findOrFail($ticketId);
-
-    return response()->json($ticket->responses);
-}
-
-public function download($id)
-{
-    $file = TicketAttachment::findOrFail($id);
-
- $path = storage_path('app/private/'.$file->file_path);
-
-
-    if(!file_exists($path)){
-        abort(404);
+        // Return only conversation fields; never serialize full user records or storage paths.
+        return response()->json($responses->map(fn ($response) => [
+            'id' => $response->id,
+            'message' => $response->message,
+            'is_staff_note' => $response->is_staff_note || $response->is_internal,
+            'created_at' => $response->created_at->toIso8601String(),
+            'user' => ['name' => $response->user?->name ?? 'Deleted user', 'is_staff' => ($response->user?->user_class ?? 0) > 5],
+            'attachments' => $response->attachments->map(fn ($file) => ['file_name' => $file->file_name, 'url' => route('tickets.download', $file->id)]),
+        ]));
     }
 
-    return response()->download($path, $file->file_name);
-}
+    public function download($id)
+    {
+        $file = TicketAttachment::with('response.ticket')->findOrFail($id);
+        abort_unless($file->response?->ticket?->canBeViewedBy(Auth::user()), 403);
+        abort_if(($file->response->is_staff_note || $file->response->is_internal) && Auth::user()->user_class <= 5, 403);
+        abort_unless(Storage::disk('local')->exists($file->file_path), 404);
 
+        return Storage::disk('local')->download($file->file_path, $file->file_name);
+    }
 
-public function typing($ticketId)
-{
-   Cache::put('ticket_typing_'.$ticketId, [
-    'user_id' => auth()->id(),
-    'name' => auth()->user()->name
-], 3);
-}
+    public function typing($ticketId)
+    {
+        $ticket = $this->accessibleTicket($ticketId);
+        abort_if($ticket->is_locked || (in_array($ticket->status, ['Resolved', 'Closed'], true) && Auth::user()->user_class <= 5), 403);
+        Cache::put('ticket_typing_'.$ticketId, ['user_id' => Auth::id(), 'name' => Auth::user()->name], 3);
 
-public function typingStatus($ticketId)
-{
-    $data = Cache::get('ticket_typing_'.$ticketId);
+        return response()->noContent();
+    }
 
-return response()->json([
-    'typing' => $data ? true : false,
-    'name' => $data['name'] ?? null,
-    'user_id' => $data['user_id'] ?? null
-]);
-}
+    public function typingStatus($ticketId)
+    {
+        $this->accessibleTicket($ticketId);
+        $data = Cache::get('ticket_typing_'.$ticketId);
 
+        return response()->json(['typing' => (bool) $data, 'name' => $data['name'] ?? null, 'user_id' => $data['user_id'] ?? null]);
+    }
+
+    private function accessibleTicket($id): Ticket
+    {
+        $ticket = Ticket::findOrFail($id);
+        abort_unless($ticket->canBeViewedBy(Auth::user()), 403);
+
+        return $ticket;
+    }
 }

@@ -463,6 +463,9 @@ if ($torrent->trashed() &&
                 ->where('history.torrent_id', $torrent->id)
                 ->get();
 
+            $traffic = History::where('torrent_id', $torrent->id)
+                ->selectRaw('SUM(actual_uploaded) as total_uploaded, SUM(actual_downloaded) as total_downloaded')
+                ->first();
               
 $displayData = app(TorrentDisplayService::class)
     ->getDisplayData($torrent);
@@ -571,6 +574,7 @@ if ($torrent->tmdb_type === 'movie' && $torrent->tmdbid) {
     'reactionCounts',
     'userReaction',
     'fileTree',
+    'traffic',
     'fanartBackground',
     'fanartPoster',
     'fanartLogo',

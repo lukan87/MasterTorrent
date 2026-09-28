@@ -4,7 +4,7 @@
 
 <div class="motd-sticky">
 
-    <div class="modern-motd-card mt-3">
+    <div class="modern-motd-card container mt-3">
 
         {{-- BACKDROP --}}
         <div class="modern-motd-backdrop"
@@ -367,12 +367,27 @@
 
 @media (max-width: 768px) {
 
+    .motd-sticky {
+        position: relative !important;
+    }
+
     .modern-motd-card {
         min-height: auto;
         border-radius: .75rem;
+        background: rgba(34, 197, 94, .08);
+        border: 1px solid rgba(34, 197, 94, .25);
+        backdrop-filter: none;
+        box-shadow: none;
+    }
+
+    .modern-motd-backdrop,
+    .modern-motd-overlay {
+>>>>>>>
+        display: none;
     }
 
     .modern-motd-content {
+>>>>>>>
         gap: 13px;
         padding: 13px;
     }

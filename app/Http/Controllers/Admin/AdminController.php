@@ -3,11 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\Movie;
 use App\Models\Series;
 use App\Models\Torrent;
-use Illuminate\Http\Request;
+use App\Models\User;
 
 class AdminController extends Controller
 {

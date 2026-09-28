@@ -21,36 +21,38 @@ class AdminUnlockController extends Controller
         ]);
 
         $user = Auth::user();
-        if (!$user) {
+        if (! $user) {
             return redirect()->route('login');
         }
 
         $allowed = config('admin_lock.allowed_admin_ids', []);
-        if (!in_array((int)$user->id, $allowed, true)) {
+        if (! in_array((int) $user->id, $allowed, true)) {
             abort(403);
         }
 
         // protectie anti brute-force
-        $key = 'admin-unlock:' . $user->id . ':' . $request->ip();
+        $key = 'admin-unlock:'.$user->id.':'.$request->ip();
         if (RateLimiter::tooManyAttempts($key, 5)) {
             return back()->withErrors('Prea multe incercari. Incearca mai tarziu.');
         }
 
         $codes = config('admin_lock.codes', []);
-        $expectedCode = $codes[(int)$user->id] ?? null;
+        $expectedCode = $codes[(int) $user->id] ?? null;
 
-        if (!$expectedCode) {
+        if (! $expectedCode) {
             abort(403, 'Cod lipsa pentru acest admin.');
         }
 
-        if ($request->input('code') !== $expectedCode) {
+        if (! hash_equals((string) $expectedCode, $request->string('code')->toString())) {
             RateLimiter::hit($key, 60);
+
             return back()->withErrors('Cod invalid.');
         }
 
         RateLimiter::clear($key);
 
         // marcheaza sesiunea ca deblocata
+        $request->session()->regenerate();
         $request->session()->put('admin_unlocked', true);
         $request->session()->put('admin_unlocked_at', now()->timestamp);
 

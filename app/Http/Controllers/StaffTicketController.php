@@ -3,168 +3,85 @@
 namespace App\Http\Controllers;
 
 use App\Models\Ticket;
-use App\Models\TicketCategory;
-use App\Models\Message;
 use App\Models\TicketEvent;
-use App\Services\SystemMessageService;
 use App\Models\User;
+use App\Services\SystemMessageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class StaffTicketController extends Controller
 {
-
     public function __construct()
     {
         $this->middleware('auth');
-    }
+        $this->middleware(function ($request, $next) {
+            abort_unless($request->user()->user_class > 5, 403);
 
-    /*
-    |--------------------------------------------------------------------------
-    | Claim Ticket
-    |--------------------------------------------------------------------------
-    */
+            return $next($request);
+        });
+    }
 
     public function claim($ticketId)
     {
-        $ticket = Ticket::findOrFail($ticketId);
+        DB::transaction(function () use ($ticketId) {
+            $ticket = Ticket::lockForUpdate()->findOrFail($ticketId);
+            abort_if(($ticket->claimed_by && $ticket->claimed_by != Auth::id()) ||
+                ($ticket->assigned_to && $ticket->assigned_to != Auth::id()), 409, 'This ticket already has an owner. Use assignment to transfer it.');
+            if ($ticket->claimed_by == Auth::id()) {
+                return;
+            }
+            $ticket->update(['claimed_by' => Auth::id()]);
+            $this->record($ticket, 'claimed the ticket');
+        });
 
-        $ticket->update([
-            'claimed_by' => Auth::id()
-        ]);
-
-        TicketEvent::create([
-    'ticket_id' => $ticket->id,
-    'user_id' => Auth::id(),
-    'event' => 'claimed the ticket'
-]);
-
-        return back()->with('success','Ticket claimed.');
+        return back()->with('success', 'Ticket claimed.');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Assign Ticket
-    |--------------------------------------------------------------------------
-    */
-
-public function assign(Request $request,$ticketId)
-{
-    $request->validate([
-        'staff_id' => 'required|exists:users,id'
-    ]);
-
-    $ticket = Ticket::findOrFail($ticketId);
-
-    $ticket->update([
-        'assigned_to' => $request->staff_id
-    ]);
-
-    /*
-    |--------------------------------------------------------------------------
-    | Send notification via messaging service
-    |--------------------------------------------------------------------------
-    */
-
-SystemMessageService::send(
-    2,
-    $request->staff_id,
-    'Ticket assigned to you',
-    $body
-);
-
-    /*
-    |--------------------------------------------------------------------------
-    | Ticket Event
-    |--------------------------------------------------------------------------
-    */
-
-    TicketEvent::create([
-        'ticket_id' => $ticket->id,
-        'user_id' => Auth::id(),
-        'event' => 'assigned the ticket'
-    ]);
-
-    return back()->with('success','Ticket assigned.');
-}
-
-    /*
-    |--------------------------------------------------------------------------
-    | Change Status
-    |--------------------------------------------------------------------------
-    */
-
-    public function changeStatus(Request $request,$ticketId)
+    public function assign(Request $request, $ticketId)
     {
+        $request->validate(['staff_id' => ['required', 'integer', Rule::exists('users', 'id')->where(fn ($query) => $query->where('user_class', '>', 5)->whereNull('deleted_at'))]]);
+        $staff = User::findOrFail($request->integer('staff_id'));
+        DB::transaction(function () use ($staff, $ticketId) {
+            $ticket = Ticket::lockForUpdate()->findOrFail($ticketId);
+            $ticket->update(['assigned_to' => $staff->id, 'claimed_by' => null]);
+            $this->record($ticket, 'assigned the ticket to '.$staff->name);
+            SystemMessageService::send(Auth::id(), $staff->id, 'Ticket assigned to you',
+                'A support ticket has been assigned to you: <a href="'.route('tickets.show', ['id' => $ticket->id, 'slug' => $ticket->slug]).'">'.e($ticket->title).'</a>');
+        });
 
-        $request->validate([
-            'status' => 'required'
-        ]);
-
-        $ticket = Ticket::findOrFail($ticketId);
-
-        $ticket->update([
-            'status' => $request->status
-        ]);
-
-        return back()->with('success','Ticket status updated.');
+        return back()->with('success', 'Ticket assigned.');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Lock Ticket
-    |--------------------------------------------------------------------------
-    */
-
-    public function lock($ticketId)
+    public function changeStatus(Request $request, $ticketId)
     {
+        $request->validate(['status' => ['required', Rule::in(Ticket::STATUSES)]]);
+        DB::transaction(function () use ($request, $ticketId) {
+            $ticket = Ticket::lockForUpdate()->findOrFail($ticketId);
+            if ($ticket->status === $request->status) {
+                return;
+            }
+            $previous = $ticket->status;
+            $ticket->update(['status' => $request->status]);
+            $this->record($ticket, 'changed status from '.$previous.' to '.$ticket->status);
+        });
 
-        $ticket = Ticket::findOrFail($ticketId);
-
-        $ticket->update([
-            'is_locked' => true
-        ]);
-
-        return back()->with('success','Ticket locked.');
+        return back()->with('success', 'Ticket status updated.');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Staff Tickets
-    |--------------------------------------------------------------------------
-    */
+    public function myTickets()
+    {
+        return redirect()->route('tickets.index', ['my' => 1]);
+    }
 
-public function myTickets()
-{
+    public function unassigned()
+    {
+        return redirect()->route('tickets.index', ['unassigned' => 1]);
+    }
 
-    $tickets = Ticket::where('claimed_by',Auth::id())
-        ->with(['user','category'])
-        ->latest()
-        ->paginate(20);
-
-    $categories = TicketCategory::orderBy('name')->get();
-
-    return view('tickets.index', [
-        'tickets' => $tickets,
-        'categories' => $categories
-    ]);
-}
-
-public function unassigned()
-{
-
-    $tickets = Ticket::whereNull('claimed_by')
-        ->with(['user','category'])
-        ->latest()
-        ->paginate(20);
-
-    $categories = TicketCategory::orderBy('name')->get();
-
-    return view('tickets.index', [
-        'tickets' => $tickets,
-        'categories' => $categories
-    ]);
-
-}
-
+    private function record(Ticket $ticket, string $event): void
+    {
+        TicketEvent::create(['ticket_id' => $ticket->id, 'user_id' => Auth::id(), 'event' => $event]);
+    }
 }

@@ -2,20 +2,23 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\View;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
-use Monicahq\Cloudflare\LaravelCloudflare;
-use Monicahq\Cloudflare\Facades\CloudflareProxies;
-use App\Models\Message;
+use App\Http\Middleware\CheckUserBanned;
+use App\Http\Middleware\CheckUserEnabled;
 use App\Models\Conversation;
+use App\Models\Message;
 use App\Models\Poll;
 use App\Models\PollVote;
 use App\Models\Ticket;
-
+use App\Models\UserClass;
 use App\Services\AnnouncementService;
 use App\Services\Contracts\AnnouncementServiceInterface;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\ServiceProvider;
+use Monicahq\Cloudflare\Facades\CloudflareProxies;
+use Monicahq\Cloudflare\LaravelCloudflare;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,9 +30,9 @@ class AppServiceProvider extends ServiceProvider
         //
 
         $this->app->bind(
-        AnnouncementServiceInterface::class,
-        AnnouncementService::class
-    );
+            AnnouncementServiceInterface::class,
+            AnnouncementService::class
+        );
     }
 
     /**
@@ -37,9 +40,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Gate::define('manage-admin-system', fn ($user) => (int) $user->user_class === UserClass::WEB_DEVELOPER);
+
         // Add your custom middleware globally
-        app('router')->pushMiddlewareToGroup('web', \App\Http\Middleware\CheckUserEnabled::class);
-        app('router')->pushMiddlewareToGroup('web', \App\Http\Middleware\CheckUserBanned::class);
+        app('router')->pushMiddlewareToGroup('web', CheckUserEnabled::class);
+        app('router')->pushMiddlewareToGroup('web', CheckUserBanned::class);
 
         View::composer('layouts.app', function ($view) {
 
@@ -102,9 +107,9 @@ class AppServiceProvider extends ServiceProvider
 
                 $conversations = Cache::remember("user_conversations_{$user->id}", 30, function () use ($user) {
                     return Conversation::where(function ($q) use ($user) {
-                            $q->where('user_one', $user->id)
-                              ->orWhere('user_two', $user->id);
-                        })
+                        $q->where('user_one', $user->id)
+                            ->orWhere('user_two', $user->id);
+                    })
                         ->with(['lastMessage', 'userOne', 'userTwo'])
                         ->orderByDesc('last_message_at')
                         ->take(5)
@@ -145,9 +150,9 @@ class AppServiceProvider extends ServiceProvider
 
                 if ($user->user_class > 5) {
 
-                    $newTickets = Ticket::where('status','Open')->count();
+                    $newTickets = Ticket::where('status', 'Open')->count();
 
-                    $waitingStaffTickets = Ticket::where('status','Waiting Staff')->count();
+                    $waitingStaffTickets = Ticket::where('status', 'Waiting Staff')->count();
 
                     $unassignedTickets = Ticket::whereNull('claimed_by')->count();
                 }

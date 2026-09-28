@@ -1,7 +1,3 @@
-{{-- =========================
-    PREMIUM FANART HEADER
-========================= --}}
-
 @include('torrents.partials._display-helpers')
 
 <div class="container px-xl-5 px-lg-4 px-3">
@@ -630,10 +626,10 @@
     background: linear-gradient(
         135deg,
         rgba(22, 32, 51, .95),
-        rgba(15, 23, 42, .84)
+        rgba(15, 23, 42, 0.13)
     );
     border: 1px solid var(--ui-border);
-    backdrop-filter: blur(14px);
+    backdrop-filter: blur(9px);
     box-shadow: 0 18px 45px rgba(0,0,0,.32);
     margin-top: 20px;
 }

@@ -1,6 +1,10 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
-@section('content')
+@section('admin-content')
+<div class="d-flex flex-wrap gap-2 mb-3">
+    <a class="btn btn-secondary" href="{{ route('admin.users.index', ['deleted' => 'only']) }}">Deleted accounts</a>
+    <a class="btn btn-secondary" href="{{ route('admin.users.index', ['warned' => 'yes']) }}">Warned users</a>
+</div>
 
 <div class="container-fluid px-3 px-md-4">
 
@@ -42,7 +46,7 @@
                 <i class="bi bi-people fs-3 text-primary me-3"></i>
                 <div>
                     <div class="small text-muted">Total Users</div>
-                    <div class="fw-bold">{{ App\Models\User::count() }}</div>
+                    <div class="fw-bold">{{ $totalUsers }}</div>
                 </div>
             </div>
         </div>
@@ -130,8 +134,8 @@
 
 {{-- keyword --}}
 <div class="col-lg-3 col-md-3 col-sm-6">
-<label class="form-label">Search</label>
-<input type="text"
+<label for="admin-field-1" class="form-label">Search</label>
+<input id="admin-field-1" type="text"
 name="keyword"
 class="form-control"
 placeholder="Username / Email / IP"
@@ -140,8 +144,8 @@ value="{{ request('keyword') }}">
 
 {{-- class --}}
 <div class="col-lg-3 col-md-3 col-sm-6">
-<label class="form-label">Class</label>
-<select name="class" class="form-select">
+<label for="admin-field-2" class="form-label">Class</label>
+<select id="admin-field-2" name="class" class="form-select">
 <option value="">All</option>
 
 @foreach($userClasses as $class => $name)
@@ -155,8 +159,8 @@ value="{{ request('keyword') }}">
 
 {{-- warned --}}
 <div class="col-lg-3 col-md-3 col-sm-6">
-<label class="form-label">Warned</label>
-<select name="warned" class="form-select">
+<label for="admin-field-3" class="form-label">Warned</label>
+<select id="admin-field-3" name="warned" class="form-select">
 <option value="">All</option>
 <option value="yes" {{ request('warned')=='yes'?'selected':'' }}>Warned</option>
 </select>
@@ -164,8 +168,8 @@ value="{{ request('keyword') }}">
 
 {{-- enabled --}}
 <div class="col-lg-3 col-md-3 col-sm-6">
-<label class="form-label">Account</label>
-<select name="enabled" class="form-select">
+<label for="admin-field-4" class="form-label">Account</label>
+<select id="admin-field-4" name="enabled" class="form-select">
 <option value="">All</option>
 <option value="no" {{ request('enabled')=='no'?'selected':'' }}>Disabled</option>
 </select>
@@ -173,8 +177,8 @@ value="{{ request('keyword') }}">
 
 {{-- ratio --}}
 <div class="col-lg-3 col-md-3 col-sm-4">
-<label class="form-label">Ratio</label>
-<select name="ratio" class="form-select">
+<label for="admin-field-5" class="form-label">Ratio</label>
+<select id="admin-field-5" name="ratio" class="form-select">
 <option value="">All</option>
 <option value="low">Low</option>
 </select>
@@ -182,8 +186,8 @@ value="{{ request('keyword') }}">
 
 {{-- inactive --}}
 <div class="col-lg-3 col-md-3 col-sm-4">
-<label class="form-label">Inactive</label>
-<select name="inactive" class="form-select">
+<label for="admin-field-6" class="form-label">Inactive</label>
+<select id="admin-field-6" name="inactive" class="form-select">
 <option value="">-</option>
 <option value="30">30d</option>
 <option value="60">60d</option>
@@ -193,8 +197,8 @@ value="{{ request('keyword') }}">
 
 {{-- deleted --}}
 <div class="col-lg-3 col-md-3 col-sm-4">
-<label class="form-label">Deleted</label>
-<select name="deleted" class="form-select">
+<label for="admin-field-7" class="form-label">Deleted</label>
+<select id="admin-field-7" name="deleted" class="form-select">
 <option value="">All</option>
 <option value="no">Active</option>
 <option value="only">Deleted</option>
@@ -420,9 +424,9 @@ value="{{ request('keyword') }}">
 
 <div class="mb-3">
 
-<label class="form-label">User Classes</label>
+<label for="admin-field-8" class="form-label">User Classes</label>
 
-<select name="user_class[]" class="form-select select2" multiple required>
+<select id="admin-field-8" name="user_class[]" class="form-select select2" multiple required>
 
 @foreach(App\Models\UserClass::getClasses() as $class => $name)
 
@@ -438,7 +442,7 @@ value="{{ request('keyword') }}">
 
 <div class="mb-3">
 
-<label class="form-label">Message</label>
+<label for="admin-field-9" class="form-label">Message</label>
 
 <textarea
 name="message"

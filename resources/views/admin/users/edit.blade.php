@@ -1,6 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
-@section('content')
+@section('admin-content')
 
 <div class="container py-4 user-edit-page">
 
@@ -40,9 +40,9 @@
 
                     <div class="col-md-4">
 
-                        <label class="form-label">Name</label>
+                        <label for="admin-field-1" class="form-label">Name</label>
 
-                        <input type="text" name="name" class="form-control elite-input"
+                        <input id="admin-field-1" type="text" name="name" class="form-control elite-input"
 
                                value="{{ old('name',$user->name) }}">
 
@@ -50,9 +50,9 @@
 
                     <div class="col-md-4">
 
-                        <label class="form-label">Email</label>
+                        <label for="admin-field-2" class="form-label">Email</label>
 
-                        <input type="email" name="email" class="form-control elite-input"
+                        <input id="admin-field-2" type="email" name="email" class="form-control elite-input"
 
                                value="{{ old('email',$user->email) }}">
 
@@ -60,9 +60,9 @@
 
                     <div class="col-md-4">
 
-                        <label class="form-label">Profile Image URL</label>
+                        <label for="admin-field-3" class="form-label">Profile Image URL</label>
 
-                        <input type="url" name="profile_image" class="form-control elite-input"
+                        <input id="admin-field-3" type="url" name="profile_image" class="form-control elite-input"
 
                                value="{{ old('profile_image',$user->profile_image) }}">
 
@@ -70,9 +70,9 @@
 
                     <div class="col-md-4">
 
-                        <label class="form-label">Recovery Code</label>
+                        <label for="admin-field-4" class="form-label">Recovery Code</label>
 
-                        <input type="text" class="form-control elite-input" name="recovery_code">
+                        <input id="admin-field-4" type="text" class="form-control elite-input" name="recovery_code">
 
                     </div>
 
@@ -268,9 +268,9 @@
 
                         <div class="col-md-4">
 
-                            <label class="form-label">Warned Until</label>
+                            <label for="admin-field-5" class="form-label">Warned Until</label>
 
-                            <input type="date" name="warned_until" class="form-control elite-input"
+                            <input id="admin-field-5" type="date" name="warned_until" class="form-control elite-input"
 
                                    value="{{ old('warned_until',optional($user->warned_until)->format('Y-m-d')) }}">
 
@@ -278,9 +278,9 @@
 
                         <div class="col-md-12">
 
-                            <label class="form-label">Warning Reason</label>
+                            <label for="admin-field-6" class="form-label">Warning Reason</label>
 
-                            <textarea name="warned_reason" class="form-control elite-input"
+                            <textarea id="admin-field-6" name="warned_reason" class="form-control elite-input"
 
                                       rows="3">{{ old('warned_reason',$user->warned_reason) }}</textarea>
 
@@ -430,9 +430,9 @@
 
                         <div class="col-md-4">
 
-                            <label class="form-label">Uploaded (GB)</label>
+                            <label for="admin-field-7" class="form-label">Uploaded (GB)</label>
 
-                            <input type="number" name="uploaded" class="form-control elite-input"
+                            <input id="admin-field-7" type="number" name="uploaded" class="form-control elite-input"
 
                                    value="{{ old('uploaded',floor($user->uploaded/(1024**3))) }}">
 
@@ -440,9 +440,9 @@
 
                         <div class="col-md-4">
 
-                            <label class="form-label">Downloaded (GB)</label>
+                            <label for="admin-field-8" class="form-label">Downloaded (GB)</label>
 
-                            <input type="number" name="downloaded" class="form-control elite-input"
+                            <input id="admin-field-8" type="number" name="downloaded" class="form-control elite-input"
 
                                    value="{{ old('downloaded',floor($user->downloaded/(1024**3))) }}">
 
@@ -450,9 +450,9 @@
 
                         <div class="col-md-4">
 
-                            <label class="form-label">Seedbonus</label>
+                            <label for="admin-field-9" class="form-label">Seedbonus</label>
 
-                            <input type="number" step="0.01" name="seedbonus" class="form-control elite-input"
+                            <input id="admin-field-9" type="number" step="0.01" name="seedbonus" class="form-control elite-input"
 
                                    value="{{ old('seedbonus',$user->seedbonus) }}">
 
@@ -460,9 +460,9 @@
 
                         <div class="col-md-6">
 
-                            <label class="form-label">Invites</label>
+                            <label for="admin-field-10" class="form-label">Invites</label>
 
-                            <input type="number" name="invites" class="form-control elite-input"
+                            <input id="admin-field-10" type="number" name="invites" class="form-control elite-input"
 
                                    value="{{ old('invites',$user->invites) }}">
 
@@ -470,9 +470,9 @@
 
                         <div class="col-md-6">
 
-                            <label class="form-label">Slots</label>
+                            <label for="admin-field-11" class="form-label">Slots</label>
 
-                            <input type="number" name="slots" class="form-control elite-input"
+                            <input id="admin-field-11" type="number" name="slots" class="form-control elite-input"
 
                                    value="{{ old('slots',$user->slots) }}">
 

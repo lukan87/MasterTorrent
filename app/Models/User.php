@@ -158,17 +158,26 @@ public function class()
     return $this->belongsTo(UserClass::class, 'user_class');
 }
 
+public const UPLOADER_MIN_AGE_DAYS = 30;
+public const UPLOADER_MIN_UPLOAD = 300 * 1073741824;
+public const UPLOADER_MIN_RATIO = 1.05;
+public const UPLOADER_COOLDOWN_DAYS = 30;
+
 public function canApplyForUploader()
 {
+    if ($this->user_class >= UserClass::UPLOADER) {
+        return ['allowed' => false, 'reason' => 'Your account already has uploader access.'];
+    }
+
     $accountAgeDays = $this->created_at->diffInDays(now());
 
     $ratio = $this->downloaded > 0
         ? $this->uploaded / $this->downloaded
-        : 0;
+        : ($this->uploaded > 0 ? INF : 0);
 
-    $minimumUpload = 300 * 1073741824; // 300GB
+    $minimumUpload = self::UPLOADER_MIN_UPLOAD; // 300GB
 
-    if ($accountAgeDays < 30) {
+    if ($accountAgeDays < self::UPLOADER_MIN_AGE_DAYS) {
         return ['allowed' => false, 'reason' => 'Account must be at least 30 days old.'];
     }
 
@@ -176,7 +185,7 @@ public function canApplyForUploader()
         return ['allowed' => false, 'reason' => 'You must upload at least 300GB before applying.'];
     }
 
-    if ($ratio < 1.05) {
+    if ($ratio < self::UPLOADER_MIN_RATIO) {
         return ['allowed' => false, 'reason' => 'Your ratio must be at least 1.05.'];
     }
 
@@ -187,7 +196,7 @@ public function uploaderApplicationCooldown()
 {
     $lastRejected = UploadApplication::where('applicant_id', $this->id)
         ->where('status', 'rejected')
-        ->latest()
+        ->orderByRaw('COALESCE(decision_at, updated_at) DESC')
         ->first();
 
     if (!$lastRejected) {
@@ -197,13 +206,13 @@ public function uploaderApplicationCooldown()
         ];
     }
 
-    $cooldownDays = 30;
+    $cooldownDays = self::UPLOADER_COOLDOWN_DAYS;
 
-    $nextAllowed = $lastRejected->decision_at->copy()->addDays($cooldownDays);
+    $nextAllowed = ($lastRejected->decision_at ?? $lastRejected->updated_at)->copy()->addDays($cooldownDays);
 
     if (now()->lt($nextAllowed)) {
 
-       $daysRemaining = (int) floor(now()->diffInDays($nextAllowed));
+       $daysRemaining = (int) ceil(now()->diffInDays($nextAllowed));
 
         return [
             'blocked' => true,

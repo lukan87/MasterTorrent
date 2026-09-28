@@ -109,65 +109,176 @@ setInterval(fetchLatestTorrent, 5000); // Check every 5 seconds
 <footer class="app-footer glass py-2">
     <div class="container-fluid">
 
-    <div class="row align-items-center">
+        <div class="row align-items-center gy-2">
 
-        <!-- Site name -->
-        <div class="col-md-4 text-center text-md-start fs-5">
-            <span class="text-info">
-                <i class="bi bi-globe2 me-1"></i>
-                {{ config('app.name') }}
-            </span>
-        </div>
+            {{-- Site name --}}
+            <div class="col-md-4 text-center text-md-start">
+                <span class="footer-brand">
+                    <i class="bi bi-globe2 text-info me-1"></i>
+                    {{ config('app.name') }}
+                </span>
+            </div>
 
-        <!-- Credits -->
-        <div class="col-md-4 text-center mt-2 mt-md-0">
-            <small class="text-muted">
-                <i class="bi bi-code-slash text-danger me-1"></i>
-                Built with Laravel
-                <span class="mx-2">|</span>
-                <i class="bi bi-filetype-php me-1"></i>
-                Developed by <strong>lukan87</strong>
-            </small>
-        </div>
+            {{-- Credits --}}
+<div class="col-md-4 text-center mt-2 mt-md-0">
+    <small class="text-muted">
 
-        <!-- Browser + motto -->
-        <div class="col-md-4 text-center text-md-end mt-2 mt-md-0">
-            <small class="text-muted">
-                <span class="me-2">Seed until you bleed</span>
-                <span class="mx-2">|</span>
-                Best viewed in
-                <i class="bi bi-browser-chrome text-warning ms-1"></i>
-                <i class="bi bi-browser-firefox text-danger ms-1"></i>
-            </small>
-        </div>
+        <a href="https://github.com/lukan87/MasterTorrent"
+           target="_blank"
+           rel="noopener noreferrer"
+           class="footer-link">
 
-    </div>
+            <i class="bi bi-github me-1"></i>
+            Laravel {{ app()->version() }}
 
-    <hr class="border-secondary opacity-25 my-2">
+        </a>
 
-    <!-- Copyright -->
-    <div class="row">
-        <div class="col-12 text-center">
-            <small class="text-muted">
-                © {{ date('Y') }} {{ config('app.name') }} — All rights reserved
-            </small>
-        </div>
-    </div>
+        <span class="mx-2">|</span>
 
+        <i class="bi bi-filetype-php text-primary me-1"></i>
+        PHP {{ PHP_VERSION }}
+
+        <span class="mx-2">|</span>
+
+        <i class="bi bi-code-slash text-danger me-1"></i>
+        Developed by <strong>lukan87</strong>
+
+    </small>
 </div>
 
+            {{-- Motto / browsers --}}
+            <div class="col-md-4 text-center text-md-end">
+                <small class="footer-text">
 
+                    <span class="footer-motto">
+                        <i class="bi bi-arrow-repeat text-success me-1"></i>
+                        Seed until you bleed
+                    </span>
+
+                    <span class="footer-divider mx-2">|</span>
+
+                    Best viewed in
+
+                    <i class="bi bi-browser-chrome text-warning ms-1"
+                       title="Google Chrome"></i>
+
+                    <i class="bi bi-browser-firefox text-danger ms-1"
+                       title="Mozilla Firefox"></i>
+
+                </small>
+            </div>
+
+        </div>
+
+        <div class="footer-line"></div>
+
+        {{-- Copyright --}}
+        <div class="text-center">
+            <small class="footer-copyright">
+                © {{ date('Y') }} {{ config('app.name') }}
+                <span class="mx-1">•</span>
+                All rights reserved
+            </small>
+        </div>
+
+    </div>
 </footer>
+
 
 <style>
 .app-footer {
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    transition: all 0.3s ease;
-    font-size: 0.9rem;
     margin: 0 !important;
+    padding: 10px 0 !important;
+
+    font-size: 0.9rem;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+
+    background: rgba(20, 24, 28, 0.65);
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
-/* Bootstrap-compatible: keep scrolling, hide scrollbar */
+
+/* Site name */
+.footer-brand {
+    color: #e9ecef;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+
+/* Normal footer text */
+.footer-text {
+    color: #8f969d;
+}
+
+
+/* Laravel / GitHub link */
+.footer-link {
+    color: #adb5bd;
+    text-decoration: none;
+
+    transition: color 0.2s ease;
+}
+
+.footer-link .bi-github {
+    color: #dee2e6;
+}
+
+.footer-link:hover {
+    color: #0dcaf0;
+}
+
+.footer-link:hover .bi-github {
+    color: #ffffff;
+}
+
+
+/* Motto */
+.footer-motto {
+    color: #adb5bd;
+}
+
+
+/* Dividers */
+.footer-divider {
+    color: rgba(255, 255, 255, 0.15);
+}
+
+
+/* Small separator */
+.footer-line {
+    width: 100%;
+    height: 1px;
+
+    margin: 8px 0 6px;
+
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.08),
+        transparent
+    );
+}
+
+
+/* Copyright */
+.footer-copyright {
+    color: #666f78;
+    font-size: 0.78rem;
+}
+
+
+/* Browser icons */
+.bi-browser-chrome,
+.bi-browser-firefox {
+    font-size: 0.95rem;
+}
+
+
+/* Keep scrolling but hide scrollbar */
 .layout-fixed .app-main {
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -179,11 +290,23 @@ setInterval(fetchLatestTorrent, 5000); // Check every 5 seconds
     height: 0;
 }
 
-.app-footer a:hover {
-    color: #4da6ff !important;
+
+/* Mobile */
+@media (max-width: 767.98px) {
+
+    .app-footer {
+        padding: 12px 0 !important;
+    }
+
+    .footer-divider {
+        margin-left: 5px !important;
+        margin-right: 5px !important;
+    }
+
+    .footer-line {
+        margin-top: 10px;
+    }
 }
-
-
 </style>
         @endauth
     </div> 
@@ -299,27 +422,288 @@ window.showNotification = function(type, message) {
 @endif
 
 
-<!-- Back to Top Button -->
-<button id="back-to-top" class="btn" type="button" aria-label="Back to top">
-<i class="bi bi-arrow-up fs-4" aria-hidden="true"></i>
+<!-- =========================================================
+     BACK TO TOP BUTTON
+========================================================= -->
+<button
+    id="back-to-top"
+    type="button"
+    aria-label="Back to top"
+    title="Back to top"
+>
+    <i class="bi bi-chevron-up" aria-hidden="true"></i>
 </button>
 
-<script>
-    // Show the "Back to Top" button when scrolling down
-    $(window).scroll(function() {
-        if ($(this).scrollTop() > 100) {
-            $('#back-to-top').fadeIn();
-        } else {
-            $('#back-to-top').fadeOut();
+<style>
+    /* =========================================================
+       BACK TO TOP
+    ========================================================= */
+
+    #back-to-top {
+        position: fixed;
+        right: 24px;
+        bottom: 24px;
+
+        width: 58px;
+        height: 58px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        padding: 0;
+
+        color: #ffffff;
+        font-size: 1.65rem;
+
+        background:
+            linear-gradient(
+                145deg,
+                rgba(48, 58, 60, 0.95),
+                rgba(82, 85, 89, 0.95)
+            );
+
+       
+        border-radius: 14px;
+
+        box-shadow:
+            0 8px 25px rgba(0, 0, 0, 0.35),
+            0 0 20px rgba(13, 202, 240, 0.12);
+
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+
+        cursor: pointer;
+
+        opacity: 0;
+        visibility: hidden;
+
+        transform:
+            translateY(15px)
+            scale(0.9);
+
+        transition:
+            opacity 0.25s ease,
+            visibility 0.25s ease,
+            transform 0.25s ease,
+            box-shadow 0.25s ease,
+            background 0.25s ease;
+
+        z-index: 99999;
+    }
+
+
+    /* Visible state */
+    #back-to-top.show {
+        opacity: 1;
+        visibility: visible;
+
+        transform:
+            translateY(0)
+            scale(1);
+    }
+
+
+    /* Icon */
+    #back-to-top i {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        line-height: 1;
+
+        transition: transform 0.25s ease;
+    }
+
+
+    /* Hover */
+    #back-to-top:hover {
+        color: #ffffff;
+
+        background:
+            linear-gradient(
+                145deg,
+                #919596,
+                #333435
+            );
+
+        transform:
+            translateY(-3px)
+            scale(1.04);
+
+        box-shadow:
+            0 12px 30px rgba(0, 0, 0, 0.4),
+            0 0 25px rgba(13, 202, 240, 0.25);
+    }
+
+
+    #back-to-top:hover i {
+        transform: translateY(-2px);
+    }
+
+
+    /* Click */
+    #back-to-top:active {
+        transform:
+            translateY(0)
+            scale(0.95);
+    }
+
+
+    /* Keyboard accessibility */
+    #back-to-top:focus-visible {
+        outline: 3px solid rgba(13, 202, 240, 0.35);
+        outline-offset: 3px;
+    }
+
+
+    /* =========================================================
+       MOBILE
+    ========================================================= */
+
+    @media (max-width: 767.98px) {
+
+        #back-to-top {
+            right: 15px;
+            bottom: 15px;
+
+            width: 44px;
+            height: 44px;
+
+            border-radius: 12px;
+
+            font-size: 1rem;
         }
+
+    }
+</style>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const backToTopButton = document.getElementById('back-to-top');
+    const appMain = document.querySelector('.app-main');
+
+    if (!backToTopButton) {
+        return;
+    }
+
+
+    /* =========================================================
+       GET CURRENT SCROLL POSITION
+    ========================================================= */
+
+    function getScrollPosition() {
+
+        const windowScroll =
+            window.pageYOffset ||
+            document.documentElement.scrollTop ||
+            document.body.scrollTop ||
+            0;
+
+        const appMainScroll = appMain
+            ? appMain.scrollTop
+            : 0;
+
+        return Math.max(
+            windowScroll,
+            appMainScroll
+        );
+    }
+
+
+    /* =========================================================
+       SHOW / HIDE BUTTON
+    ========================================================= */
+
+    function updateBackToTopButton() {
+
+        const scrollPosition = getScrollPosition();
+
+        if (scrollPosition > 250) {
+
+            backToTopButton.classList.add('show');
+
+        } else {
+
+            backToTopButton.classList.remove('show');
+
+        }
+
+    }
+
+
+    /* =========================================================
+       WINDOW SCROLL
+    ========================================================= */
+
+    window.addEventListener(
+        'scroll',
+        updateBackToTopButton,
+        {
+            passive: true
+        }
+    );
+
+
+    /* =========================================================
+       ADMINLTE / APP MAIN SCROLL
+    ========================================================= */
+
+    if (appMain) {
+
+        appMain.addEventListener(
+            'scroll',
+            updateBackToTopButton,
+            {
+                passive: true
+            }
+        );
+
+    }
+
+
+    /* =========================================================
+       BACK TO TOP CLICK
+    ========================================================= */
+
+    backToTopButton.addEventListener('click', function () {
+
+        /*
+         * Scroll the browser window.
+         */
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+
+
+        /*
+         * AdminLTE can use .app-main as the actual
+         * scrolling container on some pages.
+         */
+        if (appMain) {
+
+            appMain.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+
+        }
+
     });
 
-    // Scroll to the top when the button is clicked
-    $('#back-to-top').click(function() {
-        $('html, body').animate({ scrollTop: 0 }, 600);
-        return false;
-    });
+
+    /* =========================================================
+       INITIAL CHECK
+    ========================================================= */
+
+    updateBackToTopButton();
+
+});
 </script>
+
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css">

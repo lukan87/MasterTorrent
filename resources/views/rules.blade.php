@@ -1,322 +1,396 @@
+```blade
 @extends('layouts.app')
 
 @section('content')
 
 <div class="my-5 rules-page">
+
     <div class="card glass shadow-lg border-0 rules-card">
 
+        {{-- HEADER --}}
         <div class="card-header text-white text-center rules-header">
-            <h2 class="mb-0">{{ config('app.name') }}</h2>
+
+            <h2 class="mb-0">
+                {{ config('app.name') }}
+            </h2>
+
             <p class="small fst-italic mt-1">
                 Private Tracker Rules • Read Carefully • Seed Generously
             </p>
+
         </div>
 
+
+        {{-- BODY --}}
         <div class="card-body rules-body">
 
-            {{-- Tabs --}}
-            <ul class="nav nav-tabs nav-justified rules-tabs" role="tablist">
-                <li class="nav-item">
-                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#ro">
-                        🇷🇴 RO
-                    </button>
-                </li>
-                <li class="nav-item">
-                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#en">
-                        🇬🇧 EN
-                    </button>
-                </li>
-            </ul>
+            <div class="accordion rules-accordion" id="rulesAccordion">
 
-            <div class="tab-content mt-4">
 
-                {{-- ===================== ROMANIAN TAB ===================== --}}
-                <div class="tab-pane fade show active" id="ro">
+                {{-- =========================================================
+                     1. GENERAL RULES
+                     ========================================================= --}}
+                <div class="accordion-item bg-dark text-light border-secondary">
 
-                    <div class="accordion rules-accordion" id="rulesAccordionRo">
+                    <h2 class="accordion-header">
 
-                        {{-- 1 General --}}
-                        <div class="accordion-item bg-dark text-light border-secondary">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button"
-                                        data-bs-toggle="collapse"
-                                        data-bs-target="#roGeneral"
-                                        aria-expanded="true">
-                                    📜 1. Reguli Generale
-                                </button>
-                            </h2>
-                            <div id="roGeneral"
-                                 class="accordion-collapse collapse show"
-                                 data-bs-parent="#rulesAccordionRo">
-                                <div class="accordion-body">
-                                    <ul>
-                                        <li>Respectați staff-ul – deciziile lor sunt finale.</li>
-                                        <li>Conturile multiple sunt strict interzise.</li>
-                                        <li>Imitarea staff-ului prin username este interzisă.</li>
-                                        <li>Redistribuirea torrentelor pe alte trackere este interzisă.</li>
-                                        <li>Vânzarea conturilor sau invitațiilor este interzisă.</li>
-                                        <li>Accesul pe {{ config('app.name') }} este un privilegiu, nu un drept.</li>
-                                        <li>Comportamentul rasist, discriminatoriu sau ofensator este strict interzis.</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
+                        <button class="accordion-button"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#generalRules"
+                                aria-expanded="true"
+                                aria-controls="generalRules">
 
-                        {{-- 2 Seeding --}}
-                        <div class="accordion-item bg-dark text-light border-secondary">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed"
-                                        data-bs-toggle="collapse"
-                                        data-bs-target="#roSeeding">
-                                    ⬇ 2. Download & Seeding
-                                </button>
-                            </h2>
-                            <div id="roSeeding"
-                                 class="accordion-collapse collapse"
-                                 data-bs-parent="#rulesAccordionRo">
-                                <div class="accordion-body">
-                                    <ul>
-                                        <li>După descărcare, mențineți torrentul la seed pentru un minim de 12 ore in 7 zile.</li>
-                                        <li>Rația minimă obligatorie: <strong>1.0</strong>, asta daca nu aveți timpul minim de seed.</li>
-                                        <li>Hit & Run peste 20 → restricționare download.</li>
-                                        <li>Freeleech nu înseamnă free seed – regulile se aplică normal.</li>
-                                        <li>Clasa VIP este exceptată de la regulile Hit & Run.</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
+                            📜 1. General Rules
 
-                        {{-- 3 Forum --}}
-                        <div class="accordion-item bg-dark text-light border-secondary">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed"
-                                        data-bs-toggle="collapse"
-                                        data-bs-target="#roForum">
-                                    💬 3. Forum & Mesaje Private
-                                </button>
-                            </h2>
-                            <div id="roForum"
-                                 class="accordion-collapse collapse"
-                                 data-bs-parent="#rulesAccordionRo">
-                                <div class="accordion-body">
-                                    <ul>
-                                        <li>Spam-ul și comportamentul agresiv sunt sancționate.</li>
-                                        <li>Folosiți edit în loc de multi-post.</li>
-                                        <li>Este interzisă promovarea altor trackere.</li>
-                                        <li>Comentariile trebuie să fie constructive.</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
+                        </button>
 
-                        {{-- 4 Classes --}}
-                        <div class="accordion-item bg-black text-light border-warning">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed"
-                                        data-bs-toggle="collapse"
-                                        data-bs-target="#roClasses">
-                                    🏆 4. Clase Utilizatori
-                                </button>
-                            </h2>
-                            <div id="roClasses"
-                                 class="accordion-collapse collapse"
-                                 data-bs-parent="#rulesAccordionRo">
-                                <div class="accordion-body">
+                    </h2>
 
-                                    <p>Clasele reflectă contribuția și nivelul de încredere câștigat pe tracker.</p>
+                    <div id="generalRules"
+                         class="accordion-collapse collapse show"
+                         data-bs-parent="#rulesAccordion">
 
-                                    <ul class="list-unstyled">
-                                        <li><span style="color: SlateGrey;"><strong>User</strong></span> – Clasa de bază.</li>
-                                        <li><span style="color: cyan;"><strong>Elite User</strong></span> – Utilizator stabil, cu activitate și rație bună. Pot crea request-uri și trimite invitații.</li>
-                                        <li><span style="color: orange;"><strong>Uploader</strong></span> – Contributor activ de conținut.</li>
-                                        <li><span style="color: green;"><strong>VIP</strong></span> – Exceptat de la Hit & Run. Acces la online users</li>
-                                        <li><span style="color: gold;"><strong>Special User</strong></span> – Membru cu contribuție ridicată.</li>
-                                        <li><span style="color: yellow;"><strong>Moderator</strong></span> – Aplică regulile.</li>
-                                        <li><span style="color: red;"><strong>Admin</strong></span> – Control administrativ complet.</li>
-                                        <li><span style="color: DarkCyan;"><strong>Owner</strong></span> – Autoritate supremă.</li>
-                                        <li><span style="color: BurlyWood;"><strong>Web Developer</strong></span> – Dezvoltatorul platformei.</li>
-                                    </ul>
+                        <div class="accordion-body">
 
-                                    <hr>
+                            <ul>
 
-                                    <h6 class="text-warning">⬆ Promovare automată: User → Elite User</h6>
+                                <li>
+                                    Respect staff – their decisions are final.
+                                </li>
 
-                                    <p class="text-danger fw-bold">
-                                        Promovarea este complet automată. Nu se acceptă cereri sau excepții.
-                                    </p>
+                                <li>
+                                    Multiple accounts are strictly forbidden.
+                                </li>
 
-                                    <ul>
-                                        <li>Contul trebuie să fie mai vechi de 5 luni.</li>
-                                        <li>Minim 500GB upload și 250GB download.</li>
-                                        <li>Rație generală minim 1.1.</li>
-                                        <li>Activitate constantă de seeding.</li>
-                                        <li>Fără Hit & Run active.</li>
-                                        <li>Fără avertismente sau sancțiuni.</li>
-                                        <li>Minim 50 postări pe forum</li>
-                                        <li>Minim 50 comentarii la torrente</li>
-                                        <li>Minim 50 aprecieri la torrente</li>
-                                        <li>0 Hit & Run.</li>
-                                        
-                                    </ul>
+                                <li>
+                                    Impersonating staff members is prohibited.
+                                </li>
 
-                                </div>
-                            </div>
+                                <li>
+                                    Redistributing torrents to other trackers is prohibited.
+                                </li>
+
+                                <li>
+                                    Selling accounts or invites is forbidden.
+                                </li>
+
+                                <li>
+                                    Access to {{ config('app.name') }} is a privilege, not a right.
+                                </li>
+
+                                <li>
+                                    Racist, discriminatory or offensive behavior is strictly prohibited.
+                                </li>
+
+                            </ul>
+
                         </div>
 
                     </div>
+
                 </div>
 
-                {{-- ===================== ENGLISH TAB ===================== --}}
-                <div class="tab-pane fade" id="en">
 
-                    <div class="accordion rules-accordion" id="rulesAccordionEn">
+                {{-- =========================================================
+                     2. DOWNLOADING & SEEDING
+                     ========================================================= --}}
+                <div class="accordion-item bg-dark text-light border-secondary">
 
-                        {{-- 1 General --}}
-                        <div class="accordion-item bg-dark text-light border-secondary">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button"
-                                        data-bs-toggle="collapse"
-                                        data-bs-target="#enGeneral"
-                                        aria-expanded="true">
-                                    📜 1. General Rules
-                                </button>
-                            </h2>
-                            <div id="enGeneral"
-                                 class="accordion-collapse collapse show"
-                                 data-bs-parent="#rulesAccordionEn">
-                                <div class="accordion-body">
-                                    <ul>
-                                        <li>Respect staff – their decisions are final.</li>
-                                        <li>Multiple accounts are strictly forbidden.</li>
-                                        <li>Impersonating staff members is prohibited.</li>
-                                        <li>Redistributing torrents to other trackers is prohibited.</li>
-                                        <li>Selling accounts or invites is forbidden.</li>
-                                        <li>Access to {{ config('app.name') }} is a privilege, not a right.</li>
-                                        <li>Racist, discriminatory or offensive behavior is strictly prohibited.</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
+                    <h2 class="accordion-header">
 
-                        {{-- 2 Seeding --}}
-                        <div class="accordion-item bg-dark text-light border-secondary">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed"
-                                        data-bs-toggle="collapse"
-                                        data-bs-target="#enSeeding">
-                                    ⬇ 2. Downloading & Seeding
-                                </button>
-                            </h2>
-                            <div id="enSeeding"
-                                 class="accordion-collapse collapse"
-                                 data-bs-parent="#rulesAccordionEn">
-                                <div class="accordion-body">
-                                    <ul>
-                                        <li>Keep torrents seeding after download.</li>
-                                        <li>Minimum required ratio: <strong>1.0</strong>.</li>
-                                        <li>Hit & Run over 20 → download restriction.</li>
-                                        <li>Freeleech torrents still require seeding.</li>
-                                        <li>VIP class is exempt from Hit & Run rules.</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
+                        <button class="accordion-button collapsed"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#seedingRules"
+                                aria-expanded="false"
+                                aria-controls="seedingRules">
 
-                        {{-- 3 Forum --}}
-                        <div class="accordion-item bg-dark text-light border-secondary">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed"
-                                        data-bs-toggle="collapse"
-                                        data-bs-target="#enForum">
-                                    💬 3. Forum & Private Messages
-                                </button>
-                            </h2>
-                            <div id="enForum"
-                                 class="accordion-collapse collapse"
-                                 data-bs-parent="#rulesAccordionEn">
-                                <div class="accordion-body">
-                                    <ul>
-                                        <li>No spam or aggressive behavior.</li>
-                                        <li>Use edit instead of multi-posting.</li>
-                                        <li>Advertising other trackers is prohibited.</li>
-                                        <li>Comments must be constructive.</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
+                            ⬇ 2. Downloading & Seeding
 
-                        {{-- 4 Classes --}}
-                        <div class="accordion-item bg-black text-light border-warning">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed"
-                                        data-bs-toggle="collapse"
-                                        data-bs-target="#enClasses">
-                                    🏆 4. User Classes
-                                </button>
-                            </h2>
-                            <div id="enClasses"
-                                 class="accordion-collapse collapse"
-                                 data-bs-parent="#rulesAccordionEn">
-                                <div class="accordion-body">
+                        </button>
 
-                                    <p>User classes represent contribution level and trust within the tracker.</p>
+                    </h2>
 
-                                    <ul class="list-unstyled">
-                                        <li><span style="color: SlateGrey;"><strong>User</strong></span> – Default class.</li>
-                                        <li><span style="color: cyan;"><strong>Elite User</strong></span> – Stable member with solid ratio and activity. Can create requests and send invites.</li>
-                                        <li><span style="color: orange;"><strong>Uploader</strong></span> – Active content contributor.</li>
-                                        <li><span style="color: green;"><strong>VIP</strong></span> – Exempt from Hit & Run rules.</li>
-                                        <li><span style="color: gold;"><strong>Special User</strong></span> – High contribution member.</li>
-                                        <li><span style="color: yellow;"><strong>Moderator</strong></span> – Enforces rules.</li>
-                                        <li><span style="color: red;"><strong>Admin</strong></span> – Full administrative authority.</li>
-                                        <li><span style="color: DarkCyan;"><strong>Owner</strong></span> – Final authority.</li>
-                                        <li><span style="color: BurlyWood;"><strong>Web Developer</strong></span> – Platform architect.</li>
-                                    </ul>
+                    <div id="seedingRules"
+                         class="accordion-collapse collapse"
+                         data-bs-parent="#rulesAccordion">
 
-                                    <hr>
+                        <div class="accordion-body">
 
-                                    <h6 class="text-warning">⬆ Automatic Promotion: User → Elite User</h6>
+                            <ul>
 
-                                    <p class="text-danger fw-bold">
-                                        Promotion is fully automatic. No requests. No exceptions.
-                                    </p>
+                                <li>
+                                    Keep torrents seeding after download.
+                                </li>
 
-                                    <ul>
-                                        <li>Account must be at least 5 months old.</li>
-                                        <li>Minimum 500GB upload and 250GB download.</li>
-                                        <li>Minimum overall ratio of 1.1.</li>
-                                        <li>Consistent seeding activity.</li>
-                                        <li>No active Hit & Run violations.</li>
-                                        <li>No rule violations or warnings.</li>
-                                        <li>At least 50 forum posts.</li>
-                                        <li>At least 50 torrent comments.</li>
-                                        <li>At least 50 torrent likes.</li>
-                                        <li>Hit and Run count to be 0.</li>
+                                <li>
+                                    Minimum required ratio:
+                                    <strong>1.0</strong>.
+                                </li>
 
-                                    </ul>
+                                <li>
+                                    Hit & Run over 20 → download restriction.
+                                </li>
 
-                                </div>
-                            </div>
+                                <li>
+                                    Freeleech torrents still require seeding.
+                                </li>
+
+                                <li>
+                                    VIP class is exempt from Hit & Run rules.
+                                </li>
+
+                            </ul>
+
                         </div>
 
                     </div>
+
                 </div>
+
+
+                {{-- =========================================================
+                     3. FORUM & PRIVATE MESSAGES
+                     ========================================================= --}}
+                <div class="accordion-item bg-dark text-light border-secondary">
+
+                    <h2 class="accordion-header">
+
+                        <button class="accordion-button collapsed"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#forumRules"
+                                aria-expanded="false"
+                                aria-controls="forumRules">
+
+                            💬 3. Forum & Private Messages
+
+                        </button>
+
+                    </h2>
+
+                    <div id="forumRules"
+                         class="accordion-collapse collapse"
+                         data-bs-parent="#rulesAccordion">
+
+                        <div class="accordion-body">
+
+                            <ul>
+
+                                <li>
+                                    No spam or aggressive behavior.
+                                </li>
+
+                                <li>
+                                    Use edit instead of multi-posting.
+                                </li>
+
+                                <li>
+                                    Advertising other trackers is prohibited.
+                                </li>
+
+                                <li>
+                                    Comments must be constructive.
+                                </li>
+
+                            </ul>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                {{-- =========================================================
+                     4. USER CLASSES
+                     ========================================================= --}}
+                <div class="accordion-item bg-black text-light border-warning">
+
+                    <h2 class="accordion-header">
+
+                        <button class="accordion-button collapsed"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#userClasses"
+                                aria-expanded="false"
+                                aria-controls="userClasses">
+
+                            🏆 4. User Classes
+
+                        </button>
+
+                    </h2>
+
+                    <div id="userClasses"
+                         class="accordion-collapse collapse"
+                         data-bs-parent="#rulesAccordion">
+
+                        <div class="accordion-body">
+
+                            <p>
+                                User classes represent contribution level and trust within the tracker.
+                            </p>
+
+
+                            {{-- USER CLASSES --}}
+                            <ul class="list-unstyled">
+
+                                <li>
+                                    <span style="color: SlateGrey;">
+                                        <strong>User</strong>
+                                    </span>
+                                    – Default class.
+                                </li>
+
+                                <li>
+                                    <span style="color: cyan;">
+                                        <strong>Elite User</strong>
+                                    </span>
+                                    – Stable member with solid ratio and activity.
+                                    Can create requests and send invites.
+                                </li>
+
+                                <li>
+                                    <span style="color: orange;">
+                                        <strong>Uploader</strong>
+                                    </span>
+                                    – Active content contributor.
+                                </li>
+
+                                <li>
+                                    <span style="color: green;">
+                                        <strong>VIP</strong>
+                                    </span>
+                                    – Exempt from Hit & Run rules.
+                                </li>
+
+                                <li>
+                                    <span style="color: gold;">
+                                        <strong>Special User</strong>
+                                    </span>
+                                    – High contribution member.
+                                </li>
+
+                                <li>
+                                    <span style="color: yellow;">
+                                        <strong>Moderator</strong>
+                                    </span>
+                                    – Enforces rules.
+                                </li>
+
+                                <li>
+                                    <span style="color: red;">
+                                        <strong>Admin</strong>
+                                    </span>
+                                    – Full administrative authority.
+                                </li>
+
+                                <li>
+                                    <span style="color: DarkCyan;">
+                                        <strong>Owner</strong>
+                                    </span>
+                                    – Final authority.
+                                </li>
+
+                                <li>
+                                    <span style="color: BurlyWood;">
+                                        <strong>Web Developer</strong>
+                                    </span>
+                                    – Platform architect.
+                                </li>
+
+                            </ul>
+
+
+                            <hr>
+
+
+                            {{-- AUTOMATIC PROMOTION --}}
+                            <h6 class="text-warning">
+                                ⬆ Automatic Promotion: User → Elite User
+                            </h6>
+
+                            <p class="text-danger fw-bold">
+                                Promotion is fully automatic. No requests. No exceptions.
+                            </p>
+
+                            <ul>
+
+                                <li>
+                                    Account must be at least 5 months old.
+                                </li>
+
+                                <li>
+                                    Minimum 500GB upload and 250GB download.
+                                </li>
+
+                                <li>
+                                    Minimum overall ratio of 1.1.
+                                </li>
+
+                                <li>
+                                    Consistent seeding activity.
+                                </li>
+
+                                <li>
+                                    No active Hit & Run violations.
+                                </li>
+
+                                <li>
+                                    No rule violations or warnings.
+                                </li>
+
+                                <li>
+                                    At least 50 forum posts.
+                                </li>
+
+                                <li>
+                                    At least 50 torrent comments.
+                                </li>
+
+                                <li>
+                                    At least 50 torrent likes.
+                                </li>
+
+                                <li>
+                                    Hit and Run count to be 0.
+                                </li>
+
+                            </ul>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
 
             </div>
+
         </div>
 
+
+        {{-- FOOTER --}}
         <div class="card-footer rules-footer">
+
             <small class="fst-italic">
                 {{ config('app.name') }} • Seed More Than You Take • Quality Over Quantity
             </small>
+
         </div>
 
     </div>
+
 </div>
 
+
 <style>
+
 /* =========================================================
    FILEIPLAY — RULES PAGE
+   English only
    Dark navy glass + teal forum style
    ========================================================= */
 
@@ -325,188 +399,256 @@
     margin-bottom: 28px;
 }
 
+
+/* =========================================================
+   CARD
+   ========================================================= */
+
 .rules-card {
+
     overflow: hidden;
+
     background: linear-gradient(
         135deg,
         rgba(22, 32, 51, .96),
         rgba(15, 23, 42, .88)
     );
+
     border: 1px solid var(--ui-border) !important;
+
     border-radius: .85rem !important;
-    box-shadow: 0 18px 45px rgba(0,0,0,.32);
+
+    box-shadow: 0 18px 45px rgba(0, 0, 0, .32);
+
     backdrop-filter: blur(14px);
 }
 
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
 .rules-header {
+
     padding: 20px;
+
     text-align: center;
-    background: rgba(45,212,191,.045);
+
+    background: rgba(45, 212, 191, .045);
+
     border-bottom: 1px solid var(--ui-border);
 }
 
+
 .rules-header h2 {
+
     color: #fff;
+
     font-size: 18px;
+
     font-weight: 700;
+
     margin: 0;
 }
 
+
 .rules-header p {
-    color: rgba(255,255,255,.48);
+
+    color: rgba(255, 255, 255, .48);
+
     font-size: 12px;
+
+    margin-bottom: 0;
 }
+
+
+/* =========================================================
+   BODY
+   ========================================================= */
 
 .rules-body {
     padding: 18px;
 }
 
-/* Language tabs */
 
-.rules-tabs {
-    border-bottom: 1px solid var(--ui-border);
-}
-
-.rules-tabs .nav-link {
-    color: rgba(255,255,255,.58);
-    background: transparent;
-    border: 1px solid transparent;
-    border-bottom: 2px solid transparent;
-    font-size: 13px;
-    font-weight: 600;
-    padding: 9px 12px;
-}
-
-.rules-tabs .nav-link:hover {
-    color: #fff;
-    border-color: transparent;
-    border-bottom-color: rgba(45,212,191,.35);
-}
-
-.rules-tabs .nav-link.active {
-    color: var(--ui-accent);
-    background: rgba(45,212,191,.045);
-    border-color: var(--ui-border) var(--ui-border) transparent;
-    border-bottom-color: var(--ui-accent);
-}
-
-/* Accordion */
+/* =========================================================
+   ACCORDION
+   ========================================================= */
 
 .rules-accordion .accordion-item {
+
     margin-bottom: 8px;
+
     overflow: hidden;
 
-    background: rgba(15,23,42,.72) !important;
+    background: rgba(15, 23, 42, .72) !important;
 
     border: 1px solid var(--ui-border) !important;
+
     border-radius: .65rem !important;
 }
+
+
+.rules-accordion .accordion-item:last-child {
+    margin-bottom: 0;
+}
+
 
 .rules-accordion .accordion-header {
     margin: 0;
 }
 
-.rules-accordion .accordion-button {
-    color: rgba(255,255,255,.82) !important;
 
-    background: rgba(22,32,51,.78) !important;
+.rules-accordion .accordion-button {
+
+    color: rgba(255, 255, 255, .82) !important;
+
+    background: rgba(22, 32, 51, .78) !important;
 
     border: 0 !important;
 
     box-shadow: none !important;
 
     font-size: 14px;
+
     font-weight: 700;
 
     padding: 12px 14px;
 }
 
+
 .rules-accordion .accordion-button:hover {
+
     color: #fff !important;
-    background: rgba(45,212,191,.055) !important;
+
+    background: rgba(45, 212, 191, .055) !important;
 }
 
+
 .rules-accordion .accordion-button:not(.collapsed) {
+
     color: var(--ui-accent) !important;
-    background: rgba(45,212,191,.065) !important;
+
+    background: rgba(45, 212, 191, .065) !important;
+
     box-shadow: inset 3px 0 0 var(--ui-accent) !important;
 }
 
+
 .rules-accordion .accordion-button::after {
+
     filter: invert(1);
+
     opacity: .55;
 }
+
 
 .rules-accordion .accordion-button:not(.collapsed)::after {
     opacity: .85;
 }
 
+
+/* =========================================================
+   ACCORDION CONTENT
+   ========================================================= */
+
 .rules-accordion .accordion-body {
-    color: rgba(255,255,255,.67);
 
-    background: rgba(9,16,29,.48);
+    color: rgba(255, 255, 255, .67);
 
-    border-top: 1px solid rgba(255,255,255,.045);
+    background: rgba(9, 16, 29, .48);
+
+    border-top: 1px solid rgba(255, 255, 255, .045);
 
     padding: 14px 16px;
 
     font-size: 13px;
+
     line-height: 1.65;
 }
 
+
 .rules-accordion ul {
+
     margin-bottom: 0;
+
     padding-left: 19px;
 }
+
 
 .rules-accordion li {
     margin-bottom: 6px;
 }
 
+
 .rules-accordion li:last-child {
     margin-bottom: 0;
 }
 
+
 .rules-accordion strong {
-    color: rgba(255,255,255,.88);
+    color: rgba(255, 255, 255, .88);
 }
 
+
 .rules-accordion hr {
+
     border-color: var(--ui-border);
+
     opacity: 1;
+
     margin: 16px 0;
 }
 
+
 .rules-accordion h6 {
+
     font-size: 13px;
+
     font-weight: 700;
 }
 
-/* Keep the existing class colours, but make them readable */
+
+/* =========================================================
+   SPECIAL TEXT
+   ========================================================= */
 
 .rules-accordion .text-warning {
     color: #fcd34d !important;
 }
 
+
 .rules-accordion .text-danger {
     color: #fca5a5 !important;
 }
 
-/* Footer */
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
 
 .rules-footer {
+
     padding: 11px 16px;
-    color: rgba(255,255,255,.42);
-    background: rgba(9,16,29,.55);
+
+    color: rgba(255, 255, 255, .42);
+
+    background: rgba(9, 16, 29, .55);
+
     border-top: 1px solid var(--ui-border);
+
     text-align: center;
 }
+
 
 .rules-footer small {
     font-size: 11px;
 }
 
-/* Mobile */
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
 
 @media (max-width: 768px) {
 
@@ -515,38 +657,47 @@
         margin-bottom: 18px;
     }
 
+
     .rules-header {
         padding: 16px 12px;
     }
+
 
     .rules-header h2 {
         font-size: 16px;
     }
 
+
     .rules-body {
         padding: 12px;
     }
 
-    .rules-tabs .nav-link {
-        font-size: 12px;
-        padding: 8px 6px;
-    }
 
     .rules-accordion .accordion-button {
+
         font-size: 13px;
+
         padding: 11px 12px;
     }
 
+
     .rules-accordion .accordion-body {
+
         padding: 12px;
+
         font-size: 13px;
+
         line-height: 1.6;
     }
+
 
     .rules-footer {
         padding: 10px 12px;
     }
+
 }
+
 </style>
 
 @endsection
+```

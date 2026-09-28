@@ -187,7 +187,7 @@ Route::get('/forum/{category:slug}',
 
 // Admin email routes
 
-Route::prefix('admin')->name('admin.')->group(function () {
+Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
 
     Route::get('/emails', [EmailController::class, 'index'])
         ->name('emails.index');
@@ -536,8 +536,6 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
         // Users Management
         Route::group(['prefix' => 'users'], function () {
             Route::get('/', [UserController::class, 'index'])->name('users.index');
-            Route::get('/create', [UserController::class, 'create'])->name('users.create');
-            Route::post('/store', [UserController::class, 'store'])->name('users.store');
             Route::get('/{name}', [UserController::class, 'show'])->name('users.show');
             Route::get('/{id}/edit', [UserController::class, 'edit'])->name('users.edit');
             Route::put('/{id}/update', [UserController::class, 'update'])->name('users.update');
@@ -554,8 +552,6 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
         // Movies Management
         Route::group(['prefix' => 'movies'], function () {
             Route::get('/', [AdminMovieController::class, 'index'])->name('movies.index');
-            Route::get('/create', [AdminMovieController::class, 'create'])->name('movies.create');
-            Route::post('/store', [AdminMovieController::class, 'store'])->name('movies.store');
             Route::get('/{id}/edit', [AdminMovieController::class, 'edit'])->name('movies.edit');
             Route::put('/{id}/update', [AdminMovieController::class, 'update'])->name('movies.update');
             Route::delete('/{id}/destroy', [AdminMovieController::class, 'destroy'])->name('movies.destroy');
@@ -564,8 +560,6 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
         // Series Management
         Route::group(['prefix' => 'series'], function () {
             Route::get('/', [AdminSeriesController::class, 'index'])->name('series.index');
-            Route::get('/create', [AdminSeriesController::class, 'create'])->name('series.create');
-            Route::post('/store', [AdminSeriesController::class, 'store'])->name('series.store');
             Route::get('/{id}/edit', [AdminSeriesController::class, 'edit'])->name('series.edit');
             Route::put('/{id}/update', [AdminSeriesController::class, 'update'])->name('series.update');
             Route::delete('/{id}/destroy', [AdminSeriesController::class, 'destroy'])->name('series.destroy');
@@ -575,8 +569,6 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
         Route::group(['prefix' => 'torrents'], function () {
             Route::get('/', [TorrentsController::class, 'index'])->name('torrents.index');
             Route::get('/{id}', [TorrentsController::class, 'show'])->name('torrents.show');
-            Route::get('/create', [TorrentsController::class, 'create'])->name('torrents.create');
-            Route::post('/store', [TorrentsController::class, 'store'])->name('torrents.store');
             Route::get('/{id}/edit', [TorrentsController::class, 'edit'])->name('torrents.edit');
             Route::put('/{id}/update', [TorrentsController::class, 'update'])->name('torrents.update');
             Route::delete('/{id}/destroy', [TorrentsController::class, 'destroy'])->name('torrents.destroy');
@@ -585,7 +577,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
         });
 
         // System Info Routes
-        Route::group(['prefix' => 'system-info'], function () {
+        Route::group(['prefix' => 'system-info', 'middleware' => 'can:manage-admin-system'], function () {
             Route::get('/', [SystemInfoController::class, 'index'])->name('systemInfo.index');
             Route::post('/clear-cache', [SystemInfoController::class, 'clearCache'])->name('systemInfo.clearCache');
             Route::post('/clear-views', [SystemInfoController::class, 'clearViews'])->name('systemInfo.clearViews');
@@ -943,8 +935,6 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/tickets/{id}/status', [StaffTicketController::class, 'changeStatus'])->name('tickets.status');
 
-    Route::post('/tickets/{id}/lock', [StaffTicketController::class, 'lock'])->name('tickets.lock');
-
     Route::get('/staff/tickets/dashboard', [TicketDashboardController::class, 'index'])->name('tickets.dashboard');
 
     Route::get('/staff/tickets/my', [StaffTicketController::class, 'myTickets'])->name('tickets.my');
@@ -1003,7 +993,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::post('/admin/users/mass-message/preview', [UserController::class, 'previewMassMessage'])
-    ->name('admin.users.mass-message.preview');
+    ->middleware(['auth', 'admin'])->name('admin.users.mass-message.preview');
 
 Route::post('/messages/edit/{message}', [MessageController::class, 'edit'])
     ->name('messages.edit');

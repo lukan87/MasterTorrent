@@ -2,17 +2,39 @@
 
 @section('content')
 
+@include('library.partials.hero-styles')
+
 {{-- =========================================================
     PREMIUM HEADER — reuses the exact torrent detail header
 ========================================================= --}}
-@if(!empty($display) && $torrents->isNotEmpty())
+@if(!empty($display))
+
+    @php
+        // Prepare data for media-header, handling both torrent-db items and library-only items
+        $posterUrl = !empty($display['poster_path']) ? 'https://image.tmdb.org/t/p/w500' . $display['poster_path'] : null;
+
+        $torrent = $torrents->isNotEmpty() ? $torrents->first() : new class($posterUrl, $tmdbid, null) {
+            public $poster;
+            public $tmdbid;
+            public $trailer;
+            public $genres;
+            public function __construct($p, $t, $tr) {
+                $this->poster = $p;
+                $this->tmdbid = $t;
+                $this->trailer = $tr;
+                $this->genres = collect();
+            }
+            public function trashed() { return false; }
+        };
+    @endphp
+
 
     @include('torrents.partials.media-header', [
-        'torrent' => $torrents->first(),
+        'torrent' => $torrent,
         'display' => $display,
     ])
 
-    {{-- Subscribe control (preserved from the previous hero) --}}
+    {{-- Subscribe control --}}
     <div class="container px-xl-5 px-lg-4 px-3">
         <div class="library-subscribe-row">
 
@@ -54,115 +76,12 @@
 
 @else
 
-    {{-- Fallback (no torrent / no display data) — rich hero from TMDB/library data --}}
-    @php
-        $fbPoster = !empty($movie['poster_path'])
-            ? 'https://image.tmdb.org/t/p/w342' . $movie['poster_path']
-            : (
-                !empty($libraryEntry?->poster_path)
-                    ? 'https://image.tmdb.org/t/p/w342' . $libraryEntry->poster_path
-                    : '/images/noposter.jpg'
-            );
-
-        $fbBackdrop = !empty($movie['backdrop_path'])
-            ? 'https://image.tmdb.org/t/p/w1280' . $movie['backdrop_path']
-            : (
-                !empty($libraryEntry?->backdrop_path)
-                    ? 'https://image.tmdb.org/t/p/w1280' . $libraryEntry->backdrop_path
-                    : null
-            );
-
-        $fbRating = !empty($movie['vote_average'])
-            ? $movie['vote_average']
-            : $libraryEntry?->rating;
-
-        $fbYear = !empty($movie['release_date'])
-            ? substr($movie['release_date'], 0, 4)
-            : null;
-
-        $fbGenres = collect($movie['genres'] ?? [])
-            ->pluck('name')
-            ->take(3)
-            ->implode(' · ');
-    @endphp
-
-    <div class="hero">
-
-        @if($fbBackdrop)
-            <div
-                class="hero-bg"
-                style="background-image:url('{{ $fbBackdrop }}')"
-            ></div>
-        @endif
-
-        <div class="hero-overlay"></div>
-
-        <div class="container hero-content">
-
-            <div class="row align-items-center g-4">
-
-                <div class="col-md-3 col-sm-4 col-5 text-center">
-
-                    <img
-                        src="{{ $fbPoster }}"
-                        class="poster shadow-lg"
-                        alt="{{ $movie['title'] ?? 'Movie' }}"
-                    >
-
-                </div>
-
-                <div class="col-md-9 col-sm-8 col-7 text-white">
-
-                    <h1 class="mb-2">
-
-                        {{ $movie['title'] ?? 'Movie' }}
-
-                        @if($fbYear)
-                            <span class="year">
-                                ({{ $fbYear }})
-                            </span>
-                        @endif
-
-                    </h1>
-
-                    @if($fbRating || $fbGenres)
-
-                        <div class="meta mb-3">
-
-                            @if($fbRating)
-
-                                <span class="badge-rating">
-                                    <i class="bi bi-star-fill me-1"></i>
-                                    {{ number_format($fbRating, 1) }}
-                                </span>
-
-                            @endif
-
-                            @if($fbGenres)
-
-                                <span class="badge-meta">
-                                    {{ $fbGenres }}
-                                </span>
-
-                            @endif
-
-                        </div>
-
-                    @endif
-
-                    <p class="overview">
-                        {{ $movie['overview'] ?? 'No description available.' }}
-                    </p>
-
-                </div>
-
-            </div>
-
-        </div>
-
+    <div class="container px-xl-5 px-lg-4 px-3">
+        @include('library.movies.partials.hero')
     </div>
 
 @endif
+
 
 
 {{-- =========================================================

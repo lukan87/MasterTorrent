@@ -3,22 +3,42 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\User;
 use Illuminate\Support\Str;
 
 class Ticket extends Model
 {
+    public const STATUSES = ['Open', 'Waiting Staff', 'Waiting User', 'Resolved', 'Closed'];
 
-protected static function boot()
-{
-    parent::boot();
+    public const PRIORITIES = ['Low', 'Medium', 'High', 'Critical'];
 
-    static::creating(function ($ticket) {
+    public function canBeViewedBy(User $user): bool
+    {
+        return $user->user_class > 5 || (int) $this->user_id === (int) $user->id;
+    }
 
-        $ticket->slug = Str::slug($ticket->title);
+    public function scopeUnassigned($query)
+    {
+        return $query->whereNull('assigned_to')->whereNull('claimed_by');
+    }
 
-    });
-}
+    public function scopeOwnedBy($query, $userId)
+    {
+        return $query->where(function ($query) use ($userId) {
+            $query->where('assigned_to', $userId)->orWhere('claimed_by', $userId);
+        });
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($ticket) {
+
+            $ticket->slug = Str::slug($ticket->title);
+
+        });
+    }
+
     protected $fillable = [
         'user_id',
         'category_id',
@@ -30,12 +50,12 @@ protected static function boot()
         'claimed_by',
         'last_replied_at',
         'last_replier_id',
-        'is_locked'
+        'is_locked',
     ];
 
     protected $casts = [
         'last_replied_at' => 'datetime',
-        'is_locked' => 'boolean'
+        'is_locked' => 'boolean',
     ];
 
     /*
@@ -45,10 +65,10 @@ protected static function boot()
     */
 
     // Ticket creator
-public function user()
-{
-    return $this->belongsTo(User::class)->withTrashed();
-}
+    public function user()
+    {
+        return $this->belongsTo(User::class)->withTrashed();
+    }
 
     // Category
     public function category()
@@ -65,47 +85,45 @@ public function user()
     // Assigned staff
     public function assignedStaff()
     {
-        return $this->belongsTo(User::class,'assigned_to');
+        return $this->belongsTo(User::class, 'assigned_to');
     }
 
     // Claimed staff
     public function claimedBy()
     {
-        return $this->belongsTo(User::class,'claimed_by');
+        return $this->belongsTo(User::class, 'claimed_by');
     }
 
     // Last replier
     public function lastReplier()
     {
-        return $this->belongsTo(User::class,'last_replier_id');
+        return $this->belongsTo(User::class, 'last_replier_id');
     }
 
     public function events()
-{
-    return $this->hasMany(TicketEvent::class);
-}
+    {
+        return $this->hasMany(TicketEvent::class);
+    }
 
-
-    //Helpers for status and priority labels
+    // Helpers for status and priority labels
 
     public function isOpen()
-{
-    return $this->status === 'Open';
-}
+    {
+        return $this->status === 'Open';
+    }
 
-public function isResolved()
-{
-    return $this->status === 'Resolved';
-}
+    public function isResolved()
+    {
+        return $this->status === 'Resolved';
+    }
 
-public function isWaitingStaff()
-{
-    return $this->status === 'Waiting Staff';
-}
+    public function isWaitingStaff()
+    {
+        return $this->status === 'Waiting Staff';
+    }
 
-public function isWaitingUser()
-{
-    return $this->status === 'Waiting User';
-}
-
+    public function isWaitingUser()
+    {
+        return $this->status === 'Waiting User';
+    }
 }

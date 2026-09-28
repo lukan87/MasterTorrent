@@ -90,7 +90,7 @@ class TorrentMovieController extends Controller
         $movie = cache()->remember("tmdb_movie_v2_{$tmdbid}", 86400, function () use ($tmdbid) {
             return Http::get("https://api.themoviedb.org/3/movie/{$tmdbid}", [
                'api_key' => config('services.tmdb.key'),
-               'append_to_response' => 'recommendations',
+               'append_to_response' => 'recommendations,credits,videos',
                'language' => 'en-US',
             ])->json();
         });

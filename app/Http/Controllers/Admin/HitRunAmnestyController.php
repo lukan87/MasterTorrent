@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\UserClass;
 use App\Services\HitRun\HitRunAmnestyService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\UserClass;
 
 class HitRunAmnestyController extends Controller
 {
@@ -16,7 +16,7 @@ class HitRunAmnestyController extends Controller
     public function index()
     {
         // Only Admin and above can manage hit & runs.
-        if (Auth::user()->user_class < UserClass::ADMIN) {
+        if ((Auth::user()?->user_class ?? 0) < UserClass::ADMIN) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -30,7 +30,7 @@ class HitRunAmnestyController extends Controller
      */
     public function run(Request $request)
     {
-        if (Auth::user()->user_class < UserClass::ADMIN) {
+        if ((Auth::user()?->user_class ?? 0) < UserClass::ADMIN) {
             abort(403, 'Unauthorized action.');
         }
 

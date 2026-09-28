@@ -1,8 +1,8 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', 'Manage Happy Hours')
 
-@section('content')
+@section('admin-content')
 
 <div class="container-fluid px-3 px-md-4 py-3 happyhour-page">
 

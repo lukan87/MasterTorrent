@@ -6,8 +6,17 @@ use Illuminate\Database\Eloquent\Model;
 
 class UploadApplication extends Model
 {
+    public const ACTIVE_STATUSES = ['pending', 'discussion', 'voting'];
+
+    public const STATUSES = ['pending', 'discussion', 'voting', 'accepted', 'rejected'];
+
+    public function isActive(): bool
+    {
+        return in_array($this->status, self::ACTIVE_STATUSES, true);
+    }
 
     protected $table = 'upload_applications';
+
     protected $fillable = [
         'applicant_id',
         'reviewed_by',
@@ -23,12 +32,16 @@ class UploadApplication extends Model
         'status',
         'votes_for',
         'votes_against',
-        'decision_at'
+        'decision_at',
     ];
 
-
     protected $casts = [
-    'decision_at' => 'datetime',
+        'decision_at' => 'datetime',
+        'scene_access' => 'boolean',
+        'know_torrents' => 'boolean',
+        'understand_seeding' => 'boolean',
+        'votes_for' => 'integer',
+        'votes_against' => 'integer',
     ];
 
     /*
@@ -37,10 +50,10 @@ class UploadApplication extends Model
     |--------------------------------------------------------------------------
     */
 
-   public function applicant()
-{
-    return $this->belongsTo(User::class, 'applicant_id')->withTrashed();
-}
+    public function applicant()
+    {
+        return $this->belongsTo(User::class, 'applicant_id')->withTrashed();
+    }
 
     public function reviewer()
     {

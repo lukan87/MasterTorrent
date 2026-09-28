@@ -1,6 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
-@section('content')
+@section('admin-content')
 
 <div class="container-fluid px-3 px-md-4 py-3 system-info-page">
 
@@ -134,7 +134,7 @@
                     <div
                         class="progress-bar"
                         role="progressbar"
-                        style="width: {{ 100 - (($storage / $diskTotal) * 100) }}%"
+                        style="width: {{ 100 - (($storage / max(1, $diskTotal)) * 100) }}%"
                     ></div>
 
                 </div>
@@ -163,7 +163,7 @@
                     <div
                         class="progress-bar ram-progress"
                         role="progressbar"
-                        style="width: {{ ($ramUsage['used'] / $ramUsage['total']) * 100 }}%"
+                        style="width: {{ ($ramUsage['used'] / max(1, $ramUsage['total'])) * 100 }}%"
                     ></div>
 
                 </div>
@@ -229,6 +229,12 @@
 
 
         <div class="row g-2 maintenance-actions">
+            <div class="col-xl-3 col-md-6">
+                <form action="{{ route('admin.systemInfo.backup') }}" method="POST" onsubmit="return confirm('Create a site backup now? This may take several minutes.');">
+                    @csrf
+                    <button type="submit" class="maintenance-btn primary-btn w-100">Create backup</button>
+                </form>
+            </div>
 
             <div class="col-xl-3 col-md-6">
                 <form action="{{ route('admin.systemInfo.clearCache') }}" method="POST">

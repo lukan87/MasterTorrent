@@ -90,7 +90,7 @@ class TorrentSeriesController extends Controller
         $movie = cache()->remember("tmdb_series_v2_{$tmdbid}", 86400, function () use ($tmdbid) {
             return Http::get("https://api.themoviedb.org/3/tv/{$tmdbid}", [
                 'api_key' => config('services.tmdb.key'),
-                'append_to_response' => 'recommendations',
+                'append_to_response' => 'recommendations,credits,videos',
                 'language' => 'en-US',
             ])->json();
         });
@@ -175,7 +175,7 @@ $recommendations = collect($movie['recommendations']['results'] ?? [])
 
         return view('library.series.show', compact(
             'movie', 'torrents', 'tmdbid', 'isSubscribed',
-            'subscribers', 'recommendations', 'display', 'libraryEntry', 'watchUrl'
+            'subscribers', 'recommendations', 'display', 'libraryEntry', 'watchUrl', 'watchSeries'
         ));
     }
 

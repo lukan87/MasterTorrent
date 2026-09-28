@@ -1,168 +1,77 @@
 @extends('layouts.app')
 
 @section('content')
-
-<div class="container py-5">
-
-
-{{-- =========================================================
-     FORUM HEADER
-========================================================== --}}
-
-<div class="forum-index-header mb-4">
-
-    <div class="forum-header-copy">
-
-        <div class="forum-eyebrow">
-            <i class="bi bi-chat-square-dots-fill me-2"></i>
-            COMMUNITY
+<div class="container forum-index py-4 py-lg-5">
+    <header class="forum-index-header">
+        <div class="forum-header-copy">
+            <div class="forum-eyebrow"><i class="bi bi-chat-square-dots" aria-hidden="true"></i> FileIplay community</div>
+            <h1 class="forum-page-title">Good conversations<br>start here.</h1>
+            <p class="forum-page-subtitle">Share what you love, ask a question, or find your next great discovery. There’s a conversation for everyone.</p>
+            <div class="forum-header-actions">
+                <a href="#forum-categories" class="forum-primary-btn">Explore categories <i class="bi bi-arrow-down" aria-hidden="true"></i></a>
+                @auth
+                    @if(auth()->user()->user_class > \App\Models\UserClass::MODERATOR)
+                        <a href="{{ route('forum.category.create') }}" class="forum-secondary-btn"><i class="bi bi-folder-plus" aria-hidden="true"></i> Add Category</a>
+                    @endif
+                @endauth
+            </div>
         </div>
+        <div class="forum-overview" aria-label="Forum overview">
+            <div class="forum-overview-symbol" aria-hidden="true"><i class="bi bi-chat-square-heart"></i></div>
+            <p>A place to connect.</p>
+            <dl class="forum-stats">
+                <div><dt>Categories</dt><dd>{{ number_format($categories->count()) }}</dd></div>
+                <div><dt>Topics</dt><dd>{{ number_format($categories->sum('topics_count')) }}</dd></div>
+            </dl>
+        </div>
+    </header>
 
-        <h1 class="forum-page-title">
-            Forum
-        </h1>
-
-        <p class="forum-page-subtitle">
-            Welcome to the FileIplay community.
-            Join the conversation, share ideas and connect with others.
-        </p>
-
+    <div class="forum-toolbar">
+        <form method="GET" action="{{ route('forum.search') }}" class="forum-search-bar" role="search">
+            <label for="forum-search" class="visually-hidden">Search the forum</label>
+            <i class="bi bi-search" aria-hidden="true"></i>
+            <input id="forum-search" type="search" name="q" placeholder="Search topics and conversations…" required>
+            <button type="submit" class="forum-primary-btn">Search</button>
+        </form>
+        @auth
+            <a href="{{ route('forum.my-topics') }}" class="forum-secondary-btn"><i class="bi bi-person-circle" aria-hidden="true"></i> My Topics</a>
+        @endauth
     </div>
 
-    @auth
-
-        @if(auth()->user()->user_class > \App\Models\UserClass::MODERATOR)
-
-            <a href="{{ route('forum.category.create') }}"
-               class="forum-add-category-btn">
-
-                <i class="bi bi-folder-plus me-2"></i>
-
-                Add Category
-
-            </a>
-
-        @endif
-
-    @endauth
-
-</div>
-
-{{-- =========================================================
-     SEARCH + QUICK LINKS
-========================================================== --}}
-
-<div class="d-flex flex-wrap gap-3 mb-4 align-items-center">
-
-    <form method="GET" action="{{ route('forum.search') }}" class="forum-search-bar">
-        <input
-            type="text"
-            name="q"
-            class="form-control"
-            placeholder="Search forum..."
-        >
-        <button type="submit" class="btn btn-search">
-            <i class="bi bi-search"></i>
-        </button>
-    </form>
-
-    @auth
-        <a href="{{ route('forum.my-topics') }}"
-           class="btn forum-sort-btn">
-            <i class="bi bi-person me-1"></i>
-            My Topics
-        </a>
-    @endauth
-
-</div>
-
-
-{{-- =========================================================
-     ACTIVE CATEGORIES
-========================================================== --}}
-
-<div class="forum-category-list">
-
-    @forelse($categories as $category)
-
-        <a href="{{ route('forum.category', $category->slug) }}"
-           class="forum-category-link">
-
-            <div class="forum-category-card">
-
-                {{-- Icon --}}
-                <div class="forum-category-icon">
-
-                    <i class="bi {{ $category->icon ?? 'bi-chat' }}"></i>
-
-                </div>
-
-
-                {{-- Main content --}}
-                <div class="forum-category-content">
-
-                    <div class="forum-category-title-row">
-
-                        <h3 class="forum-category-title">
-                            {{ $category->name }}
-                        </h3>
-
-                        <span class="forum-category-arrow">
-                            <i class="bi bi-arrow-right"></i>
-                        </span>
-
-                    </div>
-
-                    @if($category->description)
-
-                        <p class="forum-category-description">
-                            {{ $category->description }}
-                        </p>
-
-                    @endif
-
-                </div>
-
-
-                {{-- Topic count --}}
-                <div class="forum-topic-count">
-
-                    <strong>
-                        {{ number_format($category->topics_count) }}
-                    </strong>
-
-                    <span>
-                        {{ $category->topics_count === 1 ? 'Topic' : 'Topics' }}
-                    </span>
-
-                </div>
-
+    <section id="forum-categories" aria-labelledby="forum-categories-title">
+        <div class="forum-section-heading">
+            <div>
+                <div class="forum-eyebrow">Find your conversation</div>
+                <h2 id="forum-categories-title">Browse categories</h2>
             </div>
-
-        </a>
-
-    @empty
-
-        <div class="forum-empty-state">
-
-            <div class="forum-empty-icon">
-                <i class="bi bi-chat-square-text"></i>
-            </div>
-
-            <h3>
-                No forum categories yet
-            </h3>
-
-            <p>
-                There are no discussion categories available at the moment.
-            </p>
-
+            <span class="forum-category-total">{{ number_format($categories->count()) }} {{ $categories->count() === 1 ? 'category' : 'categories' }}</span>
         </div>
-
-    @endforelse
-
-</div>
-
+        <div class="forum-category-list">
+            @forelse($categories as $category)
+                <a href="{{ route('forum.category', $category->slug) }}" class="forum-category-link">
+                    <div class="forum-category-icon"><i class="bi {{ $category->icon ?: 'bi-chat-square-text' }}" aria-hidden="true"></i></div>
+                    <div class="forum-category-content">
+                        <h3 class="forum-category-title">{{ $category->name }}</h3>
+                        @if($category->description)
+                            <p class="forum-category-description">{{ $category->description }}</p>
+                        @endif
+                    </div>
+                    <div class="forum-topic-count">
+                        <strong>{{ number_format($category->topics_count) }}</strong>
+                        <span>{{ (int) $category->topics_count === 1 ? 'Topic' : 'Topics' }}</span>
+                    </div>
+                    <span class="forum-category-arrow" aria-hidden="true"><i class="bi bi-arrow-up-right"></i></span>
+                </a>
+            @empty
+                <div class="forum-empty-state">
+                    <div class="forum-empty-icon"><i class="bi bi-chat-square-text" aria-hidden="true"></i></div>
+                    <h3>A new conversation is on its way</h3>
+                    <p>No categories are available yet. Check back soon to join the discussion.</p>
+                </div>
+            @endforelse
+        </div>
+        <p class="forum-community-note"><i class="bi bi-heart" aria-hidden="true"></i> A great community starts with a little kindness. Keep it friendly and helpful.</p>
+    </section>
 
 {{-- =========================================================
      DELETED CATEGORIES

@@ -1,85 +1,187 @@
-@php
-    // Allowed category IDs
-    $allowedCategoryIds = [1,5,9,11,13,18,20,24,31,54,56,82];
-@endphp
-
 @if(in_array($torrent->category_id, $allowedCategoryIds))
-    {{-- Upload Subtitle Button --}}
-    <div class="mb-3">
-        <button class="btn btn-sm btn-secondary"
-                data-bs-toggle="modal"
-                data-bs-target="#uploadSubtitleModal">
-            <i class="bi bi-badge-cc"></i> Upload Subtitle
-        </button>
-    </div>
 
-    {{-- Upload Subtitle Modal --}}
-<div class="modal fade" id="uploadSubtitleModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade"
+     id="{{ $uploadSubtitleModalId }}"
+     tabindex="-1"
+     aria-labelledby="{{ $uploadSubtitleModalId }}Label"
+     aria-hidden="true">
+
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content card-blur">
+
+        <div class="modal-content subtitle-modal-content">
+
             <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="bi bi-badge-cc"></i> Upload Subtitle
+
+                <h5 class="modal-title"
+                    id="{{ $uploadSubtitleModalId }}Label">
+
+                    <i class="bi bi-badge-cc-fill"></i>
+                    Upload Subtitle
+
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                </button>
+
             </div>
 
             <form method="POST"
                   action="{{ route('subtitles.store', $torrent) }}"
                   enctype="multipart/form-data">
+
                 @csrf
 
                 <div class="modal-body">
+
+                    @if ($errors->any())
+
+                        <div class="alert alert-danger py-2">
+
+                            <ul class="mb-0 ps-3">
+
+                                @foreach ($errors->all() as $error)
+
+                                    <li>{{ $error }}</li>
+
+                                @endforeach
+
+                            </ul>
+
+                        </div>
+
+                    @endif
+
+
+                    {{-- SUBTITLE FILE --}}
                     <div class="mb-3">
-                        <label class="form-label">Subtitle file</label>
+
+                        <label for="subtitle-{{ $torrent->id }}"
+                               class="form-label">
+
+                            Subtitle file
+
+                        </label>
+
                         <input type="file"
+                               id="subtitle-{{ $torrent->id }}"
                                name="subtitle"
                                class="form-control"
+                               accept=".srt,.sub,.ass,.txt,.zip,.rar"
                                required>
-                        <small class="text-muted">
+
+                        <small class="subtitle-help">
                             Allowed: srt, sub, ass, txt, zip, rar
                         </small>
+
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Language</label>
-                        <select name="language" class="form-select" required>
-                            <option value="">Select language</option>
-                            <option value="english">English</option>
-                            <option value="romanian">Romanian</option>
-                            <option value="italian">Italian</option>
-                            <option value="french">French</option>
-                            <option value="spanish">Spanish</option>
+
+                    {{-- LANGUAGE --}}
+                    <div>
+
+                        <label for="subtitle-language-{{ $torrent->id }}"
+                               class="form-label">
+
+                            Language
+
+                        </label>
+
+                        <select id="subtitle-language-{{ $torrent->id }}"
+                                name="language"
+                                class="form-select"
+                                required>
+
+                            <option value="">
+                                Select language
+                            </option>
+
+                            <option value="english"
+                                {{ old('language') === 'english' ? 'selected' : '' }}>
+                                English
+                            </option>
+
+                            <option value="romanian"
+                                {{ old('language') === 'romanian' ? 'selected' : '' }}>
+                                Romanian
+                            </option>
+
+                            <option value="italian"
+                                {{ old('language') === 'italian' ? 'selected' : '' }}>
+                                Italian
+                            </option>
+
+                            <option value="french"
+                                {{ old('language') === 'french' ? 'selected' : '' }}>
+                                French
+                            </option>
+
+                            <option value="spanish"
+                                {{ old('language') === 'spanish' ? 'selected' : '' }}>
+                                Spanish
+                            </option>
+
                         </select>
+
                     </div>
+
                 </div>
+
 
                 <div class="modal-footer">
+
                     <button type="button"
-                            class="btn btn-sm btn-secondary"
+                            class="btn btn-sm subtitle-cancel-btn"
                             data-bs-dismiss="modal">
+
                         Cancel
+
                     </button>
 
-                    <button class="btn btn-sm btn-primary">
-                        <i class="bi bi-upload"></i> Upload
+                    <button type="submit"
+                            class="btn btn-sm subtitle-submit-btn">
+
+                        <i class="bi bi-upload me-1"></i>
+                        Upload
+
                     </button>
+
                 </div>
+
             </form>
+
         </div>
+
     </div>
+
 </div>
 
 
-    {{-- Reopen modal on validation errors --}}
-    @if ($errors->any())
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                const modal = new bootstrap.Modal(
-                    document.getElementById('uploadSubtitleModal')
-                );
-                modal.show();
-            });
-        </script>
-    @endif
+@if($errors->any())
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const modalElement =
+        document.getElementById(@json($uploadSubtitleModalId));
+
+    if (
+        modalElement &&
+        typeof bootstrap !== 'undefined' &&
+        bootstrap.Modal
+    ) {
+
+        const subtitleModal =
+            bootstrap.Modal.getOrCreateInstance(modalElement);
+
+        subtitleModal.show();
+    }
+
+});
+</script>
+
+@endif
+
 @endif

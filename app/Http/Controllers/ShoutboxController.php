@@ -11,6 +11,15 @@ use Illuminate\Support\Facades\Redis;
 
 class ShoutboxController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware(function ($request, $next) {
+            abort_if($request->user()->chatblock, 403, 'Your chat access has been restricted by staff.');
+            return $next($request);
+        });
+    }
+
 
     public function index()
     {
@@ -74,11 +83,10 @@ public function iframe()
         'sticky' => $user->user_class >= \App\Models\UserClass::ADMIN && $request->has('sticky'),
     ]);
 
+    Cache::forget('home_shoutbox_messages');
+
     // 🔥 If request comes from AJAX (home page)
     if ($request->ajax()) {
-        // clear cached home shoutbox
-        Cache::forget('home_shoutbox_messages');
-
         return response()->json([
             'status'  => 'ok',
             'message' => $message->load('user'),
@@ -125,6 +133,8 @@ public function update(Request $request, $id)
         'message' => $request->input('content')
     ]);
 
+    Cache::forget('home_shoutbox_messages');
+
     // 🔥 AJAX (home page)
     if ($request->ajax()) {
         return response()->json([
@@ -151,9 +161,9 @@ public function destroy($id)
     $message->replies()->delete();
 
     $message->delete();
+    Cache::forget('home_shoutbox_messages');
 
    if (request()->ajax()) {
-    Cache::forget('home_shoutbox_messages');
     return response()->json(['status' => 'deleted']);
 }
 
@@ -174,6 +184,10 @@ public function toggleSticky($id)
     $message->save();
 
     Cache::forget('home_shoutbox_messages');
+
+    if (request()->ajax()) {
+        return response()->json(['status' => 'ok']);
+    }
 
     return redirect()->back()->with('success', 'Message sticky status toggled.');
 }
@@ -216,11 +230,10 @@ public function reply(Request $request, $id)
 
     // Save reply
     $parentMessage->replies()->save($reply);
+    Cache::forget('home_shoutbox_messages');
 
     // 🔥 AJAX (home)
     if ($request->ajax()) {
-        Cache::forget('home_shoutbox_messages');
-
         return response()->json([
             'html' => view('partials.reply', [
                 'reply' => $reply->load('user')
@@ -295,6 +308,21 @@ public function typingUsers()
 
 public function poll(Request $request)
 {
+    if ($request->boolean('snapshot')) {
+        $messages = Shoutbox::with(['user', 'replies.user'])
+            ->whereNull('parent_id')->orderByDesc('sticky')->orderByDesc('created_at')->orderByDesc('id')
+            ->take(30)->get();
+
+        return response()->json([
+            'html' => view('partials.shoutbox-messages', ['messages' => $messages->where('sticky', false)])->render(),
+            'pinned_html' => view('partials.shoutbox-pinned', compact('messages'))->render(),
+            'revision' => hash('sha256', $messages->map(fn ($message) => [
+                $message->id, $message->message, $message->sticky, (string) $message->updated_at,
+                $message->replies->map(fn ($reply) => [$reply->id, $reply->message, (string) $reply->updated_at])->all(),
+            ])->toJson()),
+        ])->header('Cache-Control', 'no-store');
+    }
+
     $lastId = (int) $request->query('after', 0);
 
     $query = Shoutbox::with(['user', 'replies.user'])

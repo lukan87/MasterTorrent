@@ -2,22 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Conversation;
 use App\Models\Ticket;
 use App\Models\TicketCategory;
-use App\Models\Message;
+use App\Models\TicketEvent;
 use App\Models\Torrent;
 use App\Models\User;
-use App\Models\TicketResponse;
-use App\Models\TicketAttachment;
-use App\Models\TicketEvent;
-use Illuminate\Support\Str;
+use App\Services\SystemMessageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class TicketController extends Controller
 {
-
     public function __construct()
     {
         $this->middleware('auth');
@@ -29,65 +27,56 @@ class TicketController extends Controller
     |--------------------------------------------------------------------------
     */
 
-public function index(Request $request)
-{
+    public function index(Request $request)
+    {
+        $filters = $request->validate([
+            'keyword' => 'nullable|string|max:255',
+            'ticket_id' => 'nullable|integer|min:1',
+            'status' => ['nullable', Rule::in(Ticket::STATUSES)],
+            'priority' => ['nullable', Rule::in(Ticket::PRIORITIES)],
+            'category' => 'nullable|integer',
+            'user' => 'nullable|string|max:255',
+            'my' => 'nullable|boolean',
+            'unassigned' => 'nullable|boolean',
+        ]);
+        $query = Ticket::query()->when(Auth::user()->user_class <= 5,
+            fn ($query) => $query->where('user_id', Auth::id()));
+        $counts = (clone $query)->selectRaw('status, COUNT(*) as total')->groupBy('status')->pluck('total', 'status');
+        $stats = [
+            'total' => $counts->sum(),
+            'active' => $counts->only(['Open', 'Waiting Staff', 'Waiting User'])->sum(),
+            'waiting' => $counts->get(Auth::user()->user_class > 5 ? 'Waiting Staff' : 'Waiting User', 0),
+            'resolved' => $counts->only(['Resolved', 'Closed'])->sum(),
+        ];
+        foreach (['ticket_id' => 'id', 'status' => 'status', 'priority' => 'priority', 'category' => 'category_id'] as $input => $column) {
+            if (! empty($filters[$input])) {
+                $query->where($column, $filters[$input]);
+            }
+        }
+        if (! empty($filters['keyword'])) {
+            $query->where(function ($query) use ($filters) {
+                $query->where('title', 'like', '%'.$filters['keyword'].'%')
+                    ->orWhere('description', 'like', '%'.$filters['keyword'].'%');
+            });
+        }
+        if (Auth::user()->user_class > 5) {
+            if (! empty($filters['user'])) {
+                $query->whereHas('user', fn ($query) => $query->where('name', 'like', '%'.$filters['user'].'%'));
+            }
+            if ($request->boolean('unassigned')) {
+                $query->unassigned();
+            }
+            if ($request->boolean('my')) {
+                $query->ownedBy(Auth::id());
+            }
+        }
+        $tickets = $query->with(['user', 'category', 'assignedStaff', 'claimedBy'])
+            ->withCount(['responses' => fn ($query) => $query->visibleTo(Auth::user())])
+            ->orderByDesc('updated_at')->orderByDesc('id')->paginate(20)->withQueryString();
+        $categories = TicketCategory::orderBy('name')->get();
 
-    $query = Ticket::with(['user','category','assignedStaff','claimedBy']);
-
-    /*
-    |--------------------------------------------------------------------------
-    | Regular Users
-    |--------------------------------------------------------------------------
-    */
-
-    if (Auth::user()->user_class <= 5) {
-
-        $query->where('user_id', Auth::id());
-
+        return view('tickets.index', compact('tickets', 'categories', 'stats'));
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Filters
-    |--------------------------------------------------------------------------
-    */
-
-    if ($request->ticket_id) {
-        $query->where('id',$request->ticket_id);
-    }
-
-    if ($request->status) {
-        $query->where('status',$request->status);
-    }
-
-    if ($request->priority) {
-        $query->where('priority',$request->priority);
-    }
-
-    if ($request->category) {
-        $query->where('category_id',$request->category);
-    }
-
-    if ($request->user) {
-        $query->whereHas('user',function($q) use ($request){
-            $q->where('name','LIKE','%'.$request->user.'%');
-        });
-    }
-
-    if ($request->unassigned) {
-        $query->whereNull('assigned_to');
-    }
-
-    if ($request->my) {
-        $query->where('claimed_by',Auth::id());
-    }
-
-    $tickets = $query->latest()->paginate(20);
-
-    $categories = TicketCategory::all();
-
-    return view('tickets.index',compact('tickets','categories'));
-}
 
     /*
     |--------------------------------------------------------------------------
@@ -97,23 +86,13 @@ public function index(Request $request)
 
     public function show($id)
     {
-        $ticket = Ticket::with([
-    'user',
-    'category',
-    'responses.user',
-    'responses.attachments',
-    'events.user'
-])->find($id);
+        $ticket = Ticket::with(['user', 'category', 'assignedStaff', 'claimedBy', 'events.user'])->findOrFail($id);
+        abort_unless($ticket->canBeViewedBy(Auth::user()), 403);
+        $ticket->load(['responses' => fn ($query) => $query->visibleTo(Auth::user())->with(['user', 'attachments'])->orderBy('id')]);
+        $staffMembers = Auth::user()->user_class > 5
+            ? User::where('user_class', '>', 5)->orderBy('name')->get(['id', 'name']) : collect();
 
-    if (!$ticket) {
-    return redirect()->route('tickets.index')->with('error','Ticket not found.');
-}
-
-if (Auth::user()->user_class <= 5 && $ticket->user_id != Auth::id()) {
-    abort(403);
-}
-
-        return view('tickets.show', compact('ticket'));
+        return view('tickets.show', compact('ticket', 'staffMembers'));
     }
 
     /*
@@ -124,17 +103,15 @@ if (Auth::user()->user_class <= 5 && $ticket->user_id != Auth::id()) {
 
     public function create(Request $request)
     {
-        $categories = TicketCategory::all();
+        $categories = TicketCategory::orderBy('name')->get();
 
-       $torrent = null;
+        $torrent = null;
 
-    if ($request->torrent_id) {
+        if ($request->torrent_id) {
 
-        $torrent = Torrent::find($request->torrent_id);
+            $torrent = Torrent::find($request->torrent_id);
 
-    }
-
-    
+        }
 
         return view('tickets.create', compact('categories', 'torrent'));
     }
@@ -147,184 +124,80 @@ if (Auth::user()->user_class <= 5 && $ticket->user_id != Auth::id()) {
 
     public function store(Request $request)
     {
-        $request->validate([
-    'category_id' => 'required|exists:ticket_categories,id',
-    'title' => 'required|max:255',
-    'description' => 'required',
-    'priority' => 'required',
-    'attachment' => 'nullable|array',
-    'attachment.*' => 'file|mimes:jpg,jpeg,png,gif,webp,pdf,zip,rar,txt,log|max:10240'
-]);
-
-$slug = Str::slug($request->title);
-
-$ticket = Ticket::create([
-    'user_id' => Auth::id(),
-    'category_id' => $request->category_id,
-    'title' => $request->title,
-    'slug' => $slug,
-    'description' => $request->description,
-    'priority' => $request->priority,
-    'status' => 'Open'
-]);
-
-/*
-|--------------------------------------------------------------------------
-| Create first ticket message
-|--------------------------------------------------------------------------
-*/
-
-$response = TicketResponse::create([
-    'ticket_id' => $ticket->id,
-    'user_id' => Auth::id(),
-    'message' => $request->description
-]);
-
-/*
-|--------------------------------------------------------------------------
-| Handle attachment
-|--------------------------------------------------------------------------
-*/
-
-if ($request->hasFile('attachment')) {
-
-    foreach ($request->file('attachment') as $file) {
-
-       $filename = time().'_'.uniqid().'_'.$file->getClientOriginalName();
-
-        $path = $file->storeAs(
-            'ticket_attachments',
-            $filename,
-            'local'
-        );
-
-        TicketAttachment::create([
-            'ticket_response_id' => $response->id,
-            'file_path' => $path,
-            'file_name' => $file->getClientOriginalName()
+        $data = $request->validate([
+            'category_id' => 'required|integer|exists:ticket_categories,id',
+            'title' => 'required|string|max:255',
+            'description' => 'required|string|max:20000',
+            'priority' => ['required', Rule::in(Ticket::PRIORITIES)],
+            'linked_torrent_id' => 'nullable|integer|exists:torrents,id',
+            'attachment' => 'nullable|array|max:5',
+            'attachment.*' => 'file|mimes:jpg,jpeg,png,gif,webp,pdf,zip,rar,txt,log|max:10240',
         ]);
+        $paths = [];
+        try {
+            $ticket = DB::transaction(function () use ($request, $data, &$paths) {
+                $description = $data['description'];
+                if (! empty($data['linked_torrent_id'])) {
+                    $torrent = Torrent::findOrFail($data['linked_torrent_id']);
+                    $description .= "\n\nReported torrent #{$torrent->id}: {$torrent->name}";
+                }
+                $ticket = Ticket::create([
+                    'user_id' => Auth::id(), 'category_id' => $data['category_id'],
+                    'title' => $data['title'], 'description' => $description,
+                    'priority' => $data['priority'], 'status' => 'Open',
+                ]);
+                $response = $ticket->responses()->create(['user_id' => Auth::id(), 'message' => $description]);
+                foreach ($request->file('attachment', []) as $file) {
+                    $path = $file->store('ticket_attachments/'.$ticket->id, 'local');
+                    if (! $path) {
+                        throw new \RuntimeException('Unable to save the attachment.');
+                    }
+                    $paths[] = $path;
+                    $response->attachments()->create(['file_path' => $path, 'file_name' => $file->getClientOriginalName()]);
+                }
+                TicketEvent::create(['ticket_id' => $ticket->id, 'user_id' => Auth::id(), 'event' => 'created the ticket']);
+                foreach (User::where('user_class', '>', 5)->where('id', '!=', Auth::id())->pluck('id') as $staffId) {
+                    SystemMessageService::send(Auth::id(), $staffId, 'New support ticket',
+                        'A new support ticket has been created: <a href="'.route('tickets.show', ['id' => $ticket->id, 'slug' => $ticket->slug]).'">'.e($ticket->title).'</a>');
+                }
 
+                return $ticket;
+            });
+        } catch (\Throwable $exception) {
+            Storage::disk('local')->delete($paths);
+            throw $exception;
+        }
+
+        return redirect()->route('tickets.show', ['id' => $ticket->id, 'slug' => $ticket->slug])
+            ->with('success', 'Your ticket has been submitted. You can follow its progress here.');
     }
 
-}
-
-$staffMembers = User::where('user_class','>',5)->get();
-
-foreach ($staffMembers as $staff) {
-
-    /*
-    |--------------------------------------------------------------------------
-    | Find or create conversation
-    |--------------------------------------------------------------------------
-    */
-
-    $conversation = Conversation::where(function ($q) use ($staff) {
-        $q->where('user_one', Auth::id())
-          ->where('user_two', $staff->id);
-    })
-    ->orWhere(function ($q) use ($staff) {
-        $q->where('user_one', $staff->id)
-          ->where('user_two', Auth::id());
-    })
-    ->first();
-
-    if (!$conversation) {
-
-        $conversation = Conversation::create([
-            'user_one' => Auth::id(),
-            'user_two' => $staff->id,
-            'subject' => 'Support Tickets',
-            'last_message_at' => now(),
-        ]);
-
+    public function lock($id)
+    {
+        return $this->setLocked($id, true);
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Create message
-    |--------------------------------------------------------------------------
-    */
-
-    Message::create([
-        'conversation_id' => $conversation->id,
-        'receiver_id' => $staff->id,
-        'sender_id' => Auth::id(),
-        'subject' => 'New Support Ticket',
-        'body' => 'A new ticket has been created:<br><a href="'.route('tickets.show', [
-            'id' => $ticket->id,
-            'slug' => $ticket->slug
-        ]).'">'.$ticket->title.'</a>',
-        'is_read' => false
-    ]);
-
-    /*
-    |--------------------------------------------------------------------------
-    | Update conversation timestamp
-    |--------------------------------------------------------------------------
-    */
-
-    $conversation->update([
-        'last_message_at' => now()
-    ]);
-
-}
-
-TicketEvent::create([
-    'ticket_id' => $ticket->id,
-    'user_id' => Auth::id(),
-    'event' => 'created the ticket'
-]);
-
-        return redirect()->route('tickets.show', [
-    'id' => $ticket->id,
-    'slug' => $ticket->slug
-])
-            ->with('success','Ticket created successfully.');
-    }
-
-
-public function lock($id)
-{
-    $ticket = Ticket::findOrFail($id);
-
-    // Only staff OR ticket creator can unlock
-    if(auth()->user()->user_class <= 5 && auth()->id() != $ticket->user_id){
-        abort(403);
-    }
-
-    // toggle lock
-    $ticket->is_locked = !$ticket->is_locked;
-    $ticket->save();
-
-    TicketEvent::create([
-        'ticket_id' => $ticket->id,
-        'user_id' => auth()->id(),
-        'event' => $ticket->is_locked ? 'locked the ticket' : 'unlocked the ticket'
-    ]);
-
-    return back();
-}
 
     public function unlock($id)
-{
-    $ticket = Ticket::findOrFail($id);
-
-    // allow creator or staff
-    if(auth()->id() != $ticket->user_id && auth()->user()->user_class <= 5){
-        abort(403);
+    {
+        return $this->setLocked($id, false);
     }
 
-    $ticket->update([
-        'is_locked' => 0
-    ]);
+    private function setLocked($id, bool $locked)
+    {
+        DB::transaction(function () use ($id, $locked) {
+            $ticket = Ticket::lockForUpdate()->findOrFail($id);
+            abort_unless($ticket->canBeViewedBy(Auth::user()), 403);
+            abort_if(! $locked && in_array($ticket->status, ['Resolved', 'Closed'], true) && Auth::user()->user_class <= 5, 403, 'This ticket is resolved or closed. Please create a new ticket for further help.');
+            if ($ticket->is_locked === $locked) {
+                return;
+            }
+            $ticket->update(['is_locked' => $locked]);
+            TicketEvent::create([
+                'ticket_id' => $ticket->id, 'user_id' => Auth::id(),
+                'event' => $locked ? 'locked the conversation' : 'unlocked the conversation',
+            ]);
+        });
 
-    TicketEvent::create([
-        'ticket_id' => $ticket->id,
-        'user_id' => auth()->id(),
-        'event' => 'unlocked the ticket'
-    ]);
-
-    return back();
-}
-
+        return back()->with('success', $locked ? 'Conversation locked.' : 'Conversation unlocked.');
+    }
 }

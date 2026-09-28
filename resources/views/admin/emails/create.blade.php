@@ -1,6 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
-@section('content')
+@section('admin-content')
 
 <div class="container mt-5">
 
@@ -17,7 +17,7 @@
 
                 {{-- TEMPLATE --}}
                 <div class="mb-4">
-                    <label class="form-label fw-semibold">
+                    <label for="templateSelect" class="form-label fw-semibold">
                         <i class="bi bi-layout-text-window-reverse me-1 text-muted"></i>
                         Template
                     </label>
@@ -26,7 +26,7 @@
     <option value="">Custom Email</option>
 
     @foreach($templates as $t)
-        <option 
+        <option
             value="{{ $t->id }}"
             data-subject="{{ $t->subject }}"
             data-body="{{ $t->body }}"
@@ -39,33 +39,33 @@
 
                 {{-- SUBJECT --}}
                 <div class="mb-4">
-                    <label class="form-label fw-semibold">
+                    <label for="subject" class="form-label fw-semibold">
                         <i class="bi bi-type me-1 text-muted"></i>
                         Subject
                     </label>
 
-                    <input 
-                        name="subject" 
-                        id="subject" 
-                        class="form-control form-control-lg" 
+                    <input
+                        name="subject" required maxlength="255" value="{{ old('subject') }}"
+                        id="subject"
+                        class="form-control form-control-lg"
                         placeholder="Enter email subject..."
                     >
                 </div>
 
                 {{-- BODY --}}
                 <div class="mb-4">
-                    <label class="form-label fw-semibold">
+                    <label for="body" class="form-label fw-semibold">
                         <i class="bi bi-card-text me-1 text-muted"></i>
                         Email Content
                     </label>
 
-                    <textarea 
-                        name="body" 
-                        id="body" 
-                        rows="8" 
+                    <textarea
+                        name="body" required maxlength="100000"
+                        id="body"
+                        rows="8"
                         class="form-control"
                         placeholder="Write your email here... You can use {name} and {email}"
-                    ></textarea>
+                    >{{ old('body') }}</textarea>
 
                     <small class="text-muted">
                         Available variables: <strong>{name}</strong>, <strong>{email}</strong>
@@ -77,14 +77,14 @@
 
                     {{-- USER CLASS --}}
                     <div class="col-md-6 mb-4">
-                        <label class="form-label fw-semibold">
+                        <label for="userClassSelect" class="form-label fw-semibold">
                             <i class="bi bi-people me-1 text-muted"></i>
                             User Class
                         </label>
 
                         <select name="user_class[]" id="userClassSelect" class="form-select" multiple size="6">
                             @foreach($classes as $value => $label)
-                                <option value="{{ $value }}">
+                                <option value="{{ $value }}" @selected(in_array((string) $value, array_map('strval', (array) old('user_class', [])), true))>
                                     {{ $label }}
                                 </option>
                             @endforeach
@@ -97,22 +97,22 @@
 
                     {{-- TARGET TYPE --}}
                     <div class="col-md-6 mb-4">
-                        <label class="form-label fw-semibold">
+                        <label for="targetSelect" class="form-label fw-semibold">
                             <i class="bi bi-filter-circle me-1 text-muted"></i>
                             Audience
                         </label>
 
                         <select name="target" id="targetSelect" class="form-select">
                             <option value="subscribed">Subscribed Users</option>
-                            <option value="inactive">Inactive Users (60d)</option>
-                            
+                            <option value="inactive" @selected(old('target') === 'inactive')>Inactive Users (60–90 days)</option>
+
                         </select>
                     </div>
 
 
                     <div class="mb-3">
     <div class="alert alert-info py-2">
-        👥 Will send to: <strong id="userCount">0</strong> users
+        👥 Will send to: <strong id="userCount" aria-live="polite">0</strong> users
     </div>
 </div>
 
@@ -123,7 +123,7 @@
 
     Please type <strong>SEND</strong> to confirm:
 
-    <input type="text" id="confirmInput" class="form-control mt-2" placeholder="Type SEND to confirm">
+    <input type="text" id="confirmInput" aria-label="Type SEND to confirm a large email send" class="form-control mt-2" placeholder="Type SEND to confirm">
 </div>
 
                 </div>

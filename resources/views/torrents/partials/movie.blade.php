@@ -11,7 +11,7 @@
 <div class="cast-section mt-5">
 
     {{-- HEADER --}}
-    <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
+    <!-- <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
 
         <div>
             <h3 class="cast-title mb-1">
@@ -31,7 +31,7 @@
 
         </div>
 
-    </div>
+    </div> -->
 
     {{-- CAST --}}
     <div class="cast-row">

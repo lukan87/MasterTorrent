@@ -2,27 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\UploadApplicationComment;
+use App\Services\UploadApplicationService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class UploadApplicationCommentController extends Controller
 {
-
-    public function store(Request $request, $id)
+    public function __construct(private UploadApplicationService $applications)
     {
-
-        $request->validate([
-            'comment' => 'required|string'
-        ]);
-
-        UploadApplicationComment::create([
-            'application_id' => $id,
-            'user_id' => Auth::id(),
-            'comment' => $request->comment
-        ]);
-
-        return back();
+        $this->middleware('auth');
     }
 
+    public function store(Request $request, int $id)
+    {
+        $this->applications->authorizeReviewer($request->user());
+        $data = $request->validate(['comment' => 'required|string|max:5000']);
+        $this->applications->comment($request->user(), $id, $data['comment']);
+
+        return redirect()->route('uploadapps.show', $id)->with('success', 'Staff comment added.');
+    }
 }

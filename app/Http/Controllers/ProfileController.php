@@ -381,6 +381,9 @@ $timeline = $user->timeline()->latest()->get();
         'info'              => 'nullable|string',
         'timezone'          => 'nullable|timezone',
         'recovery_code'     => 'nullable|string|min:6',
+        'current_password'  => 'nullable|string',
+        'new_password'      => 'nullable|string|min:8|confirmed',
+        'verification_recovery_code' => 'nullable|string',
     ];
 
     if ($authUser->user_class >= UserClass::ADMIN) {
@@ -464,6 +467,24 @@ $timeline = $user->timeline()->latest()->get();
 
         /*
         |--------------------------------------------------------------------------
+        | Password Change
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->filled('current_password') && $request->filled('new_password')) {
+            if (!Hash::check($request->current_password, $user->password)) {
+                return back()->withErrors(['current_password' => 'The provided password does not match your current password.']);
+            }
+
+            if (!Hash::check($request->verification_recovery_code, $user->recovery_code)) {
+                return back()->withErrors(['verification_recovery_code' => 'Invalid recovery code.']);
+            }
+
+            $user->password = Hash::make($request->new_password);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
         | Recovery Code
         |--------------------------------------------------------------------------
         */
@@ -477,6 +498,7 @@ $timeline = $user->timeline()->latest()->get();
         | Safe User Class Change
         |--------------------------------------------------------------------------
         */
+
 
         if ($request->has('user_class')) {
             $requestedClass = (int) $request->user_class;

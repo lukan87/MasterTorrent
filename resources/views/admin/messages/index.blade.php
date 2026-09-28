@@ -1,6 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
-@section('content')
+@section('admin-content')
 
 <div class="container-fluid py-3 admin-messages-page">
 
@@ -162,13 +162,9 @@
 
                             {{-- SUBJECT --}}
                             <td>
-                                <button
-                                    type="button"
-                                    class="subject-button"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#messageModal{{ $message->id }}">
+                                <a class="subject-button" href="{{ route('admin.messages.show', $message) }}">
                                     {{ $message->subject ?? '(no subject)' }}
-                                </button>
+                                </a>
 
                                 {{-- MESSAGE MODAL --}}
                                 <div

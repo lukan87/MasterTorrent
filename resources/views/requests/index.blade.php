@@ -62,7 +62,7 @@
         <i class="bi bi-exclamation-triangle-fill"></i>
 
         <span>
-            Cererile completate incorect vor fi șterse. Completați toate câmpurile corect, cu informațiile cerute!
+           Incorrectly completed requests will be deleted. Please complete all fields correctly and provide all the required information!
         </span>
 
     </div>

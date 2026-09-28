@@ -34,20 +34,22 @@
             <div class="disclaimer-text">
 
                 <p>
-                    Niciunul dintre fișierele indexate pe această platformă nu este găzduit pe serverele noastre.
-                    Toate link-urile și conținutul indexat sunt furnizate exclusiv de utilizatorii site-ului,
-                    iar administratorii platformei nu își asumă responsabilitatea pentru acțiunile și materialele distribuite de aceștia.
+                    None of the files indexed on this platform are hosted on our servers.
+                    All links and indexed content are provided exclusively by users of the site,
+                    and the platform administrators are not responsible for the actions or materials
+                    distributed by individual users.
                 </p>
 
                 <p>
-                    Accesul și utilizarea acestui serviciu trebuie să respecte legile și reglementările în vigoare.
-                    Orice utilizare a platformei pentru scopuri ilegale este strict interzisă și poate atrage măsuri disciplinare,
-                    inclusiv dezactivarea permanentă a accesului.
+                    Access to and use of this service must comply with all applicable laws and regulations.
+                    Any use of the platform for illegal purposes is strictly prohibited and may result
+                    in disciplinary action, including permanent suspension of access.
                 </p>
 
                 <p class="mb-0">
-                    Recomandăm tuturor utilizatorilor să se informeze și să respecte legislația aplicabilă
-                    în domeniul drepturilor de autor și distribuției de conținut.
+                    We strongly encourage all users to familiarise themselves with and comply with
+                    applicable copyright laws and regulations concerning the distribution and sharing
+                    of content.
                 </p>
 
             </div>
