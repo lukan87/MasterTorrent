@@ -10,7 +10,7 @@ class CheckUserEnabled
 {
     public function handle(Request $request, Closure $next)
     {
-        if (Auth::check() && Auth::user()->enabled === 'no') {
+        if (Auth::check() && (Auth::user()->enabled === 'no' || Auth::user()->activation_pending)) {
             Auth::logout();  // Optionally log the user out if they are not enabled
             return redirect()->route('login'); // Redirect to login page
         }

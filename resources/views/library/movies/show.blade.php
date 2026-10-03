@@ -428,4 +428,10 @@
 
 @include('library.movies.partials.movies')
 
+@if($libraryEntry)
+<div class="container px-xl-5 px-lg-4 px-3 mb-4">
+    @include('comments.discussion', ['commentTarget' => $libraryEntry, 'commentType' => \App\Models\TorrentMovie::class])
+</div>
+@endif
+
 @endsection

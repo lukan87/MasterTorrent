@@ -148,14 +148,14 @@
 .mc-header-icon{ width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--ui-accent),var(--ui-accent-strong));color:#0b1120;display:flex;align-items:center;justify-content:center;font-size:1.25rem;box-shadow:0 6px 16px rgba(99,210,198,.35); }
 .mc-back{ text-decoration:none;color:var(--ui-text-muted);font-size:.85rem;padding:6px 12px;border-radius:8px;transition:.15s; }
 .mc-back:hover{ color:var(--ui-accent);background:rgba(99,210,198,.1); }
-.mc-recipient-picker .mc-input-icon{ background:rgba(255,255,255,.04);border-color:var(--ui-border);color:var(--ui-accent); }
+.mc-recipient-picker .mc-input-icon{ background:rgba(255,255,255,0.028);border-color:var(--ui-border);color:var(--ui-accent); }
 .btn-ghost-accent{ background:rgba(99,210,198,.12);color:var(--ui-accent);border:1px solid rgba(99,210,198,.3);transition:.15s; }
 .btn-ghost-accent:hover{ background:var(--ui-accent);color:#0b1120; }
 .form-control{ border-radius:.6rem; transition:all .25s; }
 .form-control:focus{ border-color:var(--ui-accent); box-shadow:0 0 0 .2rem rgba(99,210,198,.22); }
 .message-box{ min-height:120px; resize:none; }
 .bbcode-toolbar{ display:flex; flex-wrap:wrap; gap:6px; }
-.bbcode-toolbar button{ background:rgba(255,255,255,.06);border:1px solid var(--ui-border);color:#fff;padding:6px 10px;border-radius:6px;cursor:pointer;transition:.2s;font-size:14px; }
+.bbcode-toolbar button{ background:rgba(255,255,255,0.042);border:1px solid var(--ui-border);color:#fff;padding:6px 10px;border-radius:6px;cursor:pointer;transition:.2s;font-size:14px; }
 .bbcode-toolbar button:hover{ background:var(--ui-accent);color:#0b1120; }
 .smilies span{ cursor:pointer; font-size:20px; margin-right:8px; transition:.2s; }
 .smilies span:hover{ transform:scale(1.25); }

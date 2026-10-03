@@ -85,16 +85,7 @@
                     </a>
 
                     <div class="overflow-hidden">
-                        <a href="{{ route('torrents.show', [$torrent->id, urlencode($torrent->slug)]) }}"
-                           class="d-block text-decoration-none"
-                           data-bs-toggle="tooltip"
-                           data-bs-html="true"
-                           data-bs-title="<img src='{{ $torrent->poster }}' class='img-fluid rounded' style='max-width:180px'>">
-
-                            <small class="torrent-title text-truncate d-block">
-                                {{ $torrent->name }}
-                            </small>
-                        </a>
+                        @include('torrents.partials.title-status')
 
                         <div class="mt-1 flex-wrap gap-2">
                             @foreach($torrent->genres as $genre)
@@ -118,21 +109,12 @@
                                 <i class="bi bi-cloud-arrow-down-fill"></i>
                             </a>
 
-                            @if($seedboxes->isNotEmpty())
-                                <button class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
-                                        data-bs-toggle="dropdown"></button>
+                            @if(Auth::user()->slots > 0 || $seedboxes->isNotEmpty())
+                                <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
+                                        data-bs-toggle="dropdown" aria-expanded="false"
+                                        aria-label="Download options" title="Download options"></button>
                                 <ul class="dropdown-menu dropdown-menu-end">
-                                    @foreach($seedboxes as $seedbox)
-                                        <li>
-                                            <button type="button"
-                                                    class="dropdown-item seedbox-send-btn"
-                                                    data-torrent="{{ $torrent->id }}"
-                                                    data-seedbox="{{ $seedbox->id }}">
-                                                <i class="bi bi-cloud-upload-fill me-2"></i>
-                                                {{ $seedbox->name }}
-                                            </button>
-                                        </li>
-                                    @endforeach
+                                    @include('torrents.partials.download-menu-items')
                                 </ul>
                             @endif
                         </div>
@@ -212,19 +194,10 @@
     {{ $adult->links('pagination::bootstrap-5') }}
 </div>
 
+@include('torrents.partials.css.list-common-css')
+
 <style>
 
-
-    .torrent-title {
-    position: relative;
-    display: inline-block;
-    color: #fff;
-    font-size: 1rem;
-    letter-spacing: .3px;
-    line-height: 1.15;
-    padding-bottom: 2px; /* space for the line */
-    transition: color .15s ease;
-}
 
 /* animated line INSIDE the element */
 .torrent-title::after {
@@ -242,14 +215,7 @@
 }
 
 /* hover */
-a:hover .torrent-title {
-    color: #aca9a9;
-}
 
-a:hover .torrent-title::after {
-    transform: scaleX(1);
-    transform-origin: left;
-}
 
 /* Sticky torrent highlight */
 .torrent-sticky {
@@ -341,7 +307,7 @@ a:hover .torrent-title::after {
 
     border-radius: 999px;
 
-    background: rgba(255, 255, 255, .06);
+    background: rgba(255,255,255,0.042);
     border: 1px solid var(--ui-border);
 
     color: var(--ui-text-muted);
@@ -366,7 +332,7 @@ a:hover .torrent-title::after {
     font-size: 12px;
     font-weight: 600;
 
-    background: rgba(255, 255, 255, .03);
+    background: rgba(255,255,255,0.021);
     border: 1px solid var(--ui-border);
 
     transition: color .15s ease, background .15s ease, border-color .15s ease, transform .15s ease;
@@ -374,7 +340,7 @@ a:hover .torrent-title::after {
 
 .tx-sort:hover {
     color: #fff;
-    background: rgba(255, 255, 255, .07);
+    background: rgba(255,255,255,0.049);
     border-color: rgba(255, 255, 255, .18);
     transform: translateY(-1px);
 }
@@ -449,7 +415,7 @@ a:hover .torrent-title::after {
 
     border-radius: 999px;
 
-    background: rgba(255, 255, 255, .05);
+    background: rgba(255,255,255,0.035);
     border: 1px solid var(--ui-border);
 
     font-size: 12px;

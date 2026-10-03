@@ -561,8 +561,8 @@
 
     background: linear-gradient(
         135deg,
-        rgba(22, 32, 51, .96),
-        rgba(15, 23, 42, .88)
+        rgba(14,21,33,.96),
+        rgba(10,15,27,.88)
     );
 
     border: 1px solid var(--ui-border);
@@ -656,7 +656,7 @@
 
     border-radius: .65rem;
 
-    background: rgba(9,16,29,.55);
+    background: rgba(6,10,19,.55);
     border: 1px solid var(--ui-border);
 }
 
@@ -713,7 +713,7 @@
 
     border-radius: .75rem;
 
-    background: rgba(9,16,29,.48);
+    background: rgba(6,10,19,.48);
     border: 1px solid var(--ui-border);
 }
 
@@ -735,7 +735,7 @@
 .upload-input {
     min-height: 40px;
 
-    background: rgba(7,13,24,.75) !important;
+    background: rgba(5,8,16,.75) !important;
 
     border: 1px solid rgba(255,255,255,.10) !important;
     border-radius: .55rem !important;
@@ -753,7 +753,7 @@
 }
 
 .upload-input:focus {
-    background: rgba(7,13,24,.92) !important;
+    background: rgba(5,8,16,.92) !important;
 
     border-color: rgba(45,212,191,.42) !important;
 
@@ -768,11 +768,11 @@
 }
 
 select.upload-input {
-    background-color: rgba(10,17,30,.95) !important;
+    background-color: rgba(6,11,20,.95) !important;
 }
 
 select.upload-input option {
-    background: #111b2d !important;
+    background: #0b121d !important;
     color: #fff !important;
 }
 
@@ -821,7 +821,7 @@ input[type="file"].upload-input::file-selector-button {
     border: 1px solid var(--ui-border);
     border-radius: .45rem;
 
-    background: rgba(255,255,255,.035);
+    background: rgba(255,255,255,0.0245);
     color: rgba(255,255,255,.65);
 
     font-size: 13px;
@@ -920,7 +920,7 @@ input[type="file"].upload-input::file-selector-button {
 
     border-radius: .5rem;
 
-    background: rgba(255,255,255,.035);
+    background: rgba(255,255,255,0.0245);
     border: 1px solid var(--ui-border);
 }
 
@@ -938,7 +938,7 @@ input[type="file"].upload-input::file-selector-button {
 .modern-switch .form-check-input {
     margin: 0;
 
-    background-color: rgba(255,255,255,.05);
+    background-color: rgba(255,255,255,0.035);
     border-color: rgba(255,255,255,.18);
 
     cursor: pointer;
@@ -1000,8 +1000,8 @@ textarea.upload-input {
 .upload-permission-card {
     background: linear-gradient(
         135deg,
-        rgba(22,32,51,.95),
-        rgba(15,23,42,.84)
+        rgba(14,21,33,.95),
+        rgba(10,15,27,.84)
     );
 
     border: 1px solid rgba(239,68,68,.25) !important;

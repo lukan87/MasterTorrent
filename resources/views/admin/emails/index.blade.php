@@ -4,6 +4,33 @@
 
 <div class="container mt-5">
 
+{{-- EMAIL ADMIN NAVIGATION --}}
+<div class="card glass shadow-sm border-0 mb-4">
+    <div class="card-body p-2">
+        <div class="d-flex flex-wrap gap-2">
+
+            <a href="{{ route('admin.emails.campaigns') }}"
+               class="btn {{ request()->routeIs('admin.emails.campaigns*') ? 'btn-primary' : 'btn-outline-secondary' }}">
+                <i class="bi bi-send-check me-1"></i>
+                Campaigns
+            </a>
+
+            <a href="{{ route('admin.emails.create') }}"
+               class="btn {{ request()->routeIs('admin.emails.create') ? 'btn-primary' : 'btn-outline-secondary' }}">
+                <i class="bi bi-pencil-square me-1"></i>
+                Compose Email
+            </a>
+
+            <a href="{{ route('admin.emails.index') }}"
+               class="btn {{ request()->routeIs('admin.emails.index') ? 'btn-primary' : 'btn-outline-secondary' }}">
+                <i class="bi bi-clock-history me-1"></i>
+                Email History
+            </a>
+
+        </div>
+    </div>
+</div>
+
 
     {{-- TOP BAR --}}
 <div class="card glass shadow-sm border-0 mb-4">

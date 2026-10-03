@@ -201,7 +201,7 @@
 .news-edit-card {
     position: relative;
     overflow: hidden;
-    background: linear-gradient(135deg, rgba(22,32,51,.96), rgba(15,23,42,.88));
+    background: linear-gradient(135deg, rgba(14,21,33,.96), rgba(10,15,27,.88));
     border: 1px solid var(--ui-border, rgba(148,163,184,.16));
     border-radius: .75rem;
     box-shadow: 0 14px 34px rgba(0,0,0,.28);
@@ -285,7 +285,7 @@
 
 .modern-input,
 .modern-textarea {
-    background: rgba(2,6,23,.58) !important;
+    background: rgba(1,4,15,.58) !important;
     border: 1px solid rgba(148,163,184,.18) !important;
     border-radius: .55rem;
     color: #f8fafc !important;
@@ -324,7 +324,7 @@
     justify-content: center;
     border: 1px solid rgba(148,163,184,.16);
     border-radius: .5rem;
-    background: rgba(30,41,59,.72);
+    background: rgba(20,27,38,.72);
     color: #cbd5e1;
     transition: background .18s ease, border-color .18s ease, color .18s ease, transform .18s ease;
 }
@@ -379,13 +379,13 @@
 
 .cancel-btn {
     border: 1px solid rgba(148,163,184,.18);
-    background: rgba(30,41,59,.65);
+    background: rgba(20,27,38,.65);
     color: #cbd5e1;
 }
 
 .cancel-btn:hover {
     transform: translateY(-1px);
-    background: rgba(51,65,85,.8);
+    background: rgba(33,42,55,.8);
     border-color: rgba(148,163,184,.3);
     color: #f8fafc;
 }

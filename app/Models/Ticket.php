@@ -11,6 +11,14 @@ class Ticket extends Model
 
     public const PRIORITIES = ['Low', 'Medium', 'High', 'Critical'];
 
+    public function notificationLink(): string
+    {
+        $url = route('tickets.show', ['id' => $this->id, 'slug' => $this->slug]);
+
+        // Private messages render BBCode and strip raw HTML anchors.
+        return '[url='.$url.']View ticket #'.$this->id.'[/url]';
+    }
+
     public function canBeViewedBy(User $user): bool
     {
         return $user->user_class > 5 || (int) $this->user_id === (int) $user->id;

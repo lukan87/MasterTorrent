@@ -38,48 +38,7 @@
 
 <div class="overflow-hidden w-100">
 
-    {{-- TITLE + STATUS ICONS --}}
-    <div class="d-flex align-items-center gap-2 overflow-hidden">
-
-        <a href="{{ route('torrents.show', [$torrent->id, urlencode($torrent->slug)]) }}"
-           class="text-decoration-none flex-grow-1 overflow-hidden"
-           data-bs-toggle="tooltip"
-           data-bs-html="true"
-           data-bs-title="<img src='{{ $torrent->poster }}' class='img-fluid rounded' style='max-width:180px'>">
-
-            <small class="torrent-title text-truncate d-block fw-bold">
-                {{ $torrent->name }}
-            </small>
-
-        </a>
-
-        {{-- Downloaded --}}
-        @if($torrent->has_downloaded)
-
-            <span
-                class="torrent-inline-icon downloaded"
-                data-bs-toggle="tooltip"
-                title="You already downloaded this torrent"
-            >
-                <i class="bi bi-check-circle-fill"></i>
-            </span>
-
-        @endif
-
-        {{-- Seeding --}}
-        @if($torrent->is_seeding)
-
-            <span
-                class="torrent-inline-icon seeding"
-                data-bs-toggle="tooltip"
-                title="You are currently seeding this torrent"
-            >
-                <i class="bi bi-broadcast-pin"></i>
-            </span>
-
-        @endif
-
-    </div>
+    @include('torrents.partials.title-status')
 
     {{-- MOBILE INFO --}}
     <div class="d-md-none small text-muted mt-1 fs-6">
@@ -117,6 +76,7 @@
 
 </div>
 
+@once
 <style>
 
     
@@ -135,7 +95,7 @@
 
     color: #cfcfcf;
 
-    background: rgba(255,255,255,.06);
+    background: rgba(255,255,255,0.042);
 
     border: 1px solid rgba(255,255,255,.06);
 
@@ -148,54 +108,10 @@
 .genre-badge:hover {
     color: #fff;
 
-    background: rgba(255,255,255,.12);
+    background: rgba(255,255,255,0.084);
 
     border-color: rgba(255,255,255,.12);
 }
-.torrent-inline-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    width: 19px;
-    height: 19px;
-
-    border-radius: 50%;
-
-    font-size: 11px;
-
-    flex-shrink: 0;
-
-    cursor: help;
-
-    transition:
-        transform .15s ease,
-        box-shadow .2s ease;
-
-    backdrop-filter: blur(4px);
-}
-
-.torrent-inline-icon:hover {
-    transform: scale(1.12);
-}
-
-/* Downloaded */
-.torrent-inline-icon.downloaded {
-    color: #72ffb0;
-    background: rgba(40,167,69,.10);
-    border: 1px solid rgba(109,255,156,.14);
-}
-
-/* Seeding */
-.torrent-inline-icon.seeding {
-    color: #9ab0ff;
-    background: rgba(80,120,255,.10);
-    border: 1px solid rgba(154,176,255,.14);
-
-    box-shadow: 0 0 10px rgba(154,176,255,.08);
-}
-
-
 .category-pill {
     width: 150px;
     height: 34px;
@@ -212,8 +128,8 @@
 
     background: linear-gradient(
         135deg,
-        rgba(255,255,255,.075),
-        rgba(255,255,255,.035)
+        rgba(255,255,255,0.0525),
+        rgba(255,255,255,0.0245)
     );
 
     border: 1px solid rgba(255,255,255,.10);
@@ -301,3 +217,4 @@
 
 
 </style>
+@endonce

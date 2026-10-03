@@ -17,6 +17,8 @@ class TopicSubscriptionController extends Controller
         ForumTopic $topic
     ): RedirectResponse {
         // Make sure the topic belongs to this category.
+        abort_if($category->is_private, 403);
+
         if ($topic->category_id !== $category->id) {
             abort(404);
         }
@@ -27,9 +29,9 @@ class TopicSubscriptionController extends Controller
             ->first();
 
         // Only create it if it doesn't already exist.
-        if (!$subscription) {
+        if (! $subscription) {
             TopicSubscription::create([
-                'user_id'  => auth()->id(),
+                'user_id' => auth()->id(),
                 'topic_id' => $topic->id,
             ]);
         }
@@ -40,7 +42,6 @@ class TopicSubscriptionController extends Controller
         );
     }
 
-
     /**
      * Stop following a forum topic.
      */
@@ -49,6 +50,8 @@ class TopicSubscriptionController extends Controller
         ForumTopic $topic
     ): RedirectResponse {
         // Make sure the topic belongs to this category.
+        abort_if($category->is_private, 403);
+
         if ($topic->category_id !== $category->id) {
             abort(404);
         }

@@ -1,68 +1,6 @@
 
 <script>
 
-const maxImages = 12;
-const fileInput = document.getElementById('images');
-const previewContainer = document.getElementById('preview-container');
-const dataTransfer = new DataTransfer();
-let fileIdCounter = 0;
-
-fileInput.addEventListener('change', function () {
-    const files = Array.from(fileInput.files);
-    files.forEach(file => {
-        if (dataTransfer.files.length >= maxImages) {
-            alert('Max 12 images');
-            return;
-        }
-
-        const uniqueId = 'file_' + (fileIdCounter++);
-        file.uniqueId = uniqueId;
-        dataTransfer.items.add(file);
-        fileInput.files = dataTransfer.files;
-
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            
-            const col = document.createElement('div');
-            col.className = 'col-md-3 mb-3 position-relative'; 
-            col.dataset.id = uniqueId;
-
-            const img = document.createElement('img');
-            img.src = e.target.result;
-            img.className = 'rounded border shadow-sm w-100';
-            img.style.height = '130px';
-            img.style.objectFit = 'cover';
-
-            const removeBtn = document.createElement('button');
-            removeBtn.className = 'btn btn-sm btn-danger position-absolute top-0 end-0 m-1';
-            removeBtn.innerHTML = '&times;';
-            removeBtn.onclick = () => {
-                const newDT = new DataTransfer();
-                Array.from(dataTransfer.files).forEach(f => { if (f.uniqueId !== uniqueId) newDT.items.add(f); });
-                dataTransfer.items.clear();
-                Array.from(newDT.files).forEach(f => dataTransfer.items.add(f));
-                fileInput.files = dataTransfer.files;
-                col.remove();
-            };
-
-            col.appendChild(img);
-            col.appendChild(removeBtn);
-
-        
-            if (!previewContainer.classList.contains('row')) {
-                previewContainer.classList.add('row');
-            }
-
-            previewContainer.appendChild(col);
-        };
-        reader.readAsDataURL(file);
-    });
-
-    fileInput.files = dataTransfer.files;
-});
-
-
-
 function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(() => alert('Announce URL copied!')).catch(err => console.error(err));
 }
@@ -297,32 +235,12 @@ document.addEventListener('click', function (e) {
 </script>
 
 
-<script>
-document.getElementById('images')?.addEventListener('change', function (event) {
-    const preview = document.getElementById('image-preview');
-    preview.innerHTML = '';
+<script src="{{ asset('js/torrent-image-previews.js') }}?v=1" defer></script>
 
-    Array.from(event.target.files).forEach(file => {
-        if (!file.type.startsWith('image/')) return;
-
-        const reader = new FileReader();
-
-        reader.onload = e => {
-            const wrapper = document.createElement('div');
-            wrapper.classList.add('position-relative');
-
-            const img = document.createElement('img');
-            img.src = e.target.result;
-            img.classList.add('img-thumbnail');
-            img.style.maxWidth = '150px';
-            img.style.maxHeight = '150px';
-
-            wrapper.appendChild(img);
-            preview.appendChild(wrapper);
-        };
-
-        reader.readAsDataURL(file);
-    });
-});
-</script>
-
+<style>
+.torrent-upload-preview { position: relative; flex: 0 0 150px; width: 150px; height: 110px; overflow: hidden; border: 1px solid var(--ui-border, #334155); border-radius: 8px; background: rgba(10,15,27,.65); }
+.torrent-upload-preview img { width: 100%; height: 100%; object-fit: contain; }
+.torrent-upload-preview-status { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 10px; color: #94a3b8; font-size: 12px; text-align: center; }
+.torrent-upload-preview-status[hidden], .torrent-upload-preview img[hidden] { display: none; }
+.torrent-upload-preview-remove { position: absolute; top: 4px; right: 4px; width: 25px; height: 25px; border: 0; border-radius: 50%; background: #842029; color: #fff; line-height: 1; }
+</style>

@@ -5,9 +5,9 @@
 ========================================================= */
 
 .actor-page {
-    --actor-bg: #111827;
-    --actor-panel: #182235;
-    --actor-panel-hover: #1d2a40;
+    --actor-bg: #0b1019;
+    --actor-panel: #101622;
+    --actor-panel-hover: #131b2a;
     --actor-border: rgba(148, 163, 184, .16);
     --actor-border-hover: rgba(34, 211, 238, .35);
     --actor-accent: #67e8f9;
@@ -138,8 +138,8 @@
         ),
         linear-gradient(
             135deg,
-            #182235 0%,
-            #111a2b 100%
+            #101622 0%,
+            #0b111c 100%
         );
 
     box-shadow:
@@ -226,7 +226,7 @@
     border-radius: 10px;
 
     background:
-        rgba(255, 255, 255, .025);
+        rgba(255,255,255,0.0175);
 
     transition:
         background .2s ease,
@@ -293,7 +293,7 @@
 
     border-radius: 15px;
 
-    background: #162033;
+    background: #0e1521;
 
     box-shadow:
         0 10px 30px rgba(0, 0, 0, .2);
@@ -370,8 +370,8 @@
     background:
         linear-gradient(
             135deg,
-            #192438 0%,
-            #151f31 100%
+            #101724 0%,
+            #0e1420 100%
         );
 
     box-shadow:
@@ -562,7 +562,7 @@
     border-radius: 7px;
 
     background:
-        rgba(255, 255, 255, .015);
+        rgba(255,255,255,0.0105);
 
     transition:
         background .2s ease,
@@ -697,7 +697,7 @@
 
     border-radius: 8px;
 
-    background: #1e293b;
+    background: #141b26;
 
     transition:
         transform .2s ease,
@@ -832,7 +832,7 @@
     border-radius: 8px;
 
     background:
-        rgba(255, 255, 255, .022);
+        rgba(255,255,255,0.0154);
 
     transition:
         background .2s ease,
@@ -868,7 +868,7 @@
 
     border-radius: 5px;
 
-    background: #1e293b;
+    background: #141b26;
 
     color: var(--actor-muted);
 }
@@ -1079,7 +1079,7 @@
 
 .actor-page ::-webkit-scrollbar-track {
     background:
-        rgba(20, 32, 51, .7);
+        rgba(13,21,33,.7);
 
     border-radius: 10px;
 }

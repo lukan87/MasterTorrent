@@ -48,7 +48,7 @@ class StaffTicketController extends Controller
             $ticket->update(['assigned_to' => $staff->id, 'claimed_by' => null]);
             $this->record($ticket, 'assigned the ticket to '.$staff->name);
             SystemMessageService::send(Auth::id(), $staff->id, 'Ticket assigned to you',
-                'A support ticket has been assigned to you: <a href="'.route('tickets.show', ['id' => $ticket->id, 'slug' => $ticket->slug]).'">'.e($ticket->title).'</a>');
+                'A support ticket has been assigned to you: '.$ticket->notificationLink());
         });
 
         return back()->with('success', 'Ticket assigned.');

@@ -14,7 +14,7 @@ body {
     margin: 0;
     background:
         radial-gradient(circle at 50% 0%, rgba(66, 217, 208, .07), transparent 32%),
-        linear-gradient(135deg, #0b1220 0%, #0f172a 55%, #0a111d 100%);
+        linear-gradient(135deg, #070c15 0%, #0a0f1b 55%, #060b13 100%);
     color: #e7edf5;
 }
 
@@ -39,7 +39,11 @@ body {
     width: 100%;
     padding: 2rem;
     box-sizing: border-box;
-    background: linear-gradient(135deg, rgba(22, 32, 51, .97), rgba(15, 23, 42, .94));
+    background: linear-gradient(
+        135deg,
+        rgba(14,21,33,.97),
+        rgba(10,15,27,.94)
+    );
     border: 1px solid rgba(148, 163, 184, .16);
     border-radius: .85rem;
     box-shadow: 0 18px 45px rgba(0, 0, 0, .3);
@@ -64,6 +68,22 @@ body {
     font-size: .88rem;
 }
 
+/* Login information */
+.login-info {
+    margin-bottom: 1.25rem;
+    padding: .85rem 1rem;
+    color: #cbd5e1;
+    background: rgba(66, 217, 208, .06);
+    border: 1px solid rgba(66, 217, 208, .16);
+    border-radius: .55rem;
+    font-size: .82rem;
+    line-height: 1.55;
+}
+
+.login-info strong {
+    color: #67e3dc;
+}
+
 .form-group {
     position: relative;
     margin-bottom: 1rem;
@@ -75,12 +95,18 @@ body {
     padding: .75rem .9rem;
     box-sizing: border-box;
     color: #e2e8f0 !important;
-    background: rgba(15, 23, 42, .78) !important;
+    background: rgba(10,15,27,.78) !important;
     border: 1px solid rgba(148, 163, 184, .2) !important;
     border-radius: .55rem;
     font-size: .95rem;
     box-shadow: none !important;
-    transition: border-color .18s ease, box-shadow .18s ease;
+    transition:
+        border-color .18s ease,
+        box-shadow .18s ease;
+}
+
+.form-control::placeholder {
+    color: #64748b;
 }
 
 .form-control:focus {
@@ -96,6 +122,14 @@ body {
     color: #cbd5e1;
     font-size: .88rem;
     font-weight: 600;
+}
+
+.form-help {
+    display: block;
+    margin-top: .4rem;
+    color: #64748b;
+    font-size: .76rem;
+    line-height: 1.4;
 }
 
 .btn-elite {
@@ -170,7 +204,7 @@ body {
     min-height: 40px;
     padding: .55rem .75rem;
     color: #cbd5e1;
-    background: rgba(15, 23, 42, .6);
+    background: rgba(10,15,27,.6);
     border: 1px solid rgba(148, 163, 184, .16);
     border-radius: .5rem;
     font-size: .86rem;
@@ -233,77 +267,130 @@ body {
 
     <div class="auth-wrapper">
 
-        <div class="glass-card" id="tilt-card">
+        <div class="glass-card">
 
             <div class="logo-wrapper">
+
                 <div class="app-logo">
                     {{ config('app.name') }}
                 </div>
+
                 <div class="logo-subtitle">
                     Sign in to your FileIplay account
                 </div>
+
+            </div>
+
+            <div class="login-info">
+                You can sign in using either your
+                <strong>username</strong> or your
+                <strong>registered email address</strong>.
+                If you do not remember your username, simply use the
+                email address associated with your FileIplay account.
             </div>
 
             @if(session('status'))
-                <div class="alert alert-success">{{ session('status') }}</div>
+                <div class="alert alert-success">
+                    {{ session('status') }}
+                </div>
             @endif
 
             @if($errors->any())
                 <div class="alert alert-danger">
+
                     <ul class="mb-0">
+
                         @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
                         @endforeach
+
                     </ul>
+
                 </div>
             @endif
 
             <form method="POST" action="{{ route('login') }}">
+
                 @csrf
 
                 <div class="form-group">
-                    <label for="login-name" class="form-label">Username</label>
-                    <input type="text"
-                           id="login-name"
-                           name="name"
-                           required
-                           autocomplete="username"
-                           class="form-control"
-                           value="{{ old('name') }}">
+
+                    <label for="login-name" class="form-label">
+                        Username or Email
+                    </label>
+
+                    <input
+                        type="text"
+                        id="login-name"
+                        name="name"
+                        required
+                        autofocus
+                        autocomplete="username"
+                        class="form-control"
+                        value="{{ old('name') }}"
+                        placeholder="Enter your username or email address"
+                    >
+
+                    <span class="form-help">
+                        You can use either your FileIplay username or
+                        the email address registered to your account.
+                    </span>
+
                 </div>
 
                 <div class="form-group">
-                    <label for="login-password" class="form-label">Password</label>
-                    <input type="password"
-                           id="login-password"
-                           name="password"
-                           required
-                           autocomplete="current-password"
-                           class="form-control">
+
+                    <label for="login-password" class="form-label">
+                        Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="login-password"
+                        name="password"
+                        required
+                        autocomplete="current-password"
+                        class="form-control"
+                        placeholder="Enter your password"
+                    >
+
                 </div>
 
                 <button type="submit" class="btn btn-elite">
                     ACCESS FileIplay
                 </button>
+
             </form>
 
         </div>
 
         <div class="glass-card help-card text-center">
 
-            <h6 class="help-title">Need Help?</h6>
+            <h6 class="help-title">
+                Need Help?
+            </h6>
 
             <div class="help-links">
+                <a href="{{ route('activation.notice') }}" class="help-btn">Resend activation email</a>
 
-                <a href="{{ route('custom.password.recover') }}" class="help-btn">
+                <a
+                    href="{{ route('custom.password.recover') }}"
+                    class="help-btn"
+                >
                     🔑 Forgot Password
                 </a>
 
-                <a href="{{ route('register') }}" class="help-btn">
+                <a
+                    href="{{ route('register') }}"
+                    class="help-btn"
+                >
                     🧾 Create Account
                 </a>
 
-                <a href="{{ route('contact.create') }}" class="help-btn help-btn-danger">
+                <a
+                    href="{{ route('contact.create') }}"
+                    class="help-btn help-btn-danger"
+                >
                     💬 Contact Staff
                 </a>
 

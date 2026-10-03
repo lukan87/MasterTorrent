@@ -27,39 +27,36 @@ class TorrentImageService
             return;
         }
 
-       foreach ((array) $request->file('images') as $image) {
-            if (!$image->isValid()) {
-                continue;
+        foreach ((array) $request->file('images') as $image) {
+            if ($image->isValid()) {
+                $this->storeWebp($torrent, $image->getPathname());
             }
+        }
+    }
 
-            $img = $this->images
-    ->read($image->getPathname())
-    ->scaleDown(1920, 1080)
-    ->sharpen(8);
+    /** Store an uploaded file or generated image binary as a single WebP. */
+    public function storeWebp(Torrent $torrent, string $source): TorrentImage
+    {
+        $encoded = $this->images->read($source)
+            ->scaleDown(1920, 1080)
+            ->sharpen(8)
+            ->toWebp(quality: 78)
+            ->toString();
 
-            $uuid = (string) Str::uuid();
+        $path = 'torrent_images/' . Str::uuid() . '.webp';
+        $disk = Storage::disk('public');
+        if (!$disk->put($path, $encoded)) {
+            throw new \RuntimeException('Could not save the screenshot.');
+        }
 
-// ---------- WebP (primary) ----------
-$webpPath = "torrent_images/{$uuid}.webp";
-Storage::disk('public')->put(
-    $webpPath,
-    $img->toWebp(quality: 78) // 👈 lower = smaller (75 sweet spot)
-        ->toString()
-);
-
-// ---------- JPEG fallback ----------
-$jpegPath = "torrent_images/{$uuid}.jpg";
-Storage::disk('public')->put(
-    $jpegPath,
-    $img->toJpeg(quality: 80, progressive: true) // 👈 progressive loading
-        ->toString()
-);
-
-            TorrentImage::create([
+        try {
+            return TorrentImage::create([
                 'torrent_id' => $torrent->id,
-                'path'       => $webpPath,
-                'fallback'   => $jpegPath,
+                'path' => $path,
             ]);
+        } catch (\Throwable $exception) {
+            $disk->delete($path);
+            throw $exception;
         }
     }
 

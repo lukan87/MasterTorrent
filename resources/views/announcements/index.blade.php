@@ -185,7 +185,7 @@ body {
     max-width: 1500px;
     margin: 0 auto;
     padding: 1.5rem;
-    background: linear-gradient(135deg, rgba(22, 32, 51, .97), rgba(15, 23, 42, .94));
+    background: linear-gradient(135deg, rgba(14,21,33,.97), rgba(10,15,27,.94));
     border: 1px solid rgba(148, 163, 184, .16);
     border-radius: .75rem;
     box-shadow: 0 14px 38px rgba(0, 0, 0, .24);
@@ -232,7 +232,7 @@ body {
     width: 100%;
     overflow: hidden;
     color: #e2e8f0;
-    background: linear-gradient(135deg, rgba(30, 41, 59, .84), rgba(15, 23, 42, .82));
+    background: linear-gradient(135deg, rgba(20,27,38,.84), rgba(10,15,27,.82));
     border: 1px solid rgba(148, 163, 184, .14) !important;
     border-radius: .65rem;
     box-shadow: 0 7px 18px rgba(0, 0, 0, .16) !important;
@@ -318,7 +318,7 @@ a.announcement-title:hover {
     flex: 0 0 36px;
     padding: 0;
     color: #cbd5e1;
-    background: rgba(15, 23, 42, .75);
+    background: rgba(10,15,27,.75);
     border: 1px solid rgba(148, 163, 184, .18);
     border-radius: .5rem;
     font-size: .92rem;
@@ -356,7 +356,7 @@ a.announcement-title:hover {
     color: #94a3b8;
     border: 1px dashed rgba(148, 163, 184, .18);
     border-radius: .65rem;
-    background: rgba(15, 23, 42, .35);
+    background: rgba(10,15,27,.35);
 }
 
 .empty-announcements h5 {
@@ -376,7 +376,7 @@ a.announcement-title:hover {
 /* Modal */
 .announcement-modal {
     color: #e2e8f0;
-    background: #111c2e;
+    background: #0b121e;
     border: 1px solid rgba(148, 163, 184, .18);
     border-radius: .7rem;
     box-shadow: 0 20px 55px rgba(0, 0, 0, .45);
@@ -401,7 +401,7 @@ a.announcement-title:hover {
 
 .announcement-input {
     color: #e2e8f0 !important;
-    background: #0f172a !important;
+    background: #0a0f1b !important;
     border: 1px solid rgba(148, 163, 184, .2) !important;
     border-radius: .5rem !important;
     font-size: .94rem !important;
@@ -415,7 +415,7 @@ a.announcement-title:hover {
 
 .announcement-input option {
     color: #e2e8f0;
-    background: #0f172a;
+    background: #0a0f1b;
 }
 
 .forum-secondary-btn {

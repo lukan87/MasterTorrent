@@ -169,7 +169,7 @@
 
 /* ------- SEARCH CARD ------- */
 .torrent-search { position: relative; z-index: 1000;
-  background: linear-gradient(135deg, rgba(22,32,51,.95), rgba(15,23,42,.84));
+  background: linear-gradient(135deg, rgba(14,21,33,.95), rgba(10,15,27,.84));
   border: 1px solid var(--ui-border); border-radius: .85rem;
   box-shadow: 0 14px 35px rgba(0,0,0,.28); backdrop-filter: blur(14px); }
 .torrent-search .card-body { position: relative; z-index: 1001; padding: 18px; }
@@ -177,11 +177,11 @@
 
 /* ------- COMBINED SEARCH / FILTER BAR ------- */
 .premium-search-combined { display: flex; align-items: center; min-height: 44px;
-  background: rgba(10,17,30,.78); border: 1px solid var(--ui-border); border-radius: .65rem;
+  background: rgba(6,11,20,.78); border: 1px solid var(--ui-border); border-radius: .65rem;
   padding: 5px 9px; position: relative; z-index: 10;
   transition: border-color .18s ease, box-shadow .18s ease, background .18s ease; }
 .premium-search-combined:focus-within { border-color: rgba(45,212,191,.40);
-  box-shadow: 0 0 0 3px rgba(45,212,191,.07); background: rgba(10,17,30,.92); }
+  box-shadow: 0 0 0 3px rgba(45,212,191,.07); background: rgba(6,11,20,.92); }
 
 /* ------- SEARCH INPUT ------- */
 .search-input-wrapper { display: flex; align-items: center; flex: 1; min-width: 0; }
@@ -216,7 +216,7 @@
 /* ------- DROPDOWN MENU -------
    NOTE: JS relocates the open menu into <body> so cards can't cover it. */
 .inline-dropdown-menu { position: fixed; min-width: 220px; max-width: 320px; max-height: 300px; padding: 6px;
-  background: #111b2d; border: 1px solid var(--ui-border); border-radius: .65rem;
+  background: #0b121d; border: 1px solid var(--ui-border); border-radius: .65rem;
   box-shadow: 0 20px 45px rgba(0,0,0,.65), 0 0 0 1px rgba(45,212,191,.08);
   display: none; overflow-y: auto; z-index: 2147483647; pointer-events: auto; }
 .inline-dropdown-menu.show-menu { display: block; }
@@ -229,7 +229,7 @@
 .inline-option:active { background: rgba(45,212,191,.20); color: #fff; }
 
 /* ------- CATEGORY PANEL ------- */
-.premium-category-panel { background: linear-gradient(135deg, rgba(22,32,51,.96), rgba(15,23,42,.90));
+.premium-category-panel { background: linear-gradient(135deg, rgba(14,21,33,.96), rgba(10,15,27,.90));
   border: 1px solid var(--ui-border); border-radius: .75rem; box-shadow: 0 18px 38px rgba(0,0,0,.32); }
 .section-title { font-size: 14px; font-weight: 700; margin-bottom: 12px; }
 .section-title.text-primary { color: var(--ui-accent) !important; }
@@ -238,7 +238,7 @@
 
 /* ------- CATEGORY CHECKBOXES ------- */
 .premium-check { margin-bottom: 7px; }
-.premium-check .form-check-input { background-color: rgba(255,255,255,.04); border-color: rgba(255,255,255,.18); margin-top: .18em; cursor: pointer; }
+.premium-check .form-check-input { background-color: rgba(255,255,255,0.028); border-color: rgba(255,255,255,.18); margin-top: .18em; cursor: pointer; }
 .premium-check .form-check-input:checked { background-color: var(--ui-accent); border-color: var(--ui-accent); }
 .premium-check .form-check-input:focus { border-color: var(--ui-accent); box-shadow: 0 0 0 .2rem rgba(45,212,191,.10); }
 .premium-check .form-check-label { color: rgba(255,255,255,.68); font-size: 13px; cursor: pointer; }

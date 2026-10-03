@@ -568,7 +568,7 @@
 
     /* Invite Row */
     .invite-row {
-        background: #3a3838;
+        background: #262424;
         border: 1px solid #1c202472;
         border-radius: 8px;
         transition:
@@ -578,7 +578,7 @@
     }
 
     .invite-row:hover {
-        background: #313436;
+        background: #202223;
         border-color: #437db8;
     }
 

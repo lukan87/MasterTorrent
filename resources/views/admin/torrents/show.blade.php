@@ -250,8 +250,8 @@
         position: relative;
         background: linear-gradient(
             135deg,
-            rgba(22, 32, 51, .96),
-            rgba(15, 23, 42, .88)
+            rgba(14,21,33,.96),
+            rgba(10,15,27,.88)
         );
         border: 1px solid var(--ui-border, rgba(255, 255, 255, .08));
         border-radius: .65rem;
@@ -301,7 +301,7 @@
         display: inline-block;
         max-width: 100%;
         padding: .2rem .45rem;
-        background: rgba(7, 15, 27, .5);
+        background: rgba(5,10,18,.5);
         border: 1px solid rgba(255, 255, 255, .07);
         border-radius: .35rem;
         color: #7f929f;
@@ -521,7 +521,7 @@
     }
 
     .status-pending {
-        background: rgba(255, 255, 255, .035);
+        background: rgba(255,255,255,0.0245);
         border-color: rgba(255, 255, 255, .08);
         color: #899ba7;
     }
@@ -577,7 +577,7 @@
     }
 
     .pagination .page-link {
-        background: rgba(22, 32, 51, .9);
+        background: rgba(14,21,33,.9);
         border-color: rgba(255, 255, 255, .075);
         color: #aabcc7;
         font-size: 11px;
@@ -648,7 +648,7 @@
 
     .peer-list::-webkit-scrollbar-thumb,
     .history-container::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, .13);
+        background: rgba(255,255,255,0.091);
         border-radius: 5px;
     }
 

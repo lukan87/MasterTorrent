@@ -68,12 +68,13 @@ html::before {
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: linear-gradient(to bottom, rgba(117, 98, 98, 0.18), rgba(78, 63, 63, 0.48)), url('{{ $profileBackground }}');
+    background-image: linear-gradient(to bottom, rgba(5,8,15,.18), rgba(5,8,15,.48)), url('{{ $profileBackground }}');
     background-position: center top;
     background-size: cover;
     background-repeat: no-repeat;
     opacity: 0.7;
-    z-index: -1;
+    pointer-events: none;
+    z-index: -2;
 }
 
 html::after {
@@ -115,147 +116,9 @@ html {
     }
 </style>
 
-<!-- Swiper CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-<!-- Swiper JS -->
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<link rel="stylesheet" href="{{ asset('css/image-lightbox.css') }}?v=2">
+<script src="{{ asset('js/image-lightbox.js') }}?v=2" defer></script>
 
-<script>
-document.addEventListener("click", function(e){
-
-    if(!e.target.classList.contains("bbcode-image")) return;
-
-    const overlay = document.createElement("div");
-    overlay.style.position = "fixed";
-    overlay.style.top = 0;
-    overlay.style.left = 0;
-    overlay.style.width = "100%";
-    overlay.style.height = "100%";
-    overlay.style.background = "rgba(0,0,0,0.9)";
-    overlay.style.display = "flex";
-    overlay.style.alignItems = "center";
-    overlay.style.justifyContent = "center";
-    overlay.style.zIndex = 9999;
-
-    const img = document.createElement("img");
-    img.src = e.target.src;
-    img.style.maxWidth = "95%";
-    img.style.maxHeight = "95%";
-    img.style.borderRadius = "10px";
-
-    overlay.appendChild(img);
-
-    overlay.addEventListener("click", () => overlay.remove());
-
-    document.body.appendChild(overlay);
-
-});
-</script>
-
-<script>
-
-document.addEventListener("DOMContentLoaded", function(){
-
-let images = [];
-let currentIndex = 0;
-let overlay = null;
-
-function openLightbox(index){
-
-    images = Array.from(document.querySelectorAll(".torrent-description img"));
-    currentIndex = index;
-
-    overlay = document.createElement("div");
-    overlay.className = "lightbox-overlay";
-
-    const img = document.createElement("img");
-    img.className = "lightbox-image";
-    img.src = images[currentIndex].src;
-
-    overlay.appendChild(img);
-    document.body.appendChild(overlay);
-
-    updateImage();
-
-}
-
-function updateImage(){
-    const img = overlay.querySelector("img");
-    img.src = images[currentIndex].src;
-}
-
-function next(){
-    currentIndex = (currentIndex + 1) % images.length;
-    updateImage();
-}
-
-function prev(){
-    currentIndex = (currentIndex - 1 + images.length) % images.length;
-    updateImage();
-}
-
-document.addEventListener("click", function(e){
-
-    if(e.target.closest(".torrent-description img")){
-
-        const imgs = Array.from(document.querySelectorAll(".torrent-description img"));
-        const index = imgs.indexOf(e.target);
-
-        openLightbox(index);
-
-    }
-
-    if(e.target.classList.contains("lightbox-overlay")){
-        e.target.remove();
-    }
-
-});
-
-document.addEventListener("keydown", function(e){
-
-    if(!overlay) return;
-
-    if(e.key === "Escape"){
-        overlay.remove();
-        overlay = null;
-    }
-
-    if(e.key === "ArrowRight"){
-        next();
-    }
-
-    if(e.key === "ArrowLeft"){
-        prev();
-    }
-
-});
-
-let startX = 0;
-
-document.addEventListener("touchstart", function(e){
-    startX = e.changedTouches[0].screenX;
-});
-
-document.addEventListener("touchend", function(e){
-
-    if(!overlay) return;
-
-    let endX = e.changedTouches[0].screenX;
-
-    if(endX - startX > 50){
-        prev();
-    }
-
-    if(startX - endX > 50){
-        next();
-    }
-
-});
-
-});
-
-</script>
-
-
+<link rel="stylesheet" href="{{ asset('css/dark-theme.css') }}?v={{ filemtime(public_path('css/dark-theme.css')) }}">
 
 </head>

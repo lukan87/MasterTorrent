@@ -4,7 +4,7 @@
 @section('title', 'Error')
 
 @section('content')
-<div class="container-fluid mt-5" style="background: linear-gradient(135deg, rgb(105, 100, 101) 0%, rgba(76, 54, 58, 0.8) 35%, rgb(189, 219, 225) 100%);rounded-corners: 20px; padding: 20px;">
+<div class="container-fluid mt-5" style="background: linear-gradient(135deg, rgb(68,65,66) 0%, rgba(49,35,38,0.8) 35%, rgb(189, 219, 225) 100%);rounded-corners: 20px; padding: 20px;">
     <div class="row justify-content-center align-items-center">
         <div class="col-md-8">
             <div class="card border-danger">

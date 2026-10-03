@@ -46,7 +46,7 @@
 }
 
 .cookie-modal {
-    background: linear-gradient(145deg, #1f1f1f, #171717);
+    background: linear-gradient(145deg, #141414, #0f0f0f);
     color: #fff;
     max-width: 520px;
     width: 92%;

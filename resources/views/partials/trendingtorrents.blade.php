@@ -1,4 +1,4 @@
-<div class="container-fluid mt-4">
+<div class="container-fluid px-0">
 
 
 <div class="modern-trending-wrapper">
@@ -277,8 +277,8 @@
         ),
         linear-gradient(
             135deg,
-            rgba(15, 23, 42, .98),
-            rgba(9, 15, 28, .98)
+            rgba(10,15,27,.98),
+            rgba(6,10,18,.98)
         );
 
     box-shadow:
@@ -339,7 +339,7 @@
     background:
         linear-gradient(
             180deg,
-            rgba(255, 255, 255, .025),
+            rgba(255,255,255,0.0175),
             transparent
         );
 
@@ -511,7 +511,7 @@
     border-radius: 10px;
 
     background:
-        rgba(255, 255, 255, .025);
+        rgba(255,255,255,0.0175);
 
     color: #64748b;
 
@@ -683,7 +683,7 @@
     border-radius: 10px;
 
     background:
-        rgba(15, 23, 42, .9);
+        rgba(10,15,27,.9);
 
     box-shadow:
         0 4px 12px rgba(0, 0, 0, .16);
@@ -744,7 +744,7 @@
     overflow: hidden;
 
     background:
-        #020617;
+        #01040f;
 
 }
 
@@ -833,7 +833,7 @@
     border-radius: 7px;
 
     background:
-        rgba(2, 6, 23, .82);
+        rgba(1,4,15,.82);
 
     border:
         1px solid rgba(255, 255, 255, .09);
@@ -989,8 +989,8 @@
     background:
         linear-gradient(
             180deg,
-            rgba(15, 23, 42, .98),
-            rgba(9, 15, 28, .98)
+            rgba(10,15,27,.98),
+            rgba(6,10,18,.98)
         );
 
     border-top:
@@ -1106,7 +1106,7 @@
 .tt-row.tt-scroll::-webkit-scrollbar-track {
 
     background:
-        rgba(255, 255, 255, .025);
+        rgba(255,255,255,0.0175);
 
     border-radius:
         999px;

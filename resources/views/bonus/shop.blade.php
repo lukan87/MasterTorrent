@@ -84,9 +84,9 @@
             <div class="reward-card h-100">
                 <div class="reward-icon"><i class="bi bi-upload"></i></div>
                 <div class="reward-content">
-                    <h3>10 GB Upload</h3><p class="reward-cost">{{ config('seedbonus.shop.upload.10') }} Points</p>
-                    <form action="{{ route('shop.upload') }}" method="POST">@csrf<input type="hidden" name="amount" value="10">
-                        <button type="submit" class="shop-btn {{ Auth::user()->seedbonus < config('seedbonus.shop.upload.10') ? 'disabled' : '' }}"><i class="bi bi-cart-plus"></i> Buy</button>
+                    <h3>100 GB Upload</h3><p class="reward-cost">{{ config('seedbonus.shop.upload.100') }} Points</p>
+                    <form action="{{ route('shop.upload') }}" method="POST">@csrf<input type="hidden" name="amount" value="100">
+                        <button type="submit" class="shop-btn {{ Auth::user()->seedbonus < config('seedbonus.shop.upload.100') ? 'disabled' : '' }}"><i class="bi bi-cart-plus"></i> Buy</button>
                     </form>
                 </div>
             </div>
@@ -96,9 +96,9 @@
             <div class="reward-card h-100">
                 <div class="reward-icon"><i class="bi bi-upload"></i></div>
                 <div class="reward-content">
-                    <h3>25 GB Upload</h3><p class="reward-cost">{{ number_format(config('seedbonus.shop.upload.25')) }} Points</p>
-                    <form action="{{ route('shop.upload') }}" method="POST">@csrf<input type="hidden" name="amount" value="25">
-                        <button type="submit" class="shop-btn {{ Auth::user()->seedbonus < config('seedbonus.shop.upload.25') ? 'disabled' : '' }}"><i class="bi bi-cart-plus"></i> Buy</button>
+                    <h3>250 GB Upload</h3><p class="reward-cost">{{ number_format(config('seedbonus.shop.upload.250')) }} Points</p>
+                    <form action="{{ route('shop.upload') }}" method="POST">@csrf<input type="hidden" name="amount" value="250">
+                        <button type="submit" class="shop-btn {{ Auth::user()->seedbonus < config('seedbonus.shop.upload.250') ? 'disabled' : '' }}"><i class="bi bi-cart-plus"></i> Buy</button>
                     </form>
                 </div>
             </div>
@@ -108,9 +108,9 @@
             <div class="reward-card h-100">
                 <div class="reward-icon"><i class="bi bi-cloud-arrow-up"></i></div>
                 <div class="reward-content">
-                    <h3>100 GB Upload</h3><p class="reward-cost">{{ number_format(config('seedbonus.shop.upload.100')) }} Points</p>
-                    <form action="{{ route('shop.upload') }}" method="POST">@csrf<input type="hidden" name="amount" value="100">
-                        <button type="submit" class="shop-btn {{ Auth::user()->seedbonus < config('seedbonus.shop.upload.100') ? 'disabled' : '' }}"><i class="bi bi-cart-plus"></i> Buy</button>
+                    <h3>500 GB Upload</h3><p class="reward-cost">{{ number_format(config('seedbonus.shop.upload.500')) }} Points</p>
+                    <form action="{{ route('shop.upload') }}" method="POST">@csrf<input type="hidden" name="amount" value="500">
+                        <button type="submit" class="shop-btn {{ Auth::user()->seedbonus < config('seedbonus.shop.upload.500') ? 'disabled' : '' }}"><i class="bi bi-cart-plus"></i> Buy</button>
                     </form>
                 </div>
             </div>
@@ -222,13 +222,13 @@
 
 <style>
 .seedbonus-shop-page{color:#e5e7eb}
-.shop-hero,.shop-card,.reward-card{background:linear-gradient(135deg,rgba(22,32,51,.96),rgba(15,23,42,.88));border:1px solid var(--ui-border,rgba(148,163,184,.16));box-shadow:0 14px 34px rgba(0,0,0,.25)}
+.shop-hero,.shop-card,.reward-card{background:linear-gradient(135deg,rgba(14,21,33,.96),rgba(10,15,27,.88));border:1px solid var(--ui-border,rgba(148,163,184,.16));box-shadow:0 14px 34px rgba(0,0,0,.25)}
 .shop-hero{padding:26px 30px;border-radius:.75rem;position:relative;overflow:hidden}
 .shop-hero:after{content:"";position:absolute;width:240px;height:240px;right:-120px;top:-140px;border-radius:50%;background:radial-gradient(circle,rgba(20,184,166,.12),transparent 68%);pointer-events:none}
 .hero-badge{display:inline-flex;align-items:center;padding:.4rem .7rem;margin-bottom:.75rem;border-radius:.5rem;background:rgba(20,184,166,.09);border:1px solid rgba(20,184,166,.22);color:#67e8df;font-size:.82rem;font-weight:800;letter-spacing:.7px}
 .hero-title{margin:0 0 .4rem;color:#f8fafc;font-size:clamp(1.7rem,3vw,2.3rem);font-weight:800}.hero-subtitle{margin:0;color:#94a3b8;font-size:.9rem}
 .shop-card{border-radius:.7rem}.shop-card .card-body{padding:20px}.section-title,.shop-section-title{color:#f1f5f9;font-weight:800}.section-title{display:flex;align-items:center;gap:.55rem;margin-bottom:1rem;font-size:.95rem}.section-title i,.shop-section-title i{color:#67e8df}
-.stats-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem;margin-bottom:.9rem}.stat-item{padding:.7rem .8rem;background:rgba(2,6,23,.42);border:1px solid rgba(148,163,184,.12);border-radius:.5rem}.stat-item span{display:block;color:#64748b;font-size:.72rem;margin-bottom:.15rem}.stat-item strong{color:#67e8df;font-size:1.05rem}.stat-item small{color:#94a3b8;font-size:.7rem;font-weight:500}
+.stats-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem;margin-bottom:.9rem}.stat-item{padding:.7rem .8rem;background:rgba(1,4,15,.42);border:1px solid rgba(148,163,184,.12);border-radius:.5rem}.stat-item span{display:block;color:#64748b;font-size:.72rem;margin-bottom:.15rem}.stat-item strong{color:#67e8df;font-size:1.05rem}.stat-item small{color:#94a3b8;font-size:.7rem;font-weight:500}
 .info-line,.muted-note{color:#cbd5e1;font-size:.82rem}.info-line{margin-bottom:.75rem}.muted-note{color:#94a3b8}
 .status-badge{display:inline-flex;align-items:center;gap:.25rem;padding:.25rem .5rem;border-radius:.4rem;font-size:.78rem;font-weight:700}.status-badge.success{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);color:#86efac}.status-badge.warning{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);color:#fbbf24}
 .happy-hour-note{display:flex;flex-wrap:wrap;align-items:center;gap:.55rem;padding:.65rem .75rem;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.16);border-radius:.5rem;color:#fcd34d;font-size:.88rem}

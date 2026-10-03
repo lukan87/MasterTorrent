@@ -19,7 +19,15 @@
             <div class="fw-semibold">
 
                 {{-- Torrent Deleted --}}
-                @if($type === 'torrent_deleted')
+                @if($type === 'achievement_unlocked')
+                    @include('notifications.achievement', ['data' => $data])
+                @elseif($type === 'shout_mention')
+                    @include('notifications.shout-mention', ['data' => $data])
+                @elseif($type === 'request_filled')
+                    @include('notifications.request-filled', ['data' => $data])
+                @elseif(in_array($type, ['torrent_comment', 'torrent_reaction'], true))
+                    @include('notifications.torrent-activity', ['data' => $data])
+                @elseif($type === 'torrent_deleted')
                     <i class="bi bi-trash-fill text-danger me-1"></i>
                     Your torrent
                     <strong>{{ $data['torrent_name'] ?? 'Unknown' }}</strong>

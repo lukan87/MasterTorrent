@@ -15,7 +15,7 @@ body {
     min-height: 100vh;
     background:
         radial-gradient(circle at 50% 0%, rgba(66, 217, 208, .07), transparent 34%),
-        linear-gradient(135deg, #0b1220 0%, #0f172a 55%, #0a111d 100%);
+        linear-gradient(135deg, #070c15 0%, #0a0f1b 55%, #060b13 100%);
     color: #e7edf5;
 }
 
@@ -40,7 +40,11 @@ body {
     width: 100%;
     padding: 2rem;
     box-sizing: border-box;
-    background: linear-gradient(135deg, rgba(22, 32, 51, .97), rgba(15, 23, 42, .94));
+    background: linear-gradient(
+        135deg,
+        rgba(14,21,33,.97),
+        rgba(10,15,27,.94)
+    );
     border: 1px solid rgba(148, 163, 184, .16);
     border-radius: .85rem;
     box-shadow: 0 18px 45px rgba(0, 0, 0, .3);
@@ -79,13 +83,15 @@ body {
     min-height: 46px;
     box-sizing: border-box;
     color: #e2e8f0 !important;
-    background: rgba(15, 23, 42, .78) !important;
+    background: rgba(10,15,27,.78) !important;
     border: 1px solid rgba(148, 163, 184, .2) !important;
     border-radius: .55rem !important;
     padding: .65rem .85rem !important;
     font-size: .94rem;
     box-shadow: none !important;
-    transition: border-color .18s ease, box-shadow .18s ease;
+    transition:
+        border-color .18s ease,
+        box-shadow .18s ease;
 }
 
 .form-control:focus,
@@ -102,7 +108,7 @@ body {
 
 .form-select option {
     color: #e2e8f0;
-    background: #0f172a;
+    background: #0a0f1b;
 }
 
 .text-muted {
@@ -144,9 +150,10 @@ body {
 }
 
 .btn-register:disabled {
-    opacity: .55;
+    opacity: .45;
     cursor: not-allowed;
     transform: none;
+    box-shadow: none;
 }
 
 .btn-back {
@@ -154,7 +161,7 @@ body {
     align-items: center;
     justify-content: center;
     color: #cbd5e1;
-    background: rgba(15, 23, 42, .65);
+    background: rgba(10,15,27,.65);
     border: 1px solid rgba(148, 163, 184, .2);
     text-decoration: none;
 }
@@ -166,7 +173,7 @@ body {
 }
 
 .form-check-input {
-    background-color: #0f172a;
+    background-color: #0a0f1b;
     border-color: rgba(148, 163, 184, .3);
 }
 
@@ -195,6 +202,34 @@ body {
     color: #86efac;
     font-size: .82rem;
     margin-top: .35rem;
+}
+
+.validation-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .45rem;
+    margin-top: .8rem;
+}
+
+.validation-item {
+    padding: .3rem .55rem;
+    border-radius: .4rem;
+    color: #94a3b8;
+    background: rgba(10,15,27,.6);
+    border: 1px solid rgba(148, 163, 184, .15);
+    font-size: .76rem;
+}
+
+.validation-item.valid {
+    color: #86efac;
+    background: rgba(34, 197, 94, .06);
+    border-color: rgba(34, 197, 94, .22);
+}
+
+.validation-item.invalid {
+    color: #fca5a5;
+    background: rgba(239, 68, 68, .06);
+    border-color: rgba(239, 68, 68, .2);
 }
 
 @media (max-width: 768px) {
@@ -246,7 +281,7 @@ body {
 
     <div class="auth-wrapper">
 
-        <div class="glass-card" id="tilt-card">
+        <div class="glass-card">
 
             @if ($errors->any())
                 <div class="register-error">
@@ -259,142 +294,350 @@ body {
             @endif
 
             <div class="logo-wrapper">
-                <div class="app-logo">{{ config('app.name') }}</div>
-                <div class="logo-subtitle">Create your FileIplay account</div>
+
+                <div class="app-logo">
+                    {{ config('app.name') }}
+                </div>
+
+                <div class="logo-subtitle">
+                    Create your FileIplay account
+                </div>
+
             </div>
 
-            <form method="POST" action="{{ route('register') }}">
+            <form
+                id="registration-form"
+                method="POST"
+                action="{{ route('register') }}"
+            >
+
                 @csrf
 
+                {{-- Username --}}
                 <div class="mb-3">
-                    <label class="form-label">Name</label>
+
+                    <label for="register-name" class="form-label">
+                        Username
+                    </label>
+
                     <input
+                        id="register-name"
                         type="text"
                         name="name"
                         class="form-control @error('name') is-invalid @enderror"
                         value="{{ old('name') }}"
+                        maxlength="20"
                         required
                         autocomplete="username"
+                        placeholder="Choose a username"
                     >
+
+                    <small class="text-muted">
+                        Your username must be available before you can register.
+                    </small>
+
+                    <div
+                        id="name-validation"
+                        class="live-error"
+                        style="display:none;"
+                    ></div>
 
                     @error('name')
-                        <div class="live-error">{{ $message }}</div>
+                        <div class="live-error">
+                            {{ $message }}
+                        </div>
                     @enderror
+
                 </div>
 
+                {{-- Email --}}
                 <div class="mb-3">
-                    <label class="form-label">Email</label>
+
+                    <label for="register-email" class="form-label">
+                        Email
+                    </label>
+
                     <input
+                        id="register-email"
                         type="email"
                         name="email"
-                        class="form-control"
-                        required
+                        class="form-control @error('email') is-invalid @enderror"
                         value="{{ old('email') }}"
+                        required
                         autocomplete="email"
+                        placeholder="Enter your email address"
                     >
+
+                    <small class="text-muted">
+                        Your email address must be valid and not already registered.
+                    </small>
+
+                    <div
+                        id="email-validation"
+                        class="live-error"
+                        style="display:none;"
+                    ></div>
+
+                    @error('email')
+                        <div class="live-error">
+                            {{ $message }}
+                        </div>
+                    @enderror
+
                 </div>
 
+                {{-- Password --}}
                 <div class="mb-3">
-                    <label class="form-label">Password</label>
+
+                    <label for="register-password" class="form-label">
+                        Password
+                    </label>
+
                     <input
+                        id="register-password"
                         type="password"
                         name="password"
-                        class="form-control"
+                        class="form-control @error('password') is-invalid @enderror"
                         required
                         autocomplete="new-password"
+                        placeholder="Choose a password"
                     >
+
+                    @error('password')
+                        <div class="live-error">
+                            {{ $message }}
+                        </div>
+                    @enderror
+
                 </div>
 
+                {{-- Password Confirmation --}}
                 <div class="mb-3">
-                    <label class="form-label">Confirm Password</label>
+
+                    <label for="password_confirmation" class="form-label">
+                        Confirm Password
+                    </label>
+
                     <input
+                        id="password_confirmation"
                         type="password"
                         name="password_confirmation"
                         class="form-control"
                         required
                         autocomplete="new-password"
+                        placeholder="Enter your password again"
                     >
+
                 </div>
 
+                @if(config('auth.email_registration'))
+                    <div class="alert alert-success">We’ll email you an activation link. Confirm your email before signing in. If you forget your password, we’ll send you a reset link.</div>
+                @else
+                {{-- Recovery Code --}}
                 <div class="mb-3">
-                    <label class="form-label">Recovery Code</label>
+
+                    <label for="recovery_code" class="form-label">
+                        Recovery Code
+                    </label>
+
                     <input
+                        id="recovery_code"
                         type="text"
                         name="recovery_code"
-                        class="form-control"
+                        class="form-control @error('recovery_code') is-invalid @enderror"
+                        value="{{ old('recovery_code') }}"
+                        minlength="6"
+                        maxlength="20"
                         required
+                        autocomplete="off"
+                        placeholder="Minimum 6 characters"
                     >
-                    <small class="text-muted">Write this down safely.</small>
+
+                    <small class="text-muted">Use 6–20 characters. Keep this code safe — you will need it if you forget your password.</small>
+
+                    <div
+                        id="recovery-validation"
+                        class="live-error"
+                        style="display:none;"
+                    ></div>
+
+                    @error('recovery_code')
+                        <div class="live-error">
+                            {{ $message }}
+                        </div>
+                    @enderror
+
                 </div>
 
-                @php $timezones = \DateTimeZone::listIdentifiers(); @endphp
+                @endif
 
-                <div class="mb-3">
-                    <label class="form-label">Timezone</label>
+                {{-- Live validation summary --}}
+                <div class="validation-summary">
 
-                    <select name="timezone" id="timezone" class="form-select" required>
-                        <option disabled selected>Select timezone</option>
+                    <span
+                        id="username-status"
+                        class="validation-item"
+                    >
+                        Username
+                    </span>
+
+                    <span
+                        id="email-status"
+                        class="validation-item"
+                    >
+                        Email
+                    </span>
+
+                    @unless(config('auth.email_registration'))
+                    <span
+                        id="recovery-status"
+                        class="validation-item"
+                    >
+                        Recovery Code
+                    </span>
+                    @endunless
+
+                </div>
+
+                {{-- Timezone --}}
+                @php
+                    $timezones = \DateTimeZone::listIdentifiers();
+                @endphp
+
+                <div class="mb-3 mt-3">
+
+                    <label for="timezone" class="form-label">
+                        Timezone
+                    </label>
+
+                    <select
+                        name="timezone"
+                        id="timezone"
+                        class="form-select @error('timezone') is-invalid @enderror"
+                        required
+                    >
+
+                        <option value="" disabled {{ old('timezone') ? '' : 'selected' }}>
+                            Select timezone
+                        </option>
 
                         @foreach($timezones as $timezone)
-                            <option value="{{ $timezone }}">{{ $timezone }}</option>
+
+                            <option
+                                value="{{ $timezone }}"
+                                @selected(old('timezone') === $timezone)
+                            >
+                                {{ $timezone }}
+                            </option>
+
                         @endforeach
+
                     </select>
 
-                    <small id="detected-timezone"
-                           class="text-info d-block mt-2"
-                           style="opacity:0.8;"></small>
+                    <small
+                        id="detected-timezone"
+                        class="text-info d-block mt-2"
+                        style="opacity:.8;"
+                    ></small>
 
-                    <button type="button"
-                            id="use-my-timezone"
-                            class="btn btn-sm btn-back mt-2">
+                    <button
+                        type="button"
+                        id="use-my-timezone"
+                        class="btn btn-sm btn-back mt-2"
+                    >
                         Use My Timezone
                     </button>
 
-                    <input type="hidden"
-                           name="detected_timezone"
-                           id="detected_timezone">
+                    <input
+                        type="hidden"
+                        name="detected_timezone"
+                        id="detected_timezone"
+                    >
+
+                    @error('timezone')
+                        <div class="live-error">
+                            {{ $message }}
+                        </div>
+                    @enderror
+
                 </div>
 
+                {{-- Invite Code --}}
                 <div class="mb-3">
-                    <label for="invite_code" class="form-label">Invite Code {{ config('app.invite_only') ? '' : '(optional)' }}</label>
-                    <input id="invite_code" type="text" name="invite_code" maxlength="255"
-                           value="{{ old('invite_code', request('invite_code')) }}"
-                           class="form-control @error('invite_code') is-invalid @enderror"
-                           @required(config('app.invite_only'))>
-                    @error('invite_code') <div class="invalid-feedback">{{ $message }}</div> @enderror
+
+                    <label for="invite_code" class="form-label">
+                        Invite Code
+                        {{ config('app.invite_only') ? '' : '(optional)' }}
+                    </label>
+
+                    <input
+                        id="invite_code"
+                        type="text"
+                        name="invite_code"
+                        maxlength="255"
+                        value="{{ old('invite_code', request('invite_code')) }}"
+                        class="form-control @error('invite_code') is-invalid @enderror"
+                        @required(config('app.invite_only'))
+                    >
+
+                    @error('invite_code')
+                        <div class="invalid-feedback">
+                            {{ $message }}
+                        </div>
+                    @enderror
+
                 </div>
 
+                {{-- Email Subscription --}}
                 <div class="mb-4">
-                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
 
-                        <div>
-                            <label class="form-label mb-0">Email Notifications</label>
-                            <div class="small text-muted">
-                                Receive login reminders and important updates
-                            </div>
+                    <input
+                        type="hidden"
+                        name="subscribed"
+                        value="0"
+                    >
+
+                    @include('partials.email-subscription-switch', [
+                        'emailToggleId' => 'registration-email-subscribe',
+                        'emailSubscribed' => (bool) old('subscribed', false),
+                        'emailHelpId' => 'registration-email-help',
+                    ])
+
+                    <p
+                        id="registration-email-help"
+                        class="small text-muted mt-2 mb-0"
+                    >
+                        Optional: receive marketing emails, site news and updates
+                        from us. You can unsubscribe at any time from your profile.
+                    </p>
+
+                    @error('subscribed')
+                        <div class="text-danger small">
+                            {{ $message }}
                         </div>
+                    @enderror
 
-                        <div class="form-check form-switch m-0">
-                            <input
-                                class="form-check-input"
-                                type="checkbox"
-                                name="subscribed"
-                                value="1"
-                                checked
-                            >
-                        </div>
-
-                    </div>
                 </div>
 
+                {{-- Actions --}}
                 <div class="d-flex gap-3 mt-3 flex-wrap">
-                    <button type="submit" class="btn btn-register">
+
+                    <button
+                        id="register-button"
+                        type="submit"
+                        class="btn btn-register"
+                        disabled
+                    >
                         REGISTER
                     </button>
 
-                    <a href="{{ route('login') }}" class="btn btn-back">
+                    <a
+                        href="{{ route('login') }}"
+                        class="btn btn-back"
+                    >
                         Back To Login
                     </a>
+
                 </div>
 
             </form>
@@ -406,134 +649,623 @@ body {
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener('DOMContentLoaded', function () {
 
-    const timezoneSelect = document.getElementById("timezone");
-    const detectedText = document.getElementById("detected-timezone");
-    const hiddenInput = document.getElementById("detected_timezone");
-    const useBtn = document.getElementById("use-my-timezone");
+    /*
+    |--------------------------------------------------------------------------
+    | Elements
+    |--------------------------------------------------------------------------
+    */
 
-    let detectedTimezone = null;
+    const form = document.getElementById('registration-form');
 
-    try {
-        detectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const nameInput = document.getElementById('register-name');
+    const emailInput = document.getElementById('register-email');
+    const recoveryInput = document.getElementById('recovery_code');
 
-        if (detectedTimezone) {
-            detectedText.innerHTML =
-                "Detected timezone: <strong>" + detectedTimezone + "</strong>";
+    const nameValidation = document.getElementById('name-validation');
+    const emailValidation = document.getElementById('email-validation');
+    const recoveryValidation = document.getElementById('recovery-validation');
 
-            hiddenInput.value = detectedTimezone;
-        }
+    const usernameStatus = document.getElementById('username-status');
+    const emailStatus = document.getElementById('email-status');
+    const recoveryStatus = document.getElementById('recovery-status');
 
-    } catch (e) {
-        detectedText.textContent = "Could not detect timezone.";
+    const registerButton = document.getElementById('register-button');
+
+    if (
+        !form ||
+        !nameInput ||
+        !emailInput ||
+        !registerButton
+    ) {
+        return;
     }
 
-    useBtn.addEventListener("click", function () {
-        if (!detectedTimezone) return;
+    /*
+    |--------------------------------------------------------------------------
+    | Validation State
+    |--------------------------------------------------------------------------
+    */
 
-        const option = timezoneSelect.querySelector(
-            `option[value="${detectedTimezone}"]`
-        );
+    const validation = {
+        username: false,
+        email: false,
+        recovery: !recoveryInput,
+        usernameChecking: false,
+        emailChecking: false
+    };
 
-        if (option) {
-            timezoneSelect.value = detectedTimezone;
+    /*
+    |--------------------------------------------------------------------------
+    | Update REGISTER Button
+    |--------------------------------------------------------------------------
+    */
+
+    function updateRegisterButton() {
+
+        const valid =
+            validation.username === true &&
+            validation.email === true &&
+            validation.recovery === true &&
+            validation.usernameChecking === false &&
+            validation.emailChecking === false;
+
+        registerButton.disabled = !valid;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Status Badge
+    |--------------------------------------------------------------------------
+    */
+
+    function setStatus(element, state, label) {
+
+        if (!element) {
+            return;
+        }
+
+        element.classList.remove('valid', 'invalid');
+
+        if (state === true) {
+            element.classList.add('valid');
+            element.textContent = '✓ ' + label;
+            return;
+        }
+
+        if (state === false) {
+            element.classList.add('invalid');
+            element.textContent = '✕ ' + label;
+            return;
+        }
+
+        element.textContent = label;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Field Message
+    |--------------------------------------------------------------------------
+    */
+
+    function showMessage(element, message, success = false) {
+
+        if (!element) {
+            return;
+        }
+
+        element.textContent = message;
+        element.className = success
+            ? 'live-success'
+            : 'live-error';
+
+        element.style.display = 'block';
+    }
+
+    function hideMessage(element) {
+
+        if (!element) {
+            return;
+        }
+
+        element.textContent = '';
+        element.style.display = 'none';
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Username
+    |--------------------------------------------------------------------------
+    */
+
+    let usernameRequest = 0;
+
+    nameInput.addEventListener('input', function () {
+
+        usernameRequest++;
+
+        validation.username = false;
+        validation.usernameChecking = false;
+
+        hideMessage(nameValidation);
+        setStatus(usernameStatus, null, 'Username');
+
+        updateRegisterButton();
+    });
+
+    nameInput.addEventListener('blur', async function () {
+
+        const username = nameInput.value.trim();
+
+        const requestId = ++usernameRequest;
+
+        validation.username = false;
+
+        hideMessage(nameValidation);
+
+        if (!username) {
+
+            setStatus(usernameStatus, false, 'Username');
+            updateRegisterButton();
+
+            return;
+        }
+
+        validation.usernameChecking = true;
+
+        usernameStatus.classList.remove('valid', 'invalid');
+        usernameStatus.textContent = 'Checking username...';
+
+        updateRegisterButton();
+
+        try {
+
+            const response = await fetch(
+                `/check-username?name=${encodeURIComponent(username)}`,
+                {
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error('Unable to check username');
+            }
+
+            const data = await response.json();
+
+            /*
+             * Ignore an old response if another check started.
+             */
+            if (
+                requestId !== usernameRequest ||
+                nameInput.value.trim() !== username
+            ) {
+                return;
+            }
+
+            if (data.exists) {
+
+                validation.username = false;
+
+                showMessage(
+                    nameValidation,
+                    'Username already taken'
+                );
+
+                setStatus(
+                    usernameStatus,
+                    false,
+                    'Username'
+                );
+
+            } else {
+
+                validation.username = true;
+
+                showMessage(
+                    nameValidation,
+                    'Username available',
+                    true
+                );
+
+                setStatus(
+                    usernameStatus,
+                    true,
+                    'Username'
+                );
+            }
+
+        } catch (error) {
+
+            if (requestId !== usernameRequest) {
+                return;
+            }
+
+            validation.username = false;
+
+            showMessage(
+                nameValidation,
+                'Unable to check username. Please try again.'
+            );
+
+            setStatus(
+                usernameStatus,
+                false,
+                'Username'
+            );
+
+        } finally {
+
+            if (requestId === usernameRequest) {
+                validation.usernameChecking = false;
+                updateRegisterButton();
+            }
         }
     });
 
+    /*
+    |--------------------------------------------------------------------------
+    | Email
+    |--------------------------------------------------------------------------
+    */
+
+    let emailRequest = 0;
+
+    emailInput.addEventListener('input', function () {
+
+        emailRequest++;
+
+        validation.email = false;
+        validation.emailChecking = false;
+
+        hideMessage(emailValidation);
+        setStatus(emailStatus, null, 'Email');
+
+        updateRegisterButton();
+    });
+
+    emailInput.addEventListener('blur', async function () {
+
+        const email = emailInput.value.trim();
+
+        const requestId = ++emailRequest;
+
+        validation.email = false;
+
+        hideMessage(emailValidation);
+
+        if (!email) {
+
+            setStatus(emailStatus, false, 'Email');
+            updateRegisterButton();
+
+            return;
+        }
+
+        if (!emailInput.checkValidity()) {
+
+            showMessage(
+                emailValidation,
+                'Please enter a valid email address'
+            );
+
+            setStatus(
+                emailStatus,
+                false,
+                'Email'
+            );
+
+            updateRegisterButton();
+
+            return;
+        }
+
+        validation.emailChecking = true;
+
+        emailStatus.classList.remove('valid', 'invalid');
+        emailStatus.textContent = 'Checking email...';
+
+        updateRegisterButton();
+
+        try {
+
+            const response = await fetch(
+                `/check-email?email=${encodeURIComponent(email)}`,
+                {
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error('Unable to check email');
+            }
+
+            const data = await response.json();
+
+            /*
+             * Ignore stale responses.
+             */
+            if (
+                requestId !== emailRequest ||
+                emailInput.value.trim() !== email
+            ) {
+                return;
+            }
+
+            if (data.exists) {
+
+                validation.email = false;
+
+                showMessage(
+                    emailValidation,
+                    'Email already registered'
+                );
+
+                setStatus(
+                    emailStatus,
+                    false,
+                    'Email'
+                );
+
+            } else {
+
+                validation.email = true;
+
+                showMessage(
+                    emailValidation,
+                    'Email available',
+                    true
+                );
+
+                setStatus(
+                    emailStatus,
+                    true,
+                    'Email'
+                );
+            }
+
+        } catch (error) {
+
+            if (requestId !== emailRequest) {
+                return;
+            }
+
+            validation.email = false;
+
+            showMessage(
+                emailValidation,
+                'Unable to check email. Please try again.'
+            );
+
+            setStatus(
+                emailStatus,
+                false,
+                'Email'
+            );
+
+        } finally {
+
+            if (requestId === emailRequest) {
+                validation.emailChecking = false;
+                updateRegisterButton();
+            }
+        }
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Recovery Code
+    |--------------------------------------------------------------------------
+    */
+
+    function validateRecoveryCode(showEmptyError = false) {
+        if (!recoveryInput) {
+            validation.recovery = true;
+            updateRegisterButton();
+            return true;
+        }
+
+        const recoveryCode = recoveryInput.value.trim();
+
+        validation.recovery = false;
+
+        hideMessage(recoveryValidation);
+
+        if (!recoveryCode) {
+
+            setStatus(
+                recoveryStatus,
+                null,
+                'Recovery Code'
+            );
+
+            if (showEmptyError) {
+                showMessage(
+                    recoveryValidation,
+                    'Recovery code is required.'
+                );
+
+                setStatus(
+                    recoveryStatus,
+                    false,
+                    'Recovery Code'
+                );
+            }
+
+            updateRegisterButton();
+
+            return false;
+        }
+
+        if (recoveryCode.length < 6) {
+
+            showMessage(
+                recoveryValidation,
+                'Recovery code must be at least 6 characters.'
+            );
+
+            setStatus(
+                recoveryStatus,
+                false,
+                'Recovery Code'
+            );
+
+            updateRegisterButton();
+
+            return false;
+        }
+
+        validation.recovery = true;
+
+        showMessage(
+            recoveryValidation,
+            'Recovery code is valid',
+            true
+        );
+
+        setStatus(
+            recoveryStatus,
+            true,
+            'Recovery Code'
+        );
+
+        updateRegisterButton();
+
+        return true;
+    }
+
+    recoveryInput?.addEventListener('input', function () {
+        validateRecoveryCode(false);
+    });
+
+    recoveryInput?.addEventListener('blur', function () {
+        validateRecoveryCode(true);
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Final Submit Protection
+    |--------------------------------------------------------------------------
+    */
+
+    form.addEventListener('submit', function (event) {
+
+        validateRecoveryCode(true);
+
+        const allLiveChecksValid =
+            validation.username === true &&
+            validation.email === true &&
+            validation.recovery === true &&
+            validation.usernameChecking === false &&
+            validation.emailChecking === false;
+
+        if (!allLiveChecksValid) {
+
+            event.preventDefault();
+
+            updateRegisterButton();
+
+            if (!validation.username) {
+                nameInput.focus();
+                return;
+            }
+
+            if (!validation.email) {
+                emailInput.focus();
+                return;
+            }
+
+            if (!validation.recovery) {
+                recoveryInput.focus();
+            }
+        }
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Initial State
+    |--------------------------------------------------------------------------
+    */
+
+    registerButton.disabled = true;
+
+    /*
+     * If Laravel returned the form with old values after another
+     * validation error, validate the recovery code immediately.
+     *
+     * Username/email availability must be checked again.
+     */
+    validateRecoveryCode(false);
 });
 </script>
 
 <script>
-const nameInput = document.querySelector('input[name="name"]');
-const registerBtn = document.querySelector('.btn-register');
+document.addEventListener('DOMContentLoaded', function () {
 
-if (nameInput && registerBtn) {
+    /*
+    |--------------------------------------------------------------------------
+    | Timezone Detection
+    |--------------------------------------------------------------------------
+    */
 
-    nameInput.addEventListener('input', function () {
-        let existing = document.getElementById('name-error-live');
+    const timezoneSelect = document.getElementById('timezone');
+    const detectedText = document.getElementById('detected-timezone');
+    const hiddenInput = document.getElementById('detected_timezone');
+    const useButton = document.getElementById('use-my-timezone');
 
-        if (existing) existing.remove();
+    if (
+        !timezoneSelect ||
+        !detectedText ||
+        !hiddenInput ||
+        !useButton
+    ) {
+        return;
+    }
 
-        registerBtn.disabled = false;
+    let detectedTimezone = null;
+
+    try {
+
+        detectedTimezone =
+            Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+        if (detectedTimezone) {
+
+            detectedText.textContent =
+                'Detected timezone: ' + detectedTimezone;
+
+            hiddenInput.value = detectedTimezone;
+        }
+
+    } catch (error) {
+
+        detectedText.textContent =
+            'Could not detect timezone.';
+    }
+
+    useButton.addEventListener('click', function () {
+
+        if (!detectedTimezone) {
+            return;
+        }
+
+        const option = Array.from(timezoneSelect.options)
+            .find(option => option.value === detectedTimezone);
+
+        if (option) {
+
+            timezoneSelect.value = detectedTimezone;
+
+            detectedText.textContent =
+                'Timezone selected: ' + detectedTimezone;
+        }
     });
-
-    nameInput.addEventListener('blur', function () {
-
-        if (!this.value) return;
-
-        fetch(`/check-username?name=${encodeURIComponent(this.value)}`)
-            .then(res => res.json())
-            .then(data => {
-
-                let existing = document.getElementById('name-error-live');
-
-                if (existing) existing.remove();
-
-                const div = document.createElement('div');
-                div.id = 'name-error-live';
-                div.style.fontSize = '13px';
-                div.style.marginTop = '5px';
-
-                if (data.exists) {
-                    div.className = 'live-error';
-                    div.innerText = 'Username already taken';
-                    registerBtn.disabled = true;
-                } else {
-                    div.className = 'live-success';
-                    div.innerText = 'Username available';
-                }
-
-                nameInput.parentNode.appendChild(div);
-            });
-    });
-}
-</script>
-
-<script>
-const emailInput = document.querySelector('input[name="email"]');
-const registerBtnEmail = document.querySelector('.btn-register');
-
-if (emailInput && registerBtnEmail) {
-
-    emailInput.addEventListener('input', function () {
-        let existing = document.getElementById('email-error-live');
-
-        if (existing) existing.remove();
-
-        registerBtnEmail.disabled = false;
-    });
-
-    emailInput.addEventListener('blur', function () {
-
-        if (!this.value) return;
-
-        fetch(`/check-email?email=${encodeURIComponent(this.value)}`)
-            .then(res => res.json())
-            .then(data => {
-
-                let existing = document.getElementById('email-error-live');
-
-                if (existing) existing.remove();
-
-                const div = document.createElement('div');
-                div.id = 'email-error-live';
-                div.style.fontSize = '13px';
-                div.style.marginTop = '5px';
-
-                if (data.exists) {
-                    div.className = 'live-error';
-                    div.innerText = 'Email already registered';
-                    registerBtnEmail.disabled = true;
-                } else {
-                    div.className = 'live-success';
-                    div.innerText = 'Email available';
-                }
-
-                emailInput.parentNode.appendChild(div);
-            });
-    });
-}
+});
 </script>
 
 @endsection

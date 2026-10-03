@@ -40,6 +40,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        foreach ([\App\Models\User::class, \App\Models\Torrent::class, \App\Models\Comment::class, \App\Models\CommentReaction::class, \App\Models\ForumPost::class, \App\Models\ForumPostLike::class, \App\Models\TorrentReaction::class] as $activityModel) {
+            $activityModel::observe(\App\Observers\AchievementActivityObserver::class);
+        }
+
         Gate::define('manage-admin-system', fn ($user) => (int) $user->user_class === UserClass::WEB_DEVELOPER);
 
         // Add your custom middleware globally

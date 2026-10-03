@@ -56,7 +56,7 @@
 
     /* Additional card styling */
     .card-body {
-        background-color: #343a40; /* Dark background */
+        background-color: #22262a; /* Dark background */
     }
 
     .card-body a {

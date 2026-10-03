@@ -48,7 +48,7 @@ $rules = [
                     $isOwn = auth()->id() === $message->user_id;
                 @endphp
 
-                <div class="message {{ $isOwn ? 'own' : '' }}">
+                <div id="shout-{{ $message->id }}" class="message {{ $isOwn ? 'own' : '' }} {{ ($highlightShoutId ?? null) === $message->id ? 'shout-mentioned' : '' }}">
                     <img class="avatar"
                          src="{{ $message->user->profile_image ?? asset('images/default_avatar/default-avatar.jpg') }}">
 
@@ -117,7 +117,7 @@ $rules = [
                                 $replyColor = \App\Models\UserClass::getClassColor($reply->user->user_class);
                             @endphp
 
-                            <div class="reply-card">
+                            <div id="shout-{{ $reply->id }}" class="reply-card {{ ($highlightShoutId ?? null) === $reply->id ? 'shout-mentioned' : '' }}">
                                 <img class="avatar-sm"
                                      src="{{ $reply->user->profile_image ?? asset('images/default_avatar/default-avatar.jpg') }}">
 
@@ -220,12 +220,12 @@ $rules = [
 {{-- Styles --}}
 <style>
 body {
-    background: radial-gradient(circle at top, #2a2a2a, #121212);
+    background: radial-gradient(circle at top, #1b1b1b, #0c0c0c);
     color: #eaeaea;
 }
 
 .glass {
-    background: rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.042);
     backdrop-filter: blur(10px);
     border-radius: 14px;
     border: 1px solid rgba(255,255,255,0.08);
@@ -319,7 +319,7 @@ body {
 
 .reply-form textarea {
     width: 100%;
-    background: #111;
+    background: #0b0b0b;
     color: #fff;
     border-radius: 8px;
 }
@@ -386,7 +386,7 @@ body {
 
 .chat-input textarea {
     width: 100%;
-    background: #111;
+    background: #0b0b0b;
     color: #fff;
     border-radius: 12px;
     resize: none;
@@ -571,7 +571,7 @@ body {
 }
 
 .shoutbox-container::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,.15);
+    background: rgba(255,255,255,0.105);
     border-radius: 10px;
 }
 
@@ -629,9 +629,9 @@ body {
     padding: 1px;
     background: linear-gradient(
         135deg,
-        rgba(115, 114, 112, 0.4),
+        rgba(75,74,73,0.4),
         rgba(24, 28, 112, 0.05),
-        rgba(31, 29, 25, 0.113)
+        rgba(20,19,16,0.113)
     );
     -webkit-mask:
         linear-gradient(#fff 0 0) content-box,
@@ -642,7 +642,7 @@ body {
 
 /* header separation */
 .shoutbox-header {
-    background: rgba(40, 40, 40, 0.168);
+    background: rgba(26,26,26,0.168);
     border-radius: 18px;
 }
 
@@ -661,7 +661,7 @@ body {
 /* === TIME BADGES === */
 
 .time-badge {
-    background: rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.056);
     color: #ddd;
     font-size: .7rem;
     font-weight: 500;
@@ -695,7 +695,7 @@ body {
 
 .actions .btn-icon,
 .reply-meta .btn-icon {
-    background: rgba(255,255,255,0.04);
+    background: rgba(255,255,255,0.028);
     border-radius: 8px;
     padding: 4px;
     transition: background .15s ease, transform .15s ease;
@@ -703,7 +703,7 @@ body {
 
 .actions .btn-icon:hover,
 .reply-meta .btn-icon:hover {
-    background: rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.084);
     transform: scale(1.05);
 }
 
@@ -722,7 +722,7 @@ body {
     width: 1px;
     background: linear-gradient(
         transparent,
-        rgba(255,255,255,.06),
+        rgba(255,255,255,0.042),
         transparent
     );
 }
@@ -750,7 +750,7 @@ body {
     background: linear-gradient(
         to top,
         rgba(0,0,0,.35),
-        rgba(255,255,255,.02)
+        rgba(255,255,255,0.014)
     );
 }
 
@@ -826,8 +826,8 @@ body {
 .message:not(.own) .bubble {
     background: linear-gradient(
         135deg,
-        rgba(15, 14, 14, 0.741),
-        rgba(120, 120, 120, 0.14)
+        rgba(10,9,9,0.741),
+        rgba(78,78,78,0.14)
     );
     border-radius: 18px 18px 18px 6px; /* opposite tail */
     border-left: 4px solid var(--accent);
@@ -843,7 +843,7 @@ body {
     inset: 0;
     background: radial-gradient(
         circle at top left,
-        rgba(255,255,255,.18),
+        rgba(255,255,255,0.126),
         transparent 60%
     );
     pointer-events: none;
@@ -882,4 +882,15 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 
+@isset($highlightShoutId)
+<style>
+.shout-mentioned { outline: 2px solid var(--ui-accent, #63d2c6); outline-offset: 4px; border-radius: 12px; scroll-margin: 20px; }
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const shout = document.getElementById('shout-' + @json($highlightShoutId));
+    if (shout) shout.scrollIntoView({ block: 'center' });
+});
+</script>
+@endisset
 @endsection

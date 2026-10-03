@@ -141,8 +141,8 @@
         position: relative;
         background: linear-gradient(
             135deg,
-            rgba(22, 32, 51, .96),
-            rgba(15, 23, 42, .88)
+            rgba(14,21,33,.96),
+            rgba(10,15,27,.88)
         );
         border: 1px solid var(--ui-border, rgba(255, 255, 255, .08));
         border-radius: .65rem;
@@ -213,8 +213,8 @@
     .comment-card:hover {
         background: linear-gradient(
             135deg,
-            rgba(24, 38, 58, .97),
-            rgba(15, 23, 42, .9)
+            rgba(16,25,38,.97),
+            rgba(10,15,27,.9)
         );
     }
 
@@ -334,7 +334,7 @@
     }
 
     .pagination .page-link {
-        background: rgba(22, 32, 51, .9);
+        background: rgba(14,21,33,.9);
         border-color: rgba(255, 255, 255, .075);
         color: #aabcc7;
         font-size: 11px;

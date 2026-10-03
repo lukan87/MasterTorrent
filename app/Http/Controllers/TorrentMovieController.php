@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use App\Models\TorrentMovie;
 use App\Services\TorrentSubscriptionService;
-use App\Services\TMDBService;
+use App\Services\MediaDisplayService;
 use Illuminate\Support\Facades\Auth;
 
 class TorrentMovieController extends Controller
@@ -77,7 +77,7 @@ class TorrentMovieController extends Controller
         // Build the rich premium header payload (same as the torrent detail page).
         $firstTorrent = $torrents->first();
         $display = $firstTorrent
-            ? app(TMDBService::class)->getDisplayPayload(
+            ? app(MediaDisplayService::class)->getDisplayPayload(
                 (int) $tmdbid,
                 'movie',
                 $firstTorrent->imdbid

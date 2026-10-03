@@ -263,7 +263,7 @@ min-height:100vh;
 /* GLASS */
 
 .glass-card{
-background: rgba(255,255,255,0.05);
+background: rgba(255,255,255,0.035);
 backdrop-filter: blur(16px);
 border:1px solid rgba(255,255,255,0.08);
 border-radius:16px;
@@ -342,7 +342,7 @@ color:white;
 
 .glass-progress{
 height:8px;
-background:rgba(255,255,255,0.08);
+background:rgba(255,255,255,0.056);
 }
 
 .progress-glow{
@@ -359,7 +359,7 @@ display:inline-block;
 padding:6px 12px;
 border-radius:20px;
 margin-left:6px;
-background:rgba(255,255,255,0.08);
+background:rgba(255,255,255,0.056);
 border:1px solid rgba(255,255,255,0.1);
 font-size:.85rem;
 }
@@ -373,7 +373,7 @@ font-size:.85rem;
 /* NAV */
 
 .glass-nav{
-background: rgba(255,255,255,0.05);
+background: rgba(255,255,255,0.035);
 backdrop-filter: blur(10px);
 border-radius:12px;
 overflow:hidden;
@@ -387,7 +387,7 @@ border-right:1px solid rgba(255,255,255,0.1);
 }
 
 .glass-btn:hover{
-background:rgba(255,255,255,0.08);
+background:rgba(255,255,255,0.056);
 }
 
 
@@ -396,7 +396,7 @@ background:rgba(255,255,255,0.08);
 
 .skeleton-card{
 height:90px;
-background:linear-gradient(90deg,#1f2937,#374151,#1f2937);
+background:linear-gradient(90deg,#141b24,#242a35,#141b24);
 background-size:200% 100%;
 animation:skeleton 1.5s infinite;
 }
@@ -419,7 +419,7 @@ padding:4px 10px;
 
 border-radius:20px;
 
-background:rgba(255,255,255,0.08);
+background:rgba(255,255,255,0.056);
 
 border:1px solid rgba(255,255,255,0.1);
 
@@ -440,7 +440,7 @@ border-left:4px solid #ef4444;
 background:linear-gradient(
 90deg,
 rgba(239,68,68,0.15),
-rgba(255,255,255,0.03)
+rgba(255,255,255,0.021)
 );
 
 box-shadow:0 0 12px rgba(239,68,68,0.3);

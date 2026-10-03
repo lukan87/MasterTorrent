@@ -14,23 +14,22 @@
 
     ])->filter()->count();
 
-    $colClass = 'col-12';
-
-    if ($sections >= 2) $colClass .= 'col-md-4 col-xl-4 col-sm-6';
-
-    if ($sections >= 3) $colClass .= 'col-lg-3 col-xl-4  col-md-6 col-sm-3';
-
-    if ($sections >= 4) $colClass .= 'col-xl-3 col-xxl-3';
+    $colClass = match ($sections) {
+        4 => 'col-12 col-md-6 col-xl-3',
+        3 => 'col-12 col-md-6 col-xl-4',
+        2 => 'col-12 col-md-6',
+        default => 'col-12',
+    };
 
 @endphp
 
-<div class="modern-mediainfo-wrapper mb-4">
+<div class="modern-mediainfo-wrapper mb-3">
 
     {{-- HEADER --}}
 
     <div class="modern-mediainfo-header">
 
-        <div class="d-flex align-items-center gap-3 flex-wrap">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
 
             <div class="mediainfo-icon-box">
 
@@ -40,7 +39,7 @@
 
             <div>
 
-                <h4 class="mediainfo-title mb-1">
+                <h4 class="mediainfo-title mb-0">
 
                     Media Information
 
@@ -62,7 +61,8 @@
 
                 data-bs-toggle="collapse"
 
-                data-bs-target="#mediainfo-raw">
+                data-bs-target="#mediainfo-raw"
+                aria-controls="mediainfo-raw" aria-expanded="false">
 
             <i class="bi bi-code-slash me-1"></i>
 
@@ -76,7 +76,7 @@
 
     <div class="modern-mediainfo-body">
 
-        <div class="row g-4">
+        <div class="row g-2">
 
             {{-- GENERAL --}}
 
@@ -216,7 +216,7 @@
 
                         @endisset
 
-                        @isset($video['width'])
+                        @if(isset($video['width'], $video['height']))
 
                         <li>
 
@@ -230,7 +230,7 @@
 
                         </li>
 
-                        @endisset
+                        @endif
 
                         @isset($video['frame_rate'])
 
@@ -270,19 +270,22 @@
 
                     </div>
 
-                    <ul class="nav nav-pills modern-audio-pills mb-3">
+                    @if(count($mediainfo['audio']) > 1)
+                    <ul class="nav nav-pills modern-audio-pills mb-2" role="tablist" aria-label="Audio tracks">
 
                         @foreach ($mediainfo['audio'] as $i => $audio)
 
                         <li class="nav-item">
 
-                            <button class="nav-link {{ $i===0?'active':'' }}"
+                            <button type="button" class="nav-link {{ $loop->first ? 'active' : '' }}"
+                                    id="audio-tab-{{ $i }}" role="tab"
+                                    aria-controls="audio-{{ $i }}" aria-selected="{{ $loop->first ? 'true' : 'false' }}"
 
                                     data-bs-toggle="pill"
 
                                     data-bs-target="#audio-{{ $i }}">
 
-                                Track {{ $i+1 }}
+                                {{ $audio['language'] ?? 'Track' }} {{ $loop->iteration }}
 
                             </button>
 
@@ -292,11 +295,13 @@
 
                     </ul>
 
+                    @endif
                     <div class="tab-content">
 
                         @foreach ($mediainfo['audio'] as $i => $audio)
 
-                        <div class="tab-pane fade {{ $i===0?'show active':'' }}"
+                        <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}"
+                             @if(count($mediainfo['audio']) > 1) role="tabpanel" aria-labelledby="audio-tab-{{ $i }}" @endif
 
                              id="audio-{{ $i }}">
 
@@ -440,7 +445,7 @@
 
 {{-- RAW --}}
 
-<div class="collapse mt-3 mb-5" id="mediainfo-raw">
+<div class="collapse mt-2 mb-3" id="mediainfo-raw">
 
     <div class="modern-raw-card">
 
@@ -451,8 +456,6 @@
 </div>
 
 @endif
-
-
 
 <script>
 
@@ -478,7 +481,6 @@ document.getElementById('mediainfo-raw')
 
 </script>
 
-
 <style>
 /* =========================================================
    FileIplay MediaInfo — Forum Style
@@ -486,7 +488,7 @@ document.getElementById('mediainfo-raw')
 
 .modern-mediainfo-wrapper {
     position: relative;
-    background: linear-gradient(135deg, rgba(22,32,51,.95), rgba(15,23,42,.84));
+    background: linear-gradient(135deg, rgba(14,21,33,.95), rgba(10,15,27,.84));
     border: 1px solid var(--ui-border);
     border-left: 3px solid var(--ui-accent);
     border-radius: .9rem;
@@ -501,14 +503,14 @@ document.getElementById('mediainfo-raw')
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 14px;
-    padding: 15px 18px;
+    gap: 10px;
+    padding: 10px 12px;
     border-bottom: 1px solid var(--ui-border);
 }
 
 .mediainfo-icon-box {
-    width: 44px;
-    height: 44px;
+    width: 32px;
+    height: 32px;
     border-radius: .65rem;
     display: flex;
     align-items: center;
@@ -516,7 +518,7 @@ document.getElementById('mediainfo-raw')
     background: rgba(45,212,191,.10);
     border: 1px solid rgba(45,212,191,.22);
     color: var(--ui-accent);
-    font-size: 1.1rem;
+    font-size: .95rem;
     box-shadow: none;
 }
 
@@ -529,15 +531,15 @@ document.getElementById('mediainfo-raw')
 
 .mediainfo-subtitle {
     color: rgba(255,255,255,.58);
-    font-size: 13px;
+    font-size: 12px;
 }
 
 .mediainfo-raw-btn {
     border: 1px solid var(--ui-border);
-    background: rgba(255,255,255,.045);
+    background: rgba(255,255,255,0.0315);
     color: #cbd5e1;
     border-radius: .55rem;
-    padding: 7px 11px;
+    padding: 5px 9px;
     font-size: 13px;
     font-weight: 600;
     transition: background .15s ease, border-color .15s ease, color .15s ease;
@@ -550,21 +552,21 @@ document.getElementById('mediainfo-raw')
 }
 
 .modern-mediainfo-body {
-    padding: 16px 18px;
+    padding: 10px 12px;
 }
 
 .modern-media-card {
-    background: linear-gradient(135deg, rgba(22,32,51,.78), rgba(15,23,42,.68));
+    background: linear-gradient(135deg, rgba(14,21,33,.78), rgba(10,15,27,.68));
     border: 1px solid var(--ui-border);
     border-radius: .75rem;
-    padding: 14px;
+    padding: 10px;
     backdrop-filter: blur(8px);
     transition: transform .15s ease, border-color .15s ease, background .15s ease;
 }
 
 .modern-media-card:hover {
     transform: translateY(-1px);
-    background: linear-gradient(135deg, rgba(24,38,58,.84), rgba(15,23,42,.72));
+    background: linear-gradient(135deg, rgba(16,25,38,.84), rgba(10,15,27,.72));
     border-color: rgba(45,212,191,.20);
 }
 
@@ -574,7 +576,7 @@ document.getElementById('mediainfo-raw')
     gap: 7px;
     font-size: 14px;
     font-weight: 700;
-    margin-bottom: 12px;
+    margin-bottom: 6px;
 }
 
 .general-header,
@@ -594,8 +596,9 @@ document.getElementById('mediainfo-raw')
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 10px;
-    padding: 8px 0;
+    gap: 8px;
+    padding: 4px 0;
+    line-height: 1.4;
     border-bottom: 1px solid rgba(255,255,255,.055);
     font-size: 13px;
 }
@@ -620,22 +623,30 @@ document.getElementById('mediainfo-raw')
     background: rgba(45,212,191,.09);
     color: var(--ui-accent);
     border: 1px solid rgba(45,212,191,.18);
-    padding: 3px 8px;
+    padding: 1px 6px;
     border-radius: 999px;
 }
 
 .modern-audio-pills {
-    gap: 6px;
-    flex-wrap: wrap;
+    gap: 5px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
 }
+.modern-audio-pills .nav-item { flex-shrink: 0; }
+.modern-audio-pills .nav-link { white-space: nowrap; }
+.modern-media-list + .modern-media-list { margin-top: 8px; padding-top: 6px; border-top: 1px solid var(--ui-border); }
+.modern-media-list li > span { flex-shrink: 0; }
+.modern-mediainfo-body .row > div { min-width: 0; }
 
 .modern-audio-pills .nav-link {
     border: 1px solid var(--ui-border);
     border-radius: .5rem;
-    background: rgba(255,255,255,.045);
+    background: rgba(255,255,255,0.0315);
     color: #bfcbd6;
     font-size: 12px;
-    padding: 5px 9px;
+    padding: 3px 7px;
     font-weight: 600;
 }
 
@@ -660,15 +671,15 @@ document.getElementById('mediainfo-raw')
     background: rgba(45,212,191,.07);
     border: 1px solid rgba(45,212,191,.16);
     color: #b9eee8;
-    padding: 5px 9px;
-    border-radius: 999px;
+    padding: 3px 7px;
+    border-radius: 6px;
     font-size: 12px;
     font-weight: 600;
 }
 
 .romanian-pill {
-    margin-top: 12px;
-    padding: 7px 10px;
+    margin-top: 8px;
+    padding: 5px 7px;
     border-radius: .55rem;
     text-align: center;
     font-size: 12px;
@@ -679,10 +690,10 @@ document.getElementById('mediainfo-raw')
 }
 
 .modern-raw-card {
-    background: rgba(8,15,28,.78);
+    background: rgba(5,10,18,.78);
     border: 1px solid var(--ui-border);
     border-radius: .75rem;
-    padding: 14px;
+    padding: 10px;
 }
 
 .modern-raw-card pre {
@@ -698,16 +709,16 @@ document.getElementById('mediainfo-raw')
 
 @media (max-width: 768px) {
     .modern-mediainfo-header {
-        padding: 13px 14px;
+        padding: 10px;
     }
 
     .modern-mediainfo-body {
-        padding: 13px 14px;
+        padding: 10px;
     }
 
     .mediainfo-icon-box {
-        width: 40px;
-        height: 40px;
+        width: 32px;
+        height: 32px;
         font-size: 1rem;
     }
 
@@ -720,7 +731,7 @@ document.getElementById('mediainfo-raw')
     }
 
     .modern-media-card {
-        padding: 12px;
+        padding: 10px;
     }
 
     .modern-media-card-header {

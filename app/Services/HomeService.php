@@ -89,10 +89,7 @@ class HomeService
 
     public function getCurrentHappyHour(): ?HappyHour
     {
-        return HappyHour::where('active', true)
-            ->where('start_at', '<=', now())
-            ->where('end_at', '>=', now())
-            ->latest('start_at')
+        return HappyHour::current()
             ->first();
     }
 

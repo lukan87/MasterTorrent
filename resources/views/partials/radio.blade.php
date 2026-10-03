@@ -8,7 +8,7 @@
 
 /* Player */
 .radio-player {
-    background: #0f172a;
+    background: #0a0f1b;
     border-radius: 14px;
     padding: 10px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.3);
@@ -21,7 +21,7 @@
     gap: 10px;
     justify-content: center;
     align-items: center;
-    background: #0f172a;
+    background: #0a0f1b;
     border-radius: 14px;
     padding: 12px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.3);
@@ -34,12 +34,12 @@
     justify-content: center;
     padding: 10px;
     border-radius: 10px;
-    background: #1e293b;
+    background: #141b26;
     transition: all 0.25s ease;
 }
 
 .radio-links a:hover {
-    background: #334155;
+    background: #212a37;
     transform: translateY(-2px) scale(1.05);
     box-shadow: 0 6px 15px rgba(0,0,0,0.4);
 }

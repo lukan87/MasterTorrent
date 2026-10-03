@@ -154,13 +154,13 @@
     padding: 22px 28px;
     margin-bottom: 18px;
     border-radius: 14px;
-    background: rgba(255,255,255,0.04);
+    background: rgba(255,255,255,0.028);
     backdrop-filter: blur(10px);
     transition: all 0.25s ease;
 }
 
 .history-row:hover {
-    background: rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.056);
     transform: translateY(-4px);
     box-shadow: 0 15px 35px rgba(0,0,0,0.5);
 }

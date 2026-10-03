@@ -203,8 +203,8 @@
     background:
         linear-gradient(
             180deg,
-            rgba(22,22,26,.92),
-            rgba(12,12,15,.96)
+            rgba(14,14,17,.92),
+            rgba(8,8,10,.96)
         );
 
     border:
@@ -295,7 +295,7 @@
         translateY(-2px);
 
     background:
-        rgba(255,255,255,.08);
+        rgba(255,255,255,0.056);
 }
 
 /* =========================================
@@ -309,8 +309,8 @@
     background:
         linear-gradient(
             180deg,
-            rgba(24,24,28,.96),
-            rgba(14,14,16,.98)
+            rgba(16,16,18,.96),
+            rgba(9,9,10,.98)
         );
 
     border:
@@ -379,7 +379,7 @@
     background:
         linear-gradient(
             to bottom,
-            rgba(255,255,255,.12),
+            rgba(255,255,255,0.084),
             transparent
         );
 
@@ -443,7 +443,7 @@
         14px;
 
     background:
-        rgba(255,255,255,.03);
+        rgba(255,255,255,0.021);
 
     border:
         1px solid rgba(255,255,255,.04);
@@ -461,7 +461,7 @@
 .donation-benefits li:hover{
 
     background:
-        rgba(255,255,255,.05);
+        rgba(255,255,255,0.035);
 
     transform:
         translateX(2px);
@@ -525,11 +525,11 @@
 ========================================= */
 
 .tier1 .donation-price{
-    background:linear-gradient(135deg,#4b5563,#374151);
+    background:linear-gradient(135deg,#313740,#242a35);
 }
 
 .tier1 .donate-btn{
-    background:linear-gradient(135deg,#4b5563,#374151);
+    background:linear-gradient(135deg,#313740,#242a35);
 }
 
 .tier2 .donation-price{

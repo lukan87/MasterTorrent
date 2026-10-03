@@ -13,28 +13,16 @@
                         <i class="bi bi-cloud-arrow-down-fill"></i>
                     </a>
 
-                    @if($seedboxes->isNotEmpty())
+                    @if(Auth::user()->slots > 0 || $seedboxes->isNotEmpty())
                         <button type="button"
                                 class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
                                 data-bs-toggle="dropdown"
                                 aria-expanded="false"
-                                aria-label="Send to seedbox"
-                                title="Send to seedbox">
+                                aria-label="Download options"
+                                title="Download options">
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li class="dropdown-header">
-                                <i class="bi bi-cloud-upload-fill me-1"></i>Send to seedbox
-                            </li>
-                            @foreach($seedboxes as $seedbox)
-                                <li>
-                                    <button type="button"
-                                            class="dropdown-item seedbox-send-btn"
-                                            data-torrent="{{ $torrent->id }}"
-                                            data-seedbox="{{ $seedbox->id }}">
-                                        <i class="bi bi-hdd-stack me-2"></i>{{ $seedbox->name }}
-                                    </button>
-                                </li>
-                            @endforeach
+                            @include('torrents.partials.download-menu-items')
                         </ul>
                     @endif
                 </div>

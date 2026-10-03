@@ -62,19 +62,19 @@
 {{-- Styles --}}
 <style>
 body {
-    background: radial-gradient(circle at top, #2a2a2a, #121212);
+    background: radial-gradient(circle at top, #1b1b1b, #0c0c0c);
     color: #eaeaea;
 }
 
 .glass {
-    background: rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.042);
     backdrop-filter: blur(10px);
     border-radius: 14px;
     border: 1px solid rgba(255,255,255,0.08);
 }
 
 .modern-textarea {
-    background: #111;
+    background: #0b0b0b;
     color: #fff;
     border-radius: 12px;
     border: 1px solid rgba(255,255,255,0.15);
@@ -82,7 +82,7 @@ body {
 }
 
 .modern-textarea:focus {
-    background: #111;
+    background: #0b0b0b;
     color: #fff;
     border-color: #0d6efd;
     box-shadow: 0 0 0 0.15rem rgba(13,110,253,.25);

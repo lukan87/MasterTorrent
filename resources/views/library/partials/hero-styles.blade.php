@@ -7,8 +7,8 @@
     padding:26px;
     background:linear-gradient(
         135deg,
-        rgba(64, 76, 101, 0.2),
-        rgba(3, 6, 12, 0.56)
+        rgba(42,49,66,0.2),
+        rgba(2,4,8,0.56)
     );
     border:1px solid rgba(255,255,255,.08);
     border-radius:.8rem;
@@ -142,7 +142,7 @@
 .movie-genre-pill{
     padding:.28rem .55rem;
     border-radius:.4rem;
-    background:rgba(255,255,255,.035);
+    background:rgba(255,255,255,0.0245);
     border:1px solid rgba(255,255,255,.08);
     color:rgba(226,232,240,.72);
     font-size:.72rem;
@@ -152,7 +152,7 @@
     max-width:900px;
     margin-top:18px;
     padding:.8rem .95rem;
-    background:rgba(255,255,255,.025);
+    background:rgba(255,255,255,0.0175);
     border:1px solid rgba(255,255,255,.065);
     border-left:3px solid rgba(45,212,191,.42);
     border-radius:.5rem;
@@ -176,7 +176,7 @@
 .movie-meta-card{
     min-width:115px;
     padding:.65rem .75rem;
-    background:rgba(255,255,255,.03);
+    background:rgba(255,255,255,0.021);
     border:1px solid rgba(255,255,255,.065);
     border-radius:.5rem;
 }

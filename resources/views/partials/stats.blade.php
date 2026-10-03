@@ -1,4 +1,4 @@
-<div class="container mt-4">
+<div class="container-fluid px-0 mt-4">
 
     <div class="stats-wrapper">
 
@@ -272,8 +272,8 @@ window.addEventListener("load", handleScroll);
     background:
         linear-gradient(
             135deg,
-            rgba(22, 32, 51, .95),
-            rgba(15, 23, 42, .84)
+            rgba(14,21,33,.95),
+            rgba(10,15,27,.84)
         );
 
     border: 1px solid var(--ui-border);
@@ -399,7 +399,7 @@ window.addEventListener("load", handleScroll);
     text-align: center;
 
     background:
-        rgba(255, 255, 255, .025);
+        rgba(255,255,255,0.0175);
 
     border:
         1px solid var(--ui-border);

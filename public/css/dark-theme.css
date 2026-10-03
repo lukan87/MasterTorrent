@@ -1,0 +1,137 @@
+/* Shared dark palette for site, admin, authentication and standalone pages. */
+:root,
+[data-bs-theme="dark"] {
+    color-scheme: dark;
+    --ui-page: #05080f;
+    --ui-surface: rgba(8, 12, 20, .94);
+    --ui-surface-raised: rgba(12, 18, 28, .97);
+    --ui-control: #080d16;
+    --ui-control-hover: #111a27;
+    --ui-border: rgba(148, 163, 184, .18);
+    --ui-text: #e5edf7;
+    --ui-text-muted: #9caec4;
+    --bs-body-bg: var(--ui-page);
+    --bs-body-bg-rgb: 5, 8, 15;
+    --bs-body-color: var(--ui-text);
+    --bs-body-color-rgb: 229, 237, 247;
+    --bs-secondary-bg: #0c121c;
+    --bs-secondary-bg-rgb: 12, 18, 28;
+    --bs-tertiary-bg: #080d16;
+    --bs-tertiary-bg-rgb: 8, 13, 22;
+    --bs-secondary-color: var(--ui-text-muted);
+    --bs-border-color: #283445;
+    --bs-emphasis-color: #f8fafc;
+    --bs-emphasis-color-rgb: 248, 250, 252;
+}
+
+html,
+body {
+    background-color: var(--ui-page);
+    color: var(--ui-text);
+}
+
+body.bg-body-tertiary {
+    background-color: var(--ui-page) !important;
+}
+
+/* Image layers sit behind the page shell; only the root supplies a base color. */
+html.site-layout body.bg-body-tertiary {
+    background-color: transparent !important;
+}
+
+.form-control,
+.form-select,
+.input-group-text {
+    background-color: var(--ui-control);
+    color: var(--ui-text);
+    border-color: var(--ui-border);
+}
+
+.form-control:focus,
+.form-select:focus {
+    background-color: var(--ui-control-hover);
+    color: #fff;
+}
+
+.form-control:disabled,
+.form-select:disabled {
+    background-color: #101620;
+    color: var(--ui-text-muted);
+}
+
+.form-control::placeholder { color: var(--ui-text-muted); }
+.form-select option { background-color: var(--ui-control); color: var(--ui-text); }
+
+.dropdown-menu {
+    --bs-dropdown-bg: #0c121c;
+    --bs-dropdown-color: var(--ui-text);
+    --bs-dropdown-link-color: var(--ui-text);
+    --bs-dropdown-link-hover-bg: #162131;
+    --bs-dropdown-link-hover-color: #fff;
+}
+
+.page-link {
+    --bs-pagination-bg: var(--ui-control);
+    --bs-pagination-hover-bg: var(--ui-control-hover);
+    --bs-pagination-disabled-bg: #101620;
+    --bs-pagination-border-color: #283445;
+}
+
+/* Legacy light panels use the same surfaces and readable foregrounds. */
+.bg-white,
+.bg-light,
+.bg-gray-100,
+.bg-zinc-50 {
+    background-color: #0c121c !important;
+    color: var(--ui-text) !important;
+}
+
+.text-black,
+.text-gray-600,
+.text-gray-700,
+.text-gray-900,
+.hover\:text-black:hover,
+.hover\:text-black\/70:hover {
+    color: var(--ui-text) !important;
+}
+
+.bg-light .text-dark,
+.bg-white .text-dark { color: var(--ui-text) !important; }
+
+.text-gray-500 { color: var(--ui-text-muted) !important; }
+.border-gray-200,
+.border-gray-400 { border-color: #283445 !important; }
+
+.swal2-popup {
+    background-color: #0c121c;
+    color: var(--ui-text);
+}
+
+.swal2-input,
+.swal2-textarea,
+.swal2-select {
+    background-color: var(--ui-control);
+    color: var(--ui-text);
+    border-color: #283445;
+}
+
+.swal2-footer,
+.swal2-validation-message {
+    background-color: #080d16;
+    color: var(--ui-text-muted);
+}
+
+.list-group-item {
+    --bs-list-group-bg: #0c121c;
+    --bs-list-group-color: var(--ui-text);
+    --bs-list-group-border-color: #283445;
+    background-color: #0c121c;
+    color: var(--ui-text);
+    border-color: #283445;
+}
+
+.list-group-item-action:hover,
+.list-group-item-action:focus {
+    background-color: var(--ui-control-hover);
+    color: #fff;
+}

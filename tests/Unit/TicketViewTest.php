@@ -168,6 +168,59 @@ class TicketViewTest extends TestCase
         self::assertMatchesRegularExpression('/<option\s+selected>High<\/option>/', $html);
     }
 
+    public function test_torrent_report_preselects_category_and_keeps_torrent_context(): void
+    {
+        $torrent = new \App\Models\Torrent;
+        $torrent->forceFill(['id' => 71, 'name' => 'Torrent <unsafe>']);
+        $category = new \App\Models\TicketCategory;
+        $category->forceFill(['id' => 24, 'name' => 'Torrent Problem']);
+        $html = $this->views->make('tickets.create', [
+            'categories' => collect([$category]), 'torrent' => $torrent,
+            'reportedUser' => null, 'selectedCategoryId' => 24,
+        ])->render();
+
+        self::assertMatchesRegularExpression('/<option value="24"\s+selected>Torrent Problem<\/option>/', $html);
+        self::assertStringContainsString('Issue with torrent: Torrent &lt;unsafe&gt;', $html);
+        self::assertStringContainsString('name="linked_torrent_id" value="71"', $html);
+        self::assertStringNotContainsString('name="linked_user_id"', $html);
+    }
+
+    public function test_user_report_preselects_category_and_escapes_user_context(): void
+    {
+        $category = new \App\Models\TicketCategory;
+        $category->forceFill(['id' => 25, 'name' => 'User Report']);
+        $html = $this->views->make('tickets.create', [
+            'categories' => collect([$category]), 'torrent' => null,
+            'reportedUser' => $this->user(30), 'selectedCategoryId' => 25,
+        ])->render();
+
+        self::assertMatchesRegularExpression('/<option value="25"\s+selected>User Report<\/option>/', $html);
+        self::assertStringContainsString('Report user: Member &lt;unsafe&gt;', $html);
+        self::assertStringContainsString('name="linked_user_id" value="30"', $html);
+        self::assertStringContainsString('Describe the behavior you are reporting', $html);
+        self::assertStringNotContainsString('name="linked_torrent_id"', $html);
+    }
+
+    public function test_report_restores_chosen_category_after_validation_error(): void
+    {
+        $this->session->flashInput(['category_id' => 26, 'title' => 'My report', 'description' => 'Details']);
+        $categories = collect([25 => 'User Report', 26 => 'Other'])->map(function ($name, $id) {
+            $category = new \App\Models\TicketCategory;
+
+            return $category->forceFill(['id' => $id, 'name' => $name]);
+        });
+        $html = $this->views->make('tickets.create', [
+            'categories' => $categories, 'torrent' => null,
+            'reportedUser' => $this->user(30), 'selectedCategoryId' => 25,
+        ])->render();
+
+        self::assertMatchesRegularExpression('/<option value="26"\s+selected>Other<\/option>/', $html);
+        self::assertStringNotContainsString('value="25" selected', $html);
+        self::assertStringContainsString('value="My report"', $html);
+        self::assertStringContainsString('>Details</textarea>', $html);
+        self::assertStringContainsString('name="linked_user_id" value="30"', $html);
+    }
+
     public function test_queue_and_empty_dashboard_render(): void
     {
         $html = $this->views->make('tickets.index', ['tickets' => new LengthAwarePaginator([$this->ticket()], 1, 20), 'categories' => collect(), 'stats' => ['total' => 1, 'active' => 1, 'waiting' => 0, 'resolved' => 0]])->render();

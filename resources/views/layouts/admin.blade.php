@@ -12,7 +12,6 @@
                 ['admin.movies.index', 'Movies', 'admin.movies.*'],
                 ['admin.series.index', 'Series', 'admin.series.*'],
                 ['admin.messages.index', 'Messages', 'admin.messages.*'],
-                ['admin.emails.index', 'Email', 'admin.emails.*'],
                 ['admin.torrent_logs.index', 'Torrent logs', 'admin.torrent_logs.*'],
                 ['happyhour.index', 'Happy hour', 'happyhour.*'],
             ];
@@ -20,6 +19,13 @@
         @foreach($adminLinks as [$destination, $label, $pattern])
             <a href="{{ route($destination) }}" @if(request()->routeIs($pattern)) aria-current="page" @endif>{{ $label }}</a>
         @endforeach
+        {{-- Email administration: WEB_DEVELOPER only --}}
+        @if(auth()->user()?->user_class === \App\Models\UserClass::WEB_DEVELOPER)
+            <a href="{{ route('admin.emails.index') }}"
+               @if(request()->routeIs('admin.emails.*')) aria-current="page" @endif>
+                Email
+            </a>
+        @endif
         @if(auth()->user()?->user_class >= \App\Models\UserClass::ADMIN)
             <a href="{{ route('admin.hitrun_amnesty.index') }}" @if(request()->routeIs('admin.hitrun_amnesty.*')) aria-current="page" @endif>Hit &amp; run amnesty</a>
         @endif
@@ -44,9 +50,9 @@
     </section>
 </div>
 <style>
-.admin-navigation { display:flex; flex-wrap:wrap; gap:.5rem; padding:1rem; background:#0f172a; border:1px solid #64748b; border-radius:.75rem; }
+.admin-navigation { display:flex; flex-wrap:wrap; gap:.5rem; padding:1rem; background:#0a0f1b; border:1px solid #64748b; border-radius:.75rem; }
 .admin-navigation a { display:inline-flex; align-items:center; min-height:44px; padding:.5rem .75rem; color:#e2e8f0; border-radius:.375rem; }
-.admin-navigation a:hover, .admin-navigation a[aria-current] { color:#fff; background:#334155; }
+.admin-navigation a:hover, .admin-navigation a[aria-current] { color:#fff; background:#212a37; }
 .admin-navigation a[aria-current] { text-decoration:underline; text-underline-offset:5px; }
 .admin-workspace :is(a,button,input,select,textarea,summary):focus-visible { outline:3px solid #fbbf24; outline-offset:3px; }
 .admin-skip:not(:focus) { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container my-5" style="background-color: #1e1e2f; padding: 2rem; border-radius: 0.5rem;">
+<div class="container my-5" style="background-color: #14141f; padding: 2rem; border-radius: 0.5rem;">
 
     
     <div class="mb-4 text-center">
@@ -97,7 +97,7 @@
         left: -75%;
         width: 50%;
         height: 100%;
-        background: linear-gradient(120deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0) 100%);
+        background: linear-gradient(120deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.105) 50%, rgba(255,255,255,0) 100%);
         transform: skewX(-20deg);
         transition: all 0.3s ease-in-out;
     }

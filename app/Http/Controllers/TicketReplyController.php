@@ -67,7 +67,7 @@ class TicketReplyController extends Controller
                         continue;
                     }
                     SystemMessageService::send(Auth::id(), $recipient, 'New reply to support ticket',
-                        'There is a new reply to ticket #'.$ticket->id.': <a href="'.route('tickets.show', ['id' => $ticket->id, 'slug' => $ticket->slug]).'">'.e($ticket->title).'</a>');
+                        'There is a new reply to ticket #'.$ticket->id.': '.$ticket->notificationLink());
                 }
             });
         } catch (\Throwable $exception) {

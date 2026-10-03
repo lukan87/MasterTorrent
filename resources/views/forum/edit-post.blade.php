@@ -130,7 +130,7 @@
 
 .forum-edit-card {
 
-    background: rgba(15,20,35,.96);
+    background: rgba(10,13,23,.96);
 
     border:
         1px solid rgba(255,255,255,.07);
@@ -153,7 +153,7 @@
         1px solid rgba(255,255,255,.06);
 
     background:
-        rgba(255,255,255,.025);
+        rgba(255,255,255,0.0175);
 
 }
 
@@ -281,7 +281,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         .replace(/\[center\](.*?)\[\/center\]/gi, '<div class="text-center">$1</div>')
                         .replace(/\[quote(?:=(.*?))?\](.*?)\[\/quote\]/gi, '<blockquote>$2</blockquote>')
                         .replace(/\[code\](.*?)\[\/code\]/gi, '<pre><code>$1</code></pre>')
-                        .replace(/\[spoiler\](.*?)\[\/spoiler\]/gi, '<span style="background:#333;color:#333">$1</span>')
+                        .replace(/\[spoiler\](.*?)\[\/spoiler\]/gi, '<span style="background:#212121;color:#333">$1</span>')
                         .replace(/\[url\](.*?)\[\/url\]/gi, '<a href="$1" target="_blank">$1</a>')
                         .replace(/\[img\](.*?)\[\/img\]/gi, '<img src="$1" style="max-width:100%;">')
                         .replace(/\[youtube\](.*?)\[\/youtube\]/gi, '<iframe src="https://www.youtube.com/embed/$1" style="width:100%;height:315px" allowfullscreen></iframe>')

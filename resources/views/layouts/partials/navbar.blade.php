@@ -28,7 +28,7 @@
 
 /* -------- Library offcanvas (mobile) -------- */
 #libraryOffcanvas {
-    background: linear-gradient(160deg, rgba(22, 32, 51, 0.98), rgba(9, 14, 24, 0.98)) !important;
+    background: linear-gradient(160deg, rgba(14,21,33,0.98), rgba(6,9,16,0.98)) !important;
     border-right: 1px solid var(--ui-border) !important;
 }
 #libraryOffcanvas .offcanvas-header {
@@ -79,7 +79,7 @@
     padding: 0 !important;
     border-radius: 1rem !important;
     border: 1px solid var(--ui-border) !important;
-    background: linear-gradient(160deg, rgba(22, 32, 51, 0.98), rgba(9, 14, 24, 0.98)) !important;
+    background: linear-gradient(160deg, rgba(14,21,33,0.98), rgba(6,9,16,0.98)) !important;
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55) !important;
     overflow: hidden;
 }
@@ -103,7 +103,7 @@
     object-fit: cover;
     border: 3px solid rgba(99, 210, 198, 0.45);
     box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
-    background: #1e293b;
+    background: #141b26;
 }
 
 .profile-cover-name {
@@ -170,7 +170,7 @@
     padding: 0.5rem 0.6rem;
     border: 1px solid var(--ui-border);
     border-radius: 0.8rem;
-    background: rgba(15, 23, 42, 0.55);
+    background: rgba(10,15,27,0.55);
     min-height: 3.3rem;
     transition: background-color 120ms ease, border-color 120ms ease, transform 120ms ease;
 }
@@ -192,7 +192,7 @@
     height: 2rem;
     border-radius: 0.55rem;
     font-size: 1.05rem;
-    background: rgba(15, 23, 42, 0.85);
+    background: rgba(10,15,27,0.85);
     border: 1px solid var(--ui-border);
 }
 
@@ -250,7 +250,7 @@
     display: flex;
     gap: 0.6rem;
     padding: 0.85rem 1rem;
-    background: rgba(9, 14, 24, 0.6);
+    background: rgba(6,9,16,0.6);
 }
 
 .profile-btn {
@@ -436,7 +436,14 @@
                         <button type="submit" class="dropdown-item text-light text-start bg-transparent border-0 w-100">
 
                             <div class="fw-semibold">
-                                @if($type === 'forum_mention')
+                                @if($type === 'achievement_unlocked')
+                                    <i class="bi bi-trophy-fill text-warning me-1" aria-hidden="true"></i>
+                                    <strong class="text-wrap">{{ $notification->data['title'] ?? 'Achievement unlocked' }}</strong>
+                                @elseif($type === 'request_filled')
+                    @include('notifications.request-filled', ['data' => $notification->data])
+                @elseif(in_array($type, ['torrent_comment', 'torrent_reaction'], true))
+                                    @include('notifications.torrent-activity', ['data' => $notification->data])
+                                @elseif($type === 'forum_mention')
 
     <i class="bi bi-at text-warning me-1"></i>
 
@@ -693,7 +700,7 @@
             <div class="row g-1">
                 <div class="col-4">
                     <a class="profile-link" href="{{ route('invites.index') }}">
-                        <i class="bi bi-envelope-plus-fill"></i><span>Invites ({{ Auth::user()->invites }})</span>
+                        <i class="bi bi-person-fill-add"></i><span>Invites ({{ Auth::user()->invites }})</span>
                     </a>
                 </div>
                 <div class="col-4">

@@ -53,7 +53,7 @@
     max-width: calc(100vw - 24px);
     overflow: hidden;
     border-radius: .75rem;
-    background: linear-gradient(135deg, rgba(22,32,51,.97), rgba(15,23,42,.95));
+    background: linear-gradient(135deg, rgba(14,21,33,.97), rgba(10,15,27,.95));
     border: 1px solid var(--ui-border, rgba(255,255,255,.09));
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
@@ -197,7 +197,7 @@
     right: 0;
     bottom: 0;
     height: 3px;
-    background: rgba(255,255,255,.035);
+    background: rgba(255,255,255,0.0245);
 }
 
 .lu-progress-bar {

@@ -204,7 +204,7 @@ body {
     max-width: 1600px;
     margin-left: auto;
     margin-right: auto;
-    background: linear-gradient(135deg, #162033, #0f172a);
+    background: linear-gradient(135deg, #0e1521, #0a0f1b);
     padding: 2.5rem;
     border: 1px solid rgba(255, 255, 255, .06);
     border-radius: .8rem;
@@ -231,7 +231,7 @@ body {
 .modern-card {
     width: 100%;
     min-width: 0;
-    background: rgba(255, 255, 255, .035);
+    background: rgba(255,255,255,0.0245);
     border: 1px solid rgba(255, 255, 255, .07) !important;
     backdrop-filter: blur(10px);
     border-radius: .75rem;
@@ -260,7 +260,7 @@ body {
     padding: 1rem .85rem;
     margin-bottom: .65rem;
     border-radius: .65rem;
-    background: rgba(255, 255, 255, .035);
+    background: rgba(255,255,255,0.0245);
     border: 1px solid rgba(255, 255, 255, .045);
     transition: background .2s ease, border-color .2s ease, transform .2s ease;
 }
@@ -271,7 +271,7 @@ body {
 
 .peer-row:hover {
     transform: translateY(-1px);
-    background: rgba(255, 255, 255, .06);
+    background: rgba(255,255,255,0.042);
     border-color: rgba(32, 201, 151, .16);
 }
 
@@ -344,7 +344,7 @@ body {
 }
 
 .badge-agent {
-    background: rgba(255, 255, 255, .08);
+    background: rgba(255,255,255,0.056);
     color: #d0d8dc;
     border: 1px solid rgba(255, 255, 255, .06);
 }

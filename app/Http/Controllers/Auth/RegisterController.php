@@ -30,7 +30,8 @@ class RegisterController extends Controller
             'name' => ['required', 'string', 'max:20', 'unique:users,name'],
             'email' => ['required', 'string', 'email', 'max:30', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'recovery_code' => ['required', 'string', 'min:6'],
+            'recovery_code' => [config('auth.email_registration') ? 'nullable' : 'required', 'string', 'min:6', 'max:20'],
+            'subscribed' => ['sometimes', 'boolean'],
             'invite_code' => [config('app.invite_only') ? 'required' : 'nullable', 'string', 'max:255'],
         ]);
     }
@@ -47,13 +48,27 @@ class RegisterController extends Controller
                 $invite?->invite_code,
                 $request->input('timezone') ?? $request->input('detected_timezone')
             );
-            $user->enabled = 'yes';
+            $user->activation_pending = (bool) config('auth.email_registration');
+            $user->enabled = $user->activation_pending ? 'no' : 'yes';
             $user->downloadpos = 'yes';
             $user->remember_token = null;
             $user->save();
 
             return $user;
         });
+
+        if ($user->activation_pending) {
+            try {
+                $user->notify(new \App\Notifications\ActivateAccount);
+            } catch (\Throwable $exception) {
+                report($exception);
+                return redirect()->route('activation.notice')->withErrors([
+                    'email' => 'Your account was created, but we could not send the activation email. Please try resending it.',
+                ]);
+            }
+
+            return redirect()->route('activation.notice')->with('status', 'Account created! Check your inbox for your activation link.');
+        }
 
         Auth::login($user);
         $request->session()->regenerate();
@@ -75,7 +90,7 @@ class RegisterController extends Controller
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
-            'recovery_code' => Hash::make($data['recovery_code']),
+            'recovery_code' => config('auth.email_registration') ? null : Hash::make($data['recovery_code']),
             'user_class' => UserClass::USER,
             'IP' => $ip,
             'acceptpm' => 'yes',
@@ -87,7 +102,7 @@ class RegisterController extends Controller
             'invited_by' => $inviterId,
             'invite_code' => $inviteCode,
             'timezone' => $timezone,
-            'subscribed' => isset($data['subscribed']),
+            'subscribed' => (bool) ($data['subscribed'] ?? false),
         ]);
     }
 }

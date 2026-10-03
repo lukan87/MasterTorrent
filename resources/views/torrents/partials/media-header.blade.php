@@ -1,6 +1,6 @@
 @include('torrents.partials._display-helpers')
 
-<div class="container px-xl-5 px-lg-4 px-3">
+<div class="container-fluid px-xl-5 px-lg-4 px-3">
 
     <div class="premium-media-card">
 
@@ -17,7 +17,7 @@
                 <div class="premium-poster-wrapper {{ $torrent->trashed() ? 'deleted-poster' : '' }}">
 
                     <img
-                        src="{{ $torrent->poster }}"
+                        src="{{ $torrent->poster ?: ($display['fanart']['poster'] ?? $display['poster'] ?? '/images/not-found.jpg') }}"
                         loading="lazy"
                         class="premium-poster"
                         alt="{{ $display['title'] }}"
@@ -81,6 +81,128 @@
                     @endif
 
                 </div>
+
+                {{-- =========================
+                    WATCH PROVIDERS (Streaming)
+                ========================= --}}
+                @if(!empty($display['watch_providers']))
+
+                    <details class="premium-watch-section mt-3">
+
+                        <summary class="watch-accordion-toggle">
+                            <span>
+                                <i class="bi bi-play-btn" aria-hidden="true"></i>
+                                Where to Watch
+                            </span>
+                            <i class="bi bi-chevron-down watch-accordion-chevron" aria-hidden="true"></i>
+                        </summary>
+
+                        <div class="watch-accordion-body">
+
+                        @php
+                            $grouped = collect($display['watch_providers'])
+                                ->groupBy('type');
+                            $typeLabels = [
+                                'flatrate' => ['Stream', 'bi-play-circle'],
+                                'free'     => ['Free', 'bi-gift'],
+                                'ads'      => ['With Ads', 'bi-megaphone'],
+                                'rent'     => ['Rent', 'bi-laptop'],
+                                'buy'      => ['Buy', 'bi-cart2'],
+                            ];
+                        @endphp
+
+                        @foreach($typeLabels as $typeKey => $meta)
+
+                            @if($grouped->has($typeKey))
+
+                                <div class="watch-group">
+
+                                    <div class="watch-type-label">
+                                        <i class="bi {{ $meta[1] }}"></i>
+                                        {{ $meta[0] }}
+                                    </div>
+
+                                    <div class="network-grid">
+
+                                        @foreach($grouped->get($typeKey) as $p)
+
+                                            @if($p['logo'])
+
+                                                <div class="network-logo-card watch-provider-card"
+                                                     data-bs-toggle="tooltip"
+                                                     title="{{ $p['name'] }} — {{ $meta[0] }}">
+
+                                                    <img
+                                                        src="{{ $p['logo'] }}"
+                                                        class="network-logo"
+                                                        alt="{{ $p['name'] }}"
+                                                    >
+
+                                                </div>
+
+                                            @else
+
+                                                <span class="watch-provider-name">
+                                                    {{ $p['name'] }}
+                                                </span>
+
+                                            @endif
+
+                                        @endforeach
+
+                                    </div>
+
+                                </div>
+
+                            @endif
+
+                        @endforeach
+
+                        </div>
+                    </details>
+
+                @endif
+
+                {{-- NETWORKS --}}
+                @if(!empty($display['networks']))
+
+                    <div class="premium-network-section">
+
+                        <div class="network-title">
+
+                            <i class="bi bi-building"></i>
+
+                            {{ $display['type'] === 'tv'
+                                ? 'Networks'
+                                : 'Production' }}
+
+                        </div>
+
+                        <div class="network-grid">
+
+                            @foreach($display['networks'] as $n)
+
+                                @if($n['logo'])
+
+                                    <div class="network-logo-card">
+
+                                        <img
+                                            src="{{ $n['logo'] }}"
+                                            class="network-logo"
+                                            title="{{ $n['name'] }}"
+                                        >
+
+                                    </div>
+
+                                @endif
+
+                            @endforeach
+
+                        </div>
+
+                    </div>
+
+                @endif
 
             </div>
 
@@ -486,121 +608,9 @@
 
                     </div>
 
-                    {{-- NETWORKS --}}
-                    @if(!empty($display['networks']))
+                    @include('torrents.partials.cast-slider')
 
-                        <div class="premium-network-section">
 
-                            <div class="network-title">
-
-                                <i class="bi bi-building"></i>
-
-                                {{ $display['type'] === 'tv'
-                                    ? 'Networks'
-                                    : 'Production' }}
-
-                            </div>
-
-                            <div class="network-grid">
-
-                                @foreach($display['networks'] as $n)
-
-                                    @if($n['logo'])
-
-                                        <div class="network-logo-card">
-
-                                            <img
-                                                src="{{ $n['logo'] }}"
-                                                class="network-logo"
-                                                title="{{ $n['name'] }}"
-                                            >
-
-                                        </div>
-
-                                    @endif
-
-                                @endforeach
-
-                            </div>
-
-                        </div>
-
-                    @endif
-
-                    {{-- =========================
-                        WATCH PROVIDERS (Streaming)
-                    ========================= --}}
-                    @if(!empty($display['watch_providers']))
-
-                        <div class="premium-watch-section mt-3">
-
-                            <div class="network-title">
-                                <i class="bi bi-play-btn"></i>
-                                Where to Watch
-                            </div>
-
-                            @php
-                                $grouped = collect($display['watch_providers'])
-                                    ->groupBy('type');
-                                $typeLabels = [
-                                    'flatrate' => ['Stream', 'bi-play-circle'],
-                                    'free'     => ['Free', 'bi-gift'],
-                                    'ads'      => ['With Ads', 'bi-megaphone'],
-                                    'rent'     => ['Rent', 'bi-laptop'],
-                                    'buy'      => ['Buy', 'bi-cart2'],
-                                ];
-                            @endphp
-
-                            @foreach($typeLabels as $typeKey => $meta)
-
-                                @if($grouped->has($typeKey))
-
-                                    <div class="watch-group">
-
-                                        <div class="watch-type-label">
-                                            <i class="bi {{ $meta[1] }}"></i>
-                                            {{ $meta[0] }}
-                                        </div>
-
-                                        <div class="network-grid">
-
-                                            @foreach($grouped->get($typeKey) as $p)
-
-                                                @if($p['logo'])
-
-                                                    <div class="network-logo-card watch-provider-card"
-                                                         data-bs-toggle="tooltip"
-                                                         title="{{ $p['name'] }} — {{ $meta[0] }}">
-
-                                                        <img
-                                                            src="{{ $p['logo'] }}"
-                                                            class="network-logo"
-                                                            alt="{{ $p['name'] }}"
-                                                        >
-
-                                                    </div>
-
-                                                @else
-
-                                                    <span class="watch-provider-name">
-                                                        {{ $p['name'] }}
-                                                    </span>
-
-                                                @endif
-
-                                            @endforeach
-
-                                        </div>
-
-                                    </div>
-
-                                @endif
-
-                            @endforeach
-
-                        </div>
-
-                    @endif
 
                 </div>
 
@@ -625,8 +635,8 @@
     border-radius: .85rem;
     background: linear-gradient(
         135deg,
-        rgba(22, 32, 51, .95),
-        rgba(15, 23, 42, 0.13)
+        rgba(14,21,33,.95),
+        rgba(10,15,27,.35)
     );
     border: 1px solid var(--ui-border);
     backdrop-filter: blur(9px);
@@ -646,7 +656,7 @@
     overflow: hidden;
     border-radius: .7rem;
     border: 1px solid var(--ui-border);
-    background: #0f172a;
+    background: #0a0f1b;
     box-shadow: 0 12px 30px rgba(0,0,0,.38);
 }
 
@@ -705,7 +715,7 @@
     border: 1px solid rgba(248,113,113,.55);
     border-radius: .55rem;
     padding: 7px 12px;
-    background: rgba(15,23,42,.82);
+    background: rgba(10,15,27,.82);
     font-size: 13px;
     font-weight: 700;
     transform: rotate(-8deg);
@@ -744,7 +754,7 @@
     padding: 9px 12px;
     border-radius: .55rem;
     color: rgba(255,255,255,.48);
-    background: rgba(255,255,255,.035);
+    background: rgba(255,255,255,0.0245);
     border: 1px solid rgba(255,255,255,.06);
     text-align: center;
     font-size: 13px;
@@ -794,7 +804,7 @@
     gap: 6px;
     padding: 6px 9px;
     border-radius: .5rem;
-    background: rgba(255,255,255,.04);
+    background: rgba(255,255,255,0.028);
     border: 1px solid var(--ui-border);
     color: rgba(255,255,255,.78);
     font-size: 13px;
@@ -843,7 +853,7 @@
     border-radius: .6rem;
     text-align: center;
     text-decoration: none;
-    background: rgba(255,255,255,.04);
+    background: rgba(255,255,255,0.028);
     border: 1px solid var(--ui-border);
     color: #fff;
     transition: background .15s ease, border-color .15s ease, transform .15s ease;
@@ -872,7 +882,7 @@
     padding: 13px 15px;
     border-left: 2px solid rgba(45,212,191,.45);
     border-radius: .55rem;
-    background: rgba(255,255,255,.025);
+    background: rgba(255,255,255,0.0175);
 }
 
 .premium-overview h5 {
@@ -892,7 +902,7 @@
 .fact-box {
     padding: 9px 12px;
     border-radius: .55rem;
-    background: rgba(255,255,255,.035);
+    background: rgba(255,255,255,0.0245);
     border: 1px solid var(--ui-border);
 }
 
@@ -938,7 +948,7 @@
 .network-logo-card {
     padding: 8px 11px;
     border-radius: .5rem;
-    background: rgba(255,255,255,.035);
+    background: rgba(255,255,255,0.0245);
     border: 1px solid var(--ui-border);
 }
 
@@ -962,7 +972,7 @@
 .keyword-tag {
     padding: 4px 9px;
     border-radius: .45rem;
-    background: rgba(148,163,184,.07);
+    background: rgba(148,163,184,0.049);
     border: 1px solid rgba(148,163,184,.14);
     color: rgba(255,255,255,.58);
     font-size: 11px;
@@ -981,7 +991,7 @@
    ========================================================= */
 
 .votes-card {
-    background: rgba(148,163,184,.06) !important;
+    background: rgba(148,163,184,0.042) !important;
     border-color: rgba(148,163,184,.16) !important;
 }
 
@@ -1004,7 +1014,7 @@
     margin-top: 4px;
     padding: 3px 9px;
     border-radius: .45rem;
-    background: rgba(148,163,184,.07);
+    background: rgba(148,163,184,0.049);
     border: 1px solid rgba(148,163,184,.14);
     color: rgba(255,255,255,.55);
     font-size: 12px;
@@ -1063,7 +1073,7 @@
     gap: 6px;
     padding: 6px 10px;
     border-radius: .5rem;
-    background: rgba(255,255,255,.04);
+    background: rgba(255,255,255,0.028);
     border: 1px solid var(--ui-border);
     color: rgba(255,255,255,.72);
     font-size: 12px;
@@ -1089,6 +1099,55 @@
 
 .premium-watch-section {
     margin-top: 14px;
+    border: 1px solid var(--ui-border);
+    border-radius: .65rem;
+    background: rgba(255,255,255,0.0175);
+}
+
+.watch-accordion-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    color: var(--ui-accent);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    list-style: none;
+    border-radius: .65rem;
+}
+
+.watch-accordion-toggle::-webkit-details-marker {
+    display: none;
+}
+
+.watch-accordion-toggle > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.watch-accordion-toggle:hover {
+    background: rgba(45,212,191,.06);
+}
+
+.watch-accordion-toggle:focus-visible {
+    outline: 2px solid var(--ui-accent);
+    outline-offset: 3px;
+}
+
+.premium-watch-section[open] .watch-accordion-chevron {
+    transform: rotate(180deg);
+}
+
+.watch-accordion-body {
+    padding: 14px;
+    border-top: 1px solid var(--ui-border);
+}
+
+.watch-accordion-body .watch-group:last-child {
+    margin-bottom: 0;
 }
 
 .watch-group {
@@ -1120,6 +1179,12 @@
     transition: transform .15s ease, border-color .15s ease;
 }
 
+.watch-provider-card .network-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: .35rem;
+}
+
 .watch-provider-card:hover {
     transform: translateY(-2px);
     border-color: rgba(45,212,191,.30);
@@ -1128,7 +1193,7 @@
 .watch-provider-name {
     padding: 6px 10px;
     border-radius: .5rem;
-    background: rgba(255,255,255,.035);
+    background: rgba(255,255,255,0.0245);
     border: 1px solid var(--ui-border);
     color: rgba(255,255,255,.62);
     font-size: 12px;

@@ -259,6 +259,17 @@
                     </span>
 
 
+                    @if($isOwner)
+                        @include('partials.email-subscription-switch', [
+                            'emailToggleId' => 'profile-email-subscribe',
+                            'emailSubscribed' => (bool) $user->subscribed,
+                            'emailPreferenceUrl' => route('user.email-preferences'),
+                        ])
+                        @push('scripts')
+                            <script src="{{ asset('js/email-subscription.js') }}" defer></script>
+                        @endpush
+                    @endif
+
                     @if($user->donor == 'yes')
                         <span class="profile-small-badge donor">
                             <i class="bi bi-heart-fill"></i>
@@ -349,6 +360,14 @@
                     >
                         <i class="bi bi-envelope"></i>
                         <span>Message</span>
+                    </a>
+
+                    <a
+                        href="{{ route('tickets.create', ['user_id' => $user->id]) }}"
+                        class="profile-action-btn danger"
+                    >
+                        <i class="bi bi-flag-fill" aria-hidden="true"></i>
+                        <span>Report User</span>
                     </a>
 
                 @endif
@@ -746,6 +765,10 @@
 
             </div>
 
+            <button type="button" class="seeder-guide-trigger" data-bs-toggle="modal" data-bs-target="#seederRankModal" aria-haspopup="dialog" aria-label="View Seeder Rank System">
+                View rank guide <i class="bi bi-arrow-up-right" aria-hidden="true"></i>
+            </button>
+
         </article>
 
 
@@ -1008,6 +1031,39 @@
         </a>
 
 
+        @if($isOwner || $isModerator)
+            <button type="button" class="community-stat-card subscriptions-card" data-bs-toggle="modal" data-bs-target="#subscribedTorrentsModal" aria-haspopup="dialog" aria-label="View subscribed torrents">
+                <span class="community-stat-icon subscriptions"><i class="bi bi-bell" aria-hidden="true"></i></span>
+                <div>
+                    <small>Subscribed Torrents</small>
+                    <strong>{{ number_format(count($subscribedTorrents)) }}</strong>
+                </div>
+                <i class="bi bi-arrow-up-right card-arrow" aria-hidden="true"></i>
+            </button>
+        @endif
+
+        @if($user->invited_by || $user->invitees_count > 0)
+            <button type="button" class="community-stat-card invitation-tree-card" data-bs-toggle="modal" data-bs-target="#invitationTreeModal" aria-haspopup="dialog" aria-label="View invitation tree">
+                <span class="community-stat-icon invitation-tree-icon"><i class="bi bi-diagram-3" aria-hidden="true"></i></span>
+                <div>
+                    <small>Invitation Tree</small>
+                    <strong>{{ number_format($user->invitees_count) }} invited</strong>
+                </div>
+                <i class="bi bi-arrow-up-right card-arrow" aria-hidden="true"></i>
+            </button>
+        @endif
+
+        @if(!empty($achievementCategories))
+            <button type="button" class="community-stat-card achievements-card" data-bs-toggle="modal" data-bs-target="#achievements" aria-haspopup="dialog" aria-label="View achievements">
+                <span class="community-stat-icon achievements"><i class="bi bi-trophy" aria-hidden="true"></i></span>
+                <div>
+                    <small>Achievements</small>
+                    <strong>{{ collect($achievementCategories)->sum('earned_count') }} / {{ collect($achievementCategories)->sum(fn ($category) => count($category['tiers'])) }}</strong>
+                </div>
+                <i class="bi bi-arrow-up-right card-arrow" aria-hidden="true"></i>
+            </button>
+        @endif
+
         {{-- USER UPLOADS --}}
         @if($isOwner || $isModerator)
 
@@ -1065,292 +1121,13 @@
 
 <div class="container-fluid profile-secondary">
 
-    <div
-        class="accordion profile-accordion"
-        id="seederRankAccordion"
-    >
+    <div class="profile-dialogs">
 
-        {{-- RANK GUIDE --}}
-        <div class="accordion-item profile-panel">
+        @include('profile.partials.achievements')
+        @include('profile.partials.seeder-rank-modal')
 
-            <h2
-                class="accordion-header"
-                id="headingSeederRank"
-            >
-
-                <button
-                    class="accordion-button collapsed"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#collapseSeederRank"
-                    aria-expanded="false"
-                    aria-controls="collapseSeederRank"
-                >
-
-                    <span class="accordion-heading-icon">
-                        <i class="bi bi-award"></i>
-                    </span>
-
-                    <span>
-                        <strong>Seeder Rank System</strong>
-                        <small>
-                            See how reputation and ranks work
-                        </small>
-                    </span>
-
-                </button>
-
-            </h2>
-
-
-            <div
-                id="collapseSeederRank"
-                class="accordion-collapse collapse"
-                aria-labelledby="headingSeederRank"
-                data-bs-parent="#seederRankAccordion"
-            >
-
-                <div class="accordion-body">
-
-                    <p class="rank-intro">
-                        Seeder Reputation determines your rank.
-                        Reputation increases when you seed torrents for longer
-                        periods and when you seed larger torrents.
-                    </p>
-
-
-                    <div class="rank-grid">
-
-                        <div class="rank-box">
-                            <div class="rank-icon">🌱</div>
-                            <div class="rank-title">New Seeder</div>
-                            <div class="rank-desc">
-                                Starting rank for new users beginning their seeding journey.
-                            </div>
-                            <div class="rank-score">
-                                0 – 100 reputation
-                            </div>
-                        </div>
-
-
-                        <div class="rank-box">
-                            <div class="rank-icon">🥉</div>
-                            <div class="rank-title">Bronze</div>
-                            <div class="rank-desc">
-                                You have started contributing by seeding torrents.
-                            </div>
-                            <div class="rank-score">
-                                101 – 300 reputation
-                            </div>
-                        </div>
-
-
-                        <div class="rank-box">
-                            <div class="rank-icon">🥈</div>
-                            <div class="rank-title">Silver</div>
-                            <div class="rank-desc">
-                                Consistent seeder helping keep torrents alive.
-                            </div>
-                            <div class="rank-score">
-                                301 – 600 reputation
-                            </div>
-                        </div>
-
-
-                        <div class="rank-box">
-                            <div class="rank-icon">🥇</div>
-                            <div class="rank-title">Gold</div>
-                            <div class="rank-desc">
-                                Strong contributor with significant seeding activity.
-                            </div>
-                            <div class="rank-score">
-                                601 – 1000 reputation
-                            </div>
-                        </div>
-
-
-                        <div class="rank-box">
-                            <div class="rank-icon">💎</div>
-                            <div class="rank-title">Elite</div>
-                            <div class="rank-desc">
-                                Highly dedicated seeder supporting the tracker ecosystem.
-                            </div>
-                            <div class="rank-score">
-                                1001 – 2000 reputation
-                            </div>
-                        </div>
-
-
-                        <div class="rank-box">
-                            <div class="rank-icon">👑</div>
-                            <div class="rank-title">Legend</div>
-                            <div class="rank-desc">
-                                Top tier seeder with exceptional long-term contribution.
-                            </div>
-                            <div class="rank-score">
-                                2001+ reputation
-                            </div>
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        {{-- SUBSCRIPTIONS --}}
         @if($isOwner || $isModerator)
-
-            <div class="accordion-item profile-panel">
-
-                <h2
-                    class="accordion-header"
-                    id="headingSubscriptions"
-                >
-
-                    <button
-                        class="accordion-button collapsed"
-                        type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#collapseSubscriptions"
-                        aria-expanded="false"
-                        aria-controls="collapseSubscriptions"
-                    >
-
-                        <span class="accordion-heading-icon subscriptions">
-                            <i class="bi bi-bell"></i>
-                        </span>
-
-                        <span>
-                            <strong>Subscribed Torrents</strong>
-
-                            <small>
-                                Titles followed by this member
-                            </small>
-                        </span>
-
-                        <span class="subscription-count">
-                            {{ count($subscribedTorrents) }}
-                        </span>
-
-                    </button>
-
-                </h2>
-
-
-                <div
-                    id="collapseSubscriptions"
-                    class="accordion-collapse collapse"
-                    aria-labelledby="headingSubscriptions"
-                    data-bs-parent="#seederRankAccordion"
-                >
-
-                    <div class="accordion-body">
-
-                        <p class="rank-intro">
-                            Titles you are subscribed to. When a new upload
-                            matches one of these, you'll be notified by private message.
-                        </p>
-
-
-                        <div class="subscribed-list">
-
-                            @forelse($subscribedTorrents as $subTorrent)
-
-                                @php
-                                    $libraryRoute =
-                                        !empty($subTorrent->tmdbid)
-                                        && !empty($subTorrent->library_type)
-                                            ? (
-                                                $subTorrent->library_type === 'series'
-                                                    ? 'library.series.show'
-                                                    : 'library.movies.show'
-                                            )
-                                            : null;
-
-                                    $libraryHref = $libraryRoute
-                                        ? route($libraryRoute, [
-                                            'tmdbid' => $subTorrent->tmdbid,
-                                            'slug' => $subTorrent->library_slug,
-                                        ])
-                                        : route('torrents.show', [
-                                            'id' => $subTorrent->id,
-                                            'slug' => $subTorrent->slug
-                                        ]);
-                                @endphp
-
-
-                                <a
-                                    href="{{ $libraryHref }}"
-                                    class="sub-torrent-row"
-                                >
-
-                                    <img
-                                        class="subscribed-poster"
-                                        src="{{ $subTorrent->poster ?: asset('images/noposter.jpg') }}"
-                                        alt=""
-                                        loading="lazy"
-                                    >
-
-
-                                    <div class="subscribed-info">
-
-                                        <span class="subscribed-name">
-                                            {{ \Illuminate\Support\Str::limit($subTorrent->name, 60) }}
-                                        </span>
-
-                                        <div class="subscribed-meta">
-
-                                            <span title="Seeders">
-                                                <i class="bi bi-arrow-up-circle-fill text-success"></i>
-                                                {{ $subTorrent->seeders ?? 0 }}
-                                            </span>
-
-                                            <span title="Leechers">
-                                                <i class="bi bi-arrow-down-circle-fill text-danger"></i>
-                                                {{ $subTorrent->leechers ?? 0 }}
-                                            </span>
-
-                                            <span title="Times completed">
-                                                <i class="bi bi-check-circle-fill text-info"></i>
-                                                {{ $subTorrent->times_completed ?? 0 }}
-                                            </span>
-
-                                        </div>
-
-                                    </div>
-
-                                    <i class="bi bi-chevron-right subscribed-arrow"></i>
-
-                                </a>
-
-                            @empty
-
-                                <div class="subscribed-empty">
-
-                                    <i class="bi bi-bell-slash"></i>
-
-                                    <strong>No subscriptions yet</strong>
-
-                                    <span>
-                                        This member hasn't subscribed to any titles.
-                                    </span>
-
-                                </div>
-
-                            @endforelse
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
+            @include('profile.partials.subscribed-torrents-modal')
         @endif
 
     </div>
@@ -1360,85 +1137,6 @@
     @include('profile.partials.invite-tree')
 
 
-    {{-- =====================================================
-         PASSKEY
-    ====================================================== --}}
-
-    @if($isAdmin || $isOwner)
-
-        <div class="profile-panel passkey-card">
-
-            <div class="passkey-main">
-
-                <div class="passkey-heading">
-
-                    <span class="passkey-icon">
-                        <i class="bi bi-key"></i>
-                    </span>
-
-                    <div>
-                        <strong>Tracker Passkey</strong>
-                        <small>
-                            Private authentication key for torrent downloads
-                        </small>
-                    </div>
-
-                </div>
-
-
-                <div
-                    id="passkeyDisplay"
-                    class="passkey-text"
-                    data-full="{{ $user->passkey }}"
-                >
-                    {{ str_repeat('*', max(0, strlen($user->passkey ?? '') - 3)) . substr($user->passkey ?? '', -3) }}
-                </div>
-
-
-                <div class="passkey-warning">
-                    <i class="bi bi-shield-exclamation"></i>
-
-                    Never share this key. Anyone with it may download using your account.
-                </div>
-
-            </div>
-
-
-            <div class="passkey-actions">
-
-                <button
-                    type="button"
-                    class="btn btn-outline-light"
-                    onclick="togglePasskey(this)"
-                >
-                    <i class="bi bi-eye"></i>
-                    <span>Show</span>
-                </button>
-
-
-                <form
-                    action="{{ route('profile.passkey.regenerate', $user->id) }}"
-                    method="POST"
-                    onsubmit="return confirm('Regenerating will invalidate ALL current torrent links. Continue?')"
-                >
-                    @csrf
-                    @method('PATCH')
-
-                    <button
-                        type="submit"
-                        class="btn btn-outline-danger"
-                    >
-                        <i class="bi bi-arrow-repeat"></i>
-                        Regenerate
-                    </button>
-
-                </form>
-
-            </div>
-
-        </div>
-
-    @endif
 
 </div>
 
@@ -1678,9 +1376,9 @@
 <style>
 
 :root {
-    --profile-bg: #071019;
-    --profile-panel: rgba(10, 22, 34, .96);
-    --profile-panel-light: rgba(15, 30, 44, .96);
+    --profile-bg: #050a10;
+    --profile-panel: rgba(6,14,22,.96);
+    --profile-panel-light: rgba(10,20,29,.96);
     --profile-border: rgba(148, 163, 184, .14);
     --profile-border-hover: rgba(45, 212, 191, .42);
     --profile-text: #edf6fb;
@@ -1710,13 +1408,13 @@ body {
 }
 
 html::before {
-    opacity: .2;
+    opacity: .7;
 
     background-image:
         linear-gradient(
             to bottom,
-            rgba(3, 9, 16, .78),
-            rgba(3, 9, 16, .98)
+            rgba(3, 9, 16, .18),
+            rgba(3, 9, 16, .48)
         ),
         url('{{ $profileBackground }}');
 
@@ -1732,8 +1430,8 @@ html::before {
     background:
         linear-gradient(
             145deg,
-            rgba(16, 31, 46, .97),
-            rgba(7, 17, 28, .97)
+            rgba(10,20,30,.97),
+            rgba(5,11,18,.97)
         );
 
     box-shadow:
@@ -1753,7 +1451,7 @@ html::before {
 
     overflow: hidden;
 
-    background-color: #08121b;
+    background-color: #050c12;
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
@@ -1773,17 +1471,17 @@ html::before {
     background:
         linear-gradient(
             to bottom,
-            rgba(2, 8, 14, .20) 0%,
-            rgba(2, 8, 14, .16) 28%,
-            rgba(2, 8, 14, .40) 55%,
-            rgba(2, 8, 14, .88) 84%,
-            #071019 100%
+            rgba(1,5,9,.20) 0%,
+            rgba(1,5,9,.16) 28%,
+            rgba(1,5,9,.40) 55%,
+            rgba(1,5,9,.88) 84%,
+            #050a10 100%
         ),
         linear-gradient(
             90deg,
-            rgba(2, 8, 14, .62),
-            rgba(2, 8, 14, .12) 55%,
-            rgba(2, 8, 14, .05)
+            rgba(1,5,9,.62),
+            rgba(1,5,9,.12) 55%,
+            rgba(1,5,9,.05)
         );
 }
 
@@ -1837,7 +1535,7 @@ html::before {
     border:
         4px solid rgba(245, 250, 253, .96);
 
-    background: #08131c;
+    background: #050c12;
 
     box-shadow:
         0 14px 38px rgba(0, 0, 0, .72),
@@ -1933,7 +1631,7 @@ html::before {
         1px solid rgba(203, 213, 225, .28);
 
     background:
-        rgba(15, 30, 43, .82);
+        rgba(10,20,28,.82);
 }
 
 .profile-small-badge.donor {
@@ -2075,7 +1773,7 @@ html::before {
         1px solid rgba(34, 211, 238, .55);
 
     background:
-        rgba(5, 35, 46, .72);
+        rgba(3,23,30,.72);
 }
 
 .profile-action-btn.primary:hover {
@@ -2094,7 +1792,7 @@ html::before {
         1px solid rgba(251, 191, 36, .45);
 
     background:
-        rgba(58, 41, 10, .68);
+        rgba(38,27,6,.68);
 }
 
 .profile-action-btn.danger {
@@ -2104,7 +1802,7 @@ html::before {
         1px solid rgba(251, 113, 133, .40);
 
     background:
-        rgba(65, 14, 24, .66);
+        rgba(42,9,16,.66);
 }
 
 
@@ -2139,8 +1837,8 @@ html::before {
     background:
         linear-gradient(
             145deg,
-            rgba(9, 24, 36, .99),
-            rgba(5, 16, 26, .995)
+            rgba(6,16,23,.99),
+            rgba(3,10,17,.995)
         );
 
     border:
@@ -2176,7 +1874,7 @@ html::before {
     margin: 7px 0;
 
     background:
-        rgba(255, 255, 255, .08);
+        rgba(255,255,255,0.056);
 }
 
 .profile-tooltip-row {
@@ -2247,7 +1945,7 @@ html::before {
     border-radius: 11px;
 
     background:
-        rgba(7, 18, 29, .76);
+        rgba(5,12,19,.76);
 }
 
 .profile-jump-links a {
@@ -2353,7 +2051,7 @@ html::before {
     border-radius: 9px;
 
     background:
-        rgba(10, 22, 34, .65);
+        rgba(6,14,22,.65);
 }
 
 .profile-tenure > i {
@@ -2419,8 +2117,8 @@ html::before {
     background:
         linear-gradient(
             145deg,
-            rgba(15, 30, 44, .96),
-            rgba(7, 17, 28, .96)
+            rgba(10,20,29,.96),
+            rgba(5,11,18,.96)
         );
 
     transition:
@@ -2555,8 +2253,8 @@ html::before {
     background:
         linear-gradient(
             145deg,
-            rgba(14, 29, 43, .98),
-            rgba(7, 17, 28, .98)
+            rgba(9,19,28,.98),
+            rgba(5,11,18,.98)
         );
 
     box-shadow:
@@ -2666,7 +2364,7 @@ html::before {
     border-radius: 999px;
 
     background:
-        rgba(255, 255, 255, .07);
+        rgba(255,255,255,0.049);
 }
 
 .feature-footer {
@@ -2799,7 +2497,7 @@ html::before {
     border-radius: 10px;
 
     background:
-        rgba(9, 21, 33, .82);
+        rgba(6,14,21,.82);
 
     transition:
         transform .16s ease,
@@ -2807,7 +2505,8 @@ html::before {
         background .16s ease;
 }
 
-a.community-stat-card:hover {
+a.community-stat-card:hover,
+button.community-stat-card:hover {
     color: inherit;
 
     transform:
@@ -2817,7 +2516,7 @@ a.community-stat-card:hover {
         rgba(45, 212, 191, .28);
 
     background:
-        rgba(13, 29, 43, .94);
+        rgba(8,19,28,.94);
 }
 
 .community-stat-icon {
@@ -2835,7 +2534,7 @@ a.community-stat-card:hover {
     color: #94a3b8;
 
     background:
-        rgba(148, 163, 184, .08);
+        rgba(148,163,184,0.056);
 }
 
 .community-stat-icon.bonus {
@@ -2941,7 +2640,7 @@ a.community-stat-card:hover {
     color: #e4edf2 !important;
 
     background:
-        rgba(9, 21, 33, .88) !important;
+        rgba(6,14,21,.88) !important;
 
     box-shadow: none !important;
 }
@@ -2950,7 +2649,7 @@ a.community-stat-card:hover {
     color: #dffbff !important;
 
     background:
-        rgba(12, 29, 43, .96) !important;
+        rgba(8,19,28,.96) !important;
 }
 
 .profile-accordion .accordion-button::after {
@@ -2987,6 +2686,9 @@ a.community-stat-card:hover {
 }
 
 .profile-accordion .accordion-button > span:nth-child(2) {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    line-height: 1.5;
     display: flex;
     flex-direction: column;
 
@@ -2996,7 +2698,7 @@ a.community-stat-card:hover {
 }
 
 .profile-accordion .accordion-button strong {
-    font-size: .82rem;
+    font-size: 1.05rem;
 }
 
 .profile-accordion .accordion-button small {
@@ -3004,7 +2706,7 @@ a.community-stat-card:hover {
 
     color: #718694;
 
-    font-size: .64rem;
+    font-size: .875rem;
 }
 
 .subscription-count {
@@ -3027,15 +2729,17 @@ a.community-stat-card:hover {
     background:
         rgba(34, 211, 238, .10);
 
-    font-size: .7rem;
+    font-size: .875rem;
     font-weight: 700;
 }
 
 .profile-accordion .accordion-body {
+    font-size: 1rem;
+    line-height: 1.6;
     padding: 20px;
 
     background:
-        rgba(6, 16, 26, .66);
+        rgba(4,10,17,.66);
 }
 
 .rank-intro {
@@ -3044,7 +2748,7 @@ a.community-stat-card:hover {
 
     color: #8397a5;
 
-    font-size: .74rem;
+    font-size: 1rem;
 }
 
 .rank-grid {
@@ -3067,7 +2771,7 @@ a.community-stat-card:hover {
     border-radius: 10px;
 
     background:
-        rgba(8, 18, 29, .72);
+        rgba(5,12,19,.72);
 
     transition:
         .15s ease;
@@ -3090,7 +2794,7 @@ a.community-stat-card:hover {
 
     color: #e5edf5;
 
-    font-size: .83rem;
+    font-size: 1.05rem;
     font-weight: 700;
 }
 
@@ -3099,7 +2803,7 @@ a.community-stat-card:hover {
 
     color: #778b99;
 
-    font-size: .67rem;
+    font-size: .9375rem;
     line-height: 1.45;
 }
 
@@ -3108,7 +2812,7 @@ a.community-stat-card:hover {
 
     color: #5eead4;
 
-    font-size: .66rem;
+    font-size: .875rem;
     font-weight: 700;
 }
 
@@ -3160,7 +2864,7 @@ a.community-stat-card:hover {
 
     border-radius: 6px;
 
-    background: #1e293b;
+    background: #141b26;
 }
 
 .subscribed-info {
@@ -3177,7 +2881,7 @@ a.community-stat-card:hover {
 .subscribed-name {
     color: #e7eff3;
 
-    font-size: .76rem;
+    font-size: 1rem;
     font-weight: 600;
 }
 
@@ -3190,7 +2894,7 @@ a.community-stat-card:hover {
 
     color: #718694;
 
-    font-size: .66rem;
+    font-size: .875rem;
 }
 
 .subscribed-arrow {
@@ -3219,13 +2923,13 @@ a.community-stat-card:hover {
 .subscribed-empty strong {
     color: #b8c8d1;
 
-    font-size: .78rem;
+    font-size: 1rem;
 }
 
 .subscribed-empty span {
     margin-top: 3px;
 
-    font-size: .68rem;
+    font-size: .9375rem;
 }
 
 
@@ -3486,7 +3190,7 @@ a.community-stat-card:hover {
     color: #7f94a3;
 
     background:
-        rgba(8, 18, 29, .55);
+        rgba(5,12,19,.55);
 
     font-size: .63rem;
 
@@ -3525,7 +3229,7 @@ a.community-stat-card:hover {
     width: 1px;
 
     background:
-        rgba(148, 163, 184, .13);
+        rgba(148,163,184,0.091);
 }
 
 .timeline-item:last-child::before {
@@ -3559,7 +3263,7 @@ a.community-stat-card:hover {
     border-radius: 9px;
 
     background:
-        rgba(8, 18, 29, .66);
+        rgba(5,12,19,.66);
 }
 
 .timeline-card-top {
@@ -3609,7 +3313,7 @@ a.community-stat-card:hover {
     color: #94a3b8;
 
     background:
-        rgba(255, 255, 255, .04);
+        rgba(255,255,255,0.028);
 
     font-size: .59rem;
 }
@@ -4014,63 +3718,6 @@ a.community-stat-card:hover {
 ========================================================== --}}
 
 <script>
-
-function togglePasskey(button) {
-
-    const element =
-        document.getElementById('passkeyDisplay');
-
-    if (!element) {
-        return;
-    }
-
-    const full =
-        element.dataset.full || '';
-
-    const masked =
-        '*'.repeat(Math.max(0, full.length - 3))
-        + full.slice(-3);
-
-    const showing =
-        element.textContent.trim() === full;
-
-    element.textContent =
-        showing ? masked : full;
-
-    if (button) {
-
-        const icon =
-            button.querySelector('i');
-
-        const text =
-            button.querySelector('span');
-
-        if (showing) {
-
-            if (icon) {
-                icon.className = 'bi bi-eye';
-            }
-
-            if (text) {
-                text.textContent = 'Show';
-            }
-
-        } else {
-
-            if (icon) {
-                icon.className = 'bi bi-eye-slash';
-            }
-
-            if (text) {
-                text.textContent = 'Hide';
-            }
-
-        }
-
-    }
-
-}
-
 
 function filterTimeline(type, button) {
 

@@ -126,6 +126,9 @@
     {{ $torrents->links('pagination::bootstrap-5') }}
 </div>
 
+
+@include('torrents.partials.css.list-common-css')
+
 <style>
     /* Sticky must NOT be blocked */
 .card,
@@ -139,7 +142,7 @@
     position: sticky;
     top: 56px; /* navbar height */
     z-index: 50;
-    background: rgba(20,20,25,.96);
+    background: rgba(13,13,16,.96);
     backdrop-filter: blur(6px);
 }
 .action-group .btn {
@@ -166,7 +169,7 @@
     gap: 30px;
     max-width: 900px;
     margin: 50px auto;
-    background: linear-gradient(145deg, #1c1c1c30, #2a2a2a);
+    background: linear-gradient(145deg, #1c1c1c30, #1b1b1b);
     backdrop-filter: blur(3px);
     border-radius: 20px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
@@ -207,16 +210,6 @@
     transform: scale(1.05);
 }
 
-.torrent-title {
-    position: relative;
-    display: inline-block;
-    color: #fff;
-    font-size: 1rem;
-    letter-spacing: .3px;
-    line-height: 1.15;
-    padding-bottom: 2px; /* space for the line */
-    transition: color .15s ease;
-}
 
 /* animated line INSIDE the element */
 .torrent-title::after {
@@ -234,14 +227,7 @@
 }
 
 /* hover */
-a:hover .torrent-title {
-    color: #aca9a9;
-}
 
-a:hover .torrent-title::after {
-    transform: scaleX(1);
-    transform-origin: left;
-}
 
 
 
@@ -398,7 +384,7 @@ a:hover .torrent-title::after {
     position: sticky;
     top: 56px; /* adjust if navbar height differs */
     z-index: 20;
-    background: #1d1c1c;
+    background: #131212;
 }
 
 /* Sticky torrent highlight */
@@ -429,7 +415,7 @@ a:hover .torrent-title::after {
 }
 
 .torrent-sticky {
-    background: rgba(53, 47, 99, 0.231);
+    background: rgba(34,31,64,0.231);
 }
 
 
@@ -658,7 +644,7 @@ html::after {
 
     border-radius: 999px;
 
-    background: rgba(255, 255, 255, .06);
+    background: rgba(255,255,255,0.042);
     border: 1px solid var(--ui-border);
 
     color: var(--ui-text-muted);
@@ -683,7 +669,7 @@ html::after {
     font-size: 12px;
     font-weight: 600;
 
-    background: rgba(255, 255, 255, .03);
+    background: rgba(255,255,255,0.021);
     border: 1px solid var(--ui-border);
 
     transition: color .15s ease, background .15s ease, border-color .15s ease, transform .15s ease;
@@ -691,7 +677,7 @@ html::after {
 
 .tx-sort:hover {
     color: #fff;
-    background: rgba(255, 255, 255, .07);
+    background: rgba(255,255,255,0.049);
     border-color: rgba(255, 255, 255, .18);
     transform: translateY(-1px);
 }

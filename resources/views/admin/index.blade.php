@@ -444,8 +444,8 @@
     padding: .85rem;
     background: linear-gradient(
         135deg,
-        rgba(22,32,51,.95),
-        rgba(15,23,42,.84)
+        rgba(14,21,33,.95),
+        rgba(10,15,27,.84)
     );
     border: 1px solid var(--ui-border, rgba(148,163,184,.16));
     border-radius: .75rem;
@@ -526,7 +526,7 @@
     gap: .3rem;
     padding: .3rem .5rem;
     color: #94a3b8;
-    background: rgba(15,23,42,.45);
+    background: rgba(10,15,27,.45);
     border: 1px solid rgba(148,163,184,.16);
     border-radius: .4rem;
     font-size: 11px;
@@ -552,8 +552,8 @@
     padding: .9rem;
     background: linear-gradient(
         135deg,
-        rgba(22,32,51,.95),
-        rgba(15,23,42,.84)
+        rgba(14,21,33,.95),
+        rgba(10,15,27,.84)
     );
     border: 1px solid var(--ui-border, rgba(148,163,184,.16));
     border-radius: .75rem;
@@ -635,13 +635,13 @@
 
 .admin-secondary-btn {
     color: #94a3b8;
-    background: rgba(15,23,42,.4);
+    background: rgba(10,15,27,.4);
     border: 1px solid rgba(148,163,184,.18);
 }
 
 .admin-secondary-btn:hover {
     color: #e2e8f0;
-    background: rgba(148,163,184,.08);
+    background: rgba(148,163,184,0.056);
     border-color: rgba(148,163,184,.3);
 }
 

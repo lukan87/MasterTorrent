@@ -61,6 +61,12 @@ class ShoutboxController extends Controller
             ]);
     }
 
+public function show(Shoutbox $shout)
+{
+    // Keep existing mention notifications working with the home-page chat.
+    return redirect()->to(route('home', ['shout' => $shout->id]) . '#shout-' . $shout->id);
+}
+
 public function iframe()
 {
     $messages = Shoutbox::with('user', 'replies.user')->whereNull('parent_id')->latest()->get();
@@ -78,10 +84,15 @@ public function iframe()
     // Create a new shoutbox message
     $user = $request->user();
 
-    $message = $user->shoutbox()->create([
-        'message' => $request->input('content'),
-        'sticky' => $user->user_class >= \App\Models\UserClass::ADMIN && $request->has('sticky'),
-    ]);
+    $message = DB::transaction(function () use ($user, $request) {
+        $message = $user->shoutbox()->create([
+            'message' => $request->input('content'),
+            'sticky' => $user->user_class >= \App\Models\UserClass::ADMIN && $request->has('sticky'),
+        ]);
+        app(\App\Services\ShoutMentionService::class)->notify($message);
+
+        return $message;
+    });
 
     Cache::forget('home_shoutbox_messages');
 
@@ -229,7 +240,10 @@ public function reply(Request $request, $id)
     $reply->parent_id = $parentMessage->id;
 
     // Save reply
-    $parentMessage->replies()->save($reply);
+    DB::transaction(function () use ($parentMessage, $reply) {
+        $parentMessage->replies()->save($reply);
+        app(\App\Services\ShoutMentionService::class)->notify($reply);
+    });
     Cache::forget('home_shoutbox_messages');
 
     // 🔥 AJAX (home)

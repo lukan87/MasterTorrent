@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Torrent;
 use App\Models\TorrentSeries;
 use App\Services\TorrentSubscriptionService;
-use App\Services\TMDBService;
+use App\Services\MediaDisplayService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -77,7 +77,7 @@ class TorrentSeriesController extends Controller
         // Build the rich premium header payload (same as the torrent detail page).
         $firstTorrent = $torrents->first();
         $display = $firstTorrent
-            ? app(TMDBService::class)->getDisplayPayload(
+            ? app(MediaDisplayService::class)->getDisplayPayload(
                 (int) $tmdbid,
                 'tv',
                 $firstTorrent->imdbid

@@ -362,8 +362,8 @@
     overflow: hidden;
     background: linear-gradient(
         135deg,
-        rgba(22,32,51,.95),
-        rgba(15,23,42,.84)
+        rgba(14,21,33,.95),
+        rgba(10,15,27,.84)
     );
     border: 1px solid var(--ui-border, rgba(148,163,184,.16));
     border-radius: .75rem;
@@ -388,7 +388,7 @@
     align-items: center;
     gap: .65rem;
     padding: .8rem .9rem;
-    background: rgba(15,23,42,.4);
+    background: rgba(10,15,27,.4);
     border-bottom: 1px solid rgba(148,163,184,.12);
 }
 
@@ -459,7 +459,7 @@
     min-height: 30px;
     padding: .3rem .55rem;
     color: #94a3b8;
-    background: rgba(15,23,42,.5);
+    background: rgba(10,15,27,.5);
     border: 1px solid rgba(148,163,184,.15);
     border-radius: .4rem;
     font-size: 11px;
@@ -515,7 +515,7 @@
 
 .filter-force.filter-active {
     color: #fff;
-    background: #334155;
+    background: #212a37;
     border-color: #475569;
 }
 
@@ -523,7 +523,7 @@
     width: auto;
     min-width: 180px;
     color: #cbd5e1;
-    background-color: rgba(15,23,42,.72);
+    background-color: rgba(10,15,27,.72);
     border: 1px solid rgba(148,163,184,.18);
     border-radius: .45rem;
     font-size: 12px;
@@ -531,13 +531,13 @@
 
 .log-filter-select:focus {
     color: #f1f5f9;
-    background-color: rgba(15,23,42,.9);
+    background-color: rgba(10,15,27,.9);
     border-color: rgba(34,211,197,.4);
     box-shadow: 0 0 0 .15rem rgba(34,211,197,.07);
 }
 
 .log-filter-select option {
-    background: #111827;
+    background: #0b1019;
     color: #e2e8f0;
 }
 
@@ -548,7 +548,7 @@
     min-height: 31px;
     padding: .3rem .55rem;
     color: #94a3b8;
-    background: rgba(51,65,85,.3);
+    background: rgba(33,42,55,.3);
     border: 1px solid rgba(148,163,184,.16);
     border-radius: .4rem;
     font-size: 11px;
@@ -558,7 +558,7 @@
 
 .reset-filter-btn:hover {
     color: #e2e8f0;
-    background: rgba(148,163,184,.08);
+    background: rgba(148,163,184,0.056);
     border-color: rgba(148,163,184,.28);
 }
 
@@ -611,7 +611,7 @@
 .logs-table-header {
     min-height: 44px;
     color: #64748b;
-    background: rgba(15,23,42,.55);
+    background: rgba(10,15,27,.55);
     border-bottom: 1px solid rgba(148,163,184,.13);
     font-size: 10px;
     font-weight: 700;
@@ -650,7 +650,7 @@
 }
 
 .log-row-force-deleted {
-    background: rgba(15,23,42,.5);
+    background: rgba(10,15,27,.5);
 }
 
 .log-row-deleted::before,
@@ -763,13 +763,13 @@
 
 .log-action-dark {
     color: #cbd5e1;
-    background: rgba(51,65,85,.45);
+    background: rgba(33,42,55,.45);
     border: 1px solid rgba(148,163,184,.16);
 }
 
 .log-action-secondary {
     color: #cbd5e1;
-    background: rgba(51,65,85,.4);
+    background: rgba(33,42,55,.4);
     border: 1px solid rgba(148,163,184,.14);
 }
 
@@ -796,7 +796,7 @@
     align-items: center;
     justify-content: center;
     color: #94a3b8;
-    background: rgba(15,23,42,.5);
+    background: rgba(10,15,27,.5);
     border: 1px solid rgba(148,163,184,.16);
     border-radius: .4rem;
     font-size: 12px;
@@ -841,7 +841,7 @@
 
 .logs-pagination .page-link {
     color: #94a3b8;
-    background: rgba(15,23,42,.75);
+    background: rgba(10,15,27,.75);
     border-color: rgba(148,163,184,.13);
     font-size: 11px;
 }

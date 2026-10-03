@@ -51,6 +51,13 @@ return Application::configure(basePath: dirname(__DIR__))
 
 $exceptions->render(function (\Exception $exception, \Illuminate\Http\Request $request) {
 
+    // Preserve form validation and HTTP responses (including rate limiting).
+    if ($exception instanceof \Illuminate\Validation\ValidationException ||
+        $exception instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface) {
+        return null;
+    }
+
+
     // IDs allowed to see debug errors
     $debugUsers = [1, 2, 3]; // add whatever user IDs you want
 

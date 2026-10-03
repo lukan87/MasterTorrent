@@ -1,0 +1,57 @@
+.email-subscription {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 7px 11px;
+    margin: 0;
+    border: 1px solid rgba(148, 163, 184, .3);
+    border-radius: 999px;
+    background: rgba(10,15,27,.85);
+    color: #e2e8f0;
+    font-size: .75rem;
+    font-weight: 600;
+    line-height: 1.4;
+    cursor: pointer;
+}
+.email-subscription-control { position: relative; display: inline-flex; align-items: center; gap: 7px; }
+.email-subscription-control input {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 38px;
+    height: 24px;
+    opacity: 0;
+    margin: 0;
+    cursor: pointer;
+    z-index: 1;
+}
+.email-subscription-track {
+    display: inline-block;
+    position: relative;
+    width: 38px;
+    height: 24px;
+    border-radius: 999px;
+    background: #2f141b;
+    border: 1px solid #a94e60;
+    transition: background .2s ease, border-color .2s ease;
+}
+.email-subscription-track::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fb7185;
+    transition: transform .2s ease, background .2s ease;
+}
+.email-subscription-control input:checked + .email-subscription-track { background: #0c281f; border-color: #3c9a72; }
+.email-subscription-control input:checked + .email-subscription-track::after { transform: translateX(14px); background: #4ade80; }
+.email-subscription-status { min-width: 20px; font-size: .65rem; color: #cbd5e1; }
+.email-subscription-status::after { content: 'Off'; }
+.email-subscription-control input:checked ~ .email-subscription-status::after { content: 'On'; }
+.email-subscription-control input:focus-visible + .email-subscription-track { outline: 2px solid #7dd3fc; outline-offset: 3px; }
+.email-subscription-control input:disabled { cursor: wait; }
+.email-subscription-control input:disabled + .email-subscription-track { opacity: .55; }
+@media (prefers-reduced-motion: reduce) { .email-subscription-track, .email-subscription-track::after { transition: none; } }

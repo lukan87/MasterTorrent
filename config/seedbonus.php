@@ -53,9 +53,9 @@ return [
 
     'shop' => [
         'upload' => [
-            10 => 100,   // 10 GB
-            25 => 200,   // 25 GB
-            100 => 350,  // 100 GB
+            100 => 100,   // 10 GB
+            250 => 200,   // 25 GB
+            500 => 300,  // 100 GB
         ],
 
         'vip' => 30000,      // 1 year VIP
@@ -70,10 +70,10 @@ return [
         'remove_hnr' => 1500,
 
         // Auto-clear the user's OLDEST H&R and restore its ratio to 1:1
-        'clear_hnr' => 7500,
+        'clear_hnr' => 3000,
 
         // Clear the user's active H&R-triggered warning
-        'reset_warning' => 5000,
+        'reset_warning' => 1500,
 
         'invite' => 1500,
         'slot' => 1000,

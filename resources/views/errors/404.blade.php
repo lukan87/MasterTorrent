@@ -18,7 +18,7 @@
   --button: #b3b3b3;
   --button-color: #0a0a0a;
   --shadow: #000;
-  --bg: #737373;
+  --bg: #4b4b4b;
   --header: #7a7a7a;
   --color: #fafafa;
   --lit-header: #e6e6e6;

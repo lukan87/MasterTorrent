@@ -30,7 +30,7 @@
         <form method="GET" action="{{ route('forum.search') }}" class="forum-search-bar" role="search">
             <label for="forum-search" class="visually-hidden">Search the forum</label>
             <i class="bi bi-search" aria-hidden="true"></i>
-            <input id="forum-search" type="search" name="q" placeholder="Search topics and conversations…" required>
+            <input id="forum-search" type="search" name="q" placeholder="Search topics and conversations…" minlength="2" maxlength="200" required>
             <button type="submit" class="forum-primary-btn">Search</button>
         </form>
         @auth
@@ -48,6 +48,7 @@
         </div>
         <div class="forum-category-list">
             @forelse($categories as $category)
+                <div class="forum-category-row">
                 <a href="{{ route('forum.category', $category->slug) }}" class="forum-category-link">
                     <div class="forum-category-icon"><i class="bi {{ $category->icon ?: 'bi-chat-square-text' }}" aria-hidden="true"></i></div>
                     <div class="forum-category-content">
@@ -62,6 +63,8 @@
                     </div>
                     <span class="forum-category-arrow" aria-hidden="true"><i class="bi bi-arrow-up-right"></i></span>
                 </a>
+                @include('forum.partials.category-activity')
+                </div>
             @empty
                 <div class="forum-empty-state">
                     <div class="forum-empty-icon"><i class="bi bi-chat-square-text" aria-hidden="true"></i></div>

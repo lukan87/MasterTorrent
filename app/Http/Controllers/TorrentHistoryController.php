@@ -8,6 +8,28 @@ use Illuminate\Http\Request;
 
 class TorrentHistoryController extends Controller
 {
+    public function snatched(Request $request, int $id)
+    {
+        abort_unless($request->user() && $request->user()->user_class >= \App\Models\UserClass::MODERATOR, 403);
+
+        $completedOnly = $request->routeIs('torrents.completed');
+        $torrent = Torrent::withTrashed()->findOrFail($id);
+        $histories = History::with('user:id,name')
+            ->where('torrent_id', $torrent->id)
+            ->when($completedOnly, fn ($query) => $query->whereNotNull('completed_at'))
+            ->orderByDesc($completedOnly ? 'completed_at' : 'created_at')
+            ->orderByDesc('id')
+            ->paginate(30);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('torrents.partials.snatched-table', compact('torrent', 'histories', 'completedOnly'))->render(),
+            ]);
+        }
+
+        return view('torrents.snatched', compact('torrent', 'histories', 'completedOnly'));
+    }
+
     /**
      * Display History of a Torrent.
      *

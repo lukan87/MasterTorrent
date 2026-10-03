@@ -840,7 +840,7 @@ document.addEventListener('DOMContentLoaded', () => {
 .modern-card,
 .modern-stat-card {
     border: 1px solid var(--ui-border, rgba(255,255,255,.08));
-    background: linear-gradient(135deg, rgba(22,32,51,.95), rgba(15,23,42,.84));
+    background: linear-gradient(135deg, rgba(14,21,33,.95), rgba(10,15,27,.84));
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     box-shadow: 0 10px 28px rgba(0,0,0,.18);
@@ -927,7 +927,7 @@ document.addEventListener('DOMContentLoaded', () => {
     padding: .45rem .7rem;
     border: 1px solid var(--ui-border, rgba(255,255,255,.08));
     border-radius: .55rem;
-    background: rgba(255,255,255,.035);
+    background: rgba(255,255,255,0.0245);
     color: rgba(226,232,240,.72);
     font-size: 13px;
     font-weight: 700;
@@ -975,7 +975,7 @@ document.addEventListener('DOMContentLoaded', () => {
     padding: .8rem .55rem;
     border-radius: .7rem;
     text-align: center;
-    background: rgba(255,255,255,.025);
+    background: rgba(255,255,255,0.0175);
     transition: transform .2s ease, border-color .2s ease;
 }
 
@@ -1062,7 +1062,7 @@ document.addEventListener('DOMContentLoaded', () => {
     min-height: 40px;
     border: 1px solid var(--ui-border, rgba(255,255,255,.08)) !important;
     border-radius: .6rem !important;
-    background: rgba(255,255,255,.035) !important;
+    background: rgba(255,255,255,0.0245) !important;
     color: #f8fafc !important;
     font-size: 13px;
     box-shadow: none !important;
@@ -1091,7 +1091,7 @@ document.addEventListener('DOMContentLoaded', () => {
     padding: .35rem .4rem .35rem .65rem;
     border: 1px solid var(--ui-border, rgba(255,255,255,.08));
     border-radius: .65rem;
-    background: rgba(255,255,255,.025);
+    background: rgba(255,255,255,0.0175);
 }
 
 .search-icon {
@@ -1178,7 +1178,7 @@ document.addEventListener('DOMContentLoaded', () => {
     overflow: hidden;
     border: 1px solid var(--ui-border, rgba(255,255,255,.07));
     border-radius: .45rem;
-    background: rgba(255,255,255,.045);
+    background: rgba(255,255,255,0.0315);
 }
 
 .progress-bar {
@@ -1269,7 +1269,7 @@ document.addEventListener('DOMContentLoaded', () => {
     padding: .18rem .4rem;
     border: 1px solid var(--ui-border, rgba(255,255,255,.07));
     border-radius: .4rem;
-    background: rgba(255,255,255,.025);
+    background: rgba(255,255,255,0.0175);
 }
 
 /* Actions */
@@ -1288,7 +1288,7 @@ document.addEventListener('DOMContentLoaded', () => {
     justify-content: center;
     border: 1px solid var(--ui-border, rgba(255,255,255,.08));
     border-radius: .5rem;
-    background: rgba(255,255,255,.035);
+    background: rgba(255,255,255,0.0245);
     color: rgba(226,232,240,.72);
     text-decoration: none;
     transition: all .2s ease;
@@ -1316,7 +1316,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 .pagination .page-link {
     border-color: var(--ui-border, rgba(255,255,255,.08));
-    background: rgba(255,255,255,.035);
+    background: rgba(255,255,255,0.0245);
     color: rgba(226,232,240,.72);
     font-size: 12px;
 }

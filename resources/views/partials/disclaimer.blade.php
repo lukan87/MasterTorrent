@@ -1,5 +1,5 @@
 {{-- Disclaimer Card --}}
-<div class="container mt-4">
+<div class="container-fluid px-0 mt-4">
 
     <div class="disclaimer-card">
 
@@ -76,8 +76,8 @@
     background:
         linear-gradient(
             135deg,
-            rgba(22, 32, 51, .95),
-            rgba(15, 23, 42, .84)
+            rgba(14,21,33,.95),
+            rgba(10,15,27,.84)
         );
 
     border: 1px solid var(--ui-border);

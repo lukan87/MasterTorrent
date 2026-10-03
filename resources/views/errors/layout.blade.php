@@ -9,10 +9,10 @@
         <!-- Styles -->
         <style>
             html, body {
-                background-color: #fff;
-                color: #636b6f;
+                background-color: #05080f;
+                color: #9caec4;
                 font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-                font-weight: 100;
+                font-weight: 400;
                 height: 100vh;
                 margin: 0;
             }
@@ -40,7 +40,8 @@
                 padding: 20px;
             }
         </style>
-    </head>
+    <link rel="stylesheet" href="{{ asset('css/dark-theme.css') }}?v={{ filemtime(public_path('css/dark-theme.css')) }}">
+</head>
     <body>
         <div class="flex-center position-ref full-height">
             <div class="content">

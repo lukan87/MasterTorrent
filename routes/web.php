@@ -33,7 +33,6 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PollController;
 use App\Http\Controllers\PostmarkController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\ResetPassword\ResetPasswordController;
 use App\Http\Controllers\RssFeedController;
 use App\Http\Controllers\SeedboxController;
 use App\Http\Controllers\SeriesController;
@@ -186,30 +185,76 @@ Route::get('/forum/{category:slug}',
     ->name('forum.category');
 
 // Admin email routes
+Route::prefix('admin')
+    ->middleware(['auth', 'admin'])
+    ->name('admin.')
+    ->group(function () {
 
-Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
+        /*
+        |--------------------------------------------------------------------------
+        | Email History
+        |--------------------------------------------------------------------------
+        */
 
-    Route::get('/emails', [EmailController::class, 'index'])
-        ->name('emails.index');
+        Route::get('/emails', [EmailController::class, 'index'])
+            ->name('emails.index');
 
-    Route::get('/emails/create', [EmailController::class, 'create'])
-        ->name('emails.create');
+        /*
+        |--------------------------------------------------------------------------
+        | Compose
+        |--------------------------------------------------------------------------
+        */
 
-    Route::post('/emails/send', [EmailController::class, 'send'])
-        ->name('emails.send');
+        Route::get('/emails/create', [EmailController::class, 'create'])
+            ->name('emails.create');
 
-    Route::post('/emails/count', [EmailController::class, 'count'])
-        ->name('emails.count');
+        Route::post('/emails/send', [EmailController::class, 'send'])
+            ->name('emails.send');
 
-    // ✅ DELETE OLD
-    Route::delete('/emails/delete-old', [EmailController::class, 'deleteOld'])
-        ->name('emails.delete-old');
+        Route::post('/emails/count', [EmailController::class, 'count'])
+            ->name('emails.count');
 
-    // ✅ DELETE SINGLE
-    Route::delete('/emails/{email}', [EmailController::class, 'destroy'])
-        ->name('emails.destroy');
+        /*
+        |--------------------------------------------------------------------------
+        | Campaigns
+        |--------------------------------------------------------------------------
+        */
 
-});
+        Route::get('/emails/campaigns', [EmailController::class, 'campaigns'])
+            ->name('emails.campaigns');
+
+        Route::get(
+            '/emails/campaigns/{campaign}',
+            [EmailController::class, 'showCampaign']
+        )->name('emails.campaigns.show');
+
+        Route::post(
+    'emails/campaigns/{campaign}/next-batch',
+    [EmailController::class, 'nextBatch']
+)->name('emails.campaigns.next-batch');
+
+Route::delete(
+    'emails/campaigns/{campaign}',
+    [EmailController::class, 'destroyCampaign']
+)->name('emails.campaigns.destroy');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Email Log Maintenance
+        |--------------------------------------------------------------------------
+        */
+
+        Route::delete(
+            '/emails/delete-old',
+            [EmailController::class, 'deleteOld']
+        )->name('emails.delete-old');
+
+        /*
+         * Keep this dynamic route LAST.
+         */
+        Route::delete('/emails/{email}', [EmailController::class, 'destroy'])
+            ->name('emails.destroy');
+    });
 
 // Notification routes
 
@@ -350,26 +395,12 @@ Route::get('/get-emoji/{emojiCode}', function ($emojiCode) {
     return response()->json(['emoji' => emoji($emojiCode)]);
 });
 
-// Account verification routes
-Route::get('/verify/{token}', function ($token) {
-
-    $user = User::where('remember_token', $token)->first();
-
-    if (! $user) {
-        dd('USER NOT FOUND', $token);
-    }
-
-    $user->remember_token = null;
-    $user->enabled = 'yes';
-    $user->email_verified_at = now();
-
-    $user->save();
-
-    // Debug after update
-    $user->refresh();
-
-    return redirect('/login')->with('status', 'Email verified! You can now log in to your account.');
-});
+// Activation links are signed, expire, and never use remember-me tokens.
+Route::get('/activate/{id}/{hash}', [App\Http\Controllers\Auth\ActivationController::class, 'activate'])
+    ->middleware('throttle:10,1')->name('activation.verify');
+Route::get('/activation', [App\Http\Controllers\Auth\ActivationController::class, 'notice'])->name('activation.notice');
+Route::post('/activation', [App\Http\Controllers\Auth\ActivationController::class, 'resend'])
+    ->middleware('throttle:3,1')->name('activation.resend');
 
 // Admin torrent log routes
 Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
@@ -402,7 +433,11 @@ Route::post('/bonus/buy-reset-warning', [BonusController::class, 'buyResetWarnin
 // Team route
 Route::get('/team', [TeamController::class, 'index'])->name('team.index')->middleware('auth');
 
-Auth::routes();
+Auth::routes(['reset' => false]);
+Route::get('/password/reset', [AuthResetPasswordController::class, 'showRecoveryForm'])->name('password.request');
+Route::post('/password/email', [AuthResetPasswordController::class, 'sendResetLink'])
+    ->middleware('throttle:3,1')->name('password.email');
+Route::get('/password/reset/{token}', [AuthResetPasswordController::class, 'showResetForm'])->name('password.reset');
 
 // Legacy invitation links use the same validation and registration flow.
 Route::post('/invite/use', [App\Http\Controllers\Auth\RegisterController::class, 'register'])
@@ -410,15 +445,15 @@ Route::post('/invite/use', [App\Http\Controllers\Auth\RegisterController::class,
 // Home and password recovery routes
 Route::get('/', [HomeController::class, 'index'])->name('home')->middleware('last_activity')->middleware('auth');
 Route::get('/recover-password', [AuthResetPasswordController::class, 'showRecoveryForm'])->name('password.recover');
-Route::post('/password/reset', [AuthResetPasswordController::class, 'updatePassword'])->name('password.update');
+Route::post('/password/reset', [AuthResetPasswordController::class, 'updatePassword'])->middleware('throttle:5,1')->name('password.update');
 
 Route::get('/test-ip', function () {
     return request()->ip();
 });
 
 // Custom password recovery routes
-Route::get('/custom-password/recover', [ResetPasswordController::class, 'showRecoveryForm'])->name('custom.password.recover');
-Route::post('/custom-password/reset', [ResetPasswordController::class, 'updatePassword'])->name('custom.password.update');
+Route::get('/custom-password/recover', [AuthResetPasswordController::class, 'showRecoveryForm'])->name('custom.password.recover');
+Route::post('/custom-password/reset', [AuthResetPasswordController::class, 'updatePassword'])->middleware('throttle:5,1')->name('custom.password.update');
 
 // Show user profile by ID and name
 Route::get('/profile/{id}/{name?}', [ProfileController::class, 'show'])->name('profile.show')->middleware('auth');
@@ -691,6 +726,16 @@ Route::get('/torrents/download/{id}/{slug}', [TorrentController::class, 'downloa
 
 Route::get('/torrents/check-imdb', [TorrentController::class, 'checkImdbUrl']);
 
+Route::get('/torrents/{id}/snatched', [TorrentHistoryController::class, 'snatched'])
+    ->whereNumber('id')
+    ->middleware('auth')
+    ->name('torrents.snatched');
+
+Route::get('/torrents/{id}/completed', [TorrentHistoryController::class, 'snatched'])
+    ->whereNumber('id')
+    ->middleware('auth')
+    ->name('torrents.completed');
+
 Route::get('/torrents/{id}/{slug?}', [TorrentController::class, 'show'])
     ->whereNumber('id')
     ->name('torrents.show')
@@ -731,6 +776,7 @@ Route::get('/rules', function () {
 // Shoutbox routes
 
 Route::get('/shoutbox', [ShoutboxController::class, 'index'])->name('shoutbox.index')->middleware('auth');
+Route::get('/shoutbox/shouts/{shout}', [ShoutboxController::class, 'show'])->name('shoutbox.show')->middleware('auth');
 Route::post('/shoutbox', [ShoutboxController::class, 'store'])->name('shoutbox.store')->middleware('auth');
 Route::get('/shoutbox/{id}/edit', [ShoutboxController::class, 'edit'])->name('shoutbox.edit')->middleware('auth');
 Route::put('/shoutbox/{id}', [ShoutboxController::class, 'update'])->name('shoutbox.update')->middleware('auth');
@@ -819,6 +865,8 @@ Route::middleware('auth')->group(function () {
     Route::put('/requests/{request}', [TorrentRequestController::class, 'update'])->name('requests.update');
     Route::delete('/requests/{request}', [TorrentRequestController::class, 'destroy'])->name('requests.destroy');
     Route::post('/requests/{id}/fill', [TorrentRequestController::class, 'fillRequest'])->name('requests.fill');
+    Route::post('/requests/{id}/vote', [TorrentRequestController::class, 'vote'])->middleware('throttle:60,1')->name('requests.vote');
+    Route::post('/requests/{id}/reopen', [TorrentRequestController::class, 'reopen'])->name('requests.reopen');
 
 });
 
@@ -1083,15 +1131,9 @@ Route::post('/postmark/bounce', [PostmarkController::class, 'bounce'])
 
 // Account preference and availability routes
 
-Route::post('/user/email-preferences', function (Request $request) {
-
-    $user = auth()->user();
-
-    $user->subscribed = $request->boolean('subscribed');
-    $user->save();
-
-    return back()->with('success', 'Email preferences updated.');
-});
+Route::post('/user/email-preferences', [\App\Http\Controllers\EmailPreferenceController::class, 'update'])
+    ->middleware('auth')
+    ->name('user.email-preferences');
 
 Route::get('/check-username', function (Request $request) {
     return response()->json([
@@ -1104,3 +1146,5 @@ Route::get('/check-email', function (Request $request) {
         'exists' => User::where('email', $request->email)->exists(),
     ]);
 });
+
+Route::post('/comments/{id}/reactions', [CommentController::class, 'react'])->middleware(['auth', 'throttle:60,1'])->name('comments.react');

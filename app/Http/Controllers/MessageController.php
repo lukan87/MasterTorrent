@@ -75,15 +75,15 @@ class MessageController extends Controller
             ? $conversation->user_two
             : $conversation->user_one;
 
-        SystemMessageService::send(
+        $message = SystemMessageService::send(
             Auth::id(),
             $receiverId,
-            $conversation->subject,
+            $conversation->subject ?? 'Conversation',
             $request->body
         );
 
         return redirect()
-            ->route('conversations.show', $conversation)
+            ->route('conversations.show', $message->conversation_id)
             ->with('success', 'Reply sent.');
     }
 

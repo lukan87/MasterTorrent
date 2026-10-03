@@ -448,14 +448,8 @@ if ($filePath && in_array($type, ['movie', 'tv'])) {
         $binary = base64_decode(trim($base64), true);
         if (!$binary) continue;
 
-        $path = 'torrent_images/' . md5($filePath . $i) . '.jpg';
-
-        Storage::disk('public')->put($path, $binary);
-
-        \App\Models\TorrentImage::create([
-            'torrent_id' => $torrentModel->id,
-            'path'       => $path,
-        ]);
+        app(\App\Services\Torrent\TorrentImageService::class)
+            ->storeWebp($torrentModel, $binary);
     }
 
 }

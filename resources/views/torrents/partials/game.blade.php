@@ -6,7 +6,7 @@
     <div class="mini-header-title">
 
         <strong>
-            {{ $steamData[$torrent->steamid]['data']['name'] ?? 'Game' }}
+            {{ $steamData[$torrent->steamid]['data']['name'] ?? $torrent->name }}
         </strong>
 
     </div>
@@ -33,7 +33,8 @@
             {{-- Poster --}}
             <div class="media-card">
 
-                <img src="{{ $torrent->poster }}"
+                <img src="{{ $torrent->poster ?: ($steamData[$torrent->steamid]['data']['header_image'] ?? '/images/not-found.jpg') }}"
+                     alt="{{ $torrent->name }}"
                      class="poster-img">
 
                 @if(isset($steamData[$torrent->steamid]['data']['movies'][0]['webm']['max']))
@@ -189,7 +190,7 @@
 
                         <h1 class="game-title mb-1">
 
-                            {{ $steamData[$torrent->steamid]['data']['name'] ?? 'N/A' }}
+                            {{ $steamData[$torrent->steamid]['data']['name'] ?? $torrent->name }}
 
                         </h1>
 
@@ -199,7 +200,7 @@
 
                                 Released
 
-                                {{ \Carbon\Carbon::parse($steamData[$torrent->steamid]['data']['release_date']['date'])->format('F j, Y') }}
+                                {{ $steamData[$torrent->steamid]['data']['release_date']['date'] }}
 
                             </p>
 
@@ -487,8 +488,8 @@
 
 <style>
 .game-page{position:relative;z-index:2;color:#e5e7eb}
-body::before{content:'';position:fixed;inset:55px 0 0 0;background:linear-gradient(to bottom,rgba(7,12,22,.82),rgba(7,12,22,.96)),url('{{ $torrent->background }}');background-size:cover;background-position:center;z-index:-1}
-.media-card,.info-card,.feature-card,.screenshot-carousel{background:linear-gradient(135deg,rgba(22,32,51,.95),rgba(15,23,42,.84));border:1px solid var(--ui-border);border-radius:.85rem;box-shadow:0 14px 36px rgba(0,0,0,.28);backdrop-filter:blur(14px)}
+body::before{content:'';position:fixed;inset:55px 0 0 0;background:linear-gradient(to bottom,rgba(5,8,14,.82),rgba(5,8,14,.96)),url('{{ $torrent->background }}');background-size:cover;background-position:center;z-index:-1}
+.media-card,.info-card,.feature-card,.screenshot-carousel{background:linear-gradient(135deg,rgba(14,21,33,.95),rgba(10,15,27,.84));border:1px solid var(--ui-border);border-radius:.85rem;box-shadow:0 14px 36px rgba(0,0,0,.28);backdrop-filter:blur(14px)}
 .media-card,.feature-card,.screenshot-carousel{padding:16px}.info-card{padding:22px}
 .poster-img{display:block;width:100%;border-radius:.65rem;border:1px solid var(--ui-border);box-shadow:0 14px 30px rgba(0,0,0,.42)}
 .media-card .btn-outline-light{border-color:var(--ui-border);color:rgba(255,255,255,.78);font-size:13px}
@@ -498,26 +499,26 @@ body::before{content:'';position:fixed;inset:55px 0 0 0;background:linear-gradie
 .genre-badge{display:inline-flex;align-items:center;padding:5px 9px;border-radius:.45rem;background:rgba(45,212,191,.06);border:1px solid rgba(45,212,191,.18);color:var(--ui-accent);text-decoration:none;font-size:13px;font-weight:600;transition:.15s ease}
 .genre-badge:hover{background:rgba(45,212,191,.12);border-color:rgba(45,212,191,.34);color:#99f6e4}
 .feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:7px}
-.feature-item{display:flex;align-items:flex-start;gap:8px;padding:9px;border-radius:.55rem;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.055);color:rgba(255,255,255,.72);font-size:13px;line-height:1.4}
+.feature-item{display:flex;align-items:flex-start;gap:8px;padding:9px;border-radius:.55rem;background:rgba(255,255,255,0.0175);border:1px solid rgba(255,255,255,.055);color:rgba(255,255,255,.72);font-size:13px;line-height:1.4}
 .feature-item i{flex:0 0 auto;margin-top:2px}
 .media-card .badge.bg-warning{background:rgba(245,158,11,.12)!important;border:1px solid rgba(245,158,11,.22);color:#fcd34d!important;font-size:12px}
 .screenshot-carousel{overflow:hidden}.screenshot-carousel .small{color:rgba(255,255,255,.45)!important;font-size:12px}
 .screenshot-carousel .carousel-inner{height:320px;overflow:hidden;border-radius:.65rem;border:1px solid var(--ui-border)}
 .screenshot-img{width:100%;height:100%;object-fit:cover;cursor:zoom-in;transition:transform .2s ease}.screenshot-img:hover{transform:scale(1.015)}
-.carousel-control-prev-icon,.carousel-control-next-icon{width:34px;height:34px;padding:7px;background-color:rgba(7,13,24,.78);border:1px solid rgba(255,255,255,.10);border-radius:50%;background-size:52%}
-.short-description{padding:14px;background:rgba(9,16,29,.48);border:1px solid var(--ui-border);border-left:3px solid var(--ui-accent);border-radius:.65rem;color:rgba(255,255,255,.72);font-size:14px;line-height:1.65}
+.carousel-control-prev-icon,.carousel-control-next-icon{width:34px;height:34px;padding:7px;background-color:rgba(5,8,16,.78);border:1px solid rgba(255,255,255,.10);border-radius:50%;background-size:52%}
+.short-description{padding:14px;background:rgba(6,10,19,.48);border:1px solid var(--ui-border);border-left:3px solid var(--ui-accent);border-radius:.65rem;color:rgba(255,255,255,.72);font-size:14px;line-height:1.65}
 .meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px}
-.meta-box{display:flex;flex-direction:column;gap:3px;padding:11px;border-radius:.6rem;background:rgba(255,255,255,.025);border:1px solid var(--ui-border)}
+.meta-box{display:flex;flex-direction:column;gap:3px;padding:11px;border-radius:.6rem;background:rgba(255,255,255,0.0175);border:1px solid var(--ui-border)}
 .meta-box small{color:rgba(255,255,255,.42);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}.meta-box span{color:rgba(255,255,255,.82);font-size:13px;font-weight:600;word-break:break-word}
-.about-box{max-height:340px;overflow-y:auto;padding:14px;background:rgba(9,16,29,.42);border:1px solid var(--ui-border);border-left:3px solid var(--ui-accent);border-radius:.65rem;color:rgba(255,255,255,.72);font-size:14px;line-height:1.6}
+.about-box{max-height:340px;overflow-y:auto;padding:14px;background:rgba(6,10,19,.42);border:1px solid var(--ui-border);border-left:3px solid var(--ui-accent);border-radius:.65rem;color:rgba(255,255,255,.72);font-size:14px;line-height:1.6}
 .about-box::-webkit-scrollbar{width:5px}.about-box::-webkit-scrollbar-thumb{background:rgba(45,212,191,.28);border-radius:999px}
-.reviews-card{padding:14px;background:rgba(9,16,29,.42);border:1px solid var(--ui-border);border-radius:.65rem}.reviews-card h5{color:#fff;font-size:14px}.reviews-card .text-success{color:#6ee7b7!important;font-size:13px}.review-count{color:rgba(255,255,255,.55);font-size:13px}
-.modern-progress{height:7px;overflow:hidden;border-radius:999px;background:rgba(255,255,255,.08)}.modern-progress .progress-bar{background:#34d399!important}
-.req-card{height:100%;padding:14px;background:rgba(9,16,29,.42);border:1px solid var(--ui-border);border-radius:.65rem;color:rgba(255,255,255,.68);font-size:13px;line-height:1.55}.req-title{margin-bottom:10px;color:#fff;font-size:14px;font-weight:700;padding-left:9px;border-left:3px solid var(--ui-accent)}
-.game-mini-header{position:fixed;top:62px;left:50%;transform:translate(-50%,-120%);width:calc(100% - 30px);max-width:900px;z-index:1050;display:flex;align-items:center;gap:10px;padding:9px 12px;background:linear-gradient(135deg,rgba(22,32,51,.96),rgba(15,23,42,.90));border:1px solid var(--ui-border);border-radius:.7rem;box-shadow:0 12px 30px rgba(0,0,0,.32);backdrop-filter:blur(14px);transition:transform .25s ease}
+.reviews-card{padding:14px;background:rgba(6,10,19,.42);border:1px solid var(--ui-border);border-radius:.65rem}.reviews-card h5{color:#fff;font-size:14px}.reviews-card .text-success{color:#6ee7b7!important;font-size:13px}.review-count{color:rgba(255,255,255,.55);font-size:13px}
+.modern-progress{height:7px;overflow:hidden;border-radius:999px;background:rgba(255,255,255,0.056)}.modern-progress .progress-bar{background:#34d399!important}
+.req-card{height:100%;padding:14px;background:rgba(6,10,19,.42);border:1px solid var(--ui-border);border-radius:.65rem;color:rgba(255,255,255,.68);font-size:13px;line-height:1.55}.req-title{margin-bottom:10px;color:#fff;font-size:14px;font-weight:700;padding-left:9px;border-left:3px solid var(--ui-accent)}
+.game-mini-header{position:fixed;top:62px;left:50%;transform:translate(-50%,-120%);width:calc(100% - 30px);max-width:900px;z-index:1050;display:flex;align-items:center;gap:10px;padding:9px 12px;background:linear-gradient(135deg,rgba(14,21,33,.96),rgba(10,15,27,.90));border:1px solid var(--ui-border);border-radius:.7rem;box-shadow:0 12px 30px rgba(0,0,0,.32);backdrop-filter:blur(14px);transition:transform .25s ease}
 .game-mini-header.visible{transform:translate(-50%,0)}.mini-header-title{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:#fff;font-size:14px}
 .game-mini-header .btn-info{flex:0 0 auto;border:1px solid rgba(45,212,191,.25);background:rgba(45,212,191,.10);color:var(--ui-accent);font-size:13px}.game-mini-header .btn-info:hover{background:rgba(45,212,191,.17);border-color:rgba(45,212,191,.4);color:#99f6e4}
-#trailerModal .modal-content,#screenshotModal .modal-content{background:linear-gradient(135deg,rgba(22,32,51,.98),rgba(15,23,42,.96))!important;border:1px solid var(--ui-border)!important;border-radius:.75rem}
+#trailerModal .modal-content,#screenshotModal .modal-content{background:linear-gradient(135deg,rgba(14,21,33,.98),rgba(10,15,27,.96))!important;border:1px solid var(--ui-border)!important;border-radius:.75rem}
 #trailerModal .modal-header{border-bottom-color:var(--ui-border)!important}#trailerModal .modal-title{color:#fff;font-size:14px}#screenshotModalImg{display:block;width:100%;max-height:90vh!important;object-fit:contain}
 .videoWrapper{position:relative;width:100%;padding-bottom:56.25%;overflow:hidden;border-radius:.6rem}.videoWrapper video{position:absolute;inset:0;width:100%;height:100%}
 @media(max-width:768px){.game-page{margin-top:1rem!important}.media-card,.info-card,.feature-card,.screenshot-carousel{border-radius:.7rem}.media-card,.feature-card,.screenshot-carousel{padding:12px}.info-card{padding:15px}.game-title{font-size:18px}.feature-grid,.meta-grid{grid-template-columns:1fr}.screenshot-carousel .carousel-inner{height:220px}.game-mini-header{top:58px;width:calc(100% - 16px);padding:8px 9px}.mini-header-title{font-size:13px}.game-mini-header .btn-info{padding:5px 9px!important;font-size:12px}}

@@ -23,8 +23,7 @@ class AwardSeedBonus extends Command
             $currentTime = now();
 
             // Check if a Happy Hour is active
-            $happyHour = HappyHour::where('active', true)
-                            ->latest('start_at')
+            $happyHour = HappyHour::current()
                             ->first();
 
             $baseBonus = config('seedbonus.points_per_hour', 0.15);

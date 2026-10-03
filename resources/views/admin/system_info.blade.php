@@ -361,8 +361,8 @@
     overflow: hidden;
     background: linear-gradient(
         135deg,
-        rgba(22,32,51,.95),
-        rgba(15,23,42,.84)
+        rgba(14,21,33,.95),
+        rgba(10,15,27,.84)
     );
     border: 1px solid var(--ui-border, rgba(148,163,184,.16));
     border-radius: .75rem;
@@ -456,7 +456,7 @@
 .system-progress {
     height: 6px;
     overflow: hidden;
-    background: rgba(30,41,59,.9);
+    background: rgba(20,27,38,.9);
     border-radius: 999px;
 }
 
@@ -482,7 +482,7 @@
     gap: .4rem;
     padding: .35rem .55rem;
     color: #cbd5e1;
-    background: rgba(51,65,85,.42);
+    background: rgba(33,42,55,.42);
     border: 1px solid rgba(148,163,184,.14);
     border-radius: .4rem;
     font-size: 11px;

@@ -164,7 +164,7 @@
     .seedbox-form-card {
         position: relative;
         overflow: hidden;
-        background: linear-gradient(135deg, rgba(22, 32, 51, .95), rgba(15, 23, 42, .84));
+        background: linear-gradient(135deg, rgba(14,21,33,.95), rgba(10,15,27,.84));
         border: 1px solid var(--ui-border, rgba(148, 163, 184, .16));
         border-radius: .9rem;
         box-shadow: 0 12px 32px rgba(0, 0, 0, .28);
@@ -187,7 +187,7 @@
         gap: .8rem;
         padding: 1rem 1.15rem;
         border-bottom: 1px solid var(--ui-border, rgba(148, 163, 184, .16));
-        background: rgba(15, 23, 42, .34);
+        background: rgba(10,15,27,.34);
     }
 
     .seedbox-form-icon {
@@ -245,7 +245,7 @@
     .seedbox-input {
         min-height: 40px;
         color: #e2e8f0 !important;
-        background: rgba(15, 23, 42, .72) !important;
+        background: rgba(10,15,27,.72) !important;
         border: 1px solid rgba(148, 163, 184, .2) !important;
         border-radius: .55rem !important;
         box-shadow: none !important;
@@ -258,7 +258,7 @@
 
     .seedbox-input:focus {
         color: #f8fafc !important;
-        background: rgba(15, 23, 42, .9) !important;
+        background: rgba(10,15,27,.9) !important;
         border-color: var(--ui-accent, #22d3c5) !important;
         box-shadow: 0 0 0 2px rgba(34, 211, 197, .08) !important;
     }
@@ -269,7 +269,7 @@
 
     .seedbox-select option {
         color: #e2e8f0;
-        background: #0f172a;
+        background: #0a0f1b;
     }
 
     .seedbox-help {
@@ -320,13 +320,13 @@
 
     .seedbox-btn-secondary {
         color: #cbd5e1;
-        background: rgba(51, 65, 85, .42);
+        background: rgba(33,42,55,.42);
         border: 1px solid rgba(148, 163, 184, .2);
     }
 
     .seedbox-btn-secondary:hover {
         color: #fff;
-        background: rgba(71, 85, 105, .55);
+        background: rgba(46,55,68,.55);
         border-color: rgba(148, 163, 184, .3);
     }
 

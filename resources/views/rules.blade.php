@@ -410,8 +410,8 @@
 
     background: linear-gradient(
         135deg,
-        rgba(22, 32, 51, .96),
-        rgba(15, 23, 42, .88)
+        rgba(14,21,33,.96),
+        rgba(10,15,27,.88)
     );
 
     border: 1px solid var(--ui-border) !important;
@@ -481,7 +481,7 @@
 
     overflow: hidden;
 
-    background: rgba(15, 23, 42, .72) !important;
+    background: rgba(10,15,27,.72) !important;
 
     border: 1px solid var(--ui-border) !important;
 
@@ -503,7 +503,7 @@
 
     color: rgba(255, 255, 255, .82) !important;
 
-    background: rgba(22, 32, 51, .78) !important;
+    background: rgba(14,21,33,.78) !important;
 
     border: 0 !important;
 
@@ -556,7 +556,7 @@
 
     color: rgba(255, 255, 255, .67);
 
-    background: rgba(9, 16, 29, .48);
+    background: rgba(6,10,19,.48);
 
     border-top: 1px solid rgba(255, 255, 255, .045);
 
@@ -633,7 +633,7 @@
 
     color: rgba(255, 255, 255, .42);
 
-    background: rgba(9, 16, 29, .55);
+    background: rgba(6,10,19,.55);
 
     border-top: 1px solid var(--ui-border);
 

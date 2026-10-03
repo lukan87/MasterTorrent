@@ -169,7 +169,7 @@
 
     .progress {
         border-radius: 5px;
-        background-color: #e9ecef;
+        background-color: var(--ui-control);
     }
 
     .progress-bar {
@@ -178,7 +178,7 @@
     }
 
     .alert-light {
-        background-color: #f8f9fa;
+        background-color: var(--ui-surface-raised);
         border-color: #e9ecef;
     }
 </style>

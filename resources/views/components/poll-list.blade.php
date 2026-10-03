@@ -302,8 +302,8 @@
     background:
         linear-gradient(
             135deg,
-            rgba(22, 32, 51, .95),
-            rgba(15, 23, 42, .84)
+            rgba(14,21,33,.95),
+            rgba(10,15,27,.84)
         );
 
     border: 1px solid var(--ui-border);
@@ -343,7 +343,7 @@
         linear-gradient(
             90deg,
             transparent,
-            rgba(255, 255, 255, .07),
+            rgba(255,255,255,0.049),
             transparent
         );
 
@@ -565,7 +565,7 @@
     color: #8295aa;
 
     background:
-        rgba(148, 163, 184, .045);
+        rgba(148,163,184,0.0315);
 
     border:
         1px solid rgba(148, 163, 184, .09);
@@ -718,7 +718,7 @@
     color: #d5e0eb;
 
     background:
-        rgba(148, 163, 184, .035);
+        rgba(148,163,184,0.0245);
 
     border:
         1px solid rgba(148, 163, 184, .09);
@@ -906,7 +906,7 @@
     margin-top: .4rem;
 
     background:
-        rgba(148, 163, 184, .07);
+        rgba(148,163,184,0.049);
 
     border:
         1px solid rgba(148, 163, 184, .05);
@@ -966,7 +966,7 @@
     color: #71859b;
 
     background:
-        rgba(148, 163, 184, .035);
+        rgba(148,163,184,0.0245);
 
     border:
         1px solid rgba(148, 163, 184, .08);

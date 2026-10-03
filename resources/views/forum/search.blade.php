@@ -28,7 +28,9 @@
     <form method="GET" action="{{ route('forum.search') }}" class="mb-4">
         <div class="forum-search-bar">
             <input
-                type="text"
+                type="search"
+                aria-label="Search topics and posts"
+                minlength="2" maxlength="200"
                 name="q"
                 class="form-control"
                 placeholder="Search topics and posts..."
@@ -42,12 +44,14 @@
         </div>
     </form>
 
+    @error('q')<p class="text-danger" role="alert">{{ $message }}</p>@enderror
+
     {{-- Results --}}
     @if(mb_strlen($query) >= 2)
 
         <p class="text-secondary mb-3">
-            Found {{ $results->count() }} result{{ $results->count() !== 1 ? 's' : '' }}
-            for "<strong>{{ e($query) }}</strong>"
+            Showing {{ $results->count() }} result{{ $results->count() !== 1 ? 's' : '' }}
+            for "<strong>{{ $query }}</strong>"
         </p>
 
         <div class="forum-topic-list">
@@ -95,12 +99,13 @@
                         </div>
 
                         <div class="flex-grow-1">
-                            <span class="text-secondary" style="font-size:0.8rem;">Reply in</span>
+                            <span class="text-secondary" style="font-size:0.8rem;">Post in</span>
                             @if($result->topic->category)
                             <a href="{{ route('forum.topic', ['category' => $result->topic->category->slug, 'topic' => $result->topic->slug, 'post' => $result->id]) }}#post-{{ $result->id }}"
                                class="forum-topic-link">
                                 {{ $result->topic->title }}
                             </a>
+                            <p class="text-secondary mt-2 mb-1">{{ \Illuminate\Support\Str::limit(strip_tags($result->body), 180) }}</p>
                             @else
                             <span class="forum-topic-link">{{ $result->topic->title }}</span>
                             @endif

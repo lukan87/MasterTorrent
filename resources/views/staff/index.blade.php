@@ -77,7 +77,7 @@
 <!-- Custom CSS -->
 <style>
 body {
-    background: linear-gradient(135deg, #1c1c1c, #2c2c2c);
+    background: linear-gradient(135deg, #121212, #1d1d1d);
     color: #fff;
     font-family: 'Segoe UI', sans-serif;
 }
@@ -85,7 +85,7 @@ body {
 .staff-card {
     border-radius: 12px;
     overflow: hidden;
-    background: rgba(25, 25, 25, 0.85);
+    background: rgba(16,16,16,0.85);
     transition: transform 0.2s, box-shadow 0.3s;
     position: relative;
 }

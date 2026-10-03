@@ -90,8 +90,8 @@
 
     background: linear-gradient(
         135deg,
-        rgba(22, 32, 51, .95),
-        rgba(15, 23, 42, .84)
+        rgba(14,21,33,.95),
+        rgba(10,15,27,.84)
     );
 
     border: 1px solid var(--ui-border);
@@ -148,7 +148,7 @@
     height: 100%;
     overflow: hidden;
 
-    background: rgba(9, 16, 29, .55);
+    background: rgba(6,10,19,.55);
 
     border: 1px solid var(--ui-border);
     border-radius: .65rem;
@@ -163,7 +163,7 @@
 .recommended-link:hover .recommended-item {
     transform: translateY(-3px);
 
-    background: rgba(12, 25, 39, .72);
+    background: rgba(8,16,25,.72);
 
     border-color: rgba(45, 212, 191, .32);
 
@@ -179,7 +179,7 @@
 
     aspect-ratio: 2 / 3;
 
-    background: #0b1220;
+    background: #070c15;
 }
 
 .recommended-poster {
@@ -207,7 +207,7 @@
     align-items: center;
     justify-content: center;
 
-    background: rgba(4, 10, 20, .42);
+    background: rgba(3,6,13,.42);
 
     opacity: 0;
 

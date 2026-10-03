@@ -156,7 +156,7 @@
         border: 1px solid rgba(203, 213, 225, 0.12);
         border-bottom: 0;
         border-radius: 12px 12px 0 0;
-        background: rgba(15, 23, 42, 0.88);
+        background: rgba(10,15,27,0.88);
     }
 
     .bbcode-btn {
@@ -168,7 +168,7 @@
         padding: 0;
         border: 1px solid rgba(203, 213, 225, 0.10);
         border-radius: 7px;
-        background: rgba(255, 255, 255, 0.045);
+        background: rgba(255,255,255,0.0315);
         color: #b8c7d9;
         font-size: 0.82rem;
         cursor: pointer;
@@ -199,7 +199,7 @@
         width: 1px;
         height: 22px;
         margin: 0 3px;
-        background: rgba(203, 213, 225, 0.12);
+        background: rgba(203,213,225,0.084);
     }
 
     .bbcode-toolbar + textarea {

@@ -19,7 +19,7 @@
 }
 
 .contact-card {
-    background: linear-gradient(135deg, rgba(22,32,51,.96), rgba(15,23,42,.92));
+    background: linear-gradient(135deg, rgba(14,21,33,.96), rgba(10,15,27,.92));
     border: 1px solid rgba(148,163,184,.18);
     border-radius: .75rem;
     box-shadow: 0 12px 30px rgba(0,0,0,.22);

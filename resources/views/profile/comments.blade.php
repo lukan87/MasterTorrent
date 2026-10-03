@@ -97,6 +97,30 @@
 
 </div>
 
+@elseif($comment->commentable_type === \App\Models\TorrentRequest::class)
+    <div class="comment-torrent mb-3">
+        <span class="badge bg-info text-dark me-2">Request</span>
+        @if($comment->commentable)
+            <a class="fancy-link fw-semibold" href="{{ route('requests.show', $comment->commentable_id) }}#discussion">{{ $comment->commentable->name }}</a>
+        @else
+            <span class="text-muted">Request no longer available</span>
+        @endif
+    </div>
+@elseif(in_array($comment->commentable_type, [\App\Models\Movie::class, \App\Models\Series::class], true))
+    @php
+        $onlineTitle = $comment->commentable;
+        $isMovie = $comment->commentable_type === \App\Models\Movie::class;
+    @endphp
+    <div class="comment-torrent mb-3 flex-wrap">
+        <i class="bi {{ $isMovie ? 'bi-film' : 'bi-tv' }} text-info me-2" aria-hidden="true"></i>
+        <span class="badge bg-info text-dark">Online {{ $isMovie ? 'movie' : 'series' }}</span>
+        @if($onlineTitle)
+            <a href="{{ route($isMovie ? 'movies.show' : 'series.show', ['id' => $onlineTitle->id, 'slug' => $onlineTitle->slug]) }}#comment-{{ $comment->id }}"
+               class="fancy-link fw-semibold">{{ $onlineTitle->name }}</a>
+        @else
+            <span class="text-muted">{{ $isMovie ? 'Movie' : 'Series' }} no longer available</span>
+        @endif
+    </div>
 @endif
 
 
@@ -166,7 +190,7 @@
 
 .comment-card{
 
-background:#161b22;
+background:#0e1216;
 
 border:1px solid rgba(255,255,255,0.06);
 
@@ -193,7 +217,7 @@ box-shadow:0 18px 45px rgba(0,0,0,0.65);
 
 .comment-torrent{
 
-background:rgba(255,255,255,0.03);
+background:rgba(255,255,255,0.021);
 
 border:1px solid rgba(255,255,255,0.05);
 
@@ -252,7 +276,7 @@ justify-content:center;
 
 border-radius:12px;
 
-background:#0d1117;
+background:#080b0f;
 
 font-size:1.4rem;
 

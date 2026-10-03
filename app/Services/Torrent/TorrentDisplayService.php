@@ -2,10 +2,12 @@
 
 namespace App\Services\Torrent;
 
-use App\Models\Torrent;
 use App\Helpers\MediaInfo;
-use App\Services\TMDBService;
-use Illuminate\Support\Facades\Cache;
+use App\Helpers\TorrentHelper;
+use App\Models\Torrent;
+use App\Services\FanartService;
+use App\Services\MediaDisplayService;
+use App\Services\SteamService;
 
 class TorrentDisplayService
 {
@@ -13,110 +15,108 @@ class TorrentDisplayService
     {
         return [
             'mediainfo' => $this->getMediaInfo($torrent),
-            'display'   => $this->getTmdbDisplay($torrent),
+            'display' => $this->getTmdbDisplay($torrent),
             'steamData' => $this->getSteamData($torrent),
-            'fileTree'  => $this->getFileTree($torrent),
+            'fileTree' => $this->getFileTree($torrent),
         ];
     }
 
     protected function getMediaInfo(Torrent $torrent)
     {
-        if (!$torrent->mediainfo) {
+        if (! $torrent->mediainfo) {
             return null;
         }
 
-        return (new MediaInfo())->parse($torrent->mediainfo);
+        return (new MediaInfo)->parse($torrent->mediainfo);
     }
 
-protected function getTmdbDisplay(Torrent $torrent)
-{
-    if (!$torrent->tmdbid) {
-        return null;
+    protected function getTmdbDisplay(Torrent $torrent)
+    {
+        if (! $torrent->tmdbid) {
+            return null;
+        }
+
+        $type = $torrent->tmdb_type;
+        if (! in_array($type, ['movie', 'tv'], true)) {
+            return null;
+        }
+
+        // Provider responses are cached independently; collection availability stays live.
+        $display = app(MediaDisplayService::class)->getDisplayPayload(
+            $torrent->tmdbid, $type, $torrent->imdbid
+        );
+        if ($display === null) {
+            return null;
+        }
+        $display['fanart'] = $this->getFanart($torrent, $type, $display['external_ids']['tvdb_id'] ?? null);
+
+        return $display;
     }
 
-    $display = Cache::remember(
-        "torrent_display_v2_{$torrent->tmdbid}",
-        now()->addMinutes(10),
-        fn () => (new TMDBService())->getDisplayPayload(
-            $torrent->tmdbid,
-            $torrent->tmdb_type,
-            $torrent->imdbid
-        )
-    );
+    protected function getFanart(Torrent $torrent, string $type, $tvdbId = null): array
+    {
+        // ✅ 1. Use DB first (FAST)
+        if ($torrent->fanart_background || $torrent->fanart_poster) {
+            return [
+                'background' => $torrent->fanart_background,
+                'poster' => $torrent->fanart_poster,
+                'logo' => $torrent->fanart_logo,
+                'banner' => $torrent->fanart_banner,
+            ];
+        }
 
-    // 🔥 Merge Fanart
-    $display['fanart'] = $this->getFanart($torrent, $display['type'] ?? 'movie');
+        // ✅ 2. Fallback to API (cached)
+        $fanartService = app(FanartService::class);
 
-    return $display;
-}
+        try {
+            $tvdbId = $torrent->tvdbid ?: $tvdbId;
+            if ($type === 'tv' && $tvdbId) {
 
-protected function getFanart(Torrent $torrent, string $type): array
-{
-    // ✅ 1. Use DB first (FAST)
-    if ($torrent->fanart_background || $torrent->fanart_poster) {
+                $data = $fanartService->getTvArt($tvdbId);
+
+                return [
+                    'background' => $data['showbackground'][0]['url'] ?? null,
+                    'poster' => $data['tvposter'][0]['url'] ?? null,
+                    'logo' => $data['hdtvlogo'][0]['url'] ?? null,
+                    'banner' => $data['tvbanner'][0]['url'] ?? null,
+                ];
+
+            } elseif ($type === 'movie' && $torrent->tmdbid) {
+
+                $data = $fanartService->getMovieArt($torrent->tmdbid);
+
+                return [
+                    'background' => $data['moviebackground'][0]['url'] ?? null,
+                    'poster' => $data['movieposter'][0]['url'] ?? null,
+                    'logo' => $data['hdmovielogo'][0]['url'] ?? null,
+                    'banner' => $data['moviebanner'][0]['url'] ?? null,
+                ];
+            }
+
+        } catch (\Throwable $e) {
+            // silently fail (never break page)
+        }
+
+        // ✅ 3. Always return structure (NO crashes)
         return [
-            'background' => $torrent->fanart_background,
-            'poster'     => $torrent->fanart_poster,
-            'logo'       => $torrent->fanart_logo,
-            'banner'     => $torrent->fanart_banner,
+            'background' => null,
+            'poster' => null,
+            'logo' => null,
+            'banner' => null,
         ];
     }
 
-    // ✅ 2. Fallback to API (cached)
-    $fanartService = app(\App\Services\FanartService::class);
-
-    try {
-        if ($type === 'tv' && $torrent->tvdbid) {
-
-            $data = $fanartService->getTvArt($torrent->tvdbid);
-
-            return [
-                'background' => $data['showbackground'][0]['url'] ?? null,
-                'poster'     => $data['tvposter'][0]['url'] ?? null,
-                'logo'       => $data['hdtvlogo'][0]['url'] ?? null,
-                'banner'     => $data['tvbanner'][0]['url'] ?? null,
-            ];
-
-        } elseif ($torrent->tmdbid) {
-
-            $data = $fanartService->getMovieArt($torrent->tmdbid);
-
-            return [
-                'background' => $data['moviebackground'][0]['url'] ?? null,
-                'poster'     => $data['movieposter'][0]['url'] ?? null,
-                'logo'       => $data['hdmovielogo'][0]['url'] ?? null,
-                'banner'     => $data['moviebanner'][0]['url'] ?? null,
-            ];
-        }
-
-    } catch (\Throwable $e) {
-        // silently fail (never break page)
-    }
-
-    // ✅ 3. Always return structure (NO crashes)
-    return [
-        'background' => null,
-        'poster'     => null,
-        'logo'       => null,
-        'banner'     => null,
-    ];
-}
-
     protected function getSteamData(Torrent $torrent)
     {
-        if (!$torrent->steamid) {
+        if (! $torrent->steamid) {
             return null;
         }
 
-        return Cache::remember(
-            "torrent_steam_{$torrent->steamid}",
-            now()->addDay(),
-            fn () => (new TMDBService())->fetchSteamData($torrent->steamid)
-        );
+        return app(SteamService::class)->fetchSteamData($torrent->steamid);
     }
 
     protected function getFileTree(Torrent $torrent)
     {
-        return \App\Helpers\TorrentHelper::buildFileTree($torrent->files);
+        return TorrentHelper::buildFileTree($torrent->files);
     }
 }

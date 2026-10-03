@@ -205,7 +205,7 @@
     justify-content:center;
 
     background:
-        rgba(255,255,255,.08);
+        rgba(255,255,255,0.056);
 
     box-shadow:
         inset 0 0 10px rgba(255,255,255,.1);
@@ -286,7 +286,7 @@
     border-radius:999px;
 
     background:
-        rgba(255,255,255,.08);
+        rgba(255,255,255,0.056);
 
     color:#dbeafe;
 

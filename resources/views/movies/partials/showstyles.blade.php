@@ -6,7 +6,7 @@
 .movie-page{
     position:relative;
     min-height:100vh;
-    background:#070b14;
+    background:#05070d;
     color:#e2e8f0;
     overflow-x:hidden;
 }
@@ -34,9 +34,9 @@
     background:linear-gradient(
         to bottom,
         rgba(220, 225, 241, 0),
-        rgba(62, 71, 93, 0.49) 48%,
-        #070b14 90%,
-        #070b14 100%
+        rgba(40,46,60,0.49) 48%,
+        #05070d 90%,
+        #05070d 100%
     );
 }
 
@@ -53,8 +53,8 @@
     padding:26px;
     background:linear-gradient(
         135deg,
-        rgba(64, 76, 101, 0.2),
-        rgba(3, 6, 12, 0.56)
+        rgba(42,49,66,0.2),
+        rgba(2,4,8,0.56)
     );
     border:1px solid rgba(255,255,255,.08);
     border-radius:.8rem;
@@ -188,7 +188,7 @@
 .movie-genre-pill{
     padding:.28rem .55rem;
     border-radius:.4rem;
-    background:rgba(255,255,255,.035);
+    background:rgba(255,255,255,0.0245);
     border:1px solid rgba(255,255,255,.08);
     color:rgba(226,232,240,.72);
     font-size:.72rem;
@@ -198,7 +198,7 @@
     max-width:900px;
     margin-top:18px;
     padding:.8rem .95rem;
-    background:rgba(255,255,255,.025);
+    background:rgba(255,255,255,0.0175);
     border:1px solid rgba(255,255,255,.065);
     border-left:3px solid rgba(45,212,191,.42);
     border-radius:.5rem;
@@ -222,7 +222,7 @@
 .movie-meta-card{
     min-width:115px;
     padding:.65rem .75rem;
-    background:rgba(255,255,255,.03);
+    background:rgba(255,255,255,0.021);
     border:1px solid rgba(255,255,255,.065);
     border-radius:.5rem;
 }
@@ -248,7 +248,7 @@
     max-width:100%;
     margin-top:18px;
     padding:.65rem .8rem;
-    background:rgba(255,255,255,.025);
+    background:rgba(255,255,255,0.0175);
     border:1px solid rgba(255,255,255,.065);
     border-radius:.5rem;
 }
@@ -298,7 +298,7 @@
     max-width:100%;
     padding:.42rem .65rem;
     border-radius:.45rem;
-    background:rgba(255,255,255,.035);
+    background:rgba(255,255,255,0.0245);
     border:1px solid rgba(255,255,255,.08);
     color:rgba(226,232,240,.78);
     font-size:.73rem;
@@ -432,8 +432,8 @@
     overflow:hidden;
     background:linear-gradient(
         135deg,
-        rgba(22,32,51,.94),
-        rgba(15,23,42,.90)
+        rgba(14,21,33,.94),
+        rgba(10,15,27,.90)
     );
     border:1px solid rgba(255,255,255,.07);
     border-radius:.65rem;
@@ -456,7 +456,7 @@
     align-items:center;
     justify-content:center;
     text-align:center;
-    background:rgba(7,14,27,.72);
+    background:rgba(5,9,18,.72);
 }
 
 .movie-cast-image{
@@ -547,7 +547,7 @@
     padding:.4rem .65rem;
     border:1px solid rgba(255,255,255,.10);
     border-radius:.45rem;
-    background:rgba(255,255,255,.035);
+    background:rgba(255,255,255,0.0245);
     color:rgba(226,232,240,.78);
     font-size:.72rem;
     font-weight:600;
@@ -574,7 +574,7 @@
     gap:12px;
     padding:.65rem .75rem;
     border-radius:.5rem;
-    background:rgba(255,255,255,.025);
+    background:rgba(255,255,255,0.0175);
     border:1px solid rgba(255,255,255,.065);
     color:#e8f0f7;
     text-decoration:none;
@@ -636,8 +636,8 @@
 .comments-modern-card{
     background:linear-gradient(
         135deg,
-        rgba(22,32,51,.94),
-        rgba(15,23,42,.88)
+        rgba(14,21,33,.94),
+        rgba(10,15,27,.88)
     );
     border:1px solid rgba(255,255,255,.08);
     border-radius:.8rem;
@@ -667,7 +667,7 @@
     outline:none;
     border:1px solid rgba(255,255,255,.08);
     border-radius:.5rem;
-    background:rgba(255,255,255,.025);
+    background:rgba(255,255,255,0.0175);
     color:#e8f0f7;
     font-size:.8rem;
 }
@@ -703,7 +703,7 @@
     margin-top:10px;
     padding:.75rem;
     border-radius:.55rem;
-    background:rgba(255,255,255,.025);
+    background:rgba(255,255,255,0.0175);
     border:1px solid rgba(255,255,255,.06);
 }
 
@@ -752,7 +752,7 @@
     padding:22px;
     border:1px dashed rgba(255,255,255,.08);
     border-radius:.55rem;
-    background:rgba(255,255,255,.02);
+    background:rgba(255,255,255,0.014);
     color:rgba(203,213,225,.48);
     font-size:.75rem;
     text-align:center;
@@ -944,7 +944,7 @@
 
     border-radius: 50%;
 
-    background: rgba(5, 10, 18, .88);
+    background: rgba(3,6,12,.88);
     backdrop-filter: blur(6px);
 
     font-size: 13px;
@@ -1012,8 +1012,8 @@
     background:
         linear-gradient(
             135deg,
-            rgba(25, 29, 36, 0.96),
-            rgba(16, 19, 24, 0.96)
+            rgba(16,19,23,0.96),
+            rgba(10,12,16,0.96)
         );
 
     border: 1px solid rgba(255, 255, 255, 0.08);

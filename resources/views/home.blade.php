@@ -4,22 +4,34 @@
 
 @section('content')
 
-<div class="row">
+<div class="home-dashboard">
+    {{-- Tracker statistics (VIP and above) --}}
+    @auth
+        @if(Auth::user()->user_class >= \App\Models\UserClass::VIP)
+            @include('partials.stats')
+        @endif
+    @endauth
 
-    {{-- Main News Section --}}
-    <div class="col-lg-7 col-md-5 col-sm-6">
-        @include('partials.news')
+    <div class="row g-3 mt-1">
+        <div class="col-md-8 home-chat">
+            @include('partials.shoutbox')
+        </div>
+        <div class="col-md-4 home-news-polls">
+            @include('partials.news')
+            <div class="mt-3">
+                <x-poll-list :polls="$polls" />
+            </div>
+        </div>
     </div>
 
-    {{-- Polls Section --}}
-    <div class="col-lg-5 col-md-7 col-sm-6">
-        <x-poll-list :polls="$polls" />
+    <div class="row g-3 mt-1">
+        <div class="col-md-8 home-trending">
+            @include('partials.trendingtorrents')
+        </div>
+        <div class="col-md-4">
+            @include('partials.topUsers24h')
+        </div>
     </div>
-
- @include('partials.topUsers24h')
-
- 
- @include('partials.trendingtorrents')
 
  <div class="row g-3 mt-1">
     @include('partials.randomonline', [
@@ -34,19 +46,11 @@
         'randomSubtitle' => 'Randomly selected series – watch online',
         'randomItems' => $randomOnlineSeries,
     ])
-</div>
+ </div>
 
     
-    @include('partials.shoutbox')
-    @include('partials.onlineusers')
 
-    {{-- VIP-only Sections --}}
-    @auth
-        @if(Auth::user()->user_class >= \App\Models\UserClass::VIP)
-            
-            @include('partials.stats')
-        @endif
-    @endauth
+
 
     @include('partials.latest-user-popup')
 
@@ -54,6 +58,34 @@
 
 
 </div>
+
+<style>
+.home-dashboard .home-news-polls > div:first-child,
+.home-dashboard .home-news-polls > div > div.mt-2 {
+    margin-top: 0 !important;
+}
+.home-dashboard .home-chat > .shoutbox-shell {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+.home-dashboard .row > div {
+    min-width: 0;
+}
+.home-trending .tt-row:not(.tt-scroll) {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(120px, 100%), 1fr));
+}
+.home-trending .tt-row:not(.tt-scroll) > .tt-col {
+    width: auto;
+    max-width: none;
+    min-width: 0;
+}
+.home-trending .tt-row.tt-scroll > .tt-col {
+    flex: 0 0 130px;
+    width: 130px;
+    max-width: 130px;
+}
+</style>
 
 <x-cookie-consent />
 

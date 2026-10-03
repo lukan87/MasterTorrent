@@ -316,8 +316,8 @@
         position: relative;
         background: linear-gradient(
             135deg,
-            rgba(22, 32, 51, .96),
-            rgba(15, 23, 42, .88)
+            rgba(14,21,33,.96),
+            rgba(10,15,27,.88)
         );
         border: 1px solid var(--ui-border, rgba(255, 255, 255, .08));
         border-radius: .65rem;
@@ -410,7 +410,7 @@
 
     .admin-input {
         min-height: 34px;
-        background: rgba(7, 15, 27, .5) !important;
+        background: rgba(5,10,18,.5) !important;
         border: 1px solid rgba(255, 255, 255, .09) !important;
         border-radius: .4rem;
         color: #dbe7ef !important;
@@ -423,13 +423,13 @@
     }
 
     .admin-input:focus {
-        background: rgba(7, 15, 27, .62) !important;
+        background: rgba(5,10,18,.62) !important;
         border-color: rgba(32, 201, 151, .38) !important;
         box-shadow: 0 0 0 .12rem rgba(32, 201, 151, .055) !important;
     }
 
     .admin-input option {
-        background: #172234;
+        background: #0f1622;
         color: #fff;
     }
 
@@ -456,13 +456,13 @@
     .reset-btn {
         width: 35px;
         padding: 0;
-        background: rgba(255, 255, 255, .035);
+        background: rgba(255,255,255,0.0245);
         border: 1px solid rgba(255, 255, 255, .08);
         color: #91a2ad;
     }
 
     .reset-btn:hover {
-        background: rgba(255, 255, 255, .07);
+        background: rgba(255,255,255,0.049);
         color: #fff;
         border-color: rgba(32, 201, 151, .25);
     }
@@ -483,7 +483,7 @@
     }
 
     .messages-table thead th {
-        background: rgba(255, 255, 255, .022);
+        background: rgba(255,255,255,0.0154);
         color: #718596;
         font-size: 10px;
         font-weight: 700;
@@ -651,7 +651,7 @@
     }
 
     .pagination .page-link {
-        background: rgba(22, 32, 51, .9);
+        background: rgba(14,21,33,.9);
         border-color: rgba(255, 255, 255, .075);
         color: #aabcc7;
         font-size: 11px;
@@ -674,8 +674,8 @@
     .message-modal {
         background: linear-gradient(
             135deg,
-            rgba(22, 32, 51, .99),
-            rgba(15, 23, 42, .97)
+            rgba(14,21,33,.99),
+            rgba(10,15,27,.97)
         );
         border: 1px solid var(--ui-border, rgba(255, 255, 255, .08));
         border-radius: .65rem;
@@ -691,7 +691,7 @@
 
     .message-modal .modal-header {
         padding: .75rem .9rem;
-        background: rgba(255, 255, 255, .018);
+        background: rgba(255,255,255,0.0126);
     }
 
     .modal-kicker {
@@ -741,7 +741,7 @@
 
     .message-body {
         padding: .7rem;
-        background: rgba(7, 15, 27, .4);
+        background: rgba(5,10,18,.4);
         border: 1px solid rgba(255, 255, 255, .065);
         border-radius: .45rem;
         color: #dbe7ef;

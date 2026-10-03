@@ -84,8 +84,8 @@
 
     background: linear-gradient(
         135deg,
-        rgba(22, 32, 51, .95),
-        rgba(15, 23, 42, .84)
+        rgba(14,21,33,.95),
+        rgba(10,15,27,.84)
     );
 
     border: 1px solid var(--ui-border);
@@ -154,7 +154,7 @@
 
     padding: 11px 13px;
 
-    background: rgba(9, 16, 29, .48);
+    background: rgba(6,10,19,.48);
 
     border: 1px solid rgba(255, 255, 255, .055);
 
@@ -254,7 +254,7 @@
 
     border-radius: .45rem;
 
-    background: rgba(255, 255, 255, .035);
+    background: rgba(255,255,255,0.0245);
 
     border: 1px solid rgba(255, 255, 255, .07);
 

@@ -99,8 +99,8 @@
 
     background: linear-gradient(
         135deg,
-        rgba(22, 32, 51, .95),
-        rgba(15, 23, 42, .84)
+        rgba(14,21,33,.95),
+        rgba(10,15,27,.84)
     );
 
     border: 1px solid var(--ui-border);
@@ -204,7 +204,7 @@
 
     padding: 8px;
 
-    background: rgba(9, 16, 29, .48);
+    background: rgba(6,10,19,.48);
 
     border: 1px solid rgba(255, 255, 255, .055);
     border-radius: .6rem;
@@ -233,7 +233,7 @@
 
     overflow: hidden;
 
-    background: #0f172a;
+    background: #0a0f1b;
 }
 
 .tmdb-recs-poster {
@@ -263,7 +263,7 @@
 
     border-radius: .4rem;
 
-    background: rgba(5, 10, 18, .82);
+    background: rgba(3,6,12,.82);
 
     color: #facc15;
     font-size: 11px;

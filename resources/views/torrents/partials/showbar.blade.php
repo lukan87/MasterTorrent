@@ -96,7 +96,7 @@
                 </span>
             @endif
 
-            <a href="{{ route('tickets.create', ['torrent_id' => $torrent->id, 'category_id' => '6']) }}"
+            <a href="{{ route('tickets.create', ['torrent_id' => $torrent->id]) }}"
                class="modern-badge report-badge-modern text-decoration-none"
                data-bs-toggle="tooltip"
                title="Report a problem with this torrent">
@@ -132,7 +132,6 @@
 
                     @php
                         $slots = Auth::user()->slots;
-                        $userSeedboxes = \App\Models\Seedbox::where('user_id', auth()->id())->get();
                         $hasSeedboxes = $userSeedboxes->isNotEmpty();
                     @endphp
 
@@ -841,13 +840,20 @@ document.addEventListener('DOMContentLoaded', function () {
             @endif
 
             {{-- COMPLETED --}}
-            <span class="modern-stat-badge completed-badge">
-
-                <i class="bi bi-download"></i>
-
-                {{ $torrent->times_completed }}
-
-            </span>
+            @if(auth()->check() && auth()->user()->user_class >= \App\Models\UserClass::MODERATOR)
+                <a href="{{ route('torrents.completed', ['id' => $torrent->id]) }}"
+                   class="modern-stat-badge completed-badge text-decoration-none"
+                   title="Times completed — view completed downloads"
+                   aria-label="{{ $torrent->times_completed }} times completed. View completed downloads">
+                    <i class="bi bi-download"></i>
+                    {{ $torrent->times_completed }}
+                </a>
+            @else
+                <span class="modern-stat-badge completed-badge" title="Times completed">
+                    <i class="bi bi-download"></i>
+                    {{ $torrent->times_completed }}
+                </span>
+            @endif
 
             {{-- SIZE --}}
             <span class="modern-stat-badge size-badge">
@@ -868,7 +874,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 <style>
-.modern-showbar{position:relative;width:100%;max-width:100%;background:linear-gradient(135deg,rgba(22,32,51,.95),rgba(15,23,42,.84));border:1px solid var(--ui-border);border-left:3px solid var(--ui-accent);border-radius:.9rem;overflow:visible;backdrop-filter:blur(14px);box-shadow:0 10px 30px rgba(0,0,0,.22);color:#e6edf3;z-index:1}
+.modern-showbar{position:relative;width:100%;max-width:100%;background:linear-gradient(135deg,rgba(14,21,33,.95),rgba(10,15,27,.84));border:1px solid var(--ui-border);border-left:3px solid var(--ui-accent);border-radius:.9rem;overflow:visible;backdrop-filter:blur(14px);box-shadow:0 10px 30px rgba(0,0,0,.22);color:#e6edf3;z-index:1}
 .modern-showbar::before{display:none}
 .modern-showbar-header{padding:16px 18px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;background:transparent;border-bottom:1px solid var(--ui-border)}
 .torrent-icon-box{width:48px;height:48px;border-radius:.7rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(45,212,191,.10);border:1px solid rgba(45,212,191,.22);color:var(--ui-accent);font-size:1.2rem;box-shadow:none}
@@ -881,14 +887,14 @@ document.addEventListener('DOMContentLoaded', function () {
 .free-badge{background:rgba(34,197,94,.10);color:#70e0a1}.double-badge{background:rgba(250,204,21,.10);color:#f3d46a}.seedbox-badge{background:rgba(6,182,212,.10);color:#67dce9}.sticky-badge{background:rgba(239,68,68,.10);color:#f58b8b}
 .report-badge-modern{background:rgba(239,68,68,.08);color:#f58b8b;text-decoration:none}.report-badge-modern:hover{background:rgba(239,68,68,.14);color:#ffaaaa;box-shadow:none}
 .modern-showbar-body{padding:16px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px}
-.modern-download-btn,.modern-action-btn{border:1px solid var(--ui-border);color:#dce7ef;background:rgba(255,255,255,.045);padding:8px 12px;border-radius:.55rem;font-size:13px;font-weight:600;transition:background .15s ease,border-color .15s ease,color .15s ease,transform .15s ease}
+.modern-download-btn,.modern-action-btn{border:1px solid var(--ui-border);color:#dce7ef;background:rgba(255,255,255,0.0315);padding:8px 12px;border-radius:.55rem;font-size:13px;font-weight:600;transition:background .15s ease,border-color .15s ease,color .15s ease,transform .15s ease}
 .modern-download-btn{background:rgba(45,212,191,.12);border-color:rgba(45,212,191,.28);color:var(--ui-accent)}
 .modern-download-btn:hover{background:rgba(45,212,191,.18);border-color:rgba(45,212,191,.42);color:#b8fff5;transform:translateY(-1px)}
 .watch-online-btn{display:inline-flex;align-items:center;gap:4px;background:rgba(34,197,94,.10);border:1px solid rgba(34,197,94,.28);color:#4ade80;padding:8px 12px;border-radius:.55rem;font-size:13px;font-weight:700;text-decoration:none;transition:background .15s ease,border-color .15s ease,color .15s ease,transform .15s ease}.watch-online-btn:hover{background:rgba(34,197,94,.18);border-color:rgba(34,197,94,.42);color:#bbf7d0;transform:translateY(-1px)}.watch-online-btn i{font-size:14px}
 .modern-action-btn:hover{background:rgba(45,212,191,.09);border-color:rgba(45,212,191,.25);color:var(--ui-accent);transform:translateY(-1px)}
 .info-btn{color:#8fd5ff;background:rgba(59,130,246,.08)}.success-btn{color:#70e0a1;background:rgba(34,197,94,.08)}.thank-btn{color:#8fd5ff;background:rgba(59,130,246,.08)}.thanked-btn{color:#70e0a1;background:rgba(34,197,94,.10)}.subscribe-btn{color:#8fd5ff;background:rgba(59,130,246,.08)}.unsubscribe-btn{color:#ff8f8f;background:rgba(239,68,68,.10)}
 .modern-action-btn.disabled,.modern-action-btn:disabled{opacity:.55!important;cursor:not-allowed;transform:none!important}
-.modern-dropdown-menu{min-width:250px;padding:7px;background:rgba(15,23,42,.98);border:1px solid var(--ui-border);border-radius:.7rem;box-shadow:0 14px 35px rgba(0,0,0,.35)!important}
+.modern-dropdown-menu{min-width:250px;padding:7px;background:rgba(10,15,27,.98);border:1px solid var(--ui-border);border-radius:.7rem;box-shadow:0 14px 35px rgba(0,0,0,.35)!important}
 .modern-dropdown-item{padding:8px 10px;border-radius:.45rem;font-size:13px;color:#d8e2eb;transition:background .15s ease,color .15s ease}
 .modern-dropdown-item:hover{background:rgba(45,212,191,.09);color:var(--ui-accent);transform:none}
 .modern-dropdown-menu .dropdown-header{font-size:12px;color:var(--ui-accent)!important}.modern-dropdown-menu .dropdown-divider{border-color:var(--ui-border)}
@@ -900,14 +906,14 @@ document.addEventListener('DOMContentLoaded', function () {
 }
 .btn-reaction:hover {
     transform: scale(1.2);
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255,255,255,0.07);
 }
 .btn-reaction.active {
     background: rgba(45, 212, 191, 0.2);
     border: 1px solid rgba(45, 212, 191, 0.5);
 }
 .modern-alert-danger{background:rgba(220,38,38,.09);border:1px solid rgba(220,38,38,.22);color:#f4a0a0;padding:9px 12px;border-radius:.6rem;font-size:13px;font-weight:600}
-.category-badge{background:rgba(148,163,184,.08);color:#c6d0da}.files-badge{background:rgba(250,204,21,.08);color:#e8cf6d}.seeders-badge{background:rgba(34,197,94,.08);color:#70e0a1}.leechers-badge{background:rgba(239,68,68,.08);color:#f58b8b}.completed-badge{background:rgba(59,130,246,.08);color:#8fc8f5}.size-badge{background:rgba(6,182,212,.08);color:#67dce9}
+.category-badge{background:rgba(148,163,184,0.056);color:#c6d0da}.files-badge{background:rgba(250,204,21,.08);color:#e8cf6d}.seeders-badge{background:rgba(34,197,94,.08);color:#70e0a1}.leechers-badge{background:rgba(239,68,68,.08);color:#f58b8b}.completed-badge{background:rgba(59,130,246,.08);color:#8fc8f5}.size-badge{background:rgba(6,182,212,.08);color:#67dce9}
 .modern-stat-badge.text-decoration-none:hover{text-decoration:none!important;border-color:rgba(45,212,191,.25)}
 .btn-group{position:relative}.btn-group .dropdown-menu,.dropdown-menu{z-index:999999!important}
 @media(max-width:768px){
@@ -941,7 +947,7 @@ html,body{overflow-x:hidden!important}.modern-showbar{border-radius:.75rem}.mode
 
     padding: 14px 16px;
 
-    background: #212529;
+    background: #15181b;
     color: #fff;
 
     border-radius: 12px;
@@ -984,7 +990,7 @@ html,body{overflow-x:hidden!important}.modern-showbar{border-radius:.75rem}.mode
     font-size: 16px;
     font-weight: bold;
 
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255,255,255,0.07);
 }
 
 .reaction-toast-success .reaction-toast-icon {

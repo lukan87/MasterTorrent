@@ -4,9 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\ForumCategory;
-use App\Models\ForumTopic;
-use App\Models\ForumPost;
 
 class ForumTopic extends Model
 {
@@ -27,6 +24,11 @@ class ForumTopic extends Model
         'is_pinned' => 'boolean',
         'is_locked' => 'boolean',
     ];
+
+    public function scopeVisible($query)
+    {
+        return $query->whereHas('category', fn ($category) => $category->where('is_private', false));
+    }
 
     public function category()
     {
@@ -49,13 +51,12 @@ class ForumTopic extends Model
     }
 
     public function subscriptions()
-{
-    return $this->hasMany(TopicSubscription::class, 'topic_id');
-}
+    {
+        return $this->hasMany(TopicSubscription::class, 'topic_id');
+    }
 
-public function views()
-{
-    return $this->hasMany(ForumTopicView::class, 'topic_id');
-}
-
+    public function views()
+    {
+        return $this->hasMany(ForumTopicView::class, 'topic_id');
+    }
 }

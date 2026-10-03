@@ -3,11 +3,10 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Carbon;
-use App\Models\User;
 
 class LoginController extends Controller
 {
@@ -15,20 +14,18 @@ class LoginController extends Controller
 
     /**
      * Where to redirect users after login.
-     *
-     * @var string
      */
     protected $redirectTo = '/';
 
     /**
      * Maximum login attempts before banning the user.
      */
-    const MAX_FAILED_ATTEMPTS = 5;
+    private const MAX_FAILED_ATTEMPTS = 5;
 
     /**
      * Ban duration in hours.
      */
-    const BAN_DURATION_HOURS = 12;
+    private const BAN_DURATION_HOURS = 12;
 
     /**
      * Create a new controller instance.
@@ -40,64 +37,167 @@ class LoginController extends Controller
     }
 
     /**
-     * Handle login attempts with custom logic for bans and failed attempts.
+     * Handle login using either username or email address.
      */
     public function login(Request $request)
     {
-        // Validate the input fields
         $request->validate([
-            'name' => 'required|string', // Assuming 'name' is the username field
-            'password' => 'required|string',
+            'name' => ['required', 'string'],
+            'password' => ['required', 'string'],
         ]);
 
-        // Retrieve the user by username
-        $user = User::withTrashed()->where('name', $request->name)->first();
+        /*
+        |--------------------------------------------------------------------------
+        | Username or email
+        |--------------------------------------------------------------------------
+        |
+        | Keep the form field named "name" so the existing login Blade does not
+        | need to change structurally. The value may now contain either the
+        | user's username or their registered email address.
+        |
+        */
 
-        if ($user && $user->trashed()) {
+        $login = trim((string) $request->input('name'));
 
-    $deletedBy = optional($user->deletedBy)->name ?? 'staff';
+        $user = User::withTrashed()
+            ->where(function ($query) use ($login) {
+                $query->where('name', $login)
+                    ->orWhere('email', $login);
+            })
+            ->first();
 
-    return redirect()->back()->withErrors([
-        'This account was deleted ' .
-        $user->deleted_at->diffForHumans() .
-        " by {$deletedBy}. If you believe this was a mistake, please contact the staff team."
-    ]);
-}
+        /*
+        |--------------------------------------------------------------------------
+        | Account not found
+        |--------------------------------------------------------------------------
+        */
 
-        // Handle non-existent user
         if (!$user) {
-            return redirect()->back()->withErrors(['Invalid credentials. Please check your username and password.']);
+            return back()
+                ->withInput($request->only('name'))
+                ->withErrors([
+                    'name' => 'Invalid credentials. Please check your username/email and password.',
+                ]);
         }
 
-        // Check if the account is disabled
-        if ($user->enabled === 'no') {
-            return redirect()->back()->withErrors(['Your account has been disabled.']);
+        /*
+        |--------------------------------------------------------------------------
+        | Deleted account
+        |--------------------------------------------------------------------------
+        */
+
+        if ($user->trashed()) {
+            $deletedBy = optional($user->deletedBy)->name ?? 'staff';
+
+            return back()
+                ->withInput($request->only('name'))
+                ->withErrors([
+                    'name' =>
+                        'This account was deleted ' .
+                        $user->deleted_at->diffForHumans() .
+                        " by {$deletedBy}. If you believe this was a mistake, " .
+                        'please contact the staff team.',
+                ]);
         }
 
-        // Check if the user is banned
+        /*
+        |--------------------------------------------------------------------------
+        | Disabled account
+        |--------------------------------------------------------------------------
+        */
+
+        if ($user->enabled === 'no' || $user->activation_pending) {
+            return back()
+                ->withInput($request->only('name'))
+                ->withErrors([
+                    'name' => $user->activation_pending
+                        ? 'Please activate your account using the link in your email. You can request a new activation email below.'
+                        : 'Your account has been disabled.',
+                ]);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Banned account
+        |--------------------------------------------------------------------------
+        */
+
         if ($user->isBanned()) {
-            return redirect()->back()->withErrors([
-                'Your account is banned until ' . $user->banned_until->format('d-m-Y H:i:s'),
-            ]);
+            return back()
+                ->withInput($request->only('name'))
+                ->withErrors([
+                    'name' =>
+                        'Your account is banned until ' .
+                        $user->banned_until->format('d-m-Y H:i:s'),
+                ]);
         }
 
-        // Attempt to authenticate the user
-        if (Auth::attempt(['name' => $request->name, 'password' => $request->password])) {
-            
-            // Reset failed attempts and clear any bans on successful login
+        /*
+        |--------------------------------------------------------------------------
+        | Determine authentication field
+        |--------------------------------------------------------------------------
+        |
+        | We already found the exact user above. Authenticate against that
+        | user's username or email depending on what was entered.
+        |
+        */
+
+        $field = filter_var($login, FILTER_VALIDATE_EMAIL)
+            ? 'email'
+            : 'name';
+
+        /*
+        |--------------------------------------------------------------------------
+        | Authenticate
+        |--------------------------------------------------------------------------
+        */
+
+        if (Auth::attempt([
+            $field => $login,
+            'password' => $request->input('password'),
+        ], $request->boolean('remember'))) {
+
+            $request->session()->regenerate();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Successful login
+            |--------------------------------------------------------------------------
+            */
+
             $user->resetFailedAttempts();
+
             $user->IP = $request->ip();
             $user->save();
+
             return redirect()->intended($this->redirectTo);
         }
 
-        // Increment failed login attempts
-        $user->incrementFailedAttempts(self::MAX_FAILED_ATTEMPTS, self::BAN_DURATION_HOURS);
+        /*
+        |--------------------------------------------------------------------------
+        | Failed login
+        |--------------------------------------------------------------------------
+        */
 
-        $remainingAttempts = max(0, self::MAX_FAILED_ATTEMPTS - $user->failed_attempts);
+        $user->incrementFailedAttempts(
+            self::MAX_FAILED_ATTEMPTS,
+            self::BAN_DURATION_HOURS
+        );
 
-        return redirect()->back()->withErrors([
-            'Invalid credentials. You have ' . $remainingAttempts . ' attempts remaining.',
-        ]);
+        $user->refresh();
+
+        $remainingAttempts = max(
+            0,
+            self::MAX_FAILED_ATTEMPTS - (int) $user->failed_attempts
+        );
+
+        return back()
+            ->withInput($request->only('name'))
+            ->withErrors([
+                'name' =>
+                    'Invalid credentials. You have ' .
+                    $remainingAttempts .
+                    ' attempts remaining.',
+            ]);
     }
 }

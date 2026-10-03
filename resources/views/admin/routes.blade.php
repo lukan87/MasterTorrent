@@ -195,8 +195,8 @@
     overflow: hidden;
     background: linear-gradient(
         135deg,
-        rgba(22,32,51,.95),
-        rgba(15,23,42,.84)
+        rgba(14,21,33,.95),
+        rgba(10,15,27,.84)
     );
     border: 1px solid var(--ui-border, rgba(148,163,184,.16));
     border-radius: .85rem;
@@ -221,7 +221,7 @@
     justify-content: space-between;
     gap: 1rem;
     padding: .85rem 1rem;
-    background: rgba(15,23,42,.4);
+    background: rgba(10,15,27,.4);
     border-bottom: 1px solid var(--ui-border, rgba(148,163,184,.16));
 }
 
@@ -282,7 +282,7 @@
 .route-group {
     margin-bottom: .45rem;
     overflow: hidden;
-    background: rgba(15,23,42,.38);
+    background: rgba(10,15,27,.38);
     border: 1px solid rgba(148,163,184,.12);
     border-radius: .6rem;
 }
@@ -378,7 +378,7 @@
 .routes-table thead th {
     padding: .55rem .6rem;
     color: #64748b;
-    background: rgba(15,23,42,.3);
+    background: rgba(10,15,27,.3);
     border-bottom: 1px solid rgba(148,163,184,.1);
     font-size: 10px;
     font-weight: 700;
@@ -418,7 +418,7 @@
     display: inline-block;
     padding: .18rem .35rem;
     color: #67e8f9;
-    background: rgba(15,23,42,.5);
+    background: rgba(10,15,27,.5);
     border: 1px solid rgba(34,211,197,.1);
     border-radius: .3rem;
     font-family: var(--bs-font-monospace);
@@ -439,7 +439,7 @@
     min-width: 38px;
     padding: .2rem .4rem;
     color: #cbd5e1;
-    background: rgba(51,65,85,.42);
+    background: rgba(33,42,55,.42);
     border: 1px solid rgba(148,163,184,.14);
     border-radius: .35rem;
     font-size: 10px;

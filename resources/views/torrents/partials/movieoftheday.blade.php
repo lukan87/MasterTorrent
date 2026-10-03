@@ -134,8 +134,8 @@
 
     background: linear-gradient(
         135deg,
-        rgba(22, 32, 51, .96),
-        rgba(15, 23, 42, .88)
+        rgba(14,21,33,.96),
+        rgba(10,15,27,.88)
     );
 
     border: 1px solid var(--ui-border);
@@ -165,10 +165,10 @@
 
     background: linear-gradient(
         90deg,
-        rgba(7, 14, 25, .96) 0%,
-        rgba(7, 14, 25, .88) 42%,
-        rgba(7, 14, 25, .66) 72%,
-        rgba(7, 14, 25, .78) 100%
+        rgba(5,9,16,.96) 0%,
+        rgba(5,9,16,.88) 42%,
+        rgba(5,9,16,.66) 72%,
+        rgba(5,9,16,.78) 100%
     );
 }
 
@@ -296,7 +296,7 @@
 
     border-radius: .5rem;
 
-    background: rgba(255, 255, 255, .035);
+    background: rgba(255,255,255,0.0245);
 
     border: 1px solid var(--ui-border);
 

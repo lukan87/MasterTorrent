@@ -2,7 +2,7 @@
 
 @section('content')
 
-<div class="container my-5" style="background:#1e1e2f;padding:2rem;border-radius:0.5rem">
+<div class="container my-5" style="background:#14141f;padding:2rem;border-radius:0.5rem">
 
 <h2 class="text-center text-danger mb-4">
 <i class="bi bi-tools"></i> Hit & Run Fixer

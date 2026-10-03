@@ -229,7 +229,7 @@
     .log-details-header,
     .log-info-card,
     .log-changes-card {
-        background: linear-gradient(135deg, rgba(22, 32, 51, .95), rgba(15, 23, 42, .84));
+        background: linear-gradient(135deg, rgba(14,21,33,.95), rgba(10,15,27,.84));
         border: 1px solid var(--ui-border, rgba(255,255,255,.08));
         box-shadow: 0 8px 24px rgba(0,0,0,.18);
     }
@@ -281,7 +281,7 @@
 
     .log-back-btn {
         color: #d8e6ed;
-        background: rgba(255,255,255,.035);
+        background: rgba(255,255,255,0.0245);
         border: 1px solid var(--ui-border, rgba(255,255,255,.08));
         border-radius: .5rem;
         font-size: 13px;
@@ -311,7 +311,7 @@
         gap: .7rem;
         padding: .9rem 1rem;
         border-bottom: 1px solid rgba(255,255,255,.07);
-        background: rgba(255,255,255,.018);
+        background: rgba(255,255,255,0.0126);
     }
 
     .log-card-icon {
@@ -421,7 +421,7 @@
     }
 
     .change-item {
-        background: rgba(8,15,28,.28);
+        background: rgba(5,10,18,.28);
         border: 1px solid rgba(255,255,255,.07);
         border-radius: .6rem;
         padding: .8rem;
@@ -457,7 +457,7 @@
 
     .change-value-box {
         min-width: 0;
-        background: rgba(255,255,255,.025);
+        background: rgba(255,255,255,0.0175);
         border: 1px solid rgba(255,255,255,.07);
         border-radius: .5rem;
         padding: .6rem .65rem;
@@ -521,7 +521,7 @@
         padding: .85rem;
         border: 1px solid rgba(255,255,255,.07);
         border-radius: .55rem;
-        background: rgba(255,255,255,.025);
+        background: rgba(255,255,255,0.0175);
     }
 
     .no-changes-icon {

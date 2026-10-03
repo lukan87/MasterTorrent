@@ -1,843 +1,1163 @@
 @extends('layouts.app')
 
+
+
 @section('content')
 
+
+
 @php
+
     $roles = App\Models\UserClass::getClasses();
 
+
+
     $customOrder = [
+
+        App\Models\UserClass::WEB_DEVELOPER,
+
         App\Models\UserClass::OWNER,
+
         App\Models\UserClass::ADMIN,
+
         App\Models\UserClass::MODERATOR,
+
         App\Models\UserClass::UPLOADER,
+
     ];
+
+
 
     $remainingRoles = array_diff(array_keys($roles), $customOrder);
+
     $orderedRoles = array_merge($customOrder, $remainingRoles);
 
+
+
     $roleIcons = [
-        App\Models\UserClass::OWNER       => 'bi-crown-fill',
-        App\Models\UserClass::ADMIN       => 'bi-shield-fill-check',
-        App\Models\UserClass::MODERATOR   => 'bi-hammer',
-        App\Models\UserClass::UPLOADER    => 'bi-cloud-arrow-up-fill',
+
+        App\Models\UserClass::WEB_DEVELOPER => 'bi-code-slash',
+
+        App\Models\UserClass::OWNER         => 'bi-crown-fill',
+
+        App\Models\UserClass::ADMIN         => 'bi-shield-fill-check',
+
+        App\Models\UserClass::MODERATOR     => 'bi-hammer',
+
+        App\Models\UserClass::UPLOADER      => 'bi-cloud-arrow-up-fill',
+
     ];
 
+
+
     $roleDescriptions = [
-        App\Models\UserClass::OWNER       => 'The founder and architect of the platform',
-        App\Models\UserClass::ADMIN       => 'Full administrative control over the tracker',
-        App\Models\UserClass::MODERATOR   => 'Keeping the community safe and on track',
-        App\Models\UserClass::UPLOADER    => 'Contributors powering the content library',
+
+        App\Models\UserClass::WEB_DEVELOPER => 'Building, improving and maintaining the platform',
+
+        App\Models\UserClass::OWNER         => 'The founder and architect of the platform',
+
+        App\Models\UserClass::ADMIN         => 'Full administrative control over the tracker',
+
+        App\Models\UserClass::MODERATOR     => 'Keeping the community safe and on track',
+
+        App\Models\UserClass::UPLOADER      => 'Contributors powering the content library',
+
     ];
+
 @endphp
+
+
+
+
 
 <div class="container team-page py-4">
 
+
+
     {{-- HERO --}}
+
     <div class="team-hero">
 
+
+
         <div class="hero-orbs">
+
             <div class="orb orb-1"></div>
+
             <div class="orb orb-2"></div>
+
             <div class="orb orb-3"></div>
+
         </div>
+
+
 
         <div class="hero-content text-center">
 
+
+
             <div class="hero-badge">
+
                 <i class="bi bi-people-fill"></i>
+
                 {{ config('app.name') }}
+
             </div>
+
+
 
             <h1 class="hero-title">Our Team</h1>
 
+
+
             <p class="hero-subtitle">
+
                 The dedicated people who keep everything running 24/7
+
             </p>
 
+
+
             <div class="hero-stats">
+
+
+
                 <div class="hero-stat">
+
                     <span class="stat-number">{{ $staff->count() }}</span>
+
                     <span class="stat-label">Members</span>
+
                 </div>
+
+
+
                 <div class="hero-stat-divider"></div>
+
+
+
                 @foreach($customOrder as $classId)
-                    @php $count = $staff->where('user_class', $classId)->count(); @endphp
+
+
+
+                    @php
+
+                        $count = $staff->where('user_class', $classId)->count();
+
+                    @endphp
+
+
+
                     @if($count > 0)
+
+
+
                         <div class="hero-stat">
-                            <span class="stat-number" style="color: {{ App\Models\UserClass::getClassColor($classId) }}">{{ $count }}</span>
-                            <span class="stat-label">{{ $roles[$classId] }}</span>
+
+                            <span
+
+                                class="stat-number"
+
+                                style="color: {{ App\Models\UserClass::getClassColor($classId) }}"
+
+                            >
+
+                                {{ $count }}
+
+                            </span>
+
+
+
+                            <span class="stat-label">
+
+                                {{ $roles[$classId] ?? 'Role' }}
+
+                            </span>
+
                         </div>
+
+
+
                         @if(!$loop->last)
+
                             <div class="hero-stat-divider"></div>
+
                         @endif
+
+
+
                     @endif
+
+
+
                 @endforeach
+
+
+
             </div>
 
+
+
         </div>
+
+
+
     </div>
+
+
+
+
 
     {{-- FILTER PILLS --}}
+
     <div class="team-filters" id="teamFilters">
+
+
+
         <button class="filter-pill active" data-role="all">
-            <i class="bi bi-grid-3x3-gap me-1"></i> All
+
+            <i class="bi bi-grid-3x3-gap me-1"></i>
+
+            All
+
         </button>
+
+
+
         @foreach ($orderedRoles as $classId)
+
+
+
             @php
+
                 $roleName = $roles[$classId] ?? null;
+
                 $roleMembers = $staff->where('user_class', $classId);
+
             @endphp
+
+
+
             @if ($roleName && $roleMembers->isNotEmpty())
-                <button class="filter-pill" data-role="{{ $classId }}">
+
+
+
+                <button
+
+                    class="filter-pill"
+
+                    data-role="{{ $classId }}"
+
+                >
+
                     <i class="bi {{ $roleIcons[$classId] ?? 'bi-person-fill' }} me-1"></i>
+
+
+
                     {{ $roleName }}
-                    <span class="pill-count">{{ $roleMembers->count() }}</span>
+
+
+
+                    <span class="pill-count">
+
+                        {{ $roleMembers->count() }}
+
+                    </span>
+
                 </button>
+
+
+
             @endif
+
+
+
         @endforeach
+
+
+
     </div>
 
+
+
+
+
     {{-- ROLE SECTIONS --}}
+
     @foreach ($orderedRoles as $classId)
 
+
+
         @php
+
             $roleName = $roles[$classId] ?? null;
+
             $roleMembers = $staff->where('user_class', $classId);
+
             $classColor = App\Models\UserClass::getClassColor($classId);
+
         @endphp
+
+
+
+
 
         @if ($roleName && $roleMembers->isNotEmpty())
 
-            <div class="role-section" data-role-section="{{ $classId }}">
 
-                <div class="role-header" style="--role-color: {{ $classColor }}">
+
+            <div
+
+                class="role-section"
+
+                data-role-section="{{ $classId }}"
+
+            >
+
+
+
+                {{-- ROLE HEADER --}}
+
+                <div
+
+                    class="role-header"
+
+                    style="--role-color: {{ $classColor }}"
+
+                >
+
+
+
                     <div class="role-icon-wrap">
+
                         <i class="bi {{ $roleIcons[$classId] ?? 'bi-person-fill' }}"></i>
+
                     </div>
+
+
+
                     <div class="role-info">
-                        <h2 class="role-title">{{ $roleName }}s</h2>
+
+
+
+                        <h2 class="role-title">
+
+                            {{ $roleName }}s
+
+                        </h2>
+
+
+
                         @if(isset($roleDescriptions[$classId]))
-                            <p class="role-desc">{{ $roleDescriptions[$classId] }}</p>
+
+                            <p class="role-desc">
+
+                                {{ $roleDescriptions[$classId] }}
+
+                            </p>
+
                         @endif
+
+
+
                     </div>
-                    <div class="role-count-badge" style="--role-color: {{ $classColor }}">
-                        {{ $roleMembers->count() }} {{ Str::plural('member', $roleMembers->count()) }}
+
+
+
+                    <div
+
+                        class="role-count-badge"
+
+                        style="--role-color: {{ $classColor }}"
+
+                    >
+
+                        {{ $roleMembers->count() }}
+
+                        {{ Str::plural('member', $roleMembers->count()) }}
+
                     </div>
+
+
+
                 </div>
 
+
+
+
+
+                {{-- MEMBERS --}}
+
                 <div class="row g-4">
+
+
+
                     @foreach ($roleMembers as $member)
+
+
+
                         @php
+
                             $memberColor = App\Models\UserClass::getClassColor($member->user_class);
+
+
+
                             $leaderClasses = [
+
                                 App\Models\UserClass::OWNER,
-                                App\Models\UserClass::ADMIN
+
+                                App\Models\UserClass::ADMIN,
+
                             ];
-                            $isLeader = in_array($member->user_class, $leaderClasses);
+
+
+
+                            $isLeader = in_array(
+
+                                $member->user_class,
+
+                                $leaderClasses
+
+                            );
+
                         @endphp
 
-                        <div class="{{ $isLeader ? 'col-md-6 col-xl-4' : 'col-md-6 col-lg-4 col-xl-3' }} member-col" data-role-col="{{ $member->user_class }}">
-                            <div class="team-card {{ $isLeader ? 'team-card--leader' : '' }}" style="--card-color: {{ $memberColor }}">
+
+
+
+
+                        <div
+
+                            class="{{ $isLeader ? 'col-md-6 col-xl-4' : 'col-md-6 col-lg-4 col-xl-3' }} member-col"
+
+                            data-role-col="{{ $member->user_class }}"
+
+                        >
+
+
+
+                            <div
+
+                                class="team-card {{ $isLeader ? 'team-card--leader' : '' }}"
+
+                                style="--card-color: {{ $memberColor }}"
+
+                            >
+
+
 
                                 <div class="card-accent"></div>
+
                                 <div class="card-glow-blob"></div>
+
+
+
+
 
                                 <div class="card-inner">
 
+
+
+                                    {{-- AVATAR --}}
+
                                     <div class="card-avatar">
+
+
+
                                         <img
+
                                             src="{{ $member->profile_image ?? asset('images/default_avatar/default-avatar.jpg') }}"
+
                                             alt="{{ $member->name }}"
+
                                             loading="lazy"
+
                                         >
+
+
+
                                         <div class="avatar-ring"></div>
+
+
+
                                         @if($isLeader)
+
+
+
                                             <div class="avatar-crown">
+
                                                 <i class="bi bi-star-fill"></i>
+
                                             </div>
+
+
+
                                         @endif
+
+
+
                                     </div>
 
-                                    <a href="{{ route('profile.show', ['id'=>$member->id,'name'=>$member->name]) }}"
-                                       class="card-name">
+
+
+
+
+                                    {{-- USERNAME --}}
+
+                                    <a
+
+                                        href="{{ route('profile.show', [
+
+                                            'id' => $member->id,
+
+                                            'name' => $member->name
+
+                                        ]) }}"
+
+                                        class="card-name"
+
+                                    >
+
                                         {{ $member->name }}
+
                                     </a>
 
+
+
+
+
+                                    {{-- ROLE --}}
+
                                     <div class="card-role-tag">
+
+
+
                                         <i class="bi {{ $roleIcons[$member->user_class] ?? 'bi-person-fill' }}"></i>
+
+
+
                                         {{ $roleName }}
+
+
+
                                     </div>
+
+
+
+
+
+                                    {{-- ACTIONS --}}
 
                                     <div class="card-actions">
-                                        <a href="{{ route('messages.create', ['receiver_id' => $member->id]) }}"
-                                           class="card-btn card-btn--primary">
+
+
+
+                                        <a
+
+                                            href="{{ route('messages.create', [
+
+                                                'receiver_id' => $member->id
+
+                                            ]) }}"
+
+                                            class="card-btn card-btn--primary"
+
+                                        >
+
                                             <i class="bi bi-chat-dots-fill"></i>
+
                                             <span>Message</span>
+
                                         </a>
-                                        <a href="{{ route('profile.show', ['id' => $member->id, 'name' => $member->name]) }}"
-                                           class="card-btn card-btn--ghost">
+
+
+
+
+
+                                        <a
+
+                                            href="{{ route('profile.show', [
+
+                                                'id' => $member->id,
+
+                                                'name' => $member->name
+
+                                            ]) }}"
+
+                                            class="card-btn card-btn--ghost"
+
+                                        >
+
                                             <i class="bi bi-person-fill"></i>
+
                                             <span>Profile</span>
+
                                         </a>
+
+
+
                                     </div>
 
+
+
                                 </div>
+
+
+
                             </div>
+
+
+
                         </div>
+
+
+
                     @endforeach
+
+
+
                 </div>
+
+
 
             </div>
 
+
+
         @endif
+
+
 
     @endforeach
 
+
+
 </div>
 
+
+
+
+
 @push('scripts')
+
+
+
 <script>
+
+
+
 document.addEventListener('DOMContentLoaded', function () {
 
-    /* filter pills */
+
+
+    /*
+
+    |--------------------------------------------------------------------------
+
+    | Team filters
+
+    |--------------------------------------------------------------------------
+
+    */
+
+
+
     const pills = document.querySelectorAll('.filter-pill');
+
     const sections = document.querySelectorAll('[data-role-section]');
 
+
+
     pills.forEach(pill => {
+
+
+
         pill.addEventListener('click', function () {
+
+
+
             pills.forEach(p => p.classList.remove('active'));
+
+
+
             this.classList.add('active');
+
+
+
             const role = this.dataset.role;
+
+
+
             if (role === 'all') {
-                sections.forEach(s => s.style.display = '');
-            } else {
-                sections.forEach(s => {
-                    s.style.display = s.dataset.roleSection === role ? '' : 'none';
+
+
+
+                sections.forEach(section => {
+
+                    section.style.display = '';
+
                 });
+
+
+
+            } else {
+
+
+
+                sections.forEach(section => {
+
+
+
+                    section.style.display =
+
+                        section.dataset.roleSection === role
+
+                            ? ''
+
+                            : 'none';
+
+
+
+                });
+
+
+
             }
+
+
+
         });
+
+
+
     });
 
-    /* scroll reveal */
-    const revealEls = document.querySelectorAll('.team-card, .role-header, .hero-content');
+
+
+
+
+    /*
+
+    |--------------------------------------------------------------------------
+
+    | Scroll reveal
+
+    |--------------------------------------------------------------------------
+
+    */
+
+
+
+    const revealEls = document.querySelectorAll(
+
+        '.team-card, .role-header, .hero-content'
+
+    );
+
+
+
     const observer = new IntersectionObserver((entries) => {
+
+
+
         entries.forEach(entry => {
+
+
+
             if (entry.isIntersecting) {
+
+
+
                 entry.target.classList.add('revealed');
+
+
+
                 observer.unobserve(entry.target);
+
+
+
             }
+
+
+
         });
-    }, { threshold: 0.1 });
+
+
+
+    }, {
+
+        threshold: 0.1
+
+    });
+
+
+
+
+
     revealEls.forEach(el => observer.observe(el));
 
+
+
 });
+
+
+
 </script>
+
+
+
 @endpush
 
-<style>
 
-/* BACKGROUND */
+
+
+
+<style>
+/* =========================================================
+   FILEIPLAY TEAM PAGE
+   Clean forum-style redesign — structure/functionality preserved
+   ========================================================= */
+
 .team-page{
     position:relative;
     z-index:1;
+    max-width:1320px;
+    color:#e5e7eb;
 }
 
 /* HERO */
 .team-hero{
     position:relative;
     overflow:hidden;
-    padding:64px 40px 56px;
-    margin-bottom:40px;
-    border-radius:28px;
-    background:
-        linear-gradient(160deg, rgba(255,255,255,.05) 0%, rgba(255,255,255,.01) 100%);
-    border:1px solid rgba(255,255,255,.07);
-    backdrop-filter:blur(24px);
-    box-shadow:
-        0 30px 80px rgba(0,0,0,.4),
-        inset 0 1px 0 rgba(255,255,255,.06);
+    margin-bottom:1.4rem;
+    padding:2rem 1.5rem;
+    background:linear-gradient(135deg,rgba(14,21,33,.96),rgba(10,15,27,.9));
+    border:1px solid rgba(148,163,184,.16);
+    border-radius:.8rem;
+    box-shadow:0 14px 34px rgba(0,0,0,.25);
 }
 
-.hero-orbs{
-    position:absolute;
-    inset:0;
-    overflow:hidden;
-    pointer-events:none;
-}
+.hero-orbs{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.orb{position:absolute;border-radius:50%;filter:blur(65px);opacity:.22}
+.orb-1{width:220px;height:220px;top:-130px;left:8%;background:rgba(45,212,191,.28)}
+.orb-2{width:180px;height:180px;right:5%;top:-70px;background:rgba(6,182,212,.2)}
+.orb-3{width:160px;height:160px;bottom:-110px;left:46%;background:rgba(20,184,166,.2)}
 
-.orb{
-    position:absolute;
-    border-radius:50%;
-    filter:blur(80px);
-    opacity:.5;
-}
-
-.orb-1{
-    width:300px; height:300px;
-    top:-100px; left:10%;
-    background:rgba(45,212,191,.20);
-    animation:orbFloat 8s ease-in-out infinite;
-}
-
-.orb-2{
-    width:250px; height:250px;
-    top:20%; right:5%;
-    background:rgba(99,210,198,.18);
-    animation:orbFloat 10s ease-in-out infinite reverse;
-}
-
-.orb-3{
-    width:200px; height:200px;
-    bottom:-80px; left:40%;
-    background:rgba(6,182,212,.15);
-    animation:orbFloat 12s ease-in-out infinite 2s;
-}
-
-@keyframes orbFloat{
-    0%, 100%{ transform:translate(0, 0) scale(1); }
-    33%{ transform:translate(30px, -20px) scale(1.05); }
-    66%{ transform:translate(-20px, 15px) scale(.95); }
-}
-
-.hero-content{
-    position:relative;
-    z-index:2;
-}
+.hero-content{position:relative;z-index:2}
 
 .hero-badge{
     display:inline-flex;
     align-items:center;
-    gap:8px;
-    padding:8px 18px;
-    margin-bottom:20px;
-    border-radius:999px;
-    font-size:.78rem;
-    font-weight:700;
-    letter-spacing:1.5px;
+    gap:.4rem;
+    margin-bottom:.65rem;
+    padding:.35rem .65rem;
+    border:1px solid rgba(45,212,191,.22);
+    border-radius:.45rem;
+    background:rgba(20,184,166,.08);
+    color:#67e8df;
+    font-size:.7rem;
+    font-weight:800;
+    letter-spacing:.7px;
     text-transform:uppercase;
-    color:var(--ui-accent);
-    background:rgba(45,212,191,.10);
-    border:1px solid rgba(45,212,191,.2);
 }
 
 .hero-title{
-    color:white;
-    font-size:3.2rem;
-    font-weight:900;
-    letter-spacing:-1px;
-    margin:0 0 12px;
+    margin:0 0 .35rem;
+    color:#f8fafc;
+    font-size:clamp(1.75rem,3vw,2.35rem);
+    font-weight:800;
     line-height:1.1;
-    background:linear-gradient(135deg, #ffffff 30%, #94a3b8 100%);
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
-    background-clip:text;
 }
 
 .hero-subtitle{
-    color:rgba(255,255,255,.5);
-    font-size:1.1rem;
-    max-width:500px;
-    margin:0 auto 36px;
-    line-height:1.6;
+    max-width:620px;
+    margin:0 auto 1.35rem;
+    color:#94a3b8;
+    font-size:.9rem;
+    line-height:1.5;
 }
 
 .hero-stats{
     display:flex;
     align-items:center;
     justify-content:center;
-    gap:24px;
     flex-wrap:wrap;
+    gap:1rem;
 }
 
-.hero-stat{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:4px;
-}
+.hero-stat{display:flex;flex-direction:column;align-items:center;gap:.15rem}
+.stat-number{color:#f8fafc;font-size:1.15rem;font-weight:800;line-height:1}
+.stat-label{color:#64748b;font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.65px}
+.hero-stat-divider{width:1px;height:28px;background:rgba(148,163,184,0.105)}
 
-.stat-number{
-    font-size:1.5rem;
-    font-weight:800;
-    color:white;
-    line-height:1;
-}
-
-.stat-label{
-    font-size:.72rem;
-    font-weight:600;
-    text-transform:uppercase;
-    letter-spacing:1px;
-    color:rgba(255,255,255,.4);
-}
-
-.hero-stat-divider{
-    width:1px;
-    height:32px;
-    background:rgba(255,255,255,.1);
-}
-
-/* FILTER PILLS */
+/* FILTERS */
 .team-filters{
     display:flex;
     align-items:center;
-    gap:10px;
-    margin-bottom:40px;
-    padding:8px 12px;
-    border-radius:18px;
-    background:rgba(255,255,255,.03);
-    border:1px solid rgba(255,255,255,.06);
+    gap:.45rem;
+    margin-bottom:1.4rem;
+    padding:.55rem;
     overflow-x:auto;
-    -webkit-overflow-scrolling:touch;
     scrollbar-width:none;
+    background:rgba(10,15,27,.55);
+    border:1px solid rgba(148,163,184,.13);
+    border-radius:.65rem;
 }
-
-.team-filters::-webkit-scrollbar{ display:none; }
+.team-filters::-webkit-scrollbar{display:none}
 
 .filter-pill{
     display:inline-flex;
     align-items:center;
-    gap:6px;
-    padding:10px 18px;
-    border-radius:12px;
-    border:1px solid rgba(255,255,255,.08);
-    background:rgba(255,255,255,.04);
-    color:rgba(255,255,255,.55);
-    font-size:.82rem;
-    font-weight:600;
+    gap:.35rem;
+    flex:0 0 auto;
+    padding:.48rem .7rem;
+    border:1px solid rgba(148,163,184,.15);
+    border-radius:.5rem;
+    background:rgba(20,27,38,.55);
+    color:#94a3b8;
+    font-size:.76rem;
+    font-weight:700;
     white-space:nowrap;
     cursor:pointer;
-    transition:all .25s ease;
+    transition:.18s ease;
 }
-
-.filter-pill:hover{
-    background:rgba(255,255,255,.08);
-    color:rgba(255,255,255,.85);
-    border-color:rgba(255,255,255,.14);
-}
-
-.filter-pill.active{
-    background:rgba(45,212,191,.15);
-    color:var(--ui-accent);
-    border-color:rgba(45,212,191,.3);
-}
-
+.filter-pill:hover{background:rgba(33,42,55,.65);color:#e2e8f0;border-color:rgba(148,163,184,.25)}
+.filter-pill.active{background:rgba(20,184,166,.12);color:#67e8df;border-color:rgba(45,212,191,.3)}
 .pill-count{
     display:inline-flex;
     align-items:center;
     justify-content:center;
-    min-width:22px;
-    height:22px;
-    padding:0 6px;
-    border-radius:8px;
-    font-size:.7rem;
-    font-weight:700;
-    background:rgba(255,255,255,.08);
-    color:rgba(255,255,255,.5);
+    min-width:20px;
+    height:20px;
+    padding:0 .3rem;
+    border-radius:.35rem;
+    background:rgba(148,163,184,0.07);
+    color:#cbd5e1;
+    font-size:.66rem;
 }
-
-.filter-pill.active .pill-count{
-    background:rgba(45,212,191,.2);
-    color:var(--ui-accent);
-}
+.filter-pill.active .pill-count{background:rgba(20,184,166,.16);color:#99f6e4}
 
 /* ROLE SECTION */
-.role-section{
-    margin-bottom:48px;
-}
+.role-section{margin-bottom:2rem}
 
 .role-header{
     display:flex;
     align-items:center;
-    gap:16px;
-    margin-bottom:28px;
-    padding:18px 24px;
-    border-radius:20px;
-    background:rgba(255,255,255,.03);
-    border:1px solid rgba(255,255,255,.06);
-    border-left:3px solid var(--role-color, rgba(255,255,255,.15));
+    gap:.8rem;
+    margin-bottom:.9rem;
+    padding:.75rem .9rem;
+    background:linear-gradient(135deg,rgba(14,21,33,.92),rgba(10,15,27,.82));
+    border:1px solid rgba(148,163,184,.14);
+    border-left:3px solid var(--role-color,rgba(45,212,191,.5));
+    border-radius:.65rem;
 }
 
 .role-icon-wrap{
     display:flex;
     align-items:center;
     justify-content:center;
-    width:44px;
-    height:44px;
-    border-radius:14px;
-    background:rgba(255,255,255,.06);
-    border:1px solid rgba(255,255,255,.08);
-    color:var(--role-color, white);
-    font-size:1.1rem;
+    width:38px;
+    height:38px;
     flex-shrink:0;
+    border-radius:.5rem;
+    background:rgba(20,27,38,.72);
+    border:1px solid rgba(148,163,184,.14);
+    color:var(--role-color,#67e8df);
+    font-size:1rem;
 }
-
-.role-info{
-    flex:1;
-    min-width:0;
-}
-
-.role-title{
-    margin:0;
-    font-size:1.2rem;
-    font-weight:800;
-    color:white;
-    line-height:1.2;
-}
-
-.role-desc{
-    margin:4px 0 0;
-    font-size:.82rem;
-    color:rgba(255,255,255,.4);
-    line-height:1.4;
-}
-
+.role-info{flex:1;min-width:0}
+.role-title{margin:0;color:#f8fafc;font-size:1rem;font-weight:800;line-height:1.2}
+.role-desc{margin:.18rem 0 0;color:#64748b;font-size:.76rem;line-height:1.35}
 .role-count-badge{
-    padding:6px 14px;
-    border-radius:10px;
-    font-size:.75rem;
-    font-weight:700;
-    color:var(--role-color, white);
-    background:rgba(255,255,255,.05);
-    border:1px solid rgba(255,255,255,.08);
-    white-space:nowrap;
     flex-shrink:0;
+    padding:.35rem .55rem;
+    border-radius:.4rem;
+    background:rgba(20,27,38,.6);
+    border:1px solid rgba(148,163,184,.14);
+    color:var(--role-color,#cbd5e1);
+    font-size:.7rem;
+    font-weight:700;
+    white-space:nowrap;
 }
 
-/* TEAM CARD */
+/* MEMBER CARDS */
 .team-card{
     position:relative;
     overflow:hidden;
     height:100%;
-    border-radius:22px;
-    background:
-        linear-gradient(160deg, rgba(255,255,255,.05) 0%, rgba(255,255,255,.015) 100%);
-    border:1px solid rgba(255,255,255,.06);
-    backdrop-filter:blur(16px);
-    transition:all .4s cubic-bezier(.25,.46,.45,.94);
-    box-shadow:0 10px 30px rgba(0,0,0,.25);
-    opacity:0;
-    transform:translateY(24px);
+    background:linear-gradient(135deg,rgba(14,21,33,.94),rgba(10,15,27,.86));
+    border:1px solid rgba(148,163,184,.14);
+    border-radius:.7rem;
+    box-shadow:0 8px 22px rgba(0,0,0,.18);
+    transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;
 }
-
-.team-card.revealed{
-    opacity:1;
-    transform:translateY(0);
-}
-
 .team-card:hover{
-    transform:translateY(-8px);
-    border-color:rgba(255,255,255,.12);
-    box-shadow:
-        0 20px 50px rgba(0,0,0,.4),
-        0 0 40px color-mix(in srgb, var(--card-color) 10%, transparent);
+    transform:translateY(-3px);
+    border-color:color-mix(in srgb,var(--card-color) 35%,rgba(148,163,184,.18));
+    box-shadow:0 12px 28px rgba(0,0,0,.26);
 }
-
-.team-card--leader{
-    border-color:rgba(255,255,255,.1);
-    background:
-        linear-gradient(160deg, rgba(255,255,255,.07) 0%, rgba(255,255,255,.02) 100%);
-    box-shadow:
-        0 15px 40px rgba(0,0,0,.4),
-        inset 0 1px 0 rgba(255,255,255,.08);
-}
-
-.team-card--leader:hover{
-    transform:translateY(-10px) scale(1.01);
-}
-
-.card-accent{
-    height:3px;
-    background:linear-gradient(90deg, var(--card-color), transparent 80%);
-    opacity:.6;
-}
-
+.team-card--leader{border-color:color-mix(in srgb,var(--card-color) 22%,rgba(148,163,184,.15))}
+.card-accent{height:2px;background:var(--card-color);opacity:.7}
 .card-glow-blob{
     position:absolute;
-    top:-60px;
-    right:-60px;
-    width:140px;
-    height:140px;
+    width:120px;
+    height:120px;
+    top:-75px;
+    right:-65px;
     border-radius:50%;
     background:var(--card-color);
-    opacity:.06;
-    filter:blur(40px);
+    opacity:.05;
+    filter:blur(30px);
     pointer-events:none;
 }
-
 .card-inner{
     position:relative;
     z-index:2;
     display:flex;
     flex-direction:column;
     align-items:center;
-    padding:32px 24px 28px;
+    height:100%;
+    padding:1.25rem 1rem 1rem;
     text-align:center;
 }
 
 /* AVATAR */
 .card-avatar{
     position:relative;
-    width:100px;
-    height:100px;
-    margin-bottom:18px;
+    width:76px;
+    height:76px;
+    margin-bottom:.8rem;
     flex-shrink:0;
 }
-
 .card-avatar img{
+    position:relative;
+    z-index:2;
     width:100%;
     height:100%;
     object-fit:cover;
     border-radius:50%;
-    border:3px solid rgba(255,255,255,.08);
-    position:relative;
-    z-index:2;
-    box-shadow:
-        0 0 20px color-mix(in srgb, var(--card-color) 25%, transparent),
-        0 8px 30px rgba(0,0,0,.5);
-    transition:all .4s ease;
+    border:2px solid rgba(148,163,184,.16);
+    box-shadow:0 6px 18px rgba(0,0,0,.3);
 }
-
-.team-card:hover .card-avatar img{
-    transform:scale(1.06);
-    border-color:color-mix(in srgb, var(--card-color) 30%, transparent);
-}
-
 .avatar-ring{
     position:absolute;
-    inset:-6px;
+    inset:-4px;
     border-radius:50%;
-    border:1.5px solid var(--card-color);
-    opacity:.2;
-    transition:opacity .4s ease;
+    border:1px solid var(--card-color);
+    opacity:.28;
 }
-
-.team-card:hover .avatar-ring{
-    opacity:.4;
-}
-
 .avatar-crown{
     position:absolute;
     top:-2px;
-    right:-2px;
+    right:-3px;
     z-index:3;
     display:flex;
     align-items:center;
     justify-content:center;
-    width:28px;
-    height:28px;
+    width:23px;
+    height:23px;
     border-radius:50%;
-    background:linear-gradient(135deg, #f59e0b, #d97706);
-    color:white;
-    font-size:.7rem;
-    box-shadow:0 4px 12px rgba(245,158,11,.35);
+    background:#92400e;
+    border:1px solid rgba(251,191,36,.45);
+    color:#fde68a;
+    font-size:.6rem;
+    box-shadow:0 3px 8px rgba(0,0,0,.3);
 }
 
-/* NAME */
+/* MEMBER DETAILS */
 .card-name{
     display:block;
-    margin-bottom:6px;
-    font-size:1.1rem;
+    max-width:100%;
+    margin-bottom:.3rem;
+    overflow:hidden;
+    color:#f8fafc;
+    font-size:.95rem;
     font-weight:800;
-    color:white;
     text-decoration:none;
-    transition:color .25s ease;
+    text-overflow:ellipsis;
+    white-space:nowrap;
 }
+.card-name:hover{color:var(--card-color)}
 
-.card-name:hover{
-    color:var(--card-color);
-}
-
-/* ROLE TAG */
 .card-role-tag{
     display:inline-flex;
     align-items:center;
-    gap:6px;
-    padding:5px 14px;
-    margin-bottom:20px;
-    border-radius:999px;
-    font-size:.72rem;
-    font-weight:700;
-    text-transform:uppercase;
-    letter-spacing:.8px;
+    gap:.3rem;
+    margin-bottom:.85rem;
+    padding:.28rem .5rem;
+    border-radius:.4rem;
+    background:rgba(20,27,38,.62);
+    border:1px solid rgba(148,163,184,.13);
     color:var(--card-color);
-    background:rgba(255,255,255,.04);
-    border:1px solid rgba(255,255,255,.08);
+    font-size:.65rem;
+    font-weight:700;
+    letter-spacing:.35px;
+    text-transform:uppercase;
 }
 
 /* ACTIONS */
 .card-actions{
     display:flex;
-    gap:10px;
+    gap:.45rem;
     width:100%;
+    margin-top:auto;
 }
-
 .card-btn{
     flex:1;
     display:inline-flex;
     align-items:center;
     justify-content:center;
-    gap:6px;
-    padding:10px 14px;
-    border-radius:12px;
-    font-size:.8rem;
+    gap:.3rem;
+    min-height:34px;
+    padding:.4rem .5rem;
+    border-radius:.45rem;
+    font-size:.72rem;
     font-weight:700;
     text-decoration:none;
-    transition:all .25s ease;
+    transition:.18s ease;
 }
-
 .card-btn--primary{
-    background:linear-gradient(135deg, #63d2c6, #2dd4bf);
-    color:#04211e;
-    border:1px solid rgba(45,212,191,.4);
-    box-shadow:0 6px 20px rgba(45,212,191,.25);
+    background:rgba(20,184,166,.12);
+    border:1px solid rgba(45,212,191,.28);
+    color:#67e8df;
 }
-
-.card-btn--primary:hover{
-    transform:translateY(-2px);
-    color:#04211e;
-    box-shadow:0 10px 30px rgba(45,212,191,.35);
-}
-
+.card-btn--primary:hover{background:rgba(20,184,166,.2);border-color:rgba(45,212,191,.45);color:#99f6e4}
 .card-btn--ghost{
-    background:rgba(255,255,255,.04);
-    color:rgba(255,255,255,.6);
-    border:1px solid rgba(255,255,255,.08);
+    background:rgba(20,27,38,.58);
+    border:1px solid rgba(148,163,184,.14);
+    color:#94a3b8;
+}
+.card-btn--ghost:hover{background:rgba(33,42,55,.68);border-color:rgba(148,163,184,.25);color:#e2e8f0}
+
+/* The original JS adds .revealed. Keep content visible even if IntersectionObserver is unavailable. */
+.hero-content,.role-header,.team-card{opacity:1;transform:none}
+
+/* RESPONSIVE — doubled @ is required inside Blade */
+@@media (max-width:768px){
+    .team-page{padding-left:.75rem!important;padding-right:.75rem!important}
+    .team-hero{padding:1.5rem 1rem;margin-bottom:1rem;border-radius:.65rem}
+    .hero-title{font-size:1.75rem}
+    .hero-subtitle{font-size:.84rem;margin-bottom:1rem}
+    .hero-stats{gap:.7rem}
+    .stat-number{font-size:1rem}
+    .team-filters{margin-bottom:1rem}
+    .role-header{padding:.7rem .75rem;gap:.65rem}
+    .role-desc{display:none}
+    .role-count-badge{font-size:.65rem}
+    .card-inner{padding:1rem .8rem .8rem}
+    .card-avatar{width:68px;height:68px}
 }
 
-.card-btn--ghost:hover{
-    background:rgba(255,255,255,.08);
-    color:rgba(255,255,255,.9);
-    transform:translateY(-2px);
+@@media (max-width:480px){
+    .hero-stat-divider{display:none}
+    .hero-stats{column-gap:1rem;row-gap:.75rem}
+    .role-header{align-items:center}
+    .role-icon-wrap{width:34px;height:34px}
+    .role-title{font-size:.9rem}
+    .card-actions{flex-direction:row}
 }
-
-/* SCROLL REVEAL */
-.role-header{
-    opacity:0;
-    transform:translateY(16px);
-    transition:all .6s cubic-bezier(.25,.46,.45,.94);
-}
-
-.role-header.revealed{
-    opacity:1;
-    transform:translateY(0);
-}
-
-.hero-content{
-    opacity:0;
-    transform:translateY(20px);
-    transition:all .7s cubic-bezier(.25,.46,.45,.94);
-}
-
-.hero-content.revealed{
-    opacity:1;
-    transform:translateY(0);
-}
-
-.team-card:nth-child(1){ transition-delay:.05s; }
-.team-card:nth-child(2){ transition-delay:.1s; }
-.team-card:nth-child(3){ transition-delay:.15s; }
-.team-card:nth-child(4){ transition-delay:.2s; }
-.team-card:nth-child(5){ transition-delay:.25s; }
-.team-card:nth-child(6){ transition-delay:.3s; }
-.team-card:nth-child(7){ transition-delay:.35s; }
-.team-card:nth-child(8){ transition-delay:.4s; }
-
-/* RESPONSIVE */
-@media(max-width:768px){
-    .team-hero{
-        padding:40px 20px 36px;
-        border-radius:22px;
-    }
-
-    .hero-title{
-        font-size:2.2rem;
-    }
-
-    .hero-subtitle{
-        font-size:.95rem;
-    }
-
-    .hero-stats{
-        gap:16px;
-    }
-
-    .stat-number{
-        font-size:1.2rem;
-    }
-
-    .role-header{
-        padding:14px 16px;
-        gap:12px;
-        border-radius:16px;
-    }
-
-    .role-icon-wrap{
-        width:38px;
-        height:38px;
-        font-size:.95rem;
-    }
-
-    .role-title{
-        font-size:1rem;
-    }
-
-    .role-desc{
-        display:none;
-    }
-
-    .card-inner{
-        padding:26px 18px 24px;
-    }
-
-    .card-avatar{
-        width:84px;
-        height:84px;
-    }
-
-    .card-name{
-        font-size:1rem;
-    }
-
-    .card-actions{
-        flex-direction:column;
-        gap:8px;
-    }
-
-    .team-filters{
-        padding:6px 8px;
-        gap:8px;
-        margin-bottom:28px;
-    }
-
-    .filter-pill{
-        padding:8px 14px;
-        font-size:.78rem;
-    }
-}
-
-@media(max-width:480px){
-    .hero-title{
-        font-size:1.8rem;
-    }
-
-    .hero-stats{
-        gap:12px;
-    }
-
-    .hero-stat-divider{
-        display:none;
-    }
-
-    .stat-number{
-        font-size:1rem;
-    }
-
-    .stat-label{
-        font-size:.65rem;
-    }
-}
-
 </style>
+
+
 
 @endsection

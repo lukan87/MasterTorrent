@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="dark">
 <head>
 <meta charset="UTF-8">
 <title>@yield('title','Admin')</title>
@@ -8,7 +8,8 @@
 
 <style>
 body{
-background:#f5f7fb;
+background:var(--ui-page);
+color:var(--ui-text);
 }
 
 .admin-sidebar{
@@ -17,7 +18,7 @@ height:100vh;
 position:fixed;
 left:0;
 top:0;
-background:#111827;
+background:#0b1019;
 color:white;
 }
 
@@ -30,7 +31,7 @@ font-size:14px;
 }
 
 .admin-sidebar a:hover{
-background:#1f2937;
+background:#141b24;
 color:white;
 }
 
@@ -39,12 +40,13 @@ margin-left:260px;
 }
 
 .admin-header{
-background:white;
-border-bottom:1px solid #e5e7eb;
+background:var(--ui-surface-raised);
+border-bottom:1px solid var(--ui-border);
 padding:15px 25px;
 }
 </style>
 
+<link rel="stylesheet" href="{{ asset('css/dark-theme.css') }}?v={{ filemtime(public_path('css/dark-theme.css')) }}">
 </head>
 
 <body>

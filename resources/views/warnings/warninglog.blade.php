@@ -362,8 +362,8 @@
         position: relative;
         background: linear-gradient(
             135deg,
-            rgba(22, 32, 51, .96),
-            rgba(15, 23, 42, .88)
+            rgba(14,21,33,.96),
+            rgba(10,15,27,.88)
         );
         border: 1px solid var(--ui-border, rgba(255, 255, 255, .08));
         border-radius: .65rem;
@@ -453,7 +453,7 @@
         align-items: center;
         justify-content: space-between;
         padding: .6rem .8rem;
-        background: rgba(255, 255, 255, .022);
+        background: rgba(255,255,255,0.0154);
         border-bottom: 1px solid rgba(255, 255, 255, .06);
         color: #dbe7ef;
         font-size: 13px;
@@ -476,7 +476,7 @@
     }
 
     .warnings-table thead th {
-        background: rgba(255, 255, 255, .018);
+        background: rgba(255,255,255,0.0126);
         color: #718596;
         font-size: 10px;
         font-weight: 700;
@@ -644,7 +644,7 @@
     }
 
     .pagination .page-link {
-        background: rgba(22, 32, 51, .9);
+        background: rgba(14,21,33,.9);
         border-color: rgba(255, 255, 255, .075);
         color: #aabcc7;
         font-size: 11px;
@@ -672,8 +672,8 @@
         padding: .7rem .8rem;
         background: linear-gradient(
             135deg,
-            rgba(22, 32, 51, .96),
-            rgba(15, 23, 42, .88)
+            rgba(14,21,33,.96),
+            rgba(10,15,27,.88)
         );
         border: 1px solid var(--ui-border, rgba(255, 255, 255, .08));
         border-radius: .65rem;

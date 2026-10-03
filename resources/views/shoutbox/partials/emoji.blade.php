@@ -152,7 +152,7 @@
 }
 
 .emoji-search {
-    background: #111;
+    background: #0b0b0b;
     color: #fff;
     border-radius: 8px;
 }

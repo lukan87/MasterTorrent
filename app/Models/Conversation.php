@@ -14,6 +14,16 @@ class Conversation extends Model
         'last_message_at'
     ];
 
+    protected static function booted(): void
+    {
+        static::saving(function (Conversation $conversation) {
+            [$conversation->user_one, $conversation->user_two] = [
+                min($conversation->user_one, $conversation->user_two),
+                max($conversation->user_one, $conversation->user_two),
+            ];
+        });
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Relationships

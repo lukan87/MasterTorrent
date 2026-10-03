@@ -161,7 +161,7 @@
     max-width: 850px;
     margin: 0 auto;
     padding: 30px;
-    background: rgba(15, 20, 35, .78);
+    background: rgba(10,13,23,.78);
     border: 1px solid rgba(255,255,255,.07);
     border-radius: 18px;
     box-shadow: 0 12px 35px rgba(0,0,0,.18);
@@ -204,7 +204,7 @@
 }
 
 .forum-category-form-card .form-control {
-    background: rgba(255,255,255,.04);
+    background: rgba(255,255,255,0.028);
     border: 1px solid rgba(255,255,255,.10);
     color: white;
     border-radius: 10px;
@@ -212,7 +212,7 @@
 }
 
 .forum-category-form-card .form-control:focus {
-    background: rgba(255,255,255,.06);
+    background: rgba(255,255,255,0.042);
     color: white;
     border-color: #4f8cff;
     box-shadow: 0 0 0 .2rem rgba(37,99,235,.15);
@@ -233,7 +233,7 @@
 }
 
 .forum-category-form-card .form-check-input {
-    background-color: rgba(255,255,255,.05);
+    background-color: rgba(255,255,255,0.035);
     border-color: rgba(255,255,255,.20);
 }
 

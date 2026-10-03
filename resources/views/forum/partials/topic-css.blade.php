@@ -20,7 +20,7 @@
 
     padding: .6rem .8rem;
 
-    background: rgba(15, 23, 42, .72);
+    background: rgba(10,15,27,.72);
 
     border: 1px solid var(--ui-border);
     border-radius: .7rem;
@@ -79,8 +79,8 @@
     background:
         linear-gradient(
             135deg,
-            rgba(22, 32, 51, .95),
-            rgba(15, 23, 42, .84)
+            rgba(14,21,33,.95),
+            rgba(10,15,27,.84)
         );
 
     border: 1px solid var(--ui-border);
@@ -106,7 +106,7 @@
     background: linear-gradient(
         90deg,
         transparent,
-        rgba(255, 255, 255, .08),
+        rgba(255,255,255,0.056),
         transparent
     );
 }
@@ -279,12 +279,12 @@
 
 .forum-topic-action.unpin {
     color: #b7c3d0;
-    background: rgba(148, 163, 184, .06);
+    background: rgba(148,163,184,0.042);
 }
 
 .forum-topic-action.unpin:hover {
     color: #fff;
-    background: rgba(148, 163, 184, .12);
+    background: rgba(148,163,184,0.084);
 }
 
 
@@ -389,7 +389,7 @@
 .forum-follow-btn.following {
     color: #9aaabd;
 
-    background: rgba(148, 163, 184, .06);
+    background: rgba(148,163,184,0.042);
 
     border-color: rgba(148, 163, 184, .12);
 }
@@ -408,7 +408,7 @@
 .forum-latest-btn {
     color: #b9c8d8;
 
-    background: rgba(148, 163, 184, .06);
+    background: rgba(148,163,184,0.042);
 
     border: 1px solid rgba(148, 163, 184, .13);
 
@@ -433,8 +433,8 @@
     background:
         linear-gradient(
             135deg,
-            rgba(22, 32, 51, .94),
-            rgba(15, 23, 42, .84)
+            rgba(14,21,33,.94),
+            rgba(10,15,27,.84)
         );
 
     border: 1px solid var(--ui-border);
@@ -525,7 +525,7 @@
 
     color: #8295aa;
 
-    background: rgba(148, 163, 184, .045);
+    background: rgba(148,163,184,0.0315);
 
     border: 1px solid rgba(148, 163, 184, .09);
 
@@ -626,8 +626,8 @@
     background:
         linear-gradient(
             180deg,
-            rgba(148, 163, 184, .045),
-            rgba(15, 23, 42, .12)
+            rgba(148,163,184,0.0315),
+            rgba(10,15,27,.12)
         );
 
     border-right: 1px solid var(--ui-border);
@@ -650,7 +650,7 @@
 
     border-radius: 50%;
 
-    background: rgba(15, 23, 42, .7);
+    background: rgba(10,15,27,.7);
 
     box-shadow:
         0 8px 20px rgba(0, 0, 0, .18);
@@ -883,7 +883,7 @@
 
     padding: .25rem .35rem;
 
-    background: rgba(148, 163, 184, .045);
+    background: rgba(148,163,184,0.0315);
 
     border: 1px solid rgba(148, 163, 184, .09);
 
@@ -918,7 +918,7 @@
 }
 
 .forum-reaction-btn:hover {
-    background: rgba(255, 255, 255, .07);
+    background: rgba(255,255,255,0.049);
 
     transform: translateY(-2px) scale(1.06);
 }
@@ -958,7 +958,7 @@
 
     color: #aab8c7;
 
-    background: rgba(148, 163, 184, .05);
+    background: rgba(148,163,184,0.035);
 
     border: 1px solid rgba(148, 163, 184, .07);
 
@@ -1066,8 +1066,8 @@
     background:
         linear-gradient(
             135deg,
-            rgba(22, 32, 51, .98),
-            rgba(15, 23, 42, .97)
+            rgba(14,21,33,.98),
+            rgba(10,15,27,.97)
         );
 
     border: 1px solid var(--ui-border);
@@ -1214,7 +1214,7 @@
     color: #e5edf7 !important;
 
     background:
-        rgba(8, 15, 29, .72) !important;
+        rgba(5,10,19,.72) !important;
 
     border: 1px solid rgba(148, 163, 184, .16) !important;
 
@@ -1239,7 +1239,7 @@
 .forum-textarea:focus {
     color: #fff !important;
 
-    background: rgba(8, 15, 29, .9) !important;
+    background: rgba(5,10,19,.9) !important;
 
     border-color: var(--ui-accent) !important;
 
@@ -1278,14 +1278,14 @@
     padding: 8px 14px;
     border-radius: 8px;
     border: 1px solid rgba(255, 255, 255, 0.10);
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(255,255,255,0.028);
     color: #cbd5e1;
     font-size: 0.875rem;
     transition: all 0.2s ease;
 }
 
 .forum-preview-btn:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255,255,255,0.056);
     border-color: rgba(114, 179, 170, 0.35);
     color: #fff;
     transform: translateY(-1px);
@@ -1342,7 +1342,7 @@
         linear-gradient(
             135deg,
             rgba(220, 53, 69, .09),
-            rgba(80, 25, 34, .12)
+            rgba(52,16,22,.12)
         );
 
     border: 1px solid rgba(220, 53, 69, .17);
@@ -1435,7 +1435,7 @@
 
     color: #aebfd0;
 
-    background: rgba(22, 32, 51, .8);
+    background: rgba(14,21,33,.8);
 
     border: 1px solid var(--ui-border);
 
@@ -1472,7 +1472,7 @@
 .forum-pagination .page-item.disabled .page-link {
     color: #4e6175;
 
-    background: rgba(15, 23, 42, .5);
+    background: rgba(10,15,27,.5);
 
     border-color: rgba(148, 163, 184, .07);
 }
@@ -1856,7 +1856,7 @@
 }
 
 .forum-search-bar .form-control {
-    background: var(--input-bg, rgba(255, 255, 255, 0.05));
+    background: var(--input-bg, rgba(255,255,255,0.035));
     border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
     color: var(--text-primary, #e2e8f0);
     border-radius: 20px;
@@ -1900,7 +1900,7 @@
 }
 
 .multiquote-bar {
-    background: var(--card-bg, rgba(30, 30, 30, 0.8));
+    background: var(--card-bg, rgba(20,20,20,0.8));
     border: 1px solid var(--accent-color, #3b82f6);
     border-radius: 8px;
     padding: 10px 16px;
@@ -1930,7 +1930,7 @@
    ========================================================= */
 
 .forum-post-preview-pane {
-    background: var(--card-bg, rgba(30, 30, 30, 0.5));
+    background: var(--card-bg, rgba(20,20,20,0.5));
     border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
     border-radius: 8px;
     padding: 16px;
@@ -1940,7 +1940,7 @@
 }
 
 .forum-preview-btn {
-    background: var(--surface-2, rgba(255, 255, 255, 0.05));
+    background: var(--surface-2, rgba(255,255,255,0.035));
     border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
     color: var(--text-secondary, #94a3b8);
     font-size: 0.85rem;
@@ -1964,7 +1964,7 @@
     bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
-    background: var(--card-bg, #1e1e1e);
+    background: var(--card-bg, #141414);
     border: 1px solid var(--accent-color, #3b82f6);
     color: var(--text-primary, #e2e8f0);
     padding: 10px 20px;

@@ -11,6 +11,16 @@ class Comment extends Model
 
     protected $fillable = ['user_id', 'commentable_id', 'commentable_type', 'comment', 'parent_id', 'torrent_id'];
 
+    public function reactions()
+    {
+        return $this->hasMany(CommentReaction::class);
+    }
+
+    public function scopeDiscussion($query)
+    {
+        return $query->whereNull('parent_id')->with(['user', 'reactions.user', 'replies.user', 'replies.reactions.user'])->withCount('replies')->latest();
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -23,7 +33,7 @@ class Comment extends Model
 
     public function replies()
     {
-        return $this->hasMany(Comment::class, 'parent_id');
+        return $this->hasMany(Comment::class, 'parent_id')->oldest();
     }
 
     // Polymorphic relationship
@@ -32,4 +42,3 @@ class Comment extends Model
         return $this->morphTo();
     }
 }
-

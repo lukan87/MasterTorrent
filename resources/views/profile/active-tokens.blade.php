@@ -193,7 +193,7 @@
     flex-wrap: wrap;
     gap: .45rem;
     padding: .65rem .85rem;
-    background: linear-gradient(135deg, rgba(22,32,51,.95), rgba(15,23,42,.88));
+    background: linear-gradient(135deg, rgba(14,21,33,.95), rgba(10,15,27,.88));
     border: 1px solid var(--ui-border, rgba(255,255,255,.08));
     border-radius: .65rem;
     box-shadow: 0 8px 24px rgba(0,0,0,.22);
@@ -243,7 +243,7 @@ h4 .bi {
 }
 
 .elite-card {
-    background: linear-gradient(135deg, rgba(22,32,51,.96), rgba(15,23,42,.9));
+    background: linear-gradient(135deg, rgba(14,21,33,.96), rgba(10,15,27,.9));
     border: 1px solid var(--ui-border, rgba(255,255,255,.08));
     border-radius: .7rem;
     box-shadow: 0 10px 28px rgba(0,0,0,.24);
@@ -257,7 +257,7 @@ h4 .bi {
     gap: 1rem;
     padding: 1rem 1.15rem;
     border-bottom: 1px solid rgba(255,255,255,.07);
-    background: rgba(255,255,255,.018);
+    background: rgba(255,255,255,0.0126);
 }
 
 .token-title {
@@ -309,7 +309,7 @@ h4 .bi {
 
 .token-table thead th {
     padding: .7rem .75rem;
-    background: rgba(7,14,27,.42);
+    background: rgba(5,9,18,.42);
     border-bottom: 1px solid rgba(255,255,255,.08);
     color: rgba(203,213,225,.58);
     font-size: .7rem;

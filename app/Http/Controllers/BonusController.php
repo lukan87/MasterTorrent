@@ -23,8 +23,7 @@ class BonusController extends Controller
     }
 
     // Get the currently active Happy Hour
-    $happyHour = \App\Models\HappyHour::where('active', true)
-        ->latest('start_at')
+    $happyHour = \App\Models\HappyHour::current()
         ->first();
 
     return view('bonus.shop', compact('user', 'happyHour'));
@@ -226,12 +225,12 @@ public function removeHNR(Request $request)
         'comment' => "Removed HitAndRun for torrent ID: {$torrentId} at the cost of {$seedtimeCost} seedbonus points.",
     ]);
 
-    Message::create([
-        'sender_id' => 2,
-        'receiver_id' => $user->id,
-        'subject' => 'Hit&Run removed',
-        'body' => "You have successfully removed the hitandrun for torrent ID: {$torrentId}!",
-    ]);
+    \App\Services\SystemMessageService::send(
+                2,
+                $user->id,
+                'Hit&Run removed',
+                "You have successfully removed the hitandrun for torrent ID: {$torrentId}!"
+            );
 
     return redirect()->back()->with('success', 'You successfully removed the hit&run for torrent ID:' . $torrentId);
 }
@@ -406,12 +405,12 @@ public function buySurprise(Request $request)
         ]);
 
         if ($result['shortfall'] > 0) {
-            Message::create([
-                'sender_id' => 2,
-                'receiver_id' => $user->id,
-                'subject' => 'Hit & Run cleared',
-                'body' => "You cleared your oldest hit & run. Your upload was topped up by {$result['shortfall']} bytes so that torrent now counts as a 1:1 ratio!",
-            ]);
+            \App\Services\SystemMessageService::send(
+                2,
+                $user->id,
+                'Hit & Run cleared',
+                "You cleared your oldest hit & run. Your upload was topped up by {$result['shortfall']} bytes so that torrent now counts as a 1:1 ratio!"
+            );
         }
 
         return redirect()->back()->with('success', 'Your oldest hit & run was cleared and your ratio restored to 1:1 on that torrent!');

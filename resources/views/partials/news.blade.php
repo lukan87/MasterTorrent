@@ -147,8 +147,8 @@
         <div class="modern-news-body" data-news-body>
 
             <div class="news-content-preview"
+                 id="news-content-{{ $news->id }}"
                  data-news-content
-                 data-char-threshold="500"
                  data-auto-collapse="10000">
 
                 {!! convertCustomTagsToHtml($news->content) !!}
@@ -169,17 +169,20 @@
 
             </a>
 
-        </div>
-
-        {{-- Floating toggle inside the card --}}
+        {{-- Expand control stays beside More News --}}
         <div class="news-expand-row"
              data-expand-row
              hidden>
 
             <button type="button"
-                    class="news-expand-toggle"
+                    class="read-more-btn news-expand-toggle"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                    data-bs-container="body"
+                    title="Expand or collapse the full news text without leaving this page."
                     data-expand-toggle
-                    aria-expanded="false">
+                    aria-expanded="false"
+                    aria-controls="news-content-{{ $news->id }}">
 
                 <span class="toggle-label">Show more</span>
 
@@ -192,6 +195,9 @@
             </button>
 
         </div>
+
+        </div>
+
 
     </div>
 
@@ -216,8 +222,8 @@
     background:
         linear-gradient(
             135deg,
-            rgba(22, 32, 51, .95),
-            rgba(15, 23, 42, .84)
+            rgba(14,21,33,.95),
+            rgba(10,15,27,.84)
         );
 
     border: 1px solid var(--ui-border);
@@ -249,7 +255,7 @@
         linear-gradient(
             90deg,
             transparent,
-            rgba(255, 255, 255, .07),
+            rgba(255,255,255,0.049),
             transparent
         );
 
@@ -298,7 +304,7 @@
     position: relative;
     overflow: hidden;
 
-    background: rgba(8, 15, 29, .65);
+    background: rgba(5,10,19,.65);
 
     border-bottom: 1px solid rgba(148, 163, 184, .09);
 }
@@ -330,8 +336,8 @@
     background:
         linear-gradient(
             180deg,
-            rgba(8, 15, 29, .02),
-            rgba(8, 15, 29, .30)
+            rgba(5,10,19,.02),
+            rgba(5,10,19,.30)
         );
 
     pointer-events: none;
@@ -455,7 +461,7 @@
 
     color: #8295aa;
 
-    background: rgba(148, 163, 184, .045);
+    background: rgba(148,163,184,0.0315);
 
     border: 1px solid rgba(148, 163, 184, .09);
 
@@ -544,7 +550,7 @@
 
     overflow: hidden;
 
-    transition: max-height 1120ms ease;
+
 }
 
 .news-content-preview.is-collapsed::after {
@@ -556,13 +562,17 @@
     right: 0;
     bottom: 0;
 
-    height: 2.4em;
+    height: 4em;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    mask-image: linear-gradient(to bottom, transparent, black 45%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 45%);
 
     background:
         linear-gradient(
             180deg,
-            rgba(15, 23, 42, 0),
-            rgba(15, 23, 42, .92)
+            rgba(10,15,27,0),
+            rgba(10,15,27,.92)
         );
 
     pointer-events: none;
@@ -577,29 +587,10 @@
 }
 
 
-/* =========================================================
-   FLOATING-IN-CARD TOGGLE
-   Now on the LEFT side, so it never collides with the
-   admin Create / Edit buttons on the right.
-   ========================================================= */
-
+/* Footer expand control */
 .news-expand-row {
-    position: absolute;
-
-    top: 0;
-    left: 1.15rem;
-
-    z-index: 5;
-
     display: flex;
-
     align-items: center;
-
-    justify-content: flex-start;
-
-    pointer-events: none;
-
-    transition: top 60ms linear;
 }
 
 .news-expand-row[hidden] {
@@ -612,54 +603,10 @@
    ========================================================= */
 
 .news-expand-toggle {
-    display: inline-flex;
-
-    align-items: center;
     gap: .3rem;
-
-    padding: .25rem .65rem;
-
-    color: var(--ui-accent);
-
-    background: rgba(15, 23, 42, .95);
-
-    border: 1px solid rgba(99, 210, 198, .25);
-
-    border-radius: 999px;
-
-    font-size: .72rem;
-    font-weight: 700;
-
-    letter-spacing: .2px;
-
     cursor: pointer;
-
-    pointer-events: auto;
-
-    opacity: .95;
-
-    box-shadow:
-        0 4px 14px rgba(0, 0, 0, .4),
-        0 0 0 1px rgba(0, 0, 0, .2);
-
-    backdrop-filter: blur(6px);
-
-    -webkit-backdrop-filter: blur(6px);
-
-    transition:
-        opacity 160ms ease,
-        color 160ms ease,
-        background 160ms ease,
-        border-color 160ms ease,
-        transform 160ms ease;
-}
-
-.news-expand-toggle:hover {
-    opacity: 1;
-    color: #a0f0e8;
-    background: rgba(15, 23, 42, .99);
-    border-color: rgba(99, 210, 198, .4);
-    transform: translateY(-1px);
+    font-family: inherit;
+    line-height: inherit;
 }
 
 .news-expand-toggle .toggle-arrow {
@@ -677,6 +624,8 @@
 
 /* FOOTER */
 .modern-news-footer {
+    flex-wrap: wrap;
+    gap: .6rem;
     position: relative;
     z-index: 2;
 
@@ -700,7 +649,7 @@
 
     color: #8295aa;
 
-    background: rgba(148, 163, 184, .045);
+    background: rgba(148,163,184,0.0315);
 
     border: 1px solid rgba(148, 163, 184, .09);
 
@@ -895,9 +844,6 @@
         padding: 1.5rem 1rem;
     }
 
-    .news-expand-row {
-        left: .9rem;
-    }
 }
 
 
@@ -922,212 +868,53 @@
 
 <script>
 (function () {
-
-    /* -------- Detect navbar / sticky header height -------- */
-
-    function getStickyOffset() {
-
-        var candidates = document.querySelectorAll(
-            'header, nav, .navbar, .site-header, .app-header, [data-sticky-header]'
-        );
-
-        var maxBottom = 0;
-
-        candidates.forEach(function (el) {
-
-            var style = window.getComputedStyle(el);
-
-            var isFixedOrSticky =
-                style.position === 'fixed' ||
-                style.position === 'sticky';
-
-            if (!isFixedOrSticky) return;
-
-            var rect = el.getBoundingClientRect();
-
-            if (rect.bottom > 0 && rect.top < 100) {
-                if (rect.bottom > maxBottom) {
-                    maxBottom = rect.bottom;
-                }
-            }
-        });
-
-        return maxBottom + 8;
-    }
-
-
     function initNewsExpanders() {
+        document.querySelectorAll('[data-news-content]').forEach(function (content) {
+            if (content.dataset.expanderReady) return;
+            content.dataset.expanderReady = '1';
 
-        var contents = document.querySelectorAll('[data-news-content]');
+            const card = content.closest('[data-news-card]');
+            const row = card.querySelector('[data-expand-row]');
+            const toggle = row.querySelector('[data-expand-toggle]');
+            const label = toggle.querySelector('.toggle-label');
+            const autoCollapseMs = Number(content.dataset.autoCollapse) || 0;
+            let collapseTimer;
+            let expanded = false;
 
-        contents.forEach(function (content) {
-
-            if (content.getAttribute('data-expander-ready') === '1') {
-                return;
-            }
-
-            content.setAttribute('data-expander-ready', '1');
-
-            var threshold = parseInt(
-                content.getAttribute('data-char-threshold'),
-                10
-            ) || 500;
-
-            var autoCollapseMs = parseInt(
-                content.getAttribute('data-auto-collapse'),
-                10
-            ) || 0;
-
-            var plainText = (content.textContent || '')
-                .replace(/\s+/g, ' ')
-                .trim();
-
-            if (plainText.length <= threshold) {
-                return;
-            }
-
-            var card = content.closest('[data-news-card]');
-            var header = card ? card.querySelector('[data-news-header]') : null;
-            var row = card ? card.querySelector('[data-expand-row]') : null;
-            var toggle = row ? row.querySelector('[data-expand-toggle]') : null;
-
-            if (!card || !row || !toggle) {
-                return;
-            }
-
-            row.hidden = false;
-            content.classList.add('is-collapsed');
-
-            var collapseTimer = null;
-
-            function collapseNow() {
-                content.classList.remove('is-expanded');
-                content.classList.add('is-collapsed');
-
-                toggle.classList.remove('is-open');
-                toggle.setAttribute('aria-expanded', 'false');
-                toggle.querySelector('.toggle-label').textContent = 'Show more';
-
-                updateRowPosition();
-            }
-
-            function expandNow() {
-                content.classList.remove('is-collapsed');
-                content.classList.add('is-expanded');
-
-                toggle.classList.add('is-open');
-                toggle.setAttribute('aria-expanded', 'true');
-                toggle.querySelector('.toggle-label').textContent = 'Show less';
-
-                if (autoCollapseMs > 0) {
-                    clearTimeout(collapseTimer);
-                    collapseTimer = setTimeout(function () {
-                        collapseNow();
-                    }, autoCollapseMs);
-                }
-
-                updateRowPosition();
+            function update() {
+                const limit = parseFloat(getComputedStyle(content).fontSize) * 17.65;
+                const overflows = content.scrollHeight > limit + 1;
+                row.hidden = !overflows;
+                content.classList.toggle('is-collapsed', overflows && !expanded);
+                content.classList.toggle('is-expanded', expanded);
+                toggle.classList.toggle('is-open', expanded);
+                toggle.setAttribute('aria-expanded', String(expanded));
+                label.textContent = expanded ? 'Show less' : 'Show more';
             }
 
             toggle.addEventListener('click', function () {
                 clearTimeout(collapseTimer);
-
-                if (toggle.classList.contains('is-open')) {
-                    collapseNow();
-                } else {
-                    expandNow();
+                expanded = !expanded;
+                update();
+                if (expanded && autoCollapseMs > 0) {
+                    collapseTimer = setTimeout(function () {
+                        expanded = false;
+                        update();
+                    }, autoCollapseMs);
                 }
             });
 
-            /* ---- reposition row inside card, respecting sticky header
-                    AND staying below the card's own header row ---- */
-
-            function updateRowPosition() {
-
-                var cardRect = card.getBoundingClientRect();
-
-                var stickyOffset = getStickyOffset();
-
-                /* Minimum offset inside the card: below the card header */
-                var minOffset = 8;
-
-                if (header) {
-                    var headerRect = header.getBoundingClientRect();
-                    /* Distance from card top to bottom of header, plus a gap */
-                    var headerBottomInCard = headerRect.bottom - cardRect.top;
-
-                    if (headerBottomInCard > minOffset) {
-                        minOffset = headerBottomInCard + 6;
-                    }
-                }
-
-                /* Visible top of card, clamped to below sticky site header */
-                var visibleTop = Math.max(stickyOffset, cardRect.top);
-
-                /* Visible bottom of card */
-                var visibleBottom = Math.min(
-                    window.innerHeight,
-                    cardRect.bottom
-                );
-
-                /* Hide if card visible band is too small */
-                if (visibleBottom - visibleTop < 30) {
-                    row.style.visibility = 'hidden';
-                    return;
-                }
-
-                /* Offset relative to the card's own top */
-                var offset = visibleTop - cardRect.top;
-
-                /* Never go above the card's own header row */
-                if (offset < minOffset) offset = minOffset;
-
-                /* Never go past the bottom of the card */
-                var maxOffset = cardRect.height - row.offsetHeight - 8;
-                if (offset > maxOffset) offset = maxOffset;
-
-                row.style.top = offset + 'px';
-                row.style.visibility = 'visible';
-            }
-
-            card._updateExpandRow = updateRowPosition;
-
-            updateRowPosition();
-        });
-
-    }
-
-    var rafPending = false;
-
-    function onScrollOrResize() {
-
-        if (rafPending) return;
-
-        rafPending = true;
-
-        requestAnimationFrame(function () {
-            rafPending = false;
-
-            document.querySelectorAll('[data-news-card]').forEach(function (card) {
-                if (typeof card._updateExpandRow === 'function') {
-                    card._updateExpandRow();
-                }
+            content.querySelectorAll('img').forEach(function (image) {
+                image.addEventListener('load', update);
             });
+            window.addEventListener('resize', update);
+            update();
         });
     }
-
-    window.addEventListener('scroll', onScrollOrResize, { passive: true });
-    window.addEventListener('resize', onScrollOrResize);
-
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function () {
-            initNewsExpanders();
-            onScrollOrResize();
-        });
+        document.addEventListener('DOMContentLoaded', initNewsExpanders);
     } else {
         initNewsExpanders();
-        onScrollOrResize();
     }
-
 })();
 </script>

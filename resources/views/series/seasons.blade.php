@@ -3,7 +3,7 @@
 /* FileIplay — Series Torrents / Seasons */
 .series-torrents-wrap{margin:1.25rem 0}
 .series-torrents-card{
-    background:linear-gradient(135deg,rgba(22,32,51,.95),rgba(15,23,42,.88));
+    background:linear-gradient(135deg,rgba(14,21,33,.95),rgba(10,15,27,.88));
     border:1px solid var(--ui-border,rgba(255,255,255,.08));
     border-radius:.75rem;
     padding:1rem;
@@ -16,13 +16,13 @@
 }
 .series-torrents-title i{color:var(--ui-accent,#22d3ee)}
 .series-torrents-accordion .accordion-item{
-    background:rgba(11,18,32,.72)!important;
+    background:rgba(7,12,21,.72)!important;
     border:1px solid rgba(255,255,255,.07)!important;
     border-radius:.6rem!important;
     overflow:hidden;
 }
 .series-torrents-accordion .accordion-button{
-    background:rgba(17,27,45,.92)!important;
+    background:rgba(11,18,29,.92)!important;
     color:#e8eef7!important;
     border:0!important;
     box-shadow:none!important;
@@ -31,14 +31,14 @@
 }
 .series-torrents-accordion .accordion-button:not(.collapsed){
     color:#fff!important;
-    background:rgba(20,38,57,.96)!important;
+    background:rgba(13,25,37,.96)!important;
 }
 .series-torrents-accordion .accordion-button::after{filter:invert(1) brightness(1.4);opacity:.75}
 .series-torrents-accordion .accordion-button .text-info,
 .series-torrents-accordion .accordion-button i.bi-collection-play{color:var(--ui-accent,#22d3ee)!important}
 .series-torrents-accordion .toggle-icon{color:#94a3b8;font-size:.75rem}
 .series-torrents-accordion .accordion-body{
-    background:rgba(8,14,25,.72)!important;
+    background:rgba(5,9,16,.72)!important;
     padding:.8rem;
 }
 .series-torrents-section-title{
@@ -55,7 +55,7 @@
     font-size:.82rem;
 }
 .series-torrents-table thead th{
-    background:rgba(255,255,255,.035);
+    background:rgba(255,255,255,0.0245);
     color:#94a3b8;
     border-bottom:1px solid rgba(255,255,255,.08);
     font-size:.7rem;text-transform:uppercase;letter-spacing:.035em;

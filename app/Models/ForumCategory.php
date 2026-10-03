@@ -23,6 +23,11 @@ class ForumCategory extends Model
         'is_private' => 'boolean',
     ];
 
+    public function latestTopic()
+    {
+        return $this->hasOne(ForumTopic::class, 'category_id')->ofMany('last_post_id', 'max');
+    }
+
     public function topics()
     {
         return $this->hasMany(ForumTopic::class, 'category_id');

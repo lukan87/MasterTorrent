@@ -111,12 +111,7 @@ $content = preg_replace_callback('/\[img\](.*?)\[\/img\]/is', function ($matches
 
     $url = e($url);
 
-    return '<img src="'.$url.'" class="bbcode-image img-fluid rounded shadow-sm" loading="lazy" style="max-width:100%;
-height:auto;
-margin:8px auto;
-cursor:pointer;
-display:block;
-border-radius:8px;">';
+    return '<img src="'.$url.'" class="bbcode-image img-fluid rounded shadow-sm" loading="lazy" alt="Embedded image" tabindex="0" role="button" aria-label="Open image preview">';
 
 }, $content);
 

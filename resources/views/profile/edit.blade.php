@@ -510,48 +510,6 @@
                         </div>
 
 
-
-                        {{-- SEEDBONUS --}}
-                        @if (
-                            Auth::check() &&
-                            Auth::user()->user_class >= \App\Models\UserClass::ADMIN &&
-                            Auth::user()->id != $user->id
-                        )
-
-                            <div class="sidebar-settings-field">
-
-                                <label for="seedbonus">
-                                    <i class="bi bi-stars"></i>
-                                    Seedbonus
-                                </label>
-
-                                <div class="settings-input-wrap">
-
-                                    <span class="settings-input-icon">
-                                        <i class="bi bi-stars"></i>
-                                    </span>
-
-                                    <input
-                                        type="text"
-                                        id="seedbonus"
-                                        name="seedbonus"
-                                        class="form-control settings-input sidebar-settings-input"
-                                        value="{{ old('seedbonus', $user->seedbonus) }}"
-                                    >
-
-                                </div>
-
-                                <div class="sidebar-admin-label">
-                                    <i class="bi bi-shield-check"></i>
-                                    Administrator option
-                                </div>
-
-                            </div>
-
-                        @endif
-
-
-
                         {{-- RECOVERY CODE --}}
                         <div class="sidebar-settings-field">
 
@@ -583,6 +541,26 @@
 
                         </div>
                         
+                        @if(auth()->id() === $user->id)
+                        <div class="sidebar-settings-field" id="tracker-passkey">
+                            <label><i class="bi bi-key"></i> Tracker Passkey</label>
+                            <details class="mb-3">
+                                <summary class="text-info">Show tracker passkey</summary>
+                                <code class="d-block mt-2 text-break">{{ $user->passkey }}</code>
+                            </details>
+                            <details @if($errors->getBag('passkey')->any()) open @endif>
+                                <summary class="text-warning">Regenerate tracker passkey</summary>
+                                <p class="sidebar-security-help mt-2">Your old tracker URLs will stop working. Update your torrent clients after regenerating.</p>
+                                <label for="passkey-current-password">Your account password</label>
+                                <input type="password" id="passkey-current-password" name="current_password" form="regenerate-passkey-form" autocomplete="current-password" required class="form-control settings-input sidebar-settings-input @if($errors->getBag('passkey')->has('current_password')) is-invalid @endif" aria-describedby="passkey-password-help passkey-password-error">
+                                <small id="passkey-password-help" class="sidebar-security-help d-block mt-2">Enter your signed-in account password to confirm this change.</small>
+                                <div id="passkey-password-error" class="text-danger mt-2" role="alert">{{ $errors->getBag('passkey')->first('current_password') }}</div>
+                                <button type="submit" form="regenerate-passkey-form" class="btn btn-outline-warning mt-3">Confirm regeneration</button>
+                            </details>
+                        </div>
+
+
+
                         {{-- PASSWORD CHANGE --}}
                         <div class="sidebar-settings-field">
                             <label>Change Password</label>
@@ -591,6 +569,8 @@
                             <input type="password" name="new_password_confirmation" class="form-control settings-input sidebar-settings-input" placeholder="Confirm New Password">
                         </div>
 
+                        @endif
+
                     </div>
 
                 @endif
@@ -598,7 +578,7 @@
             </aside>
 
         </div>
->>>>>>>
+
 
 
 
@@ -643,6 +623,14 @@
 
     </form>
 
+    @if(auth()->id() === $user->id)
+        <form id="regenerate-passkey-form" method="POST" action="{{ route('profile.passkey.regenerate', $user->id) }}">
+            @csrf
+            @method('PATCH')
+        </form>
+    @endif
+
+    @if(auth()->id() === $user->id)
     <!-- Recovery Code Modal -->
     <div class="modal fade" id="recoveryModal" tabindex="-1">
         <div class="modal-dialog">
@@ -659,8 +647,9 @@
         </div>
     </div>
 
+    @endif
 </div>
->>>>>>>
+
 
 
 
@@ -759,10 +748,10 @@ function submitPasswordChange() {
 }
 
 document.querySelector('form.profile-settings-form').addEventListener('submit', function(e) {
-    const currentPass = document.querySelector('input[name="current_password"]').value;
-    const newPass = document.querySelector('input[name="new_password"]').value;
+    const currentPass = this.elements.namedItem('current_password')?.value;
+    const newPass = this.elements.namedItem('new_password')?.value;
     
-    if (currentPass && newPass) {
+    if (!@json((bool) config('auth.email_registration')) && currentPass && newPass) {
         e.preventDefault();
         var myModal = new bootstrap.Modal(document.getElementById('recoveryModal'));
         myModal.show();
@@ -799,7 +788,7 @@ document.querySelector('form.profile-settings-form').addEventListener('submit', 
 
     overflow: hidden;
 
-    background-color: #0f172a;
+    background-color: #0a0f1b;
     background-size: cover;
     background-position: center;
 
@@ -826,8 +815,8 @@ document.querySelector('form.profile-settings-form').addEventListener('submit', 
         ),
         linear-gradient(
             135deg,
-            rgba(2, 6, 23, .35),
-            rgba(2, 6, 23, .85)
+            rgba(1,4,15,.35),
+            rgba(1,4,15,.85)
         );
 }
 
@@ -839,9 +828,9 @@ document.querySelector('form.profile-settings-form').addEventListener('submit', 
     background:
         linear-gradient(
             to top,
-            rgba(2, 6, 23, .98) 0%,
-            rgba(2, 6, 23, .62) 55%,
-            rgba(2, 6, 23, .25) 100%
+            rgba(1,4,15,.98) 0%,
+            rgba(1,4,15,.62) 55%,
+            rgba(1,4,15,.25) 100%
         );
 }
 
@@ -882,7 +871,7 @@ document.querySelector('form.profile-settings-form').addEventListener('submit', 
 
     border: 4px solid rgba(255, 255, 255, .92);
 
-    background: #0f172a;
+    background: #0a0f1b;
 
     box-shadow:
         0 10px 30px rgba(0, 0, 0, .45),
@@ -1002,8 +991,8 @@ document.querySelector('form.profile-settings-form').addEventListener('submit', 
     background:
         linear-gradient(
             145deg,
-            rgba(17, 24, 39, .96),
-            rgba(15, 23, 42, .94)
+            rgba(11,16,25,.96),
+            rgba(10,15,27,.94)
         );
 
     border: 1px solid rgba(148, 163, 184, .13);
@@ -1031,7 +1020,7 @@ document.querySelector('form.profile-settings-form').addEventListener('submit', 
 
     border-bottom: 1px solid rgba(148, 163, 184, .10);
 
-    background: rgba(2, 6, 23, .18);
+    background: rgba(1,4,15,.18);
 }
 
 
@@ -1135,7 +1124,7 @@ document.querySelector('form.profile-settings-form').addEventListener('submit', 
 
     color: #f1f5f9 !important;
 
-    background: rgba(2, 6, 23, .55) !important;
+    background: rgba(1,4,15,.55) !important;
 
     border: 1px solid rgba(148, 163, 184, .16) !important;
 
@@ -1158,7 +1147,7 @@ document.querySelector('form.profile-settings-form').addEventListener('submit', 
 
 
 .settings-input:focus {
-    background: rgba(2, 6, 23, .76) !important;
+    background: rgba(1,4,15,.76) !important;
 
     border-color: rgba(45, 212, 191, .65) !important;
 
@@ -1177,7 +1166,7 @@ document.querySelector('form.profile-settings-form').addEventListener('submit', 
 
     cursor: not-allowed;
 
-    background: rgba(30, 41, 59, .35) !important;
+    background: rgba(20,27,38,.35) !important;
 }
 
 
@@ -1189,7 +1178,7 @@ document.querySelector('form.profile-settings-form').addEventListener('submit', 
 .settings-select option {
     color: #f1f5f9;
 
-    background: #0f172a;
+    background: #0a0f1b;
 }
 
 
@@ -1283,7 +1272,7 @@ document.querySelector('form.profile-settings-form').addEventListener('submit', 
 
     padding: 16px 17px;
 
-    background: rgba(2, 6, 23, .22);
+    background: rgba(1,4,15,.22);
 
     border-bottom: 1px solid rgba(148, 163, 184, .10);
 }
@@ -1405,7 +1394,7 @@ document.querySelector('form.profile-settings-form').addEventListener('submit', 
 
     padding: 16px 18px;
 
-    background: rgba(15, 23, 42, .95);
+    background: rgba(10,15,27,.95);
 
     border: 1px solid rgba(148, 163, 184, .13);
     border-radius: 13px;
@@ -1479,7 +1468,7 @@ document.querySelector('form.profile-settings-form').addEventListener('submit', 
 .settings-cancel-btn {
     color: #94a3b8;
 
-    background: rgba(30, 41, 59, .55);
+    background: rgba(20,27,38,.55);
 
     border: 1px solid rgba(148, 163, 184, .16);
 }
@@ -1488,7 +1477,7 @@ document.querySelector('form.profile-settings-form').addEventListener('submit', 
 .settings-cancel-btn:hover {
     color: #fff;
 
-    background: rgba(51, 65, 85, .7);
+    background: rgba(33,42,55,.7);
 
     border-color: rgba(148, 163, 184, .3);
 }

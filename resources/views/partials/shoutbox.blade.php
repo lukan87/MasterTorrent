@@ -1,4 +1,4 @@
-<div class="shoutbox-shell my-4" id="community-chat" data-user="{{ auth()->id() }}"
+<div class="shoutbox-shell my-4" id="community-chat" data-user="{{ auth()->id() }}" data-highlight-shout="{{ $highlightShoutId ?? '' }}"
      data-poll-url="{{ url('/shoutbox/poll') }}" data-typing-url="{{ url('/shoutbox/typing') }}"
      data-stop-url="{{ url('/shoutbox/typing-stop') }}" data-typing-users-url="{{ url('/shoutbox/typing-users') }}">
 
@@ -26,6 +26,8 @@
 
     </div>
 
+    @include('partials.onlineusers')
+
     @if(!auth()->user()->chatblock)
     <div class="shoutbox-tools mb-3">
         <label class="flex-grow-1"> <span class="visually-hidden">Search loaded messages and members</span>
@@ -41,7 +43,7 @@
     </div>
     <p id="chat-no-results" class="small text-muted" hidden>No loaded messages match this filter.</p>
     @endif
-    <div id="chat-feedback" class="small mb-2" role="status" aria-live="polite"></div>
+    <div id="chat-feedback" class="small mb-2" role="status" aria-live="polite">{{ !empty($shoutUnavailable) ? 'This shout is no longer available.' : '' }}</div>
     {{-- Messages --}}
 
     <div id="shoutbox-pinned">
@@ -220,7 +222,7 @@
 
 
         <div class="chat-compose-actions">
-            <small id="chat-compose-hint" class="text-muted">Enter to send · Shift+Enter for a new line</small>
+            <small id="chat-compose-hint" class="text-muted">Enter to send · Shift+Enter for a new line · Tag with @username or @&quot;Display Name&quot;</small>
             <span id="chat-draft-status" class="small text-muted" role="status"></span>
 <div id="char-counter" class="char-counter">
 
@@ -374,7 +376,7 @@ function addEmoji(emoji) {
 
 .emoji-btn {
 
-    background: rgba(255,255,255,.06);
+    background: rgba(255,255,255,0.042);
 
     border: none;
 
@@ -392,7 +394,7 @@ function addEmoji(emoji) {
 
 .emoji-btn:hover {
 
-    background: rgba(255,255,255,.15);
+    background: rgba(255,255,255,0.105);
 
     transform: scale(1.15);
 
@@ -418,7 +420,7 @@ function addEmoji(emoji) {
 
 .bbcode-buttons button {
 
-    background: rgba(255,255,255,.08);
+    background: rgba(255,255,255,0.056);
 
     border: none;
 
@@ -436,7 +438,7 @@ function addEmoji(emoji) {
 
 .bbcode-buttons button:hover {
 
-    background: rgba(255,255,255,.18);
+    background: rgba(255,255,255,0.126);
 
 }
 
@@ -540,7 +542,7 @@ function addEmoji(emoji) {
 
     padding-top: 22px; 
 
-    background: rgba(15,15,15,.9);
+    background: rgba(10,10,10,.9);
 
     color: #fff;
 
@@ -628,7 +630,7 @@ body {
 }
 
 .glass {
-    background: linear-gradient(135deg, rgba(22, 32, 51, .95), rgba(15, 23, 42, .84));
+    background: linear-gradient(135deg, rgba(14,21,33,.95), rgba(10,15,27,.84));
     backdrop-filter: blur(10px);
     border: 1px solid var(--ui-border);
     border-radius: .85rem;
@@ -722,7 +724,7 @@ body {
 
     width: 100%;
 
-    background: #111;
+    background: #0b0b0b;
 
     color: #fff;
 
@@ -836,7 +838,7 @@ body {
 
     width: 100%;
 
-    background: #111;
+    background: #0b0b0b;
 
     color: #fff;
 
@@ -940,7 +942,7 @@ body {
 
 .shoutbox-container::-webkit-scrollbar-thumb {
 
-    background: rgba(255,255,255,.15);
+    background: rgba(255,255,255,0.105);
 
     border-radius: 10px;
 
@@ -1024,7 +1026,7 @@ body {
 
 .shoutbox-header {
 
-    background: rgba(40, 40, 40, 0.168);
+    background: rgba(26,26,26,0.168);
 
     border-radius: 18px;
 
@@ -1056,7 +1058,7 @@ body {
 
 .time-badge {
 
-    background: rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.056);
 
     color: #ddd;
 
@@ -1112,7 +1114,7 @@ body {
 
 .reply-meta .btn-icon {
 
-    background: rgba(255,255,255,0.04);
+    background: rgba(255,255,255,0.028);
 
     border-radius: 8px;
 
@@ -1126,7 +1128,7 @@ body {
 
 .reply-meta .btn-icon:hover {
 
-    background: rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.084);
 
     transform: scale(1.05);
 
@@ -1172,7 +1174,7 @@ body {
 
         transparent,
 
-        rgba(255,255,255,.06),
+        rgba(255,255,255,0.042),
 
         transparent
 
@@ -1218,7 +1220,7 @@ body {
 
         rgba(0,0,0,.35),
 
-        rgba(255,255,255,.02)
+        rgba(255,255,255,0.014)
 
     );
 
@@ -1350,9 +1352,9 @@ body {
 
         135deg,
 
-        rgba(15, 14, 14, 0.741),
+        rgba(10,9,9,0.741),
 
-        rgba(120, 120, 120, 0.14)
+        rgba(78,78,78,0.14)
 
     );
 
@@ -1384,7 +1386,7 @@ body {
 
         circle at top left,
 
-        rgba(255,255,255,.18),
+        rgba(255,255,255,0.126),
 
         transparent 60%
 
@@ -1412,7 +1414,7 @@ body {
 
     border-radius: 14px;
 
-    background: rgba(20, 20, 20, 0.85);
+    background: rgba(13,13,13,0.85);
 
     color: #fff;
 
@@ -1452,7 +1454,7 @@ body {
 
 .user-class-badge {
 
-    background: rgba(214, 212, 212, 0.045);
+    background: rgba(214,212,212,0.0315);
 
     color: var(--class-color);
 
@@ -1632,7 +1634,7 @@ body {
 
 .role-user {
 
-    background: rgba(255,255,255,.14);
+    background: rgba(255,255,255,0.098);
 
     color: #ddd;
 
@@ -1828,7 +1830,7 @@ body {
 
 .actions-inline .btn-icon:hover {
 
-    background: rgba(255,255,255,.08);
+    background: rgba(255,255,255,0.056);
 
     transform: scale(1.05);
 
@@ -1868,7 +1870,7 @@ body {
 
     width: 100%;
 
-    background: rgba(20,20,20,.9);
+    background: rgba(13,13,13,.9);
 
     color: #fff;
 
@@ -1912,7 +1914,7 @@ body {
     max-width: 100%;
     padding: 18px;
     position: relative;
-    background: linear-gradient(135deg, rgba(22, 32, 51, .95), rgba(15, 23, 42, .84));
+    background: linear-gradient(135deg, rgba(14,21,33,.95), rgba(10,15,27,.84));
     border: 1px solid var(--ui-border);
     border-left: 3px solid var(--ui-accent);
     border-radius: .9rem;
@@ -1920,7 +1922,7 @@ body {
 }
 
 .shoutbox-header {
-    background: linear-gradient(135deg, rgba(22,32,51,.95), rgba(15,23,42,.84)) !important;
+    background: linear-gradient(135deg, rgba(14,21,33,.95), rgba(10,15,27,.84)) !important;
     border: 1px solid var(--ui-border) !important;
     border-left: 3px solid var(--ui-accent) !important;
     border-radius: .8rem !important;
@@ -1950,7 +1952,7 @@ body {
 .shoutbox-container {
     max-height: 650px;
     overflow-y: auto;
-    background: rgba(8, 15, 28, .55) !important;
+    background: rgba(5,10,18,.55) !important;
     border: 1px solid var(--ui-border);
     border-radius: .8rem;
 }
@@ -1972,7 +1974,7 @@ body {
 
 .bubble,
 .reply-bubble {
-    background: linear-gradient(135deg, rgba(22,32,51,.92), rgba(15,23,42,.80)) !important;
+    background: linear-gradient(135deg, rgba(14,21,33,.92), rgba(10,15,27,.80)) !important;
     border: 1px solid var(--ui-border) !important;
     border-left: 3px solid var(--accent) !important;
     border-radius: .75rem !important;
@@ -1980,14 +1982,14 @@ body {
 }
 
 .message.own .bubble {
-    background: linear-gradient(135deg, rgba(20, 62, 70, .48), rgba(15, 35, 49, .82)) !important;
+    background: linear-gradient(135deg, rgba(13,40,46,.48), rgba(10,23,32,.82)) !important;
     border-left: 0 !important;
     border-right: 3px solid var(--ui-accent) !important;
     border-radius: .75rem !important;
 }
 
 .message:not(.own) .bubble {
-    background: linear-gradient(135deg, rgba(22,32,51,.92), rgba(15,23,42,.80)) !important;
+    background: linear-gradient(135deg, rgba(14,21,33,.92), rgba(10,15,27,.80)) !important;
 }
 
 .username,
@@ -2004,7 +2006,7 @@ body {
 }
 
 .time-badge {
-    background: rgba(255,255,255,.055) !important;
+    background: rgba(255,255,255,0.0385) !important;
     color: #aeb8c4 !important;
     border: 1px solid var(--ui-border);
     font-size: 12px !important;
@@ -2049,7 +2051,7 @@ body {
 .edit-textarea,
 .chat-input textarea,
 #content {
-    background: rgba(8, 15, 28, .82) !important;
+    background: rgba(5,10,18,.82) !important;
     color: #e6edf3 !important;
     border: 1px solid var(--ui-border) !important;
     border-radius: .7rem !important;
@@ -2066,7 +2068,7 @@ body {
 }
 
 .chat-input {
-    background: linear-gradient(135deg, rgba(22,32,51,.95), rgba(15,23,42,.84)) !important;
+    background: linear-gradient(135deg, rgba(14,21,33,.95), rgba(10,15,27,.84)) !important;
     border: 1px solid var(--ui-border) !important;
     border-radius: .8rem !important;
 }
@@ -2077,7 +2079,7 @@ body {
 
 .bbcode-buttons button,
 .emoji-btn {
-    background: rgba(255,255,255,.045) !important;
+    background: rgba(255,255,255,0.0315) !important;
     color: #b9c4cf !important;
     border: 1px solid var(--ui-border) !important;
     border-radius: .5rem !important;
@@ -2119,7 +2121,7 @@ body {
 }
 
 .shoutbox-container::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,.12);
+    background: rgba(255,255,255,0.084);
     border-radius: 999px;
 }
 
@@ -2178,7 +2180,7 @@ body {
     height: 40px;
     border-radius: 50%;
     border: 1px solid var(--ui-border);
-    background: linear-gradient(135deg, rgba(22,32,51,.95), rgba(15,23,42,.92));
+    background: linear-gradient(135deg, rgba(14,21,33,.95), rgba(10,15,27,.92));
     color: var(--ui-accent);
     font-size: 1.1rem;
     display: flex;
@@ -2265,7 +2267,7 @@ body {
     margin: 0;
 }
 #shoutbox-pinned:empty { display:none; }
-#shoutbox-pinned .shoutbox-pinned-panel { max-height:240px; max-height:min(30vh, 240px); overflow-y:auto; margin-bottom:12px; padding:12px; border:1px solid var(--ui-accent); border-radius:.8rem; background:rgba(15,23,42,.95); }
+#shoutbox-pinned .shoutbox-pinned-panel { max-height:240px; max-height:min(30vh, 240px); overflow-y:auto; margin-bottom:12px; padding:12px; border:1px solid var(--ui-accent); border-radius:.8rem; background:rgba(10,15,27,.95); }
 #shoutbox-pinned .message:last-child { margin-bottom:0; }
 #shoutbox-container { overflow-anchor:none; }
 /* Additional controls follow the existing chat palette. */
@@ -2304,7 +2306,7 @@ body {
     overflow-wrap: anywhere;
 }
 #shoutbox-messages > .message.own > .bubble {
-    background: linear-gradient(135deg, #164c48, #123b38) !important;
+    background: linear-gradient(135deg, #0e312f, #0c2624) !important;
     border-radius: 16px 4px 16px 16px !important;
 }
 #shoutbox-messages .header,
@@ -2379,7 +2381,7 @@ body {
     content: ''; display: block; position: absolute;
     left: -24px; top: 10px; width: 10px; height: 10px;
     border: 2px solid var(--reply-accent, var(--ui-accent));
-    border-radius: 50%; background: #142330 !important;
+    border-radius: 50%; background: #0d171f !important;
     box-shadow: 0 0 0 3px rgba(15,23,42,.65);
 }
 #community-chat .reply-timeline > .reply-card.own::before {
@@ -2391,7 +2393,7 @@ body {
 }
 #community-chat .reply-timeline .reply-bubble {
     flex: 1; min-width: 0; padding: 7px 10px;
-    background: rgba(8,15,28,.3) !important;
+    background: rgba(5,10,18,.3) !important;
     border: 1px solid rgba(255,255,255,.06) !important;
     border-radius: 6px !important; box-shadow: none !important;
     backdrop-filter: none; overflow-wrap: anywhere;
@@ -2415,5 +2417,21 @@ body {
 
 
 @push('scripts')
-<script src="{{ asset('js/shoutbox.js') }}?v=3" defer></script>
+<script src="{{ asset('js/shoutbox.js') }}?v=4" defer></script>
 @endpush
+
+<style>
+#community-chat .shout-mention-flash {
+    outline: 2px solid var(--ui-accent, #63d2c6);
+    outline-offset: 3px;
+    border-radius: 12px;
+    animation: shout-mention-flash 1s ease-in-out 2;
+}
+@keyframes shout-mention-flash {
+    0%, 100% { background-color: rgba(99, 210, 198, .08); }
+    50% { background-color: rgba(99, 210, 198, .3); box-shadow: 0 0 20px rgba(99, 210, 198, .25); }
+}
+@media (prefers-reduced-motion: reduce) {
+    #community-chat .shout-mention-flash { animation: none; background-color: rgba(99, 210, 198, .18); }
+}
+</style>

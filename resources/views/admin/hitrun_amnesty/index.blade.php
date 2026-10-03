@@ -17,30 +17,30 @@
     @endif
 
     {{-- Preview status --}}
-    <div class="card mb-4" style="background:#1e1e2f;border:1px solid rgba(148,163,184,.16)">
+    <div class="card mb-4" style="background:#14141f;border:1px solid rgba(148,163,184,.16)">
         <div class="card-body">
             <h5 class="fw-bold mb-3" style="color:#67e8df"><i class="bi bi-eye"></i> Current Preview</h5>
             <div class="row g-3">
                 <div class="col-md-3 col-6">
-                    <div class="border rounded p-3 text-center" style="background:#0b0b16">
+                    <div class="border rounded p-3 text-center" style="background:#07070e">
                         <div class="small text-muted">Hit &amp; Runs</div>
                         <div class="fs-4 fw-bold">{{ number_format($stats['records']) }}</div>
                     </div>
                 </div>
                 <div class="col-md-3 col-6">
-                    <div class="border rounded p-3 text-center" style="background:#0b0b16">
+                    <div class="border rounded p-3 text-center" style="background:#07070e">
                         <div class="small text-muted">Affected Users</div>
                         <div class="fs-4 fw-bold">{{ number_format($stats['users']) }}</div>
                     </div>
                 </div>
                 <div class="col-md-3 col-6">
-                    <div class="border rounded p-3 text-center" style="background:#0b0b16">
+                    <div class="border rounded p-3 text-center" style="background:#07070e">
                         <div class="small text-muted">Upload to Credit (1:1)</div>
                         <div class="fs-4 fw-bold">{{ \App\Helpers\FormatHelper::formatSize($stats['total_upload_credited']) }}</div>
                     </div>
                 </div>
                 <div class="col-md-3 col-6">
-                    <div class="border rounded p-3 text-center" style="background:#0b0b16">
+                    <div class="border rounded p-3 text-center" style="background:#07070e">
                         <div class="small text-muted">Warnings / DL Locks</div>
                         <div class="fs-4 fw-bold">{{ number_format($stats['warnings_cleared']) }} / {{ number_format($stats['downloads_restored']) }}</div>
                     </div>
@@ -77,7 +77,7 @@
 
     @if($stats['records'] > 0)
         {{-- Confirm form --}}
-        <div class="card" style="background:#1e1e2f;border:1px solid rgba(239,68,68,.35)">
+        <div class="card" style="background:#14141f;border:1px solid rgba(239,68,68,.35)">
             <div class="card-body">
                 <h5 class="fw-bold mb-2 text-danger"><i class="bi bi-exclamation-triangle"></i> Apply Amnesty</h5>
                 <p class="text-muted small mb-3">This adds upload to affected users to give a 1:1 ratio on each hit &amp; run torrent, then clears the hit &amp; runs, resets counters and restores any H&amp;R-triggered restrictions. A summary is sent to each affected user. This action cannot be undone.</p>

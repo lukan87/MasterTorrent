@@ -105,15 +105,17 @@ class TicketController extends Controller
     {
         $categories = TicketCategory::orderBy('name')->get();
 
-        $torrent = null;
+        $context = $request->validate([
+            'torrent_id' => 'nullable|integer|exists:torrents,id',
+            'user_id' => ['nullable', 'integer', 'exists:users,id', Rule::notIn([Auth::id()])],
+        ]);
+        $torrentId = $context['torrent_id'] ?? $request->old('linked_torrent_id');
+        $userId = $context['user_id'] ?? $request->old('linked_user_id');
+        $torrent = $torrentId ? Torrent::findOrFail($torrentId) : null;
+        $reportedUser = ! $torrent && $userId ? User::findOrFail($userId) : null;
+        $selectedCategoryId = $categories->firstWhere('name', $torrent ? 'Torrent Problem' : ($reportedUser ? 'User Report' : ''))?->id;
 
-        if ($request->torrent_id) {
-
-            $torrent = Torrent::find($request->torrent_id);
-
-        }
-
-        return view('tickets.create', compact('categories', 'torrent'));
+        return view('tickets.create', compact('categories', 'torrent', 'reportedUser', 'selectedCategoryId'));
     }
 
     /*
@@ -130,6 +132,7 @@ class TicketController extends Controller
             'description' => 'required|string|max:20000',
             'priority' => ['required', Rule::in(Ticket::PRIORITIES)],
             'linked_torrent_id' => 'nullable|integer|exists:torrents,id',
+            'linked_user_id' => ['nullable', 'integer', 'exists:users,id', Rule::notIn([Auth::id()])],
             'attachment' => 'nullable|array|max:5',
             'attachment.*' => 'file|mimes:jpg,jpeg,png,gif,webp,pdf,zip,rar,txt,log|max:10240',
         ]);
@@ -140,6 +143,11 @@ class TicketController extends Controller
                 if (! empty($data['linked_torrent_id'])) {
                     $torrent = Torrent::findOrFail($data['linked_torrent_id']);
                     $description .= "\n\nReported torrent #{$torrent->id}: {$torrent->name}";
+                }
+                if (! empty($data['linked_user_id'])) {
+                    $reportedUser = User::findOrFail($data['linked_user_id']);
+                    $profileUrl = route('profile.show', ['id' => $reportedUser->id, 'name' => $reportedUser->name]);
+                    $description .= "\n\nReported user #{$reportedUser->id}: {$reportedUser->name}\nProfile: {$profileUrl}";
                 }
                 $ticket = Ticket::create([
                     'user_id' => Auth::id(), 'category_id' => $data['category_id'],
@@ -158,7 +166,7 @@ class TicketController extends Controller
                 TicketEvent::create(['ticket_id' => $ticket->id, 'user_id' => Auth::id(), 'event' => 'created the ticket']);
                 foreach (User::where('user_class', '>', 5)->where('id', '!=', Auth::id())->pluck('id') as $staffId) {
                     SystemMessageService::send(Auth::id(), $staffId, 'New support ticket',
-                        'A new support ticket has been created: <a href="'.route('tickets.show', ['id' => $ticket->id, 'slug' => $ticket->slug]).'">'.e($ticket->title).'</a>');
+                        'A new support ticket has been created: '.$ticket->notificationLink());
                 }
 
                 return $ticket;

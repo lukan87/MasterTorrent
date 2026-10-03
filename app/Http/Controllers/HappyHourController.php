@@ -3,229 +3,88 @@
 namespace App\Http\Controllers;
 
 use App\Models\HappyHour;
-use App\Models\Shoutbox;
+use App\Services\HappyHourService;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class HappyHourController extends Controller
 {
+    public function __construct(private HappyHourService $service) {}
+
     public function index()
-{
-    // Get all happy hours, latest first
-$happyHours = HappyHour::with('user')
-    ->orderByDesc('start_at')
-    ->paginate(10)
-    ->withQueryString();
-
-    // Get current automatic theme for today
-    $day = now()->dayOfWeek;
-    $dayThemes = config('happyhour.day_themes', []);
-
-    $theme = $dayThemes[$day] ?? [
-        'name' => 'Classic Happy Hour',
-        'upload_multiplier' => 3,
-        'duration_hours' => 2,
-        'free_download' => true,
-    ];
-
-    $automatic = HappyHour::where('automatic', true)
-    ->where('active', true)
-    ->exists();
-
-
-    return view('admin.happyhour.index', compact('happyHours', 'automatic', 'theme'));
-}
-
+    {
+        return view('admin.happyhour.index', [
+            'happyHours' => HappyHour::with('user')->orderByDesc('start_at')->orderByDesc('id')->paginate(15),
+            'automatic' => $this->service->automaticEnabled(),
+            'theme' => $this->service->theme(),
+            'current' => HappyHour::current()->first(),
+            'upcoming' => HappyHour::where('active', true)->where('start_at', '>', now())->orderBy('start_at')->first(),
+        ]);
+    }
 
     public function create()
-{
-    $automatic = false; // default off
-    $day = now()->dayOfWeek;
-
-    // All day themes for select dropdown
-    $dayThemes = config('happyhour.day_themes');
-
-    // Today's theme as default
-    $theme = $dayThemes[$day] ?? [
-        'name' => 'Classic Happy Hour',
-        'upload_multiplier' => 3,
-        'duration_hours' => 2,
-        'free_download' => true,
-    ];
-
-    return view('admin.happyhour.create', compact('automatic', 'theme', 'dayThemes'));
-}
-
-
-   public function store(Request $request)
-{
-    $data = $request->validate([
-        'theme' => 'required|string',
-        'custom_theme_name' => 'nullable|string|max:255',
-        'upload_multiplier' => 'required|integer|min:1|max:10',
-        'free_download' => 'nullable', // checkbox can be missing if unchecked
-        'start_at' => 'required|date',
-        'end_at' => 'required|date|after:start_at',
-    ]);
-
-    // Determine final theme name
-    if ($data['theme'] === 'custom' && !empty($data['custom_theme_name'])) {
-        $data['theme'] = $data['custom_theme_name'];
+    {
+        return view('admin.happyhour.create', ['theme' => $this->service->theme(), 'dayThemes' => config('happyhour.day_themes', [])]);
     }
 
-    // Create the Happy Hour
-    $happyHour = HappyHour::create([
-        'theme' => $data['theme'],
-        'upload_multiplier' => $data['upload_multiplier'],
-        'free_download' => isset($data['free_download']),
-        'start_at' => $data['start_at'],
-        'end_at' => $data['end_at'],
-        'automatic' => false,
-        'active' => true,
-        'activated_by' => auth()->id(),
-    ]);
-
-    // Post a single message in Shoutbox
-    try {
-        Shoutbox::create([
-            'user_id' => auth()->id(),
-            'message' => "🎉 Happy Hour <strong>{$happyHour->theme}</strong> has started! {$happyHour->upload_multiplier}x Uploads"
-                        . ($happyHour->free_download ? " & Free Downloads!" : ""),
-            'parent_id' => null,
+    public function store(Request $request)
+    {
+        $themes = array_column(config('happyhour.day_themes', []), 'name');
+        $data = $request->validate([
+            'theme' => ['required', Rule::in([...$themes, 'custom'])],
+            'custom_theme_name' => 'required_if:theme,custom|nullable|string|max:100',
+            'upload_multiplier' => 'required|integer|min:1|max:10',
+            'free_download' => 'required|boolean',
+            'start_at' => 'required|date',
+            'end_at' => 'required|date|after:start_at|after:now',
         ]);
-    } catch (\Throwable $e) {
-        \Log::error("Failed to post Happy Hour to Shoutbox: " . $e->getMessage());
+        $data['theme'] = $data['theme'] === 'custom' ? $data['custom_theme_name'] : $data['theme'];
+        unset($data['custom_theme_name']);
+        $event = $this->service->create($data + ['activated_by' => $request->user()->id]);
+        $this->service->announce($event, $event->isActive() ? 'has started' : 'is scheduled');
+
+        return redirect()->route('happyhour.index')->with('success', 'Happy Hour '.$event->status.': '.$event->theme);
     }
 
-    return redirect()->route('happyhour.index')
-        ->with('success', 'Happy Hour started: ' . $happyHour->theme);
-}
+    public function toggleAutomatic(Request $request)
+    {
+        $data = $request->validate(['enabled' => 'required|boolean']);
+        $this->service->locked(fn () => DB::table('happy_hour_settings')->where('id', 1)
+            ->update(['automatic_enabled' => (bool) $data['enabled']]));
 
+        return back()->with('success', $data['enabled']
+            ? 'Automatic events enabled. The scheduler will check hourly after 07:00.'
+            : 'Automatic events disabled. Existing events keep their scheduled times.');
+    }
 
-
- public function toggleAutomatic()
-{
-    $day = now()->dayOfWeek;
-    $dayThemes = config('happyhour.day_themes', []);
-
-    $theme = $dayThemes[$day] ?? [
-        'name' => 'Classic Happy Hour',
-        'upload_multiplier' => config('happyhour.default_upload_multiplier'),
-        'duration_hours' => config('happyhour.default_duration_hours'),
-        'free_download' => config('happyhour.default_free_download'),
-    ];
-
-    $automatic = HappyHour::where('automatic', true)->first();
-    $triggeredBy = auth()->user()->name;
-
-    if ($automatic) {
-
-        if ($automatic->active) {
-
-            // Disable
-            $automatic->update([
-                'active' => false,
-                'end_at' => now(),
-            ]);
-
-            $enabled = false;
-
-            try {
-                Shoutbox::create([
-                    'user_id' => 2,
-                    'message' => "⛔ Automatic Happy Hour <strong>{$automatic->theme}</strong> has been disabled by <strong>{$triggeredBy}</strong>.",
-                    'parent_id' => null,
-                ]);
-            } catch (\Throwable $e) {
-                \Log::error("Shoutbox disable failed: " . $e->getMessage());
+    public function stop(HappyHour $happyHour)
+    {
+        $this->service->locked(function () use ($happyHour) {
+            $happyHour->refresh();
+            $data = ['active' => false];
+            if ($happyHour->isActive()) {
+                $data['end_at'] = now();
             }
+            $happyHour->update($data);
+        });
 
-        } else {
+        return back()->with('success', 'Happy Hour stopped or cancelled.');
+    }
 
-            // Re-enable with TODAY'S THEME
-            $automatic->update([
-                'theme' => $theme['name'],
-                'upload_multiplier' => $theme['upload_multiplier'],
-                'free_download' => $theme['free_download'],
-                'active' => true,
-                'start_at' => now(),
-                'end_at' => now()->addHours($theme['duration_hours']),
-                'activated_by' => auth()->id(),
-            ]);
-
-            $enabled = true;
-
-            try {
-                Shoutbox::create([
-                    'user_id' => 2,
-                    'message' => "🎉 Automatic Happy Hour <strong>{$theme['name']}</strong> was started by <strong>{$triggeredBy}</strong>! "
-                        . "{$theme['upload_multiplier']}x Upload"
-                        . ($theme['free_download'] ? " & Free Downloads!" : ""),
-                    'parent_id' => null,
-                ]);
-            } catch (\Throwable $e) {
-                \Log::error("Shoutbox enable failed: " . $e->getMessage());
+    public function destroy(HappyHour $happyHour)
+    {
+        return $this->service->locked(function () use ($happyHour) {
+            $happyHour->refresh();
+            if ($happyHour->isActive() || $happyHour->status === 'Scheduled') {
+                return back()->with('error', 'Stop or cancel this event before deleting it.');
             }
-        }
+            if ($happyHour->automatic && $happyHour->start_at?->isToday()) {
+                return back()->with('error', 'Keep today’s automatic event in history to prevent another automatic start today. You can delete it tomorrow.');
+            }
+            $happyHour->delete();
 
-    } else {
-
-        // Create automatic with TODAY'S THEME
-        $automatic = HappyHour::create([
-            'theme' => $theme['name'],
-            'upload_multiplier' => $theme['upload_multiplier'],
-            'free_download' => $theme['free_download'],
-            'automatic' => true,
-            'active' => true,
-            'start_at' => now(),
-            'end_at' => now()->addHours($theme['duration_hours']),
-            'activated_by' => auth()->id(),
-        ]);
-
-        $enabled = true;
-
-        try {
-            Shoutbox::create([
-                'user_id' => 2,
-                'message' => "🎉 Automatic Happy Hour <strong>{$theme['name']}</strong> was started by <strong>{$triggeredBy}</strong>! "
-                    . "{$theme['upload_multiplier']}x Upload"
-                    . ($theme['free_download'] ? " & Free Downloads!" : ""),
-                'parent_id' => null,
-            ]);
-        } catch (\Throwable $e) {
-            \Log::error("Shoutbox create failed: " . $e->getMessage());
-        }
+            return back()->with('success', 'Happy Hour deleted.');
+        });
     }
-
-    return redirect()
-        ->route('happyhour.index')
-        ->with('success', 'Automatic Happy Hour ' . ($enabled ? 'enabled' : 'disabled'));
-}
-
-
-
-
-
-public function stop(HappyHour $happyHour)
-{
-    $happyHour->update([
-        'active' => false,
-        'end_at' => now(),
-    ]);
-
-    return back()->with('success', 'Happy Hour stopped.');
-}
-
-public function destroy(HappyHour $happyHour)
-{
-    if (HappyHour::where('automatic', true)->where('active', true)->exists()) {
-        return back()->with('error', 'Cannot delete while Automatic mode is enabled.');
-    }
-
-    $happyHour->delete();
-
-    return back()->with('success', 'Happy Hour deleted successfully.');
-}
-
-
 }

@@ -1,11 +1,11 @@
 <style>
 .ua-page { max-width: 1440px; margin: auto; color: #dce8f0; }
-.ua-page .ua-hero { padding: 28px; border: 1px solid #294656; border-radius: 18px; background: radial-gradient(ellipse at top right, #155e7544, transparent 65%), #101e2b; }
+.ua-page .ua-hero { padding: 28px; border: 1px solid #294656; border-radius: 18px; background: radial-gradient(ellipse at top right, #155e7544, transparent 65%), #0a141c; }
 .ua-page .ua-eyebrow { color: #5eead4; font-size: .7rem; letter-spacing: .13em; text-transform: uppercase; font-weight: 700; }
 .ua-page h1 { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; margin: 8px 0; }
 .ua-page h2 { font-size: 1.05rem; font-weight: 650; }
 .ua-page .ua-muted { color: #a0b6c6; font-size: .85rem; }
-.ua-page .ua-card { background: #101d2a; border: 1px solid #293c4c; border-radius: 14px; padding: 24px; height: 100%; }
+.ua-page .ua-card { background: #0a131b; border: 1px solid #293c4c; border-radius: 14px; padding: 24px; height: 100%; }
 .ua-page .ua-card-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
 .ua-page .ua-card-header h2 { margin: 0; }
 .ua-page .ua-badge { display: inline-flex; align-items: center; gap: 6px; border: 1px solid currentColor; border-radius: 99px; padding: 5px 12px; font-size: .73rem; font-weight: 650; white-space: nowrap; }
@@ -14,12 +14,12 @@
 .ua-page .ua-accepted { color: #6ee7b7; background: #6ee7b70c; }
 .ua-page .ua-rejected { color: #fda4af; background: #fda4af0c; }
 .ua-page .ua-requirements { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
-.ua-page .ua-requirement { padding: 16px; background: #091421; border-radius: 10px; border: 1px solid #293c4c; }
+.ua-page .ua-requirement { padding: 16px; background: #060d15; border-radius: 10px; border: 1px solid #293c4c; }
 .ua-page .ua-requirement strong { display: block; margin: 6px 0; }
 .ua-page .ua-filters { display: flex; gap: 8px; flex-wrap: wrap; }
 .ua-page .ua-filters a { color: #b9ccdb; border: 1px solid #33495d; border-radius: 9px; padding: 8px 12px; text-decoration: none; font-size: .8rem; }
-.ua-page .ua-filters a[aria-current="page"], .ua-page .ua-filters a:hover { color: #81f4d8; background: #15352f; border-color: #347b68; }
-.ua-page .ua-table { --bs-table-bg: transparent; --bs-table-color: #dce8f0; --bs-table-border-color: #293c4c; --bs-table-hover-bg: #182c3b; --bs-table-hover-color: #fff; }
+.ua-page .ua-filters a[aria-current="page"], .ua-page .ua-filters a:hover { color: #81f4d8; background: #0e221f; border-color: #347b68; }
+.ua-page .ua-table { --bs-table-bg: transparent; --bs-table-color: #dce8f0; --bs-table-border-color: #293c4c; --bs-table-hover-bg: #101d26; --bs-table-hover-color: #fff; }
 .ua-page .ua-table th { color: #a0b6c6; font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; padding: 14px 12px; white-space: nowrap; }
 .ua-page .ua-table td { padding: 16px 12px; vertical-align: middle; font-size: .85rem; }
 .ua-page .ua-table a, .ua-page .ua-link { color: #81d4ee; text-decoration: none; }
@@ -30,8 +30,8 @@
 .ua-page .ua-details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 0; }
 .ua-page .ua-details dt { color: #a0b6c6; font-size: .75rem; font-weight: 400; }
 .ua-page .ua-details dd { margin: 4px 0 0; overflow-wrap: anywhere; }
-.ua-page .ua-comment { border-left: 2px solid #428f81; padding: 12px 16px; background: #0b1723; border-radius: 0 8px 8px 0; margin-bottom: 12px; }
-.ua-page .form-control, .ua-page .form-select { background-color: #091421; color: #e2ecf4; border-color: #3a5062; }
+.ua-page .ua-comment { border-left: 2px solid #428f81; padding: 12px 16px; background: #070f17; border-radius: 0 8px 8px 0; margin-bottom: 12px; }
+.ua-page .form-control, .ua-page .form-select { background-color: #060d15; color: #e2ecf4; border-color: #3a5062; }
 .ua-page .form-control::placeholder { color: #8298a9; }
 .ua-page .form-control:focus, .ua-page .form-select:focus { border-color: #5eead4; box-shadow: 0 0 0 3px #5eead41a; }
 .ua-page .form-label { font-size: .9rem; font-weight: 600; }

@@ -696,8 +696,8 @@ document.addEventListener('click', function (e) {
     overflow: hidden;
     background: linear-gradient(
         135deg,
-        rgba(22, 32, 51, .98),
-        rgba(15, 23, 42, .96)
+        rgba(14,21,33,.98),
+        rgba(10,15,27,.96)
     );
     border: 1px solid var(--ui-border);
     border-radius: .85rem;
@@ -708,7 +708,7 @@ document.addEventListener('click', function (e) {
 .torrent-files-header {
     padding: 16px 20px;
     border-bottom: 1px solid var(--ui-border);
-    background: rgba(255,255,255,.02);
+    background: rgba(255,255,255,0.014);
 }
 
 .torrent-files-header .modal-title {
@@ -857,7 +857,7 @@ document.addEventListener('click', function (e) {
     justify-content: center;
     border-radius: .5rem;
     color: var(--ui-accent);
-    background: rgba(255,255,255,.045);
+    background: rgba(255,255,255,0.0315);
     font-size: 13px;
 }
 
@@ -959,7 +959,7 @@ document.addEventListener('click', function (e) {
 .torrent-files-footer {
     padding: 10px 16px;
     border-top: 1px solid var(--ui-border);
-    background: rgba(255,255,255,.02);
+    background: rgba(255,255,255,0.014);
 }
 
 .files-close-btn {
@@ -968,7 +968,7 @@ document.addEventListener('click', function (e) {
     padding: 7px 13px;
     border-radius: .55rem;
     color: rgba(255,255,255,.72);
-    background: rgba(255,255,255,.045);
+    background: rgba(255,255,255,0.0315);
     border: 1px solid var(--ui-border);
     font-size: 13px;
     transition: background .15s ease, color .15s ease, border-color .15s ease;

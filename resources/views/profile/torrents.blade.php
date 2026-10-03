@@ -259,7 +259,7 @@
     flex-wrap: wrap;
     gap: .45rem;
     padding: .65rem .85rem;
-    background: linear-gradient(135deg, rgba(22,32,51,.95), rgba(15,23,42,.88));
+    background: linear-gradient(135deg, rgba(14,21,33,.95), rgba(10,15,27,.88));
     border: 1px solid var(--ui-border, rgba(255,255,255,.08));
     border-radius: .65rem;
     box-shadow: 0 8px 24px rgba(0,0,0,.22);
@@ -290,7 +290,7 @@
 }
 
 .uploads-card {
-    background: linear-gradient(135deg, rgba(22,32,51,.97), rgba(15,23,42,.92));
+    background: linear-gradient(135deg, rgba(14,21,33,.97), rgba(10,15,27,.92));
     border: 1px solid var(--ui-border, rgba(255,255,255,.08));
     border-radius: .7rem;
     box-shadow: 0 10px 28px rgba(0,0,0,.25);
@@ -304,7 +304,7 @@
     gap: 1rem;
     padding: 1rem 1.15rem;
     border-bottom: 1px solid rgba(255,255,255,.07);
-    background: rgba(255,255,255,.018);
+    background: rgba(255,255,255,0.0126);
 }
 
 .uploads-heading {
@@ -363,7 +363,7 @@
 
 .browse-header {
     color: rgba(203,213,225,.52);
-    background: rgba(7,14,27,.4);
+    background: rgba(5,9,18,.4);
     border-bottom: 1px solid rgba(255,255,255,.075);
     font-size: .69rem;
     font-weight: 600;
@@ -510,7 +510,7 @@
 }
 
 .pagination {
-    --bs-pagination-bg: rgba(22,32,51,.9);
+    --bs-pagination-bg: rgba(14,21,33,.9);
     --bs-pagination-border-color: rgba(255,255,255,.08);
     --bs-pagination-color: rgba(255,255,255,.68);
     --bs-pagination-hover-bg: rgba(45,212,191,.08);
@@ -529,7 +529,7 @@
 
 
 .delete-modal {
-    background: linear-gradient(135deg, rgba(22,32,51,.98), rgba(15,23,42,.97));
+    background: linear-gradient(135deg, rgba(14,21,33,.98), rgba(10,15,27,.97));
     border: 1px solid rgba(255,255,255,.09);
     border-radius: .7rem;
     color: #e2e8f0;
@@ -563,7 +563,7 @@
     display: flex;
     align-items: center;
     padding: .7rem .75rem;
-    background: rgba(255,255,255,.025);
+    background: rgba(255,255,255,0.0175);
     border: 1px solid rgba(255,255,255,.07);
     border-radius: .5rem;
     color: #dce7f3;
@@ -599,13 +599,13 @@
 
 .modal-cancel-btn {
     color: rgba(255,255,255,.7);
-    background: rgba(255,255,255,.04);
+    background: rgba(255,255,255,0.028);
     border: 1px solid rgba(255,255,255,.1);
 }
 
 .modal-cancel-btn:hover {
     color: #fff;
-    background: rgba(255,255,255,.08);
+    background: rgba(255,255,255,0.056);
     border-color: rgba(255,255,255,.18);
 }
 

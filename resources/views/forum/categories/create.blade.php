@@ -271,7 +271,7 @@
         padding: 28px;
 
         background:
-            rgba(15,20,35,.96);
+            rgba(10,13,23,.96);
 
         border:
             1px solid rgba(255,255,255,.07);
@@ -302,7 +302,7 @@
     .forum-form-control {
 
         background:
-            rgba(255,255,255,.04);
+            rgba(255,255,255,0.028);
 
         border:
             1px solid rgba(255,255,255,.10);
@@ -319,7 +319,7 @@
     .forum-form-control:focus {
 
         background:
-            rgba(255,255,255,.05);
+            rgba(255,255,255,0.035);
 
         border-color:
             rgba(59,130,246,.55);
@@ -441,7 +441,7 @@
         color: white;
 
         background:
-            rgba(255,255,255,.05);
+            rgba(255,255,255,0.035);
 
     }
 

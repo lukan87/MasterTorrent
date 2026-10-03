@@ -576,7 +576,7 @@
 
 .user-id-badge {
     border-color: rgba(45,212,191,.30);
-    background: linear-gradient(135deg, rgba(45,212,191,.10), rgba(15,23,42,.35));
+    background: linear-gradient(135deg, rgba(45,212,191,.10), rgba(10,15,27,.35));
     box-shadow: inset 0 0 14px rgba(45,212,191,.025);
 }
 
@@ -584,7 +584,7 @@
     position: relative;
     border-color: rgba(148,163,184,.15);
     background:
-        linear-gradient(145deg, rgba(24,35,55,.97), rgba(12,20,36,.96));
+        linear-gradient(145deg, rgba(16,23,36,.97), rgba(8,13,23,.96));
     box-shadow:
         0 10px 28px rgba(0,0,0,.18),
         inset 0 1px 0 rgba(255,255,255,.018);
@@ -602,7 +602,7 @@
     position: relative;
     min-height: 44px;
     padding: .7rem .9rem .7rem 1rem;
-    background: rgba(2,6,23,.30);
+    background: rgba(1,4,15,.30);
 }
 
 .admin-card-header::after {
@@ -634,7 +634,7 @@
 .form-select {
     min-height: 40px;
     border-color: rgba(148,163,184,.20);
-    background: rgba(8,15,29,.82);
+    background: rgba(5,10,19,.82);
     transition: border-color .16s ease, background .16s ease, box-shadow .16s ease;
 }
 
@@ -674,7 +674,7 @@ input[type="date"].elite-input {
 
 .current-value {
     border-color: rgba(45,212,191,.22);
-    background: linear-gradient(135deg, rgba(20,184,166,.08), rgba(15,23,42,.25));
+    background: linear-gradient(135deg, rgba(20,184,166,.08), rgba(10,15,27,.25));
 }
 
 .form-actions {
@@ -686,7 +686,7 @@ input[type="date"].elite-input {
     padding: .75rem;
     border: 1px solid rgba(148,163,184,.12);
     border-radius: .7rem;
-    background: rgba(8,15,29,.88);
+    background: rgba(5,10,19,.88);
     backdrop-filter: blur(12px);
     box-shadow: 0 -8px 25px rgba(0,0,0,.16);
 }

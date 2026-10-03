@@ -251,7 +251,7 @@
     background: linear-gradient(
         145deg,
         #1b1b1b8b,
-        #242424
+        #171717
     );
 
     border-radius: 16px;
@@ -285,8 +285,8 @@
 
     background: linear-gradient(
         145deg,
-        #111,
-        #1c1c1c
+        #0b0b0b,
+        #121212
     );
 
     border: 1px solid rgba(255,255,255,.12);
@@ -370,7 +370,7 @@
 
     height: 26px;
 
-    background: rgba(255,255,255,.12);
+    background: rgba(255,255,255,0.084);
 
     margin: 0 12px;
 
@@ -512,7 +512,7 @@
 
     padding: 6px;
 
-    background: #1c1c1c;
+    background: #121212;
 
     border-radius: 12px;
 
@@ -593,8 +593,8 @@
     background:
         linear-gradient(
             145deg,
-            #151515,
-            #1e1e1e
+            #0e0e0e,
+            #141414
         );
 
     border-radius: 16px;
@@ -638,7 +638,7 @@
 
 .premium-check .form-check-input {
 
-    background-color: rgba(255,255,255,.04);
+    background-color: rgba(255,255,255,0.028);
 
     border-color: rgba(255,255,255,.18);
 

@@ -199,8 +199,8 @@
     border: 1px solid var(--ui-border, rgba(255,255,255,.08));
     background: linear-gradient(
         135deg,
-        rgba(22,32,51,.95),
-        rgba(15,23,42,.84)
+        rgba(14,21,33,.95),
+        rgba(10,15,27,.84)
     );
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -395,7 +395,7 @@
     text-align: center;
     border: 1px dashed var(--ui-border, rgba(255,255,255,.08));
     border-radius: .7rem;
-    background: rgba(255,255,255,.018);
+    background: rgba(255,255,255,0.0126);
 }
 
 .empty-state i {
@@ -435,7 +435,7 @@
 .modern-section-card .table thead th {
     padding: .6rem .7rem;
     border-bottom: 1px solid var(--ui-border, rgba(255,255,255,.08)) !important;
-    background: rgba(255,255,255,.025);
+    background: rgba(255,255,255,0.0175);
     color: rgba(226,232,240,.55);
     font-size: 11px;
     font-weight: 700;
@@ -500,7 +500,7 @@
 .modern-section-card .form-select {
     border: 1px solid var(--ui-border, rgba(255,255,255,.08)) !important;
     border-radius: .5rem !important;
-    background: rgba(255,255,255,.035) !important;
+    background: rgba(255,255,255,0.0245) !important;
     color: #f8fafc !important;
     font-size: 13px;
     box-shadow: none !important;
@@ -521,7 +521,7 @@
 .modern-section-card button[onclick^="togglePassword"] {
     border: 1px solid var(--ui-border, rgba(255,255,255,.08));
     border-radius: .45rem;
-    background: rgba(255,255,255,.04);
+    background: rgba(255,255,255,0.028);
     color: rgba(226,232,240,.65);
     font-size: 12px;
 }

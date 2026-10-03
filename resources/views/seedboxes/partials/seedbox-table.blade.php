@@ -30,7 +30,7 @@
 </div>
 @once
 <style>
-.seedbox-server { display:flex; align-items:center; gap:1rem; padding:1rem; border:1px solid rgba(255,255,255,.09); border-radius:.7rem; background:rgba(255,255,255,.025); }
+.seedbox-server { display:flex; align-items:center; gap:1rem; padding:1rem; border:1px solid rgba(255,255,255,.09); border-radius:.7rem; background:rgba(255,255,255,0.0175); }
 .seedbox-server + .seedbox-server { margin-top:.65rem; }
 .seedbox-server-icon { display:grid; place-items:center; width:44px; height:44px; flex-shrink:0; border-radius:.65rem; background:rgba(34,211,238,.09); color:#67e8f9; font-size:1.35rem; }
 .seedbox-server-details { flex:1; min-width:0; }

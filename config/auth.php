@@ -2,6 +2,10 @@
 
 return [
 
+    // true: email activation and email password resets; false: recovery codes.
+    'email_registration' => env('EMAIL_REGISTRATION', false),
+    'activation_expire' => 60,
+
     /*
     |--------------------------------------------------------------------------
     | Authentication Defaults

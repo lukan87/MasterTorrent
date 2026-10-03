@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 
 use App\Helpers\Bencode;
 use App\Models\Peer;
+use App\Models\Movie;
+use App\Models\Series;
+use App\Models\UserClass;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Models\User;
 use App\Models\Genre;
 use App\Models\History;
@@ -32,7 +36,6 @@ use App\Services\Torrent\TorrentUpdateService;
 use App\Services\Torrent\MovieOfTheDayService;
 use App\Services\Torrent\TorrentBrowseService;
 use App\Services\Torrent\TorrentDisplayService;
-use App\Services\Subtitle\SubsRoService;
 use App\Services\TorrentSubscriptionService;
 
 
@@ -56,71 +59,194 @@ class TorrentController extends Controller
 
  public function index(Request $request)
 {
-    $categories = Category::all();
-    $allGenres = Genre::all();
-
-    $sortColumn = $request->get('sort', 'name');
-    $sortDirection = $request->get('direction', 'desc');
-
-  $user = $request->user();
-
-$torrents = TorrentHelper::buildTorrentQuery($request, $sortColumn, $sortDirection);
-
-if ($user) {
-    $torrents->getCollection()->load([
-        'histories' => function ($q) use ($user) {
-            $q->where('user_id', $user->id);
-        }
-    ]);
-}
-    $tz = $user->timezone ?? 'UTC';
-
-    
- $torrents = $torrents->through(function ($torrent) use ($tz) {
-
-    $torrent->created_at_local = $torrent->created_at->clone()->tz($tz);
-
-    $history = $torrent->histories->first();
-
     /*
     |--------------------------------------------------------------------------
-    | User Torrent Status
+    | Current User
     |--------------------------------------------------------------------------
     */
 
-    $torrent->has_downloaded = false;
-    $torrent->is_seeding = false;
+    $user = $request->user();
 
-    if ($history) {
 
-        // User downloaded torrent
-        $torrent->has_downloaded = true;
+    /*
+    |--------------------------------------------------------------------------
+    | Browse Filters
+    |--------------------------------------------------------------------------
+    */
 
-        // User currently seeding
-        $torrent->is_seeding =
-            ($history->active ?? 0) == 1 ||
-            ($history->seeder ?? 0) == 1;
+    $categories = Category::query()
+        ->orderBy('name')
+        ->get();
+
+    $allGenres = Genre::query()
+        ->orderBy('name')
+        ->get();
+
+    $sortColumn = $request->get('sort', 'created_at');
+    $sortDirection = $request->get('direction', 'desc');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Torrents
+    |--------------------------------------------------------------------------
+    */
+
+    $torrents = TorrentHelper::buildTorrentQuery(
+        $request,
+        $sortColumn,
+        $sortDirection
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | User Torrent History
+    |--------------------------------------------------------------------------
+    |
+    | Load only the current user's history for torrents displayed
+    | on this page.
+    |
+    | This avoids querying history separately for every torrent.
+    |
+    */
+
+    if ($user) {
+        $torrents->getCollection()->load([
+            'histories' => function ($query) use ($user) {
+                $query
+                    ->select([
+                        'id',
+                        'torrent_id',
+                        'user_id',
+                        'active',
+                        'seeder',
+                        'completed_at',
+                    ])
+                    ->where('user_id', $user->id);
+            },
+        ]);
     }
 
-    return $torrent;
-});
-  
-$newTorrents = app(TorrentBrowseService::class)
-    ->getNewTorrents($user, $torrents, 'last_browse');
+
+    /*
+    |--------------------------------------------------------------------------
+    | User Timezone
+    |--------------------------------------------------------------------------
+    */
+
+    $timezone = $user?->timezone ?? 'UTC';
 
 
-    $movieOfTheDay = app(MovieOfTheDayService::class)->get();
+    /*
+    |--------------------------------------------------------------------------
+    | Prepare Torrent Display Data
+    |--------------------------------------------------------------------------
+    */
+
+    $torrents->through(
+        function ($torrent) use ($timezone, $user) {
+
+            /*
+             * Local upload time.
+             */
+            $torrent->created_at_local = $torrent
+                ->created_at
+                ->clone()
+                ->tz($timezone);
 
 
-    $currentHappyHour = HappyHour::where('active', true)
+            /*
+             * Default user-specific status.
+             */
+            $torrent->has_downloaded = false;
+            $torrent->is_seeding = false;
+
+
+            /*
+             * Guests do not have torrent history.
+             */
+            if (!$user) {
+                return $torrent;
+            }
+
+
+            /*
+             * History has already been eager-loaded above,
+             * so this does NOT execute another SQL query.
+             */
+            $history = $torrent->histories->first();
+
+            if ($history) {
+                $torrent->has_downloaded = $history->completed_at !== null;
+
+                $torrent->is_seeding =
+                    (bool) ($history->active ?? false)
+                    && (bool) ($history->seeder ?? false);
+            }
+
+            return $torrent;
+        }
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | New Torrents
+    |--------------------------------------------------------------------------
+    */
+
+    $newTorrents = app(TorrentBrowseService::class)
+        ->getNewTorrents(
+            $user,
+            $torrents,
+            'last_browse'
+        );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Movie Of The Day
+    |--------------------------------------------------------------------------
+    */
+
+    $movieOfTheDay = app(MovieOfTheDayService::class)
+        ->get();
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Happy Hour
+    |--------------------------------------------------------------------------
+    */
+
+    $currentHappyHour = HappyHour::query()
+        ->where('active', true)
         ->where('start_at', '<=', now())
-        ->where('end_at', '>=', now())
+        ->where('end_at', '>', now())
         ->latest('start_at')
         ->first();
 
-        $seedboxes = auth()->check()
-    ? Seedbox::where('user_id', auth()->id())->get()
-    : collect();
+
+    /*
+    |--------------------------------------------------------------------------
+    | User Seedboxes
+    |--------------------------------------------------------------------------
+    */
+
+    $seedboxes = $user
+        ? Seedbox::query()
+            ->where('user_id', $user->id)
+            ->orderBy('name')
+            ->get()
+        : collect();
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | View
+    |--------------------------------------------------------------------------
+    */
 
     return view('torrents.index', compact(
         'torrents',
@@ -134,7 +260,6 @@ $newTorrents = app(TorrentBrowseService::class)
         'seedboxes'
     ));
 }
-
 
 
 
@@ -157,6 +282,24 @@ $newTorrents = app(TorrentBrowseService::class)
     // Convert paginator to collection
     $adultCollection = $adult->getCollection();
 
+    // Fetch personal status once for the displayed page, not once per title.
+    if ($user) {
+        $adultCollection->load([
+            'histories' => function ($query) use ($user) {
+                $query->select(['id', 'torrent_id', 'user_id', 'active', 'seeder', 'completed_at'])
+                    ->where('user_id', $user->id);
+            },
+        ]);
+    }
+
+    $adultCollection->each(function ($torrent) use ($user) {
+        $history = $user ? $torrent->histories->first() : null;
+
+        $torrent->has_downloaded = $history?->completed_at !== null;
+        $torrent->is_seeding = (bool) ($history?->active ?? false)
+            && (bool) ($history?->seeder ?? false);
+    });
+
     // New torrents based on last_browsex
    $newTorrents = app(TorrentBrowseService::class)
     ->getNewTorrents($user, $adult, 'last_browsex');
@@ -164,7 +307,7 @@ $newTorrents = app(TorrentBrowseService::class)
 
     $currentHappyHour = HappyHour::where('active', true)
         ->where('start_at', '<=', now())
-        ->where('end_at', '>=', now())
+        ->where('end_at', '>', now())
         ->latest('start_at')
         ->first();
 
@@ -392,208 +535,150 @@ public function bump($id, TorrentBumpService $service)
 
 
    
-public function show(
-    $id,
-    $slug = null
-)
-    {
+    public function show(
+        $id,
+        $slug = null
+    ) {
         try {
-          
-           $query = Torrent::with([
-    'files',
-    'images',
-    'genres',
-    'category',
-    'subtitles',
-    'deletedBy'
-]);
 
-// Allow moderators to see deleted torrents
-if (auth()->check() && auth()->user()->user_class >= \App\Models\UserClass::MODERATOR) {
-    $query = $query->withTrashed();
-}
+            $query = Torrent::query();
 
-$torrent = $query->findOrFail($id);
+            // Allow moderators to see deleted torrents
+            if (auth()->check() && auth()->user()->user_class >= UserClass::MODERATOR) {
+                $query = $query->withTrashed();
+            }
 
-$subsRoService = app(SubsRoService::class);
-$externalSubtitles = [];
+            $torrent = $query->findOrFail($id);
 
-if ($torrent->imdbid) {
+            // Block normal users from viewing deleted torrents
+            if ($torrent->trashed() &&
+                (! auth()->check() || auth()->user()->user_class < UserClass::MODERATOR)) {
+                abort(404);
+            }
 
-    $externalSubtitles = $subsRoService
-        ->search($torrent->imdbid);
-}
-
-$fanartData = [];
-$fanartBackground = null;
-$fanartPoster = null;
-$fanartLogo = null;
-$fanartBanner = null;
-
-if ($torrent->tmdbid) {
-    $fanartData = app(\App\Services\FanartService::class)
-        ->getMovieArt($torrent->tmdbid);
-
-    $fanartBackground = $fanartData['moviebackground'][0]['url'] ?? null;
-    $fanartPoster     = $fanartData['movieposter'][0]['url'] ?? null;
-    $fanartLogo       = $fanartData['hdmovielogo'][0]['url'] ?? null;
-    $fanartBanner     = $fanartData['moviebanner'][0]['url'] ?? null;
-}
-
-// Block normal users from viewing deleted torrents
-if ($torrent->trashed() &&
-    (!auth()->check() || auth()->user()->user_class < \App\Models\UserClass::MODERATOR)) {
-    abort(404);
-}
-    
-         
             if ($slug !== $torrent->slug) {
                 return redirect()->route('torrents.show', ['id' => $torrent->id, 'slug' => $torrent->slug]);
             }
-    
-          
-            $comments = Comment::with('user')
-                ->where('torrent_id', $torrent->id)
-                ->orderByDesc('created_at')
-                ->paginate(5);
-    
-          
-            $snatched = History::select('history.*', 'users.name as user_name', 'users.id as user_id')
-                ->join('users', 'users.id', '=', 'history.user_id')
-                ->where('history.torrent_id', $torrent->id)
-                ->get();
+
+            $torrent->load(['files', 'images', 'genres', 'category', 'uploader:id,name', 'deletedBy:id,name']);
+
+            $comments = Comment::where('torrent_id', $torrent->id)->discussion()->paginate(10, ['*'], 'comments_page')->withQueryString()->fragment('discussion');
 
             $traffic = History::where('torrent_id', $torrent->id)
                 ->selectRaw('SUM(actual_uploaded) as total_uploaded, SUM(actual_downloaded) as total_downloaded')
                 ->first();
-              
-$displayData = app(TorrentDisplayService::class)
-    ->getDisplayData($torrent);
 
-extract($displayData);
+            $displayData = app(TorrentDisplayService::class)
+                ->getDisplayData($torrent);
 
-          
+            $display = $displayData['display'];
+            $mediainfo = $displayData['mediainfo'];
+            $steamData = $displayData['steamData'];
+            $fileTree = $displayData['fileTree'];
+            $fanartBackground = $display['fanart']['background'] ?? null;
+            $userSeedboxes = Auth::check()
+                ? Seedbox::where('user_id', Auth::id())->get(['id', 'name'])
+                : collect();
+
             $similarTorrents = $torrent->tmdbid
                 ? Torrent::where('id', '!=', $torrent->id)
                     ->where('tmdbid', $torrent->tmdbid)
+                    ->where('tmdb_type', $torrent->tmdb_type)
+                    ->orderByDesc('seeders')
                     ->where('seeders', '>', 0)
                     ->limit(5)
                     ->get()
                 : collect(); // Default to empty collection if no TMDB ID
-    
-         
-            // $recommendedTorrents = Torrent::where('category_id', $torrent->category_id)
-            //     ->where('seeders', '>', 0)
-            //     ->whereHas('genres', function ($query) use ($torrent) {
-            //         $query->whereIn('genres.id', $torrent->genres->pluck('id'));
-            //     })
-            //     ->orWhere('name', 'like', '%' . preg_replace('/[^\w]+/', '', $torrent->name) . '%')
-            //     ->select('id', 'slug', 'name', 'size', 'seeders', 'leechers', 'times_completed', 'poster')
-            //     ->inRandomOrder()
-            //     ->limit(6)
-            //     ->get();
-    
-           
-$thankUsers = User::whereIn(
-    'id',
-    TorrentThank::where('torrent_id', $torrent->id)->pluck('user_id')
-)->get(['id', 'name']);
 
-$hasThanked = Auth::check()
-    ? $thankUsers->contains('id', Auth::id())
-    : false;
+            $thankUsers = User::whereIn(
+                'id',
+                TorrentThank::where('torrent_id', $torrent->id)->select('user_id')
+            )->get(['id', 'name']);
 
-$thankCount = $thankUsers->count();
+            $hasThanked = Auth::check()
+                ? $thankUsers->contains('id', Auth::id())
+                : false;
 
-// Build tooltip text
-$names = $thankUsers
-    ->where('id', '!=', Auth::id())
-    ->pluck('name')
-    ->take(2)
-    ->toArray();
+            $thankCount = $thankUsers->count();
 
-if ($hasThanked) {
-    array_unshift($names, 'You');
-}
+            // Build tooltip text
+            $names = $thankUsers
+                ->where('id', '!=', Auth::id())
+                ->pluck('name')
+                ->take(2)
+                ->toArray();
 
-$remaining = $thankCount - count($names);
+            if ($hasThanked) {
+                array_unshift($names, 'You');
+            }
 
-$thankTooltip = match (true) {
-    $thankCount === 0 => 'No thanks yet',
-    $remaining > 0   => implode(', ', $names) . " and {$remaining} others thanked",
-    default          => implode(', ', $names) . ' thanked',
-};
+            $remaining = $thankCount - count($names);
 
-$reactions = \App\Models\TorrentReaction::where('torrent_id', $torrent->id)
-    ->with('user:id,name')
-    ->get();
+            $thankTooltip = match (true) {
+                $thankCount === 0 => 'No thanks yet',
+                $remaining > 0 => implode(', ', $names)." and {$remaining} others thanked",
+                default => implode(', ', $names).' thanked',
+            };
 
-$reactionCounts = $reactions->groupBy('reaction')->map->count();
+            $reactions = TorrentReaction::where('torrent_id', $torrent->id)
+                ->with('user:id,name')
+                ->get();
 
-$userReaction = Auth::check()
-    ? $reactions->where('user_id', Auth::id())->first()
-    : null;
+            $reactionCounts = $reactions->groupBy('reaction')->map->count();
 
-$subscriptionService = app(\App\Services\TorrentSubscriptionService::class);
-$subscribeAvailable = $subscriptionService->canSubscribe($torrent);
-$isSubscribed       = $subscribeAvailable && $subscriptionService->isSubscribed(Auth::user(), $torrent);
-$subscribers        = $subscriptionService->subscribers($torrent->imdbid, $torrent->tmdbid);
-// "Watch online" link — shown only when the movie/series exists in the
-// online catalogue (movies / series tables). Keyed by TMDB id.
-$watchUrl = null;
-if ($torrent->tmdb_type === 'movie' && $torrent->tmdbid) {
-    $watchMovie = \App\Models\Movie::where('tmdb_id', $torrent->tmdbid)->first();
-    $watchUrl = $watchMovie
-        ? route('movies.show', [$watchMovie->id, $watchMovie->slug])
-        : null;
-} elseif ($torrent->tmdb_type === 'tv' && $torrent->tmdbid) {
-    $watchSeries = \App\Models\Series::where('tmdb_id', $torrent->tmdbid)->first();
-    $watchUrl = $watchSeries
-        ? route('series.show', [$watchSeries->id, $watchSeries->slug])
-        : null;
-}
+            $userReaction = Auth::check()
+                ? $reactions->where('user_id', Auth::id())->first()
+                : null;
 
+            $subscriptionService = app(TorrentSubscriptionService::class);
+            $subscribeAvailable = $subscriptionService->canSubscribe($torrent);
+            $isSubscribed = $subscribeAvailable && $subscriptionService->isSubscribed(Auth::user(), $torrent);
+            $subscribers = $subscriptionService->subscribers($torrent->imdbid, $torrent->tmdbid);
+            // "Watch online" link — shown only when the movie/series exists in the
+            // online catalogue (movies / series tables). Keyed by TMDB id.
+            $watchUrl = null;
+            if ($torrent->tmdb_type === 'movie' && $torrent->tmdbid) {
+                $watchMovie = Movie::where('tmdb_id', $torrent->tmdbid)->first();
+                $watchUrl = $watchMovie
+                    ? route('movies.show', [$watchMovie->id, $watchMovie->slug])
+                    : null;
+            } elseif ($torrent->tmdb_type === 'tv' && $torrent->tmdbid) {
+                $watchSeries = Series::where('tmdb_id', $torrent->tmdbid)->first();
+                $watchUrl = $watchSeries
+                    ? route('series.show', [$watchSeries->id, $watchSeries->slug])
+                    : null;
+            }
 
-
-           
-           
-    
             return view('torrents.show', compact(
-    'torrent',
-    'comments',
-    'display',
-    'mediainfo',
-    'steamData',
-    'snatched',
-    'similarTorrents',
-    'hasThanked',
-    'thankUsers',
-    'thankTooltip',
-    'thankCount',
-    'reactions',
-    'reactionCounts',
-    'userReaction',
-    'fileTree',
-    'traffic',
-    'fanartBackground',
-    'fanartPoster',
-    'fanartLogo',
-    'fanartBanner',
-    'externalSubtitles',
-    'isSubscribed',
-    'subscribeAvailable',
-    'subscribers',
-    'watchUrl'
+                'torrent',
+                'comments',
+                'display',
+                'mediainfo',
+                'steamData',
+                'similarTorrents',
+                'hasThanked',
+                'thankUsers',
+                'thankTooltip',
+                'thankCount',
+                'reactions',
+                'reactionCounts',
+                'userReaction',
+                'fileTree',
+                'traffic',
+                'fanartBackground',
+                'userSeedboxes',
+                'isSubscribed',
+                'subscribeAvailable',
+                'subscribers',
+                'watchUrl'
 
-));
+            ));
 
-    
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        } catch (ModelNotFoundException $e) {
             // Handle the case where the torrent is not found
-            return view('errors.torrent-not-found');
+            return response()->view('errors.torrent-not-found', [], 404);
         }
     }
-    
 
 
 public function thank($id)
@@ -660,7 +745,7 @@ public function react(Request $request, Torrent $torrent)
     };
 
     // Owner check
-if ($torrent->owner === Auth::id()) {
+if ((int) $torrent->owner === (int) Auth::id()) {
     return $errorResponse('You cannot react to your own torrent.');
 }
 
@@ -680,6 +765,7 @@ if ($torrent->owner === Auth::id()) {
             $existing->delete();
         } else {
             $existing->update(['reaction' => $reaction]);
+            app(\App\Services\TorrentActivityNotifier::class)->send($torrent, Auth::user(), reaction: $reaction);
         }
     } else {
         TorrentReaction::create([
@@ -687,6 +773,7 @@ if ($torrent->owner === Auth::id()) {
             'user_id' => Auth::id(),
             'reaction' => $reaction,
         ]);
+        app(\App\Services\TorrentActivityNotifier::class)->send($torrent, Auth::user(), reaction: $reaction);
     }
 
     if ($request->expectsJson()) {
@@ -880,13 +967,12 @@ public function bulkDelete(Request $request)
         $owner = $torrent->owner;
 
         if ($owner && User::where('id', $owner)->exists()) {
-            Message::create([
-                'receiver_id' => $owner,
-                'subject' => 'Torrent Deletion',
-                'sender_id' => 2,
-                'body' => 'Your torrent "' . $torrent->name . '" has been deleted  by ' . auth()->user()->name . '. Reason: ' . $deletionReason,
-                'is_read' => false,
-            ]);
+            \App\Services\SystemMessageService::send(
+                2,
+                $owner,
+                'Torrent Deletion',
+                'Your torrent "' . $torrent->name . '" has been deleted  by ' . auth()->user()->name . '. Reason: ' . $deletionReason
+            );
         }
 
         Peer::where('torrent_id', $torrent->id)->delete();
@@ -927,7 +1013,7 @@ public function peers($torrentId, Request $request)
 
     
 if ($request->has('seeders')) {
-    $seeders = Peer::where('torrent_id', $torrentId)
+    $seeders = Peer::with('user:id,name')->where('torrent_id', $torrentId)
         ->where('seeder', 1)
         ->orderByRaw('user_id = ? DESC', [$request->user()->id]) // logged in user first
         ->orderByRaw('user_id = ? DESC', [$torrent->owner])   // then torrent owner
@@ -940,7 +1026,7 @@ if ($request->has('seeders')) {
 
    
     if (request()->has('leechers')) {
-        $leechers = Peer::where('torrent_id', $torrentId)->where('seeder', 0)->where('active', 1)->paginate(25);
+        $leechers = Peer::with('user:id,name')->where('torrent_id', $torrentId)->where('seeder', 0)->where('active', 1)->paginate(25);
        
         $leechers->withPath(url()->current())->appends(['leechers' => '1']);
     }

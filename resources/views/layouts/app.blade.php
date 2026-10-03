@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"> 
+<html lang="en" class="site-layout" data-bs-theme="dark">
 
 @include('layouts.partials.header')
 
@@ -194,7 +194,7 @@ setInterval(fetchLatestTorrent, 5000); // Check every 5 seconds
 
     border-top: 1px solid rgba(255, 255, 255, 0.08);
 
-    background: rgba(20, 24, 28, 0.65);
+    background: rgba(13,16,18,0.65);
 
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -258,7 +258,7 @@ setInterval(fetchLatestTorrent, 5000); // Check every 5 seconds
     background: linear-gradient(
         90deg,
         transparent,
-        rgba(255, 255, 255, 0.08),
+        rgba(255,255,255,0.056),
         transparent
     );
 }
@@ -459,8 +459,8 @@ window.showNotification = function(type, message) {
         background:
             linear-gradient(
                 145deg,
-                rgba(48, 58, 60, 0.95),
-                rgba(82, 85, 89, 0.95)
+                rgba(31,38,39,0.95),
+                rgba(53,55,58,0.95)
             );
 
        
@@ -524,7 +524,7 @@ window.showNotification = function(type, message) {
             linear-gradient(
                 145deg,
                 #919596,
-                #333435
+                #212222
             );
 
         transform:

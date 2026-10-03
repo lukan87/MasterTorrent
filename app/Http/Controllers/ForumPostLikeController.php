@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\ForumCategory;
 use App\Models\ForumPost;
-use App\Models\ForumTopic;
 use App\Models\ForumPostLike;
+use App\Models\ForumTopic;
 use App\Notifications\ForumLikeNotification;
 use Illuminate\Http\Request;
 
@@ -24,9 +24,11 @@ class ForumPostLikeController extends Controller
 
         $allowedReactions = ['like', 'love', 'laugh', 'wow', 'sad'];
 
-        if (!in_array($reaction, $allowedReactions, true)) {
+        if (! in_array($reaction, $allowedReactions, true)) {
             abort(422);
         }
+
+        abort_if($category->is_private, 403);
 
         if ($topic->category_id !== $category->id) {
             abort(404);
@@ -41,6 +43,7 @@ class ForumPostLikeController extends Controller
             if ($request->ajax()) {
                 return response()->json(['error' => 'You cannot react to your own post.'], 403);
             }
+
             return back()->with('error', 'You cannot like your own post.');
         }
 
@@ -93,7 +96,7 @@ class ForumPostLikeController extends Controller
         $flashMsg = match ($action) {
             'removed' => 'Reaction removed.',
             'changed' => 'Reaction changed.',
-            default   => 'Post liked.',
+            default => 'Post liked.',
         };
 
         return back()->with('success', $flashMsg);

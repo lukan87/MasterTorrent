@@ -23,6 +23,11 @@ Schedule::command('auto:seedbonus_award')->everyFifteenMinutes()->withoutOverlap
 // User account and warning maintenance
 Schedule::command('users:promote-demote')->daily()->withoutOverlapping();
 
+// Process confirmed permanent email bounces and soft-delete invalid-email users
+Schedule::command('email:process-bounces --since=10m --delete')
+    ->everyFiveMinutes()
+    ->withoutOverlapping(10);
+
 Schedule::command('torrents:update-imdb')->everyThirtyMinutes()->withoutOverlapping(5);
 
 // History maintenance
@@ -97,3 +102,6 @@ Schedule::command('torrent:sync-movies')->hourly()->withoutOverlapping();
 
 //Online Movies&Series metadata backfill (ratings, genres, dates)
 Schedule::command('media:backfill')->weeklyOn(0, '03:00');
+
+// Reconcile tracker activity, account anniversaries, and any missed activity events.
+Schedule::command('achievements:award')->everyFiveMinutes()->withoutOverlapping();

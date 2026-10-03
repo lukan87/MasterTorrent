@@ -4,7 +4,7 @@
 
 <style>
 .news-create-page{color:#e5e7eb}
-.news-create-hero,.news-form-card{position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(22,32,51,.96),rgba(15,23,42,.88));border:1px solid rgba(148,163,184,.16);border-radius:.75rem;box-shadow:0 14px 34px rgba(0,0,0,.28)}
+.news-create-hero,.news-form-card{position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(14,21,33,.96),rgba(10,15,27,.88));border:1px solid rgba(148,163,184,.16);border-radius:.75rem;box-shadow:0 14px 34px rgba(0,0,0,.28)}
 .news-create-hero{padding:28px 30px}.news-form-card{padding:28px 30px}
 .hero-glow,.form-glow{position:absolute;pointer-events:none;border-radius:50%;filter:blur(8px)}
 .hero-glow{width:260px;height:260px;top:-150px;right:-110px;background:radial-gradient(circle,rgba(20,184,166,.12),transparent 68%)}
@@ -14,20 +14,20 @@
 .hero-subtitle{margin:0;color:#94a3b8;font-size:.9rem}
 .modern-label{display:flex;align-items:center;margin-bottom:.55rem;color:#cbd5e1;font-size:.78rem;font-weight:700;letter-spacing:.35px}
 .modern-label i{color:#67e8df}
-.modern-input,.modern-textarea{background:rgba(2,6,23,.58)!important;border:1px solid rgba(148,163,184,.18)!important;border-radius:.55rem!important;color:#f8fafc!important;padding:.72rem .85rem!important;box-shadow:none!important;font-size:.9rem}
+.modern-input,.modern-textarea{background:rgba(1,4,15,.58)!important;border:1px solid rgba(148,163,184,.18)!important;border-radius:.55rem!important;color:#f8fafc!important;padding:.72rem .85rem!important;box-shadow:none!important;font-size:.9rem}
 .modern-input::placeholder,.modern-textarea::placeholder{color:#64748b}
 .modern-input:focus,.modern-textarea:focus{border-color:rgba(20,184,166,.55)!important;box-shadow:0 0 0 .18rem rgba(20,184,166,.10)!important}
 .modern-textarea{min-height:280px;resize:vertical;line-height:1.65}
 .editor-toolbar{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.65rem}
-.toolbar-btn{width:36px;height:36px;padding:0;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(148,163,184,.16);border-radius:.5rem;background:rgba(30,41,59,.72);color:#cbd5e1;transition:background .18s ease,border-color .18s ease,color .18s ease,transform .18s ease}
+.toolbar-btn{width:36px;height:36px;padding:0;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(148,163,184,.16);border-radius:.5rem;background:rgba(20,27,38,.72);color:#cbd5e1;transition:background .18s ease,border-color .18s ease,color .18s ease,transform .18s ease}
 .toolbar-btn:hover{transform:translateY(-1px);background:rgba(20,184,166,.12);border-color:rgba(20,184,166,.32);color:#67e8df}
 .danger-btn:hover{background:rgba(239,68,68,.11);border-color:rgba(239,68,68,.28);color:#fca5a5}
 .success-btn:hover{background:rgba(34,197,94,.11);border-color:rgba(34,197,94,.28);color:#86efac}
 .publish-btn,.cancel-btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:.62rem 1rem;border-radius:.55rem;font-size:.84rem;font-weight:700;text-decoration:none;transition:transform .18s ease,background .18s ease,border-color .18s ease}
 .publish-btn{border:1px solid rgba(20,184,166,.35);background:rgba(20,184,166,.14);color:#67e8df}
 .publish-btn:hover{transform:translateY(-1px);background:rgba(20,184,166,.22);border-color:rgba(20,184,166,.5);color:#99f6ef}
-.cancel-btn{border:1px solid rgba(148,163,184,.18);background:rgba(30,41,59,.65);color:#cbd5e1}
-.cancel-btn:hover{transform:translateY(-1px);background:rgba(51,65,85,.8);border-color:rgba(148,163,184,.3);color:#f8fafc}
+.cancel-btn{border:1px solid rgba(148,163,184,.18);background:rgba(20,27,38,.65);color:#cbd5e1}
+.cancel-btn:hover{transform:translateY(-1px);background:rgba(33,42,55,.8);border-color:rgba(148,163,184,.3);color:#f8fafc}
 @@media (max-width:768px){.news-create-page{padding-top:1.25rem!important;padding-bottom:1.25rem!important}.news-create-hero,.news-form-card{padding:20px;border-radius:.65rem}.hero-title{font-size:1.7rem}.hero-subtitle{font-size:.84rem}.modern-textarea{min-height:240px}.publish-btn,.cancel-btn{width:100%}}
 @@media (prefers-reduced-motion:reduce){.toolbar-btn,.publish-btn,.cancel-btn{transition:none}}
 </style>

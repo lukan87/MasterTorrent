@@ -77,7 +77,7 @@
         linear-gradient(
             120deg,
             transparent 35%,
-            rgba(255,255,255,.12) 50%,
+            rgba(255,255,255,0.084) 50%,
             transparent 65%
         );
 
@@ -96,15 +96,15 @@
 /* Variants */
 
 .free-btn {
-    background: linear-gradient(135deg, #284233, #52d68d);
+    background: linear-gradient(135deg, #1a2b21, #52d68d);
 }
 
 .double-btn {
-    background: linear-gradient(135deg, #40344d, #9567ff);
+    background: linear-gradient(135deg, #2a2232, #9567ff);
 }
 
 .new-btn {
-    background: linear-gradient(135deg, #2d5563, #2496d1);
+    background: linear-gradient(135deg, #1d3740, #2496d1);
 }
 
 .recommended-btn {
@@ -114,15 +114,15 @@
 }
 
 .seedbox-btn {
-    background: linear-gradient(135deg, #4d2f39, #dc0c5c);
+    background: linear-gradient(135deg, #321f25, #dc0c5c);
 }
 
 .bump-btn {
-    background: linear-gradient(135deg, #35522a, #28c7d9);
+    background: linear-gradient(135deg, #22351b, #28c7d9);
 }
 
 .subtitles-btn {
-    background: linear-gradient(135deg, #38284f, #8a63d2);
+    background: linear-gradient(135deg, #241a33, #8a63d2);
 }
 
 .happyhour-btn {
@@ -130,7 +130,7 @@
 }
 
 .sticky-btn {
-    background: linear-gradient(135deg, #4b5258, #8f98a1);
+    background: linear-gradient(135deg, #313539, #8f98a1);
 }
 </style>
 
@@ -184,11 +184,13 @@
 
 
     {{-- Subtitles badge --}}
-    @if($torrent->subtitles->isNotEmpty())
-        <div class="badge-btn subtitles-btn" data-bs-toggle="tooltip" title="This torrent has external subtitles included">
-            <i class="bi bi-badge-cc"></i> Subtitles
-        </div>
-    @endif
+    @if($torrent->subtitles_exists)
+    <div class="badge-btn subtitles-btn"
+         data-bs-toggle="tooltip"
+         title="This torrent has external subtitles included">
+        <i class="bi bi-badge-cc"></i> Subtitles
+    </div>
+@endif
 
     {{-- Happy Hour badge --}}
     @if(!empty($currentHappyHour))

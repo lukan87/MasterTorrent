@@ -306,7 +306,7 @@ title="Unassigned tickets">
 /* Hover */
 
 .sidebar-menu .nav-link:hover{
-    background:#1e293b;
+    background:#141b26;
     color:#fff;
     transform:translateX(3px);
 }
@@ -314,7 +314,7 @@ title="Unassigned tickets">
 /* Active */
 
 .sidebar-menu .nav-link.active{
-    background:linear-gradient(135deg,#505872,#2d374b);
+    background:linear-gradient(135deg,#34394a,#1d2431);
     color:#fff !important;
     font-weight:500;
     box-shadow:0 4px 10px rgba(0,0,0,.35);
@@ -342,7 +342,7 @@ title="Unassigned tickets">
 /* Active tree */
 
 .nav-treeview .nav-link.active{
-    background:#1e293b;
+    background:#141b26;
     border-left:3px solid #4f7cff;
     padding-left:14px;
 }
@@ -378,7 +378,7 @@ title="Unassigned tickets">
 }
 
 .sidebar-wrapper::-webkit-scrollbar-thumb{
-    background:#1e293b;
+    background:#141b26;
     border-radius:10px;
 }
 

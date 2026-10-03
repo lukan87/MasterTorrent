@@ -16,7 +16,7 @@
 
 <style>
 #trailerModal .modal-content {
-    background: linear-gradient(135deg, rgba(22, 32, 51, .98), rgba(15, 23, 42, .96)) !important;
+    background: linear-gradient(135deg, rgba(14,21,33,.98), rgba(10,15,27,.96)) !important;
     border: 1px solid rgba(255, 255, 255, .1) !important;
     border-radius: .75rem;
 }

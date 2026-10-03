@@ -1,6 +1,7 @@
+@php($sliderId = 'random-' . \Illuminate\Support\Str::slug($randomTitle))
 <div class="col-md-6">
 
-    <div class="modern-trending-wrapper ro-wrapper">
+    <div class="modern-trending-wrapper ro-wrapper" data-random-slider>
 
         {{-- =========================================================
              HEADER
@@ -27,6 +28,14 @@
 
             </div>
 
+            <div class="ro-controls" aria-label="{{ $randomTitle }} navigation">
+                <button type="button" class="ro-slide-button" data-slide="-1" aria-label="Previous {{ $randomTitle }}" aria-controls="{{ $sliderId }}" disabled>
+                    <i class="bi bi-chevron-left" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="ro-slide-button" data-slide="1" aria-label="Next {{ $randomTitle }}" aria-controls="{{ $sliderId }}" disabled>
+                    <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                </button>
+            </div>
         </div>
 
 
@@ -35,9 +44,9 @@
         ========================================================== --}}
         <div class="modern-trending-body ro-body">
 
-            <div class="ro-row">
+            <div class="ro-row" id="{{ $sliderId }}" tabindex="0" role="region" aria-label="{{ $randomTitle }}">
 
-                @foreach($randomItems as $item)
+                @forelse(collect($randomItems)->take(10) as $item)
 
                     <a href="{{ $item['url'] }}"
                        class="ro-card text-decoration-none"
@@ -87,7 +96,9 @@
 
                     </a>
 
-                @endforeach
+                @empty
+                    <p class="text-muted mb-0">No titles available right now.</p>
+                @endforelse
 
             </div>
 
@@ -104,8 +115,7 @@
    RANDOM ONLINE
    Movies / Series panels
 
-   Desktop: 5 posters x 2 rows
-   Mobile: horizontal scrolling
+   Single row with horizontal scrolling and navigation buttons
 ========================================================== */
 
 
@@ -129,8 +139,8 @@
     background:
         linear-gradient(
             135deg,
-            rgba(22, 32, 51, .94),
-            rgba(15, 23, 42, .88)
+            rgba(14,21,33,.94),
+            rgba(10,15,27,.88)
         );
 
     box-shadow:
@@ -217,7 +227,7 @@
     border-radius: .65rem;
 
     background:
-        rgba(15, 23, 42, .70);
+        rgba(10,15,27,.70);
 
     border:
         1px solid rgba(255, 255, 255, .07);
@@ -260,7 +270,7 @@
 
     overflow: hidden;
 
-    background: #0f172a;
+    background: #0a0f1b;
 }
 
 
@@ -310,7 +320,7 @@
     border-radius: .4rem;
 
     background:
-        rgba(15, 23, 42, .90);
+        rgba(10,15,27,.90);
 
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
@@ -630,4 +640,71 @@
 
 }
 
+/* Keep both panels in a single row at every screen size. */
+.ro-wrapper .ro-row {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    gap: 12px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(45, 212, 191, .35) transparent;
+    padding: 5px 0 10px;
+}
+.ro-wrapper .ro-card {
+    flex: 0 0 clamp(110px, calc((100% - 48px) / 5), 150px);
+    width: auto;
+    max-width: none;
+    scroll-snap-align: start;
+}
+.ro-wrapper .modern-trending-header { flex-wrap: wrap; gap: .75rem; }
+.ro-controls { display: flex; gap: .4rem; margin-left: auto; }
+.ro-slide-button {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border: 1px solid rgba(99, 210, 198, .2);
+    border-radius: 9px;
+    color: var(--ui-accent, #63d2c6);
+    background: rgba(99, 210, 198, .08);
+}
+.ro-slide-button:hover:not(:disabled) { background: rgba(99, 210, 198, .2); }
+.ro-slide-button:disabled { opacity: .3; cursor: default; }
+.ro-slide-button:focus-visible, .ro-row:focus-visible { outline: 2px solid var(--ui-accent, #63d2c6); outline-offset: 2px; }
 </style>
+
+@once
+@push('scripts')
+<script>
+document.querySelectorAll('[data-random-slider]').forEach(function (slider) {
+    const row = slider.querySelector('.ro-row');
+    const previous = slider.querySelector('[data-slide="-1"]');
+    const next = slider.querySelector('[data-slide="1"]');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    function updateButtons() {
+        previous.disabled = row.scrollLeft <= 1;
+        next.disabled = row.scrollLeft + row.clientWidth >= row.scrollWidth - 1;
+    }
+
+    slider.querySelectorAll('[data-slide]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            const card = row.querySelector('.ro-card');
+            if (!card) return;
+            const step = card.getBoundingClientRect().width + parseFloat(getComputedStyle(row).gap);
+            const page = Math.max(1, Math.floor(row.clientWidth / step)) * step;
+            row.scrollBy({ left: Number(button.dataset.slide) * page, behavior: reducedMotion.matches ? 'instant' : 'smooth' });
+        });
+    });
+
+    row.addEventListener('scroll', updateButtons, { passive: true });
+    window.addEventListener('resize', updateButtons);
+    if ('ResizeObserver' in window) new ResizeObserver(updateButtons).observe(row);
+    updateButtons();
+});
+</script>
+@endpush
+@endonce

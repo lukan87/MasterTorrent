@@ -201,7 +201,7 @@ body:has(.messenger-app) .app-content{padding-top:1rem;padding-bottom:1rem}
 .ms-title i{color:var(--ui-accent)}
 .ms-compose-btn{width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:var(--ui-accent);color:#0b1120;font-size:.95rem;text-decoration:none;transition:.2s}
 .ms-compose-btn:hover{transform:scale(1.08);color:#0b1120}
-.ms-search{margin:0 14px 6px;padding:9px 14px;border-radius:10px;border:1px solid var(--ui-border);background:rgba(255,255,255,.04);color:#e5edf7;font-size:.88rem;outline:none;transition:.2s}
+.ms-search{margin:0 14px 6px;padding:9px 14px;border-radius:10px;border:1px solid var(--ui-border);background:rgba(255,255,255,0.028);color:#e5edf7;font-size:.88rem;outline:none;transition:.2s}
 .ms-search:focus{border-color:var(--ui-accent)}
 .ms-search::placeholder{color:var(--ui-text-muted)}
 .ms-conversation-scroll{flex:1;overflow-y:auto;padding:4px 0}
@@ -223,7 +223,7 @@ body:has(.messenger-app) .app-content{padding-top:1rem;padding-bottom:1rem}
 .ms-empty-state i{font-size:2.4rem;margin-bottom:8px}
 .ms-pagination{padding:8px 14px;text-align:center}
 .ms-pagination .pagination{margin:0}
-.messenger-chat{display:flex;flex-direction:column;background:rgba(11,17,32,.55);overflow:hidden}
+.messenger-chat{display:flex;flex-direction:column;background:rgba(7,11,21,.55);overflow:hidden}
 .ms-chat-header{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:var(--ui-surface-raised);border-bottom:1px solid var(--ui-border)}
 .ms-chat-user{display:flex;align-items:center;gap:10px;text-decoration:none;color:#e5edf7}
 .ms-avatar-sm{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--ui-border)}
@@ -237,7 +237,7 @@ body:has(.messenger-app) .app-content{padding-top:1rem;padding-bottom:1rem}
 .ms-older-link{font-size:.82rem;color:var(--ui-accent);text-decoration:none;padding:6px 16px;border-radius:20px;border:1px solid var(--ui-border);transition:.15s}
 .ms-older-link:hover{background:rgba(99,210,198,.1);color:var(--ui-accent)}
 .ms-day-divider{display:flex;align-items:center;justify-content:center;padding:12px 0 4px}
-.ms-day-divider span{font-size:.72rem;color:var(--ui-text-muted);text-transform:uppercase;letter-spacing:.08em;background:rgba(255,255,255,.05);padding:3px 14px;border-radius:14px}
+.ms-day-divider span{font-size:.72rem;color:var(--ui-text-muted);text-transform:uppercase;letter-spacing:.08em;background:rgba(255,255,255,0.035);padding:3px 14px;border-radius:14px}
 .ms-msg-row{display:flex;align-items:flex-end;gap:8px;max-width:75%;animation:fadeUp .2s ease}
 .ms-msg-row.me{align-self:flex-end;flex-direction:row}
 .ms-msg-row.them{align-self:flex-start}
@@ -253,7 +253,7 @@ body:has(.messenger-app) .app-content{padding-top:1rem;padding-bottom:1rem}
 .ms-msg-action:hover{color:var(--ui-accent)}
 .ms-composer{display:flex;flex-direction:column;gap:0;padding:12px 18px 16px;background:var(--ui-surface-raised);border-top:1px solid var(--ui-border);border-radius:0 0 16px 0}
 .ms-toolbar{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
-.ms-toolbar button{background:rgba(255,255,255,.06);border:1px solid var(--ui-border);color:#e5edf7;width:30px;height:30px;border-radius:7px;font-size:.82rem;display:inline-flex;align-items:center;justify-content:center;transition:.15s;cursor:pointer}
+.ms-toolbar button{background:rgba(255,255,255,0.042);border:1px solid var(--ui-border);color:#e5edf7;width:30px;height:30px;border-radius:7px;font-size:.82rem;display:inline-flex;align-items:center;justify-content:center;transition:.15s;cursor:pointer}
 .ms-toolbar button:hover{background:var(--ui-accent);color:#0b1120;border-color:var(--ui-accent)}
 .ms-toolbar-sep{width:1px;background:var(--ui-border);margin:0 4px}
 .ms-smilies-toggle{cursor:pointer;font-size:1.1rem;padding:0 4px;transition:.15s}
@@ -261,7 +261,7 @@ body:has(.messenger-app) .app-content{padding-top:1rem;padding-bottom:1rem}
 .ms-smilies-panel{display:flex;flex-wrap:wrap;gap:8px;padding:8px 0 10px}
 .ms-smilies-panel span{cursor:pointer;font-size:1.3rem;transition:.15s}
 .ms-smilies-panel span:hover{transform:scale(1.25)}
-.ms-composer textarea{flex:1;background:rgba(255,255,255,.04);border:1px solid var(--ui-border);border-radius:12px;padding:10px 14px;color:#e5edf7;font-size:.88rem;resize:none;outline:none;min-height:44px;max-height:160px;transition:.2s}
+.ms-composer textarea{flex:1;background:rgba(255,255,255,0.028);border:1px solid var(--ui-border);border-radius:12px;padding:10px 14px;color:#e5edf7;font-size:.88rem;resize:none;outline:none;min-height:44px;max-height:160px;transition:.2s}
 .ms-composer textarea:focus{border-color:var(--ui-accent)}
 .ms-composer textarea::placeholder{color:var(--ui-text-muted)}
 .ms-send-btn{align-self:flex-end;margin-top:8px;width:40px;height:40px;border-radius:50%;border:none;background:var(--ui-accent);color:#0b1120;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:.2s;cursor:pointer}

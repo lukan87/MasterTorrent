@@ -19,7 +19,7 @@
 }
 
 .conversation-card {
-    background: linear-gradient(135deg, rgba(22,32,51,.96), rgba(15,23,42,.92));
+    background: linear-gradient(135deg, rgba(14,21,33,.96), rgba(10,15,27,.92));
     border: 1px solid rgba(148,163,184,.18);
     border-radius: .75rem;
     box-shadow: 0 12px 30px rgba(0,0,0,.22);
@@ -33,7 +33,7 @@
     justify-content: space-between;
     gap: .75rem;
     padding: .85rem 1rem;
-    background: rgba(2,6,23,.25);
+    background: rgba(1,4,15,.25);
     border-bottom: 1px solid rgba(148,163,184,.14);
 }
 
@@ -72,7 +72,7 @@
 }
 
 .message {
-    background: rgba(2,6,23,.34);
+    background: rgba(1,4,15,.34);
     border: 1px solid rgba(148,163,184,.15);
     border-radius: .6rem;
     padding: .85rem;
@@ -130,7 +130,7 @@
 }
 
 .form-control {
-    background: rgba(2,6,23,.48) !important;
+    background: rgba(1,4,15,.48) !important;
     border: 1px solid rgba(148,163,184,.22) !important;
     border-radius: .55rem !important;
     color: #f8fafc !important;
@@ -144,7 +144,7 @@
 }
 
 .form-control:focus {
-    background: rgba(2,6,23,.62) !important;
+    background: rgba(1,4,15,.62) !important;
     border-color: rgba(45,212,191,.75) !important;
     box-shadow: 0 0 0 .18rem rgba(45,212,191,.10) !important;
     outline: none !important;

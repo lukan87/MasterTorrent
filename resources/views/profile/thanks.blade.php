@@ -175,7 +175,7 @@
     flex-wrap: wrap;
     gap: .45rem;
     padding: .65rem .85rem;
-    background: linear-gradient(135deg, rgba(22,32,51,.95), rgba(15,23,42,.88));
+    background: linear-gradient(135deg, rgba(14,21,33,.95), rgba(10,15,27,.88));
     border: 1px solid var(--ui-border, rgba(255,255,255,.08));
     border-radius: .65rem;
     box-shadow: 0 8px 24px rgba(0,0,0,.22);
@@ -242,7 +242,7 @@ h4 .bi {
 }
 
 .elite-card {
-    background: linear-gradient(135deg, rgba(22,32,51,.96), rgba(15,23,42,.9));
+    background: linear-gradient(135deg, rgba(14,21,33,.96), rgba(10,15,27,.9));
     border: 1px solid var(--ui-border, rgba(255,255,255,.08));
     border-radius: .7rem;
     box-shadow: 0 10px 28px rgba(0,0,0,.24);
@@ -263,7 +263,7 @@ h4 .bi {
     align-items: center;
     min-width: 0;
     padding: .55rem .75rem;
-    background: rgba(255,255,255,.025);
+    background: rgba(255,255,255,0.0175);
     border: 1px solid rgba(255,255,255,.065);
     border-radius: .5rem;
     font-size: .82rem;
@@ -310,7 +310,7 @@ h4 .bi {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(7,14,27,.72);
+    background: rgba(5,9,18,.72);
     color: rgba(255,255,255,.4);
     font-size: 1.2rem;
 }
@@ -365,7 +365,7 @@ h4 .bi {
 }
 
 .pagination {
-    --bs-pagination-bg: rgba(22,32,51,.9);
+    --bs-pagination-bg: rgba(14,21,33,.9);
     --bs-pagination-border-color: rgba(255,255,255,.08);
     --bs-pagination-color: rgba(255,255,255,.68);
     --bs-pagination-hover-bg: rgba(45,212,191,.08);

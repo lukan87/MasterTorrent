@@ -12,6 +12,7 @@ class TeamController extends Controller
     {
         // Fetch users with class >= MODERATOR
         $staff = User::whereIn('user_class', [
+            UserClass::WEB_DEVELOPER,
             UserClass::OWNER,
             UserClass::ADMIN,
             UserClass::MODERATOR,

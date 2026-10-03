@@ -153,44 +153,13 @@ $systemId = 2;
 
 foreach ($staff as $admin) {
 
-    $conversation = \App\Models\Conversation::where(function ($q) use ($systemId, $admin) {
-        $q->where('user_one', $systemId)
-          ->where('user_two', $admin->id);
-    })
-    ->orWhere(function ($q) use ($systemId, $admin) {
-        $q->where('user_one', $admin->id)
-          ->where('user_two', $systemId);
-    })
-    ->first();
-
-    if (!$conversation) {
-
-        $conversation = \App\Models\Conversation::create([
-            'user_one' => $systemId,
-            'user_two' => $admin->id,
-            'subject' => 'Staff Notifications',
-            'last_message_at' => now(),
-        ]);
-
-    }
-
-    Message::create([
-        'conversation_id' => $conversation->id,
-        'sender_id' => $systemId,
-        'receiver_id' => $admin->id,
-        'subject' => 'New Contact Request',
-        'body' =>
+    \App\Services\SystemMessageService::send($systemId, $admin->id, 'New Contact Request',
 "A guest contacted staff.\n\n".
 "Email: {$contact->email}\n".
 "Subject: {$contact->subject}\n\n".
 "Open conversation:\n".
-config('app.site_url').'/contactstaff/'.$contact->id,
-        'is_read' => 0
-    ]);
-
-    $conversation->update([
-        'last_message_at' => now()
-    ]);
+config('app.site_url').'/contactstaff/'.$contact->id
+    );
 
 }
 
@@ -317,44 +286,13 @@ $systemId = 2;
 
 foreach ($staff as $admin) {
 
-    $conversation = \App\Models\Conversation::where(function ($q) use ($systemId, $admin) {
-        $q->where('user_one', $systemId)
-          ->where('user_two', $admin->id);
-    })
-    ->orWhere(function ($q) use ($systemId, $admin) {
-        $q->where('user_one', $admin->id)
-          ->where('user_two', $systemId);
-    })
-    ->first();
-
-    if (!$conversation) {
-
-        $conversation = \App\Models\Conversation::create([
-            'user_one' => $systemId,
-            'user_two' => $admin->id,
-            'subject' => 'Staff Notifications',
-            'last_message_at' => now(),
-        ]);
-
-    }
-
-    Message::create([
-        'conversation_id' => $conversation->id,
-        'sender_id' => $systemId,
-        'receiver_id' => $admin->id,
-        'subject' => 'Contact Reply',
-        'body' =>
+    \App\Services\SystemMessageService::send($systemId, $admin->id, 'Contact Reply',
 "A guest contacted staff.\n\n".
 "Email: {$contact->email}\n".
 "Subject: {$contact->subject}\n\n".
 "Open conversation:\n".
-config('app.site_url').'/contactstaff/'.$contact->id,
-        'is_read' => 0
-    ]);
-
-    $conversation->update([
-        'last_message_at' => now()
-    ]);
+config('app.site_url').'/contactstaff/'.$contact->id
+    );
 
 }
 

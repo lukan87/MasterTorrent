@@ -760,7 +760,7 @@ Restore Torrent
 
     .admin-search {
         position: relative;
-        background: linear-gradient(135deg, rgba(22,32,51,.95), rgba(15,23,42,.84));
+        background: linear-gradient(135deg, rgba(14,21,33,.95), rgba(10,15,27,.84));
         border: 1px solid var(--ui-border, rgba(255,255,255,.08)) !important;
         border-radius: .7rem;
         box-shadow: 0 8px 24px rgba(0,0,0,.18);
@@ -782,7 +782,7 @@ Restore Torrent
         display: flex;
         align-items: center;
         gap: 6px;
-        background: rgba(7,15,27,.45);
+        background: rgba(5,10,18,.45);
         border: 1px solid rgba(255,255,255,.08);
         border-radius: .55rem;
         padding: 5px 7px;
@@ -826,7 +826,7 @@ Restore Torrent
     }
 
     .premium-select option {
-        background: #172234;
+        background: #0f1622;
         color: #e7eef2;
     }
 
@@ -838,7 +838,7 @@ Restore Torrent
     .search-divider {
         width: 1px;
         height: 25px;
-        background: rgba(255,255,255,.08);
+        background: rgba(255,255,255,0.056);
         margin: 0 4px;
         flex: 0 0 auto;
     }
@@ -878,21 +878,21 @@ Restore Torrent
     .premium-reset-btn {
         width: 31px;
         height: 31px;
-        background: rgba(255,255,255,.035);
+        background: rgba(255,255,255,0.0245);
         border: 1px solid rgba(255,255,255,.08);
         color: #9aabb8;
         padding: 0;
     }
 
     .premium-reset-btn:hover {
-        background: rgba(255,255,255,.07);
+        background: rgba(255,255,255,0.049);
         color: #fff;
         border-color: rgba(32,201,151,.25);
     }
 
     .torrent-list-card {
         position: relative;
-        background: linear-gradient(135deg, rgba(22,32,51,.95), rgba(15,23,42,.84));
+        background: linear-gradient(135deg, rgba(14,21,33,.95), rgba(10,15,27,.84));
         border: 1px solid var(--ui-border, rgba(255,255,255,.08));
         border-radius: .7rem;
         box-shadow: 0 8px 24px rgba(0,0,0,.18);
@@ -900,7 +900,7 @@ Restore Torrent
     }
 
     .torrent-header {
-        background: rgba(255,255,255,.025);
+        background: rgba(255,255,255,0.0175);
         border-color: rgba(255,255,255,.07) !important;
     }
 
@@ -998,7 +998,7 @@ Restore Torrent
     }
 
     .pagination .page-link {
-        background: rgba(22,32,51,.9);
+        background: rgba(14,21,33,.9);
         border-color: rgba(255,255,255,.08);
         color: #aabcc7;
         font-size: 12px;
@@ -1018,7 +1018,7 @@ Restore Torrent
     }
 
     .modal-content {
-        background: linear-gradient(135deg, rgba(22,32,51,.98), rgba(15,23,42,.96));
+        background: linear-gradient(135deg, rgba(14,21,33,.98), rgba(10,15,27,.96));
         border: 1px solid var(--ui-border, rgba(255,255,255,.08));
         border-radius: .7rem;
         color: #dbe7ef;
@@ -1031,7 +1031,7 @@ Restore Torrent
     }
 
     .modal-header:not(.bg-danger):not(.bg-success) {
-        background: rgba(255,255,255,.02);
+        background: rgba(255,255,255,0.014);
     }
 
     .modal-title {
@@ -1051,7 +1051,7 @@ Restore Torrent
 
     .modal .form-select,
     .modal .form-control {
-        background: rgba(7,15,27,.55);
+        background: rgba(5,10,18,.55);
         border: 1px solid rgba(255,255,255,.1);
         color: #dbe7ef;
         font-size: 13px;
@@ -1059,14 +1059,14 @@ Restore Torrent
 
     .modal .form-select:focus,
     .modal .form-control:focus {
-        background: rgba(7,15,27,.65);
+        background: rgba(5,10,18,.65);
         color: #fff;
         border-color: rgba(32,201,151,.4);
         box-shadow: 0 0 0 .15rem rgba(32,201,151,.07);
     }
 
     .modal .form-select option {
-        background: #172234;
+        background: #0f1622;
         color: #fff;
     }
 

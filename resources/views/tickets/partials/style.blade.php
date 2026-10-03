@@ -1,5 +1,5 @@
 <style>
-.support { --support-bg:#111c2d; --support-line:rgba(148,163,184,.18); --support-muted:#a4b3c7; --support-accent:var(--ui-accent,#22d3c5); max-width:1440px; margin:0 auto; padding:24px 16px 40px; color:#e6edf7; font-size:14px; }
+.support { --support-bg:#0b121d; --support-line:rgba(148,163,184,.18); --support-muted:#a4b3c7; --support-accent:var(--ui-accent,#22d3c5); max-width:1440px; margin:0 auto; padding:24px 16px 40px; color:#e6edf7; font-size:14px; }
 .support * { box-sizing:border-box; }
 .support a { text-decoration:none; }
 .support .support-muted,.support small { color:var(--support-muted); }
@@ -10,8 +10,8 @@
 .support h3 { font-size:15px; font-weight:650; }
 .support-header p { margin:0; color:var(--support-muted); }
 .support-actions { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-.support-btn { display:inline-flex; justify-content:center; align-items:center; gap:8px; padding:10px 15px; min-height:42px; background:#1a2940; color:#e6edf7; border:1px solid var(--support-line); border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; }
-.support-btn:hover { color:#fff; border-color:var(--support-accent); background:#21344d; }
+.support-btn { display:inline-flex; justify-content:center; align-items:center; gap:8px; padding:10px 15px; min-height:42px; background:#111b2a; color:#e6edf7; border:1px solid var(--support-line); border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; }
+.support-btn:hover { color:#fff; border-color:var(--support-accent); background:#152232; }
 .support-btn-primary { background:var(--support-accent); border-color:var(--support-accent); color:#071c20; }
 .support-btn-primary:hover { background:#6ee7dc; color:#071c20; }
 .support a:focus-visible,.support button:focus-visible { outline:2px solid var(--support-accent); outline-offset:3px; }
@@ -27,22 +27,22 @@
 .support-panel-body { padding:22px; }
 .support-filters { display:grid; grid-template-columns:2fr repeat(3,minmax(120px,1fr)); gap:14px; }
 .support label { display:block; font-size:12px; font-weight:600; color:#cbd5e1; margin-bottom:7px; }
-.support .form-control,.support .form-select { background-color:#0c1625; border:1px solid #35445a; border-radius:7px; color:#e6edf7; font-size:14px; min-height:42px; }
+.support .form-control,.support .form-select { background-color:#080e18; border:1px solid #35445a; border-radius:7px; color:#e6edf7; font-size:14px; min-height:42px; }
 .support .form-control::placeholder { color:#8292a9; }
 .support .form-control:focus,.support .form-select:focus { border-color:var(--support-accent); box-shadow:0 0 0 3px rgba(34,211,197,.12); }
 .support textarea.form-control { min-height:150px; line-height:1.7; resize:vertical; }
-.support .form-select option { background:#111c2d; }
+.support .form-select option { background:#0b121d; }
 .support-help { font-size:12px; color:var(--support-muted); margin:7px 0 0; line-height:1.6; }
 .support-filter-footer { display:flex; gap:12px; align-items:end; flex-wrap:wrap; margin-top:16px; }
 .support-filter-footer > div { max-width:190px; }
 .support-table { width:100%; border-collapse:collapse; }
 .support-table th { padding:12px 20px; color:var(--support-muted); text-transform:uppercase; font-size:10px; letter-spacing:.07em; background:rgba(0,0,0,.12); font-weight:600; white-space:nowrap; }
 .support-table td { padding:18px 20px; border-top:1px solid var(--support-line); vertical-align:middle; }
-.support-table tbody tr:hover { background:rgba(148,163,184,.035); }
+.support-table tbody tr:hover { background:rgba(148,163,184,0.0245); }
 .support-subject { color:#edf5ff; font-weight:600; display:block; margin:5px 0; overflow-wrap:anywhere; }
 .support-subject:hover { color:var(--support-accent); }
 .support-ticket-id { font-size:11px; color:var(--support-muted); font-variant-numeric:tabular-nums; }
-.support-badge { display:inline-flex; align-items:center; gap:6px; padding:5px 9px; border-radius:5px; background:rgba(148,163,184,.1); color:#cbd5e1; font-size:11px; font-weight:600; white-space:nowrap; }
+.support-badge { display:inline-flex; align-items:center; gap:6px; padding:5px 9px; border-radius:5px; background:rgba(148,163,184,0.07); color:#cbd5e1; font-size:11px; font-weight:600; white-space:nowrap; }
 .support-badge::before { content:''; width:5px; height:5px; border-radius:50%; background:currentColor; }
 .support-badge[data-value="Open"],.support-badge[data-value="Waiting User"] { color:#93c5fd; background:rgba(59,130,246,.12); }
 .support-badge[data-value="Waiting Staff"],.support-badge[data-value="High"] { color:#fcd978; background:rgba(245,158,11,.11); }

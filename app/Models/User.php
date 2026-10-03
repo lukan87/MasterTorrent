@@ -31,6 +31,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'subscribed',
         'password',
         'recovery_code',
         'profile_image',
@@ -95,6 +96,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'activation_pending' => 'boolean',
             'password' => 'hashed',
             'banned_until' => 'datetime',
             'last_activity' => 'datetime',

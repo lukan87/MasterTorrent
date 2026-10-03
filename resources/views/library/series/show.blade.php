@@ -486,7 +486,7 @@
 .hero-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, #0b0b0b 10%, transparent 60%);
+    background: linear-gradient(to top, #070707 10%, transparent 60%);
 }
 
 .hero-content {
@@ -517,7 +517,7 @@
 }
 
 .badge-rating {
-background: rgba(255,255,255,0.15);
+background: rgba(255,255,255,0.105);
     padding: 4px 8px;
     border-radius: 6px;
     font-weight: 700;
@@ -525,7 +525,7 @@ background: rgba(255,255,255,0.15);
 }
 
 .badge-meta {
-    background: rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.105);
     padding: 4px 8px;
     border-radius: 6px;
     font-size: 1.25rem
@@ -560,7 +560,7 @@ background: rgba(255,255,255,0.15);
 
 /* TORRENTS */
 .torrent-item {
-    background: #111;
+    background: #0b0b0b;
     border: 1px solid rgba(255, 255, 255, .05);
     border-radius: 10px;
     padding: 13px 15px;
@@ -568,7 +568,7 @@ background: rgba(255,255,255,0.15);
 }
 
 .torrent-item:hover {
-    background: #1a1a1a;
+    background: #111111;
     border-color: rgba(59, 130, 246, .25);
 }
 
@@ -635,7 +635,7 @@ background: rgba(255,255,255,0.15);
     border: 1px solid rgba(255, 255, 255, .07);
     border-radius: 12px;
     overflow: hidden;
-    background: rgba(9, 16, 29, .45);
+    background: rgba(6,10,19,.45);
 }
 
 .res-panel-header {
@@ -709,7 +709,7 @@ background: rgba(255,255,255,0.15);
 .torrent-empty {
     text-align: center;
     padding: 2.5rem 1.5rem;
-    background: rgba(15, 23, 42, .55);
+    background: rgba(10,15,27,.55);
     border: 1px solid rgba(255, 255, 255, .06);
     border-radius: .85rem;
 }
@@ -752,7 +752,7 @@ background: rgba(255,255,255,0.15);
    EPISODE CARD (Last Episode)
 ========================= */
 .tv-episode-card {
-    background: linear-gradient(135deg, rgba(22, 32, 51, .95), rgba(15, 23, 42, .84));
+    background: linear-gradient(135deg, rgba(14,21,33,.95), rgba(10,15,27,.84));
     border: 1px solid var(--ui-border);
     border-radius: .85rem;
     overflow: hidden;
@@ -829,7 +829,7 @@ background: rgba(255,255,255,0.15);
     gap: 5px;
     padding: 4px 9px;
     border-radius: .45rem;
-    background: rgba(255, 255, 255, .06);
+    background: rgba(255,255,255,0.042);
     border: 1px solid rgba(255, 255, 255, .08);
     color: rgba(255, 255, 255, .78);
     font-size: 12px;
@@ -876,7 +876,7 @@ background: rgba(255,255,255,0.15);
 .season-card {
     overflow: hidden;
     border-radius: .7rem;
-    background: rgba(9, 16, 29, .48);
+    background: rgba(6,10,19,.48);
     border: 1px solid rgba(255, 255, 255, .055);
     transition: transform .18s ease, border-color .18s ease;
 }
@@ -890,7 +890,7 @@ background: rgba(255,255,255,0.15);
     position: relative;
     aspect-ratio: 2 / 3;
     overflow: hidden;
-    background: #0f172a;
+    background: #0a0f1b;
 }
 
 .season-poster {
@@ -913,7 +913,7 @@ background: rgba(255,255,255,0.15);
     gap: 3px;
     padding: 3px 6px;
     border-radius: .4rem;
-    background: rgba(5, 10, 18, .82);
+    background: rgba(3,6,12,.82);
     color: #facc15;
     font-size: 11px;
     font-weight: 700;
@@ -960,7 +960,7 @@ background: rgba(255,255,255,0.15);
 ========================= */
 .tmdb-recs {
     overflow: hidden;
-    background: linear-gradient(135deg, rgba(22, 32, 51, .95), rgba(15, 23, 42, .84));
+    background: linear-gradient(135deg, rgba(14,21,33,.95), rgba(10,15,27,.84));
     border: 1px solid var(--ui-border);
     border-radius: .85rem;
     box-shadow: 0 14px 36px rgba(0, 0, 0, .28);
@@ -1038,7 +1038,7 @@ background: rgba(255,255,255,0.15);
     min-width: 140px;
     max-width: 140px;
     padding: 8px;
-    background: rgba(9, 16, 29, .48);
+    background: rgba(6,10,19,.48);
     border: 1px solid rgba(255, 255, 255, .055);
     border-radius: .6rem;
     transition: background .15s ease, border-color .15s ease, transform .15s ease;
@@ -1055,7 +1055,7 @@ background: rgba(255,255,255,0.15);
     aspect-ratio: 2 / 3;
     border-radius: .45rem;
     overflow: hidden;
-    background: #0f172a;
+    background: #0a0f1b;
 }
 
 .tmdb-recs-poster {
@@ -1078,7 +1078,7 @@ background: rgba(255,255,255,0.15);
     gap: 3px;
     padding: 3px 6px;
     border-radius: .4rem;
-    background: rgba(5, 10, 18, .82);
+    background: rgba(3,6,12,.82);
     color: #facc15;
     font-size: 11px;
     font-weight: 700;
@@ -1124,7 +1124,7 @@ background: rgba(255,255,255,0.15);
     padding: 12px 16px;
     margin-top: 14px;
     border-radius: .8rem;
-    background: rgba(9, 16, 29, .55);
+    background: rgba(6,10,19,.55);
     border: 1px solid var(--ui-border);
 }
 .library-subscribe-row .subscribe-btn {
@@ -1152,7 +1152,7 @@ background: rgba(255,255,255,0.15);
     color: #fff;
     font-size: 12px;
     font-weight: 700;
-    background: rgba(5, 10, 18, .72);
+    background: rgba(3,6,12,.72);
     opacity: 0;
     transition: opacity .18s ease;
     pointer-events: none;
@@ -1169,7 +1169,7 @@ background: rgba(255,255,255,0.15);
    SEASON MODAL
 ========================================================= */
 .season-modal-content {
-    background: linear-gradient(150deg, #101a2c, #0b1120);
+    background: linear-gradient(150deg, #0a111d, #070b15);
     border: 1px solid var(--ui-border);
     border-radius: .9rem;
     color: rgba(255, 255, 255, .88);
@@ -1187,7 +1187,7 @@ background: rgba(255,255,255,0.15);
     object-fit: cover;
     border-radius: .5rem;
     border: 1px solid var(--ui-border);
-    background: #0f172a;
+    background: #0a0f1b;
 }
 .season-modal-subtitle {
     color: rgba(255, 255, 255, .55);
@@ -1234,7 +1234,7 @@ background: rgba(255,255,255,0.15);
     gap: 12px;
     padding: 10px;
     border-radius: .6rem;
-    background: rgba(255, 255, 255, .03);
+    background: rgba(255,255,255,0.021);
     border: 1px solid var(--ui-border);
 }
 .season-episode-num {
@@ -1260,7 +1260,7 @@ background: rgba(255,255,255,0.15);
     object-fit: cover;
     border-radius: .45rem;
     border: 1px solid var(--ui-border);
-    background: #0f172a;
+    background: #0a0f1b;
 }
 .season-episode-nostill {
     flex: 0 0 auto;
@@ -1270,7 +1270,7 @@ background: rgba(255,255,255,0.15);
     align-items: center;
     justify-content: center;
     border-radius: .45rem;
-    background: #0f172a;
+    background: #0a0f1b;
     border: 1px solid var(--ui-border);
     color: rgba(255, 255, 255, .25);
     font-size: 22px;
@@ -1317,7 +1317,7 @@ background: rgba(255,255,255,0.15);
     text-align: center;
     padding: 8px;
     border-radius: .6rem;
-    background: rgba(255, 255, 255, .03);
+    background: rgba(255,255,255,0.021);
     border: 1px solid var(--ui-border);
 }
 .season-cast-photo {
@@ -1329,7 +1329,7 @@ background: rgba(255,255,255,0.15);
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #0f172a;
+    background: #0a0f1b;
     border: 1px solid var(--ui-border);
     color: rgba(255, 255, 255, .25);
     font-size: 24px;
@@ -1430,7 +1430,7 @@ background: rgba(255,255,255,0.15);
 
 /* Keep unavailable cards from getting the normal hover effect */
 .tmdb-recs-card-unavailable:hover {
-    background: rgba(9, 16, 29, .48);
+    background: rgba(6,10,19,.48);
     border-color: rgba(255, 255, 255, .055);
     transform: none;
 }
@@ -1456,7 +1456,7 @@ background: rgba(255,255,255,0.15);
 
     border-radius: 50%;
 
-    background: rgba(5, 10, 18, .86);
+    background: rgba(3,6,12,.86);
     backdrop-filter: blur(5px);
 
     font-size: 12px;
@@ -1641,5 +1641,11 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 @endpush
+
+@if($libraryEntry)
+<div class="container px-xl-5 px-lg-4 px-3 mb-4">
+    @include('comments.discussion', ['commentTarget' => $libraryEntry, 'commentType' => \App\Models\TorrentSeries::class])
+</div>
+@endif
 
 @endsection

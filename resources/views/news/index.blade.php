@@ -192,7 +192,7 @@
 /* FILEIPLAY NEWS CENTER */
 .news-page { color:#e5e7eb; }
 .news-hero,.news-card,.empty-news-card,.modern-alert {
-    background:linear-gradient(135deg,rgba(22,32,51,.97),rgba(15,23,42,.90));
+    background:linear-gradient(135deg,rgba(14,21,33,.97),rgba(10,15,27,.90));
     border:1px solid var(--ui-border,rgba(255,255,255,.08));
     box-shadow:0 12px 32px rgba(0,0,0,.25);
 }

@@ -1,4 +1,4 @@
-<div class="container-fluid mt-3 tt-wrapper">
+<div class="container-fluid px-0 tt-wrapper">
 
 <div class="accordion modern-lb-accordion" id="lbAccordion">
 
@@ -32,11 +32,17 @@
 
 <div class="accordion-body pt-2">
 
-<div class="row g-2">
+<div class="nav nav-pills modern-lb-tabs gap-2 mb-3" role="tablist" aria-label="Community leaderboards">
+    <button class="nav-link active" id="lb-seeders-tab" data-bs-toggle="pill" data-bs-target="#lb-seeders" type="button" role="tab" aria-controls="lb-seeders" aria-selected="true">Top Seeders</button>
+    <button class="nav-link" id="lb-uploaders-tab" data-bs-toggle="pill" data-bs-target="#lb-uploaders" type="button" role="tab" aria-controls="lb-uploaders" aria-selected="false">Top Uploaders</button>
+    <button class="nav-link" id="lb-downloaders-tab" data-bs-toggle="pill" data-bs-target="#lb-downloaders" type="button" role="tab" aria-controls="lb-downloaders" aria-selected="false">Top Downloaders</button>
+</div>
+
+<div class="tab-content">
 
 {{-- ================= UPLOADERS ================= --}}
 
-<div class="col-xl-4 col-md-6">
+<div class="tab-pane fade" id="lb-uploaders" role="tabpanel" aria-labelledby="lb-uploaders-tab" tabindex="0">
 
 <div class="card modern-lb-card border-0 h-100">
 
@@ -170,7 +176,7 @@ Top {{ $uploadPercentile }}%
 
 {{-- ================= DOWNLOADERS ================= --}}
 
-<div class="col-xl-4 col-md-6">
+<div class="tab-pane fade" id="lb-downloaders" role="tabpanel" aria-labelledby="lb-downloaders-tab" tabindex="0">
 
 <div class="card modern-lb-card border-0 h-100">
 
@@ -304,7 +310,7 @@ Top {{ $downloadPercentile }}%
 
 {{-- ================= SEEDERS ================= --}}
 
-<div class="col-xl-4 col-md-6">
+<div class="tab-pane fade show active" id="lb-seeders" role="tabpanel" aria-labelledby="lb-seeders-tab" tabindex="0">
 
 <div class="card modern-lb-card border-0 h-100">
 
@@ -427,6 +433,29 @@ Top {{ $seederPercentile }}%
 </div>
 
 <style>
+.modern-lb-tabs .nav-link {
+    padding: .45rem .65rem;
+    color: #9db2c5;
+    background: rgba(148,163,184,0.049);
+    font-size: 12px;
+    font-weight: 600;
+}
+.modern-lb-tabs .nav-link.active {
+    color: #0f172a;
+    background: var(--ui-accent, #63d2c6);
+}
+.modern-lb-tabs .nav-link:focus-visible {
+    outline: 2px solid var(--ui-accent, #63d2c6);
+    outline-offset: 2px;
+}
+.modern-lb-button {
+    flex-wrap: wrap;
+    gap: .25rem 0;
+}
+.modern-lb-item {
+    gap: .5rem;
+}
+
 /* =========================================================
    FILEIPLAY COMMUNITY LEADERBOARDS
    News / Poll matched typography
@@ -437,8 +466,8 @@ Top {{ $seederPercentile }}%
     overflow: hidden;
     background: linear-gradient(
         135deg,
-        rgba(22, 32, 51, .95),
-        rgba(15, 23, 42, .84)
+        rgba(14,21,33,.95),
+        rgba(10,15,27,.84)
     );
     border: 1px solid var(--ui-border);
     border-radius: 1rem;
@@ -491,8 +520,8 @@ Top {{ $seederPercentile }}%
     height: 100%;
     background: linear-gradient(
         135deg,
-        rgba(22, 32, 51, .90),
-        rgba(15, 23, 42, .78)
+        rgba(14,21,33,.90),
+        rgba(10,15,27,.78)
     ) !important;
     border: 1px solid var(--ui-border) !important;
     border-radius: .85rem !important;
@@ -507,7 +536,7 @@ Top {{ $seederPercentile }}%
     left: 10%;
     right: 10%;
     height: 1px;
-    background: rgba(255,255,255,.07);
+    background: rgba(255,255,255,0.049);
     pointer-events: none;
 }
 
@@ -559,7 +588,7 @@ Top {{ $seederPercentile }}%
     height: 26px;
     padding: .2rem .4rem !important;
     color: #aab8c7 !important;
-    background: rgba(148,163,184,.07) !important;
+    background: rgba(148,163,184,0.049) !important;
     border: 1px solid rgba(148,163,184,.10);
     border-radius: .4rem;
     font-size: 12px;

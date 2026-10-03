@@ -69,7 +69,7 @@
 
 
 
-              <div class="message {{ auth()->id() === $message->user_id ? 'own' : '' }}{{ $grouped ? ' grouped' : '' }}" data-id="{{ $message->id }}" data-user="{{ $message->user_id }}" data-sticky="{{ $message->sticky ? 1 : 0 }}">
+              <div id="shout-{{ $message->id }}" class="message {{ auth()->id() === $message->user_id ? 'own' : '' }}{{ $grouped ? ' grouped' : '' }}" data-id="{{ $message->id }}" data-user="{{ $message->user_id }}" data-sticky="{{ $message->sticky ? 1 : 0 }}">
 
                 <img class="avatar"
 
@@ -360,7 +360,7 @@ $isSystem = $message->user_id == 2;
 
                                 @endphp
 
-                                <div class="reply-card {{ auth()->id() === $reply->user_id ? 'own' : '' }}" data-user="{{ $reply->user_id }}" role="listitem" style="--reply-accent: {{ $replyColor }}">
+                                <div id="shout-{{ $reply->id }}" class="reply-card {{ auth()->id() === $reply->user_id ? 'own' : '' }}" data-user="{{ $reply->user_id }}" role="listitem" style="--reply-accent: {{ $replyColor }}">
 
                                     <img class="avatar-sm"
 

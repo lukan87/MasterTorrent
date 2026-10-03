@@ -7,7 +7,8 @@
     const box = document.getElementById('shoutbox-messages');
     const container = document.getElementById('shoutbox-container');
     const pinned = document.getElementById('shoutbox-pinned');
-    let followingLatest = true;
+    let viewingMention = Boolean(root.dataset.highlightShout);
+    let followingLatest = !viewingMention;
     const input = form.querySelector('[name="content"]');
     const search = document.getElementById('chat-search');
     const filter = document.getElementById('chat-filter');
@@ -86,6 +87,7 @@
     }
 
     function scrollToLatest() {
+        viewingMention = false;
         followingLatest = true;
         container.scrollTop = container.scrollHeight;
         showJump();
@@ -118,7 +120,7 @@
             if (requestGeneration !== generation) return;
             if (typeof data.html !== 'string') throw new Error('Unable to refresh chat.');
             // Never replace a reply or edit being composed, even if it opened during this request.
-            if (editing() || (!force && (!nearBottom() || mutation))) {
+            if (editing() || (!force && (viewingMention || !nearBottom() || mutation))) {
                 if (data.revision !== lastRevision) pending = data;
             } else {
                 render(data);
@@ -247,7 +249,7 @@
     search.addEventListener('input', applyFilter);
     filter.addEventListener('change', applyFilter);
     container.addEventListener('scroll', () => {
-        followingLatest = nearBottom();
+        followingLatest = !viewingMention && nearBottom();
         showJump();
     });
     jump.addEventListener('click', () => {
@@ -282,7 +284,23 @@
     window.addEventListener('offline', () => { status.textContent = 'Offline · draft kept'; });
     saveDraft();
     applyFilter();
-    scrollToLatest();
+    if (viewingMention) {
+        const shout = document.getElementById('shout-' + root.dataset.highlightShout);
+        if (shout) {
+            shout.scrollIntoView({ block: 'center', behavior: 'instant' });
+            shout.classList.add('shout-mention-flash');
+            setTimeout(() => shout.classList.remove('shout-mention-flash'), 2000);
+            // Keep the target in view when avatars and embedded images finish loading.
+            window.addEventListener('load', () => {
+                if (viewingMention) shout.scrollIntoView({ block: 'center', behavior: 'instant' });
+            }, { once: true });
+        } else {
+            scrollToLatest();
+        }
+        showJump();
+    } else {
+        scrollToLatest();
+    }
     // Images and other embedded content can grow after the initial render.
     if ('ResizeObserver' in window) {
         new ResizeObserver(() => {

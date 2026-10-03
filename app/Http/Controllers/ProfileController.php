@@ -329,7 +329,10 @@ $timeline = $user->timeline()->latest()->get();
 
 
 
+    $achievementCategories = app(\App\Services\AchievementService::class)->progress($user);
+
     return view('profile.show', compact(
+        'achievementCategories',
         'inviteTreeMembers',
         'user',
         'activeSeeds',
@@ -368,6 +371,13 @@ $timeline = $user->timeline()->latest()->get();
 
     $authUser = Auth::user();
 
+    if ((int) $authUser->id !== (int) $user->id) {
+        foreach (['current_password', 'new_password', 'new_password_confirmation', 'verification_recovery_code'] as $field) {
+            abort_if($request->filled($field), 403, 'Only the account owner can change account credentials.');
+        }
+    }
+
+
     /*
     |--------------------------------------------------------------------------
     | Validation Rules
@@ -381,9 +391,9 @@ $timeline = $user->timeline()->latest()->get();
         'info'              => 'nullable|string',
         'timezone'          => 'nullable|timezone',
         'recovery_code'     => 'nullable|string|min:6',
-        'current_password'  => 'nullable|string',
+        'current_password'  => 'required_with:new_password|nullable|string',
         'new_password'      => 'nullable|string|min:8|confirmed',
-        'verification_recovery_code' => 'nullable|string',
+        'verification_recovery_code' => config('auth.email_registration') ? 'nullable|string' : 'required_with:new_password|nullable|string',
     ];
 
     if ($authUser->user_class >= UserClass::ADMIN) {
@@ -399,6 +409,20 @@ $timeline = $user->timeline()->latest()->get();
     }
 
     $validated = $request->validate($rules);
+
+    if ($request->filled('new_password')) {
+        $errors = [];
+        if (!Hash::check($request->current_password, $user->password)) {
+            $errors['current_password'] = 'The provided password does not match your current password.';
+        }
+        if (!config('auth.email_registration') && !Hash::check($request->verification_recovery_code, $user->recovery_code ?? '')) {
+            $errors['verification_recovery_code'] = 'Invalid recovery code.';
+        }
+        if ($errors) {
+            throw \Illuminate\Validation\ValidationException::withMessages($errors);
+        }
+    }
+
 
     /*
     |--------------------------------------------------------------------------
@@ -471,16 +495,8 @@ $timeline = $user->timeline()->latest()->get();
         |--------------------------------------------------------------------------
         */
 
-        if ($request->filled('current_password') && $request->filled('new_password')) {
-            if (!Hash::check($request->current_password, $user->password)) {
-                return back()->withErrors(['current_password' => 'The provided password does not match your current password.']);
-            }
-
-            if (!Hash::check($request->verification_recovery_code, $user->recovery_code)) {
-                return back()->withErrors(['verification_recovery_code' => 'Invalid recovery code.']);
-            }
-
-            $user->password = Hash::make($request->new_password);
+        if ($request->filled('new_password')) {
+            $user->password = Hash::make($validated['new_password']);
         }
 
         /*
@@ -782,20 +798,26 @@ private function deleteTorrentCompletely(Torrent $torrent): void
     $torrent->forceDelete();
 }
 
-public function regeneratePasskey($id)
+public function regeneratePasskey(Request $request, $id)
 {
     $user = User::findOrFail($id);
 
-    if (auth()->id() !== $user->id && 
-        auth()->user()->user_class < UserClass::ADMIN) {
-        abort(403);
-    }
+    abort_unless(auth()->check() && (int) auth()->id() === (int) $user->id, 403);
 
-    $user->passkey = bin2hex(random_bytes(16));
-    $user->save();
-    Peer::where('user_id', $user->id)->delete();
+    $request->validateWithBag('passkey', [
+        'current_password' => ['required', 'string', 'current_password:web'],
+    ], [
+        'current_password.current_password' => 'The account password is incorrect.',
+    ]);
 
-    return back()->with('success', 'Passkey regenerated successfully.');
+    DB::transaction(function () use ($user) {
+        $user->passkey = bin2hex(random_bytes(16));
+        $user->save();
+        Peer::where('user_id', $user->id)->delete();
+    });
+
+    return redirect()->route('profile.edit', [$user->id, $user->name])
+        ->with('success', 'Passkey regenerated. Update your torrent clients with the new tracker passkey.');
 }
 
 
@@ -809,6 +831,11 @@ public function comments($id, $name)
         }])
         ->latest()
         ->paginate(25);
+
+    // Only load known online targets; legacy torrent comments use the 'torrent' alias.
+    $comments->getCollection()
+        ->whereIn('commentable_type', [\App\Models\Movie::class, \App\Models\Series::class, \App\Models\TorrentRequest::class])
+        ->load('commentable');
 
     return view('profile.comments', compact('user', 'comments'));
 }

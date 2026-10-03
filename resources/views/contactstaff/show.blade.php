@@ -19,7 +19,7 @@
 }
 
 .contact-message-card {
-    background: linear-gradient(135deg, rgba(22,32,51,.96), rgba(15,23,42,.92));
+    background: linear-gradient(135deg, rgba(14,21,33,.96), rgba(10,15,27,.92));
     border: 1px solid rgba(148,163,184,.18);
     border-radius: .75rem;
     box-shadow: 0 14px 35px rgba(0,0,0,.25);
@@ -27,7 +27,7 @@
 }
 
 .contact-message-card .card-header {
-    background: rgba(2,6,23,.28);
+    background: rgba(1,4,15,.28);
     border-bottom: 1px solid rgba(148,163,184,.14);
     color: #f8fafc;
     padding: .9rem 1.1rem;
@@ -96,7 +96,7 @@
 }
 
 .message-bubble.staff {
-    background: rgba(30,41,59,.72);
+    background: rgba(20,27,38,.72);
     border-color: rgba(148,163,184,.16);
 }
 
@@ -143,7 +143,7 @@
 }
 
 .form-control {
-    background: rgba(2,6,23,.48) !important;
+    background: rgba(1,4,15,.48) !important;
     border: 1px solid rgba(148,163,184,.22) !important;
     border-radius: .55rem !important;
     color: #f8fafc !important;
@@ -157,7 +157,7 @@
 }
 
 .form-control:focus {
-    background: rgba(2,6,23,.62) !important;
+    background: rgba(1,4,15,.62) !important;
     border-color: rgba(45,212,191,.75) !important;
     box-shadow: 0 0 0 .18rem rgba(45,212,191,.10) !important;
     outline: none !important;
