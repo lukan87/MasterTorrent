@@ -20,7 +20,7 @@ yarn-error.log
 /.idea
 /.vscode
 /.zed
-/tests/Unit
+/tests/
 # Generated torrent files
 /public/files/torrents/
 
