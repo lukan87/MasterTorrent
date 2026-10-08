@@ -1408,7 +1408,7 @@
             @if($recipients->hasPages())
 
                 <div class="card-footer bg-transparent border-top py-3">
-                    {{ $recipients->links() }}
+                    {{ $recipients->links('pagination::bootstrap-5') }}
                 </div>
 
             @endif

@@ -7,7 +7,7 @@ use App\Models\Torrent;
 /** Compose movie/TV display data from independent metadata providers. */
 class MediaDisplayService
 {
-    public function getDisplayPayload(int $tmdbId, string $type, ?string $imdbId = null): ?array
+    public function getDisplayPayload(int $tmdbId, string $type, ?string $imdbId = null, bool $includeCollection = true): ?array
     {
         $tmdb = app(TMDBService::class)->fetchTMDBData($tmdbId, $type);
         if (! $tmdb) {
@@ -40,7 +40,7 @@ class MediaDisplayService
         $collection = null;
         $collectionMovies = [];
 
-        if ($isMovie && ! empty($tmdb['belongs_to_collection'])) {
+        if ($includeCollection && $isMovie && ! empty($tmdb['belongs_to_collection'])) {
             $collection = [
                 'id' => $tmdb['belongs_to_collection']['id'],
                 'name' => $tmdb['belongs_to_collection']['name'],
@@ -90,7 +90,7 @@ class MediaDisplayService
 
             // IMAGES
             'poster' => isset($tmdb['poster_path']) ? "https://image.tmdb.org/t/p/w500{$tmdb['poster_path']}" : null,
-            'backdrop' => isset($tmdb['backdrop_path']) ? "https://image.tmdb.org/t/p/original{$tmdb['backdrop_path']}" : null,
+            'backdrop' => isset($tmdb['backdrop_path']) ? "https://image.tmdb.org/t/p/w1280{$tmdb['backdrop_path']}" : null,
             'backdrops' => collect($tmdb['images']['backdrops'] ?? [])
                 ->pluck('file_path')
                 ->filter(fn ($path) => is_string($path) && preg_match('~^/[a-zA-Z0-9_.-]+$~', $path))

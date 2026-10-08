@@ -431,7 +431,7 @@ body {
                 </div>
 
                 @if(config('auth.email_registration'))
-                    <div class="alert alert-success">We’ll email you an activation link. Confirm your email before signing in. If you forget your password, we’ll send you a reset link.</div>
+                    <div class="alert alert-success">We’ll email you an activation link. Confirm your email before signing in. If you forget your password, we’ll send you a reset link. Check your spam folder as well</div>
                 @else
                 {{-- Recovery Code --}}
                 <div class="mb-3">

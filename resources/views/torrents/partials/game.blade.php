@@ -524,54 +524,10 @@ body::before{content:'';position:fixed;inset:55px 0 0 0;background:linear-gradie
 @media(max-width:768px){.game-page{margin-top:1rem!important}.media-card,.info-card,.feature-card,.screenshot-carousel{border-radius:.7rem}.media-card,.feature-card,.screenshot-carousel{padding:12px}.info-card{padding:15px}.game-title{font-size:18px}.feature-grid,.meta-grid{grid-template-columns:1fr}.screenshot-carousel .carousel-inner{height:220px}.game-mini-header{top:58px;width:calc(100% - 16px);padding:8px 9px}.mini-header-title{font-size:var(--site-font-body, 13px)}.game-mini-header .btn-info{padding:5px 9px!important;font-size:var(--site-font-small, 13px)}}
 </style>
 
-<script>
-
-/* Sticky header */
-window.addEventListener('scroll', () => {
-
-    document.querySelector('.game-mini-header')
-        .classList.toggle('visible', window.scrollY > 300);
-
-});
-
-/* Screenshot modal */
-document.querySelectorAll('.screenshot-img').forEach(img => {
-
-    img.addEventListener('click', () => {
-
-        const modalImg = document.getElementById('screenshotModalImg');
-
-        modalImg.src = img.dataset.full;
-
-        const modal = new bootstrap.Modal(
-            document.getElementById('screenshotModal')
-        );
-
-        modal.show();
-
-    });
-
-});
-
-/* Trailer */
-const trailerModal = document.getElementById('trailerModal');
-
-const trailerVideo = document.getElementById('trailerVideo');
-
-if (trailerModal) {
-
-    trailerModal.addEventListener('shown.bs.modal', () => trailerVideo.play());
-
-    trailerModal.addEventListener('hidden.bs.modal', () => {
-
-        trailerVideo.pause();
-
-        trailerVideo.currentTime = 0;
-
-    });
-
-}
-
-</script>
+@unless(request()->routeIs('torrents.show'))
+@push('scripts')
+<script src="{{ asset('js/torrent-game.js') }}?v={{ filemtime(public_path('js/torrent-game.js')) }}" defer></script>
+@endpush
+@endunless
 
 @endunless

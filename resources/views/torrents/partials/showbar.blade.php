@@ -786,7 +786,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             </span>
 
-            @if(!empty($fileTree))
+            @if(!empty($fileTree) || ($torrent->files_count ?? 0) > 0)
 
                 <button type="button"
                         class="modern-stat-badge files-badge border-0"
@@ -796,7 +796,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     <i class="bi bi-folder2-open"></i>
 
-                    {{ $torrent->files->count() }} Files
+                    {{ $torrent->files_count ?? $torrent->files->count() }} Files
 
                 </button>
 

@@ -2,6 +2,8 @@
     'use strict';
     function init() {
         document.querySelectorAll('[data-torrent-media-hero]').forEach(hero => {
+            if (hero.dataset.heroInitialized) return;
+            hero.dataset.heroInitialized = '1';
             const wrapper = hero.querySelector('.premium-poster-wrapper');
             const poster = wrapper?.querySelector('.premium-poster');
             const backdrop = hero.querySelector('.premium-backdrop');
@@ -61,4 +63,5 @@
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
     else init();
+    document.addEventListener('torrent:metadata-ready', init);
 })();

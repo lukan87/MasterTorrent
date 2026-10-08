@@ -65,6 +65,13 @@
 
 <ul class="navbar-nav ms-auto">
 
+<li class="nav-item" data-torrent-loading hidden>
+    <span class="nav-link navbar-icon-button" role="status">
+        <span class="spinner-border spinner-border-sm text-info" aria-hidden="true"></span>
+        <span class="visually-hidden">Loading content…</span>
+    </span>
+</li>
+
 {{-- Appearance is available on desktop and mobile, beside activity controls. --}}
 <li class="nav-item dropdown theme-menu">
     <button type="button" id="themeMenuToggle" class="nav-link navbar-icon-button"

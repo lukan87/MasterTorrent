@@ -287,6 +287,7 @@
 }
 .app-header > .container-fluid { gap: 8px; padding-inline: 18px; min-width: 0; }
 .app-header .navbar-nav { align-items: center; gap: 4px; flex-shrink: 0; }
+.app-header [data-torrent-loading][hidden] { display: none !important; }
 .app-header .nav-link {
     display: inline-flex;
     align-items: center;

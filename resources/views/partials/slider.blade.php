@@ -2,6 +2,38 @@
 @if($recommendedTorrents->isEmpty())
 
 @else
+@once
+@push('styles')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css">
+@endpush
+@push('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+
+<script>
+    $(document).ready(function(){
+        $(".hero-slide").owlCarousel({
+            loop: true,
+            margin: 10,
+            nav: false,
+            dots: true,
+            autoplay: true,
+            autoplayTimeout: 5000,
+            autoplayHoverPause: true,
+            lazyLoad: true,
+        responsive:{
+            0:{ items: 1 },
+            576:{ items: 2 },
+            768:{ items: 3 },
+            1200:{ items: 4 },
+            1600:{ items: 8 },
+            2500:{ items: 12 }
+        }
+        });
+    });
+</script>
+@endpush
+@endonce
 <div class="container mt-4">
     <div class="card shadow-lg border-0 rounded-4 theme-surface theme-text">
         <!-- Card Title -->

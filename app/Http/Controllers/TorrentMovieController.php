@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Torrent;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use App\Models\TorrentMovie;
@@ -22,30 +21,13 @@ class TorrentMovieController extends Controller
     {
         $query = request('q');
 
-        // ── Seeder health map (one query, cached per request) ──
-        $health = Torrent::query()
-            ->where('tmdb_type', 'movie')
-            ->whereNotNull('tmdbid')
-            ->select('tmdbid', DB::raw('MAX(seeders) as max_seeders'))
-            ->groupBy('tmdbid')
-            ->get()
-            ->keyBy(fn ($t) => (int) $t->tmdbid);
+        $browser = app(\App\Services\LibraryBrowseService::class);
+        $movies = $browser->paginate(TorrentMovie::query(), 'movie');
+        if ($browser->isPartial()) {
+            return $browser->response('library.movies.results', compact('movies', 'query'));
+        }
 
-        // ── All library movies ──
-        $movies = TorrentMovie::query()
-            ->when($query, fn ($q) => $q->where('title', 'like', "%{$query}%"))
-            ->orderByDesc('created_at')
-            ->paginate(24)
-            ->withQueryString();
-
-        // Attach fields the Blade cards expect
-        $movies->getCollection()->transform(function ($movie) use ($health) {
-            $t = $health->get((int) $movie->tmdbid);
-            $movie->poster      = $movie->poster_path;
-            $movie->background  = $movie->backdrop_path;
-            $movie->max_seeders = $t?->max_seeders ?? 0;
-            return $movie;
-        });
+        $health = $browser->seederHealth();
 
         // ── Featured row (hero + cards) ──
         $featured = TorrentMovie::query()

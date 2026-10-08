@@ -37,6 +37,8 @@ use App\Services\Torrent\MovieOfTheDayService;
 use App\Services\Torrent\TorrentBrowseService;
 use App\Services\Torrent\TorrentDisplayService;
 use App\Services\TorrentSubscriptionService;
+use App\Services\Torrent\MetadataHttpCache;
+use Illuminate\Support\Facades\Cache;
 
 
 
@@ -74,13 +76,9 @@ class TorrentController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    $categories = Category::query()
-        ->orderBy('name')
-        ->get();
+    $categories = Cache::remember('torrent_browse:categories', 300, fn () => Category::orderBy('name')->get());
 
-    $allGenres = Genre::query()
-        ->orderBy('name')
-        ->get();
+    $allGenres = Cache::remember('torrent_browse:genres', 300, fn () => Genre::orderBy('name')->get());
 
     $sortColumn = $request->get('sort', 'created_at');
     $sortDirection = $request->get('direction', 'desc');
@@ -210,8 +208,7 @@ class TorrentController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    $movieOfTheDay = app(MovieOfTheDayService::class)
-        ->get();
+    $movieOfTheDay = $this->isBrowseFragment($request) ? null : app(MovieOfTheDayService::class)->get();
 
 
     /*
@@ -248,7 +245,7 @@ class TorrentController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    return view('torrents.index', compact(
+    return $this->browseResponse($request, 'index', compact(
         'torrents',
         'categories',
         'allGenres',
@@ -269,8 +266,9 @@ class TorrentController extends Controller
 
   public function adult(Request $request)
 {
-    $categories = Category::whereIn('id', Category::ADULT_IDS)->orderBy('name')->get();
-    $allGenres = Genre::orderBy('name')->get();
+    $categories = Cache::remember('torrent_browse:categories', 300, fn () => Category::orderBy('name')->get())
+        ->whereIn('id', Category::ADULT_IDS);
+    $allGenres = Cache::remember('torrent_browse:genres', 300, fn () => Genre::orderBy('name')->get());
 
     $sortColumn = $request->get('sort', 'name');
     $sortDirection = $request->get('direction', 'desc');
@@ -315,7 +313,7 @@ class TorrentController extends Controller
     ? Seedbox::where('user_id', auth()->id())->get()
     : collect();
 
-    return view('torrents.adult', compact(
+    return $this->browseResponse($request, 'adult', compact(
         'adult',
         'categories',
         'allGenres',
@@ -327,6 +325,26 @@ class TorrentController extends Controller
     ));
 }
 
+
+private function isBrowseFragment(Request $request): bool
+{
+    return $request->header('X-Torrent-Browse') === '1' && $request->expectsJson();
+}
+
+private function browseResponse(Request $request, string $page, array $data)
+{
+    if (! $this->isBrowseFragment($request)) {
+        return view('torrents.'.$page, $data);
+    }
+
+    return response()->json([
+        'html' => view('torrents.partials.'.$page.'-results', $data)->render(),
+        'filters' => view('torrents.partials.search-form', $data + [
+            'searchRoute' => 'torrents.'.$page,
+            'adultSearch' => $page === 'adult',
+        ])->render(),
+    ])->header('Cache-Control', 'private, no-store')->header('Vary', 'Accept, X-Torrent-Browse');
+}
 
 public function deleted(Request $request)
 {
@@ -560,12 +578,46 @@ public function bump($id, TorrentBumpService $service)
                 return redirect()->route('torrents.show', ['id' => $torrent->id, 'slug' => $torrent->slug]);
             }
 
-            $torrent->load(['files', 'images', 'genres', 'category', 'uploader:id,name', 'deletedBy:id,name', 'subtitles.uploader:id,name']);
+            // Partial responses use this exact route, after its auth, deletion and slug checks.
+            if (request()->expectsJson() && request()->header('X-Torrent-Content') === 'files') {
+                $fileTree = TorrentHelper::buildFileTree($torrent->files);
+
+                return response()->json([
+                    'html' => view('torrents.partials.file-tree', compact('fileTree'))->render(),
+                ])->header('Cache-Control', 'private, no-store');
+            }
+
+            if (request()->expectsJson() && request()->header('X-Torrent-Content') === 'metadata') {
+                $cache = app(MetadataHttpCache::class);
+                $data = $cache->defer(fn () => app(TorrentDisplayService::class)->getDisplayData($torrent, includeFiles: false));
+                $display = $data['display'];
+                $steamData = $data['steamData'];
+                $partial = $display && in_array($torrent->tmdb_type, ['movie', 'tv'], true)
+                    ? $torrent->tmdb_type
+                    : ($steamData && $torrent->steamid ? 'game' : null);
+                $html = null;
+                if ($partial) {
+                    if ($partial === 'game') {
+                        $torrent->load('genres');
+                    }
+                    $fanartBackground = $display['fanart']['background'] ?? null;
+                    $html = view('torrents.partials.'.$partial, compact('torrent', 'display', 'steamData', 'fanartBackground'))->render();
+                }
+
+                return response()->json([
+                    'html' => $html,
+                    'pending' => $cache->hasPendingRefreshes(),
+                ])->header('Cache-Control', 'private, no-store');
+            }
+
+            $torrent->load(['images', 'genres', 'category', 'uploader:id,name', 'deletedBy:id,name', 'subtitles.uploader:id,name']);
+            $torrent->loadCount('files');
 
             $comments = Comment::where('torrent_id', $torrent->id)->discussion()->paginate(10, ['*'], 'comments_page')->withQueryString()->fragment('discussion');
 
-            $displayData = app(TorrentDisplayService::class)
-                ->getDisplayData($torrent);
+            $displayData = app(MetadataHttpCache::class)->defer(
+                fn () => app(TorrentDisplayService::class)->getDisplayData($torrent, includeFiles: false)
+            );
 
             $display = $displayData['display'];
             $mediainfo = $displayData['mediainfo'];
@@ -670,6 +722,10 @@ public function bump($id, TorrentBumpService $service)
             ));
 
         } catch (ModelNotFoundException $e) {
+            if (request()->expectsJson() && in_array(request()->header('X-Torrent-Content'), ['files', 'metadata'], true)) {
+                return response()->json(['message' => 'Torrent not found.'], 404)
+                    ->header('Cache-Control', 'private, no-store');
+            }
             // Handle the case where the torrent is not found
             return response()->view('errors.torrent-not-found', [], 404);
         }

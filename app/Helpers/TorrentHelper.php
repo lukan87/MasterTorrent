@@ -62,6 +62,13 @@ class TorrentHelper
     private static function applyBrowseRelations(Builder $query): void
     {
         $query
+            ->select([
+                'torrents.id', 'torrents.name', 'torrents.slug', 'torrents.poster',
+                'torrents.category_id', 'torrents.owner', 'torrents.bumped_by',
+                'torrents.size', 'torrents.seeders', 'torrents.leechers', 'torrents.times_completed',
+                'torrents.sticky', 'torrents.created_at', 'torrents.bumped_at', 'torrents.deleted_at',
+                'torrents.free', 'torrents.double', 'torrents.recommended', 'torrents.seedbox', 'torrents.external',
+            ])
             ->with([
                 'genres:id,name',
                 'category:id,name,icon,image',

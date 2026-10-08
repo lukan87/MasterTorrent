@@ -27,6 +27,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->scoped(\App\Services\Torrent\MetadataHttpCache::class);
         //
 
         $this->app->bind(

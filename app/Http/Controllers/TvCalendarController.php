@@ -82,7 +82,7 @@ class TvCalendarController extends Controller
         }
         $watchlist = $calendar->watchlist((int) $request->user()->id);
 
-        return response()->view('tv-calendar.index', [
+        $data = [
             'filters' => $filters, 'today' => $today, 'start' => $start, 'end' => $start->addDays($days - 1),
             'dates' => $dates, 'episodes' => $episodes->groupBy('date'), 'genres' => $genres, 'networks' => $networks, 'networkCounts' => $networkCounts,
             'countries' => self::COUNTRIES, 'warnings' => $schedule['warnings'], 'watchlist' => $watchlist,
@@ -91,7 +91,14 @@ class TvCalendarController extends Controller
             'stats' => ['episodes' => $episodes->count(), 'shows' => $episodes->pluck('show_id')->unique()->count(),
                 'followed' => $episodes->where('followed', true)->pluck('show_id')->unique()->count(),
                 'available' => $episodes->where('available', true)->count()],
-        ])->header('Cache-Control', 'private, no-store');
+        ];
+        $partial = $request->header('X-Calendar-Browse') === '1' && $request->expectsJson();
+        $response = $partial
+            ? response()->json(['html' => view('tv-calendar.results', $data)->render()])
+            : response()->view('tv-calendar.index', $data);
+
+        return $response->header('Cache-Control', 'private, no-store')
+            ->header('Vary', 'Accept, X-Calendar-Browse');
     }
 
     public function follow(Request $request, int $show, TvmazeService $tvmaze)
@@ -100,7 +107,7 @@ class TvCalendarController extends Controller
         try {
             $info = $tvmaze->show($show);
         } catch (RuntimeException|ConnectionException $exception) {
-            return back()->with('error', 'TVmaze is temporarily unavailable. Your watchlist has not changed.');
+            return $this->actionResponse($request, 'TVmaze is temporarily unavailable. Your watchlist has not changed.', 503);
         }
         $imdb = $tvmaze->imdbId($info['externals']['imdb'] ?? null);
         $tmdb = $imdb ? Series::where('imdb_id', $imdb)->value('tmdb_id') : null;
@@ -108,20 +115,31 @@ class TvCalendarController extends Controller
             $tmdb = Torrent::where('imdbid', $imdb)->where('tmdb_type', 'tv')->value('tmdbid');
         }
         if ($data['notify_upload'] && ! $imdb && ! $tmdb) {
-            return back()->with('error', 'This show has no IMDb or local series ID yet. You can follow it, but upload alerts are not available.');
+            return $this->actionResponse($request, 'This show has no IMDb or local series ID yet. You can follow it, but upload alerts are not available.', 422);
         }
         TvShowFollow::updateOrCreate(['user_id' => $request->user()->id, 'tvmaze_id' => $show], [
             'title' => mb_substr($info['name'], 0, 255), 'imdbid' => $imdb,
             'tmdbid' => $tmdb ? (string) $tmdb : null, 'notify_upload' => $data['notify_upload'],
         ]);
 
-        return back()->with('success', $data['notify_upload'] ? 'Show followed. New matching uploads will be sent to your site inbox.' : 'Show saved to your watchlist. Calendar upload alerts are off.');
+        return $this->actionResponse($request, $data['notify_upload'] ? 'Show followed. New matching uploads will be sent to your site inbox.' : 'Show saved to your watchlist. Calendar upload alerts are off.');
     }
 
     public function unfollow(Request $request, int $show)
     {
         TvShowFollow::where('user_id', $request->user()->id)->where('tvmaze_id', $show)->delete();
 
-        return back()->with('success', 'Removed from your calendar watchlist.');
+        return $this->actionResponse($request, 'Removed from your calendar watchlist.');
     }
+
+    private function actionResponse(Request $request, string $message, int $status = 200)
+    {
+        if ($request->expectsJson()) {
+            return response()->json(['message' => $message], $status)
+                ->header('Cache-Control', 'private, no-store');
+        }
+
+        return back()->with($status === 200 ? 'success' : 'error', $message);
+    }
+
 }

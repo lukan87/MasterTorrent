@@ -5,7 +5,7 @@
             ['route' => 'home', 'patterns' => ['home'], 'icon' => 'bi-house-door', 'label' => 'Home'],
             ['route' => 'torrents.index', 'patterns' => ['torrents.index', 'torrents.show', 'torrents.snatched'], 'icon' => 'bi-search', 'label' => 'Browse'],
             ['route' => 'torrents.adult', 'patterns' => ['torrents.adult'], 'icon' => 'bi-fire', 'label' => 'XXX'],
-            ['route' => $canUpload ? 'torrents.create' : 'uploadapps.create', 'patterns' => $canUpload ? ['torrents.create', 'torrents.upload*'] : ['uploadapps.*'], 'icon' => 'bi-cloud-arrow-up', 'label' => $canUpload ? 'Upload torrent' : 'Uploader application'],
+            ['route' => $canUpload ? 'torrents.create' : 'uploadapps.create', 'patterns' => $canUpload ? ['torrents.create', 'torrents.upload*'] : ['uploadapps.*'], 'icon' => 'bi-cloud-arrow-up', 'label' => $canUpload ? 'Upload' : 'Uploader application'],
             ['route' => 'requests.index', 'patterns' => ['requests.*'], 'icon' => 'bi-journal-plus', 'label' => 'Requests'],
             ['route' => 'seedboxes.index', 'patterns' => ['seedboxes.*'], 'icon' => 'bi-hdd-network', 'label' => 'Seedboxes'],
         ]],
@@ -13,7 +13,7 @@
             ['route' => 'forum.index', 'patterns' => ['forum.*'], 'icon' => 'bi-chat-square-text', 'label' => 'Forums'],
             ['route' => 'rules', 'patterns' => ['rules'], 'icon' => 'bi-shield-check', 'label' => 'Rules'],
             ['route' => 'team.index', 'patterns' => ['team.*'], 'icon' => 'bi-people', 'label' => 'Team'],
-            ['route' => 'tickets.index', 'patterns' => ['tickets.*'], 'icon' => 'bi-ticket-detailed', 'label' => 'Support tickets'],
+            ['route' => 'tickets.index', 'patterns' => ['tickets.*'], 'icon' => 'bi-ticket-detailed', 'label' => 'Support'],
         ]],
     ];
     if (Auth::user()->user_class >= \App\Models\UserClass::USER) {

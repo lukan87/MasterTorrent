@@ -2,6 +2,7 @@
 
 namespace App\Services\Torrent;
 
+use App\Jobs\RefreshTorrentMetadata;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -9,13 +10,60 @@ use Illuminate\Support\Facades\Http;
 /** Cache provider data only; user permissions and live torrent stats stay uncached. */
 class MetadataHttpCache
 {
+    private bool $deferred = false;
+
+    private array $pendingRefreshes = [];
+
+    public function hasPendingRefreshes(): bool
+    {
+        foreach ($this->pendingRefreshes as $key) {
+            if (Cache::has("{$key}:pending")) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /** Return saved metadata during rendering, and refresh outside the response. */
+    public function defer(callable $render): mixed
+    {
+        $previous = $this->deferred;
+        $this->deferred = true;
+        try {
+            return $render();
+        } finally {
+            $this->deferred = $previous;
+        }
+    }
+
     public function get(string $key, string $url, array $query, ?callable $valid = null): ?array
     {
+        $providerKey = $key;
         $key = "torrent_metadata_v3:{$key}";
         $cached = Cache::get($key);
         $fallback = $cached['data'] ?? null;
 
         if (($cached['fresh_until'] ?? 0) > now()->timestamp || Cache::has("{$key}:retry")) {
+            return $fallback;
+        }
+
+        if ($this->deferred) {
+            $this->pendingRefreshes[$key] = $key;
+            if (Cache::add("{$key}:pending", true, 120)) {
+                try {
+                    $job = RefreshTorrentMetadata::dispatch($providerKey);
+                    // A sync development queue must also wait until the response is sent.
+                    if (config('queue.default') === 'sync') {
+                        $job->afterResponse();
+                    }
+                    unset($job);
+                } catch (\Throwable $exception) {
+                    Cache::forget("{$key}:pending");
+                    report($exception);
+                }
+            }
+
             return $fallback;
         }
 

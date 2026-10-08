@@ -88,7 +88,7 @@ class EmailController extends Controller
 
         $sendLimit = (string) $request->input(
             'send_limit',
-            '500'
+            '100'
         );
 
         /*
@@ -1017,6 +1017,7 @@ private function recipients(Request $request)
             'send_limit' => [
                 'required',
                 Rule::in([
+                    '100',
                     '500',
                     '1000',
                     '1500',

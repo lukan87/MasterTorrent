@@ -11,13 +11,13 @@ use App\Services\SteamService;
 
 class TorrentDisplayService
 {
-    public function getDisplayData(Torrent $torrent): array
+    public function getDisplayData(Torrent $torrent, bool $includeFiles = true): array
     {
         return [
             'mediainfo' => $this->getMediaInfo($torrent),
             'display' => $this->getTmdbDisplay($torrent),
             'steamData' => $this->getSteamData($torrent),
-            'fileTree' => $this->getFileTree($torrent),
+            'fileTree' => $includeFiles ? $this->getFileTree($torrent) : null,
         ];
     }
 

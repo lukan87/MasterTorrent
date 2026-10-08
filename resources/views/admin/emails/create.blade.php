@@ -128,7 +128,8 @@
 
                                     @foreach ($templates as $template)
                                         <option value="{{ $template->id }}" data-subject="{{ $template->subject }}"
-                                            data-body="{{ $template->body }}">
+                                            data-body="{{ $template->body }}"
+                                            @selected((string) old('template_id') === (string) $template->id)>
                                             {{ $template->name }}
                                         </option>
                                     @endforeach
@@ -136,7 +137,8 @@
                                 </select>
 
                                 <div class="form-text">
-                                    Selecting a template will automatically fill the subject and message.
+                                    Selecting a template fills the subject and message. You can edit both before sending.
+                                    Replace any [bracketed details] with your own content; {name} is filled for each recipient.
                                 </div>
 
                             </div>
@@ -350,7 +352,11 @@
 
                                         <select name="send_limit" id="sendLimit" class="form-select" required>
 
-                                            <option value="500" @selected(old('send_limit', '500') === '500')>
+                                            <option value="100" @selected(old('send_limit', '100') === '100')>
+                                                100 users
+                                            </option>
+
+                                            <option value="500" @selected(old('send_limit') === '500')>
                                                 500 users
                                             </option>
 
@@ -374,7 +380,8 @@
 
                                         <div class="form-text mt-2">
                                             Choose the maximum number of matching users
-                                            to include in this campaign.
+                                            to include in this batch. Once it finishes, use
+                                            “Queue next batch” to send to the next matching users.
                                         </div>
 
                                     </div>
@@ -543,7 +550,7 @@
                                     <i class="bi bi-shield-check me-1"></i>
 
                                     Batch size:
-                                    <strong>500 – All matching users</strong>
+                                    <strong>100 – All matching users</strong>
 
                                 </div>
 

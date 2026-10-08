@@ -17,8 +17,12 @@
 @endphp
 
 @once
-    <link rel="stylesheet" href="{{ asset('css/torrent-search.css') }}?v={{ filemtime(public_path('css/torrent-search.css')) }}">
-    <script src="{{ asset('js/torrent-search.js') }}?v={{ filemtime(public_path('js/torrent-search.js')) }}" defer></script>
+    @push('styles')
+        <link rel="stylesheet" href="{{ asset('css/torrent-search.css') }}?v={{ filemtime(public_path('css/torrent-search.css')) }}">
+    @endpush
+    @push('scripts')
+        <script src="{{ asset('js/torrent-search.js') }}?v={{ filemtime(public_path('js/torrent-search.js')) }}" defer></script>
+    @endpush
 @endonce
 
 <div class="torrent-search card mb-4 mt-5">

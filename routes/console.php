@@ -36,7 +36,7 @@ Schedule::command('torrents:update-imdb')->everyThirtyMinutes()->withoutOverlapp
 // Ban and backup maintenance
 Schedule::command('bans:clear-expired')->everyThirtyMinutes()->withoutOverlapping();
 
-Schedule::command('backup:run-custom')->daily()->withoutOverlapping();
+Schedule::command('backup:run-custom')->sundays()->withoutOverlapping();
 
 // Schedule::command('auto:prewarning')->daily();
 // Schedule::command('auto:warning')->daily();

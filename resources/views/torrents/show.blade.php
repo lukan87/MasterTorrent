@@ -2,6 +2,16 @@
 
 @section('title', $torrent->name)
 
+@if($torrent->tmdbid && !$display)
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('css/torrent-media-hero.css') }}?v={{ filemtime(public_path('css/torrent-media-hero.css')) }}">
+@endpush
+@endif
+
+@push('scripts')
+    @vite('resources/js/torrent-detail.js')
+@endpush
+
 @section('content')
 
     <div class="container-fluid">
@@ -17,10 +27,15 @@
             @include('torrents.partials.movie')
         @elseif($torrent->tmdb_type === 'tv' && $display)
             @include('torrents.partials.tv')
-        @elseif($torrent->steamid)
+        @elseif($torrent->steamid && $steamData)
             @include('torrents.partials.game')
-        @else
-            @include('torrents.partials.default')
+        @elseif($torrent->tmdbid || $torrent->steamid)
+            <div data-torrent-metadata data-url="{{ route('torrents.show', [$torrent->id, $torrent->slug]) }}" aria-busy="true">
+                <div class="d-flex justify-content-center align-items-center py-5 mb-4" role="status">
+                    <span class="spinner-border text-info" aria-hidden="true"></span>
+                    <span class="visually-hidden">Loading title details…</span>
+                </div>
+            </div>
         @endif
 
 

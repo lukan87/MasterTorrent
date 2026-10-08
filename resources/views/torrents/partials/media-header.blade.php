@@ -1296,7 +1296,9 @@
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/torrent-media-hero.css') }}?v={{ filemtime(public_path('css/torrent-media-hero.css')) }}">
 @endpush
+@unless(request()->routeIs('torrents.show'))
 @push('scripts')
     <script src="{{ asset('js/torrent-media-hero.js') }}?v={{ filemtime(public_path('js/torrent-media-hero.js')) }}" defer></script>
 @endpush
+@endunless
 @endonce

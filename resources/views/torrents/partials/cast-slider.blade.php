@@ -64,36 +64,10 @@
     .media-cast-profile img { width: 64px; height: 64px; }
 }
 </style>
+@unless(request()->routeIs('torrents.show'))
 @push('scripts')
-<script>
-document.querySelectorAll('[data-cast-slider]').forEach(function (slider) {
-    const track = slider.querySelector('.media-cast-track');
-    const controls = slider.querySelector('.media-cast-controls');
-    const previous = slider.querySelector('[data-cast-step="-1"]');
-    const next = slider.querySelector('[data-cast-step="1"]');
-    function update() {
-        const overflows = track.scrollWidth > track.clientWidth + 1;
-        controls.hidden = !overflows;
-        previous.disabled = !overflows || track.scrollLeft <= 1;
-        next.disabled = !overflows || track.scrollLeft + track.clientWidth >= track.scrollWidth - 1;
-    }
-    slider.querySelectorAll('[data-cast-step]').forEach(function (button) {
-        button.addEventListener('click', function () {
-            const card = track.querySelector('.media-cast-person');
-            if (!card) return;
-            const step = card.getBoundingClientRect().width + parseFloat(getComputedStyle(track).gap);
-            track.scrollBy({
-                left: Number(button.dataset.castStep) * Math.max(1, Math.floor(track.clientWidth / step)) * step,
-                behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth'
-            });
-        });
-    });
-    track.addEventListener('scroll', update, { passive: true });
-    window.addEventListener('resize', update);
-    if ('ResizeObserver' in window) new ResizeObserver(update).observe(track);
-    update();
-});
-</script>
+<script src="{{ asset('js/media-cast-slider.js') }}?v={{ filemtime(public_path('js/media-cast-slider.js')) }}" defer></script>
 @endpush
+@endunless
 @endonce
 @endif

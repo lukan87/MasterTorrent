@@ -351,7 +351,7 @@
 
             @if($campaigns->hasPages())
                 <div class="card-footer bg-transparent border-top py-3">
-                    {{ $campaigns->links() }}
+                    {{ $campaigns->links('pagination::bootstrap-5') }}
                 </div>
             @endif
 
