@@ -34,13 +34,14 @@ class SeedboxController extends Controller
         });
     }
 
-    private function seedboxService(Seedbox $seedbox): SeedboxService
+    protected function seedboxService(Seedbox $seedbox, bool $useRpc = false): SeedboxService
     {
         return new SeedboxService(
             $seedbox->address,
             $seedbox->username,
             $seedbox->password,
-            $seedbox->auth_type
+            $seedbox->auth_type,
+            $useRpc
         );
     }
 
@@ -62,10 +63,12 @@ class SeedboxController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'address' => 'required|url:http,https|max:2048',
+            'address' => $request->input('auth_type') === 'session'
+                ? 'required|url:https|max:2048'
+                : 'required|url:http,https|max:2048',
             'username' => 'required|string|max:255',
             'password' => 'required|string|max:255',
-            'auth_type' => 'required|in:basic,digest',
+            'auth_type' => 'required|in:basic,digest,session',
         ]);
 
         Seedbox::create([
@@ -89,10 +92,12 @@ class SeedboxController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'address' => 'required|url:http,https|max:2048',
+            'address' => $request->input('auth_type') === 'session'
+                ? 'required|url:https|max:2048'
+                : 'required|url:http,https|max:2048',
             'username' => 'required|string|max:255',
             'password' => 'nullable|string|max:255',
-            'auth_type' => 'required|in:basic,digest',
+            'auth_type' => 'required|in:basic,digest,session',
         ]);
 
         if (!$request->filled('password')) {
@@ -280,13 +285,7 @@ public function downloadRebuiltTorrent($seedboxId, $hash)
         return back()->with('error', 'You do not have a passkey.');
     }
 
-    $service = new SeedboxService(
-        $seedbox->address,
-        $seedbox->username,
-        $seedbox->password,
-        $seedbox->auth_type,
-        true
-    );
+    $service = $this->seedboxService($seedbox, true);
 
     /* =========================================================
        1️⃣ GET TORRENT FROM SEEDBOX
@@ -296,7 +295,7 @@ public function downloadRebuiltTorrent($seedboxId, $hash)
     $torrentContent = $torrentData['torrentContent'] ?? null;
 
     if (!$torrentContent) {
-        return back()->with('error', 'Failed to retrieve torrent.');
+        return back()->with('error', 'Failed to retrieve torrent. ' . ($torrentData['error'] ?? 'The seedbox did not return a torrent file.'));
     }
 
     $basePath = rtrim($torrentData['basePath'], '/');
@@ -310,19 +309,21 @@ public function downloadRebuiltTorrent($seedboxId, $hash)
 // );
 
     $decoded = \App\Helpers\Bencode::bdecode($torrentContent);
-    $torrentName = $decoded['info']['name'] ?? strtoupper($hash);
+    $metaService = app(TorrentMetadataService::class);
+    $torrentName = is_array($decoded) ? $metaService->torrentName($decoded) : null;
+    if ($torrentName === null) {
+        return back()->with('error', 'The seedbox torrent file does not contain a valid torrent name.');
+    }
 
     /* =========================================================
        2️⃣ METADATA SERVICE (CLEAN NAME + TYPE + TMDB)
     ========================================================= */
 
-    $metaService = app(TorrentMetadataService::class);
-
     $type = $metaService->detectTypeFromName($torrentName);
 
     $parsed = $metaService->cleanNameAndExtractData($torrentName);
 
-    $category_id = $metaService->detectCategory($torrentName, $type);
+    $category_id = $metaService->detectCategory($torrentName, $type, $parsed['year']);
 
     [$imdbId, $imdbLink, $imdbDescription] =
         $metaService->fetchTmdb(
@@ -411,8 +412,14 @@ if ($type === 'tv' && isset($tvData)) {
     ];
 
     //dd($uploadData);
-  
-    $auto = new \App\Services\AutoUploadService();
+
+    $existing = \App\Models\Torrent::where('info_hash', \App\Helpers\Bencode::get_infohash_raw($rebuiltTorrent))->first();
+    if ($existing) {
+        return redirect()->route('torrents.show', ['id' => $existing->id, 'slug' => $existing->slug])
+            ->with('info', 'This torrent already exists on the tracker.');
+    }
+
+    $auto = app(\App\Services\AutoUploadService::class);
     $uploadResult = $auto->upload(
         $uploadData,
         $rebuiltTorrent,
@@ -425,8 +432,8 @@ if ($type === 'tv' && isset($tvData)) {
 
     if (!$uploadResult['created']) {
         return redirect()
-            ->route('seedboxes.torrents', $seedbox)
-            ->with('error', 'This torrent already exists on the tracker.');
+            ->route('torrents.show', ['id' => $uploadResult['torrent']->id, 'slug' => $uploadResult['torrent']->slug])
+            ->with('info', 'This torrent already exists on the tracker.');
     }
 
     $torrentModel = $uploadResult['torrent'];
@@ -435,35 +442,39 @@ if ($type === 'tv' && isset($tvData)) {
        7️⃣ ADD BACK TO SEEDBOX
     ========================================================= */
 
-    $this->addTorrentToSeedbox($seedbox, $rebuiltTorrent);
-
-/* =========================================================
-   8️⃣ GENERATE SCREENSHOTS (MOVIES + TV)
-========================================================= */
-
-if ($filePath && in_array($type, ['movie', 'tv'])) {
-
-    foreach ($service->generateScreenshots($filePath) as $i => $base64) {
-
-        $binary = base64_decode(trim($base64), true);
-        if (!$binary) continue;
-
-        app(\App\Services\Torrent\TorrentImageService::class)
-            ->storeWebp($torrentModel, $binary);
+    $warnings = [];
+    try {
+        $result = $this->addTorrentToSeedbox($seedbox, $rebuiltTorrent);
+        if (!empty($result['error'])) {
+            $warnings[] = 'The torrent was uploaded, but could not be added back to the seedbox.';
+        }
+    } catch (\Throwable $exception) {
+        \Illuminate\Support\Facades\Log::warning('Seedbox re-add failed', ['torrent_id' => $torrentModel->id, 'exception' => get_class($exception)]);
+        $warnings[] = 'The torrent was uploaded, but could not be added back to the seedbox.';
     }
 
-}
+    if ($filePath && in_array($type, ['movie', 'tv'])) {
+        try {
+            // Separate jobs keep each capture within the worker's timeout.
+            for ($index = 0; $index < 6; $index++) {
+                \App\Jobs\CaptureSeedboxScreenshot::dispatch($seedbox->id, $torrentModel->id, $filePath, $index);
+            }
+        } catch (\Throwable $exception) {
+            \Illuminate\Support\Facades\Log::warning('Seedbox screenshot scheduling failed', ['torrent_id' => $torrentModel->id, 'exception' => get_class($exception)]);
+            $warnings[] = 'Some screenshots could not be scheduled. You can add screenshots using Edit Torrent.';
+        }
+    }
 
     /* =========================================================
        9️⃣ REDIRECT
     ========================================================= */
 
     return redirect()
-        ->route('torrents.show', $torrentModel->id)
+        ->route('torrents.show', ['id' => $torrentModel->id, 'slug' => $torrentModel->slug])
         ->with(
             'success',
-            "Torrent '{$torrentName}' uploaded successfully!"
-        );
+            "Torrent '{$torrentName}' uploaded successfully!" . ($filePath && in_array($type, ['movie', 'tv']) ? ' Screenshots are being prepared; refresh shortly to see them.' : '')
+        )->with('warning', implode(' ', $warnings));
 }
 
     protected function screenshotsToUploadedFiles(array $paths): array

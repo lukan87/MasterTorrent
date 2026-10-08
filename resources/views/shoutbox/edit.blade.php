@@ -62,34 +62,34 @@
 {{-- Styles --}}
 <style>
 body {
-    background: radial-gradient(circle at top, #1b1b1b, #0c0c0c);
-    color: #eaeaea;
+    background: radial-gradient(circle at top, var(--theme-surface, #1b1b1b), var(--theme-surface-alt, #0c0c0c));
+    color: var(--theme-text, #eaeaea);
 }
 
 .glass {
-    background: rgba(255,255,255,0.042);
+    background: var(--theme-surface-alt, rgba(255,255,255,0.042));
     backdrop-filter: blur(10px);
     border-radius: 14px;
-    border: 1px solid rgba(255,255,255,0.08);
+    border: 1px solid var(--theme-border, rgba(255,255,255,0.08));
 }
 
 .modern-textarea {
-    background: #0b0b0b;
-    color: #fff;
+    background: var(--theme-control, #0b0b0b);
+    color: var(--theme-text, #fff);
     border-radius: 12px;
-    border: 1px solid rgba(255,255,255,0.15);
+    border: 1px solid var(--theme-border, rgba(255,255,255,0.15));
     resize: vertical;
 }
 
 .modern-textarea:focus {
-    background: #0b0b0b;
-    color: #fff;
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 0.15rem rgba(13,110,253,.25);
+    background: var(--theme-control, #0b0b0b);
+    color: var(--theme-text, #fff);
+    border-color: var(--theme-blue-border, #0d6efd);
+    box-shadow: 0 0 0 0.15rem var(--theme-shadow, rgba(13,110,253,.25));
 }
 
 .text-muted {
-    color: #aaa !important;
+    color: var(--theme-muted, #aaa) !important;
 }
 
 .emoji-wrapper {
@@ -99,7 +99,7 @@ body {
 .emoji-toggle {
     background: none;
     border: none;
-    color: #ffc107;
+    color: var(--theme-amber-text, #ffc107);
     font-weight: 600;
     cursor: pointer;
     padding: 4px 0;

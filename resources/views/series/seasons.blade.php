@@ -3,80 +3,80 @@
 /* FileIplay — Series Torrents / Seasons */
 .series-torrents-wrap{margin:1.25rem 0}
 .series-torrents-card{
-    background:linear-gradient(135deg,rgba(14,21,33,.95),rgba(10,15,27,.88));
-    border:1px solid var(--ui-border,rgba(255,255,255,.08));
+    background:linear-gradient(135deg,var(--theme-surface, rgba(14,21,33,.95)),var(--theme-surface, rgba(10,15,27,.88)));
+    border:1px solid var(--ui-border,var(--theme-border, rgba(255,255,255,.08)));
     border-radius:.75rem;
     padding:1rem;
-    box-shadow:0 10px 30px rgba(0,0,0,.28);
-    color:#e7eef7;
+    box-shadow:0 10px 30px var(--theme-shadow, rgba(0,0,0,.28));
+    color:var(--theme-text, #e7eef7);
 }
 .series-torrents-title{
     display:flex;align-items:center;gap:.5rem;
-    margin:0 0 1rem;font-size:1.15rem;font-weight:700;color:#f1f5f9;
+    margin:0 0 1rem;font-size:1.15rem;font-weight:700;color:var(--theme-text, #f1f5f9);
 }
-.series-torrents-title i{color:var(--ui-accent,#22d3ee)}
+.series-torrents-title i{color:var(--ui-accent,var(--theme-teal-text, #22d3ee))}
 .series-torrents-accordion .accordion-item{
-    background:rgba(7,12,21,.72)!important;
-    border:1px solid rgba(255,255,255,.07)!important;
+    background:var(--theme-surface, rgba(7,12,21,.72))!important;
+    border:1px solid var(--theme-border, rgba(255,255,255,.07))!important;
     border-radius:.6rem!important;
     overflow:hidden;
 }
 .series-torrents-accordion .accordion-button{
-    background:rgba(11,18,29,.92)!important;
-    color:#e8eef7!important;
+    background:var(--theme-surface, rgba(11,18,29,.92))!important;
+    color:var(--theme-text, #e8eef7)!important;
     border:0!important;
     box-shadow:none!important;
     padding:.7rem .85rem;
-    font-size:.9rem;font-weight:600;
+    font-size:var(--site-font-body, 13px);font-weight:600;
 }
 .series-torrents-accordion .accordion-button:not(.collapsed){
-    color:#fff!important;
-    background:rgba(13,25,37,.96)!important;
+    color:var(--theme-text, #fff)!important;
+    background:var(--theme-surface, rgba(13,25,37,.96))!important;
 }
 .series-torrents-accordion .accordion-button::after{filter:invert(1) brightness(1.4);opacity:.75}
 .series-torrents-accordion .accordion-button .text-info,
-.series-torrents-accordion .accordion-button i.bi-collection-play{color:var(--ui-accent,#22d3ee)!important}
-.series-torrents-accordion .toggle-icon{color:#94a3b8;font-size:.75rem}
+.series-torrents-accordion .accordion-button i.bi-collection-play{color:var(--ui-accent,var(--theme-teal-text, #22d3ee))!important}
+.series-torrents-accordion .toggle-icon{color:var(--theme-muted, #94a3b8);font-size:.75rem}
 .series-torrents-accordion .accordion-body{
-    background:rgba(5,9,16,.72)!important;
+    background:var(--theme-surface-alt, rgba(5,9,16,.72))!important;
     padding:.8rem;
 }
 .series-torrents-section-title{
-    color:var(--ui-accent,#22d3ee)!important;
-    font-size:.82rem;font-weight:700;
+    color:var(--ui-accent,var(--theme-teal-text, #22d3ee))!important;
+    font-size:var(--site-font-body, 13px);font-weight:700;
     text-transform:uppercase;letter-spacing:.03em;
     margin:.35rem 0 .65rem;
 }
 .series-torrents-table{
     --bs-table-bg:transparent;
-    --bs-table-color:#dbe5ef;
-    --bs-table-border-color:rgba(255,255,255,.06);
+    --bs-table-color:var(--theme-text, #dbe5ef);
+    --bs-table-border-color:var(--theme-border, rgba(255,255,255,.06));
     margin-bottom:1rem!important;
-    font-size:.82rem;
+    font-size:var(--site-font-body, 13px);
 }
 .series-torrents-table thead th{
-    background:rgba(255,255,255,0.0245);
-    color:#94a3b8;
-    border-bottom:1px solid rgba(255,255,255,.08);
-    font-size:.7rem;text-transform:uppercase;letter-spacing:.035em;
+    background:var(--theme-surface-alt, rgba(255,255,255,0.0245));
+    color:var(--theme-muted, #94a3b8);
+    border-bottom:1px solid var(--theme-border, rgba(255,255,255,.08));
+    font-size:var(--site-font-small, 13px);text-transform:uppercase;letter-spacing:.035em;
     font-weight:700;padding:.55rem .6rem;
 }
 .series-torrents-table tbody td{padding:.55rem .6rem;vertical-align:middle}
 .series-torrents-table tbody tr{transition:background .15s ease}
-.series-torrents-table tbody tr:hover{background:rgba(34,211,238,.045)!important}
+.series-torrents-table tbody tr:hover{background:var(--theme-teal-soft, rgba(34,211,238,.045))!important}
 .series-torrent-link{
-    color:#dce8f2!important;text-decoration:none;
+    color:var(--theme-text, #dce8f2)!important;text-decoration:none;
     font-weight:600;
 }
-.series-torrent-link:hover{color:var(--ui-accent,#22d3ee)!important}
+.series-torrent-link:hover{color:var(--ui-accent,var(--theme-teal-text, #22d3ee))!important}
 .series-torrents-table .badge{
-    font-size:.68rem;font-weight:600;padding:.3rem .45rem;
+    font-size:var(--site-font-small, 13px);font-weight:600;padding:.3rem .45rem;
 }
 .series-download-btn{
     width:30px;height:30px;padding:0;
     display:inline-flex;align-items:center;justify-content:center;
     border-radius:.45rem!important;
-    border:1px solid rgba(34,197,94,.4)!important;
+    border:1px solid var(--theme-green-border, rgba(34,197,94,.4))!important;
 }
 .series-download-btn:hover{transform:translateY(-1px)}
 @media(max-width:767.98px){
@@ -84,7 +84,7 @@
     .series-torrents-card{padding:.7rem;border-radius:.6rem}
     .series-torrents-title{font-size:1rem;margin-bottom:.75rem}
     .series-torrents-accordion .accordion-body{padding:.55rem}
-    .series-torrents-table{font-size:.78rem}
+    .series-torrents-table{font-size:var(--site-font-body, 13px)}
     .series-torrents-table tbody td{padding:.5rem .4rem}
     .series-torrent-link{display:block;max-width:calc(100vw - 125px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 }
@@ -100,9 +100,9 @@
 
         <div class="accordion series-torrents-accordion" id="seasonsAccordion">
             @foreach($groupedTorrents as $season => $seasonTorrents)
-                <div class="accordion-item bg-dark text-white border-0 mb-3 shadow-sm rounded">
+                <div class="accordion-item theme-surface theme-text border-0 mb-3 shadow-sm rounded">
                     <h2 class="accordion-header" id="heading-{{ Str::slug($season) }}">
-                        <button class="accordion-button collapsed bg-dark text-white d-flex justify-content-between align-items-center" 
+                        <button class="accordion-button collapsed theme-surface theme-text d-flex justify-content-between align-items-center"
                                 type="button" data-bs-toggle="collapse" 
                                 data-bs-target="#collapse-{{ Str::slug($season) }}" 
                                 aria-expanded="false" 
@@ -116,7 +116,7 @@
                          class="accordion-collapse collapse" 
                          aria-labelledby="heading-{{ Str::slug($season) }}" 
                          data-bs-parent="#seasonsAccordion">
-                        <div class="accordion-body bg-dark">
+                        <div class="accordion-body theme-surface">
 
                             @php
                                 $completePacks = $seasonTorrents->filter(fn($t) => preg_match('/S\d{1,2}(?!E\d)/i', $t->name));

@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class LoginController extends Controller
 {
@@ -170,7 +171,9 @@ class LoginController extends Controller
             $user->IP = $request->ip();
             $user->save();
 
-            return redirect()->intended($this->redirectTo);
+            app(\App\Services\AchievementService::class)->recordLoginDay((int) $user->id);
+
+            return $this->redirectAfterLogin($request);
         }
 
         /*
@@ -200,4 +203,17 @@ class LoginController extends Controller
                     ' attempts remaining.',
             ]);
     }
+
+    protected function redirectAfterLogin(Request $request): RedirectResponse
+    {
+        $intended = $request->session()->get('url.intended');
+
+        // Repair destinations saved by announcement polling before the auth fix.
+        if (is_string($intended) && parse_url($intended, PHP_URL_PATH) === '/announcements-unread-count') {
+            $request->session()->forget('url.intended');
+        }
+
+        return redirect()->intended($this->redirectTo);
+    }
+
 }

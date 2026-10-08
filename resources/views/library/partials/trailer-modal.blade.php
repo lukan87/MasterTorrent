@@ -16,15 +16,15 @@
 
 <style>
 #trailerModal .modal-content {
-    background: linear-gradient(135deg, rgba(14,21,33,.98), rgba(10,15,27,.96)) !important;
-    border: 1px solid rgba(255, 255, 255, .1) !important;
+    background: linear-gradient(135deg, var(--theme-surface, rgba(14,21,33,.98)), var(--theme-surface, rgba(10,15,27,.96))) !important;
+    border: 1px solid var(--theme-border, rgba(255, 255, 255, .1)) !important;
     border-radius: .75rem;
 }
 #trailerModal .modal-header {
-    border-bottom: 1px solid rgba(255, 255, 255, .1) !important;
+    border-bottom: 1px solid var(--theme-border, rgba(255, 255, 255, .1)) !important;
 }
 #trailerModal .modal-title {
-    color: #fff;
+    color: var(--theme-text, #fff);
 }
 </style>
 

@@ -202,58 +202,8 @@ class SeriesController extends Controller
             });
         });
 
-        // Similar series (TMDB).
-$similarData = cache()->remember(
-    'series_similar_v3_' . $series->tmdb_id,
-    now()->addWeek(),
-    function () use ($series) {
-        $data = $this->tmdb("tv/{$series->tmdb_id}/similar");
-
-        return collect($data['results'] ?? [])
-            ->map(fn ($item) => [
-                'tmdb_id' => $item['id'] ?? null,
-                'name'    => $item['name'] ?? 'Unknown',
-                'poster'  => !empty($item['poster_path'])
-                    ? 'https://image.tmdb.org/t/p/w500' . $item['poster_path']
-                    : null,
-                'year'    => !empty($item['first_air_date'])
-                    ? substr($item['first_air_date'], 0, 4)
-                    : null,
-                'rating'  => number_format($item['vote_average'] ?? 0, 1),
-            ])
-            ->values();
-    }
-);
-
-/*
-|--------------------------------------------------------------------------
-| Filter and randomise AFTER the cached TMDB data
-|--------------------------------------------------------------------------
-*/
-$similar = $similarData
-    ->filter(function ($item) {
-        return !empty($item['poster'])
-            && !empty($item['year'])
-            && (int) $item['year'] >= 1990;
-    })
-    ->shuffle()
-    ->take(10)
-    ->values();
-
-        // Resolve whether each similar series already exists in the DB (fresh lookup,
-        // not cached, so newly added titles become linkable immediately).
-        $existingSim = \App\Models\Series::whereIn('tmdb_id', $similar->pluck('tmdb_id')->filter())
-            ->get()
-            ->keyBy('tmdb_id');
-
-        $similar = $similar->map(function ($item) use ($existingSim) {
-            $dbSeries = ($item['tmdb_id'] ?? null) ? $existingSim->get($item['tmdb_id']) : null;
-            $item['in_library'] = (bool) $dbSeries;
-            $item['db_url'] = $dbSeries
-                ? route('series.show', [$dbSeries->id, $dbSeries->slug])
-                : null;
-            return $item;
-        });
+        $similar = app(\App\Services\MediaRecommendationService::class)
+            ->forTitle($series, $seriesDetails['genres'] ?? []);
 
         // Track a view once per session.
         $viewKey = "series_viewed_{$series->id}";

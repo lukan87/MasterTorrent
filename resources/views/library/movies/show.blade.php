@@ -91,7 +91,7 @@
 
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
 
-        <h4 class="text-white mb-0">
+        <h4 class="theme-text mb-0">
             📥 Available Torrents
         </h4>
 

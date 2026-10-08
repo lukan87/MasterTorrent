@@ -3,7 +3,7 @@
 @section('content')
 <div class="container-fluid my-5 modern-wrapper">
 
-    <h3 class="mb-5 text-center text-light peers-title">
+    <h3 class="mb-5 text-center theme-text peers-title">
         Peers for Torrent:
         @if($torrent)
             <a href="{{ route('torrents.show', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}"
@@ -204,11 +204,11 @@ body {
     max-width: 1600px;
     margin-left: auto;
     margin-right: auto;
-    background: linear-gradient(135deg, #0e1521, #0a0f1b);
+    background: linear-gradient(135deg, var(--theme-surface, #0e1521), var(--theme-surface, #0a0f1b));
     padding: 2.5rem;
-    border: 1px solid rgba(255, 255, 255, .06);
+    border: 1px solid var(--theme-border, rgba(255, 255, 255, .06));
     border-radius: .8rem;
-    box-shadow: 0 18px 45px rgba(0, 0, 0, .28);
+    box-shadow: 0 18px 45px var(--theme-shadow, rgba(0, 0, 0, .28));
     overflow: hidden;
 }
 
@@ -231,8 +231,8 @@ body {
 .modern-card {
     width: 100%;
     min-width: 0;
-    background: rgba(255,255,255,0.0245);
-    border: 1px solid rgba(255, 255, 255, .07) !important;
+    background: var(--theme-surface-alt, rgba(255,255,255,0.0245));
+    border: 1px solid var(--theme-border, rgba(255, 255, 255, .07)) !important;
     backdrop-filter: blur(10px);
     border-radius: .75rem;
     overflow: hidden;
@@ -241,11 +241,11 @@ body {
 .modern-header {
     font-weight: 700;
     padding: 1rem 1.25rem;
-    border-bottom: 1px solid rgba(255, 255, 255, .07);
+    border-bottom: 1px solid var(--theme-border, rgba(255, 255, 255, .07));
 }
 
 .section-title {
-    color: #fff;
+    color: var(--theme-text, #fff);
     font-size: 1.15rem;
     font-weight: 800;
 }
@@ -260,8 +260,8 @@ body {
     padding: 1rem .85rem;
     margin-bottom: .65rem;
     border-radius: .65rem;
-    background: rgba(255,255,255,0.0245);
-    border: 1px solid rgba(255, 255, 255, .045);
+    background: var(--theme-surface-alt, rgba(255,255,255,0.0245));
+    border: 1px solid var(--theme-border, rgba(255, 255, 255, .045));
     transition: background .2s ease, border-color .2s ease, transform .2s ease;
 }
 
@@ -271,8 +271,8 @@ body {
 
 .peer-row:hover {
     transform: translateY(-1px);
-    background: rgba(255,255,255,0.042);
-    border-color: rgba(32, 201, 151, .16);
+    background: var(--theme-surface-alt, rgba(255,255,255,0.042));
+    border-color: var(--theme-teal-border, rgba(32, 201, 151, .16));
 }
 
 .peer-left {
@@ -287,7 +287,7 @@ body {
 .peer-number {
     flex: 0 0 auto;
     margin-right: .15rem;
-    color: #8f9aa5;
+    color: var(--theme-muted, #8f9aa5);
     font-size: 1rem;
     font-weight: 800;
 }
@@ -303,16 +303,16 @@ body {
 }
 
 .peer-name {
-    color: #fff;
+    color: var(--theme-text, #fff);
     text-decoration: none;
 }
 
 .peer-name:hover {
-    color: #55d6ba;
+    color: var(--theme-teal-text, #55d6ba);
 }
 
 .deleted-user {
-    color: #ff7f8a;
+    color: var(--theme-red-text, #ff7f8a);
 }
 
 .peer-right {
@@ -331,7 +331,7 @@ body {
     max-width: 100%;
     padding: .42rem .62rem;
     border-radius: .42rem;
-    font-size: .82rem;
+    font-size: var(--site-font-body, 13px);
     line-height: 1.25;
     font-weight: 700;
     white-space: normal;
@@ -344,33 +344,33 @@ body {
 }
 
 .badge-agent {
-    background: rgba(255,255,255,0.056);
-    color: #d0d8dc;
-    border: 1px solid rgba(255, 255, 255, .06);
+    background: var(--theme-surface-alt, rgba(255,255,255,0.056));
+    color: var(--theme-text, #d0d8dc);
+    border: 1px solid var(--theme-border, rgba(255, 255, 255, .06));
 }
 
 .badge-success-soft {
-    background: rgba(40, 167, 69, .15);
-    color: #72df9c;
-    border: 1px solid rgba(40, 167, 69, .18);
+    background: var(--theme-green-soft, rgba(40, 167, 69, .15));
+    color: var(--theme-green-text, #72df9c);
+    border: 1px solid var(--theme-green-border, rgba(40, 167, 69, .18));
 }
 
 .badge-danger-soft {
-    background: rgba(220, 53, 69, .15);
-    color: #ff8c96;
-    border: 1px solid rgba(220, 53, 69, .18);
+    background: var(--theme-red-soft, rgba(220, 53, 69, .15));
+    color: var(--theme-red-text, #ff8c96);
+    border: 1px solid var(--theme-red-border, rgba(220, 53, 69, .18));
 }
 
 .badge-time {
-    background: rgba(108, 117, 125, .16);
-    color: #c0c9ce;
-    border: 1px solid rgba(255, 255, 255, .05);
+    background: var(--theme-surface-alt, rgba(108, 117, 125, .16));
+    color: var(--theme-text, #c0c9ce);
+    border: 1px solid var(--theme-border, rgba(255, 255, 255, .05));
 }
 
 .badge-ip {
-    background: rgba(0, 0, 0, .28);
-    color: #c0c8cc;
-    border: 1px solid rgba(255, 255, 255, .045);
+    background: var(--theme-surface-alt, rgba(0, 0, 0, .28));
+    color: var(--theme-text, #c0c8cc);
+    border: 1px solid var(--theme-border, rgba(255, 255, 255, .045));
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
@@ -449,16 +449,16 @@ body {
     }
 
     .peer-row .badge {
-        font-size: .78rem;
+        font-size: var(--site-font-body, 13px);
     }
 
     .peer-name,
     .deleted-user {
-        font-size: .95rem;
+        font-size: var(--site-font-body, 13px);
     }
 
     .peer-number {
-        font-size: .95rem;
+        font-size: var(--site-font-body, 13px);
     }
 }
 
@@ -495,7 +495,7 @@ body {
     .peer-row .badge {
         width: 100%;
         justify-content: flex-start;
-        font-size: .77rem;
+        font-size: var(--site-font-body, 13px);
     }
 
     .pagination-wrap {

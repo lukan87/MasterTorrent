@@ -103,11 +103,6 @@
                                 English
                             </option>
 
-                            <option value="romanian"
-                                {{ old('language') === 'romanian' ? 'selected' : '' }}>
-                                Romanian
-                            </option>
-
                             <option value="italian"
                                 {{ old('language') === 'italian' ? 'selected' : '' }}>
                                 Italian

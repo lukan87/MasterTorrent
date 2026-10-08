@@ -90,14 +90,14 @@
 
     background: linear-gradient(
         135deg,
-        rgba(14,21,33,.95),
-        rgba(10,15,27,.84)
+        var(--theme-surface, rgba(14,21,33,.95)),
+        var(--theme-surface, rgba(10,15,27,.84))
     );
 
     border: 1px solid var(--ui-border);
     border-radius: .85rem;
 
-    box-shadow: 0 14px 36px rgba(0, 0, 0, .28);
+    box-shadow: 0 14px 36px var(--theme-shadow, rgba(0, 0, 0, .28));
 
     backdrop-filter: blur(14px);
 }
@@ -107,15 +107,15 @@
 .recommended-header {
     padding: 14px 16px;
 
-    background: rgba(45, 212, 191, .045);
+    background: var(--theme-teal-soft, rgba(45, 212, 191, .045));
 
     border-bottom: 1px solid var(--ui-border);
 }
 
 .recommended-title {
-    color: #fff;
+    color: var(--theme-text, #fff);
 
-    font-size: 14px;
+    font-size: var(--site-font-body, 13px);
     font-weight: 700;
 }
 
@@ -126,9 +126,9 @@
 .recommended-subtitle {
     margin-top: 3px;
 
-    color: rgba(255, 255, 255, .42);
+    color: var(--theme-muted, rgba(255, 255, 255, .42));
 
-    font-size: 12px;
+    font-size: var(--site-font-small, 13px);
 }
 
 /* Body */
@@ -148,7 +148,7 @@
     height: 100%;
     overflow: hidden;
 
-    background: rgba(6,10,19,.55);
+    background: var(--theme-surface, rgba(6,10,19,.55));
 
     border: 1px solid var(--ui-border);
     border-radius: .65rem;
@@ -163,11 +163,11 @@
 .recommended-link:hover .recommended-item {
     transform: translateY(-3px);
 
-    background: rgba(8,16,25,.72);
+    background: var(--theme-surface, rgba(8,16,25,.72));
 
-    border-color: rgba(45, 212, 191, .32);
+    border-color: var(--theme-teal-border, rgba(45, 212, 191, .32));
 
-    box-shadow: 0 10px 24px rgba(0, 0, 0, .28);
+    box-shadow: 0 10px 24px var(--theme-shadow, rgba(0, 0, 0, .28));
 }
 
 /* Poster */
@@ -235,9 +235,9 @@
 .recommended-name {
     overflow: hidden;
 
-    color: rgba(255, 255, 255, .82);
+    color: var(--theme-muted, rgba(255, 255, 255, .82));
 
-    font-size: 13px;
+    font-size: var(--site-font-body, 13px);
     font-weight: 600;
 
     line-height: 1.35;
@@ -254,16 +254,16 @@
 
     margin-top: 7px;
 
-    font-size: 11px;
+    font-size: var(--site-font-small, 13px);
     font-weight: 600;
 }
 
 .recommended-seeders {
-    color: #6ee7b7;
+    color: var(--theme-teal-text, #6ee7b7);
 }
 
 .recommended-leechers {
-    color: #fca5a5;
+    color: var(--theme-red-text, #fca5a5);
 }
 
 .recommended-completed {
@@ -289,12 +289,12 @@
     }
 
     .recommended-name {
-        font-size: 12px;
+        font-size: var(--site-font-small, 13px);
     }
 
     .recommended-stats {
         gap: 5px;
-        font-size: 10px;
+        font-size: var(--site-font-small, 13px);
     }
 
     .recommended-stats i {

@@ -3,14 +3,13 @@
 namespace App\Helpers;
 
 use App\Models\Torrent;
+use App\Models\Category;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
 class TorrentHelper
 {
-    private const ADULT_CATEGORY_IDS = [27, 34];
-
     private const PER_PAGE = 50;
 
     private static array $allowedSortColumns = [
@@ -65,7 +64,7 @@ class TorrentHelper
         $query
             ->with([
                 'genres:id,name',
-                'category:id,name,icon',
+                'category:id,name,icon,image',
                 'uploader:id,name,user_class',
                 'bumper:id,name',
             ])
@@ -88,7 +87,7 @@ class TorrentHelper
         $query = Torrent::query()
             ->whereNotIn(
                 'category_id',
-                self::ADULT_CATEGORY_IDS
+                Category::ADULT_IDS
             );
 
         self::applyBrowseRelations($query);
@@ -146,7 +145,7 @@ class TorrentHelper
         $query = Torrent::query()
             ->whereIn(
                 'category_id',
-                self::ADULT_CATEGORY_IDS
+                Category::ADULT_IDS
             );
 
         self::applyBrowseRelations($query);
@@ -156,10 +155,7 @@ class TorrentHelper
             $request
         );
 
-        self::applyAdultCategoryFilter(
-            $query,
-            $request
-        );
+        self::applyCategoryFilter($query, $request, true);
 
         self::applyTmdbFilter(
             $query,
@@ -207,104 +203,46 @@ class TorrentHelper
             return;
         }
 
-        $query->where(
-            function (Builder $q) use ($keyword) {
-                $q
-                    ->where(
-                        'name',
-                        'like',
-                        '%' . $keyword . '%'
-                    )
-                    ->orWhere(
-                        'imdb_url',
-                        'like',
-                        '%' . $keyword . '%'
-                    );
-            }
-        );
+        // Match meaningful words independently of release separators or word order.
+        $words = preg_split('/[\s._-]+/u', mb_strtolower($keyword), -1, PREG_SPLIT_NO_EMPTY);
+        $meaningful = array_values(array_diff($words, ['a', 'an', 'the', 'of', 'and']));
+        $words = $meaningful ?: ($words ?: [$keyword]);
+        $escape = static fn (string $value): string => str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $value);
+
+        $query->where(function (Builder $q) use ($keyword, $words, $escape) {
+            $q->where(function (Builder $names) use ($words, $escape) {
+                foreach (array_unique($words) as $word) {
+                    // A simple plural such as "dragons" can match "Dragon".
+                    if (mb_strlen($word) >= 5 && preg_match('/(?<!s|u|i)s$/u', $word) && ! str_ends_with($word, 'ies')) {
+                        $word = mb_substr($word, 0, -1);
+                    }
+                    $names->whereRaw("name LIKE ? ESCAPE '!'", ['%'.$escape($word).'%']);
+                }
+            })->orWhereRaw("imdb_url LIKE ? ESCAPE '!'", ['%'.$escape($keyword).'%']);
+        });
     }
 
     /**
-     * Normal browse category filter.
+     * Apply selected categories within the current browser's category scope.
      */
-    private static function applyCategoryFilter(
-        Builder $query,
-        Request $request
-    ): void {
-        $categories = $request->input(
-            'categories',
-            []
-        );
-
-        if (!is_array($categories)) {
+    private static function applyCategoryFilter(Builder $query, Request $request, bool $adult = false): void
+    {
+        // Retain links using the previous single-category adult parameter.
+        $categories = $request->input('categories', $adult && $request->filled('category') ? [$request->input('category')] : []);
+        if (! is_array($categories)) {
             return;
         }
+        $categories = array_values(array_unique(array_map('intval', array_filter(
+            $categories,
+            static fn ($category) => is_scalar($category) && ctype_digit((string) $category) && (int) $category > 0
+        ))));
+        $categories = array_values($adult
+            ? array_intersect($categories, Category::ADULT_IDS)
+            : array_diff($categories, Category::ADULT_IDS));
 
-        $categories = array_values(
-            array_unique(
-                array_map(
-                    'intval',
-                    array_filter(
-                        $categories,
-                        static fn ($category) =>
-                            is_numeric($category)
-                    )
-                )
-            )
-        );
-
-        /*
-         * Prevent adult categories from appearing
-         * in the normal torrent browser.
-         */
-        $categories = array_values(
-            array_diff(
-                $categories,
-                self::ADULT_CATEGORY_IDS
-            )
-        );
-
-        if (empty($categories)) {
-            return;
+        if ($categories !== []) {
+            $query->whereIn('category_id', $categories);
         }
-
-        $query->whereIn(
-            'category_id',
-            $categories
-        );
-    }
-
-    /**
-     * Adult category filter.
-     */
-    private static function applyAdultCategoryFilter(
-        Builder $query,
-        Request $request
-    ): void {
-        if (!$request->filled('category')) {
-            return;
-        }
-
-        $category = $request->input('category');
-
-        if (!is_numeric($category)) {
-            return;
-        }
-
-        $category = (int) $category;
-
-        if (!in_array(
-            $category,
-            self::ADULT_CATEGORY_IDS,
-            true
-        )) {
-            return;
-        }
-
-        $query->where(
-            'category_id',
-            $category
-        );
     }
 
     /**
@@ -373,6 +311,9 @@ class TorrentHelper
         );
 
         switch ($status) {
+            case 'all':
+                break;
+
             case 'dead':
                 $query->where(
                     'seeders',

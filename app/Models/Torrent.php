@@ -352,13 +352,7 @@ public function purge(): void
 
         foreach ($images as $image) {
 
-            if (!empty($image->path)) {
-                Storage::disk('public')->delete($image->path);
-            }
-
-            if (!empty($image->fallback)) {
-                Storage::disk('public')->delete($image->fallback);
-            }
+            \App\Models\TorrentImage::deleteLocalFiles([$image->path, $image->fallback ?? null]);
         }
 
         DB::table('torrent_images')->where('torrent_id', $torrentId)->delete();

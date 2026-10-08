@@ -2,14 +2,15 @@
 
 namespace App\Services;
 
-use App\Models\News;
-use App\Models\User;
-use App\Models\Torrent;
-use App\Models\Poll;
 use App\Models\HappyHour;
-use App\Models\Shoutbox;
 use App\Models\Movie;
+use App\Models\News;
+use App\Models\Poll;
 use App\Models\Series;
+use App\Models\Shoutbox;
+use App\Models\Torrent;
+use App\Models\User;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
@@ -27,37 +28,38 @@ class HomeService
         return Cache::remember($key, $this->cacheDuration, $callback);
     }
 
-
     public function getLatestUsers(int $limit = 1)
-{
-    return $this->cacheQuery('latest_users', function () use ($limit) {
-        return User::latest('created_at')
-            ->take($limit)
-            ->get()
-            ->map(function ($user) {
-                $user->registered_ago = $user->created_at->diffForHumans();
-                return $user;
-            });
-    });
-}
+    {
+        return $this->cacheQuery('latest_users', function () use ($limit) {
+            return User::latest('created_at')
+                ->take($limit)
+                ->get()
+                ->map(function ($user) {
+                    $user->registered_ago = $user->created_at->diffForHumans();
+
+                    return $user;
+                });
+        });
+    }
 
     public function getActiveUsers24h()
-{
-    return $this->cacheQuery('active_users_24h', function () {
-        $users = User::where('last_activity', '>=', now()->subDay())
-            ->orderBy('updated_at', 'desc')
-            ->get()
-            ->map(function ($user) {
-                $user->last_active_local = $user->last_activity->timezone($user->timezone ?? 'Europe/London');
-                return $user;
-            });
+    {
+        return $this->cacheQuery('active_users_24h', function () {
+            $users = User::where('last_activity', '>=', now()->subDay())
+                ->orderBy('updated_at', 'desc')
+                ->get()
+                ->map(function ($user) {
+                    $user->last_active_local = $user->last_activity->timezone($user->timezone ?? 'Europe/London');
 
-        return [
-            'users' => $users,
-            'count' => $users->count(),
-        ];
-    });
-}
+                    return $user;
+                });
+
+            return [
+                'users' => $users,
+                'count' => $users->count(),
+            ];
+        });
+    }
 
     private function getShoutboxMessages(int $limit = 30)
     {
@@ -77,6 +79,7 @@ class HomeService
                 ->get()
                 ->map(function ($user) {
                     $user->last_active_local = $user->updated_at->timezone($user->timezone ?? 'Europe/London');
+
                     return $user;
                 });
 
@@ -145,11 +148,11 @@ class HomeService
             ->get();
     }
 
-/**
+    /**
      * Returns up to $limit random titles from the movies or series table,
      * mapped to the poster/URL format the view needs.
      */
-    private function getRandomOnlineTitles(string $type, int $limit = 10): \Illuminate\Support\Collection
+    private function getRandomOnlineTitles(string $type, int $limit = 10): Collection
     {
         $model = $type === 'series' ? new Series : new Movie;
 
@@ -160,11 +163,11 @@ class HomeService
                 $routeName = $type === 'series' ? 'series.show' : 'movies.show';
 
                 return [
-                    'title'  => $item->name,
+                    'title' => $item->name,
                     'poster' => $item->poster_url,
-                    'year'   => $item->year,
+                    'year' => $item->year,
                     'rating' => number_format($item->vote_average ?? 0, 1),
-                    'url'    => route($routeName, [$item->id, $item->slug]),
+                    'url' => route($routeName, [$item->id, $item->slug]),
                 ];
             });
     }
@@ -172,8 +175,54 @@ class HomeService
     public function getDashboardData(): array
     {
         $onlineUsersData = $this->getOnlineUsers();
-        $activeUsers24hData = $this->getActiveUsers24h();
+        $activeUsers24hCount = $this->cacheQuery('home_active_users_24h_count',
+            fn () => User::where('last_activity', '>=', now()->subDay())->count());
         $userId = auth()->id();
+        $memberLeaderboards = $this->cacheQuery('home_member_leaderboards_v1_'.($userId ?? 'guest'),
+            fn () => $this->getMemberLeaderboardData($userId));
+
+        return [
+            'onlineUsers' => $onlineUsersData['users'],
+            'onlineUserCount' => $onlineUsersData['count'],
+
+            'latestUsers' => $this->getLatestUsers(),
+
+            'latestNews' => $this->cacheQuery('latest_news', fn () => News::with('user')->latest()->take(1)->get()),
+            'polls' => $this->cacheQuery('polls', fn () => Poll::with(['options.votes', 'votes'])->latest()->take(1)->get()),
+
+            'torrentCount' => $this->cacheQuery('torrent_count', fn () => Torrent::count()),
+            'torrentActive' => $this->cacheQuery('torrent_active_count', fn () => Torrent::where('seeders', '>', 0)->count()),
+            'userCount' => $this->cacheQuery('user_count', fn () => User::count()),
+
+            'activeUsers24hCount' => $activeUsers24hCount,
+
+            'uniqueSeeders' => $this->cacheQuery('unique_seeders', fn () => DB::table('peers')->where('seeder', 1)->where('active', true)->count()),
+            'uniqueLeechers' => $this->cacheQuery('home_unique_leechers', fn () => DB::table('peers')
+                ->where('seeder', false)
+                ->where('active', true)
+                ->where('client_updated_at', '>', now()->subMinutes(30))
+                ->select(DB::raw('COUNT(DISTINCT CONCAT(user_id, "-", torrent_id)) as total'))
+                ->value('total')),
+
+            'currentHappyHour' => $this->getCurrentHappyHour(),
+            'trendingTorrents' => $this->cacheQuery('trending_torrents', fn () => $this->getTrendingTorrents(12)),
+            'randomOnlineMovies' => $this->cacheQuery('home_random_movies_10', fn () => $this->getRandomOnlineTitles('movie')),
+            'randomOnlineSeries' => $this->cacheQuery('home_random_series_10', fn () => $this->getRandomOnlineTitles('series')),
+            'messages' => $this->cacheQuery('home_shoutbox_messages', fn () => $this->getShoutboxMessages(30)),
+
+            'topUploaders24h' => $this->cacheQuery('top_uploaders_24h', fn () => $this->getTopUploaders24h()),
+            'topDownloaders24h' => $this->cacheQuery('top_downloaders_24h', fn () => $this->getTopDownloaders24h()),
+            'topSeeders24h' => $this->cacheQuery('top_seeders_24h', fn () => $this->getTopSeeders24h()),
+
+        ] + $memberLeaderboards;
+    }
+
+    /** Keep member rankings out of shared cache entries. */
+    private function getMemberLeaderboardData(?int $userId): array
+    {
+        $movementClass = $downloadMovementClass = $seederMovementClass = null;
+        $streak = $downloadStreak = $seederStreak = 0;
+        $percentile = $downloadPercentile = $seederPercentile = null;
 
         $userUploadRank = null;
         $userDownloadRank = null;
@@ -185,114 +234,122 @@ class HomeService
 
         if ($userId) {
 
-// TOTAL USERS TODAY (download)
-$totalDownloadUsers = DB::table('history')
-    ->where('created_at', '>=', now()->subDay())
-    ->distinct('user_id')
-    ->count('user_id');
+            // TOTAL USERS TODAY (download)
+            $totalDownloadUsers = DB::table('history')
+                ->where('created_at', '>=', now()->subDay())
+                ->distinct('user_id')
+                ->count('user_id');
 
-// STREAK (download)
-$downloadStreak = 0;
-for ($i = 0; $i < 7; $i++) {
-    $has = DB::table('history')
-        ->where('user_id', $userId)
-        ->whereBetween('created_at', [
-            now()->subDays($i + 1),
-            now()->subDays($i)
-        ])
-        ->sum('actual_downloaded');
+            // STREAK (download)
+            $downloadStreak = 0;
+            for ($i = 0; $i < 7; $i++) {
+                $has = DB::table('history')
+                    ->where('user_id', $userId)
+                    ->whereBetween('created_at', [
+                        now()->subDays($i + 1),
+                        now()->subDays($i),
+                    ])
+                    ->sum('actual_downloaded');
 
-    if ($has > 0) $downloadStreak++;
-    else break;
-}
+                if ($has > 0) {
+                    $downloadStreak++;
+                } else {
+                    break;
+                }
+            }
 
-// PERCENTILE
-$downloadPercentile = null;
-if ($userDownloadRank) {
-    $downloadPercentile = round(($userDownloadRank['rank'] / $totalDownloadUsers) * 100);
-}
+            // PERCENTILE
+            $downloadPercentile = null;
+            if ($userDownloadRank) {
+                $downloadPercentile = round(($userDownloadRank['rank'] / $totalDownloadUsers) * 100);
+            }
 
-// MOVEMENT CLASS
-$downloadMovementClass = null;
-if ($downloadMovement !== null) {
-    if ($downloadMovement >= 10) $downloadMovementClass = 'move-big-up';
-    elseif ($downloadMovement >= 3) $downloadMovementClass = 'move-up';
-    elseif ($downloadMovement > 0) $downloadMovementClass = 'move-small-up';
-    elseif ($downloadMovement <= -10) $downloadMovementClass = 'move-big-down';
-    elseif ($downloadMovement < 0) $downloadMovementClass = 'move-down';
-}
+            // MOVEMENT CLASS
+            $downloadMovementClass = null;
+            if ($downloadMovement !== null) {
+                if ($downloadMovement >= 10) {
+                    $downloadMovementClass = 'move-big-up';
+                } elseif ($downloadMovement >= 3) {
+                    $downloadMovementClass = 'move-up';
+                } elseif ($downloadMovement > 0) {
+                    $downloadMovementClass = 'move-small-up';
+                } elseif ($downloadMovement <= -10) {
+                    $downloadMovementClass = 'move-big-down';
+                } elseif ($downloadMovement < 0) {
+                    $downloadMovementClass = 'move-down';
+                }
+            }
 
+            // TOTAL SEEDERS
+            $totalSeedUsers = DB::table('peers')
+                ->where('seeder', 1)
+                ->where('active', true)
+                ->distinct('user_id')
+                ->count('user_id');
 
-// TOTAL SEEDERS
-$totalSeedUsers = DB::table('peers')
-    ->where('seeder', 1)
-    ->where('active', true)
-    ->distinct('user_id')
-    ->count('user_id');
+            // STREAK (seeders = days active)
+            $seederStreak = DB::table('peers')
+                ->where('user_id', $userId)
+                ->where('seeder', 1)
+                ->where('active', true)
+                ->exists() ? 7 : 0;
 
-// STREAK (seeders = days active)
-$seederStreak = 0;
-for ($i = 0; $i < 7; $i++) {
-    $has = DB::table('peers')
-        ->where('user_id', $userId)
-        ->where('seeder', 1)
-        ->where('active', true)
-        ->exists();
+            // PERCENTILE
+            $seederPercentile = null;
+            if ($userSeederRank) {
+                $seederPercentile = round(($userSeederRank['rank'] / $totalSeedUsers) * 100);
+            }
 
-    if ($has) $seederStreak++;
-    else break;
-}
+            // MOVEMENT CLASS (optional - no real history so reuse null)
+            $seederMovementClass = null;
 
-// PERCENTILE
-$seederPercentile = null;
-if ($userSeederRank) {
-    $seederPercentile = round(($userSeederRank['rank'] / $totalSeedUsers) * 100);
-}
+            // TOTAL USERS TODAY (for percentile)
+            $totalUsersToday = DB::table('history')
+                ->where('created_at', '>=', now()->subDay())
+                ->distinct('user_id')
+                ->count('user_id');
 
-// MOVEMENT CLASS (optional - no real history so reuse null)
-$seederMovementClass = null;
+            // STREAK (last 7 days example)
+            $streak = 0;
+            for ($i = 0; $i < 7; $i++) {
+                $hasUpload = DB::table('history')
+                    ->where('user_id', $userId)
+                    ->whereBetween('created_at', [
+                        now()->subDays($i + 1),
+                        now()->subDays($i),
+                    ])
+                    ->sum('uploaded');
 
-        // TOTAL USERS TODAY (for percentile)
-$totalUsersToday = DB::table('history')
-    ->where('created_at', '>=', now()->subDay())
-    ->distinct('user_id')
-    ->count('user_id');
+                if ($hasUpload > 0) {
+                    $streak++;
+                } else {
+                    break;
+                }
+            }
 
-// STREAK (last 7 days example)
-$streak = 0;
-for ($i = 0; $i < 7; $i++) {
-    $hasUpload = DB::table('history')
-        ->where('user_id', $userId)
-        ->whereBetween('created_at', [
-            now()->subDays($i + 1),
-            now()->subDays($i)
-        ])
-        ->sum('uploaded');
+            // PERCENTILE
+            $percentile = null;
+            if ($userUploadRank) {
+                $percentile = round(($userUploadRank['rank'] / $totalUsersToday) * 100);
+            }
 
-    if ($hasUpload > 0) {
-        $streak++;
-    } else {
-        break;
-    }
-}
+            // MOVEMENT INTENSITY CLASS
+            $movementClass = null;
+            if ($uploadMovement !== null) {
+                if ($uploadMovement >= 10) {
+                    $movementClass = 'move-big-up';
+                } elseif ($uploadMovement >= 3) {
+                    $movementClass = 'move-up';
+                } elseif ($uploadMovement > 0) {
+                    $movementClass = 'move-small-up';
+                } elseif ($uploadMovement <= -10) {
+                    $movementClass = 'move-big-down';
+                } elseif ($uploadMovement < 0) {
+                    $movementClass = 'move-down';
+                }
+            }
 
-// PERCENTILE
-$percentile = null;
-if ($userUploadRank) {
-    $percentile = round(($userUploadRank['rank'] / $totalUsersToday) * 100);
-}
-
-// MOVEMENT INTENSITY CLASS
-$movementClass = null;
-if ($uploadMovement !== null) {
-    if ($uploadMovement >= 10) $movementClass = 'move-big-up';
-    elseif ($uploadMovement >= 3) $movementClass = 'move-up';
-    elseif ($uploadMovement > 0) $movementClass = 'move-small-up';
-    elseif ($uploadMovement <= -10) $movementClass = 'move-big-down';
-    elseif ($uploadMovement < 0) $movementClass = 'move-down';
-}
-
-// attach to return
+            // attach to return
 
             // ---------------- UPLOAD ----------------
             $uploadTotal = DB::table('history')
@@ -311,7 +368,7 @@ if ($uploadMovement !== null) {
 
                 $userUploadRank = [
                     'rank' => $currentRank,
-                    'value' => $uploadTotal
+                    'value' => $uploadTotal,
                 ];
 
                 // Yesterday
@@ -331,8 +388,6 @@ if ($uploadMovement !== null) {
                     $uploadMovement = $yesterdayRank - $currentRank;
                 }
 
-
-                
             }
 
             // ---------------- DOWNLOAD ----------------
@@ -352,7 +407,7 @@ if ($uploadMovement !== null) {
 
                 $userDownloadRank = [
                     'rank' => $currentRank,
-                    'value' => $downloadTotal
+                    'value' => $downloadTotal,
                 ];
 
                 $yesterdayTotal = DB::table('history')
@@ -392,49 +447,12 @@ if ($uploadMovement !== null) {
 
                 $userSeederRank = [
                     'rank' => $currentRank,
-                    'value' => $seedCount
+                    'value' => $seedCount,
                 ];
             }
         }
 
         return [
-            'onlineUsers' => $onlineUsersData['users'],
-            'onlineUserCount' => $onlineUsersData['count'],
-
-            'latestUsers' => $this->getLatestUsers(),
-            
-
-            'topUploaders' => User::orderBy('uploaded', 'desc')->take(10)->get(),
-            'topDownloaders' => User::orderBy('downloaded', 'desc')->take(10)->get(),
-
-            'latestNews' => $this->cacheQuery('latest_news', fn() => News::latest()->take(1)->get()),
-            'polls' => $this->cacheQuery('polls', fn() => Poll::with('options.votes')->latest()->take(1)->get()),
-
-            'torrentCount' => $this->cacheQuery('torrent_count', fn() => Torrent::count()),
-            'torrentActive' => $this->cacheQuery('torrent_active_count', fn() => Torrent::where('seeders', '>', 0)->count()),
-            'userCount' => $this->cacheQuery('user_count', fn() => User::count()),
-
-            'activeUsers24h' => $activeUsers24hData['users'],
-            'activeUsers24hCount' => $activeUsers24hData['count'],
-
-            'uniqueSeeders' => $this->cacheQuery('unique_seeders', fn() => DB::table('peers')->where('seeder', 1)->where('active', true)->count()),
-           'uniqueLeechers' => DB::table('peers')
-    ->where('seeder', false)
-    ->where('active', true)
-    ->where('client_updated_at', '>', now()->subMinutes(30))
-    ->select(DB::raw('COUNT(DISTINCT CONCAT(user_id, "-", torrent_id)) as total'))
-    ->value('total'),
-
-            'currentHappyHour' => $this->getCurrentHappyHour(),
-            'trendingTorrents' => $this->cacheQuery('trending_torrents', fn() => $this->getTrendingTorrents(12)),
-            'randomOnlineMovies' => $this->getRandomOnlineTitles('movie'),
-            'randomOnlineSeries' => $this->getRandomOnlineTitles('series'),
-            'messages' => $this->cacheQuery('home_shoutbox_messages', fn() => $this->getShoutboxMessages(30)),
-
-            'topUploaders24h' => $this->cacheQuery('top_uploaders_24h', fn() => $this->getTopUploaders24h()),
-            'topDownloaders24h' => $this->cacheQuery('top_downloaders_24h', fn() => $this->getTopDownloaders24h()),
-            'topSeeders24h' => $this->cacheQuery('top_seeders_24h', fn() => $this->getTopSeeders24h()),
-
             'userUploadRank24h' => $userUploadRank,
             'userDownloadRank24h' => $userDownloadRank,
             'userSeederRank' => $userSeederRank,
@@ -450,7 +468,7 @@ if ($uploadMovement !== null) {
             'downloadMovementClass' => $downloadMovementClass,
             'downloadStreak' => $downloadStreak,
             'downloadPercentile' => $downloadPercentile,
-            
+
             'seederStreak' => $seederStreak,
             'seederPercentile' => $seederPercentile,
         ];

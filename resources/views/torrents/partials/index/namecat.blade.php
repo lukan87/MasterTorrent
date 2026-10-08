@@ -1,33 +1,17 @@
-<!-- <a href="{{ route('torrents.index', [
-        'keyword' => '',
-        'categories' => [$torrent->category->id],
-        'genre' => '',
-        'torrent_status' => 'active'
-    ]) }}"
-   class="me-3 d-inline-block"
-   data-bs-toggle="tooltip"
-   title="{{ $torrent->category->name }}">
-
-    <img src="{{ asset($torrent->category->image) }}?v={{ filemtime(public_path($torrent->category->image)) }}"
-         class="rounded shadow-sm"
-         style="width:74px;height:40px"
-         alt="{{ $torrent->category->name }}">
-
-</a> -->
-
-<a href="{{ route('torrents.index', [
+<a href="{{ route($browseRoute ?? 'torrents.index', [
         'keyword' => '',
         'categories' => [$torrent->category->id],
         'genre' => '',
         'torrent_status' => 'active'
     ]) }}"
    class="category-pill me-2"
+   aria-label="{{ $torrent->category->name }}"
    data-bs-toggle="tooltip"
    data-bs-placement="top"
    title="{{ $torrent->category->name }}">
 
     <span class="category-icon">
-        <i class="{{ $torrent->category->icon }}" aria-hidden="true"></i>
+        <i class="{{ $categoryIcon ?? $torrent->category->icon }}" aria-hidden="true"></i>
     </span>
 
     <span class="category-name">
@@ -40,40 +24,20 @@
 
     @include('torrents.partials.title-status')
 
-    {{-- MOBILE INFO --}}
-    <div class="d-md-none small text-muted mt-1 fs-6">
-
-        {{ $torrent->created_at->format('M d, Y') }} ·
-        {{ App\Helpers\FormatHelper::formatSize($torrent->size) }} ·
-        {{ $torrent->times_completed }}
-        {{ Str::plural('Time', $torrent->times_completed) }}
-
-    </div>
-
-    {{-- GENRES + TAGS --}}
-<div class="mt-1 d-flex flex-wrap align-items-center gap-1">
-
-    {{-- Genres --}}
-    @foreach($torrent->genres as $genre)
-
-        <a href="{{ route('torrents.index', ['genre' => $genre->id]) }}"
-           class="genre-badge text-decoration-none">
-
-            {{ $genre->name }}
-
-        </a>
-
-    @endforeach
-
-    {{-- Tags --}}
-    <div class="d-flex flex-wrap gap-1 align-items-center">
-
+    <div class="tx-release-meta">
+        @if($torrent->genres->isNotEmpty())
+            <span class="tx-genres">
+                <i class="bi bi-tag-fill" aria-hidden="true"></i>
+                <span>
+                    @foreach($torrent->genres as $genre)
+                        <a href="{{ route($browseRoute ?? 'torrents.index', ['genre' => $genre->id]) }}" class="genre-badge text-decoration-none">{{ $genre->name }}</a>@if(! $loop->last)<span class="tx-genre-comma">, </span>@endif
+                    @endforeach
+                </span>
+            </span>
+        @endif
         @include('torrents.partials.tags')
-
+        @include('torrents.partials.index.release-badges')
     </div>
-
-</div>
-
 </div>
 
 @once
@@ -88,16 +52,16 @@
 
     border-radius: 6px;
 
-    font-size: 11px;
+    font-size: var(--site-font-small, 13px);
     font-weight: 600;
 
     line-height: 1.1;
 
-    color: #cfcfcf;
+    color: var(--theme-text, #cfcfcf);
 
-    background: rgba(255,255,255,0.042);
+    background: var(--theme-surface-alt, rgba(255,255,255,0.042));
 
-    border: 1px solid rgba(255,255,255,.06);
+    border: 1px solid var(--theme-border, rgba(255,255,255,.06));
 
     transition:
         background .15s ease,
@@ -106,11 +70,11 @@
 }
 
 .genre-badge:hover {
-    color: #fff;
+    color: var(--theme-text, #fff);
 
-    background: rgba(255,255,255,0.084);
+    background: var(--theme-surface-alt, rgba(255,255,255,0.084));
 
-    border-color: rgba(255,255,255,.12);
+    border-color: var(--theme-border, rgba(255,255,255,.12));
 }
 .category-pill {
     width: 150px;
@@ -128,23 +92,23 @@
 
     background: linear-gradient(
         135deg,
-        rgba(255,255,255,0.0525),
-        rgba(255,255,255,0.0245)
+        var(--theme-surface-alt, rgba(255,255,255,0.0525)),
+        var(--theme-surface-alt, rgba(255,255,255,0.0245))
     );
 
-    border: 1px solid rgba(255,255,255,.10);
+    border: 1px solid var(--theme-border, rgba(255,255,255,.10));
 
-    color: #d8d8d8;
+    color: var(--theme-text, #d8d8d8);
     text-decoration: none;
 
-    font-size: 11px;
+    font-size: var(--site-font-small, 13px);
     font-weight: 600;
 
     white-space: nowrap;
 
     box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.04),
-        0 2px 8px rgba(0,0,0,.08);
+        inset 0 1px 0 var(--theme-shadow, rgba(255,255,255,.04)),
+        0 2px 8px var(--theme-shadow, rgba(0,0,0,.08));
 
     transition:
         transform .2s ease,
@@ -160,15 +124,15 @@
 }
 
 .category-pill:hover {
-    background: rgba(108, 117, 125, 0.18);
-    border-color: rgba(108, 117, 125, 0.30);
+    background: var(--theme-surface-alt, rgba(108, 117, 125, 0.18));
+    border-color: var(--theme-border, rgba(108, 117, 125, 0.30));
 
     color: inherit;
     text-decoration: none;
 
     transform: translateY(-1px);
 
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 3px 10px var(--theme-shadow, rgba(0, 0, 0, 0.08));
 }
 
 .category-pill:active {

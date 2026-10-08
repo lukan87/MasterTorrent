@@ -15,13 +15,13 @@
 
 @import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@800&family=Roboto:wght@100;300&display=swap");
 :root {
-  --button: #b3b3b3;
-  --button-color: #0a0a0a;
-  --shadow: #000;
-  --bg: #4b4b4b;
-  --header: #7a7a7a;
-  --color: #fafafa;
-  --lit-header: #e6e6e6;
+  --button: var(--theme-muted, #b3b3b3);
+  --button-color: var(--theme-text, #0a0a0a);
+  --shadow: var(--theme-shadow, #000);
+  --bg: var(--theme-surface, #4b4b4b);
+  --header: var(--theme-muted, #7a7a7a);
+  --color: var(--theme-text, #fafafa);
+  --lit-header: var(--theme-text, #e6e6e6);
   --speed: 2s;
 }
 * {
@@ -56,7 +56,7 @@ a {
   color: var(--button-color);
   padding: 1rem 4rem;
   border-radius: 4rem;
-  font-size: 0.875rem;
+  font-size: var(--site-font-body, 13px);
   letter-spacing: 0.05rem;
 }
 p {
@@ -93,7 +93,7 @@ h1:after {
   width: 100%;
   transform-origin: 50% 30%;
   transform: rotate(calc(var(--swing-x) * -0.25deg));
-  background: radial-gradient(40% 40% at 50% 42%, transparent, #000 35%);
+  background: radial-gradient(40% 40% at 50% 42%, transparent, var(--theme-surface-alt, #000) 35%);
 }
 .cloak__wrapper {
   position: fixed;

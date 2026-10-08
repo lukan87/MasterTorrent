@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
 <head>
+<script src="{{ asset('js/theme.js') }}?v={{ filemtime(public_path('js/theme.js')) }}"></script>
 <meta charset="UTF-8">
 <title>@yield('title','Admin')</title>
 
@@ -18,21 +19,21 @@ height:100vh;
 position:fixed;
 left:0;
 top:0;
-background:#0b1019;
-color:white;
+background:var(--theme-surface, #0b1019);
+color:var(--theme-text, white);
 }
 
 .admin-sidebar a{
 display:block;
 padding:12px 20px;
-color:#cbd5e1;
+color:var(--theme-text, #cbd5e1);
 text-decoration:none;
-font-size:14px;
+font-size:var(--site-font-body, 13px);
 }
 
 .admin-sidebar a:hover{
-background:#141b24;
-color:white;
+background:var(--theme-surface, #141b24);
+color:var(--theme-text, white);
 }
 
 .admin-content{
@@ -47,6 +48,7 @@ padding:15px 25px;
 </style>
 
 <link rel="stylesheet" href="{{ asset('css/dark-theme.css') }}?v={{ filemtime(public_path('css/dark-theme.css')) }}">
+<link rel="stylesheet" href="{{ asset('css/theme.css') }}?v={{ filemtime(public_path('css/theme.css')) }}">
 </head>
 
 <body>

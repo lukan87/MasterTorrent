@@ -105,3 +105,6 @@ Schedule::command('media:backfill')->weeklyOn(0, '03:00');
 
 // Reconcile tracker activity, account anniversaries, and any missed activity events.
 Schedule::command('achievements:award')->everyFiveMinutes()->withoutOverlapping();
+
+// Reconcile direct SQL deletions without deleting any remaining messages.
+Schedule::command('messages:prune-empty')->everyFiveMinutes()->withoutOverlapping(5);

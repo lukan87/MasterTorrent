@@ -149,7 +149,7 @@
 ========================================= */
 
 .donation-page{
-    color:#fff;
+    color:var(--theme-text, #fff);
     max-width:1450px;
 }
 
@@ -168,8 +168,8 @@
     background:
         linear-gradient(
             135deg,
-            #ffffff,
-            #bfc8ff
+            var(--theme-text, #ffffff),
+            var(--theme-blue-text, #bfc8ff)
         );
 
     -webkit-background-clip:text;
@@ -181,8 +181,8 @@
     background:
         linear-gradient(
             135deg,
-            #6ea8ff,
-            #9b7cff
+            var(--theme-blue-text, #6ea8ff),
+            var(--theme-blue-text, #9b7cff)
         );
 
     -webkit-background-clip:text;
@@ -190,8 +190,8 @@
 }
 
 .donation-page .text-muted{
-    color:rgba(255,255,255,.55) !important;
-    font-size:.95rem;
+    color:var(--theme-muted, rgba(255,255,255,.55)) !important;
+    font-size:var(--site-font-body, 13px);
 }
 
 /* =========================================
@@ -203,12 +203,12 @@
     background:
         linear-gradient(
             180deg,
-            rgba(14,14,17,.92),
-            rgba(8,8,10,.96)
+            var(--theme-surface-alt, rgba(14,14,17,.92)),
+            var(--theme-surface-alt, rgba(8,8,10,.96))
         );
 
     border:
-        1px solid rgba(255,255,255,.06);
+        1px solid var(--theme-border, rgba(255,255,255,.06));
 
     border-radius:
         28px;
@@ -220,7 +220,7 @@
         blur(18px);
 
     box-shadow:
-        0 20px 60px rgba(0,0,0,.4);
+        0 20px 60px var(--theme-shadow, rgba(0,0,0,.4));
 
     position:relative;
 
@@ -238,7 +238,7 @@
     background:
         radial-gradient(
             circle at top right,
-            rgba(110,168,255,.12),
+            var(--theme-blue-soft, rgba(110,168,255,.12)),
             transparent 45%
         );
 
@@ -255,12 +255,12 @@
 }
 
 .donation-alert h4 i{
-    color:#ff6b81;
+    color:var(--theme-red-text, #ff6b81);
 }
 
 .donation-alert p{
 
-    color:rgba(255,255,255,.75);
+    color:var(--theme-muted, rgba(255,255,255,.75));
 
     font-size:1rem;
 
@@ -283,7 +283,7 @@
         700;
 
     border:
-        1px solid rgba(255,255,255,.12);
+        1px solid var(--theme-border, rgba(255,255,255,.12));
 
     transition:
         all .18s ease;
@@ -295,7 +295,7 @@
         translateY(-2px);
 
     background:
-        rgba(255,255,255,0.056);
+        var(--theme-surface-alt, rgba(255,255,255,0.056));
 }
 
 /* =========================================
@@ -309,12 +309,12 @@
     background:
         linear-gradient(
             180deg,
-            rgba(16,16,18,.96),
-            rgba(9,9,10,.98)
+            var(--theme-surface, rgba(16,16,18,.96)),
+            var(--theme-surface-alt, rgba(9,9,10,.98))
         );
 
     border:
-        1px solid rgba(255,255,255,.05);
+        1px solid var(--theme-border, rgba(255,255,255,.05));
 
     border-radius:
         24px;
@@ -325,7 +325,7 @@
         all .28s ease;
 
     box-shadow:
-        0 18px 45px rgba(0,0,0,.28);
+        0 18px 45px var(--theme-shadow, rgba(0,0,0,.28));
 
     height:100%;
 }
@@ -336,10 +336,10 @@
         translateY(-8px);
 
     box-shadow:
-        0 30px 60px rgba(0,0,0,.45);
+        0 30px 60px var(--theme-shadow, rgba(0,0,0,.45));
 
     border-color:
-        rgba(255,255,255,.1);
+        var(--theme-border, rgba(255,255,255,.1));
 }
 
 /* =========================================
@@ -364,7 +364,7 @@
     letter-spacing:
         -.5px;
 
-    color:#fff;
+    color:var(--theme-text, #fff);
 }
 
 /* glow */
@@ -379,7 +379,7 @@
     background:
         linear-gradient(
             to bottom,
-            rgba(255,255,255,0.084),
+            var(--theme-surface-alt, rgba(255,255,255,0.084)),
             transparent
         );
 
@@ -410,7 +410,7 @@
         1.4rem;
 
     color:
-        rgba(255,255,255,.92);
+        var(--theme-text, rgba(255,255,255,.92));
 }
 
 /* =========================================
@@ -443,16 +443,16 @@
         14px;
 
     background:
-        rgba(255,255,255,0.021);
+        var(--theme-surface-alt, rgba(255,255,255,0.021));
 
     border:
-        1px solid rgba(255,255,255,.04);
+        1px solid var(--theme-border, rgba(255,255,255,.04));
 
     font-size:
-        .95rem;
+        var(--site-font-body, 13px);
 
     color:
-        rgba(255,255,255,.82);
+        var(--theme-muted, rgba(255,255,255,.82));
 
     transition:
         .18s ease;
@@ -461,7 +461,7 @@
 .donation-benefits li:hover{
 
     background:
-        rgba(255,255,255,0.035);
+        var(--theme-surface-alt, rgba(255,255,255,0.035));
 
     transform:
         translateX(2px);
@@ -496,12 +496,12 @@
         800;
 
     font-size:
-        .95rem;
+        var(--site-font-body, 13px);
 
     letter-spacing:
         .2px;
 
-    color:#fff;
+    color:var(--theme-text, #fff);
 
     transition:
         all .2s ease;
@@ -525,51 +525,51 @@
 ========================================= */
 
 .tier1 .donation-price{
-    background:linear-gradient(135deg,#313740,#242a35);
+    background:linear-gradient(135deg,var(--theme-surface, #313740),var(--theme-surface, #242a35));
 }
 
 .tier1 .donate-btn{
-    background:linear-gradient(135deg,#313740,#242a35);
+    background:linear-gradient(135deg,var(--theme-surface, #313740),var(--theme-surface, #242a35));
 }
 
 .tier2 .donation-price{
-    background:linear-gradient(135deg,#2563eb,#1d4ed8);
+    background:linear-gradient(135deg,var(--theme-blue-soft, #2563eb),var(--theme-blue-soft, #1d4ed8));
 }
 
 .tier2 .donate-btn{
-    background:linear-gradient(135deg,#2563eb,#1d4ed8);
+    background:linear-gradient(135deg,var(--theme-blue-action, #2563eb),var(--theme-blue-action, #1d4ed8));
 }
 
 .tier3 .donation-price{
-    background:linear-gradient(135deg,#7c3aed,#6d28d9);
+    background:linear-gradient(135deg,var(--theme-purple-soft, #7c3aed),var(--theme-purple-soft, #6d28d9));
 }
 
 .tier3 .donate-btn{
-    background:linear-gradient(135deg,#7c3aed,#6d28d9);
+    background:linear-gradient(135deg,var(--theme-purple-action, #7c3aed),var(--theme-purple-action, #6d28d9));
 }
 
 .tier4 .donation-price{
-    background:linear-gradient(135deg,#dc2626,#b91c1c);
+    background:linear-gradient(135deg,var(--theme-red-soft, #dc2626),var(--theme-red-soft, #b91c1c));
 }
 
 .tier4 .donate-btn{
-    background:linear-gradient(135deg,#dc2626,#b91c1c);
+    background:linear-gradient(135deg,var(--theme-red-action, #dc2626),var(--theme-red-action, #b91c1c));
 }
 
 .tier5 .donation-price{
-    background:linear-gradient(135deg,#d97706,#b45309);
+    background:linear-gradient(135deg,var(--theme-amber-soft, #d97706),var(--theme-amber-soft, #b45309));
 }
 
 .tier5 .donate-btn{
-    background:linear-gradient(135deg,#d97706,#b45309);
+    background:linear-gradient(135deg,var(--theme-amber-action, #d97706),var(--theme-amber-action, #b45309));
 }
 
 .tier6 .donation-price{
-    background:linear-gradient(135deg,#059669,#047857);
+    background:linear-gradient(135deg,var(--theme-teal-soft, #059669),var(--theme-teal-soft, #047857));
 }
 
 .tier6 .donate-btn{
-    background:linear-gradient(135deg,#059669,#047857);
+    background:linear-gradient(135deg,var(--theme-teal-action, #059669),var(--theme-teal-action, #047857));
 }
 
 /* =========================================

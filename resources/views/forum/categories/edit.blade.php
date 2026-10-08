@@ -115,6 +115,7 @@
                 </div>
             </div>
 
+<input type="hidden" name="is_private" value="0">
             <div class="form-check mb-4">
                 <input
                     type="checkbox"
@@ -161,10 +162,10 @@
     max-width: 850px;
     margin: 0 auto;
     padding: 30px;
-    background: rgba(10,13,23,.78);
-    border: 1px solid rgba(255,255,255,.07);
+    background: var(--theme-surface, rgba(10,13,23,.78));
+    border: 1px solid var(--theme-border, rgba(255,255,255,.07));
     border-radius: 18px;
-    box-shadow: 0 12px 35px rgba(0,0,0,.18);
+    box-shadow: 0 12px 35px var(--theme-shadow, rgba(0,0,0,.18));
 }
 
 .forum-category-form-header {
@@ -181,8 +182,8 @@
     align-items: center;
     justify-content: center;
     border-radius: 14px;
-    background: linear-gradient(135deg, #2563eb, #7c3aed);
-    color: white;
+    background: linear-gradient(135deg, var(--theme-blue-soft, #2563eb), var(--theme-purple-soft, #7c3aed));
+    color: var(--theme-text, white);
     font-size: 1.3rem;
 }
 
@@ -190,64 +191,64 @@
     margin: 0;
     font-size: 1.8rem;
     font-weight: 800;
-    color: white;
+    color: var(--theme-text, white);
 }
 
 .forum-category-form-description {
     margin-top: 4px;
-    color: rgba(255,255,255,.55);
+    color: var(--theme-muted, rgba(255,255,255,.55));
 }
 
 .forum-category-form-card .form-label {
-    color: rgba(255,255,255,.85);
+    color: var(--theme-text, rgba(255,255,255,.85));
     font-weight: 700;
 }
 
 .forum-category-form-card .form-control {
-    background: rgba(255,255,255,0.028);
-    border: 1px solid rgba(255,255,255,.10);
-    color: white;
+    background: var(--theme-control, rgba(255,255,255,0.028));
+    border: 1px solid var(--theme-border, rgba(255,255,255,.10));
+    color: var(--theme-text, white);
     border-radius: 10px;
     padding: 11px 13px;
 }
 
 .forum-category-form-card .form-control:focus {
-    background: rgba(255,255,255,0.042);
-    color: white;
-    border-color: #4f8cff;
-    box-shadow: 0 0 0 .2rem rgba(37,99,235,.15);
+    background: var(--theme-control, rgba(255,255,255,0.042));
+    color: var(--theme-text, white);
+    border-color: var(--theme-blue-border, #4f8cff);
+    box-shadow: 0 0 0 .2rem var(--theme-shadow, rgba(37,99,235,.15));
 }
 
 .forum-category-form-card .form-text {
-    color: rgba(255,255,255,.45);
+    color: var(--theme-muted, rgba(255,255,255,.45));
     margin-top: 6px;
 }
 
 .forum-category-form-card code {
-    color: #93c5fd;
+    color: var(--theme-blue-text, #93c5fd);
 }
 
 .forum-category-form-card .form-check-label {
-    color: rgba(255,255,255,.85);
+    color: var(--theme-text, rgba(255,255,255,.85));
     font-weight: 700;
 }
 
 .forum-category-form-card .form-check-input {
-    background-color: rgba(255,255,255,0.035);
-    border-color: rgba(255,255,255,.20);
+    background-color: var(--theme-control, rgba(255,255,255,0.035));
+    border-color: var(--theme-border, rgba(255,255,255,.20));
 }
 
 .forum-save-category-btn {
     padding: 10px 17px;
     border: none;
     border-radius: 10px;
-    background: linear-gradient(135deg, #2563eb, #7c3aed);
-    color: white;
+    background: linear-gradient(135deg, var(--theme-blue-action, #2563eb), var(--theme-purple-action, #7c3aed));
+    color: var(--theme-on-action, white);
     font-weight: 700;
 }
 
 .forum-save-category-btn:hover {
-    color: white;
+    color: var(--theme-text, white);
     transform: translateY(-1px);
 }
 

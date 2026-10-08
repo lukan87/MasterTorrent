@@ -420,15 +420,15 @@
     display: flex;
     align-items: stretch;
 
-    background: #03080e;
+    background: var(--theme-surface-alt, #03080e);
 
     border: 1px solid var(--ui-border);
 
     border-radius: 1rem;
 
     box-shadow:
-        0 25px 60px rgba(0, 0, 0, .5),
-        0 0 0 1px rgba(255, 255, 255, .04);
+        0 25px 60px var(--theme-shadow, rgba(0, 0, 0, .5)),
+        0 0 0 1px var(--theme-shadow, rgba(255, 255, 255, .04));
 }
 
 
@@ -619,7 +619,7 @@
     padding-bottom: .35rem;
 
     text-shadow:
-        0 2px 15px rgba(0, 0, 0, .8);
+        0 2px 15px var(--theme-shadow, rgba(0, 0, 0, .8));
 
 }
 
@@ -634,25 +634,25 @@
 
     border-radius: 999px;
 
-    font-size: 11px;
+    font-size: var(--site-font-small, 13px);
 
     font-weight: 800;
 
     letter-spacing: 1.8px;
 
-    color: #061311;
+    color: var(--theme-on-action, #061311);
 
-    background: var(--ui-accent);
+    background: var(--theme-teal-action, var(--ui-accent));
 
     box-shadow:
-        0 6px 18px rgba(0, 0, 0, .35);
+        0 6px 18px var(--theme-shadow, rgba(0, 0, 0, .35));
 
 }
 
 
 .lib-hero-title {
 
-    color: #f8fafc;
+    color: var(--theme-text, #f8fafc);
 
     font-size: 2.6rem;
 
@@ -665,16 +665,16 @@
     margin-bottom: .5rem;
 
     text-shadow:
-        0 3px 20px rgba(0, 0, 0, .9);
+        0 3px 20px var(--theme-shadow, rgba(0, 0, 0, .9));
 
 }
 
 
 .lib-hero-sub {
 
-    color: #dbe5f0;
+    color: var(--theme-text, #dbe5f0);
 
-    font-size: 14px;
+    font-size: var(--site-font-body, 13px);
 
     margin-bottom: 1.2rem;
 
@@ -706,20 +706,20 @@
 
     border-radius: .6rem;
 
-    font-size: 13px;
+    font-size: var(--site-font-body, 13px);
 
     font-weight: 700;
 
-    color: #061311;
+    color: var(--theme-on-action, #061311);
 
-    background: var(--ui-accent);
+    background: var(--theme-teal-action, var(--ui-accent));
 
     border: 0;
 
     text-decoration: none;
 
     box-shadow:
-        0 10px 25px rgba(0, 0, 0, .35);
+        0 10px 25px var(--theme-shadow, rgba(0, 0, 0, .35));
 
     transition:
         transform .18s ease,
@@ -733,12 +733,12 @@
 
     filter: brightness(1.08);
 
-    color: #061311;
+    color: var(--theme-text, #061311);
 
     transform: translateY(-2px);
 
     box-shadow:
-        0 14px 30px rgba(0, 0, 0, .45);
+        0 14px 30px var(--theme-shadow, rgba(0, 0, 0, .45));
 
 }
 
@@ -749,7 +749,7 @@
 
 .lib-page-title {
 
-    color: #f1f5f9;
+    color: var(--theme-text, #f1f5f9);
 
     font-size: 1.5rem;
 
@@ -769,7 +769,7 @@
 
     color: var(--ui-text-muted);
 
-    font-size: 13px;
+    font-size: var(--site-font-body, 13px);
 
 }
 
@@ -806,7 +806,7 @@
     border-color: var(--ui-accent);
 
     box-shadow:
-        0 0 0 2px rgba(99, 210, 198, .1);
+        0 0 0 2px var(--theme-shadow, rgba(99, 210, 198, .1));
 
 }
 
@@ -830,9 +830,9 @@
 
     background: transparent;
 
-    color: #e2e8f0;
+    color: var(--theme-text, #e2e8f0);
 
-    font-size: 13px;
+    font-size: var(--site-font-body, 13px);
 
     min-width: 180px;
 
@@ -841,16 +841,16 @@
 
 .lib-search-input::placeholder {
 
-    color: #64748b;
+    color: var(--theme-muted, #64748b);
 
 }
 
 
 .lib-search-clear {
 
-    color: #64748b;
+    color: var(--theme-muted, #64748b);
 
-    font-size: 12px;
+    font-size: var(--site-font-small, 13px);
 
     padding: 4px 6px;
 
@@ -861,7 +861,7 @@
 
 .lib-search-clear:hover {
 
-    color: #f1f5f9;
+    color: var(--theme-text, #f1f5f9);
 
 }
 
@@ -882,11 +882,11 @@
 
     font-weight: 700;
 
-    font-size: 13px;
+    font-size: var(--site-font-body, 13px);
 
-    color: #061311;
+    color: var(--theme-on-action, #061311);
 
-    background: var(--ui-accent);
+    background: var(--theme-teal-action, var(--ui-accent));
 
     cursor: pointer;
 
@@ -908,14 +908,14 @@
 
     color: var(--ui-text-muted);
 
-    font-size: 13px;
+    font-size: var(--site-font-body, 13px);
 
 }
 
 
 .lib-search-result-text strong {
 
-    color: #f1f5f9;
+    color: var(--theme-text, #f1f5f9);
 
 }
 
@@ -953,11 +953,11 @@
     z-index: 5;
 
     box-shadow:
-        0 20px 40px rgba(0, 0, 0, .55),
-        0 0 20px rgba(99, 210, 198, .06);
+        0 20px 40px var(--theme-shadow, rgba(0, 0, 0, .55)),
+        0 0 20px var(--theme-shadow, rgba(99, 210, 198, .06));
 
     border-color:
-        rgba(99, 210, 198, .25);
+        var(--theme-teal-border, rgba(99, 210, 198, .25));
 
 }
 
@@ -1010,14 +1010,14 @@
 
     border-radius: .35rem;
 
-    font-size: 11px;
+    font-size: var(--site-font-small, 13px);
 
     font-weight: 800;
 
     line-height: 1;
 
     box-shadow:
-        0 4px 12px rgba(0,0,0,.35);
+        0 4px 12px var(--theme-shadow, rgba(0,0,0,.35));
 
     pointer-events: none;
 
@@ -1030,16 +1030,16 @@
 
     left: 8px;
 
-    color: #061311;
+    color: var(--theme-on-action, #061311);
 
-    background: var(--ui-accent);
+    background: var(--theme-teal-action, var(--ui-accent));
 
 }
 
 
 .lib-badge-rating i {
 
-    color: #061311;
+    color: var(--theme-text, #061311);
 
     font-size: 9px;
 
@@ -1052,9 +1052,9 @@
 
     right: 8px;
 
-    color: #f8fafc;
+    color: var(--theme-text, #f8fafc);
 
-    background: rgba(3,8,14,.72);
+    background: var(--theme-surface-alt, rgba(3,8,14,.72));
 
     backdrop-filter: blur(4px);
 
@@ -1067,9 +1067,9 @@
 
     left: 8px;
 
-    color: #22c55e;
+    color: var(--theme-green-text, #22c55e);
 
-    background: rgba(3,8,14,.82);
+    background: var(--theme-surface-alt, rgba(3,8,14,.82));
 
     backdrop-filter: blur(4px);
 
@@ -1162,7 +1162,7 @@
 
 .lib-overlay-label {
 
-    font-size: 12px;
+    font-size: var(--site-font-small, 13px);
 
     font-weight: 700;
 
@@ -1188,9 +1188,9 @@
 
 .lib-card-title {
 
-    color: #e2e8f0;
+    color: var(--theme-text, #e2e8f0);
 
-    font-size: .82rem;
+    font-size: var(--site-font-body, 13px);
 
     font-weight: 700;
 
@@ -1228,7 +1228,7 @@
 
     margin-top: .25rem;
 
-    font-size: 11px;
+    font-size: var(--site-font-small, 13px);
 
     color: var(--ui-text-muted);
 
@@ -1237,7 +1237,7 @@
 
 .lib-card-info i {
 
-    color: #22c55e;
+    color: var(--theme-green-text, #22c55e);
 
     font-size: 9px;
 
@@ -1274,9 +1274,9 @@
 
     margin: 0 0 .25rem;
 
-    color: #f1f5f9;
+    color: var(--theme-text, #f1f5f9);
 
-    font-size: 14px;
+    font-size: var(--site-font-body, 13px);
 
     font-weight: 700;
 
@@ -1287,9 +1287,9 @@
 
     margin: 0;
 
-    color: #64748b;
+    color: var(--theme-muted, #64748b);
 
-    font-size: 13px;
+    font-size: var(--site-font-body, 13px);
 
 }
 
@@ -1313,7 +1313,7 @@
 
     padding: .4rem .6rem;
 
-    color: #cbd5e1;
+    color: var(--theme-text, #cbd5e1);
 
     background: var(--ui-surface);
 
@@ -1321,7 +1321,7 @@
 
     border-radius: .5rem;
 
-    font-size: 13px;
+    font-size: var(--site-font-body, 13px);
 
     text-align: center;
 
@@ -1335,19 +1335,19 @@
     color: var(--ui-accent);
 
     background:
-        rgba(99,210,198,.07);
+        var(--theme-teal-soft, rgba(99,210,198,.07));
 
     border-color:
-        rgba(99,210,198,.3);
+        var(--theme-teal-border, rgba(99,210,198,.3));
 
 }
 
 
 .lib-page .pagination .page-item.active .page-link {
 
-    color: #061311;
+    color: var(--theme-on-action, #061311);
 
-    background: var(--ui-accent);
+    background: var(--theme-teal-action, var(--ui-accent));
 
     border-color: var(--ui-accent);
 
@@ -1356,13 +1356,13 @@
 
 .lib-page .pagination .page-item.disabled .page-link {
 
-    color: #475569;
+    color: var(--theme-muted, #475569);
 
     background:
-        rgba(10,15,27,.55);
+        var(--theme-surface, rgba(10,15,27,.55));
 
     border-color:
-        rgba(148,163,184,.1);
+        var(--theme-border, rgba(148,163,184,.1));
 
 }
 
@@ -1509,7 +1509,7 @@
 
     .lib-hero-badge {
 
-        font-size: 9px;
+        font-size: var(--site-font-small, 13px);
 
         letter-spacing: 1.2px;
 
@@ -1520,7 +1520,7 @@
 
     .lib-hero-sub {
 
-        font-size: 12px;
+        font-size: var(--site-font-small, 13px);
 
         margin-bottom: .8rem;
 
@@ -1531,7 +1531,7 @@
 
         padding: .5rem .85rem;
 
-        font-size: 12px;
+        font-size: var(--site-font-small, 13px);
 
     }
 
@@ -1603,7 +1603,7 @@
 
     .lib-hero-sub {
 
-        font-size: 11px;
+        font-size: var(--site-font-small, 13px);
 
     }
 

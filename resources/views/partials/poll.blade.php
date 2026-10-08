@@ -159,12 +159,12 @@
 
 <style>
     .bg-gradient-secondary {
-        background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+        background: linear-gradient(135deg, var(--theme-purple-soft, #6a11cb) 0%, var(--theme-blue-soft, #2575fc) 100%);
     }
 
     .list-group-item {
         transition: all 0.2s;
-        border: 1px solid #e0e0e0; /* lighter, subtle border */
+        border: 1px solid var(--theme-border, #e0e0e0); /* lighter, subtle border */
     }
 
     .progress {
@@ -179,6 +179,6 @@
 
     .alert-light {
         background-color: var(--ui-surface-raised);
-        border-color: #e9ecef;
+        border-color: var(--theme-border, #e9ecef);
     }
 </style>

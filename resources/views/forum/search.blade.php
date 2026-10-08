@@ -1,145 +1,32 @@
 @extends('layouts.app')
-
 @section('content')
-
-<div class="container py-5">
-
-    {{-- Breadcrumb --}}
-    <div class="forum-breadcrumb mb-4">
-        <a href="{{ route('forum.index') }}" class="forum-breadcrumb-link">
-            <i class="bi bi-arrow-left"></i>
-            <span>Back to Forum</span>
-        </a>
-    </div>
-
-    {{-- Header --}}
-    <div class="forum-category-header mb-4">
-        <div>
-            <div class="forum-category-icon">
-                <i class="bi bi-search"></i>
-            </div>
-        </div>
-        <div class="flex-grow-1">
-            <h1 class="forum-category-title">Forum Search</h1>
-        </div>
-    </div>
-
-    {{-- Search Form --}}
-    <form method="GET" action="{{ route('forum.search') }}" class="mb-4">
-        <div class="forum-search-bar">
-            <input
-                type="search"
-                aria-label="Search topics and posts"
-                minlength="2" maxlength="200"
-                name="q"
-                class="form-control"
-                placeholder="Search topics and posts..."
-                value="{{ old('q', $query) }}"
-                autofocus
-            >
-            <button type="submit" class="btn btn-search">
-                <i class="bi bi-search me-1"></i>
-                Search
-            </button>
-        </div>
+<div class="container forum-page py-4 py-lg-5">
+    <nav class="forum-breadcrumb mb-4" aria-label="Breadcrumb"><a class="forum-breadcrumb-link" href="{{ route('forum.index') }}">Forum</a><span aria-hidden="true">/</span><span>Search</span></nav>
+    <header class="forum-category-header mb-4"><h1 class="forum-category-title">Forum Search</h1></header>
+    <form method="GET" action="{{ route('forum.search') }}" class="mb-4" role="search">
+        <label for="forum-search-query" class="form-label">Search topics and posts</label>
+        <div class="forum-search-bar"><input id="forum-search-query" type="search" name="q" class="form-control" minlength="2" maxlength="200" value="{{ $query }}" required><button class="btn btn-search" type="submit">Search</button></div>
     </form>
-
     @error('q')<p class="text-danger" role="alert">{{ $message }}</p>@enderror
-
-    {{-- Results --}}
     @if(mb_strlen($query) >= 2)
-
-        <p class="text-secondary mb-3">
-            Showing {{ $results->count() }} result{{ $results->count() !== 1 ? 's' : '' }}
-            for "<strong>{{ $query }}</strong>"
-        </p>
-
+        <p class="forum-rank-note">{{ number_format($results->total()) }} results for “{{ $query }}” · Best matches first</p>
         <div class="forum-topic-list">
-
             @forelse($results as $result)
-
-                @if($result instanceof \App\Models\ForumTopic)
-                    <article class="forum-topic-row">
-                        <div class="forum-topic-icon">
-                            @if($result->is_locked)
-                                <i class="bi bi-lock-fill"></i>
-                            @elseif($result->is_pinned)
-                                <i class="bi bi-pin-fill"></i>
-                            @else
-                                <i class="bi bi-chat-left-text-fill"></i>
-                            @endif
-                        </div>
-
-                        <div class="flex-grow-1">
-                            @if($result->category)
-                            <a href="{{ route('forum.topic', ['category' => $result->category->slug, 'topic' => $result->slug]) }}"
-                               class="forum-topic-link">
-                                {{ $result->title }}
-                            </a>
-                            <div class="forum-topic-meta">
-                                in <a href="{{ route('forum.category', $result->category->slug) }}">{{ $result->category->name }}</a>
-                                &middot; by {{ $result->user->name ?? 'Unknown' }}
-                                &middot; {{ $result->created_at->diffForHumans() }}
-                            </div>
-                            @else
-                            <span class="forum-topic-link">{{ $result->title }}</span>
-                            @endif
-                        </div>
-
-                        <div class="forum-topic-stats d-none d-md-flex">
-                            <span><i class="bi bi-chat-left-text me-1"></i>{{ $result->posts_count }}</span>
-                            <span><i class="bi bi-eye me-1"></i>{{ $result->views }}</span>
-                        </div>
-                    </article>
-
-                @elseif($result instanceof \App\Models\ForumPost && $result->topic)
-                    <article class="forum-topic-row">
-                        <div class="forum-topic-icon">
-                            <i class="bi bi-chat-left-text-fill"></i>
-                        </div>
-
-                        <div class="flex-grow-1">
-                            <span class="text-secondary" style="font-size:0.8rem;">Post in</span>
-                            @if($result->topic->category)
-                            <a href="{{ route('forum.topic', ['category' => $result->topic->category->slug, 'topic' => $result->topic->slug, 'post' => $result->id]) }}#post-{{ $result->id }}"
-                               class="forum-topic-link">
-                                {{ $result->topic->title }}
-                            </a>
-                            <p class="text-secondary mt-2 mb-1">{{ \Illuminate\Support\Str::limit(strip_tags($result->body), 180) }}</p>
-                            @else
-                            <span class="forum-topic-link">{{ $result->topic->title }}</span>
-                            @endif
-                            <div class="forum-topic-meta">
-                                by {{ $result->user->name ?? 'Unknown' }}
-                                &middot; {{ $result->created_at->diffForHumans() }}
-                            </div>
-                        </div>
-                    </article>
+                @if($result instanceof \App\Models\ForumTopic && $result->category)
+                    @include('forum.partials.topic-row', ['topic' => $result, 'category' => $result->category, 'showCategory' => true])
+                @elseif($result instanceof \App\Models\ForumPost && $result->topic?->category)
+                    <article class="forum-topic-row"><div class="forum-topic-icon" aria-hidden="true"><i class="bi bi-chat-left-text"></i></div><div class="forum-topic-copy">
+                        <a class="forum-topic-link" href="{{ route('forum.topic', ['category' => $result->topic->category->slug, 'topic' => $result->topic->slug, 'post' => $result->id]) }}">Post in {{ $result->topic->title }}</a>
+                        <p class="forum-search-snippet">{{ \App\Services\ForumService::snippet($result->body, $query) }}</p>
+                        <div class="forum-topic-started">{{ $result->user?->name ?? 'Former member' }} · {{ $result->topic->category->name }} · {{ $result->created_at->diffForHumans() }}</div>
+                    </div></article>
                 @endif
-
-            @empty
-
-                <div class="text-center text-secondary py-4">
-                    <i class="bi bi-search" style="font-size:2rem;"></i>
-                    <p class="mt-2">No results found.</p>
-                </div>
-
-            @endforelse
-
+            @empty<p class="forum-empty-state">No results found. Try another phrase.</p>@endforelse
         </div>
-
-    @else
-
-        <div class="text-center text-secondary py-4">
-            <i class="bi bi-search" style="font-size:2rem;"></i>
-            <p class="mt-2">Type at least 2 characters to search.</p>
-        </div>
-
-    @endif
-
+        @if($results->hasPages())<div class="forum-pagination mt-4">{{ $results->links('pagination::bootstrap-5') }}</div>@endif
+    @else<p class="forum-empty-state">Enter at least two characters to search.</p>@endif
 </div>
-
 @include('forum.partials.category-css')
+@include('forum.partials.common-css')
 @include('forum.partials.back-to-top')
-
 @endsection

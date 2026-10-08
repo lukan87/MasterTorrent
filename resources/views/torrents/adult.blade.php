@@ -2,21 +2,25 @@
 
 @section('title', 'Adult Torrents')
 
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/torrent-index.css') }}?v={{ filemtime(public_path('css/torrent-index.css')) }}">
+<link rel="stylesheet" href="{{ asset('css/torrent-browser.css') }}?v={{ filemtime(public_path('css/torrent-browser.css')) }}">
+<style>
+.torrent-browser-adult .tx-logo i, .tx-library-adult .category-icon { color: #dc3545; }
+</style>
+@endpush
+
 @section('content')
 
-<div class="d-flex justify-content-between align-items-center mb-4 mt-5">
-    
-</div>
 
-{{-- 🔍 SEARCH --}}
 @include('torrents.partials.adultsearch')
 
-<div class="torrent-browser">
+<div class="torrent-browser torrent-browser-adult">
 
     {{-- ===================== TOOLBAR ===================== --}}
     <div class="tx-toolbar">
         <div class="tx-toolbar-left">
-            <span class="tx-logo"><i class="bi bi-heart-fill"></i></span>
+            <span class="tx-logo"><i class="bi bi-fire"></i></span>
             <div>
                 <span class="tx-eyebrow">Adult</span>
                 <h2 class="tx-heading">Adult Torrents</h2>
@@ -27,21 +31,21 @@
         <div class="tx-sorts">
             @php
                 $mx = function ($sort, $direction) {
-                    return route('torrents.adult', array_merge(request()->all(), [
+                    return route('torrents.adult', array_merge(request()->except('page'), [
                         'sort'      => $sort,
                         'direction' => $direction,
                     ]));
                 };
-                $activeSort = request('sort') ?? '';
+                $activeSort = request('sort', 'created_at');
                 $curDir     = request('direction') === 'asc' ? 'asc' : 'desc';
             @endphp
 
             @foreach ([
-                'created_at'      => ['Age',       'bi-clock',                '27'],
-                'size'            => ['Size',      'bi-aspect-ratio',         '35'],
-                'seeders'         => ['Seeders',   'bi-arrow-up-circle-fill', '15'],
+                'created_at'      => ['Age',       'bi-clock',                 '27'],
+                'size'            => ['Size',      'bi-aspect-ratio',          '35'],
+                'seeders'         => ['Seeders',   'bi-arrow-up-circle-fill',  '15'],
                 'leechers'        => ['Leechers',  'bi-arrow-down-circle-fill','25'],
-                'times_completed' => ['Downloads', 'bi-check2-circle',        '13'],
+                'times_completed' => ['Downloads', 'bi-check2-circle',         '13'],
             ] as $sort => [$label, $icon])
                 @php
                     $isActive = $activeSort === $sort;
@@ -58,470 +62,97 @@
         </div>
     </div>
 
-    {{-- ===================== LIST ===================== --}}
-    <div class="torrent-list">
+</div>
 
-        {{-- ROWS --}}
-        @forelse($adult as $torrent)
-        <div class="torrent-card {{ $torrent->sticky ? 'torrent-sticky' : '' }}">
 
-            <div class="torrent-card-head">
-                <div class="torrent-info d-flex align-items-start">
 
-                    <a href="{{ route('torrents.index', [
-                        'keyword' => '',
-                        'categories' => [$torrent->category->id],
-                        'genre' => '',
-                        'torrent_status' => 'active'
-                    ]) }}"
-                       class="me-3 d-inline-block"
-                       data-bs-toggle="tooltip"
-                       title="{{ $torrent->category->name }}">
+{{ $adult->onEachSide(1)->links('torrents.partials.pagination', ['position' => 'top']) }}
 
-                        <img src="{{ asset($torrent->category->image) }}?v={{ filemtime(public_path($torrent->category->image)) }}"
-                             class="rounded shadow-sm"
-                             style="width:74px;height:40px"
-                             alt="{{ $torrent->category->name }}">
-                    </a>
-
-                    <div class="overflow-hidden">
-                        @include('torrents.partials.title-status')
-
-                        <div class="mt-1 flex-wrap gap-2">
-                            @foreach($torrent->genres as $genre)
-                                <a href="{{ route('torrents.index', ['genre' => $genre->id]) }}"
-                                   class="badge bg-secondary text-decoration-none">
-                                    {{ $genre->name }}
-                                </a>
-                            @endforeach
-                            @include('torrents.partials.tags')
-                        </div>
-                    </div>
-
-                </div>
-<div class="tx-actions">
-
-                    {{-- DOWNLOAD / SEEDBOX --}}
-                    @if(Auth::check() && Auth::user()->hit_and_run_count <= 20)
-                        <div class="btn-group btn-group-sm">
-                            <a href="{{ route('torrents.download', [$torrent->id, $torrent->slug]) }}"
-                               class="btn btn-secondary">
-                                <i class="bi bi-cloud-arrow-down-fill"></i>
-                            </a>
-
-                            @if(Auth::user()->slots > 0 || $seedboxes->isNotEmpty())
-                                <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
-                                        data-bs-toggle="dropdown" aria-expanded="false"
-                                        aria-label="Download options" title="Download options"></button>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    @include('torrents.partials.download-menu-items')
-                                </ul>
-                            @endif
-                        </div>
-                    @endif
-
-                    {{-- MODERATOR --}}
-                    @if(Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
-                        <a href="{{ route('torrents.edit', [$torrent->id, $torrent->slug]) }}"
-                           class="btn btn-warning btn-sm">
-                            <i class="bi bi-pencil-square"></i>
+<section class="tx-library tx-library-adult" aria-label="Adult torrent library">
+    <table class="tx-table">
+        <caption class="visually-hidden">Browse adult torrents, activity, uploaders, and available actions.</caption>
+        <colgroup>
+            <col class="tx-col-title"><col class="tx-col-size">
+            <col class="tx-col-peers"><col class="tx-col-completed"><col class="tx-col-uploader"><col class="tx-col-actions">
+        </colgroup>
+        <thead>
+            <tr>
+                <th scope="col">Torrent</th>
+                @foreach (['size' => 'Size', 'seeders' => 'Peers', 'times_completed' => 'Completed'] as $sort => $label)
+                    <th scope="col" @if($activeSort === $sort) aria-sort="{{ $curDir === 'asc' ? 'ascending' : 'descending' }}" @endif>
+                        <a href="{{ $mx($sort, $activeSort === $sort && $curDir === 'desc' ? 'asc' : 'desc') }}">
+                            {{ $label }}
+                            <i class="bi {{ $activeSort === $sort ? ($curDir === 'asc' ? 'bi-arrow-up-short' : 'bi-arrow-down-short') : 'bi-arrow-down-up' }}" aria-hidden="true"></i>
                         </a>
+                    </th>
+                @endforeach
+                <th scope="col">Uploader</th>
+                <th scope="col" class="tx-actions-heading">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @php
+                $lastUploadDay = null;
+                $browseTimezone = config('app.default_timezone', config('app.timezone'));
+                $browseToday = now($browseTimezone)->startOfDay();
+                $browseYesterday = $browseToday->copy()->subDay();
+            @endphp
+            @forelse($adult as $torrent)
+                @if(! $torrent->sticky)
+                    @php
+                        $uploadDate = $torrent->created_at->copy()->timezone($browseTimezone);
+                        $uploadDay = $uploadDate->toDateString();
+                        $uploadDayLabel = match ($uploadDay) {
+                            $browseToday->toDateString() => 'Today',
+                            $browseYesterday->toDateString() => 'Yesterday',
+                            default => $uploadDate->format('j F Y'),
+                        };
+                    @endphp
+                    @if($uploadDay !== $lastUploadDay)
+                        @include('torrents.partials.index.date-separator')
                     @endif
+                    @php($lastUploadDay = $uploadDay)
+                @endif
+                <tr class="tx-list-row {{ $torrent->sticky ? 'torrent-sticky' : '' }}">
+                    <td class="tx-info-cell">
+                        <div class="tx-info">@include('torrents.partials.index.namecat', ['browseRoute' => 'torrents.adult', 'categoryIcon' => 'bi bi-fire'])</div>
+                    </td>
+                    <td class="tx-size-cell" data-label="Size" tabindex="0" data-bs-toggle="tooltip" data-bs-trigger="hover focus click" title="Total file size: {{ App\Helpers\FormatHelper::formatSize($torrent->size) }}">{{ App\Helpers\FormatHelper::formatSize($torrent->size) }}</td>
+                    <td class="tx-peers-cell" data-label="Peers">
+                        <div class="tx-peer-stats">
+                            <span class="tx-seeders" tabindex="0" data-bs-toggle="tooltip" data-bs-trigger="hover focus click" title="Seeders: {{ number_format($torrent->seeders) }} users sharing the complete torrent" aria-label="{{ number_format($torrent->seeders) }} seeders"><i class="bi bi-arrow-up" aria-hidden="true"></i>{{ number_format($torrent->seeders) }}</span>
+                            <span class="tx-leechers" tabindex="0" data-bs-toggle="tooltip" data-bs-trigger="hover focus click" title="Leechers: {{ number_format($torrent->leechers) }} users downloading the torrent" aria-label="{{ number_format($torrent->leechers) }} leechers"><i class="bi bi-arrow-down" aria-hidden="true"></i>{{ number_format($torrent->leechers) }}</span>
+                        </div>
+                    </td>
+                    <td class="tx-completed-cell" data-label="Completed">
+                        <span tabindex="0" data-bs-toggle="tooltip" data-bs-trigger="hover focus click" title="Completed: {{ number_format($torrent->times_completed) }} finished downloads" aria-label="{{ number_format($torrent->times_completed) }} completed downloads"><i class="bi bi-check2-circle" aria-hidden="true"></i> {{ number_format($torrent->times_completed) }}</span>
+                    </td>
+                    <td class="tx-uploader-cell" data-label="Uploader" tabindex="0" data-bs-toggle="tooltip" data-bs-trigger="hover focus click" title="Uploaded by {{ $torrent->uploader->name ?? 'an unknown user' }}">
+                        <span class="tx-meta-icon" aria-hidden="true"><i class="bi bi-person"></i></span>
+                        @include('torrents.partials.index.uploaders')
+                    </td>
+                    <td class="tx-actions-cell">@include('torrents.partials.index.actions')</td>
+                </tr>
+            @empty
+                <tr><td colspan="6" class="tx-empty">
+                    <i class="bi bi-search" aria-hidden="true"></i>
+                    <strong>No torrents found</strong>
+                    <span>Try another title or adjust your filters.</span>
+                    <a href="{{ route('torrents.adult') }}">Clear filters <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+                </td></tr>
+            @endforelse
+        </tbody>
+    </table>
+</section>
 
-                    {{-- ADMIN --}}
-                    @if(Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::ADMIN)
-                        <form method="POST" action="{{ route('torrents.destroy', $torrent->slug) }}">
-                            @csrf
-                            @method('DELETE')
-                            <button class="btn btn-danger btn-sm">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </form>
-                    @endif
+{{ $adult->onEachSide(1)->links('torrents.partials.pagination', ['position' => 'bottom']) }}
 
-                </div>
-            </div>
-
-            <div class="torrent-chips">
-                <span class="stat-chip chip-muted" title="Uploaded {{ $torrent->created_at->format('M d, Y') }}">
-                    <i class="bi bi-clock"></i>{{ $torrent->created_at->format('d M, Y') }}
-                </span>
-                <span class="stat-chip chip-info" title="Size">
-                    <i class="bi bi-hdd-stack"></i>{{ App\Helpers\FormatHelper::formatSize($torrent->size) }}
-                </span>
-                <span class="stat-chip chip-seed" title="Seeders">
-                    <i class="bi bi-arrow-up"></i>{{ $torrent->seeders }}
-                </span>
-                <span class="stat-chip chip-leech" title="Leechers">
-                    <i class="bi bi-arrow-down"></i>{{ $torrent->leechers }}
-                </span>
-                <span class="stat-chip chip-ok" title="Times completed">
-                    <i class="bi bi-check2-circle"></i>{{ $torrent->times_completed }}
-                </span>
-
-                <span class="torrent-uploader">
-                    @if($torrent->uploader)
-                        @if(Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::VIP)
-                            <i class="bi bi-arrow-90deg-up"></i>
-                            <a href="{{ route('profile.show', $torrent->uploader->id) }}"
-                               class="fw-semibold text-decoration-none"
-                               style="color: {{ \App\Models\UserClass::getClassColor($torrent->uploader->user_class) }}">
-                                {{ $torrent->uploader->name }}
-                            </a>
-                        @else
-                            <span style="color: {{ \App\Models\UserClass::getClassColor($torrent->uploader->user_class) }}">
-                                <i class="bi bi-arrow-90deg-up"></i> {{ $torrent->uploader->name }}
-                            </span>
-                        @endif
-                    @else
-                        <span class="text-muted">Unknown</span>
-                    @endif
-                </span>
-            </div>
-
-        </div>
-        @empty
-        <div class="torrent-empty">
-            <i class="bi bi-inbox"></i>
-            <p class="mb-0">No torrents found.</p>
-        </div>
-        @endforelse
-
-    </div>
-
-</div>
-<div class="d-flex justify-content-center mt-4">
-    {{ $adult->links('pagination::bootstrap-5') }}
-</div>
 
 @include('torrents.partials.css.list-common-css')
 
-<style>
 
 
-/* animated line INSIDE the element */
-.torrent-title::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: 0; /* <-- inside, not outside */
-    width: 100%;
-    height: 1px;
-    opacity: .9;
-    background: linear-gradient(90deg, #aca9a9, #f0527f);
-    transform: scaleX(0);
-    transform-origin: right;
-    transition: transform .25s ease;
-}
 
-/* hover */
-
-
-/* Sticky torrent highlight */
-.torrent-sticky {
-    position: relative;
-    background: linear-gradient(
-        90deg,
-        rgba(120, 140, 255, 0.08),
-        transparent 35%
-    );
-}
-
-/* Dark accent line on the left */
-.torrent-sticky::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background: linear-gradient(
-        180deg,
-        #9aa4ff,
-        #d41a6b
-    );
-    border-radius: 0 4px 4px 0;
-}
-
-.torrent-sticky {
-    background: rgba(134, 151, 252, 0.1);
-}
-
-/* ---------- Toolbar ---------- */
-.tx-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 14px;
-
-    margin-bottom: 18px;
-    padding: 16px 18px;
-
-    border-radius: 16px;
-    background: var(--ui-surface);
-    border: 1px solid var(--ui-border);
-    box-shadow: var(--ui-shadow);
-}
-
-.tx-toolbar-left { display: flex; align-items: center; gap: 12px; }
-
-.tx-logo {
-    width: 44px;
-    height: 44px;
-
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 12px;
-    font-size: 20px;
-
-    color: #08213a;
-    background: linear-gradient(135deg, var(--ui-accent), var(--ui-accent-strong));
-    box-shadow: 0 8px 20px rgba(99, 210, 198, .35);
-}
-
-.tx-eyebrow {
-    display: block;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: .14em;
-    text-transform: uppercase;
-    color: var(--ui-accent);
-    margin-bottom: 1px;
-}
-
-.tx-heading {
-    font-family: 'Poppins', 'Inter', 'Segoe UI', sans-serif;
-    font-size: 20px;
-    font-weight: 800;
-    color: #fff;
-    margin: 0;
-    line-height: 1.1;
-}
-
-.tx-count {
-    margin-left: 6px;
-    padding: 4px 10px;
-
-    border-radius: 999px;
-
-    background: rgba(255,255,255,0.042);
-    border: 1px solid var(--ui-border);
-
-    color: var(--ui-text-muted);
-    font-size: 12px;
-    font-weight: 600;
-    white-space: nowrap;
-}
-
-.tx-sorts { display: flex; flex-wrap: wrap; gap: 6px; }
-
-.tx-sort {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-
-    padding: 7px 11px;
-    border-radius: 999px;
-
-    color: var(--ui-text-muted);
-    text-decoration: none;
-
-    font-size: 12px;
-    font-weight: 600;
-
-    background: rgba(255,255,255,0.021);
-    border: 1px solid var(--ui-border);
-
-    transition: color .15s ease, background .15s ease, border-color .15s ease, transform .15s ease;
-}
-
-.tx-sort:hover {
-    color: #fff;
-    background: rgba(255,255,255,0.049);
-    border-color: rgba(255, 255, 255, .18);
-    transform: translateY(-1px);
-}
-
-.tx-sort.active {
-    color: #0b2338;
-    background: linear-gradient(135deg, var(--ui-accent), var(--ui-accent-strong));
-    border-color: transparent;
-    box-shadow: 0 6px 16px rgba(99, 210, 198, .28);
-}
-
-.tx-sort-arrow { font-size: 10px; }
-
-/* ---------- Torrent cards ---------- */
-.torrent-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 4px;
-}
-
-.torrent-card {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-
-    padding: 16px 18px;
-
-    border-radius: 16px;
-
-    background: var(--ui-surface);
-    border: 1px solid var(--ui-border);
-    box-shadow: 0 4px 18px rgba(0, 0, 0, .16);
-
-    transition: border-color .15s ease, transform .15s ease;
-}
-
-.torrent-card:hover {
-    border-color: rgba(99, 210, 198, .35);
-    transform: translateY(-1px);
-}
-
-.torrent-card-head {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 14px;
-}
-
-.torrent-info {
-    flex: 1 1 auto;
-    min-width: 0;
-}
-
-.torrent-chips {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
-    padding-top: 12px;
-    border-top: 1px solid rgba(255, 255, 255, .06);
-}
-
-/* ---------- Stat chips (horizontal pills) ---------- */
-.stat-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-
-    padding: 6px 12px;
-
-    border-radius: 999px;
-
-    background: rgba(255,255,255,0.035);
-    border: 1px solid var(--ui-border);
-
-    font-size: 12px;
-    font-weight: 600;
-
-    color: var(--ui-text-muted);
-    white-space: nowrap;
-}
-
-.stat-chip i {
-    font-size: 13px;
-    line-height: 1;
-}
-
-.chip-muted { color: var(--ui-text-muted); }
-.chip-info  { color: #7dd3fc; border-color: rgba(125, 211, 252, .2); }
-.chip-seed  { color: #34d399; border-color: rgba(52, 211, 153, .22); }
-.chip-leech { color: #f87171; border-color: rgba(248, 113, 113, .22); }
-.chip-ok    { color: #a5b4fc; border-color: rgba(165, 180, 252, .22); }
-
-.torrent-uploader {
-    margin-left: auto;
-    font-size: 12px;
-    color: var(--ui-text-muted);
-}
-
-.torrent-empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    padding: 48px 16px;
-    color: var(--ui-text-muted);
-    background: var(--ui-surface);
-    border: 1px dashed var(--ui-border);
-    border-radius: 16px;
-}
-
-.torrent-empty i {
-    font-size: 32px;
-    opacity: .5;
-}
-
-/* ---------- Action buttons ---------- */
-.tx-actions {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 4px;
-    flex-wrap: nowrap;
-}
-
-.tx-actions .btn-group .btn {
-    background: var(--ui-surface-raised);
-    border-color: var(--ui-border);
-    color: var(--ui-text-muted);
-}
-
-.tx-actions .btn-group {
-    box-shadow: 0 3px 10px rgba(0, 0, 0, .14);
-}
-
-.tx-actions .btn-warning {
-    background: rgba(245, 158, 11, .16);
-    border-color: rgba(245, 158, 11, .4);
-    color: #fcd34d;
-}
-
-.tx-actions .btn-warning:hover {
-    background: rgba(245, 158, 11, .3);
-    color: #fff;
-}
-
-.tx-actions .btn-danger {
-    background: rgba(239, 68, 68, .12);
-    border: 1px solid rgba(239, 68, 68, .34);
-    color: #fca5a5;
-}
-
-.tx-actions .btn-danger:hover {
-    background: rgba(239, 68, 68, .24);
-    color: #fff;
-}
-
-@media (max-width: 767.98px) {
-    .tx-toolbar {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .torrent-card-head {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .tx-actions {
-        justify-content: flex-end;
-        flex-wrap: wrap;
-    }
-
-    .torrent-uploader {
-        margin-left: 0;
-    }
-}
-
-</style>
 
 <script>
  function swalSuccess(message) {
@@ -600,5 +231,6 @@ document.addEventListener('click', function (e) {
 
 
 </script>
+
 
 @endsection

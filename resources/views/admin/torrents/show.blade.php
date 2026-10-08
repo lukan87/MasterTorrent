@@ -9,7 +9,7 @@
         <div class="col-xl-9">
 
             {{-- TORRENT HEADER --}}
-            <div class="torrent-header-card">
+            <div class="torrent-header-card admin-page-header">
                 <div class="torrent-header-content">
                     <h1 class="torrent-title">
                         <i class="bi bi-download me-2"></i>
@@ -241,8 +241,8 @@
      */
 
     .admin-torrent-view {
-        color: #dbe7ef;
-        font-size: 14px;
+        color: var(--theme-text, #dbe7ef);
+        font-size: var(--site-font-body, 13px);
     }
 
     .torrent-header-card,
@@ -250,12 +250,12 @@
         position: relative;
         background: linear-gradient(
             135deg,
-            rgba(14,21,33,.96),
-            rgba(10,15,27,.88)
+            var(--theme-surface, rgba(14,21,33,.96)),
+            var(--theme-surface, rgba(10,15,27,.88))
         );
-        border: 1px solid var(--ui-border, rgba(255, 255, 255, .08));
+        border: 1px solid var(--ui-border, var(--theme-border, rgba(255, 255, 255, .08)));
         border-radius: .65rem;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, .16);
+        box-shadow: 0 6px 18px var(--theme-shadow, rgba(0, 0, 0, .16));
         overflow: hidden;
     }
 
@@ -267,7 +267,7 @@
         top: 0;
         bottom: 0;
         width: 2px;
-        background: var(--ui-accent, #20c997);
+        background: var(--theme-teal-action, var(--ui-accent, #20c997));
         opacity: .75;
     }
 
@@ -286,7 +286,7 @@
 
     .torrent-title {
         margin: 0 0 .3rem;
-        color: #f3f8fb;
+        color: var(--theme-text, #f3f8fb);
         font-size: 17px;
         font-weight: 700;
         line-height: 1.35;
@@ -294,19 +294,19 @@
     }
 
     .torrent-title i {
-        color: var(--ui-accent, #20c997);
+        color: var(--ui-accent, var(--theme-teal-text, #20c997));
     }
 
     .torrent-hash {
         display: inline-block;
         max-width: 100%;
         padding: .2rem .45rem;
-        background: rgba(5,10,18,.5);
-        border: 1px solid rgba(255, 255, 255, .07);
+        background: var(--theme-surface, rgba(5,10,18,.5));
+        border: 1px solid var(--theme-border, rgba(255, 255, 255, .07));
         border-radius: .35rem;
-        color: #7f929f;
+        color: var(--theme-muted, #7f929f);
         font-family: monospace;
-        font-size: 10px;
+        font-size: var(--site-font-small, 13px);
         overflow-wrap: anywhere;
     }
 
@@ -324,25 +324,25 @@
         min-width: 42px;
         justify-content: center;
         padding: .3rem .5rem;
-        border: 1px solid rgba(255, 255, 255, .07);
+        border: 1px solid var(--theme-border, rgba(255, 255, 255, .07));
         border-radius: .4rem;
-        font-size: 12px;
+        font-size: var(--site-font-small, 13px);
         font-weight: 700;
     }
 
     .seeders {
-        background: rgba(32, 201, 151, .08);
-        color: #72e0a9;
+        background: var(--theme-teal-soft, rgba(32, 201, 151, .08));
+        color: var(--theme-green-text, #72e0a9);
     }
 
     .leechers {
-        background: rgba(220, 53, 69, .08);
-        color: #ff8e98;
+        background: var(--theme-red-soft, rgba(220, 53, 69, .08));
+        color: var(--theme-red-text, #ff8e98);
     }
 
     .completed {
-        background: rgba(255, 193, 7, .07);
-        color: #e8c66d;
+        background: var(--theme-amber-soft, rgba(255, 193, 7, .07));
+        color: var(--theme-amber-text, #e8c66d);
     }
 
     .modern-card .card-body {
@@ -351,26 +351,26 @@
 
     .section-title {
         margin: 0;
-        color: #eaf2f5;
-        font-size: 14px;
+        color: var(--theme-text, #eaf2f5);
+        font-size: var(--site-font-body, 13px);
         font-weight: 700;
     }
 
     .section-title i {
-        color: var(--ui-accent, #20c997);
+        color: var(--ui-accent, var(--theme-teal-text, #20c997));
     }
 
     .seed-title i {
-        color: #72e0a9;
+        color: var(--theme-green-text, #72e0a9);
     }
 
     .leech-title i {
-        color: #ff8e98;
+        color: var(--theme-red-text, #ff8e98);
     }
 
     .section-subtitle {
-        color: #718596;
-        font-size: 11px;
+        color: var(--theme-muted, #718596);
+        font-size: var(--site-font-small, 13px);
     }
 
     .section-heading {
@@ -380,7 +380,7 @@
         gap: .75rem;
         margin-bottom: .65rem;
         padding-bottom: .55rem;
-        border-bottom: 1px solid rgba(255, 255, 255, .065);
+        border-bottom: 1px solid var(--theme-border, rgba(255, 255, 255, .065));
     }
 
     .history-count {
@@ -390,11 +390,11 @@
         min-width: 28px;
         height: 25px;
         padding: 0 .45rem;
-        background: rgba(32, 201, 151, .08);
-        border: 1px solid rgba(32, 201, 151, .2);
+        background: var(--theme-teal-soft, rgba(32, 201, 151, .08));
+        border: 1px solid var(--theme-teal-border, rgba(32, 201, 151, .2));
         border-radius: .35rem;
-        color: #72e3bb;
-        font-size: 11px;
+        color: var(--theme-teal-text, #72e3bb);
+        font-size: var(--site-font-small, 13px);
         font-weight: 700;
     }
 
@@ -410,7 +410,7 @@
         justify-content: space-between;
         gap: .75rem;
         padding: .45rem .15rem;
-        border-bottom: 1px solid rgba(255, 255, 255, .055);
+        border-bottom: 1px solid var(--theme-border, rgba(255, 255, 255, .055));
     }
 
     .peer-row:last-child {
@@ -423,8 +423,8 @@
 
     .peer-user strong {
         display: block;
-        color: #dce8ed;
-        font-size: 13px;
+        color: var(--theme-text, #dce8ed);
+        font-size: var(--site-font-body, 13px);
         font-weight: 600;
         overflow-wrap: anywhere;
     }
@@ -432,29 +432,29 @@
     .peer-time,
     .history-time {
         margin-top: .1rem;
-        color: #718596;
-        font-size: 10px;
+        color: var(--theme-muted, #718596);
+        font-size: var(--site-font-small, 13px);
     }
 
     .peer-stats {
         flex: 0 0 auto;
         text-align: right;
-        font-size: 11px;
+        font-size: var(--site-font-small, 13px);
         line-height: 1.5;
     }
 
     .upload {
-        color: #72e0a9;
+        color: var(--theme-green-text, #72e0a9);
     }
 
     .download {
-        color: #ff9a9f;
+        color: var(--theme-red-text, #ff9a9f);
     }
 
     .empty-message {
         margin: .65rem 0 0;
-        color: #718596;
-        font-size: 12px;
+        color: var(--theme-muted, #718596);
+        font-size: var(--site-font-small, 13px);
     }
 
     .history-container {
@@ -469,7 +469,7 @@
         align-items: center;
         gap: .7rem;
         padding: .55rem .15rem;
-        border-bottom: 1px solid rgba(255, 255, 255, .055);
+        border-bottom: 1px solid var(--theme-border, rgba(255, 255, 255, .055));
     }
 
     .history-row:last-child {
@@ -478,8 +478,8 @@
 
     .history-user strong {
         display: block;
-        color: #dce8ed;
-        font-size: 12px;
+        color: var(--theme-text, #dce8ed);
+        font-size: var(--site-font-small, 13px);
         font-weight: 600;
     }
 
@@ -497,33 +497,33 @@
         padding: .2rem .4rem;
         border: 1px solid transparent;
         border-radius: .3rem;
-        font-size: 10px;
+        font-size: var(--site-font-small, 13px);
         font-weight: 700;
         white-space: nowrap;
     }
 
     .status-seeded {
-        background: rgba(32, 201, 151, .08);
-        border-color: rgba(32, 201, 151, .18);
-        color: #72e0a9;
+        background: var(--theme-teal-soft, rgba(32, 201, 151, .08));
+        border-color: var(--theme-teal-border, rgba(32, 201, 151, .18));
+        color: var(--theme-green-text, #72e0a9);
     }
 
     .status-not-seeded {
-        background: rgba(220, 53, 69, .08);
-        border-color: rgba(220, 53, 69, .18);
-        color: #ff8e98;
+        background: var(--theme-red-soft, rgba(220, 53, 69, .08));
+        border-color: var(--theme-red-border, rgba(220, 53, 69, .18));
+        color: var(--theme-red-text, #ff8e98);
     }
 
     .status-completed {
-        background: rgba(32, 201, 151, .08);
-        border-color: rgba(32, 201, 151, .18);
-        color: #72e0a9;
+        background: var(--theme-teal-soft, rgba(32, 201, 151, .08));
+        border-color: var(--theme-teal-border, rgba(32, 201, 151, .18));
+        color: var(--theme-green-text, #72e0a9);
     }
 
     .status-pending {
-        background: rgba(255,255,255,0.0245);
-        border-color: rgba(255, 255, 255, .08);
-        color: #899ba7;
+        background: var(--theme-surface-alt, rgba(255,255,255,0.0245));
+        border-color: var(--theme-border, rgba(255, 255, 255, .08));
+        color: var(--theme-muted, #899ba7);
     }
 
     .history-stats {
@@ -532,8 +532,8 @@
         align-items: center;
         flex-wrap: wrap;
         gap: .55rem;
-        color: #8fa2ae;
-        font-size: 10px;
+        color: var(--theme-muted, #8fa2ae);
+        font-size: var(--site-font-small, 13px);
         white-space: nowrap;
     }
 
@@ -544,7 +544,7 @@
     }
 
     .history-stats i {
-        color: #6f8490;
+        color: var(--theme-muted, #6f8490);
     }
 
     .empty-history {
@@ -554,15 +554,15 @@
         gap: .45rem;
         min-height: 70px;
         padding: .8rem;
-        background: rgba(255, 193, 7, .035);
-        border: 1px solid rgba(255, 193, 7, .1);
+        background: var(--theme-amber-soft, rgba(255, 193, 7, .035));
+        border: 1px solid var(--theme-amber-border, rgba(255, 193, 7, .1));
         border-radius: .45rem;
-        color: #a99b70;
-        font-size: 12px;
+        color: var(--theme-muted, #a99b70);
+        font-size: var(--site-font-small, 13px);
     }
 
     .empty-history i {
-        color: #d2ad45;
+        color: var(--theme-amber-text, #d2ad45);
     }
 
     .pagination-wrap {
@@ -577,24 +577,24 @@
     }
 
     .pagination .page-link {
-        background: rgba(14,21,33,.9);
-        border-color: rgba(255, 255, 255, .075);
-        color: #aabcc7;
-        font-size: 11px;
+        background: var(--theme-surface, rgba(14,21,33,.9));
+        border-color: var(--theme-border, rgba(255, 255, 255, .075));
+        color: var(--theme-muted, #aabcc7);
+        font-size: var(--site-font-small, 13px);
         padding: .3rem .55rem;
         border-radius: .35rem !important;
     }
 
     .pagination .page-item.active .page-link {
-        background: rgba(32, 201, 151, .13);
-        border-color: rgba(32, 201, 151, .28);
-        color: #73e2bb;
+        background: var(--theme-teal-soft, rgba(32, 201, 151, .13));
+        border-color: var(--theme-teal-border, rgba(32, 201, 151, .28));
+        color: var(--theme-teal-text, #73e2bb);
     }
 
     .pagination .page-link:hover {
-        background: rgba(32, 201, 151, .07);
-        color: #fff;
-        border-color: rgba(32, 201, 151, .22);
+        background: var(--theme-teal-soft, rgba(32, 201, 151, .07));
+        color:  var(--theme-text, #fff);
+        border-color: var(--theme-teal-border, rgba(32, 201, 151, .22));
     }
 
     .sticky-info {
@@ -614,7 +614,7 @@
         justify-content: space-between;
         gap: .75rem;
         padding: .45rem 0;
-        border-bottom: 1px solid rgba(255, 255, 255, .055);
+        border-bottom: 1px solid var(--theme-border, rgba(255, 255, 255, .055));
     }
 
     .info-list li:last-child {
@@ -623,14 +623,14 @@
 
     .info-list span {
         flex: 0 0 auto;
-        color: #718596;
-        font-size: 11px;
+        color: var(--theme-muted, #718596);
+        font-size: var(--site-font-small, 13px);
     }
 
     .info-list strong {
         min-width: 0;
-        color: #dbe7ef;
-        font-size: 11px;
+        color: var(--theme-text, #dbe7ef);
+        font-size: var(--site-font-small, 13px);
         font-weight: 600;
         text-align: right;
         overflow-wrap: anywhere;
@@ -648,7 +648,7 @@
 
     .peer-list::-webkit-scrollbar-thumb,
     .history-container::-webkit-scrollbar-thumb {
-        background: rgba(255,255,255,0.091);
+        background: var(--theme-surface-alt, rgba(255,255,255,0.091));
         border-radius: 5px;
     }
 
@@ -680,7 +680,7 @@
         }
 
         .torrent-title {
-            font-size: 15px;
+            font-size: var(--site-font-body, 13px);
         }
 
         .torrent-stats {
@@ -701,7 +701,7 @@
         }
 
         .history-stats {
-            font-size: 10px;
+            font-size: var(--site-font-small, 13px);
         }
     }
 </style>

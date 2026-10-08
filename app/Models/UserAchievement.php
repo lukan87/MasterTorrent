@@ -14,5 +14,7 @@ class UserAchievement extends Model
         'earned_at' => 'datetime',
         'balance_before' => 'decimal:2',
         'bonus_awarded' => 'decimal:2',
+        'tokens_awarded' => 'integer',
+        'vip_months_awarded' => 'integer',
     ];
 }

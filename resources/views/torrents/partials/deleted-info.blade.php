@@ -1,6 +1,6 @@
 @if($torrent->trashed())
 <div class="card border-danger mt-5 mb-4 shadow-sm">
-    <div class="card-body bg-dark text-danger">
+    <div class="card-body theme-surface text-danger">
 
         <div class="d-flex justify-content-between flex-wrap align-items-center">
 

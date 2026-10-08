@@ -14,13 +14,13 @@
     --bs-body-bg-rgb: 5, 8, 15;
     --bs-body-color: var(--ui-text);
     --bs-body-color-rgb: 229, 237, 247;
-    --bs-secondary-bg: #0c121c;
+    --bs-secondary-bg: var(--theme-surface, #0c121c);
     --bs-secondary-bg-rgb: 12, 18, 28;
-    --bs-tertiary-bg: #080d16;
+    --bs-tertiary-bg: var(--theme-surface, #080d16);
     --bs-tertiary-bg-rgb: 8, 13, 22;
     --bs-secondary-color: var(--ui-text-muted);
-    --bs-border-color: #283445;
-    --bs-emphasis-color: #f8fafc;
+    --bs-border-color: var(--theme-border, #283445);
+    --bs-emphasis-color: var(--theme-text, #f8fafc);
     --bs-emphasis-color-rgb: 248, 250, 252;
 }
 
@@ -50,12 +50,12 @@ html.site-layout body.bg-body-tertiary {
 .form-control:focus,
 .form-select:focus {
     background-color: var(--ui-control-hover);
-    color: #fff;
+    color: var(--theme-text, #fff);
 }
 
 .form-control:disabled,
 .form-select:disabled {
-    background-color: #101620;
+    background-color: var(--theme-control, #101620);
     color: var(--ui-text-muted);
 }
 
@@ -63,18 +63,18 @@ html.site-layout body.bg-body-tertiary {
 .form-select option { background-color: var(--ui-control); color: var(--ui-text); }
 
 .dropdown-menu {
-    --bs-dropdown-bg: #0c121c;
+    --bs-dropdown-bg: var(--theme-surface, #0c121c);
     --bs-dropdown-color: var(--ui-text);
     --bs-dropdown-link-color: var(--ui-text);
-    --bs-dropdown-link-hover-bg: #162131;
-    --bs-dropdown-link-hover-color: #fff;
+    --bs-dropdown-link-hover-bg: var(--theme-surface, #162131);
+    --bs-dropdown-link-hover-color: var(--theme-text, #fff);
 }
 
 .page-link {
     --bs-pagination-bg: var(--ui-control);
     --bs-pagination-hover-bg: var(--ui-control-hover);
-    --bs-pagination-disabled-bg: #101620;
-    --bs-pagination-border-color: #283445;
+    --bs-pagination-disabled-bg: var(--theme-surface, #101620);
+    --bs-pagination-border-color: var(--theme-border, #283445);
 }
 
 /* Legacy light panels use the same surfaces and readable foregrounds. */
@@ -82,7 +82,7 @@ html.site-layout body.bg-body-tertiary {
 .bg-light,
 .bg-gray-100,
 .bg-zinc-50 {
-    background-color: #0c121c !important;
+    background-color: var(--theme-surface, #0c121c) !important;
     color: var(--ui-text) !important;
 }
 
@@ -100,10 +100,10 @@ html.site-layout body.bg-body-tertiary {
 
 .text-gray-500 { color: var(--ui-text-muted) !important; }
 .border-gray-200,
-.border-gray-400 { border-color: #283445 !important; }
+.border-gray-400 { border-color: var(--theme-border, #283445) !important; }
 
 .swal2-popup {
-    background-color: #0c121c;
+    background-color: var(--theme-surface, #0c121c);
     color: var(--ui-text);
 }
 
@@ -112,26 +112,26 @@ html.site-layout body.bg-body-tertiary {
 .swal2-select {
     background-color: var(--ui-control);
     color: var(--ui-text);
-    border-color: #283445;
+    border-color: var(--theme-border, #283445);
 }
 
 .swal2-footer,
 .swal2-validation-message {
-    background-color: #080d16;
+    background-color: var(--theme-surface, #080d16);
     color: var(--ui-text-muted);
 }
 
 .list-group-item {
-    --bs-list-group-bg: #0c121c;
+    --bs-list-group-bg: var(--theme-surface, #0c121c);
     --bs-list-group-color: var(--ui-text);
-    --bs-list-group-border-color: #283445;
-    background-color: #0c121c;
+    --bs-list-group-border-color: var(--theme-border, #283445);
+    background-color: var(--theme-surface, #0c121c);
     color: var(--ui-text);
-    border-color: #283445;
+    border-color: var(--theme-border, #283445);
 }
 
 .list-group-item-action:hover,
 .list-group-item-action:focus {
     background-color: var(--ui-control-hover);
-    color: #fff;
+    color: var(--theme-text, #fff);
 }

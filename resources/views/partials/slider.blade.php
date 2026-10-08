@@ -3,7 +3,7 @@
 
 @else
 <div class="container mt-4">
-    <div class="card shadow-lg border-0 rounded-4 bg-dark text-white">
+    <div class="card shadow-lg border-0 rounded-4 theme-surface theme-text">
         <!-- Card Title -->
         <div class="card-header bg-transparent border-0 text-center">
             <h4 class="mb-0">Recommended Torrents</h4>
@@ -21,7 +21,7 @@
 
                             <!-- Hover Content (Initially Hidden) -->
                             <a href="{{ route('torrents.show', ['id' => $torrent->id, 'slug' => urlencode($torrent->slug)]) }}" class="hover-overlay position-absolute top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center align-items-center text-center bg-dark bg-opacity-75 rounded-4 text-decoration-none" data-bs-toggle="tooltip" title="{{ $torrent->name }}">
-                                <div class="p-3 text-white">
+                                <div class="p-3 theme-text">
                                     <p class="mb-2">
                                         @foreach($torrent->genres as $genre)
                                             <span class="badge bg-secondary">{{ $genre->name }}</span>

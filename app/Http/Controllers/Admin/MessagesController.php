@@ -4,7 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Message;
+use App\Models\UserClass;
+use App\Services\SystemMessageService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class MessagesController extends Controller
 {
@@ -13,9 +16,15 @@ class MessagesController extends Controller
      */
     public function index(Request $request)
     {
-        $request->validate(['search' => 'nullable|string|max:255', 'status' => 'nullable|in:read,unread']);
-        $query = Message::with(['sender', 'receiver'])
+        $request->validate(['search' => 'nullable|string|max:255', 'status' => 'nullable|in:read,unread', 'type' => 'nullable|in:normal,mass']);
+        $query = Message::with(['sender', 'receiver', 'massDelivery.massMessage'])
             ->orderByDesc('created_at');
+
+        if ($request->input('type') === 'mass') {
+            $query->whereHas('massDelivery.massMessage');
+        } elseif ($request->input('type') === 'normal') {
+            $query->whereDoesntHave('massDelivery.massMessage');
+        }
 
         // Filter: read / unread
         if ($request->filled('status')) {
@@ -52,6 +61,8 @@ class MessagesController extends Controller
      */
     public function show(Message $message)
     {
+        $message->load('massDelivery.massMessage');
+
         return view('admin.messages.show', compact('message'));
     }
 
@@ -60,7 +71,8 @@ class MessagesController extends Controller
      */
     public function destroy(Message $message)
     {
-        $message->delete();
+        abort_unless(Auth::user()?->user_class >= UserClass::ADMIN, 403);
+        SystemMessageService::deleteMessage($message);
 
         return redirect()
             ->route('admin.messages.index')
@@ -72,16 +84,19 @@ class MessagesController extends Controller
      */
     public function bulk(Request $request)
     {
+        abort_unless(Auth::user()?->user_class >= UserClass::ADMIN, 403);
         $request->validate([
             'action' => 'required|in:delete',
             'ids' => 'required|array|min:1|max:100',
             'ids.*' => 'required|integer|distinct|exists:messages,id',
         ]);
 
-        $messages = Message::whereIn('id', $request->ids);
+        $messages = Message::whereIn('id', $request->ids)->get();
 
         if ($request->action === 'delete') {
-            $messages->delete();
+            foreach ($messages as $message) {
+                SystemMessageService::deleteMessage($message);
+            }
         }
 
         return redirect()->route('admin.messages.index')

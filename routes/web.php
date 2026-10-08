@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\EmailController;
 use App\Http\Controllers\Admin\MessagesController;
+use App\Http\Controllers\Admin\MassMessageController;
 use App\Http\Controllers\Admin\MovieController as AdminMovieController;
 use App\Http\Controllers\Admin\SeriesController as AdminSeriesController;
 use App\Http\Controllers\Admin\SystemInfoController;
@@ -72,27 +73,30 @@ Route::get('/forum', [ForumController::class, 'index'])
     ->name('forum.index');
 
 Route::get('/forum/categories/create', [ForumCategoryController::class, 'create'])
-    ->name('forum.category.create');
+    ->name('forum.category.create')->middleware('auth');
 
 Route::post('/forum/categories', [ForumCategoryController::class, 'store'])
-    ->name('forum.category.store');
+    ->name('forum.category.store')->middleware('auth');
 
 Route::get('/forum/categories/{category}/edit', [ForumCategoryController::class, 'edit'])
-    ->name('forum.category.edit');
+    ->name('forum.category.edit')->middleware('auth');
 
 Route::put('/forum/categories/{category}', [ForumCategoryController::class, 'update'])
-    ->name('forum.category.update');
+    ->name('forum.category.update')->middleware('auth');
 
 Route::delete('/forum/categories/{category}', [ForumCategoryController::class, 'destroy'])
-    ->name('forum.category.destroy');
+    ->name('forum.category.destroy')->middleware('auth');
 
 Route::patch('/forum/categories/{category}/restore', [ForumCategoryController::class, 'restore'])
-    ->name('forum.category.restore');
+    ->name('forum.category.restore')->middleware('auth');
 
 Route::delete('/forum/categories/{category}/permanent', [ForumCategoryController::class, 'forceDestroy'])
-    ->name('forum.category.force-delete');
+    ->name('forum.category.force-delete')->middleware('auth');
 
 Route::middleware('auth')->group(function () {
+
+    Route::post('/forum/preview', [ForumController::class, 'preview'])
+        ->name('forum.preview')->middleware('throttle:30,1');
 
     Route::get('/forum/{category:slug}/create',
         [ForumController::class, 'create'])
@@ -271,19 +275,36 @@ Route::post('/notifications/{id}/read', function ($id) {
     // Mark as read
     $notification->markAsRead();
 
-    // ✅ SAFE redirect with fallback reconstruction
-    if (! empty($notification->data['url'])) {
-        return redirect($notification->data['url']);
+    // Reconstruct achievement destinations so older notifications also open the earned tier.
+    if (($notification->data['type'] ?? null) === 'achievement_unlocked') {
+        $category = $notification->data['category'] ?? '';
+        $threshold = (int) ($notification->data['threshold'] ?? 0);
+        $thresholds = config('achievements.categories.'.$category.'.thresholds', []);
+        $anchor = in_array($threshold, $thresholds, true) ? '#achievement-'.$category.'-'.$threshold : '#achievements';
+
+        return redirect(route('profile.show', ['id' => auth()->id(), 'name' => auth()->user()->name]).$anchor);
     }
 
-    // 🛟 Fallback for OLD notifications
+    // Resolve both new and historical forum notifications to the actual post page.
     if (! empty($notification->data['topic_id'])) {
-        return redirect(
-            route('topics.show', $notification->data['topic_id'])
-            .(! empty($notification->data['post_id'])
-                ? '#post-'.$notification->data['post_id']
-                : '')
-        );
+        $topic = \App\Models\ForumTopic::visible(\App\Services\ForumAccess::allows(auth()->user(), 'manage_topics'))
+            ->with('category')->find($notification->data['topic_id']);
+        if (! $topic) {
+            return redirect()->route('notifications.index')->with('error', 'This conversation is no longer available.');
+        }
+        $parameters = ['category' => $topic->category->slug, 'topic' => $topic->slug];
+        if (! empty($notification->data['post_id'])) {
+            if (! $topic->posts()->whereKey($notification->data['post_id'])->exists()) {
+                return redirect()->route('notifications.index')->with('error', 'This post is no longer available.');
+            }
+            $parameters['post'] = $notification->data['post_id'];
+        }
+
+        return redirect()->route('forum.topic', $parameters);
+    }
+
+    if (! empty($notification->data['url'])) {
+        return redirect($notification->data['url']);
     }
 
     // Final fallback
@@ -571,6 +592,16 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
         // Users Management
         Route::group(['prefix' => 'users'], function () {
             Route::get('/', [UserController::class, 'index'])->name('users.index');
+            // Static broadcast routes must precede the user-name route.
+            Route::prefix('mass-messages')->name('users.mass-messages.')->group(function () {
+                Route::get('/', [MassMessageController::class, 'index'])->name('index');
+                Route::get('/create', [MassMessageController::class, 'create'])->name('create');
+                Route::post('/', [MassMessageController::class, 'store'])->name('store');
+                Route::post('/preview', [MassMessageController::class, 'preview'])->name('preview');
+                Route::get('/{massMessage}', [MassMessageController::class, 'show'])->name('show');
+                Route::delete('/{massMessage}', [MassMessageController::class, 'destroy'])->name('destroy');
+                Route::delete('/{massMessage}/recipients/{delivery}', [MassMessageController::class, 'destroyDelivery'])->name('deliveries.destroy');
+            });
             Route::get('/{name}', [UserController::class, 'show'])->name('users.show');
             Route::get('/{id}/edit', [UserController::class, 'edit'])->name('users.edit');
             Route::put('/{id}/update', [UserController::class, 'update'])->name('users.update');
@@ -791,6 +822,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('messages/create', [MessageController::class, 'create'])->name('messages.create');
     Route::post('messages', [MessageController::class, 'store'])->name('messages.store');
     Route::post('messages/{conversation}/reply', [MessageController::class, 'storeReply'])->name('messages.storeReply');
+    Route::get('messages/{conversation}/receipts', [ConversationController::class, 'receipts'])->name('conversations.receipts');
     Route::get('messages/{conversation}', [ConversationController::class, 'show'])->name('conversations.show');
     Route::delete('messages/{conversation}', [MessageController::class, 'destroyConversation'])->name('messages.destroyConversation');
 });
@@ -1044,10 +1076,10 @@ Route::post('/admin/users/mass-message/preview', [UserController::class, 'previe
     ->middleware(['auth', 'admin'])->name('admin.users.mass-message.preview');
 
 Route::post('/messages/edit/{message}', [MessageController::class, 'edit'])
-    ->name('messages.edit');
+    ->middleware('auth')->name('messages.edit');
 
 Route::delete('/messages/delete/{message}', [MessageController::class, 'delete'])
-    ->name('messages.delete');
+    ->middleware('auth')->name('messages.delete');
 
 Route::middleware(['auth'])->group(function () {
 
@@ -1148,3 +1180,20 @@ Route::get('/check-email', function (Request $request) {
 });
 
 Route::post('/comments/{id}/reactions', [CommentController::class, 'react'])->middleware(['auth', 'throttle:60,1'])->name('comments.react');
+
+// Session-free Torznab requests authenticate with the member's integration key.
+Route::get('/torznab/api', [\App\Http\Controllers\TorznabController::class, 'api'])
+    ->name('torznab.api')
+    ->withoutMiddleware([StartSession::class, ShareErrorsFromSession::class, VerifyCsrfToken::class, \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class, \App\Http\Middleware\CheckUserEnabled::class, \App\Http\Middleware\CheckUserBanned::class])
+    ->middleware('throttle:120,1,torznab');
+Route::get('/integrations', [\App\Http\Controllers\TorznabController::class, 'setup'])
+    ->name('torznab.setup')->middleware('auth');
+
+Route::get('/shoutbox/older', [ShoutboxController::class, 'older'])->middleware(['auth', 'throttle:60,1'])->name('shoutbox.older');
+
+// TVmaze discovery calendar and per-member watchlist.
+Route::middleware(['auth'])->prefix('tv-calendar')->name('tv-calendar.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\TvCalendarController::class, 'index'])->middleware('throttle:30,1')->name('index');
+    Route::post('/shows/{show}', [\App\Http\Controllers\TvCalendarController::class, 'follow'])->whereNumber('show')->middleware('throttle:20,1')->name('follow');
+    Route::delete('/shows/{show}', [\App\Http\Controllers\TvCalendarController::class, 'unfollow'])->whereNumber('show')->name('unfollow');
+});

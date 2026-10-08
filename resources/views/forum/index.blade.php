@@ -10,7 +10,7 @@
             <div class="forum-header-actions">
                 <a href="#forum-categories" class="forum-primary-btn">Explore categories <i class="bi bi-arrow-down" aria-hidden="true"></i></a>
                 @auth
-                    @if(auth()->user()->user_class > \App\Models\UserClass::MODERATOR)
+                    @if(\App\Services\ForumAccess::allows(auth()->user(), 'create_categories'))
                         <a href="{{ route('forum.category.create') }}" class="forum-secondary-btn"><i class="bi bi-folder-plus" aria-hidden="true"></i> Add Category</a>
                     @endif
                 @endauth
@@ -53,6 +53,7 @@
                     <div class="forum-category-icon"><i class="bi {{ $category->icon ?: 'bi-chat-square-text' }}" aria-hidden="true"></i></div>
                     <div class="forum-category-content">
                         <h3 class="forum-category-title">{{ $category->name }}</h3>
+                        @if($category->is_private)<span class="forum-private-label">Staff only</span>@endif
                         @if($category->description)
                             <p class="forum-category-description">{{ $category->description }}</p>
                         @endif
@@ -82,7 +83,7 @@
 
 @if(
     auth()->check() &&
-    auth()->user()->user_class > \App\Models\UserClass::MODERATOR &&
+    \App\Services\ForumAccess::allows(auth()->user(), 'create_categories') &&
     $deletedCategories->isNotEmpty()
 )
 

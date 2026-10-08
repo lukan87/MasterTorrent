@@ -14,7 +14,7 @@ $status = request('status', 'active');
 
         <!-- Header -->
 
-        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+        <div class="admin-page-header d-flex justify-content-between align-items-center mb-4 flex-wrap">
 
             <h2 class="admin-torrents-header mb-3 mb-md-0"><i class="bi bi-collection-play me-2"></i>Manage Torrents</h2>
 
@@ -599,7 +599,7 @@ Delete Torrent
 
 @method('DELETE')
 
-<div class="modal-header bg-danger text-white">
+<div class="modal-header bg-danger theme-text">
 
 <h5 class="modal-title">
 
@@ -681,7 +681,7 @@ Permanent Delete
 
 @csrf
 
-<div class="modal-header bg-success text-white">
+<div class="modal-header bg-success theme-text">
 
 <h5 class="modal-title">
 
@@ -743,27 +743,27 @@ Restore Torrent
 
 <style>
     .admin-torrents-page {
-        color: #dbe7ef;
-        font-size: 14px;
+        color: var(--theme-text, #dbe7ef);
+        font-size: var(--site-font-body, 13px);
     }
 
     .admin-torrents-header {
-        color: #f3f8fb;
+        color: var(--theme-text, #f3f8fb);
         font-size: 21px;
         font-weight: 700;
         letter-spacing: -.01em;
     }
 
     .admin-torrents-header i {
-        color: var(--ui-accent, #20c997);
+        color: var(--ui-accent, var(--theme-teal-text, #20c997));
     }
 
     .admin-search {
         position: relative;
-        background: linear-gradient(135deg, rgba(14,21,33,.95), rgba(10,15,27,.84));
-        border: 1px solid var(--ui-border, rgba(255,255,255,.08)) !important;
+        background: linear-gradient(135deg, var(--theme-surface, rgba(14,21,33,.95)), var(--theme-surface, rgba(10,15,27,.84)));
+        border: 1px solid var(--ui-border, var(--theme-border, rgba(255,255,255,.08))) !important;
         border-radius: .7rem;
-        box-shadow: 0 8px 24px rgba(0,0,0,.18);
+        box-shadow: 0 8px 24px var(--theme-shadow, rgba(0,0,0,.18));
         overflow: hidden;
     }
 
@@ -774,7 +774,7 @@ Restore Torrent
         top: 0;
         bottom: 0;
         width: 3px;
-        background: var(--ui-accent, #20c997);
+        background: var(--theme-teal-action, var(--ui-accent, #20c997));
         opacity: .85;
     }
 
@@ -782,20 +782,20 @@ Restore Torrent
         display: flex;
         align-items: center;
         gap: 6px;
-        background: rgba(5,10,18,.45);
-        border: 1px solid rgba(255,255,255,.08);
+        background: var(--theme-surface, rgba(5,10,18,.45));
+        border: 1px solid var(--theme-border, rgba(255,255,255,.08));
         border-radius: .55rem;
         padding: 5px 7px;
         transition: .18s ease;
     }
 
     .premium-search-combined:focus-within {
-        border-color: rgba(32,201,151,.4);
-        box-shadow: 0 0 0 .15rem rgba(32,201,151,.06);
+        border-color: var(--theme-teal-border, rgba(32,201,151,.4));
+        box-shadow: 0 0 0 .15rem var(--theme-shadow, rgba(32,201,151,.06));
     }
 
     .search-icon {
-        color: #718596;
+        color: var(--theme-muted, #718596);
         flex: 0 0 auto;
     }
 
@@ -815,19 +815,19 @@ Restore Torrent
     .premium-date {
         background: transparent !important;
         border: 0 !important;
-        color: #dce8ed !important;
+        color: var(--theme-text, #dce8ed) !important;
         box-shadow: none !important;
-        font-size: 13px;
+        font-size: var(--site-font-body, 13px);
         min-height: 30px;
     }
 
     .premium-input-combined::placeholder {
-        color: #65798a;
+        color: var(--theme-muted, #65798a);
     }
 
     .premium-select option {
-        background: #0f1622;
-        color: #e7eef2;
+        background: var(--theme-control, #0f1622);
+        color: var(--theme-text, #e7eef2);
     }
 
     .premium-date {
@@ -838,7 +838,7 @@ Restore Torrent
     .search-divider {
         width: 1px;
         height: 25px;
-        background: rgba(255,255,255,0.056);
+        background: var(--theme-surface-alt, rgba(255,255,255,0.056));
         margin: 0 4px;
         flex: 0 0 auto;
     }
@@ -856,52 +856,52 @@ Restore Torrent
         align-items: center;
         justify-content: center;
         border-radius: .45rem;
-        font-size: 12px;
+        font-size: var(--site-font-small, 13px);
         font-weight: 700;
         transition: .18s ease;
         text-decoration: none;
     }
 
     .premium-search-btn {
-        background: rgba(32,201,151,.13);
-        border: 1px solid rgba(32,201,151,.28);
-        color: #72e3bb;
+        background: var(--theme-teal-soft, rgba(32,201,151,.13));
+        border: 1px solid var(--theme-teal-border, rgba(32,201,151,.28));
+        color: var(--theme-teal-text, #72e3bb);
         padding: 6px 12px;
     }
 
     .premium-search-btn:hover {
-        background: rgba(32,201,151,.2);
-        border-color: rgba(32,201,151,.45);
-        color: #a2f1d3;
+        background: var(--theme-teal-soft, rgba(32,201,151,.2));
+        border-color: var(--theme-teal-border, rgba(32,201,151,.45));
+        color: var(--theme-teal-text, #a2f1d3);
     }
 
     .premium-reset-btn {
         width: 31px;
         height: 31px;
-        background: rgba(255,255,255,0.0245);
-        border: 1px solid rgba(255,255,255,.08);
-        color: #9aabb8;
+        background: var(--theme-surface-alt, rgba(255,255,255,0.0245));
+        border: 1px solid var(--theme-border, rgba(255,255,255,.08));
+        color: var(--theme-muted, #9aabb8);
         padding: 0;
     }
 
     .premium-reset-btn:hover {
-        background: rgba(255,255,255,0.049);
-        color: #fff;
-        border-color: rgba(32,201,151,.25);
+        background: var(--theme-surface-alt, rgba(255,255,255,0.049));
+        color: var(--theme-text, #fff);
+        border-color: var(--theme-teal-border, rgba(32,201,151,.25));
     }
 
     .torrent-list-card {
         position: relative;
-        background: linear-gradient(135deg, rgba(14,21,33,.95), rgba(10,15,27,.84));
-        border: 1px solid var(--ui-border, rgba(255,255,255,.08));
+        background: linear-gradient(135deg, var(--theme-surface, rgba(14,21,33,.95)), var(--theme-surface, rgba(10,15,27,.84)));
+        border: 1px solid var(--ui-border, var(--theme-border, rgba(255,255,255,.08)));
         border-radius: .7rem;
-        box-shadow: 0 8px 24px rgba(0,0,0,.18);
+        box-shadow: 0 8px 24px var(--theme-shadow, rgba(0,0,0,.18));
         overflow: hidden;
     }
 
     .torrent-header {
-        background: rgba(255,255,255,0.0175);
-        border-color: rgba(255,255,255,.07) !important;
+        background: var(--theme-surface-alt, rgba(255,255,255,0.0175));
+        border-color: var(--theme-border, rgba(255,255,255,.07)) !important;
     }
 
     .torrent-header i {
@@ -913,15 +913,15 @@ Restore Torrent
     }
 
     .torrent-row:hover {
-        background: rgba(32,201,151,.025);
+        background: var(--theme-teal-soft, rgba(32,201,151,.025));
     }
 
     .torrent-trashed {
-        background: rgba(220,53,69,.035);
+        background: var(--theme-red-soft, rgba(220,53,69,.035));
     }
 
     .torrent-trashed:hover {
-        background: rgba(220,53,69,.055);
+        background: var(--theme-red-soft, rgba(220,53,69,.055));
     }
 
     .torrent-name-tags {
@@ -930,36 +930,36 @@ Restore Torrent
     }
 
     .torrent-title {
-        color: #dce8ed;
-        font-size: 14px;
+        color: var(--theme-text, #dce8ed);
+        font-size: var(--site-font-body, 13px);
         font-weight: 700;
         line-height: 1.45;
         word-break: break-word;
     }
 
     a .torrent-title {
-        color: #dce8ed;
+        color: var(--theme-text, #dce8ed);
         text-decoration: none;
         transition: color .16s ease;
     }
 
     a:hover .torrent-title {
-        color: var(--ui-accent, #20c997);
+        color: var(--ui-accent, var(--theme-teal-text, #20c997));
     }
 
     .torrent-date,
     .torrent-uploader {
-        color: #a7bac6;
-        font-size: 12px;
+        color: var(--theme-muted, #a7bac6);
+        font-size: var(--site-font-small, 13px);
     }
 
     .torrent-uploader a {
-        color: #9edcc8;
+        color: var(--theme-text, #9edcc8);
         text-decoration: none;
     }
 
     .torrent-uploader a:hover {
-        color: #fff;
+        color: var(--theme-text, #fff);
     }
 
     .torrent-action-btn {
@@ -968,29 +968,29 @@ Restore Torrent
 
     .torrent-list-card .btn {
         border-radius: .4rem;
-        font-size: 12px;
+        font-size: var(--site-font-small, 13px);
     }
 
     .torrent-list-card .btn-outline-primary {
-        color: #7fdcca;
-        border-color: rgba(32,201,151,.28);
+        color: var(--theme-teal-text, #7fdcca);
+        border-color: var(--theme-teal-border, rgba(32,201,151,.28));
     }
 
     .torrent-list-card .btn-outline-primary:hover {
-        color: #fff;
-        background: rgba(32,201,151,.12);
-        border-color: rgba(32,201,151,.45);
+        color:  var(--theme-text, #fff);
+        background: var(--theme-teal-soft, rgba(32,201,151,.12));
+        border-color: var(--theme-teal-border, rgba(32,201,151,.45));
     }
 
     .torrent-list-card .btn-outline-danger {
-        color: #ff8e98;
-        border-color: rgba(220,53,69,.28);
+        color: var(--theme-red-text, #ff8e98);
+        border-color: var(--theme-red-border, rgba(220,53,69,.28));
     }
 
     .torrent-list-card .btn-outline-danger:hover {
-        color: #fff;
-        background: rgba(220,53,69,.12);
-        border-color: rgba(220,53,69,.45);
+        color: var(--theme-text, #fff);
+        background: var(--theme-red-soft, rgba(220,53,69,.12));
+        border-color: var(--theme-red-border, rgba(220,53,69,.45));
     }
 
     .pagination {
@@ -998,80 +998,80 @@ Restore Torrent
     }
 
     .pagination .page-link {
-        background: rgba(14,21,33,.9);
-        border-color: rgba(255,255,255,.08);
-        color: #aabcc7;
-        font-size: 12px;
+        background: var(--theme-surface, rgba(14,21,33,.9));
+        border-color: var(--theme-border, rgba(255,255,255,.08));
+        color: var(--theme-muted, #aabcc7);
+        font-size: var(--site-font-small, 13px);
         border-radius: .4rem !important;
     }
 
     .pagination .page-item.active .page-link {
-        background: rgba(32,201,151,.14);
-        border-color: rgba(32,201,151,.3);
-        color: #73e2bb;
+        background: var(--theme-teal-soft, rgba(32,201,151,.14));
+        border-color: var(--theme-teal-border, rgba(32,201,151,.3));
+        color: var(--theme-teal-text, #73e2bb);
     }
 
     .pagination .page-link:hover {
-        background: rgba(32,201,151,.08);
-        color: #fff;
-        border-color: rgba(32,201,151,.25);
+        background: var(--theme-teal-soft, rgba(32,201,151,.08));
+        color:  var(--theme-text, #fff);
+        border-color: var(--theme-teal-border, rgba(32,201,151,.25));
     }
 
     .modal-content {
-        background: linear-gradient(135deg, rgba(14,21,33,.98), rgba(10,15,27,.96));
-        border: 1px solid var(--ui-border, rgba(255,255,255,.08));
+        background: linear-gradient(135deg, var(--theme-surface, rgba(14,21,33,.98)), var(--theme-surface, rgba(10,15,27,.96)));
+        border: 1px solid var(--ui-border, var(--theme-border, rgba(255,255,255,.08)));
         border-radius: .7rem;
-        color: #dbe7ef;
-        box-shadow: 0 18px 50px rgba(0,0,0,.4);
+        color: var(--theme-text, #dbe7ef);
+        box-shadow: 0 18px 50px var(--theme-shadow, rgba(0,0,0,.4));
     }
 
     .modal-header,
     .modal-footer {
-        border-color: rgba(255,255,255,.07);
+        border-color: var(--theme-border, rgba(255,255,255,.07));
     }
 
     .modal-header:not(.bg-danger):not(.bg-success) {
-        background: rgba(255,255,255,0.014);
+        background: var(--theme-surface-alt, rgba(255,255,255,0.014));
     }
 
     .modal-title {
-        font-size: 15px;
+        font-size: var(--site-font-body, 13px);
         font-weight: 700;
     }
 
     .modal-body {
-        font-size: 13px;
+        font-size: var(--site-font-body, 13px);
     }
 
     .modal .form-label {
-        color: #9fb0bc;
-        font-size: 12px;
+        color: var(--theme-muted, #9fb0bc);
+        font-size: var(--site-font-small, 13px);
         font-weight: 600;
     }
 
     .modal .form-select,
     .modal .form-control {
-        background: rgba(5,10,18,.55);
-        border: 1px solid rgba(255,255,255,.1);
-        color: #dbe7ef;
-        font-size: 13px;
+        background: var(--theme-control, rgba(5,10,18,.55));
+        border: 1px solid var(--theme-border, rgba(255,255,255,.1));
+        color: var(--theme-text, #dbe7ef);
+        font-size: var(--site-font-body, 13px);
     }
 
     .modal .form-select:focus,
     .modal .form-control:focus {
-        background: rgba(5,10,18,.65);
-        color: #fff;
-        border-color: rgba(32,201,151,.4);
-        box-shadow: 0 0 0 .15rem rgba(32,201,151,.07);
+        background: var(--theme-control, rgba(5,10,18,.65));
+        color: var(--theme-text, #fff);
+        border-color: var(--theme-teal-border, rgba(32,201,151,.4));
+        box-shadow: 0 0 0 .15rem var(--theme-shadow, rgba(32,201,151,.07));
     }
 
     .modal .form-select option {
-        background: #0f1622;
-        color: #fff;
+        background: var(--theme-control, #0f1622);
+        color: var(--theme-text, #fff);
     }
 
     .modal .alert {
-        font-size: 12px;
+        font-size: var(--site-font-small, 13px);
         border-radius: .5rem;
     }
 
@@ -1131,7 +1131,7 @@ Restore Torrent
         }
 
         .torrent-title {
-            font-size: 13px;
+            font-size: var(--site-font-body, 13px);
         }
 
         .torrent-list-card .btn {

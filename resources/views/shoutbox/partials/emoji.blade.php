@@ -131,7 +131,7 @@
     .emoji-toggle {
     background: none;
     border: none;
-    color: #ffc107;
+    color: var(--theme-amber-text, #ffc107);
     font-weight: 600;
     cursor: pointer;
     padding: 4px 0;
@@ -152,8 +152,8 @@
 }
 
 .emoji-search {
-    background: #0b0b0b;
-    color: #fff;
+    background: var(--theme-surface-alt, #0b0b0b);
+    color: var(--theme-text, #fff);
     border-radius: 8px;
 }
 

@@ -27,7 +27,9 @@ class AchievementUnlocked extends Notification
                 : 'Congratulations! You reached '.app(AchievementService::class)->formatTarget($this->definition['unit'], $award->threshold).'. Keep up the good work!',
             'category' => $award->category, 'threshold' => $award->threshold,
             'bonus' => $award->bonus_awarded, 'invites' => $award->invites_awarded,
-            'url' => route('profile.show', ['id' => $notifiable->id, 'name' => $notifiable->name]).'#achievements',
+            'tokens' => $award->tokens_awarded, 'vip_months' => $award->vip_months_awarded,
+            'tier' => $award->tier,
+            'url' => route('profile.show', ['id' => $notifiable->id, 'name' => $notifiable->name]).'#achievement-'.$award->category.'-'.$award->threshold,
         ];
     }
 }

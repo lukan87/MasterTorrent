@@ -1,0 +1,73 @@
+.torrent-search {
+    background: linear-gradient(135deg, var(--theme-surface, rgba(14, 21, 33, .95)), var(--theme-surface, rgba(10, 15, 27, .84)));
+    border: 1px solid var(--ui-border);
+    border-radius: 14px;
+    box-shadow: 0 14px 35px var(--theme-shadow, rgba(0, 0, 0, .22));
+    backdrop-filter: blur(14px);
+}
+.torrent-search .card-body { padding: 20px; }
+.torrent-search .form-label { color: var(--theme-text, #bac8d9); font-size: var(--site-font-small, 13px); font-weight: 600; margin-bottom: 7px; }
+.torrent-search :is(.form-control, .form-select, .torrent-search-submit) { min-height: 44px; border-radius: 9px; font-size: var(--site-font-body, 13px); }
+.torrent-search-input { display: flex; align-items: center; gap: 8px; min-height: 44px; padding-inline: 12px 6px; background: var(--ui-control); border: 1px solid var(--ui-border); border-radius: 9px; }
+.torrent-search-input > i { color: var(--ui-accent); }
+.torrent-search-input .form-control { min-width: 0; padding-inline: 0; border: 0; background: transparent; box-shadow: none; }
+.torrent-search-input:focus-within { border-color: var(--theme-border, #485568); box-shadow: none; }
+.torrent-search :is(.form-control, .form-select):focus { border-color: var(--theme-border, #485568); box-shadow: none; outline: none; }
+.torrent-category-trigger { display: inline-flex; align-items: center; gap: 7px; flex-shrink: 0; padding: 8px; border: 0; border-left: 1px solid var(--ui-border); background: transparent; color: var(--theme-text, #bac8d9); font-size: var(--site-font-small, 13px); font-weight: 600; cursor: pointer; }
+.torrent-category-trigger:hover { color: var(--ui-accent); }
+.torrent-category-trigger .bi-chevron-down { font-size: 10px; transition: rotate 150ms ease; }
+.torrent-category-trigger[aria-expanded="true"] .bi-chevron-down { rotate: 180deg; }
+.torrent-search-help { margin: 10px 0 0; font-size: var(--site-font-small, 13px); color: var(--ui-text-muted); }
+.torrent-search-help kbd { background: var(--theme-surface, #1b2738); color: var(--theme-text, #cbd5e1); }
+.torrent-category-panel { padding: 16px; margin-top: 16px; background: var(--theme-surface, rgba(5, 10, 18, .5)); border: 1px solid var(--ui-border); border-radius: 11px; }
+.torrent-category-tools { display: flex; gap: 12px; align-items: center; justify-content: space-between; padding-bottom: 14px; margin-bottom: 4px; border-bottom: 1px solid var(--ui-border); }
+.torrent-category-find { width: min(100%, 320px); }
+.torrent-category-tools button { flex-shrink: 0; color: var(--theme-text, #bac8d9); }
+.torrent-category-grid { display: flex; flex-direction: column; }
+.torrent-category-group { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 18px; min-width: 0; padding: 16px 0; margin: 0; border: 0; border-bottom: 1px solid var(--ui-border); }
+.torrent-category-group:last-child { border-bottom: 0; padding-bottom: 0; }
+.torrent-category-heading { align-self: start; padding-top: 7px; }
+.torrent-category-title { display: flex; align-items: center; gap: 7px; color: var(--theme-text, #e5edf7); font-size: var(--site-font-body, 13px); }
+.torrent-category-title > i { color: var(--ui-accent); font-size: 16px; }
+.torrent-category-title > span { display: grid; place-items: center; min-width: 21px; height: 21px; margin-left: auto; padding-inline: 5px; border-radius: 6px; background: var(--theme-surface-alt, rgba(148, 163, 184, .08)); color: var(--ui-text-muted); font-size: var(--site-font-small, 13px); }
+.torrent-category-select { padding: 0; margin: 8px 0 0 23px; border: 0; background: transparent; color: var(--theme-muted, #94a8bf); font-size: var(--site-font-small, 13px); cursor: pointer; }
+.torrent-category-select:hover { color: var(--ui-accent); }
+.torrent-category-options { display: grid; grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); align-content: start; gap: 7px; min-width: 0; }
+.torrent-category-check { display: flex; align-items: center; gap: 8px; position: relative; min-height: 37px; padding: 8px 10px; border: 1px solid var(--theme-border, rgba(148, 163, 184, .13)); border-radius: 7px; background: var(--theme-surface-alt, rgba(148, 163, 184, .025)); transition: background-color 150ms ease, border-color 150ms ease; }
+.torrent-category-check:hover { background: var(--theme-surface-alt, rgba(148, 163, 184, .07)); border-color: var(--theme-border, rgba(148, 163, 184, .25)); }
+.torrent-category-check:has(input:checked) { background: var(--theme-teal-soft, rgba(99, 210, 198, .09)); border-color: var(--theme-teal-border, rgba(99, 210, 198, .32)); }
+.torrent-category-check:focus-within { outline: 2px solid var(--theme-border, #8493a7); outline-offset: 2px; }
+.torrent-category-check label { flex: 1; margin: 0; font-size: var(--site-font-small, 13px); line-height: 1.4; color: var(--theme-text, #bac8d9); cursor: pointer; overflow-wrap: anywhere; }
+.torrent-category-check label::after { content: ''; position: absolute; inset: 0; border-radius: inherit; }
+.torrent-category-check .form-check-input { float: none; flex: 0 0 14px; width: 14px; height: 14px; margin: 0; cursor: pointer; border-color: var(--theme-border, #48576a); background-color: var(--theme-control, #0c121c); }
+.torrent-category-check .form-check-input:checked { border-color: var(--ui-accent); background-color: var(--theme-teal-action, var(--ui-accent)); }
+.torrent-category-check input:checked + label { color: var(--theme-text, #d4f6f1); }
+.torrent-active-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin-top: 16px; }
+.torrent-filter-label { color: var(--ui-text-muted); font-size: var(--site-font-small, 13px); margin-right: 3px; }
+.torrent-filter-chip { display: inline-flex; align-items: center; gap: 5px; max-width: 100%; padding: 5px 10px; border: 1px solid var(--theme-teal-border, rgba(99, 210, 198, .24)); border-radius: 999px; background: var(--theme-teal-soft, rgba(99, 210, 198, .08)); color: var(--theme-teal-text, #a1e6dd); font-size: var(--site-font-small, 13px); text-decoration: none; overflow-wrap: anywhere; }
+.torrent-filter-chip:hover { background: var(--theme-teal-soft, rgba(99, 210, 198, .15)); color:  var(--theme-text, #fff); }
+.torrent-filter-clear { color: var(--theme-red-text, #fca5a5); border-color: var(--theme-red-border, rgba(248, 113, 113, .24)); background: var(--theme-red-soft, rgba(248, 113, 113, .06)); }
+.torrent-search :is(a, button, input, select):focus-visible { outline: 2px solid var(--theme-border, #8493a7); outline-offset: 3px; }
+.torrent-search :is(.form-control, .form-select):focus-visible { outline: none; }
+.torrent-search [hidden] { display: none !important; }
+@media (max-width: 767.98px) {
+    .torrent-search .card-body { padding: 14px; }
+    .torrent-category-group { grid-template-columns: 1fr; gap: 12px; }
+    .torrent-category-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 0; }
+    .torrent-category-title { flex: 1; }
+    .torrent-category-title > span { margin-left: 2px; }
+    .torrent-category-select { margin: 0; }
+    .torrent-category-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .torrent-category-tools { align-items: stretch; flex-direction: column; }
+    .torrent-category-find { width: 100%; }
+}
+@media (max-width: 479.98px) {
+    .torrent-search-input { flex-wrap: wrap; padding: 4px 10px; gap: 4px; }
+    .torrent-search-input .form-control { flex: 1; }
+    .torrent-category-trigger { width: 100%; justify-content: center; border-left: 0; border-top: 1px solid var(--ui-border); }
+    .torrent-category-panel { padding: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .torrent-category-trigger .bi-chevron-down,
+    .torrent-category-check { transition: none; }
+}

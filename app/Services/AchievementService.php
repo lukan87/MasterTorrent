@@ -23,12 +23,36 @@ class AchievementService
 
     public function available(): bool
     {
-        return config('achievements.enabled', true) && ($this->schemaReady ??= Schema::hasTable('user_achievements'));
+        return config('achievements.enabled', true) && ($this->schemaReady ??= Schema::hasTable('user_achievements') && Schema::hasColumn('user_achievements', 'tokens_awarded') && Schema::hasColumn('user_achievements', 'vip_months_awarded') && Schema::hasColumn('users', 'login_streak_days'));
+    }
+
+    public function recordLoginDay(int $userId): void
+    {
+        if (! $this->available()) {
+            return;
+        }
+        $changed = DB::transaction(function () use ($userId) {
+            $user = User::whereKey($userId)->lockForUpdate()->first();
+            $today = now()->toDateString();
+            if (! $user || $user->enabled === 'no' || $user->isBanned() || $user->last_login_streak_date === $today) {
+                return false;
+            }
+            $user->login_streak_days = $user->last_login_streak_date === now()->subDay()->toDateString()
+                ? (int) $user->login_streak_days + 1 : 1;
+            $user->last_login_streak_date = $today;
+            $user->saveQuietly();
+
+            return true;
+        }, 3);
+        if ($changed) {
+            ProfileService::invalidate($userId);
+            \App\Jobs\CheckUserAchievements::dispatch($userId);
+        }
     }
 
     public function metrics(User $user): array
     {
-        $history = History::where('user_id', $user->id)->selectRaw('SUM(actual_uploaded) AS upload_total, SUM(actual_downloaded) AS download_total, SUM(seedtime) AS seed_total, COUNT(DISTINCT CASE WHEN completed_at IS NOT NULL THEN torrent_id END) AS completions')->first();
+        $history = History::where('user_id', $user->id)->selectRaw('SUM(actual_uploaded) AS upload_total, SUM(actual_downloaded) AS download_total, COUNT(DISTINCT CASE WHEN completed_at IS NOT NULL THEN torrent_id END) AS completions')->first();
 
         return [
             'invited_users' => User::withTrashed()->where('invited_by', $user->id)->where('id', '!=', $user->id)->count(),
@@ -42,7 +66,10 @@ class AchievementService
             'snatches' => (int) $history->completions,
             'uploaded' => (int) $history->upload_total,
             'downloaded' => (int) $history->download_total,
-            'seedtime' => (int) $history->seed_total,
+            'torrent_seedtime' => (int) History::where('user_id', $user->id)
+                ->whereHas('torrent', fn ($q) => $q->where('owner', '!=', $user->id))->max('seedtime'),
+            'login_streak' => $user->last_login_streak_date && $user->last_login_streak_date >= now()->subDay()->toDateString()
+                ? (int) $user->login_streak_days : 0,
         ];
     }
 
@@ -55,12 +82,22 @@ class AchievementService
         return ($metrics[$category] ?? 0) >= $threshold;
     }
 
-    public function reward(float $balance, int $tier): float
+    public function reward(float $balance, int $tier, ?string $category = null): float
     {
-        $requested = round(max(0, $balance) * (config('achievements.reward_percent', 25) / 100) * $tier, 2);
+        $requested = $this->tierReward($tier, $category);
         $room = max(0, round(config('seedbonus.cap', 999999.99) - $balance, 2));
 
         return min($requested, $room);
+    }
+
+    public function tierReward(int $tier, ?string $category = null): float
+    {
+        return round(max(0, (float) config('achievements.categories.'.$category.'.points.'.$tier, config('achievements.tier_rewards.'.$tier, 0))), 2);
+    }
+
+    public function tierTokens(int $tier, ?string $category = null): int
+    {
+        return max(0, (int) config('achievements.categories.'.$category.'.tokens.'.$tier, config('achievements.tier_tokens.'.$tier, 0)));
     }
 
     public function award(int $userId): int
@@ -69,8 +106,8 @@ class AchievementService
             return 0;
         }
 
-        // Serializes competing workers; award, balance, invites, and notification commit together.
-        return DB::transaction(function () use ($userId) {
+        // Serializes competing workers; award, balances, invites, and notification commit together.
+        $awarded = DB::transaction(function () use ($userId) {
             $user = User::whereKey($userId)->lockForUpdate()->first();
             if (! $user || $user->enabled === 'no' || $user->banned_until !== null) {
                 return 0;
@@ -85,15 +122,26 @@ class AchievementService
                         continue;
                     }
                     $tier = $index + 1;
-                    $bonus = $this->reward((float) $user->seedbonus, $tier);
+                    $bonus = $this->reward((float) $user->seedbonus, $tier, $category);
                     $invites = $definition['invites'][$tier] ?? 0;
+                    $tokens = $this->tierTokens($tier, $category);
+                    $vipMonths = (int) ($definition['vip_months'][$tier] ?? 0);
                     $achievement = UserAchievement::create([
                         'user_id' => $userId, 'category' => $category, 'threshold' => $threshold,
                         'tier' => $tier, 'balance_before' => $user->seedbonus,
-                        'bonus_awarded' => $bonus, 'invites_awarded' => $invites, 'earned_at' => now(),
+                        'bonus_awarded' => $bonus, 'invites_awarded' => $invites,
+                        'tokens_awarded' => $tokens, 'vip_months_awarded' => $vipMonths, 'earned_at' => now(),
                     ]);
                     $user->seedbonus = round((float) $user->seedbonus + $bonus, 2);
                     $user->invites = (int) $user->invites + $invites;
+                    $user->slots = (int) $user->slots + $tokens;
+                    if ($vipMonths > 0) {
+                        $base = $user->vip_until && $user->vip_until->isFuture() ? $user->vip_until->copy() : now();
+                        $user->vip_until = $base->addMonthsNoOverflow($vipMonths);
+                        if ((int) $user->user_class <= \App\Models\UserClass::VIP) {
+                            $user->user_class = \App\Models\UserClass::VIP;
+                        }
+                    }
                     $user->saveQuietly();
                     $user->notify(new AchievementUnlocked($achievement, $definition));
                     $count++;
@@ -102,6 +150,11 @@ class AchievementService
 
             return $count;
         }, 3);
+        if ($awarded > 0) {
+            ProfileService::invalidate($userId);
+        }
+
+        return $awarded;
     }
 
     public function formatTarget(string $unit, int $value): string
@@ -138,12 +191,14 @@ class AchievementService
                     $remaining = $this->formatTarget($definition['unit'], max(0, $threshold - $current)).' to go';
                 }
                 $tiers[] = [
-                    'tier' => $index + 1, 'target' => $this->formatTarget($definition['unit'], $threshold),
+                    'tier' => $index + 1, 'target' => $definition['labels'][$index] ?? ($key === 'seeding' ? number_format($threshold).' at Once' : $this->formatTarget($definition['unit'], $threshold)),
                     'award' => $award, 'qualified' => $reached,
                     'percent' => $award ? 100 : min(100, round($current / $total * 100, 1)),
                     'remaining' => $award ? 'Unlocked' : ($reached ? 'Reached · reward pending' : $remaining),
-                    'reward_percent' => config('achievements.reward_percent', 25) * ($index + 1),
+                    'reward_points' => $this->tierReward($index + 1, $key),
+                    'reward_tokens' => $this->tierTokens($index + 1, $key),
                     'invites' => $definition['invites'][$index + 1] ?? 0,
+                    'vip_months' => $definition['vip_months'][$index + 1] ?? 0,
                 ];
             }
             $categories[] = $definition + ['key' => $key, 'tiers' => $tiers, 'earned_count' => collect($tiers)->whereNotNull('award')->count()];

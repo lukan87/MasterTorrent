@@ -25,7 +25,7 @@
             </div>
             <div class="achievement-rules">
                 <i class="bi bi-gift" aria-hidden="true"></i>
-                <span>Each milestone awards {{ config('achievements.reward_percent', 25) }}% of your bonus balance × its tier (1–6), up to the {{ number_format(config('seedbonus.cap', 999999.99), 2) }} point balance cap. Selected milestones also award invites. Rewards are paid once; a zero balance earns zero points.</span>
+                <span>Each milestone awards fixed bonus points and tokens shown in its tier. Tokens can be used for free download or double upload. Bonus points are limited by the {{ number_format(config('seedbonus.cap', 999999.99), 2) }} point balance cap. Selected milestones also award invites and time-limited VIP. Rewards are paid once, including when your balance is zero.</span>
             </div>
             <div class="achievement-grid">
                 @foreach($achievementCategories as $category)
@@ -86,7 +86,27 @@
         bootstrap.Modal.getOrCreateInstance(overview).hide();
     });
     const revealAchievements = () => {
-        if (window.location.hash === '#achievements' && window.bootstrap && !switching) {
+        if (!window.bootstrap || switching) return;
+        const tier = document.getElementById(window.location.hash.slice(1));
+        if (tier && tier.classList.contains('achievement-modal-tier')) {
+            const detail = tier.closest('.achievement-modal');
+            const focusTier = () => {
+                tier.scrollIntoView({ block: 'center', behavior: 'auto' });
+                tier.focus({ preventScroll: true });
+            };
+            const showDetail = () => {
+                detail.addEventListener('shown.bs.modal', focusTier, { once: true });
+                bootstrap.Modal.getOrCreateInstance(detail).show();
+                if (detail.classList.contains('show')) focusTier();
+            };
+            const open = document.querySelector('.achievement-modal.show');
+            if (open && open !== detail) {
+                open.addEventListener('hidden.bs.modal', showDetail, { once: true });
+                bootstrap.Modal.getOrCreateInstance(open).hide();
+            } else {
+                showDetail();
+            }
+        } else if (window.location.hash === '#achievements') {
             bootstrap.Modal.getOrCreateInstance(overview).show();
         }
     };

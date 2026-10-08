@@ -158,7 +158,7 @@
                     @if($trailer)
                         <div class="movie-meta-card">
                             <span class="movie-meta-label">Trailer</span>
-                            <a href="#" data-bs-toggle="modal" data-bs-target="#trailerModal" data-video-key="{{ $trailer['key'] }}" class="movie-meta-value text-decoration-none" style="color:#2dd4bf;">
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#trailerModal" data-video-key="{{ $trailer['key'] }}" class="movie-meta-value text-decoration-none" style="color:var(--theme-teal-text, #2dd4bf);">
                                 <i class="bi bi-play-circle"></i> Watch
                             </a>
                         </div>

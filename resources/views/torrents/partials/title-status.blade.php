@@ -30,7 +30,7 @@
         @endif
 
         {{-- Seeding --}}
-        @if($torrent->is_seeding)
+        {{-- @if($torrent->is_seeding)
 
             <span
                 class="torrent-seeding-label"
@@ -40,11 +40,11 @@
                 data-bs-toggle="tooltip"
                 title="You are currently seeding this torrent"
             >
-                <i class="bi bi-arrow-up" aria-hidden="true"></i>
+                <i class="bi bi-arrow-up-circle-fill" aria-hidden="true"></i>
                 <span aria-hidden="true">Seeding</span>
             </span>
 
-        @endif
+        @endif --}}
 
     </div>
 
@@ -62,17 +62,17 @@
 }
 
 .torrent-title-line .torrent-name-link--seeding .torrent-title {
-    color: #9aebc9;
-    text-shadow: 0 0 12px rgba(52, 211, 153, .32);
+    color: var(--theme-green-text, #9aebc9);
+    text-shadow: 0 0 12px var(--theme-shadow, rgba(52, 211, 153, .32));
 }
 
 .torrent-title-line .torrent-name-link--seeding:hover .torrent-title {
-    color: #c5ffe7;
-    text-shadow: 0 0 16px rgba(52, 211, 153, .48);
+    color: var(--theme-text, #c5ffe7);
+    text-shadow: 0 0 16px var(--theme-shadow, rgba(52, 211, 153, .48));
 }
 
 .torrent-name-link--seeding .torrent-title::after {
-    background: linear-gradient(90deg, transparent, #6ee7b7);
+    background: linear-gradient(90deg, transparent, var(--theme-teal-soft, #6ee7b7));
 }
 
 .torrent-completed-mark,
@@ -85,19 +85,19 @@
 }
 
 .torrent-completed-mark {
-    color: #6ee7b7;
-    font-size: 14px;
+    color: var(--theme-teal-text, #6ee7b7);
+    font-size: var(--site-font-body, 13px);
     line-height: 1;
 }
 
 .torrent-seeding-label {
     gap: 3px;
     padding: 3px 7px;
-    border: 1px solid rgba(110, 231, 183, .24);
+    border: 1px solid var(--theme-teal-border, rgba(110, 231, 183, .24));
     border-radius: 50rem;
-    background: rgba(52, 211, 153, .09);
-    color: #9aebc9;
-    font-size: 10px;
+    background: var(--theme-teal-soft, rgba(52, 211, 153, .09));
+    color: var(--theme-green-text, #9aebc9);
+    font-size: var(--site-font-small, 13px);
     font-weight: 600;
     line-height: 1.2;
     white-space: nowrap;
@@ -105,7 +105,7 @@
 
 .torrent-completed-mark:focus-visible,
 .torrent-seeding-label:focus-visible {
-    outline: 2px solid #6ee7b7;
+    outline: 2px solid var(--theme-teal-border, #6ee7b7);
     outline-offset: 2px;
     border-radius: 4px;
 }

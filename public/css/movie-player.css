@@ -1,0 +1,41 @@
+.movie-watch-modal .modal-dialog { width: calc(100% - 32px); max-width: 1280px; margin-inline: auto; }
+.movie-watch-modal .modal-content { background: #080e18; border: 1px solid rgba(148, 163, 184, .2); border-radius: 16px; overflow: hidden; box-shadow: 0 25px 90px rgba(0, 0, 0, .55); }
+.movie-watch-modal .modal-header { display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-bottom: 1px solid rgba(148, 163, 184, .12); }
+.movie-watch-icon { display: grid; place-items: center; flex: 0 0 38px; height: 38px; border-radius: 10px; color: #8ce3d8; background: rgba(99, 210, 198, .1); font-size: 23px; }
+.movie-watch-heading { flex: 1; min-width: 0; }
+.movie-watch-eyebrow { display: block; margin-bottom: 3px; color: #8ce3d8; font-size: 9px; font-weight: 650; letter-spacing: .12em; text-transform: uppercase; }
+.movie-watch-modal .modal-title { color: #e5edf7; font-size: 15px; font-weight: 650; line-height: 1.4; overflow-wrap: anywhere; }
+.movie-watch-modal .btn-close { flex-shrink: 0; margin: 0; }
+.movie-watch-fullscreen { display: grid; place-items: center; flex: 0 0 34px; height: 34px; padding: 0; border: 1px solid rgba(148, 163, 184, .25); border-radius: 8px; background: rgba(148, 163, 184, .08); color: #b8e9e3; }
+.movie-watch-fullscreen:hover { background: rgba(99, 210, 198, .18); color: #fff; }
+.movie-watch-modal .modal-body { display: flex; align-items: center; justify-content: center; flex: 1; padding: 0; background: #000; }
+.movie-watch-modal iframe { display: block; width: 100%; aspect-ratio: 16 / 9; max-height: calc(100vh - 170px); max-height: calc(100dvh - 170px); border: 0; background: #000; }
+.movie-watch-modal .modal-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 20px; border-top: 1px solid rgba(148, 163, 184, .12); color: #92a3b9; font-size: 11px; }
+.movie-watch-modal .modal-footer > * { margin: 0; }
+.movie-watch-modal .modal-footer span { display: inline-flex; align-items: center; gap: 7px; }
+.movie-watch-modal .modal-footer a { display: inline-flex; align-items: center; gap: 6px; color: #8ce3d8; text-decoration: none; }
+.movie-watch-modal .modal-footer a:hover { color: #c2fff6; }
+.movie-watch-modal :is(a, button):focus-visible { outline: 2px solid #8ce3d8; outline-offset: 3px; }
+@media (max-width: 575.98px) {
+    .movie-watch-modal .modal-dialog { width: 100%; max-width: none; margin: 0; }
+    .movie-watch-modal .modal-content { border: 0; border-radius: 0; }
+    .movie-watch-modal .modal-header { padding: 12px 14px; }
+    .movie-watch-modal .modal-title { font-size: 13px; }
+    .movie-watch-modal .modal-footer { padding: 10px 14px; font-size: 10px; }
+    .movie-watch-modal .modal-footer span { flex: 1; }
+    .movie-watch-modal .modal-footer a { flex-shrink: 0; }
+    .movie-watch-modal iframe { max-height: calc(100dvh - 140px); }
+}
+/* Remove modal-size limits when the embedded player enters fullscreen itself. */
+.movie-watch-modal iframe:fullscreen { width: 100%; height: 100%; max-height: none; aspect-ratio: auto; }
+.movie-watch-modal iframe:-webkit-full-screen { width: 100%; height: 100%; max-height: none; aspect-ratio: auto; }
+.movie-watch-modal .modal-content:fullscreen { width: 100%; height: 100%; border: 0; border-radius: 0; }
+.movie-watch-modal .modal-content:-webkit-full-screen { width: 100%; height: 100%; border: 0; border-radius: 0; }
+.movie-watch-modal .modal-content:fullscreen .modal-body { min-height: 0; }
+.movie-watch-modal .modal-content:-webkit-full-screen .modal-body { min-height: 0; }
+.movie-watch-modal .modal-content:fullscreen iframe { height: 100%; max-height: none; aspect-ratio: auto; }
+.movie-watch-modal .modal-content:-webkit-full-screen iframe { height: 100%; max-height: none; aspect-ratio: auto; }
+.movie-watch-modal.movie-watch-expanded .modal-dialog { width: 100%; max-width: none; height: 100%; margin: 0; }
+.movie-watch-modal.movie-watch-expanded .modal-content { height: 100%; border: 0; border-radius: 0; }
+.movie-watch-modal.movie-watch-expanded .modal-body { min-height: 0; }
+.movie-watch-modal.movie-watch-expanded iframe { height: 100%; max-height: none; aspect-ratio: auto; }

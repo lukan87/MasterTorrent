@@ -13,7 +13,7 @@
                     <i class="bi bi-bar-chart-line-fill"></i>
                 </div>
 
-                <h5 class="text-white mb-2">
+                <h5 class="theme-text mb-2">
                     No polls available
                 </h5>
 
@@ -302,8 +302,8 @@
     background:
         linear-gradient(
             135deg,
-            rgba(14,21,33,.95),
-            rgba(10,15,27,.84)
+            var(--theme-surface, rgba(14,21,33,.95)),
+            var(--theme-surface, rgba(10,15,27,.84))
         );
 
     border: 1px solid var(--ui-border);
@@ -311,8 +311,8 @@
     border-radius: 1rem;
 
     box-shadow:
-        0 10px 26px rgba(0, 0, 0, .16),
-        inset 0 1px 0 rgba(255, 255, 255, .025);
+        0 10px 26px var(--theme-shadow, rgba(0, 0, 0, .16)),
+        inset 0 1px 0 var(--theme-shadow, rgba(255, 255, 255, .025));
 
     transition:
         transform 160ms ease,
@@ -343,7 +343,7 @@
         linear-gradient(
             90deg,
             transparent,
-            rgba(255,255,255,0.049),
+            var(--theme-surface-alt, rgba(255,255,255,0.049)),
             transparent
         );
 
@@ -367,8 +367,8 @@
     background:
         linear-gradient(
             180deg,
-            var(--ui-accent),
-            var(--ui-accent-strong)
+            var(--theme-teal-action, var(--ui-accent)),
+            var(--theme-teal-action, var(--ui-accent-strong))
         );
 
     border-radius: 0 4px 4px 0;
@@ -383,11 +383,11 @@
 
     transform: translateY(-2px);
 
-    border-color: rgba(99, 210, 198, .20);
+    border-color: var(--theme-teal-border, rgba(99, 210, 198, .20));
 
     box-shadow:
-        0 14px 32px rgba(0, 0, 0, .22),
-        0 0 0 1px rgba(99, 210, 198, .025);
+        0 14px 32px var(--theme-shadow, rgba(0, 0, 0, .22)),
+        0 0 0 1px var(--theme-shadow, rgba(99, 210, 198, .025));
 }
 
 
@@ -411,7 +411,7 @@
     background:
         radial-gradient(
             circle,
-            rgba(99, 210, 198, .055),
+            var(--theme-teal-soft, rgba(99, 210, 198, .055)),
             transparent 70%
         );
 
@@ -438,7 +438,7 @@
     padding: 1rem 1.15rem .9rem;
 
     border-bottom:
-        1px solid rgba(148, 163, 184, .08);
+        1px solid var(--theme-border, rgba(148, 163, 184, .08));
 }
 
 
@@ -457,17 +457,17 @@
     color: var(--ui-accent);
 
     background:
-        rgba(99, 210, 198, .075);
+        var(--theme-teal-soft, rgba(99, 210, 198, .075));
 
     border:
-        1px solid rgba(99, 210, 198, .14);
+        1px solid var(--theme-teal-border, rgba(99, 210, 198, .14));
 
     border-radius: .65rem;
 
     font-size: 1.1rem;
 
     box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, .025);
+        inset 0 1px 0 var(--theme-shadow, rgba(255, 255, 255, .025));
 
     transition:
         background 160ms ease,
@@ -477,9 +477,9 @@
 
 .modern-poll-card:hover .poll-icon-box {
 
-    background: rgba(99, 210, 198, .11);
+    background: var(--theme-teal-soft, rgba(99, 210, 198, .11));
 
-    border-color: rgba(99, 210, 198, .22);
+    border-color: var(--theme-teal-border, rgba(99, 210, 198, .22));
 }
 
 
@@ -487,7 +487,7 @@
 
     margin: 0;
 
-    color: #f1f5f9;
+    color: var(--theme-text, #f1f5f9);
 
     font-size: 1.15rem;
 
@@ -510,9 +510,9 @@
 
     margin-top: .4rem;
 
-    color: #71859b;
+    color: var(--theme-muted, #71859b);
 
-    font-size: .85rem;
+    font-size: var(--site-font-body, 13px);
 }
 
 
@@ -528,7 +528,7 @@
 
 .modern-poll-meta i {
 
-    color: #60758b;
+    color: var(--theme-muted, #60758b);
 
     font-size: .82rem;
 }
@@ -562,17 +562,17 @@
 
     padding: 0;
 
-    color: #8295aa;
+    color: var(--theme-muted, #8295aa);
 
     background:
-        rgba(148,163,184,0.0315);
+        var(--theme-surface-alt, rgba(148,163,184,0.0315));
 
     border:
-        1px solid rgba(148, 163, 184, .09);
+        1px solid var(--theme-border, rgba(148, 163, 184, .09));
 
     border-radius: .45rem;
 
-    font-size: .85rem;
+    font-size: var(--site-font-body, 13px);
 
     text-decoration: none;
 
@@ -590,9 +590,9 @@
 
     color: var(--ui-accent);
 
-    background: rgba(99, 210, 198, .07);
+    background: var(--theme-teal-soft, rgba(99, 210, 198, .07));
 
-    border-color: rgba(99, 210, 198, .17);
+    border-color: var(--theme-teal-border, rgba(99, 210, 198, .17));
 
     transform: translateY(-1px);
 }
@@ -600,21 +600,21 @@
 
 .poll-action-btn.danger-btn:hover {
 
-    color: #ffc4c8;
+    color: var(--theme-text, #ffc4c8);
 
-    background: rgba(220, 53, 69, .09);
+    background: var(--theme-red-soft, rgba(220, 53, 69, .09));
 
-    border-color: rgba(220, 53, 69, .18);
+    border-color: var(--theme-red-border, rgba(220, 53, 69, .18));
 }
 
 
 .poll-action-btn.success-btn:hover {
 
-    color: #c9f3ee;
+    color:  var(--theme-text, #c9f3ee);
 
-    background: rgba(99, 210, 198, .07);
+    background: var(--theme-teal-soft, rgba(99, 210, 198, .07));
 
-    border-color: rgba(99, 210, 198, .17);
+    border-color: var(--theme-teal-border, rgba(99, 210, 198, .17));
 }
 
 
@@ -635,17 +635,17 @@
 
     padding: .75rem .9rem;
 
-    color: #a9bacb;
+    color:  var(--theme-muted, #a9bacb);
 
     background:
-        rgba(99, 210, 198, .045);
+        var(--theme-teal-soft, rgba(99, 210, 198, .045));
 
     border:
-        1px solid rgba(99, 210, 198, .10);
+        1px solid var(--theme-teal-border, rgba(99, 210, 198, .10));
 
     border-radius: .6rem;
 
-    font-size: .95rem;
+    font-size: var(--site-font-body, 13px);
 
     line-height: 1.65;
 }
@@ -678,9 +678,9 @@
 
 .poll-select-title {
 
-    color: #e5edf7;
+    color: var(--theme-text, #e5edf7);
 
-    font-size: .95rem;
+    font-size: var(--site-font-body, 13px);
 
     font-weight: 800;
 
@@ -715,13 +715,13 @@
 
     padding: .75rem .85rem;
 
-    color: #d5e0eb;
+    color: var(--theme-text, #d5e0eb);
 
     background:
-        rgba(148,163,184,0.0245);
+        var(--theme-surface-alt, rgba(148,163,184,0.0245));
 
     border:
-        1px solid rgba(148, 163, 184, .09);
+        1px solid var(--theme-border, rgba(148, 163, 184, .09));
 
     border-radius: .6rem;
 
@@ -737,13 +737,13 @@
 
 .modern-poll-option:hover {
 
-    color: #eef6fb;
+    color:  var(--theme-text, #eef6fb);
 
     background:
-        rgba(99, 210, 198, .055);
+        var(--theme-teal-soft, rgba(99, 210, 198, .055));
 
     border-color:
-        rgba(99, 210, 198, .15);
+        var(--theme-teal-border, rgba(99, 210, 198, .15));
 
     transform: translateX(2px);
 }
@@ -752,10 +752,10 @@
 .modern-poll-option:has(.modern-radio:checked) {
 
     background:
-        rgba(99, 210, 198, .075);
+        var(--theme-teal-soft, rgba(99, 210, 198, .075));
 
     border-color:
-        rgba(99, 210, 198, .22);
+        var(--theme-teal-border, rgba(99, 210, 198, .22));
 }
 
 
@@ -774,9 +774,9 @@
 
 .option-text {
 
-    color: #d9e4ee;
+    color: var(--theme-text, #d9e4ee);
 
-    font-size: .95rem;
+    font-size: var(--site-font-body, 13px);
 
     font-weight: 650;
 
@@ -799,28 +799,28 @@
 
     padding: .5rem .9rem;
 
-    color: #062523;
+    color: var(--theme-on-action, #062523);
 
     background:
         linear-gradient(
             135deg,
-            var(--ui-accent),
-            var(--ui-accent-strong)
+            var(--theme-teal-action, var(--ui-accent)),
+            var(--theme-teal-action, var(--ui-accent-strong))
         );
 
     border:
-        1px solid rgba(99, 210, 198, .22);
+        1px solid var(--theme-teal-border, rgba(99, 210, 198, .22));
 
     border-radius: .5rem;
 
-    font-size: .85rem;
+    font-size: var(--site-font-body, 13px);
 
     font-weight: 800;
 
     cursor: pointer;
 
     box-shadow:
-        0 4px 12px rgba(0, 0, 0, .14);
+        0 4px 12px var(--theme-shadow, rgba(0, 0, 0, .14));
 
     transition:
         transform 160ms ease,
@@ -831,14 +831,14 @@
 
 .modern-vote-btn:hover {
 
-    color: #062523;
+    color: var(--theme-text, #062523);
 
     transform: translateY(-1px);
 
     filter: brightness(1.04);
 
     box-shadow:
-        0 6px 16px rgba(0, 0, 0, .18);
+        0 6px 16px var(--theme-shadow, rgba(0, 0, 0, .18));
 }
 
 
@@ -858,9 +858,9 @@
 
 .result-option-name {
 
-    color: #dce7f2;
+    color: var(--theme-text, #dce7f2);
 
-    font-size: .95rem;
+    font-size: var(--site-font-body, 13px);
 
     font-weight: 750;
 
@@ -887,9 +887,9 @@
 
     flex-shrink: 0;
 
-    color: #71859b;
+    color: var(--theme-muted, #71859b);
 
-    font-size: .85rem;
+    font-size: var(--site-font-body, 13px);
 
     font-weight: 650;
 
@@ -906,10 +906,10 @@
     margin-top: .4rem;
 
     background:
-        rgba(148,163,184,0.049);
+        var(--theme-surface-alt, rgba(148,163,184,0.049));
 
     border:
-        1px solid rgba(148, 163, 184, .05);
+        1px solid var(--theme-border, rgba(148, 163, 184, .05));
 
     border-radius: 999px;
 }
@@ -926,8 +926,8 @@
     background:
         linear-gradient(
             90deg,
-            rgba(99, 210, 198, .65),
-            var(--ui-accent)
+            var(--theme-teal-soft, rgba(99, 210, 198, .65)),
+            var(--theme-teal-action, var(--ui-accent))
         );
 
     transition: width 450ms ease;
@@ -939,8 +939,8 @@
     background:
         linear-gradient(
             90deg,
-            rgba(99, 210, 198, .72),
-            var(--ui-accent-strong)
+            var(--theme-teal-soft, rgba(99, 210, 198, .72)),
+            var(--theme-teal-action, var(--ui-accent-strong))
         );
 }
 
@@ -950,12 +950,12 @@
     background:
         linear-gradient(
             90deg,
-            var(--ui-accent-strong),
-            var(--ui-accent)
+            var(--theme-teal-action, var(--ui-accent-strong)),
+            var(--theme-teal-action, var(--ui-accent))
         );
 
     box-shadow:
-        0 0 10px rgba(99, 210, 198, .12);
+        0 0 10px var(--theme-shadow, rgba(99, 210, 198, .12));
 }
 
 
@@ -963,19 +963,19 @@
 
     padding: .8rem .9rem;
 
-    color: #71859b;
+    color: var(--theme-muted, #71859b);
 
     background:
-        rgba(148,163,184,0.0245);
+        var(--theme-surface-alt, rgba(148,163,184,0.0245));
 
     border:
-        1px solid rgba(148, 163, 184, .08);
+        1px solid var(--theme-border, rgba(148, 163, 184, .08));
 
     border-radius: .6rem;
 
     text-align: center;
 
-    font-size: .9rem;
+    font-size: var(--site-font-body, 13px);
 
     line-height: 1.5;
 }
@@ -1008,10 +1008,10 @@
     color: var(--ui-accent);
 
     background:
-        rgba(99, 210, 198, .075);
+        var(--theme-teal-soft, rgba(99, 210, 198, .075));
 
     border:
-        1px solid rgba(99, 210, 198, .14);
+        1px solid var(--theme-teal-border, rgba(99, 210, 198, .14));
 
     border-radius: .75rem;
 
@@ -1021,7 +1021,7 @@
 
 .modern-poll-empty h5 {
 
-    color: #f1f5f9;
+    color: var(--theme-text, #f1f5f9);
 
     font-size: 1.1rem;
 
@@ -1031,9 +1031,9 @@
 
 .modern-poll-empty p {
 
-    color: #71859b !important;
+    color: var(--theme-muted, #71859b) !important;
 
-    font-size: .9rem;
+    font-size: var(--site-font-body, 13px);
 
     line-height: 1.55;
 }
@@ -1054,28 +1054,28 @@
 
     padding: .5rem .85rem;
 
-    color: #062523;
+    color: var(--theme-on-action, #062523);
 
     background:
         linear-gradient(
             135deg,
-            var(--ui-accent),
-            var(--ui-accent-strong)
+            var(--theme-teal-action, var(--ui-accent)),
+            var(--theme-teal-action, var(--ui-accent-strong))
         );
 
     border:
-        1px solid rgba(99, 210, 198, .22);
+        1px solid var(--theme-teal-border, rgba(99, 210, 198, .22));
 
     border-radius: .5rem;
 
-    font-size: .85rem;
+    font-size: var(--site-font-body, 13px);
 
     font-weight: 800;
 
     text-decoration: none;
 
     box-shadow:
-        0 4px 12px rgba(0, 0, 0, .14);
+        0 4px 12px var(--theme-shadow, rgba(0, 0, 0, .14));
 
     transition:
         transform 160ms ease,
@@ -1086,14 +1086,14 @@
 
 .modern-poll-create-btn:hover {
 
-    color: #062523;
+    color: var(--theme-text, #062523);
 
     transform: translateY(-1px);
 
     filter: brightness(1.04);
 
     box-shadow:
-        0 6px 16px rgba(0, 0, 0, .18);
+        0 6px 16px var(--theme-shadow, rgba(0, 0, 0, .18));
 }
 
 
@@ -1122,7 +1122,7 @@
         margin-left: .9rem;
         margin-right: .9rem;
 
-        font-size: .9rem;
+        font-size: var(--site-font-body, 13px);
 
     }
 
@@ -1143,7 +1143,7 @@
 
     .modern-poll-meta {
 
-        font-size: .8rem;
+        font-size: var(--site-font-body, 13px);
 
         gap: .35rem .7rem;
 
@@ -1171,28 +1171,28 @@
 
     .option-text {
 
-        font-size: .9rem;
+        font-size: var(--site-font-body, 13px);
 
     }
 
 
     .poll-select-title {
 
-        font-size: .9rem;
+        font-size: var(--site-font-body, 13px);
 
     }
 
 
     .result-option-name {
 
-        font-size: .9rem;
+        font-size: var(--site-font-body, 13px);
 
     }
 
 
     .result-votes {
 
-        font-size: .8rem;
+        font-size: var(--site-font-body, 13px);
 
     }
 
@@ -1213,7 +1213,7 @@
 
     .modern-poll-empty p {
 
-        font-size: .88rem;
+        font-size: var(--site-font-body, 13px);
 
     }
 
@@ -1249,14 +1249,14 @@
 
     .result-votes {
 
-        font-size: .78rem;
+        font-size: var(--site-font-body, 13px);
 
     }
 
 
     .option-text {
 
-        font-size: .88rem;
+        font-size: var(--site-font-body, 13px);
 
     }
 

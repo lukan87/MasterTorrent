@@ -91,14 +91,14 @@
 }
 
 .announcement-body blockquote {
-    border-left: 4px solid #999;
+    border-left: 4px solid var(--theme-border, #999);
     padding-left: 12px;
-    color: #ccc;
+    color: var(--theme-text, #ccc);
     margin: 10px 0;
 }
 
 .announcement-body a {
-    color: #0d6efd;
+    color: var(--theme-blue-text, #0d6efd);
     text-decoration: underline;
 }
 </style>

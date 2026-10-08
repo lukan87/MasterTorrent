@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Jobs\SendMassMessageJob;
 use App\Models\Comment;
 use App\Models\Conversation;
 use App\Models\History;
@@ -18,11 +17,12 @@ use App\Models\UserTimeline;
 use App\Models\Warning;
 use App\Services\SystemMessageService;
 use App\Services\Torrent\TorrentDestroyService;
-use Hash;
 use Illuminate\Http\Request;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
@@ -48,6 +48,10 @@ class UserController extends Controller
             'class' => 'nullable|integer|in:'.implode(',', array_keys(UserClass::getClasses())),
             'inactive' => 'nullable|integer|min:1|max:36500',
             'seedbonus' => 'nullable|numeric|min:0',
+            'deleted' => 'nullable|in:no,only',
+            'warned' => 'nullable|in:yes',
+            'enabled' => 'nullable|in:no',
+            'ratio' => 'nullable|in:low',
         ]);
         $userClasses = UserClass::getClasses();
 
@@ -235,7 +239,8 @@ class UserController extends Controller
                 $profileChanged = true;
             }
 
-            if ($request->has('info') && $user->info !== $request->info) {
+            // Empty form inputs become null; treat them like stored empty strings.
+            if ($request->has('info') && (string) $user->info !== (string) $request->info) {
                 $oldInfo = filled($user->info) ? $user->info : '[empty]';
                 $newInfo = filled($request->info) ? $request->info : '[empty]';
                 $log("📝 Profile information changed from {$oldInfo} to {$newInfo}");
@@ -243,7 +248,7 @@ class UserController extends Controller
                 $profileChanged = true;
             }
 
-            if ($request->has('profile_image') && $user->profile_image !== $request->profile_image) {
+            if ($request->has('profile_image') && (string) $user->profile_image !== (string) $request->profile_image) {
                 $oldImage = filled($user->profile_image) ? $user->profile_image : '[empty]';
                 $newImage = filled($request->profile_image) ? $request->profile_image : '[empty]';
                 $log("🖼️ Profile image changed from {$oldImage} to {$newImage}");
@@ -445,7 +450,7 @@ class UserController extends Controller
                         );
                     }
                 } else {
-                    $reasonChanged = $user->warned_reason !== $request->warned_reason;
+                    $reasonChanged = (string) $user->warned_reason !== (string) $request->warned_reason;
                     $untilChanged = $user->warned_until != $request->warned_until;
 
                     if ($newWarned && empty($request->warned_reason)) {
@@ -690,38 +695,12 @@ class UserController extends Controller
 
     public function sendMassMessage(Request $request)
     {
-        $request->validate([
-            'message' => 'required|string',
-            'user_class' => 'required|array',
-            'user_class.*' => 'in:'.implode(',', array_keys(UserClass::getClasses())),
-        ]);
-
-        SendMassMessageJob::dispatch(
-            $request->message,
-            $request->user_class,
-            Auth::id()
-        );
-
-        return redirect()
-            ->route('admin.users.index')
-            ->with('success', 'Mass message queued and will be sent in the background.');
+        return app(MassMessageController::class)->store($request);
     }
 
     public function previewMassMessage(Request $request)
     {
-        $request->validate([
-            'user_class' => 'required|array',
-            'user_class.*' => 'in:'.implode(',', array_keys(UserClass::getClasses())),
-        ]);
-
-        $count = User::whereIn('user_class', $request->user_class)
-            ->whereNull('deleted_at')
-            ->where('updated_at', '>=', now()->subMonths(12))
-            ->count();
-
-        return response()->json([
-            'recipients' => $count,
-        ]);
+        return app(MassMessageController::class)->preview($request);
     }
 
     public function comments()
@@ -742,7 +721,7 @@ class UserController extends Controller
             || $currentUser->user_class === UserClass::WEB_DEVELOPER;
 
         if (! $allowed) {
-            \Log::warning('USER_DELETE_BLOCKED', [
+            Log::warning('USER_DELETE_BLOCKED', [
                 'actor_id' => $currentUser->id,
                 'actor_name' => $currentUser->name,
                 'target_user_id' => (int) $id,
@@ -796,7 +775,7 @@ class UserController extends Controller
             $user->delete(); // soft delete
         });
 
-        \Log::warning('USER_SOFT_DELETE_OK', [
+        Log::warning('USER_SOFT_DELETE_OK', [
             'actor_id' => $currentUser->id,
             'actor_name' => $currentUser->name,
             'target_user_id' => $user->id,

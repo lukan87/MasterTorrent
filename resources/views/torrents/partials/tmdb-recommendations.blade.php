@@ -99,14 +99,14 @@
 
     background: linear-gradient(
         135deg,
-        rgba(14,21,33,.95),
-        rgba(10,15,27,.84)
+        var(--theme-surface, rgba(14,21,33,.95)),
+        var(--theme-surface, rgba(10,15,27,.84))
     );
 
     border: 1px solid var(--ui-border);
     border-radius: .85rem;
 
-    box-shadow: 0 14px 36px rgba(0, 0, 0, .28);
+    box-shadow: 0 14px 36px var(--theme-shadow, rgba(0, 0, 0, .28));
 
     backdrop-filter: blur(14px);
 }
@@ -121,15 +121,15 @@
 
     padding: 14px 16px;
 
-    background: rgba(45, 212, 191, .045);
+    background: var(--theme-teal-soft, rgba(45, 212, 191, .045));
 
     border-bottom: 1px solid var(--ui-border);
 }
 
 .tmdb-recs-title {
-    color: #fff;
+    color: var(--theme-text, #fff);
 
-    font-size: 14px;
+    font-size: var(--site-font-body, 13px);
     font-weight: 700;
 }
 
@@ -140,9 +140,9 @@
 .tmdb-recs-subtitle {
     margin-top: 3px;
 
-    color: rgba(255, 255, 255, .42);
+    color: var(--theme-muted, rgba(255, 255, 255, .42));
 
-    font-size: 12px;
+    font-size: var(--site-font-small, 13px);
 }
 
 .tmdb-recs-link {
@@ -154,19 +154,19 @@
 
     border-radius: .5rem;
 
-    background: rgba(45, 212, 191, .07);
-    border: 1px solid rgba(45, 212, 191, .18);
+    background: var(--theme-teal-soft, rgba(45, 212, 191, .07));
+    border: 1px solid var(--theme-teal-border, rgba(45, 212, 191, .18));
 
     color: var(--ui-accent);
-    font-size: 12px;
+    font-size: var(--site-font-small, 13px);
     font-weight: 600;
 
     transition: background .15s ease, border-color .15s ease;
 }
 
 .tmdb-recs-link:hover {
-    background: rgba(45, 212, 191, .12);
-    border-color: rgba(45, 212, 191, .32);
+    background: var(--theme-teal-soft, rgba(45, 212, 191, .12));
+    border-color: var(--theme-teal-border, rgba(45, 212, 191, .32));
     color: var(--ui-accent);
 }
 
@@ -204,9 +204,9 @@
 
     padding: 8px;
 
-    background: rgba(6,10,19,.48);
+    background: var(--theme-surface, rgba(6,10,19,.48));
 
-    border: 1px solid rgba(255, 255, 255, .055);
+    border: 1px solid var(--theme-border, rgba(255, 255, 255, .055));
     border-radius: .6rem;
 
     transition:
@@ -216,8 +216,8 @@
 }
 
 .tmdb-recs-card:hover {
-    background: rgba(45, 212, 191, .05);
-    border-color: rgba(45, 212, 191, .24);
+    background: var(--theme-teal-soft, rgba(45, 212, 191, .05));
+    border-color: var(--theme-teal-border, rgba(45, 212, 191, .24));
 
     transform: translateY(-2px);
 }
@@ -263,10 +263,10 @@
 
     border-radius: .4rem;
 
-    background: rgba(3,6,12,.82);
+    background: var(--theme-surface-alt, rgba(3,6,12,.82));
 
-    color: #facc15;
-    font-size: 11px;
+    color: var(--theme-amber-text, #facc15);
+    font-size: var(--site-font-small, 13px);
     font-weight: 700;
 }
 
@@ -279,8 +279,8 @@
 .tmdb-recs-name {
     overflow: hidden;
 
-    color: rgba(255, 255, 255, .82);
-    font-size: 12px;
+    color: var(--theme-muted, rgba(255, 255, 255, .82));
+    font-size: var(--site-font-small, 13px);
     font-weight: 600;
     line-height: 1.35;
 
@@ -292,8 +292,8 @@
 .tmdb-recs-year {
     margin-top: 3px;
 
-    color: rgba(255, 255, 255, .42);
-    font-size: 11px;
+    color: var(--theme-muted, rgba(255, 255, 255, .42));
+    font-size: var(--site-font-small, 13px);
 }
 
 /* Mobile */

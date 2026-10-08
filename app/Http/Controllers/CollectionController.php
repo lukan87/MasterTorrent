@@ -121,7 +121,7 @@ class CollectionController extends Controller
                 ? "https://image.tmdb.org/t/p/original{$tmdb['backdrop_path']}"
                 : null,
             'total'    => $mapped->count(),
-            'uploaded' => $mapped->where('exists', true)->count(),
+            'uploaded' => $mapped->where('has_torrents', true)->count(),
         ],
         'movies' => $mapped,
     ]);

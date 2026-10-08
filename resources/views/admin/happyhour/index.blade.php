@@ -3,7 +3,7 @@
 @section('admin-content')
 @include('admin.happyhour.partials.styles')
 <div class="happyhour-workspace">
-    <div class="hh-header">
+    <div class="hh-header admin-page-header">
         <div><div class="hh-eyebrow"><i class="bi bi-clock-history" aria-hidden="true"></i> Community rewards</div><h1>Happy Hours</h1><p class="text-muted mb-0">Reward the community. Schedule events and manage automatic promotions.</p></div>
         <a class="btn btn-primary" href="{{ route('happyhour.create') }}">Schedule an event</a>
     </div>

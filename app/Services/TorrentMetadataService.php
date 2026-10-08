@@ -2,215 +2,232 @@
 
 namespace App\Services;
 
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class TorrentMetadataService
 {
+    public function torrentName(array $decoded): ?string
+    {
+        foreach (['name.utf-8', 'name'] as $key) {
+            $name = $decoded['info'][$key] ?? null;
+            if (is_string($name) && trim($name) !== '') {
+                return trim($name);
+            }
+        }
+
+        return null;
+    }
+
+    private function normalizeReleaseName(string $name): string
+    {
+        $name = preg_replace('/\.(?:mkv|mp4|avi|mov|nfo|torrent)$/i', '', trim($name));
+        // Remove website prefixes, but preserve titles such as [REC].
+        $name = preg_replace('/^\[(?:www\.|https?:\/\/|[^\]]+\.(?:com|org|net|mx))[^\]]*\]\s*/i', '', $name);
+
+        return trim(preg_replace('/\s+/', ' ', str_replace(['.', '_'], ' ', $name)));
+    }
+
+    private function episodeMarker(string $name): ?array
+    {
+        foreach ([
+            '/\bS(\d{1,2})(?:\s*E(\d{1,3})(?:E\d{1,3})*)?\b/i',
+            '/\b(\d{1,2})x(\d{1,3})\b/i',
+            '/\bSeason\s*(\d{1,2})(?:\s*(?:Episode|Ep)\s*(\d{1,3}))?\b/i',
+        ] as $pattern) {
+            if (preg_match($pattern, $name, $match, PREG_OFFSET_CAPTURE)) {
+                return [
+                    'season' => (int) $match[1][0],
+                    'episode' => isset($match[2]) && $match[2][0] !== '' ? (int) $match[2][0] : null,
+                    'offset' => $match[0][1],
+                ];
+            }
+        }
+        if (preg_match('/\b(?:Ep|Episode)\s*(\d{1,3})\b/i', $name, $match, PREG_OFFSET_CAPTURE)) {
+            return ['season' => null, 'episode' => (int) $match[1][0], 'offset' => $match[0][1]];
+        }
+
+        return null;
+    }
+
     public function detectTypeFromName(string $name): string
     {
-        $name = strtolower($name);
+        $name = $this->normalizeReleaseName($name);
 
-        if (preg_match('/\bs\d{1,2}e\d{1,2}\b/', $name)) return 'tv';
-        if (preg_match('/\b\d{1,2}x\d{1,2}\b/', $name)) return 'tv';
-        if (preg_match('/\bs\d{1,2}\b/', $name)) return 'tv';
-        if (preg_match('/\bseason\s?\d{1,2}\b/', $name)) return 'tv';
-        if (preg_match('/\b(ep|episode)\s?\d{1,3}\b/', $name)) return 'tv';
-        if (preg_match('/season\s?\d/i', $name)) return 'tv';
-        if (preg_match('/complete\s?(series|collection)/i', $name)) return 'tv';
-
-        return 'movie';
+        return $this->episodeMarker($name) || preg_match('/\bcomplete\s+(?:series|collection)\b/i', $name)
+            ? 'tv' : 'movie';
     }
 
     public function cleanNameAndExtractData(string $torrentName): array
     {
-        $clean = preg_replace('/\.(mkv|mp4|avi|mov|nfo)$/i', '', $torrentName);
-
-        $clean = preg_replace('/\b(?:DDP?|DTS(?:-HD)?(?:\sMA)?|AAC|TrueHD)(?:\+)?\s?\d(?:[\.\s]\d)?\b/i','',$clean);
-        $clean = preg_replace('/\bAtmos\b/i','',$clean);
-        $clean = preg_replace('/\b(2160p|1080p|720p|480p|WEB[- ]DL|-FZHD|-PSYCHD|-BYNDR|HDR|RoSub|DoVi|-playWEB|-F1|WEB-DL|WEBRip|HDRip|-Joy|HDTV|BluRay|BDRip|REMUX|DVD|DTS|HDDVD|x264|x265|AAC|HQ|SDR|RoSubbed|BLOOM|CONDITION|-KyoGo|-SPWEB|PLEX|-HD|-MA|E-AC3-|HDR10|5|1|S|h\.?264|h\.?265|h[\.\s]?264|h[\.\s]?265|hevc|avc|proper|repack|8bit|10bit|12bit|-Fr334ALL)\b/i','',$clean);
-        $clean = preg_replace('/\b(English|TELESYNC|WEB|Fr334ALL|DL|DDP|COMPLETE|Series|)\b/i','',$clean);
-        $clean = preg_replace('/\b(AMZN|NF|NETFLIX|HULU|DSNP|HBO|MAX|Ghost|QxR|VOYO|Dual|Panda|Msubs|GTM|HMAX|2CH)\b/i','',$clean);
-        $clean = preg_replace('/\b\d{1,2}\s?\d{2}\s?[AP]\s?M\b/i','',$clean);
-
-        $clean = str_replace(['.', '_'], ' ', $clean);
-
-        //dd($clean);
-
-        preg_match('/\b(19|20)\d{2}\b/', $clean, $yearMatch);
-        $year = $yearMatch[0] ?? null;
-
-        if ($year) {
-            $clean = preg_replace('/\b'.$year.'\b/', '', $clean);
+        $name = $this->normalizeReleaseName($torrentName);
+        $episode = $this->episodeMarker($name);
+        $end = $episode['offset'] ?? strlen($name);
+        // Cut the release suffix instead of deleting ordinary title words globally.
+        if (preg_match('/\b(?:\d{3,4}[pi]|WEB[ -]?DL|WEBRip|Blu[ -]?Ray|BDRip|BRRip|HDRip|HDTV|REMUX|DVD(?:Rip)?|HDDVD|[xh][ -]?26[45]|HEVC|AVC)\b/i', $name, $technical, PREG_OFFSET_CAPTURE)) {
+            $end = min($end, $technical[0][1]);
         }
-
-        $season = null;
-        $episode = null;
-
-        if (preg_match('/\bS(\d{1,2})E(\d{1,2})\b/i', $clean, $match)) {
-            $season = (int)$match[1];
-            $episode = (int)$match[2];
-            $clean = preg_replace('/\bS\d{1,2}E\d{1,2}\b/i','',$clean);
+        $title = trim(substr($name, 0, $end), " \t\n\r\0\x0B-[]()");
+        $year = null;
+        preg_match_all('/\b(?:19|20)\d{2}\b/', $title, $years, PREG_OFFSET_CAPTURE);
+        // The last plausible year preserves numeric titles: 1917 (2019),
+        // Blade Runner 2049 (2017), and 2001: A Space Odyssey (1968).
+        foreach (array_reverse($years[0]) as [$candidate, $offset]) {
+            $prefix = trim(substr($title, 0, $offset), " \t\n\r\0\x0B-[]()");
+            if ($prefix !== '' && (int) $candidate <= (int) date('Y') + 1) {
+                $year = $candidate;
+                $title = $prefix;
+                break;
+            }
         }
-
-        if (preg_match('/\b(\d{1,2})x(\d{1,2})\b/i', $clean, $match)) {
-            $season = (int)$match[1];
-            $episode = (int)$match[2];
-            $clean = preg_replace('/\b\d{1,2}x\d{1,2}\b/i','',$clean);
-        }
-
-        if (preg_match('/\bS(\d{1,2})\b/i', $clean, $match)) {
-            $season = (int)$match[1];
-            $clean = preg_replace('/\bS\d{1,2}\b/i','',$clean);
-        }
-
-        $clean = preg_replace('/-\w+$/', '', $clean);
-        $clean = trim(preg_replace('/\s+/', ' ', $clean));
-        
-        // dd($clean, $year, $season, $episode);
-
         return [
-            'clean' => $clean,
+            'clean' => trim($title),
             'year' => $year,
-            'season' => $season,
-            'episode' => $episode
+            'season' => $episode['season'] ?? null,
+            'episode' => $episode['episode'] ?? null,
         ];
+    }
+
+    private function tmdbGet(string $path, array $params): array
+    {
+        $response = Http::connectTimeout(5)->timeout(15)->retry(2, 200,
+            fn ($exception) => $exception instanceof ConnectionException ||
+                ($exception instanceof RequestException && $exception->response->serverError())
+        )->get('https://api.themoviedb.org/3/'.$path, $params)->throw();
+        $data = $response->json();
+        if (! is_array($data)) {
+            throw new \RuntimeException('TMDB returned an invalid response.');
+        }
+
+        return $data;
     }
 
     public function fetchTmdb(string $clean, ?string $year, string $type): array
     {
+        if (trim($clean) === '') {
+            return [null, null, null];
+        }
+        $endpoint = $type === 'tv' ? 'tv' : 'movie';
         try {
-            $tmdbKey = env('TMDB_API_KEY');
-            $endpoint = $type === 'tv' ? 'tv' : 'movie';
-
-            $params = [
-                'api_key' => $tmdbKey,
-                'query'   => $clean,
-            ];
-
-            if ($type === 'movie' && $year) {
+            $params = ['api_key' => config('services.tmdb.key'), 'query' => $clean];
+            if ($year) {
                 $params['year'] = $year;
             }
-
-            $results = Http::get(
-                "https://api.themoviedb.org/3/search/{$endpoint}",
-                $params
-            )->json('results');
-
-            if (empty($results)) {
-                return [null,null,null];
+            $results = $this->tmdbGet('search/'.$endpoint, $params)['results'] ?? [];
+            // Release years can differ by country or TV season. Retry the same
+            // title without the year only after a successful search with no hits.
+            if (empty($results) && $year) {
+                unset($params['year']);
+                $results = $this->tmdbGet('search/'.$endpoint, $params)['results'] ?? [];
             }
+            if (empty($results)) {
+                Log::info('Seedbox metadata title not found', ['title' => $clean, 'year' => $year, 'type' => $endpoint]);
 
-            $tmdbId = $results[0]['id'];
+                return [null, null, null];
+            }
+            $normalize = fn ($title) => preg_replace('/[^\pL\pN]+/u', '', mb_strtolower($title));
+            $ranked = collect($results)->sortByDesc(function ($result) use ($normalize, $clean, $year, $endpoint) {
+                $titleKey = $endpoint === 'tv' ? 'name' : 'title';
+                $dateKey = $endpoint === 'tv' ? 'first_air_date' : 'release_date';
+                $exact = $normalize($result[$titleKey] ?? '') === $normalize($clean) ||
+                    $normalize($result['original_'.$titleKey] ?? '') === $normalize($clean);
 
-            $details = Http::get(
-                "https://api.themoviedb.org/3/{$endpoint}/{$tmdbId}",
-                ['api_key'=>$tmdbKey]
-            )->json();
-
-            $external = Http::get(
-                "https://api.themoviedb.org/3/{$endpoint}/{$tmdbId}/external_ids",
-                ['api_key'=>$tmdbKey]
-            )->json();
-
+                return ($exact ? 100 : 0) + ($year && substr($result[$dateKey] ?? '', 0, 4) === $year ? 10 : 0);
+            });
+            $tmdbId = $ranked->first()['id'];
+            $credentials = ['api_key' => config('services.tmdb.key')];
+            $details = $this->tmdbGet("{$endpoint}/{$tmdbId}", $credentials);
+            $external = $this->tmdbGet("{$endpoint}/{$tmdbId}/external_ids", $credentials);
             $imdbId = $external['imdb_id'] ?? null;
             $imdbLink = $imdbId ? "https://www.imdb.com/title/{$imdbId}" : null;
-
             $desc = '';
-
-            if (!empty($details['poster_path'])) {
+            if (! empty($details['poster_path'])) {
                 $desc .= "[img]https://image.tmdb.org/t/p/w342{$details['poster_path']}[/img]\n";
             }
-
-            $desc .= '**Title:** '.($details['title'] ?? $details['name'])."\n";
-
-            if (!empty($details['overview'])) {
+            $desc .= '**Title:** '.($details['title'] ?? $details['name'] ?? $clean)."\n";
+            if (! empty($details['overview'])) {
                 $desc .= "**Plot:** {$details['overview']}\n";
             }
 
-            return [$imdbId,$imdbLink,$desc];
-
+            return [$imdbId, $imdbLink, $desc];
         } catch (\Throwable $e) {
-            return [null,null,null];
+            // Do not log exception messages: HTTP exceptions can contain API keys.
+            Log::warning('Seedbox metadata lookup failed', [
+                'title' => $clean, 'year' => $year, 'type' => $endpoint,
+                'exception' => get_class($e),
+                'status' => $e instanceof RequestException ? $e->response->status() : null,
+            ]);
+
+            return [null, null, null];
         }
     }
 
-   public function detectCategory(string $torrentName, string $type, ?string $year = null): int
+  public function detectCategory(string $torrentName, string $type, ?string $year = null): int
 {
     $tn = strtolower($torrentName);
 
-    $isRo = str_contains($tn, '-ro') || str_contains($tn, ' ro ');
-    $isPack = str_contains($tn, 'complete') || str_contains($tn, 'season') && !preg_match('/s\d+e\d+/i', $tn);
-    $isAnime = str_contains($tn, 'anime');
-    $isDocumentary = str_contains($tn, 'documentary') || str_contains($tn, 'docu');
+    $isPack = str_contains($tn, 'complete')
+        || (str_contains($tn, 'season') && ! preg_match('/s\d+e\d+/i', $tn));
 
-    /* =====================================================
-       📺 TV CATEGORIES
-    ===================================================== */
+    $isAnime = str_contains($tn, 'anime');
+
+    $isDocumentary = str_contains($tn, 'documentary')
+        || str_contains($tn, 'docu');
+
+    /*
+    |--------------------------------------------------------------------------
+    | TV Categories
+    |--------------------------------------------------------------------------
+    */
 
     if ($type === 'tv') {
-        return $isRo ? 21 : 20; // TV Episodes / TV Episodes-Ro
+        return 20; // TV Episodes
     }
 
-    /* =====================================================
-       🎬 MOVIE CATEGORIES
-    ===================================================== */
+    /*
+    |--------------------------------------------------------------------------
+    | Movie Categories
+    |--------------------------------------------------------------------------
+    */
 
-  
     if ($isAnime) {
-        return $isRo ? 2 : 1;
+        return 1; // Movies: Anime
     }
 
-    
     if ($isDocumentary) {
-        return $isRo ? 57 : 56;
+        return 56; // Documentary
     }
 
-  
     if ($isPack) {
-        return $isRo ? 19 : 18;
+        return 18; // Movies: Pack
     }
-
 
     if (str_contains($tn, '2160p') || str_contains($tn, '4k')) {
-        return $isRo ? 32 : 31;
+        return 31; // Movies: 4K
     }
 
-    
-    if (str_contains($tn, 'x265') || str_contains($tn, 'hevc')) {
-        return $isRo ? 81 : 82;
-    }
-
-  
     if (str_contains($tn, 'bluray') || str_contains($tn, 'bdrip')) {
-        return $isRo ? 6 : 5;
+        return 5; // Movies: BluRay
     }
 
-    
     if (str_contains($tn, 'dvd')) {
-        return $isRo ? 10 : 9;
+        return 9; // Movies: DVD
     }
 
-   
     if (str_contains($tn, 'xvid')) {
-        return $isRo ? 25 : 24;
+        return 24; // Movies: XVID
     }
 
-   
     if (str_contains($tn, 'web-dl') || str_contains($tn, 'webrip')) {
-        return $isRo ? 55 : 54;
+        return 54; // Movies/WEB-DL
     }
 
- 
-    if ($year && (int)$year < 2000) {
-        return $isRo ? 17 : 16;
-    }
-
- 
     if (str_contains($tn, '1080p') || str_contains($tn, '720p')) {
-        return $isRo ? 12 : 11;
+        return 11; // Movies: HD
     }
 
-    
     return 49; // Diverse
 }
 }

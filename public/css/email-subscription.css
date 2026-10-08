@@ -5,11 +5,11 @@
     gap: 10px;
     padding: 7px 11px;
     margin: 0;
-    border: 1px solid rgba(148, 163, 184, .3);
+    border: 1px solid var(--theme-border, rgba(148, 163, 184, .3));
     border-radius: 999px;
-    background: rgba(10,15,27,.85);
-    color: #e2e8f0;
-    font-size: .75rem;
+    background: var(--theme-surface, rgba(10,15,27,.85));
+    color: var(--theme-text, #e2e8f0);
+    font-size: var(--site-font-small, 13px);
     font-weight: 600;
     line-height: 1.4;
     cursor: pointer;
@@ -31,8 +31,8 @@
     width: 38px;
     height: 24px;
     border-radius: 999px;
-    background: #2f141b;
-    border: 1px solid #a94e60;
+    background: var(--theme-surface, #2f141b);
+    border: 1px solid var(--theme-red-border, #a94e60);
     transition: background .2s ease, border-color .2s ease;
 }
 .email-subscription-track::after {
@@ -43,15 +43,15 @@
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    background: #fb7185;
+    background: var(--theme-red-soft, #fb7185);
     transition: transform .2s ease, background .2s ease;
 }
-.email-subscription-control input:checked + .email-subscription-track { background: #0c281f; border-color: #3c9a72; }
-.email-subscription-control input:checked + .email-subscription-track::after { transform: translateX(14px); background: #4ade80; }
-.email-subscription-status { min-width: 20px; font-size: .65rem; color: #cbd5e1; }
+.email-subscription-control input:checked + .email-subscription-track { background: var(--theme-control, #0c281f); border-color: var(--theme-green-border, #3c9a72); }
+.email-subscription-control input:checked + .email-subscription-track::after { transform: translateX(14px); background: var(--theme-green-soft, #4ade80); }
+.email-subscription-status { min-width: 20px; font-size: var(--site-font-small, 13px); color: var(--theme-text, #cbd5e1); }
 .email-subscription-status::after { content: 'Off'; }
 .email-subscription-control input:checked ~ .email-subscription-status::after { content: 'On'; }
-.email-subscription-control input:focus-visible + .email-subscription-track { outline: 2px solid #7dd3fc; outline-offset: 3px; }
+.email-subscription-control input:focus-visible + .email-subscription-track { outline: 2px solid var(--theme-blue-border, #7dd3fc); outline-offset: 3px; }
 .email-subscription-control input:disabled { cursor: wait; }
 .email-subscription-control input:disabled + .email-subscription-track { opacity: .55; }
 @media (prefers-reduced-motion: reduce) { .email-subscription-track, .email-subscription-track::after { transition: none; } }

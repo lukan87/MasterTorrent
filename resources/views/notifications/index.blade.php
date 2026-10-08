@@ -41,7 +41,7 @@
 
 
     {{-- Notifications card --}}
-    <div class="card bg-dark bg-opacity-50 border-0 shadow-lg rounded-4 overflow-hidden">
+    <div class="card theme-surface bg-opacity-50 border-0 shadow-lg rounded-4 overflow-hidden">
         <div class="card-body p-0">
 
             @forelse($notifications as $notification)
@@ -57,7 +57,7 @@
                             @csrf
 
                             <button type="submit"
-                                    class="w-100 text-start bg-transparent border-0 text-light">
+                                    class="w-100 text-start bg-transparent border-0 theme-text">
 
                                 @php
     $data = $notification->data ?? [];
@@ -191,22 +191,22 @@
 }
 
 .notification-item:hover {
-    background-color: rgba(255,255,255,0.028);
+    background-color: var(--theme-surface-alt, rgba(255,255,255,0.028));
 }
 
 .notification-item.unread {
     background: linear-gradient(
         90deg,
-        rgba(13,110,253,0.12),
-        rgba(13,110,253,0.02)
+        var(--theme-blue-soft, rgba(13,110,253,0.12)),
+        var(--theme-blue-soft, rgba(13,110,253,0.02))
     );
 }
 
 .notification-item.unread:hover {
     background: linear-gradient(
         90deg,
-        rgba(13,110,253,0.18),
-        rgba(13,110,253,0.04)
+        var(--theme-blue-soft, rgba(13,110,253,0.18)),
+        var(--theme-blue-soft, rgba(13,110,253,0.04))
     );
 }
 
@@ -216,7 +216,7 @@
 
 .notification-item em {
     font-style: normal;
-    color: #9ec5fe;
+    color: var(--theme-blue-text, #9ec5fe);
 }
 
 .card {

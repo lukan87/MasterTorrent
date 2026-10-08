@@ -68,6 +68,69 @@ class SystemMessageService
         }, 3);
     }
 
+    /** Delete a message and keep both participants' inboxes consistent. */
+    public static function deleteMessage(Message $message): void
+    {
+        DB::transaction(function () use ($message) {
+            // Delivery workers lock the recipient copy before its conversation.
+            $message->massDelivery()->lockForUpdate()->first();
+            if ($message->conversation_id) {
+                Conversation::whereKey($message->conversation_id)->lockForUpdate()->first();
+            }
+            $message->delete(); // Model events synchronize the thread and delivery audit.
+        }, 3);
+    }
+
+    /** Keep a thread only while it contains messages. Also repairs direct SQL deletions. */
+    public static function refreshConversation(int $conversationId): bool
+    {
+        return DB::transaction(function () use ($conversationId) {
+            $conversation = Conversation::whereKey($conversationId)->lockForUpdate()->first();
+            if (! $conversation) {
+                return false;
+            }
+            $last = $conversation->messages()->max('created_at');
+            $empty = ! $conversation->messages()->exists();
+            if ($empty) {
+                $conversation->delete();
+            } else {
+                $conversation->update(['last_message_at' => $last]);
+            }
+            self::forgetUserCache($conversation->user_one);
+            self::forgetUserCache($conversation->user_two);
+
+            return $empty;
+        }, 3);
+    }
+
+    /** Remove historical orphans without deleting any messages. */
+    public static function pruneEmptyConversations(): int
+    {
+        $deleted = 0;
+        Conversation::doesntHave('messages')->chunkById(200, function ($threads) use (&$deleted) {
+            foreach ($threads as $thread) {
+                $deleted += (int) self::refreshConversation($thread->id);
+            }
+        });
+
+        return $deleted;
+    }
+
+    public static function deleteConversation(Conversation $conversation): void
+    {
+        DB::transaction(function () use ($conversation) {
+            // Keep delivery -> conversation lock order consistent with broadcast workers.
+            $conversation->messages()->orderBy('id')->chunkById(200, function ($messages) {
+                foreach ($messages as $message) {
+                    self::deleteMessage($message);
+                }
+            });
+            self::refreshConversation($conversation->id);
+            self::forgetUserCache($conversation->user_one);
+            self::forgetUserCache($conversation->user_two);
+        }, 3);
+    }
+
     /** Consolidate historical threads and attach messages written by older send paths. */
     public static function consolidateHistory(): void
     {

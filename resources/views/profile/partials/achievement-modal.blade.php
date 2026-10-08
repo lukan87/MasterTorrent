@@ -15,11 +15,11 @@
                 <p id="achievementModalDescription-{{ $category['key'] }}" class="achievement-modal-description">{{ $category['description'] }}</p>
                 <div class="achievement-modal-summary">
                     <span><i class="bi bi-trophy" aria-hidden="true"></i> <strong>{{ $category['earned_count'] }}</strong> of {{ count($category['tiers']) }} milestones unlocked</span>
-                    <span>Permanent rewards · One award per milestone</span>
+                    <span>One award per milestone · VIP is time limited</span>
                 </div>
                 <ol class="achievement-modal-tiers">
                     @foreach($category['tiers'] as $tier)
-                        <li class="achievement-modal-tier {{ $tier['award'] ? 'is-earned' : '' }}">
+                        <li id="achievement-{{ $category['key'] }}-{{ $category['thresholds'][$tier['tier'] - 1] }}" tabindex="-1" class="achievement-modal-tier {{ $tier['award'] ? 'is-earned' : '' }}">
                             <div class="achievement-tier-heading">
                                 <span class="achievement-tier-number">@if($tier['award'])<i class="bi bi-check-lg" aria-hidden="true"></i>@else{{ $tier['tier'] }}@endif</span>
                                 <div>
@@ -40,15 +40,15 @@
                             <div class="achievement-tier-reward">
                                 <i class="bi bi-gift" aria-hidden="true"></i>
                                 @if($tier['award'])
-                                    <span><strong>+{{ number_format($tier['award']->bonus_awarded, 2) }} points</strong> credited @if($tier['award']->invites_awarded) · +{{ $tier['award']->invites_awarded }} {{ \Illuminate\Support\Str::plural('invite', $tier['award']->invites_awarded) }} @endif</span>
+                                    <span><strong>+{{ number_format($tier['award']->bonus_awarded, 2) }} points</strong> credited @if($tier['award']->vip_months_awarded) · {{ $tier['award']->vip_months_awarded }} months VIP @endif @if($tier['award']->tokens_awarded) · +{{ $tier['award']->tokens_awarded }} {{ \Illuminate\Support\Str::plural('token', $tier['award']->tokens_awarded) }} @endif @if($tier['award']->invites_awarded) · +{{ $tier['award']->invites_awarded }} {{ \Illuminate\Support\Str::plural('invite', $tier['award']->invites_awarded) }} @endif</span>
                                 @else
-                                    <span><strong>{{ $tier['reward_percent'] }}% of bonus balance</strong> at unlock @if($tier['invites']) · +{{ $tier['invites'] }} {{ \Illuminate\Support\Str::plural('invite', $tier['invites']) }} @endif</span>
+                                    <span><strong>+{{ number_format($tier['reward_points'], 2) }} points</strong> at unlock @if($tier['vip_months']) · {{ $tier['vip_months'] }} months VIP @endif @if($tier['reward_tokens']) · +{{ $tier['reward_tokens'] }} {{ \Illuminate\Support\Str::plural('token', $tier['reward_tokens']) }} @endif @if($tier['invites']) · +{{ $tier['invites'] }} {{ \Illuminate\Support\Str::plural('invite', $tier['invites']) }} @endif</span>
                                 @endif
                             </div>
                         </li>
                     @endforeach
                 </ol>
-                <p class="achievement-footnote"><i class="bi bi-info-circle" aria-hidden="true"></i> Bonus rewards use the balance when each milestone is awarded, up to the {{ number_format(config('seedbonus.cap', 999999.99), 2) }} point balance cap. A zero balance earns zero points. Unlocks remain yours even if activity changes.</p>
+                <p class="achievement-footnote"><i class="bi bi-info-circle" aria-hidden="true"></i> Bonus rewards are fixed per tier and limited by the {{ number_format(config('seedbonus.cap', 999999.99), 2) }} point balance cap. Unlocks remain yours even if activity changes.</p>
             </div>
             <div class="modal-footer"><button type="button" class="achievement-modal-close" data-bs-dismiss="modal">Back to achievements</button></div>
         </div>

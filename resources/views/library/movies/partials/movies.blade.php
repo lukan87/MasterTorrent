@@ -50,7 +50,7 @@
 }
 
 .badge-rating {
-background: rgba(255,255,255,0.105);
+background: var(--theme-surface-alt, rgba(255,255,255,0.105));
     padding: 4px 8px;
     border-radius: 6px;
     font-weight: 700;
@@ -58,7 +58,7 @@ background: rgba(255,255,255,0.105);
 }
 
 .badge-meta {
-    background: rgba(255,255,255,0.105);
+    background: var(--theme-surface-alt, rgba(255,255,255,0.105));
     padding: 4px 8px;
     border-radius: 6px;
     font-size: 1.25rem
@@ -70,9 +70,9 @@ background: rgba(255,255,255,0.105);
 }
 
 .subscribe-btn {
-    background: rgba(59,130,246,.18);
-    border: 1px solid rgba(59,130,246,.35);
-    color: #9cc7ff;
+    background: var(--theme-blue-soft, rgba(59,130,246,.18));
+    border: 1px solid var(--theme-blue-border, rgba(59,130,246,.35));
+    color: var(--theme-blue-text, #9cc7ff);
     font-weight: 600;
     border-radius: 8px;
     padding: 6px 14px;
@@ -80,9 +80,9 @@ background: rgba(255,255,255,0.105);
 }
 
 .subscribe-btn:hover {
-    background: rgba(59,130,246,.32);
-    border-color: rgba(59,130,246,.55);
-    color: #fff;
+    background: var(--theme-blue-soft, rgba(59,130,246,.32));
+    border-color: var(--theme-blue-border, rgba(59,130,246,.55));
+    color: var(--theme-text, #fff);
 }
 
 /* OVERVIEW */
@@ -93,16 +93,16 @@ background: rgba(255,255,255,0.105);
 
 /* TORRENTS */
 .torrent-item {
-    background: #0b0b0b;
-    border: 1px solid rgba(255, 255, 255, .05);
+    background: var(--theme-surface-alt, #0b0b0b);
+    border: 1px solid var(--theme-border, rgba(255, 255, 255, .05));
     border-radius: 10px;
     padding: 13px 15px;
     transition: 0.2s ease;
 }
 
 .torrent-item:hover {
-    background: #111111;
-    border-color: rgba(59, 130, 246, .25);
+    background: var(--theme-surface-alt, #111111);
+    border-color: var(--theme-blue-border, rgba(59, 130, 246, .25));
 }
 
 .torrent-main {
@@ -121,7 +121,7 @@ background: rgba(255,255,255,0.105);
 
 .torrent-link {
     font-weight: 600;
-    color: #fff;
+    color: var(--theme-text, #fff);
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -129,18 +129,18 @@ background: rgba(255,255,255,0.105);
 }
 
 .torrent-link:hover {
-    color: #60a5fa;
+    color: var(--theme-blue-text, #60a5fa);
 }
 
 .torrent-meta {
     display: flex;
     gap: 15px;
-    color: #aaa;
+    color: var(--theme-muted, #aaa);
     flex-shrink: 0;
 }
 
 .seeders {
-    color: #4caf50;
+    color: var(--theme-green-text, #4caf50);
     font-weight: 600;
 }
 
@@ -152,10 +152,10 @@ background: rgba(255,255,255,0.105);
 }
 
 .res-panel {
-    border: 1px solid rgba(255, 255, 255, .07);
+    border: 1px solid var(--theme-border, rgba(255, 255, 255, .07));
     border-radius: 12px;
     overflow: hidden;
-    background: rgba(6,10,19,.45);
+    background: var(--theme-surface, rgba(6,10,19,.45));
 }
 
 .res-panel-header {
@@ -172,13 +172,13 @@ background: rgba(255,255,255,0.105);
 }
 
 .res-panel-header:hover {
-    background: rgba(45, 212, 191, .05);
+    background: var(--theme-teal-soft, rgba(45, 212, 191, .05));
 }
 
 .res-panel-header .res-label {
-    font-size: 15px;
+    font-size: var(--site-font-body, 13px);
     font-weight: 700;
-    color: #f1f5f9;
+    color: var(--theme-text, #f1f5f9);
     letter-spacing: .2px;
 }
 
@@ -187,15 +187,15 @@ background: rgba(255,255,255,0.105);
     align-items: center;
     padding: 2px 9px;
     border-radius: 999px;
-    background: rgba(45, 212, 191, .12);
+    background: var(--theme-teal-soft, rgba(45, 212, 191, .12));
     color: var(--ui-accent);
-    font-size: 12px;
+    font-size: var(--site-font-small, 13px);
     font-weight: 700;
 }
 
 .res-panel-header .res-chevron {
     margin-left: auto;
-    color: #64748b;
+    color: var(--theme-muted, #64748b);
     transition: transform .2s ease;
 }
 
@@ -229,8 +229,8 @@ background: rgba(255,255,255,0.105);
 .torrent-empty {
     text-align: center;
     padding: 2.5rem 1.5rem;
-    background: rgba(10,15,27,.55);
-    border: 1px solid rgba(255, 255, 255, .06);
+    background: var(--theme-surface, rgba(10,15,27,.55));
+    border: 1px solid var(--theme-border, rgba(255, 255, 255, .06));
     border-radius: .85rem;
 }
 .torrent-empty i {
@@ -241,30 +241,30 @@ background: rgba(255,255,255,0.105);
     margin-bottom: .75rem;
 }
 .torrent-empty h4 {
-    color: #f1f5f9;
-    font-size: 15px;
+    color: var(--theme-text, #f1f5f9);
+    font-size: var(--site-font-body, 13px);
     font-weight: 700;
     margin: 0 0 .5rem;
 }
 .torrent-empty p {
-    color: #64748b;
-    font-size: 13px;
+    color: var(--theme-muted, #64748b);
+    font-size: var(--site-font-body, 13px);
     max-width: 480px;
     margin: 0 auto 1.1rem;
 }
 .torrent-empty .request-btn {
-    background: rgba(45, 212, 191, .10);
-    border: 1px solid rgba(45, 212, 191, .25);
+    background: var(--theme-teal-soft, rgba(45, 212, 191, .10));
+    border: 1px solid var(--theme-teal-border, rgba(45, 212, 191, .25));
     color: var(--ui-accent);
     font-weight: 600;
     border-radius: .55rem;
     padding: .45rem 1.1rem;
-    font-size: 13px;
+    font-size: var(--site-font-body, 13px);
     transition: background .15s, border-color .15s;
 }
 .torrent-empty .request-btn:hover {
-    background: rgba(45, 212, 191, .20);
-    border-color: rgba(45, 212, 191, .45);
+    background: var(--theme-teal-soft, rgba(45, 212, 191, .20));
+    border-color: var(--theme-teal-border, rgba(45, 212, 191, .45));
     color: var(--ui-accent);
 }
 
@@ -273,10 +273,10 @@ background: rgba(255,255,255,0.105);
 ========================= */
 .tmdb-recs {
     overflow: hidden;
-    background: linear-gradient(135deg, rgba(14,21,33,.95), rgba(10,15,27,.84));
+    background: linear-gradient(135deg, var(--theme-surface, rgba(14,21,33,.95)), var(--theme-surface, rgba(10,15,27,.84)));
     border: 1px solid var(--ui-border);
     border-radius: .85rem;
-    box-shadow: 0 14px 36px rgba(0, 0, 0, .28);
+    box-shadow: 0 14px 36px var(--theme-shadow, rgba(0, 0, 0, .28));
 }
 
 .tmdb-recs-header {
@@ -286,13 +286,13 @@ background: rgba(255,255,255,0.105);
     flex-wrap: wrap;
     gap: 10px;
     padding: 14px 16px;
-    background: rgba(45, 212, 191, .045);
+    background: var(--theme-teal-soft, rgba(45, 212, 191, .045));
     border-bottom: 1px solid var(--ui-border);
 }
 
 .tmdb-recs-title {
-    color: #fff;
-    font-size: 14px;
+    color: var(--theme-text, #fff);
+    font-size: var(--site-font-body, 13px);
     font-weight: 700;
 }
 
@@ -302,8 +302,8 @@ background: rgba(255,255,255,0.105);
 
 .tmdb-recs-subtitle {
     margin-top: 3px;
-    color: rgba(255, 255, 255, .42);
-    font-size: 12px;
+    color: var(--theme-muted, rgba(255, 255, 255, .42));
+    font-size: var(--site-font-small, 13px);
 }
 
 .tmdb-recs-link {
@@ -312,17 +312,17 @@ background: rgba(255,255,255,0.105);
     gap: 5px;
     padding: 6px 10px;
     border-radius: .5rem;
-    background: rgba(45, 212, 191, .07);
-    border: 1px solid rgba(45, 212, 191, .18);
+    background: var(--theme-teal-soft, rgba(45, 212, 191, .07));
+    border: 1px solid var(--theme-teal-border, rgba(45, 212, 191, .18));
     color: var(--ui-accent);
-    font-size: 12px;
+    font-size: var(--site-font-small, 13px);
     font-weight: 600;
     transition: background .15s ease, border-color .15s ease;
 }
 
 .tmdb-recs-link:hover {
-    background: rgba(45, 212, 191, .12);
-    border-color: rgba(45, 212, 191, .32);
+    background: var(--theme-teal-soft, rgba(45, 212, 191, .12));
+    border-color: var(--theme-teal-border, rgba(45, 212, 191, .32));
     color: var(--ui-accent);
 }
 
@@ -351,15 +351,15 @@ background: rgba(255,255,255,0.105);
     min-width: 140px;
     max-width: 140px;
     padding: 8px;
-    background: rgba(6,10,19,.48);
-    border: 1px solid rgba(255, 255, 255, .055);
+    background: var(--theme-surface, rgba(6,10,19,.48));
+    border: 1px solid var(--theme-border, rgba(255, 255, 255, .055));
     border-radius: .6rem;
     transition: background .15s ease, border-color .15s ease, transform .15s ease;
 }
 
 .tmdb-recs-card:hover {
-    background: rgba(45, 212, 191, .05);
-    border-color: rgba(45, 212, 191, .24);
+    background: var(--theme-teal-soft, rgba(45, 212, 191, .05));
+    border-color: var(--theme-teal-border, rgba(45, 212, 191, .24));
     transform: translateY(-2px);
 }
 
@@ -391,9 +391,9 @@ background: rgba(255,255,255,0.105);
     gap: 3px;
     padding: 3px 6px;
     border-radius: .4rem;
-    background: rgba(3,6,12,.82);
-    color: #facc15;
-    font-size: 11px;
+    background: var(--theme-surface-alt, rgba(3,6,12,.82));
+    color: var(--theme-amber-text, #facc15);
+    font-size: var(--site-font-small, 13px);
     font-weight: 700;
 }
 
@@ -403,8 +403,8 @@ background: rgba(255,255,255,0.105);
 
 .tmdb-recs-name {
     overflow: hidden;
-    color: rgba(255, 255, 255, .82);
-    font-size: 12px;
+    color: var(--theme-muted, rgba(255, 255, 255, .82));
+    font-size: var(--site-font-small, 13px);
     font-weight: 600;
     line-height: 1.35;
     display: -webkit-box;
@@ -414,8 +414,8 @@ background: rgba(255,255,255,0.105);
 
 .tmdb-recs-year {
     margin-top: 3px;
-    color: rgba(255, 255, 255, .42);
-    font-size: 11px;
+    color: var(--theme-muted, rgba(255, 255, 255, .42));
+    font-size: var(--site-font-small, 13px);
 }
 
 @media (max-width: 768px) {
@@ -437,19 +437,19 @@ background: rgba(255,255,255,0.105);
     padding: 12px 16px;
     margin-top: 14px;
     border-radius: .8rem;
-    background: rgba(6,10,19,.55);
+    background: var(--theme-surface, rgba(6,10,19,.55));
     border: 1px solid var(--ui-border);
 }
 .library-subscribe-row .subscribe-btn {
-    background: rgba(45, 212, 191, .08);
-    border: 1px solid rgba(45, 212, 191, .22);
+    background: var(--theme-teal-soft, rgba(45, 212, 191, .08));
+    border: 1px solid var(--theme-teal-border, rgba(45, 212, 191, .22));
     color: var(--ui-accent);
     font-weight: 600;
     transition: background .15s ease, border-color .15s ease, color .15s ease;
 }
 .library-subscribe-row .subscribe-btn:hover {
-    background: rgba(45, 212, 191, .16);
-    border-color: rgba(45, 212, 191, .38);
+    background: var(--theme-teal-soft, rgba(45, 212, 191, .16));
+    border-color: var(--theme-teal-border, rgba(45, 212, 191, .38));
     color: var(--ui-accent);
 }
 
@@ -459,7 +459,7 @@ background: rgba(255,255,255,0.105);
     align-items: center;
     gap: 6px;
     flex-wrap: wrap;
-    font-size: 12.5px;
+    font-size: var(--site-font-body, 13px);
     color: var(--ui-text-muted);
     line-height: 1.3;
 }
@@ -472,21 +472,21 @@ background: rgba(255,255,255,0.105);
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: rgba(34,197,94,.10);
-    border: 1px solid rgba(34,197,94,.30);
-    color: #4ade80;
+    background: var(--theme-green-soft, rgba(34,197,94,.10));
+    border: 1px solid var(--theme-green-border, rgba(34,197,94,.30));
+    color: var(--theme-green-text, #4ade80);
     padding: 8px 14px;
     border-radius: .6rem;
-    font-size: 13px;
+    font-size: var(--site-font-body, 13px);
     font-weight: 700;
     text-decoration: none;
     white-space: nowrap;
     transition: background .15s ease, border-color .15s ease, color .15s ease, transform .15s ease;
 }
 .watch-online-btn:hover {
-    background: rgba(34,197,94,.18);
-    border-color: rgba(34,197,94,.44);
-    color: #bbf7d0;
+    background: var(--theme-green-soft, rgba(34,197,94,.18));
+    border-color: var(--theme-green-border, rgba(34,197,94,.44));
+    color: var(--theme-text, #bbf7d0);
     transform: translateY(-1px);
 }
 .watch-online-btn i { font-size: 15px; }
@@ -515,8 +515,8 @@ background: rgba(255,255,255,0.105);
 }
 
 .tmdb-recs-card-unavailable:hover {
-    background: rgba(6,10,19,.48);
-    border-color: rgba(255, 255, 255, .055);
+    background: var(--theme-surface, rgba(6,10,19,.48));
+    border-color: var(--theme-border, rgba(255, 255, 255, .055));
     transform: none;
 }
 
@@ -541,7 +541,7 @@ background: rgba(255,255,255,0.105);
 
     border-radius: 50%;
 
-    background: rgba(3,6,12,.86);
+    background: var(--theme-surface-alt, rgba(3,6,12,.86));
     backdrop-filter: blur(5px);
 
     font-size: 12px;
@@ -549,12 +549,12 @@ background: rgba(255,255,255,0.105);
 }
 
 .tmdb-recs-status-online {
-    color: #4ade80;
-    border: 1px solid rgba(74, 222, 128, .3);
+    color: var(--theme-green-text, #4ade80);
+    border: 1px solid var(--theme-green-border, rgba(74, 222, 128, .3));
 }
 
 .tmdb-recs-status-missing {
-    color: rgba(255, 255, 255, .45);
-    border: 1px solid rgba(255, 255, 255, .12);
+    color: var(--theme-muted, rgba(255, 255, 255, .45));
+    border: 1px solid var(--theme-border, rgba(255, 255, 255, .12));
 }
 </style>

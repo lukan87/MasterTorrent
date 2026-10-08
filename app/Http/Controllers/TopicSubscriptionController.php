@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\ForumCategory;
 use App\Models\ForumTopic;
 use App\Models\TopicSubscription;
+use App\Services\ForumAccess;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 
 class TopicSubscriptionController extends Controller
 {
@@ -17,24 +19,17 @@ class TopicSubscriptionController extends Controller
         ForumTopic $topic
     ): RedirectResponse {
         // Make sure the topic belongs to this category.
-        abort_if($category->is_private, 403);
+        ForumAccess::authorizeView($category);
+        ForumAccess::authorizeParticipation();
 
         if ($topic->category_id !== $category->id) {
             abort(404);
         }
 
-        // Check whether the user is already subscribed.
-        $subscription = TopicSubscription::where('user_id', auth()->id())
-            ->where('topic_id', $topic->id)
-            ->first();
-
-        // Only create it if it doesn't already exist.
-        if (! $subscription) {
-            TopicSubscription::create([
-                'user_id' => auth()->id(),
-                'topic_id' => $topic->id,
-            ]);
-        }
+        DB::transaction(function () use ($topic) {
+            ForumTopic::whereKey($topic->id)->lockForUpdate()->firstOrFail();
+            TopicSubscription::firstOrCreate(['user_id' => auth()->id(), 'topic_id' => $topic->id]);
+        }, 3);
 
         return back()->with(
             'success',
@@ -50,7 +45,8 @@ class TopicSubscriptionController extends Controller
         ForumTopic $topic
     ): RedirectResponse {
         // Make sure the topic belongs to this category.
-        abort_if($category->is_private, 403);
+        ForumAccess::authorizeView($category);
+        ForumAccess::authorizeParticipation();
 
         if ($topic->category_id !== $category->id) {
             abort(404);

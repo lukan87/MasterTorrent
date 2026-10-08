@@ -100,7 +100,9 @@
            id="images"
            class="form-control"
            multiple
-           accept="image/*">
+           accept="image/jpeg,image/png,image/webp"
+                                       aria-describedby="screenshot-help">
+<p class="form-text mb-0" id="screenshot-help">Select screenshots from your computer. Saved on FileIplay as optimized WebP images. Up to 10 JPG, PNG or WebP images, 10 MB each.</p>
 
     <!-- NEW PREVIEW AREA -->
     <div id="image-preview"
@@ -113,7 +115,7 @@
                         <div class="d-flex flex-wrap gap-3">
                             @foreach ($torrent->images as $image)
                                 <div class="position-relative">
-                                    <img src="{{ asset('storage/' . $image->path) }}" class="img-thumbnail" style="max-width: 150px;">
+                                    <img src="{{ $image->url }}" class="img-thumbnail" style="max-width: 150px;">
                                     <div class="form-check mt-1">
                                         <input type="checkbox" name="delete_images[]" value="{{ $image->id }}" class="form-check-input" id="delete_image_{{ $image->id }}">
                                         <label for="delete_image_{{ $image->id }}" class="form-check-label">Delete</label>
@@ -143,7 +145,7 @@
 
     @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
     <div class="card glass mt-5 shadow-lg">
-        <div class="card-header bg-danger text-white">
+        <div class="card-header bg-danger theme-text">
             <h5 class="card-title mb-0">Delete Torrent</h5>
         </div>
         <div class="card-body">

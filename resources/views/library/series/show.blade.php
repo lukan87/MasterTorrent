@@ -67,13 +67,12 @@
     </div>
 
 @endif
->>>>>>>
 
 {{-- 📦 TORRENTS SECTION --}}
 <div class="container py-5">
 
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
-        <h4 class="text-white mb-0">📥 Available Torrents</h4>
+        <h4 class="theme-text mb-0">📥 Available Torrents</h4>
         @include('partials._watch-online-btn', ['watchUrl' => $watchUrl ?? null])
     </div>
 
@@ -517,7 +516,7 @@
 }
 
 .badge-rating {
-background: rgba(255,255,255,0.105);
+background: var(--theme-surface-alt, rgba(255,255,255,0.105));
     padding: 4px 8px;
     border-radius: 6px;
     font-weight: 700;
@@ -525,7 +524,7 @@ background: rgba(255,255,255,0.105);
 }
 
 .badge-meta {
-    background: rgba(255,255,255,0.105);
+    background: var(--theme-surface-alt, rgba(255,255,255,0.105));
     padding: 4px 8px;
     border-radius: 6px;
     font-size: 1.25rem
@@ -537,9 +536,9 @@ background: rgba(255,255,255,0.105);
 }
 
 .subscribe-btn {
-    background: rgba(59,130,246,.18);
-    border: 1px solid rgba(59,130,246,.35);
-    color: #9cc7ff;
+    background: var(--theme-blue-soft, rgba(59,130,246,.18));
+    border: 1px solid var(--theme-blue-border, rgba(59,130,246,.35));
+    color: var(--theme-blue-text, #9cc7ff);
     font-weight: 600;
     border-radius: 8px;
     padding: 6px 14px;
@@ -547,9 +546,9 @@ background: rgba(255,255,255,0.105);
 }
 
 .subscribe-btn:hover {
-    background: rgba(59,130,246,.32);
-    border-color: rgba(59,130,246,.55);
-    color: #fff;
+    background: var(--theme-blue-soft, rgba(59,130,246,.32));
+    border-color: var(--theme-blue-border, rgba(59,130,246,.55));
+    color: var(--theme-text, #fff);
 }
 
 /* OVERVIEW */
@@ -560,16 +559,16 @@ background: rgba(255,255,255,0.105);
 
 /* TORRENTS */
 .torrent-item {
-    background: #0b0b0b;
-    border: 1px solid rgba(255, 255, 255, .05);
+    background: var(--theme-surface-alt, #0b0b0b);
+    border: 1px solid var(--theme-border, rgba(255, 255, 255, .05));
     border-radius: 10px;
     padding: 13px 15px;
     transition: 0.2s ease;
 }
 
 .torrent-item:hover {
-    background: #111111;
-    border-color: rgba(59, 130, 246, .25);
+    background: var(--theme-surface-alt, #111111);
+    border-color: var(--theme-blue-border, rgba(59, 130, 246, .25));
 }
 
 .torrent-main {
@@ -588,7 +587,7 @@ background: rgba(255,255,255,0.105);
 
 .torrent-link {
     font-weight: 600;
-    color: #fff;
+    color: var(--theme-text, #fff);
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -596,18 +595,18 @@ background: rgba(255,255,255,0.105);
 }
 
 .torrent-link:hover {
-    color: #60a5fa;
+    color: var(--theme-blue-text, #60a5fa);
 }
 
 .torrent-meta {
     display: flex;
     gap: 15px;
-    color: #aaa;
+    color: var(--theme-muted, #aaa);
     flex-shrink: 0;
 }
 
 .seeders {
-    color: #4caf50;
+    color: var(--theme-green-text, #4caf50);
     font-weight: 600;
 }
 
@@ -616,10 +615,10 @@ background: rgba(255,255,255,0.105);
     flex-shrink: 0;
     padding: 3px 8px;
     border-radius: 6px;
-    background: rgba(59, 130, 246, .14);
-    border: 1px solid rgba(59, 130, 246, .28);
-    color: #93c5fd;
-    font-size: 11px;
+    background: var(--theme-blue-soft, rgba(59, 130, 246, .14));
+    border: 1px solid var(--theme-blue-border, rgba(59, 130, 246, .28));
+    color: var(--theme-blue-text, #93c5fd);
+    font-size: var(--site-font-small, 13px);
     font-weight: 700;
     white-space: nowrap;
 }
@@ -632,10 +631,10 @@ background: rgba(255,255,255,0.105);
 }
 
 .res-panel {
-    border: 1px solid rgba(255, 255, 255, .07);
+    border: 1px solid var(--theme-border, rgba(255, 255, 255, .07));
     border-radius: 12px;
     overflow: hidden;
-    background: rgba(6,10,19,.45);
+    background: var(--theme-surface, rgba(6,10,19,.45));
 }
 
 .res-panel-header {
@@ -652,13 +651,13 @@ background: rgba(255,255,255,0.105);
 }
 
 .res-panel-header:hover {
-    background: rgba(45, 212, 191, .05);
+    background: var(--theme-teal-soft, rgba(45, 212, 191, .05));
 }
 
 .res-panel-header .res-label {
-    font-size: 15px;
+    font-size: var(--site-font-body, 13px);
     font-weight: 700;
-    color: #f1f5f9;
+    color: var(--theme-text, #f1f5f9);
     letter-spacing: .2px;
 }
 
@@ -667,15 +666,15 @@ background: rgba(255,255,255,0.105);
     align-items: center;
     padding: 2px 9px;
     border-radius: 999px;
-    background: rgba(45, 212, 191, .12);
+    background: var(--theme-teal-soft, rgba(45, 212, 191, .12));
     color: var(--ui-accent);
-    font-size: 12px;
+    font-size: var(--site-font-small, 13px);
     font-weight: 700;
 }
 
 .res-panel-header .res-chevron {
     margin-left: auto;
-    color: #64748b;
+    color: var(--theme-muted, #64748b);
     transition: transform .2s ease;
 }
 
@@ -709,8 +708,8 @@ background: rgba(255,255,255,0.105);
 .torrent-empty {
     text-align: center;
     padding: 2.5rem 1.5rem;
-    background: rgba(10,15,27,.55);
-    border: 1px solid rgba(255, 255, 255, .06);
+    background: var(--theme-surface, rgba(10,15,27,.55));
+    border: 1px solid var(--theme-border, rgba(255, 255, 255, .06));
     border-radius: .85rem;
 }
 .torrent-empty i {
@@ -721,30 +720,30 @@ background: rgba(255,255,255,0.105);
     margin-bottom: .75rem;
 }
 .torrent-empty h4 {
-    color: #f1f5f9;
-    font-size: 15px;
+    color: var(--theme-text, #f1f5f9);
+    font-size: var(--site-font-body, 13px);
     font-weight: 700;
     margin: 0 0 .5rem;
 }
 .torrent-empty p {
-    color: #64748b;
-    font-size: 13px;
+    color: var(--theme-muted, #64748b);
+    font-size: var(--site-font-body, 13px);
     max-width: 480px;
     margin: 0 auto 1.1rem;
 }
 .torrent-empty .request-btn {
-    background: rgba(45, 212, 191, .10);
-    border: 1px solid rgba(45, 212, 191, .25);
+    background: var(--theme-teal-soft, rgba(45, 212, 191, .10));
+    border: 1px solid var(--theme-teal-border, rgba(45, 212, 191, .25));
     color: var(--ui-accent);
     font-weight: 600;
     border-radius: .55rem;
     padding: .45rem 1.1rem;
-    font-size: 13px;
+    font-size: var(--site-font-body, 13px);
     transition: background .15s, border-color .15s;
 }
 .torrent-empty .request-btn:hover {
-    background: rgba(45, 212, 191, .20);
-    border-color: rgba(45, 212, 191, .45);
+    background: var(--theme-teal-soft, rgba(45, 212, 191, .20));
+    border-color: var(--theme-teal-border, rgba(45, 212, 191, .45));
     color: var(--ui-accent);
 }
 
@@ -752,11 +751,11 @@ background: rgba(255,255,255,0.105);
    EPISODE CARD (Last Episode)
 ========================= */
 .tv-episode-card {
-    background: linear-gradient(135deg, rgba(14,21,33,.95), rgba(10,15,27,.84));
+    background: linear-gradient(135deg, var(--theme-surface, rgba(14,21,33,.95)), var(--theme-surface, rgba(10,15,27,.84)));
     border: 1px solid var(--ui-border);
     border-radius: .85rem;
     overflow: hidden;
-    box-shadow: 0 10px 28px rgba(0, 0, 0, .24);
+    box-shadow: 0 10px 28px var(--theme-shadow, rgba(0, 0, 0, .24));
 }
 
 .episode-card-header {
@@ -764,7 +763,7 @@ background: rgba(255,255,255,0.105);
     align-items: center;
     gap: 12px;
     padding: 14px 16px;
-    background: rgba(45, 212, 191, .045);
+    background: var(--theme-teal-soft, rgba(45, 212, 191, .045));
     border-bottom: 1px solid var(--ui-border);
 }
 
@@ -776,23 +775,23 @@ background: rgba(255,255,255,0.105);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #fff;
+    color: var(--theme-text, #fff);
 }
 
 .last-icon {
-    background: rgba(45, 212, 191, .16);
+    background: var(--theme-teal-soft, rgba(45, 212, 191, .16));
     color: var(--ui-accent);
 }
 
 .episode-card-title {
-    color: #fff;
-    font-size: 15px;
+    color: var(--theme-text, #fff);
+    font-size: var(--site-font-body, 13px);
     font-weight: 700;
 }
 
 .episode-card-subtitle {
-    color: rgba(255, 255, 255, .5);
-    font-size: 12px;
+    color: var(--theme-muted, rgba(255, 255, 255, .5));
+    font-size: var(--site-font-small, 13px);
 }
 
 .episode-card-body {
@@ -810,7 +809,7 @@ background: rgba(255,255,255,0.105);
 }
 
 .episode-title {
-    color: #fff;
+    color: var(--theme-text, #fff);
     font-size: 16px;
     font-weight: 700;
     margin-bottom: 8px;
@@ -829,16 +828,16 @@ background: rgba(255,255,255,0.105);
     gap: 5px;
     padding: 4px 9px;
     border-radius: .45rem;
-    background: rgba(255,255,255,0.042);
-    border: 1px solid rgba(255, 255, 255, .08);
-    color: rgba(255, 255, 255, .78);
-    font-size: 12px;
+    background: var(--theme-surface-alt, rgba(255,255,255,0.042));
+    border: 1px solid var(--theme-border, rgba(255, 255, 255, .08));
+    color: var(--theme-muted, rgba(255, 255, 255, .78));
+    font-size: var(--site-font-small, 13px);
     font-weight: 600;
 }
 
 .episode-overview {
-    color: rgba(255, 255, 255, .6);
-    font-size: 13px;
+    color: var(--theme-muted, rgba(255, 255, 255, .6));
+    font-size: var(--site-font-body, 13px);
     line-height: 1.55;
 }
 
@@ -876,14 +875,14 @@ background: rgba(255,255,255,0.105);
 .season-card {
     overflow: hidden;
     border-radius: .7rem;
-    background: rgba(6,10,19,.48);
-    border: 1px solid rgba(255, 255, 255, .055);
+    background: var(--theme-surface, rgba(6,10,19,.48));
+    border: 1px solid var(--theme-border, rgba(255, 255, 255, .055));
     transition: transform .18s ease, border-color .18s ease;
 }
 
 .season-card:hover {
     transform: translateY(-3px);
-    border-color: rgba(45, 212, 191, .28);
+    border-color: var(--theme-teal-border, rgba(45, 212, 191, .28));
 }
 
 .season-poster-wrap {
@@ -913,9 +912,9 @@ background: rgba(255,255,255,0.105);
     gap: 3px;
     padding: 3px 6px;
     border-radius: .4rem;
-    background: rgba(3,6,12,.82);
-    color: #facc15;
-    font-size: 11px;
+    background: var(--theme-surface-alt, rgba(3,6,12,.82));
+    color: var(--theme-amber-text, #facc15);
+    font-size: var(--site-font-small, 13px);
     font-weight: 700;
 }
 
@@ -924,8 +923,8 @@ background: rgba(255,255,255,0.105);
 }
 
 .season-name {
-    color: rgba(255, 255, 255, .85);
-    font-size: 13px;
+    color: var(--theme-text, rgba(255, 255, 255, .85));
+    font-size: var(--site-font-body, 13px);
     font-weight: 700;
     line-height: 1.35;
 }
@@ -935,8 +934,8 @@ background: rgba(255,255,255,0.105);
     flex-wrap: wrap;
     gap: 6px;
     margin-top: 6px;
-    color: rgba(255, 255, 255, .48);
-    font-size: 11px;
+    color: var(--theme-muted, rgba(255, 255, 255, .48));
+    font-size: var(--site-font-small, 13px);
     font-weight: 600;
 }
 
@@ -947,8 +946,8 @@ background: rgba(255,255,255,0.105);
 
 .season-overview {
     margin-top: 7px;
-    color: rgba(255, 255, 255, .52);
-    font-size: 11px;
+    color: var(--theme-muted, rgba(255, 255, 255, .52));
+    font-size: var(--site-font-small, 13px);
     line-height: 1.5;
     display: -webkit-box;
     -webkit-line-clamp: 3;
@@ -960,10 +959,10 @@ background: rgba(255,255,255,0.105);
 ========================= */
 .tmdb-recs {
     overflow: hidden;
-    background: linear-gradient(135deg, rgba(14,21,33,.95), rgba(10,15,27,.84));
+    background: linear-gradient(135deg, var(--theme-surface, rgba(14,21,33,.95)), var(--theme-surface, rgba(10,15,27,.84)));
     border: 1px solid var(--ui-border);
     border-radius: .85rem;
-    box-shadow: 0 14px 36px rgba(0, 0, 0, .28);
+    box-shadow: 0 14px 36px var(--theme-shadow, rgba(0, 0, 0, .28));
 }
 
 .tmdb-recs-header {
@@ -973,13 +972,13 @@ background: rgba(255,255,255,0.105);
     flex-wrap: wrap;
     gap: 10px;
     padding: 14px 16px;
-    background: rgba(45, 212, 191, .045);
+    background: var(--theme-teal-soft, rgba(45, 212, 191, .045));
     border-bottom: 1px solid var(--ui-border);
 }
 
 .tmdb-recs-title {
-    color: #fff;
-    font-size: 14px;
+    color: var(--theme-text, #fff);
+    font-size: var(--site-font-body, 13px);
     font-weight: 700;
 }
 
@@ -989,8 +988,8 @@ background: rgba(255,255,255,0.105);
 
 .tmdb-recs-subtitle {
     margin-top: 3px;
-    color: rgba(255, 255, 255, .42);
-    font-size: 12px;
+    color: var(--theme-muted, rgba(255, 255, 255, .42));
+    font-size: var(--site-font-small, 13px);
 }
 
 .tmdb-recs-link {
@@ -999,17 +998,17 @@ background: rgba(255,255,255,0.105);
     gap: 5px;
     padding: 6px 10px;
     border-radius: .5rem;
-    background: rgba(45, 212, 191, .07);
-    border: 1px solid rgba(45, 212, 191, .18);
+    background: var(--theme-teal-soft, rgba(45, 212, 191, .07));
+    border: 1px solid var(--theme-teal-border, rgba(45, 212, 191, .18));
     color: var(--ui-accent);
-    font-size: 12px;
+    font-size: var(--site-font-small, 13px);
     font-weight: 600;
     transition: background .15s ease, border-color .15s ease;
 }
 
 .tmdb-recs-link:hover {
-    background: rgba(45, 212, 191, .12);
-    border-color: rgba(45, 212, 191, .32);
+    background: var(--theme-teal-soft, rgba(45, 212, 191, .12));
+    border-color: var(--theme-teal-border, rgba(45, 212, 191, .32));
     color: var(--ui-accent);
 }
 
@@ -1038,15 +1037,15 @@ background: rgba(255,255,255,0.105);
     min-width: 140px;
     max-width: 140px;
     padding: 8px;
-    background: rgba(6,10,19,.48);
-    border: 1px solid rgba(255, 255, 255, .055);
+    background: var(--theme-surface, rgba(6,10,19,.48));
+    border: 1px solid var(--theme-border, rgba(255, 255, 255, .055));
     border-radius: .6rem;
     transition: background .15s ease, border-color .15s ease, transform .15s ease;
 }
 
 .tmdb-recs-card:hover {
-    background: rgba(45, 212, 191, .05);
-    border-color: rgba(45, 212, 191, .24);
+    background: var(--theme-teal-soft, rgba(45, 212, 191, .05));
+    border-color: var(--theme-teal-border, rgba(45, 212, 191, .24));
     transform: translateY(-2px);
 }
 
@@ -1078,9 +1077,9 @@ background: rgba(255,255,255,0.105);
     gap: 3px;
     padding: 3px 6px;
     border-radius: .4rem;
-    background: rgba(3,6,12,.82);
-    color: #facc15;
-    font-size: 11px;
+    background: var(--theme-surface-alt, rgba(3,6,12,.82));
+    color: var(--theme-amber-text, #facc15);
+    font-size: var(--site-font-small, 13px);
     font-weight: 700;
 }
 
@@ -1090,8 +1089,8 @@ background: rgba(255,255,255,0.105);
 
 .tmdb-recs-name {
     overflow: hidden;
-    color: rgba(255, 255, 255, .82);
-    font-size: 12px;
+    color: var(--theme-muted, rgba(255, 255, 255, .82));
+    font-size: var(--site-font-small, 13px);
     font-weight: 600;
     line-height: 1.35;
     display: -webkit-box;
@@ -1101,8 +1100,8 @@ background: rgba(255,255,255,0.105);
 
 .tmdb-recs-year {
     margin-top: 3px;
-    color: rgba(255, 255, 255, .42);
-    font-size: 11px;
+    color: var(--theme-muted, rgba(255, 255, 255, .42));
+    font-size: var(--site-font-small, 13px);
 }
 
 @media (max-width: 768px) {
@@ -1124,19 +1123,19 @@ background: rgba(255,255,255,0.105);
     padding: 12px 16px;
     margin-top: 14px;
     border-radius: .8rem;
-    background: rgba(6,10,19,.55);
+    background: var(--theme-surface, rgba(6,10,19,.55));
     border: 1px solid var(--ui-border);
 }
 .library-subscribe-row .subscribe-btn {
-    background: rgba(45, 212, 191, .08);
-    border: 1px solid rgba(45, 212, 191, .22);
+    background: var(--theme-teal-soft, rgba(45, 212, 191, .08));
+    border: 1px solid var(--theme-teal-border, rgba(45, 212, 191, .22));
     color: var(--ui-accent);
     font-weight: 600;
     transition: background .15s ease, border-color .15s ease, color .15s ease;
 }
 .library-subscribe-row .subscribe-btn:hover {
-    background: rgba(45, 212, 191, .16);
-    border-color: rgba(45, 212, 191, .38);
+    background: var(--theme-teal-soft, rgba(45, 212, 191, .16));
+    border-color: var(--theme-teal-border, rgba(45, 212, 191, .38));
     color: var(--ui-accent);
 }
 
@@ -1150,7 +1149,7 @@ background: rgba(255,255,255,0.105);
     justify-content: center;
     gap: 4px;
     color: #fff;
-    font-size: 12px;
+    font-size: var(--site-font-small, 13px);
     font-weight: 700;
     background: rgba(3,6,12,.72);
     opacity: 0;
@@ -1169,17 +1168,17 @@ background: rgba(255,255,255,0.105);
    SEASON MODAL
 ========================================================= */
 .season-modal-content {
-    background: linear-gradient(150deg, #0a111d, #070b15);
+    background: linear-gradient(150deg, var(--theme-surface, #0a111d), var(--theme-surface, #070b15));
     border: 1px solid var(--ui-border);
     border-radius: .9rem;
-    color: rgba(255, 255, 255, .88);
+    color: var(--theme-text, rgba(255, 255, 255, .88));
 }
 .season-modal-header {
     display: flex;
     align-items: center;
     gap: 14px;
     border-bottom: 1px solid var(--ui-border);
-    background: rgba(45, 212, 191, .04);
+    background: var(--theme-teal-soft, rgba(45, 212, 191, .04));
 }
 .season-modal-poster {
     width: 64px;
@@ -1190,8 +1189,8 @@ background: rgba(255,255,255,0.105);
     background: #0a0f1b;
 }
 .season-modal-subtitle {
-    color: rgba(255, 255, 255, .55);
-    font-size: 13px;
+    color: var(--theme-muted, rgba(255, 255, 255, .55));
+    font-size: var(--site-font-body, 13px);
     margin-top: 3px;
 }
 .season-modal-body {
@@ -1203,17 +1202,17 @@ background: rgba(255,255,255,0.105);
     align-items: center;
     justify-content: center;
     gap: 8px;
-    color: rgba(255, 255, 255, .6);
+    color: var(--theme-muted, rgba(255, 255, 255, .6));
     padding: 40px 0;
 }
 .season-modal-overview {
-    color: rgba(255, 255, 255, .78);
-    font-size: 14px;
+    color: var(--theme-muted, rgba(255, 255, 255, .78));
+    font-size: var(--site-font-body, 13px);
     line-height: 1.6;
 }
 .season-modal-section-title {
     margin: 18px 0 10px;
-    font-size: 13px;
+    font-size: var(--site-font-body, 13px);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .5px;
@@ -1234,7 +1233,7 @@ background: rgba(255,255,255,0.105);
     gap: 12px;
     padding: 10px;
     border-radius: .6rem;
-    background: rgba(255,255,255,0.021);
+    background: var(--theme-surface-alt, rgba(255,255,255,0.021));
     border: 1px solid var(--ui-border);
 }
 .season-episode-num {
@@ -1246,10 +1245,10 @@ background: rgba(255,255,255,0.105);
     min-height: 44px;
     padding: 0 8px;
     border-radius: .5rem;
-    background: rgba(45, 212, 191, .08);
-    border: 1px solid rgba(45, 212, 191, .18);
+    background: var(--theme-teal-soft, rgba(45, 212, 191, .08));
+    border: 1px solid var(--theme-teal-border, rgba(45, 212, 191, .18));
     color: var(--ui-accent);
-    font-size: 12px;
+    font-size: var(--site-font-small, 13px);
     font-weight: 700;
     align-self: flex-start;
 }
@@ -1260,7 +1259,7 @@ background: rgba(255,255,255,0.105);
     object-fit: cover;
     border-radius: .45rem;
     border: 1px solid var(--ui-border);
-    background: #0a0f1b;
+    background: var(--theme-surface, #0a0f1b);
 }
 .season-episode-nostill {
     flex: 0 0 auto;
@@ -1270,15 +1269,15 @@ background: rgba(255,255,255,0.105);
     align-items: center;
     justify-content: center;
     border-radius: .45rem;
-    background: #0a0f1b;
+    background: var(--theme-surface, #0a0f1b);
     border: 1px solid var(--ui-border);
-    color: rgba(255, 255, 255, .25);
+    color: var(--theme-muted, rgba(255, 255, 255, .25));
     font-size: 22px;
 }
 .season-episode-info { min-width: 0; }
 .season-episode-title {
-    color: rgba(255, 255, 255, .9);
-    font-size: 14px;
+    color: var(--theme-text, rgba(255, 255, 255, .9));
+    font-size: var(--site-font-body, 13px);
     font-weight: 700;
 }
 .season-episode-meta {
@@ -1286,14 +1285,14 @@ background: rgba(255,255,255,0.105);
     flex-wrap: wrap;
     gap: 10px;
     margin-top: 4px;
-    color: rgba(255, 255, 255, .5);
-    font-size: 12px;
+    color: var(--theme-muted, rgba(255, 255, 255, .5));
+    font-size: var(--site-font-small, 13px);
 }
 .season-episode-meta i { color: var(--ui-accent); }
 .season-episode-overview {
     margin-top: 6px;
-    color: rgba(255, 255, 255, .62);
-    font-size: 13px;
+    color: var(--theme-muted, rgba(255, 255, 255, .62));
+    font-size: var(--site-font-body, 13px);
     line-height: 1.5;
     display: -webkit-box;
     -webkit-line-clamp: 3;
@@ -1317,7 +1316,7 @@ background: rgba(255,255,255,0.105);
     text-align: center;
     padding: 8px;
     border-radius: .6rem;
-    background: rgba(255,255,255,0.021);
+    background: var(--theme-surface-alt, rgba(255,255,255,0.021));
     border: 1px solid var(--ui-border);
 }
 .season-cast-photo {
@@ -1329,9 +1328,9 @@ background: rgba(255,255,255,0.105);
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #0a0f1b;
+    background: var(--theme-surface, #0a0f1b);
     border: 1px solid var(--ui-border);
-    color: rgba(255, 255, 255, .25);
+    color: var(--theme-muted, rgba(255, 255, 255, .25));
     font-size: 24px;
 }
 .season-cast-photo img {
@@ -1340,8 +1339,8 @@ background: rgba(255,255,255,0.105);
     object-fit: cover;
 }
 .season-cast-name {
-    color: rgba(255, 255, 255, .85);
-    font-size: 12px;
+    color: var(--theme-text, rgba(255, 255, 255, .85));
+    font-size: var(--site-font-small, 13px);
     font-weight: 600;
     line-height: 1.2;
     overflow: hidden;
@@ -1349,8 +1348,8 @@ background: rgba(255,255,255,0.105);
     white-space: nowrap;
 }
 .season-cast-character {
-    color: rgba(255, 255, 255, .45);
-    font-size: 11px;
+    color: var(--theme-muted, rgba(255, 255, 255, .45));
+    font-size: var(--site-font-small, 13px);
     margin-top: 2px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1371,7 +1370,7 @@ background: rgba(255,255,255,0.105);
     align-items: center;
     gap: 6px;
     flex-wrap: wrap;
-    font-size: 12.5px;
+    font-size: var(--site-font-body, 13px);
     color: var(--ui-text-muted);
     line-height: 1.3;
 }
@@ -1384,21 +1383,21 @@ background: rgba(255,255,255,0.105);
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: rgba(34,197,94,.10);
-    border: 1px solid rgba(34,197,94,.30);
-    color: #4ade80;
+    background: var(--theme-green-soft, rgba(34,197,94,.10));
+    border: 1px solid var(--theme-green-border, rgba(34,197,94,.30));
+    color: var(--theme-green-text, #4ade80);
     padding: 8px 14px;
     border-radius: .6rem;
-    font-size: 13px;
+    font-size: var(--site-font-body, 13px);
     font-weight: 700;
     text-decoration: none;
     white-space: nowrap;
     transition: background .15s ease, border-color .15s ease, color .15s ease, transform .15s ease;
 }
 .watch-online-btn:hover {
-    background: rgba(34,197,94,.18);
-    border-color: rgba(34,197,94,.44);
-    color: #bbf7d0;
+    background: var(--theme-green-soft, rgba(34,197,94,.18));
+    border-color: var(--theme-green-border, rgba(34,197,94,.44));
+    color: var(--theme-text, #bbf7d0);
     transform: translateY(-1px);
 }
 .watch-online-btn i { font-size: 15px; }
@@ -1430,8 +1429,8 @@ background: rgba(255,255,255,0.105);
 
 /* Keep unavailable cards from getting the normal hover effect */
 .tmdb-recs-card-unavailable:hover {
-    background: rgba(6,10,19,.48);
-    border-color: rgba(255, 255, 255, .055);
+    background: var(--theme-surface, rgba(6,10,19,.48));
+    border-color: var(--theme-border, rgba(255, 255, 255, .055));
     transform: none;
 }
 
@@ -1456,7 +1455,7 @@ background: rgba(255,255,255,0.105);
 
     border-radius: 50%;
 
-    background: rgba(3,6,12,.86);
+    background: var(--theme-surface-alt, rgba(3,6,12,.86));
     backdrop-filter: blur(5px);
 
     font-size: 12px;
@@ -1464,13 +1463,13 @@ background: rgba(255,255,255,0.105);
 }
 
 .tmdb-recs-status-online {
-    color: #4ade80;
-    border: 1px solid rgba(74, 222, 128, .3);
+    color: var(--theme-green-text, #4ade80);
+    border: 1px solid var(--theme-green-border, rgba(74, 222, 128, .3));
 }
 
 .tmdb-recs-status-missing {
-    color: rgba(255, 255, 255, .45);
-    border: 1px solid rgba(255, 255, 255, .12);
+    color: var(--theme-muted, rgba(255, 255, 255, .45));
+    border: 1px solid var(--theme-border, rgba(255, 255, 255, .12));
 }
 </style>
 
@@ -1484,7 +1483,7 @@ background: rgba(255,255,255,0.105);
                 <div class="d-flex align-items-center gap-3">
                     <img class="season-modal-poster" id="seasonModalPoster" src="/images/noposter.jpg" alt="">
                     <div>
-                        <h5 class="modal-title mb-0 text-white" id="seasonModalTitle">Loading…</h5>
+                        <h5 class="modal-title mb-0 theme-text" id="seasonModalTitle">Loading…</h5>
                         <div class="season-modal-subtitle" id="seasonModalMeta"></div>
                     </div>
                 </div>

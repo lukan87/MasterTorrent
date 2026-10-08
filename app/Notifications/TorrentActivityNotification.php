@@ -13,6 +13,7 @@ class TorrentActivityNotification extends Notification
         public User $actor,
         public ?int $commentId = null,
         public ?string $reaction = null,
+        public bool $downloaded = false,
     ) {}
 
     public function via(object $notifiable): array
@@ -24,6 +25,7 @@ class TorrentActivityNotification extends Notification
     {
         return [
             'type' => $this->commentId ? 'torrent_comment' : 'torrent_reaction',
+            'audience' => $this->downloaded ? 'downloader' : 'uploader',
             'author' => $this->actor->name,
             'author_id' => $this->actor->id,
             'torrent_id' => $this->torrent->id,
@@ -31,7 +33,7 @@ class TorrentActivityNotification extends Notification
             'comment_id' => $this->commentId,
             'reaction' => $this->reaction,
             'url' => route('torrents.show', [$this->torrent->id, $this->torrent->slug])
-                . ($this->commentId ? '#comment-'.$this->commentId : ''),
+                . ($this->commentId ? '#comment-'.$this->commentId : '#reaction-tooltip-wrap'),
         ];
     }
 }

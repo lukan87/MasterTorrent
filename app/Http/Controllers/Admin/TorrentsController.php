@@ -7,6 +7,7 @@ use App\Models\History;
 use App\Models\Torrent;
 use App\Services\Torrent\TorrentDestroyService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class TorrentsController extends Controller
@@ -210,7 +211,9 @@ class TorrentsController extends Controller
         if ($reason === 'custom') {
             $reason = $request->input('custom_reason');
         }
-        app(TorrentDestroyService::class)->handle($torrent, auth()->id(), $reason);
+
+        $userId = Auth::id();
+        app(TorrentDestroyService::class)->handle($torrent, $userId, $reason);
 
         return redirect()
             ->route('admin.torrents.index')
@@ -219,7 +222,8 @@ class TorrentsController extends Controller
 
     public function restore(Torrent $torrent, TorrentDestroyService $service)
     {
-        $service->restore($torrent, auth()->id());
+        $userId = Auth::id();
+        $service->restore($torrent, $userId);
 
         return redirect()
             ->route('admin.torrents.index', ['status' => 'trashed'])

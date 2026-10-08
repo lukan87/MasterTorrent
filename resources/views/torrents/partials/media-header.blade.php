@@ -1,18 +1,28 @@
 @include('torrents.partials._display-helpers')
 
+@php
+    $heroBackdrop = $torrent->background ?: ($display['backdrop'] ?? null);
+    $movieCollection = ($display['type'] ?? null) === 'movie' ? data_get($display, 'collection') : null;
+    $rawImdbVotes = $display['ratings']['votes'] ?? null;
+    $imdbVotes = (is_string($rawImdbVotes) || is_int($rawImdbVotes)) && preg_match('/^\d+(?:,\d{3})*$/', (string) $rawImdbVotes)
+        ? (int) str_replace(',', '', (string) $rawImdbVotes) : null;
+@endphp
+
 <div class="container-fluid px-xl-5 px-lg-4 px-3">
 
-    <div class="premium-media-card">
+    <div class="premium-media-card torrent-media-hero" data-torrent-media-hero>
 
         {{-- BACKDROP GLOW --}}
-        <div class="premium-backdrop"></div>
+        @if($heroBackdrop)
+            <img class="premium-backdrop" src="{{ $heroBackdrop }}" alt="" aria-hidden="true" decoding="async">
+        @endif
 
-        <div class="row g-4 align-items-start position-relative">
+        <div class="row g-4 align-items-start position-relative premium-hero-layout {{ !empty($display['cast']) ? 'premium-hero-has-cast' : '' }}">
 
             {{-- =========================
                 POSTER COLUMN
             ========================= --}}
-            <div class="col-12 col-sm-4 col-md-3 col-lg-3">
+            <div class="col-12 col-sm-4 col-md-3 col-lg-3 premium-poster-column">
 
                 <div class="premium-poster-wrapper {{ $torrent->trashed() ? 'deleted-poster' : '' }}">
 
@@ -20,6 +30,7 @@
                         src="{{ $torrent->poster ?: ($display['fanart']['poster'] ?? $display['poster'] ?? '/images/not-found.jpg') }}"
                         loading="lazy"
                         class="premium-poster"
+                        data-poster-fallback="{{ asset('images/not-found.jpg') }}"
                         alt="{{ $display['title'] }}"
                     >
 
@@ -32,13 +43,6 @@
 
                     {{-- Overlay --}}
                     <div class="poster-overlay"></div>
-
-                    {{-- LOGO --}}
-                    {{-- @if(!empty($fanartLogo))
-                        <div class="fanart-logo">
-                            <img src="{{ $display['fanart']['logo'] }}">
-                        </div>
-                    @endif --}}
 
                 </div>
 
@@ -209,7 +213,7 @@
             {{-- =========================
                 INFO COLUMN
             ========================= --}}
-            <div class="col-12 col-sm-8 col-md-9 col-lg-9">
+            <div class="col-12 col-sm-8 col-md-9 col-lg-9 premium-details-column">
 
                 <div class="premium-info">
 
@@ -261,6 +265,13 @@
                             </p>
                         @endif
 
+                        @if(data_get($movieCollection, 'id') && data_get($movieCollection, 'name'))
+                            <p class="premium-collection">
+                                <i class="bi bi-collection-play" aria-hidden="true"></i>
+                                <span>Belongs to <a href="{{ route('collections.show', data_get($movieCollection, 'id')) }}">{{ data_get($movieCollection, 'name') }}</a></span>
+                            </p>
+                        @endif
+
                     </div>
 
                     {{-- META --}}
@@ -280,7 +291,7 @@
 
                         @if($display['runtime'])
 
-                            <div class="meta-pill">
+                            <div class="meta-pill meta-runtime">
                                 <i class="bi bi-clock"></i>
 
                                 {{ $display['type'] === 'tv'
@@ -292,7 +303,7 @@
 
                         @if($display['type'] === 'tv' && $display['seasons'])
 
-                            <div class="meta-pill">
+                            <div class="meta-pill meta-seasons">
                                 <i class="bi bi-collection-play"></i>
                                 {{ $display['seasons'] }} Seasons
                             </div>
@@ -301,7 +312,7 @@
 
                         @if($display['type'] === 'tv' && $display['episodes'])
 
-                            <div class="meta-pill">
+                            <div class="meta-pill meta-episodes">
                                 <i class="bi bi-tv"></i>
                                 {{ $display['episodes'] }} Episodes
                             </div>
@@ -373,7 +384,7 @@
                     {{-- EXTERNAL LINKS --}}
                     @php
                         $extLinks = [];
-                        
+
                         if (!empty($display['external_ids']['facebook_id'])) {
                             $extLinks[] = ['icon' => 'bi-facebook', 'label' => 'Facebook', 'url' => 'https://www.facebook.com/' . $display['external_ids']['facebook_id']];
                         }
@@ -451,7 +462,7 @@
                                class="rating-card tmdb-card">
 
                                 <div class="rating-value">
-                                    {{ $display['ratings']['tmdb'] }}
+                                    {{ $display['ratings']['tmdb'] }}<span class="rating-scale"> / 10</span>
                                 </div>
 
                                 <div class="rating-source">
@@ -462,14 +473,14 @@
 
                         @endif
 
-                        @if($display['ratings']['imdb'] && $torrent->imdbid)
+                        @if(is_numeric($display['ratings']['imdb'] ?? null) && (float) $display['ratings']['imdb'] > 0 && $torrent->imdbid)
 
                             <a href="https://www.imdb.com/title/{{ $torrent->imdbid }}"
                                target="_blank"
                                class="rating-card imdb-card">
 
                                 <div class="rating-value">
-                                    {{ $display['ratings']['imdb'] }}
+                                    {{ $display['ratings']['imdb'] }}<span class="rating-scale"> / 10</span>
                                 </div>
 
                                 <div class="rating-source">
@@ -478,6 +489,13 @@
 
                             </a>
 
+                        @endif
+
+                        @if($imdbVotes > 0)
+                            <div class="rating-card imdb-votes-card">
+                                <div class="rating-source">IMDb votes</div>
+                                <div class="rating-value">{{ number_format($imdbVotes) }}</div>
+                            </div>
                         @endif
 
                         @if($display['ratings']['rt'])
@@ -504,7 +522,7 @@
                                     {{ number_format($display['vote_count']) }}
                                 </div>
                                 <div class="rating-source">
-                                    Votes
+                                    TMDB votes
                                 </div>
                             </div>
 
@@ -608,13 +626,15 @@
 
                     </div>
 
-                    @include('torrents.partials.cast-slider')
-
-
-
                 </div>
 
             </div>
+
+            @if(!empty($display['cast']))
+                <div class="premium-cast-column">
+                    @include('torrents.partials.cast-slider')
+                </div>
+            @endif
 
         </div>
 
@@ -635,12 +655,12 @@
     border-radius: .85rem;
     background: linear-gradient(
         135deg,
-        rgba(14,21,33,.95),
-        rgba(10,15,27,.35)
+        var(--theme-surface, rgba(14,21,33,.95)),
+        var(--theme-surface, rgba(10,15,27,.35))
     );
     border: 1px solid var(--ui-border);
     backdrop-filter: blur(9px);
-    box-shadow: 0 18px 45px rgba(0,0,0,.32);
+    box-shadow: 0 18px 45px var(--theme-shadow, rgba(0,0,0,.32));
     margin-top: 20px;
 }
 
@@ -716,7 +736,7 @@
     border-radius: .55rem;
     padding: 7px 12px;
     background: rgba(10,15,27,.82);
-    font-size: 13px;
+    font-size: var(--site-font-body, 13px);
     font-weight: 700;
     transform: rotate(-8deg);
 }
@@ -733,19 +753,19 @@
     gap: 7px;
     padding: 9px 12px;
     border-radius: .55rem;
-    background: rgba(239,68,68,.12);
-    border: 1px solid rgba(239,68,68,.28);
-    color: #fca5a5;
+    background: var(--theme-red-soft, rgba(239,68,68,.12));
+    border: 1px solid var(--theme-red-border, rgba(239,68,68,.28));
+    color: var(--theme-red-text, #fca5a5);
     text-decoration: none;
     font-weight: 600;
-    font-size: 13px;
+    font-size: var(--site-font-body, 13px);
     transition: background .15s ease, border-color .15s ease, color .15s ease, transform .15s ease;
 }
 
 .premium-trailer-btn:hover {
-    background: rgba(239,68,68,.18);
-    border-color: rgba(239,68,68,.42);
-    color: #fecaca;
+    background: var(--theme-red-soft, rgba(239,68,68,.18));
+    border-color: var(--theme-red-border, rgba(239,68,68,.42));
+    color: var(--theme-text, #fecaca);
     transform: translateY(-1px);
 }
 
@@ -753,11 +773,11 @@
     width: 100%;
     padding: 9px 12px;
     border-radius: .55rem;
-    color: rgba(255,255,255,.48);
-    background: rgba(255,255,255,0.0245);
-    border: 1px solid rgba(255,255,255,.06);
+    color: var(--theme-muted, rgba(255,255,255,.48));
+    background: var(--theme-surface-alt, rgba(255,255,255,0.0245));
+    border: 1px solid var(--theme-border, rgba(255,255,255,.06));
     text-align: center;
-    font-size: 13px;
+    font-size: var(--site-font-body, 13px);
 }
 
 .premium-info {
@@ -771,8 +791,8 @@
 }
 
 .premium-title {
-    color: #fff;
-    font-size: 14px;
+    color: var(--theme-text, #fff);
+    font-size: var(--site-font-body, 13px);
     font-weight: 700;
     line-height: 1.45;
     margin-bottom: 6px;
@@ -785,8 +805,8 @@
 }
 
 .premium-tagline {
-    color: rgba(255,255,255,.58);
-    font-size: 13px;
+    color: var(--theme-muted, rgba(255,255,255,.58));
+    font-size: var(--site-font-body, 13px);
     font-style: italic;
     margin-bottom: 16px;
 }
@@ -804,10 +824,10 @@
     gap: 6px;
     padding: 6px 9px;
     border-radius: .5rem;
-    background: rgba(255,255,255,0.028);
+    background: var(--theme-surface-alt, rgba(255,255,255,0.028));
     border: 1px solid var(--ui-border);
-    color: rgba(255,255,255,.78);
-    font-size: 13px;
+    color: var(--theme-muted, rgba(255,255,255,.78));
+    font-size: var(--site-font-body, 13px);
     font-weight: 600;
 }
 
@@ -826,18 +846,18 @@
     padding: 5px 9px;
     border-radius: .45rem;
     text-decoration: none;
-    background: rgba(45,212,191,.07);
-    border: 1px solid rgba(45,212,191,.16);
+    background: var(--theme-teal-soft, rgba(45,212,191,.07));
+    border: 1px solid var(--theme-teal-border, rgba(45,212,191,.16));
     color: var(--ui-accent);
-    font-size: 12px;
+    font-size: var(--site-font-small, 13px);
     font-weight: 600;
     transition: background .15s ease, border-color .15s ease, color .15s ease;
 }
 
 .premium-genre-tag:hover {
-    color: #fff;
-    background: rgba(45,212,191,.12);
-    border-color: rgba(45,212,191,.30);
+    color:  var(--theme-text, #fff);
+    background: var(--theme-teal-soft, rgba(45,212,191,.12));
+    border-color: var(--theme-teal-border, rgba(45,212,191,.30));
 }
 
 .premium-ratings {
@@ -853,41 +873,41 @@
     border-radius: .6rem;
     text-align: center;
     text-decoration: none;
-    background: rgba(255,255,255,0.028);
+    background: var(--theme-surface-alt, rgba(255,255,255,0.028));
     border: 1px solid var(--ui-border);
-    color: #fff;
+    color: var(--theme-text, #fff);
     transition: background .15s ease, border-color .15s ease, transform .15s ease;
 }
 
 .rating-card:hover {
     transform: translateY(-1px);
-    color: #fff;
-    border-color: rgba(45,212,191,.24);
-    background: rgba(45,212,191,.05);
+    color:  var(--theme-text, #fff);
+    border-color: var(--theme-teal-border, rgba(45,212,191,.24));
+    background: var(--theme-teal-soft, rgba(45,212,191,.05));
 }
 
 .rating-value {
-    font-size: 14px;
+    font-size: var(--site-font-body, 13px);
     font-weight: 700;
 }
 
 .rating-source {
-    color: rgba(255,255,255,.48);
-    font-size: 11px;
+    color: var(--theme-muted, rgba(255,255,255,.48));
+    font-size: var(--site-font-small, 13px);
     margin-top: 2px;
 }
 
 .premium-overview {
     margin-bottom: 18px;
     padding: 13px 15px;
-    border-left: 2px solid rgba(45,212,191,.45);
+    border-left: 2px solid var(--theme-teal-border, rgba(45,212,191,.45));
     border-radius: .55rem;
-    background: rgba(255,255,255,0.0175);
+    background: var(--theme-surface-alt, rgba(255,255,255,0.0175));
 }
 
 .premium-overview h5 {
-    color: rgba(255,255,255,.76);
-    font-size: 14px;
+    color: var(--theme-muted, rgba(255,255,255,.76));
+    font-size: var(--site-font-body, 13px);
     line-height: 1.65;
     font-weight: 500;
     margin: 0;
@@ -902,22 +922,22 @@
 .fact-box {
     padding: 9px 12px;
     border-radius: .55rem;
-    background: rgba(255,255,255,0.0245);
+    background: var(--theme-surface-alt, rgba(255,255,255,0.0245));
     border: 1px solid var(--ui-border);
 }
 
 .fact-label {
     display: block;
-    color: rgba(255,255,255,.45);
-    font-size: 10px;
+    color: var(--theme-muted, rgba(255,255,255,.45));
+    font-size: var(--site-font-small, 13px);
     text-transform: uppercase;
     letter-spacing: .7px;
     margin-bottom: 3px;
 }
 
 .fact-value {
-    color: rgba(255,255,255,.82);
-    font-size: 13px;
+    color: var(--theme-muted, rgba(255,255,255,.82));
+    font-size: var(--site-font-body, 13px);
     font-weight: 600;
 }
 
@@ -930,8 +950,8 @@
     align-items: center;
     gap: 7px;
     margin-bottom: 9px;
-    color: rgba(255,255,255,.72);
-    font-size: 13px;
+    color: var(--theme-muted, rgba(255,255,255,.72));
+    font-size: var(--site-font-body, 13px);
     font-weight: 700;
 }
 
@@ -948,7 +968,7 @@
 .network-logo-card {
     padding: 8px 11px;
     border-radius: .5rem;
-    background: rgba(255,255,255,0.0245);
+    background: var(--theme-surface-alt, rgba(255,255,255,0.0245));
     border: 1px solid var(--ui-border);
 }
 
@@ -972,18 +992,18 @@
 .keyword-tag {
     padding: 4px 9px;
     border-radius: .45rem;
-    background: rgba(148,163,184,0.049);
-    border: 1px solid rgba(148,163,184,.14);
-    color: rgba(255,255,255,.58);
-    font-size: 11px;
+    background: var(--theme-surface-alt, rgba(148,163,184,0.049));
+    border: 1px solid var(--theme-border, rgba(148,163,184,.14));
+    color: var(--theme-muted, rgba(255,255,255,.58));
+    font-size: var(--site-font-small, 13px);
     font-weight: 600;
     transition: background .15s ease, color .15s ease;
 }
 
 .keyword-tag:hover {
-    background: rgba(45,212,191,.09);
+    background: var(--theme-teal-soft, rgba(45,212,191,.09));
     color: var(--ui-accent);
-    border-color: rgba(45,212,191,.22);
+    border-color: var(--theme-teal-border, rgba(45,212,191,.22));
 }
 
 /* =========================================================
@@ -991,16 +1011,16 @@
    ========================================================= */
 
 .votes-card {
-    background: rgba(148,163,184,0.042) !important;
-    border-color: rgba(148,163,184,.16) !important;
+    background: var(--theme-surface-alt, rgba(148,163,184,0.042)) !important;
+    border-color: var(--theme-border, rgba(148,163,184,.16)) !important;
 }
 
 .votes-card .rating-value {
-    color: rgba(255,255,255,.72);
+    color: var(--theme-muted, rgba(255,255,255,.72));
 }
 
 .votes-card .rating-source {
-    color: rgba(255,255,255,.42);
+    color: var(--theme-muted, rgba(255,255,255,.42));
 }
 
 /* =========================================================
@@ -1014,10 +1034,10 @@
     margin-top: 4px;
     padding: 3px 9px;
     border-radius: .45rem;
-    background: rgba(148,163,184,0.049);
-    border: 1px solid rgba(148,163,184,.14);
-    color: rgba(255,255,255,.55);
-    font-size: 12px;
+    background: var(--theme-surface-alt, rgba(148,163,184,0.049));
+    border: 1px solid var(--theme-border, rgba(148,163,184,.14));
+    color: var(--theme-muted, rgba(255,255,255,.55));
+    font-size: var(--site-font-small, 13px);
     font-weight: 600;
 }
 
@@ -1031,13 +1051,13 @@
    ========================================================= */
 
 .popularity-pill {
-    color: #fbbf24;
-    border-color: rgba(251,191,36,.22);
-    background: rgba(251,191,36,.06);
+    color: var(--theme-amber-text, #fbbf24);
+    border-color: var(--theme-amber-border, rgba(251,191,36,.22));
+    background: var(--theme-amber-soft, rgba(251,191,36,.06));
 }
 
 .popularity-pill i {
-    color: #fbbf24;
+    color: var(--theme-amber-text, #fbbf24);
 }
 
 /* =========================================================
@@ -1051,9 +1071,9 @@
 }
 
 .homepage-pill:hover {
-    color: #fff;
-    background: rgba(45,212,191,.12);
-    border-color: rgba(45,212,191,.30);
+    color:  var(--theme-text, #fff);
+    background: var(--theme-teal-soft, rgba(45,212,191,.12));
+    border-color: var(--theme-teal-border, rgba(45,212,191,.30));
 }
 
 /* =========================================================
@@ -1073,10 +1093,10 @@
     gap: 6px;
     padding: 6px 10px;
     border-radius: .5rem;
-    background: rgba(255,255,255,0.028);
+    background: var(--theme-surface-alt, rgba(255,255,255,0.028));
     border: 1px solid var(--ui-border);
-    color: rgba(255,255,255,.72);
-    font-size: 12px;
+    color: var(--theme-muted, rgba(255,255,255,.72));
+    font-size: var(--site-font-small, 13px);
     font-weight: 600;
     text-decoration: none;
     transition: background .15s ease, border-color .15s ease, color .15s ease, transform .15s ease;
@@ -1084,8 +1104,8 @@
 
 .external-link:hover {
     color: var(--ui-accent);
-    border-color: rgba(45,212,191,.26);
-    background: rgba(45,212,191,.06);
+    border-color: var(--theme-teal-border, rgba(45,212,191,.26));
+    background: var(--theme-teal-soft, rgba(45,212,191,.06));
     transform: translateY(-1px);
 }
 
@@ -1101,7 +1121,7 @@
     margin-top: 14px;
     border: 1px solid var(--ui-border);
     border-radius: .65rem;
-    background: rgba(255,255,255,0.0175);
+    background: var(--theme-surface-alt, rgba(255,255,255,0.0175));
 }
 
 .watch-accordion-toggle {
@@ -1111,7 +1131,7 @@
     gap: 12px;
     padding: 12px 14px;
     color: var(--ui-accent);
-    font-size: 12px;
+    font-size: var(--site-font-small, 13px);
     font-weight: 700;
     cursor: pointer;
     list-style: none;
@@ -1129,7 +1149,7 @@
 }
 
 .watch-accordion-toggle:hover {
-    background: rgba(45,212,191,.06);
+    background: var(--theme-teal-soft, rgba(45,212,191,.06));
 }
 
 .watch-accordion-toggle:focus-visible {
@@ -1161,10 +1181,10 @@
     margin-bottom: 7px;
     padding: 3px 8px;
     border-radius: .4rem;
-    background: rgba(45,212,191,.06);
-    border: 1px solid rgba(45,212,191,.14);
+    background: var(--theme-teal-soft, rgba(45,212,191,.06));
+    border: 1px solid var(--theme-teal-border, rgba(45,212,191,.14));
     color: var(--ui-accent);
-    font-size: 11px;
+    font-size: var(--site-font-small, 13px);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .4px;
@@ -1187,16 +1207,16 @@
 
 .watch-provider-card:hover {
     transform: translateY(-2px);
-    border-color: rgba(45,212,191,.30);
+    border-color: var(--theme-teal-border, rgba(45,212,191,.30));
 }
 
 .watch-provider-name {
     padding: 6px 10px;
     border-radius: .5rem;
-    background: rgba(255,255,255,0.0245);
+    background: var(--theme-surface-alt, rgba(255,255,255,0.0245));
     border: 1px solid var(--ui-border);
-    color: rgba(255,255,255,.62);
-    font-size: 12px;
+    color: var(--theme-muted, rgba(255,255,255,.62));
+    font-size: var(--site-font-small, 13px);
     font-weight: 600;
 }
 
@@ -1215,12 +1235,12 @@
     }
 
     .premium-title {
-        font-size: 14px;
+        font-size: var(--site-font-body, 13px);
         text-align: left;
     }
 
     .premium-tagline {
-        font-size: 13px;
+        font-size: var(--site-font-body, 13px);
     }
 
     .premium-meta-row,
@@ -1232,7 +1252,7 @@
     }
 
     .premium-overview h5 {
-        font-size: 14px;
+        font-size: var(--site-font-body, 13px);
         text-align: left;
     }
 
@@ -1248,26 +1268,35 @@
 .tv-y-rating,
 .tv-y7-rating,
 .tv-g-rating {
-    color: #86efac;
-    border-color: rgba(134, 239, 172, .20);
-    background: rgba(134, 239, 172, .06);
+    color: var(--theme-green-text, #86efac);
+    border-color: var(--theme-green-border, rgba(134, 239, 172, .20));
+    background: var(--theme-green-soft, rgba(134, 239, 172, .06));
 }
 
 .tv-pg-rating {
-    color: #fde68a;
-    border-color: rgba(253, 230, 138, .20);
-    background: rgba(253, 230, 138, .06);
+    color: var(--theme-amber-text, #fde68a);
+    border-color: var(--theme-amber-border, rgba(253, 230, 138, .20));
+    background: var(--theme-amber-soft, rgba(253, 230, 138, .06));
 }
 
 .tv-14-rating {
-    color: #fdba74;
-    border-color: rgba(253, 186, 116, .20);
-    background: rgba(253, 186, 116, .06);
+    color: var(--theme-amber-text, #fdba74);
+    border-color: var(--theme-amber-border, rgba(253, 186, 116, .20));
+    background: var(--theme-amber-soft, rgba(253, 186, 116, .06));
 }
 
 .tv-ma-rating {
-    color: #fca5a5;
-    border-color: rgba(252, 165, 165, .20);
-    background: rgba(252, 165, 165, .06);
+    color: var(--theme-red-text, #fca5a5);
+    border-color: var(--theme-red-border, rgba(252, 165, 165, .20));
+    background: var(--theme-red-soft, rgba(252, 165, 165, .06));
 }
 </style>
+
+@once
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('css/torrent-media-hero.css') }}?v={{ filemtime(public_path('css/torrent-media-hero.css')) }}">
+@endpush
+@push('scripts')
+    <script src="{{ asset('js/torrent-media-hero.js') }}?v={{ filemtime(public_path('js/torrent-media-hero.js')) }}" defer></script>
+@endpush
+@endonce

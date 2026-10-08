@@ -272,8 +272,8 @@ window.addEventListener("load", handleScroll);
     background:
         linear-gradient(
             135deg,
-            rgba(14,21,33,.95),
-            rgba(10,15,27,.84)
+            var(--theme-surface, rgba(14,21,33,.95)),
+            var(--theme-surface, rgba(10,15,27,.84))
         );
 
     border: 1px solid var(--ui-border);
@@ -281,7 +281,7 @@ window.addEventListener("load", handleScroll);
     border-radius: .9rem;
 
     box-shadow:
-        0 10px 28px rgba(0, 0, 0, .24);
+        0 10px 28px var(--theme-shadow, rgba(0, 0, 0, .24));
 }
 
 .stats-wrapper::before {
@@ -299,8 +299,8 @@ window.addEventListener("load", handleScroll);
     background:
         linear-gradient(
             180deg,
-            var(--ui-accent),
-            var(--ui-accent-strong)
+            var(--theme-teal-action, var(--ui-accent)),
+            var(--theme-teal-action, var(--ui-accent-strong))
         );
 
     opacity: .9;
@@ -344,19 +344,19 @@ window.addEventListener("load", handleScroll);
     color: var(--ui-accent);
 
     background:
-        rgba(45, 212, 191, .08);
+        var(--theme-teal-soft, rgba(45, 212, 191, .08));
 
     border:
-        1px solid rgba(45, 212, 191, .18);
+        1px solid var(--theme-teal-border, rgba(45, 212, 191, .18));
 
     font-size: 15px;
 }
 
 .stats-title {
 
-    color: #fff;
+    color: var(--theme-text, #fff);
 
-    font-size: 14px;
+    font-size: var(--site-font-body, 13px);
 
     font-weight: 700;
 
@@ -366,9 +366,9 @@ window.addEventListener("load", handleScroll);
 .stats-subtitle {
 
     color:
-        rgba(255, 255, 255, .55);
+        var(--theme-muted, rgba(255, 255, 255, .55));
 
-    font-size: 13px;
+    font-size: var(--site-font-body, 13px);
 
     margin-top: .15rem;
 }
@@ -399,7 +399,7 @@ window.addEventListener("load", handleScroll);
     text-align: center;
 
     background:
-        rgba(255,255,255,0.0175);
+        var(--theme-surface-alt, rgba(255,255,255,0.0175));
 
     border:
         1px solid var(--ui-border);
@@ -407,7 +407,7 @@ window.addEventListener("load", handleScroll);
     border-radius: .75rem;
 
     box-shadow:
-        0 6px 18px rgba(0, 0, 0, .16);
+        0 6px 18px var(--theme-shadow, rgba(0, 0, 0, .16));
 
     transition:
         transform .2s ease,
@@ -432,7 +432,7 @@ window.addEventListener("load", handleScroll);
         linear-gradient(
             90deg,
             transparent,
-            var(--ui-accent),
+            var(--theme-teal-action, var(--ui-accent)),
             transparent
         );
 
@@ -444,13 +444,13 @@ window.addEventListener("load", handleScroll);
     transform: translateY(-3px);
 
     background:
-        rgba(45, 212, 191, .045);
+        var(--theme-teal-soft, rgba(45, 212, 191, .045));
 
     border-color:
-        rgba(45, 212, 191, .22);
+        var(--theme-teal-border, rgba(45, 212, 191, .22));
 
     box-shadow:
-        0 10px 24px rgba(0, 0, 0, .24);
+        0 10px 24px var(--theme-shadow, rgba(0, 0, 0, .24));
 }
 
 
@@ -475,15 +475,15 @@ window.addEventListener("load", handleScroll);
     color: var(--ui-accent);
 
     background:
-        rgba(45, 212, 191, .08);
+        var(--theme-teal-soft, rgba(45, 212, 191, .08));
 
     border:
-        1px solid rgba(45, 212, 191, .15);
+        1px solid var(--theme-teal-border, rgba(45, 212, 191, .15));
 
     font-size: 20px;
 
     box-shadow:
-        inset 0 0 12px rgba(45, 212, 191, .04);
+        inset 0 0 12px var(--theme-shadow, rgba(45, 212, 191, .04));
 }
 
 
@@ -496,9 +496,9 @@ window.addEventListener("load", handleScroll);
     margin-bottom: .35rem;
 
     color:
-        rgba(255, 255, 255, .62);
+        var(--theme-muted, rgba(255, 255, 255, .62));
 
-    font-size: 13px;
+    font-size: var(--site-font-body, 13px);
 
     font-weight: 600;
 
@@ -507,9 +507,9 @@ window.addEventListener("load", handleScroll);
 
 .stat-value {
 
-    color: #fff;
+    color: var(--theme-text, #fff);
 
-    font-size: 14px;
+    font-size: var(--site-font-body, 13px);
 
     font-weight: 800;
 
@@ -525,7 +525,7 @@ window.addEventListener("load", handleScroll);
 
 .stat-value {
 
-    font-size: 14px;
+    font-size: var(--site-font-body, 13px);
 }
 
 
@@ -557,12 +557,12 @@ window.addEventListener("load", handleScroll);
 
     .stats-title {
 
-        font-size: 14px;
+        font-size: var(--site-font-body, 13px);
     }
 
     .stats-subtitle {
 
-        font-size: 13px;
+        font-size: var(--site-font-body, 13px);
     }
 
     .stat-card {
@@ -584,12 +584,12 @@ window.addEventListener("load", handleScroll);
 
     .stat-label {
 
-        font-size: 13px;
+        font-size: var(--site-font-body, 13px);
     }
 
     .stat-value {
 
-        font-size: 14px;
+        font-size: var(--site-font-body, 13px);
     }
 
 }

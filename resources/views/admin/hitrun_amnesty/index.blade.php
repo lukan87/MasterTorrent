@@ -4,9 +4,9 @@
 
 <div class="container-fluid px-3 px-md-4 py-3">
 
-    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+    <div class="admin-page-header d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
         <div>
-            <h2 class="mb-1" style="color:#f8fafc"><i class="bi bi-tools"></i> Hit &amp; Run Amnesty</h2>
+            <h2 class="mb-1" style="color:var(--theme-text, #f8fafc)"><i class="bi bi-tools"></i> Hit &amp; Run Amnesty</h2>
             <p class="mb-0 text-muted small">Give every user a 1:1 ratio on each affected torrent and clear all hit &amp; runs.</p>
         </div>
         <div class="badge bg-danger"><i class="bi bi-shield-exclamation"></i> Administrative Action</div>
@@ -17,30 +17,30 @@
     @endif
 
     {{-- Preview status --}}
-    <div class="card mb-4" style="background:#14141f;border:1px solid rgba(148,163,184,.16)">
+    <div class="card mb-4" style="background:var(--theme-surface, #14141f);border:1px solid var(--theme-border, rgba(148,163,184,.16))">
         <div class="card-body">
-            <h5 class="fw-bold mb-3" style="color:#67e8df"><i class="bi bi-eye"></i> Current Preview</h5>
+            <h5 class="fw-bold mb-3" style="color:var(--theme-teal-text, #67e8df)"><i class="bi bi-eye"></i> Current Preview</h5>
             <div class="row g-3">
                 <div class="col-md-3 col-6">
-                    <div class="border rounded p-3 text-center" style="background:#07070e">
+                    <div class="border rounded p-3 text-center" style="background:var(--theme-surface-alt, #07070e)">
                         <div class="small text-muted">Hit &amp; Runs</div>
                         <div class="fs-4 fw-bold">{{ number_format($stats['records']) }}</div>
                     </div>
                 </div>
                 <div class="col-md-3 col-6">
-                    <div class="border rounded p-3 text-center" style="background:#07070e">
+                    <div class="border rounded p-3 text-center" style="background:var(--theme-surface-alt, #07070e)">
                         <div class="small text-muted">Affected Users</div>
                         <div class="fs-4 fw-bold">{{ number_format($stats['users']) }}</div>
                     </div>
                 </div>
                 <div class="col-md-3 col-6">
-                    <div class="border rounded p-3 text-center" style="background:#07070e">
+                    <div class="border rounded p-3 text-center" style="background:var(--theme-surface-alt, #07070e)">
                         <div class="small text-muted">Upload to Credit (1:1)</div>
                         <div class="fs-4 fw-bold">{{ \App\Helpers\FormatHelper::formatSize($stats['total_upload_credited']) }}</div>
                     </div>
                 </div>
                 <div class="col-md-3 col-6">
-                    <div class="border rounded p-3 text-center" style="background:#07070e">
+                    <div class="border rounded p-3 text-center" style="background:var(--theme-surface-alt, #07070e)">
                         <div class="small text-muted">Warnings / DL Locks</div>
                         <div class="fs-4 fw-bold">{{ number_format($stats['warnings_cleared']) }} / {{ number_format($stats['downloads_restored']) }}</div>
                     </div>
@@ -51,7 +51,7 @@
                 <div class="alert alert-success mt-3 mb-0 fw-bold">&#127881; There are no hit & runs to clear.</div>
             @else
                 <div class="mt-4">
-                    <h5 class="fw-bold mb-3" style="color:#67e8df"><i class="bi bi-people"></i> Affected Users</h5>
+                    <h5 class="fw-bold mb-3" style="color:var(--theme-teal-text, #67e8df)"><i class="bi bi-people"></i> Affected Users</h5>
                     <div class="table-responsive">
                         <table class="table table-dark table-striped table-hover">
                             <thead>
@@ -77,7 +77,7 @@
 
     @if($stats['records'] > 0)
         {{-- Confirm form --}}
-        <div class="card" style="background:#14141f;border:1px solid rgba(239,68,68,.35)">
+        <div class="card" style="background:var(--theme-surface, #14141f);border:1px solid var(--theme-red-border, rgba(239,68,68,.35))">
             <div class="card-body">
                 <h5 class="fw-bold mb-2 text-danger"><i class="bi bi-exclamation-triangle"></i> Apply Amnesty</h5>
                 <p class="text-muted small mb-3">This adds upload to affected users to give a 1:1 ratio on each hit &amp; run torrent, then clears the hit &amp; runs, resets counters and restores any H&amp;R-triggered restrictions. A summary is sent to each affected user. This action cannot be undone.</p>

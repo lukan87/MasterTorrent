@@ -6,11 +6,11 @@
     @if(Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::VIP)
         <a href="{{ route('profile.show', $torrent->uploader->id) }}"
            class="fw-semibold text-decoration-none"
-           style="color: {{ \App\Models\UserClass::getClassColor($torrent->uploader->user_class) }}">
+           style="--member-color: {{ \App\Models\UserClass::getClassColor($torrent->uploader->user_class) }}; color: var(--member-color)">
             {{ $torrent->uploader->name }}
         </a>
     @else
-        <span style="color: {{ \App\Models\UserClass::getClassColor($torrent->uploader->user_class) }}">
+        <span style="--member-color: {{ \App\Models\UserClass::getClassColor($torrent->uploader->user_class) }}; color: var(--member-color)">
             {{ $torrent->uploader->name }}
         </span>
     @endif

@@ -7,98 +7,59 @@ use App\Models\ForumPost;
 use App\Models\ForumPostLike;
 use App\Models\ForumTopic;
 use App\Notifications\ForumLikeNotification;
+use App\Services\ForumAccess;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class ForumPostLikeController extends Controller
 {
-    /**
-     * Like or unlike a forum post. Supports AJAX (JSON) and standard form submission.
-     */
-    public function toggle(
-        Request $request,
-        ForumCategory $category,
-        ForumTopic $topic,
-        ForumPost $post
-    ) {
-        $reaction = $request->input('reaction', 'like');
+    public function toggle(Request $request, ForumCategory $category, ForumTopic $topic, ForumPost $post)
+    {
+        ForumAccess::authorizeView($category);
+        ForumAccess::authorizeParticipation();
+        abort_unless($topic->category_id === $category->id && $post->topic_id === $topic->id, 404);
+        abort_if($post->user_id === auth()->id(), 403, 'You cannot react to your own post.');
+        $validated = $request->validate(['reaction' => ['required', Rule::in(['like', 'love', 'laugh', 'wow', 'sad'])]]);
+        $reaction = $validated['reaction'];
+        $action = DB::transaction(function () use ($topic, $post, $reaction) {
+            ForumTopic::whereKey($topic->id)->lockForUpdate()->firstOrFail();
+            ForumPost::whereKey($post->id)->lockForUpdate()->firstOrFail();
+            $like = ForumPostLike::where('user_id', auth()->id())->where('post_id', $post->id)->first();
+            if ($like) {
+                if ($like->reaction === $reaction) {
+                    $like->delete();
 
-        $allowedReactions = ['like', 'love', 'laugh', 'wow', 'sad'];
-
-        if (! in_array($reaction, $allowedReactions, true)) {
-            abort(422);
-        }
-
-        abort_if($category->is_private, 403);
-
-        if ($topic->category_id !== $category->id) {
-            abort(404);
-        }
-
-        if ($post->topic_id !== $topic->id) {
-            abort(404);
-        }
-
-        // Users cannot react to their own posts.
-        if ($post->user_id === auth()->id()) {
-            if ($request->ajax()) {
-                return response()->json(['error' => 'You cannot react to your own post.'], 403);
-            }
-
-            return back()->with('error', 'You cannot like your own post.');
-        }
-
-        // Check whether the current user already reacted to this post.
-        $like = ForumPostLike::where('user_id', auth()->id())
-            ->where('post_id', $post->id)
-            ->first();
-
-        $action = '';
-
-        if ($like) {
-            if ($like->reaction === $reaction) {
-                $like->delete();
-                $action = 'removed';
-            } else {
+                    return 'removed';
+                }
                 $like->update(['reaction' => $reaction]);
-                $action = 'changed';
-            }
-        } else {
-            ForumPostLike::create([
-                'user_id' => auth()->id(),
-                'post_id' => $post->id,
-                'reaction' => $reaction,
-            ]);
-            $action = 'added';
 
-            // Notify the post owner.
-            $post->loadMissing('user');
-            if ($post->user && $post->user_id !== auth()->id()) {
-                $post->user->notify(
-                    new ForumLikeNotification($post, auth()->user())
-                );
+                return 'changed';
             }
-        }
+            ForumPostLike::create(['user_id' => auth()->id(), 'post_id' => $post->id, 'reaction' => $reaction]);
+            $actor = auth()->user();
+            DB::afterCommit(function () use ($post, $actor) {
+                $post->loadMissing('user');
+                if ($post->user) {
+                    $post->user->notify(new ForumLikeNotification($post, $actor));
+                }
+            });
 
-        // AJAX: return fresh reaction data as JSON.
-        if ($request->ajax()) {
-            $freshLikes = ForumPostLike::where('post_id', $post->id)->get();
-            $userLike = $freshLikes->firstWhere('user_id', auth()->id());
-            $counts = $freshLikes->groupBy('reaction')->map->count();
+            return 'added';
+        }, 3);
+        if ($request->expectsJson()) {
+            $post->load('likes');
+            $likes = $post->likes;
 
             return response()->json([
-                'action' => $action,
-                'user_reaction' => $userLike?->reaction,
-                'counts' => $counts->toArray(),
-                'total' => $freshLikes->count(),
-            ]);
+                'action' => $action, 'user_reaction' => $likes->firstWhere('user_id', auth()->id())?->reaction,
+                'counts' => $likes->groupBy('reaction')->map->count()->toArray(), 'total' => $likes->count(),
+                'html' => view('forum.partials.reactions', compact('category', 'topic', 'post'))->render(),
+            ])->header('Cache-Control', 'private, no-store');
         }
 
-        $flashMsg = match ($action) {
-            'removed' => 'Reaction removed.',
-            'changed' => 'Reaction changed.',
-            default => 'Post liked.',
-        };
-
-        return back()->with('success', $flashMsg);
+        return back()->with('success', match ($action) {
+            'removed' => 'Reaction removed.', 'changed' => 'Reaction changed.', default => 'Reaction added.',
+        });
     }
 }

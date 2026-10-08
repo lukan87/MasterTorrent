@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\ForumCategory;
-use App\Models\UserClass;
+use App\Services\ForumAccess;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -11,18 +12,14 @@ class ForumCategoryController extends Controller
 {
     public function create()
     {
-        if (auth()->user()->user_class <= UserClass::ADMIN) {
-            abort(403, 'You are not allowed to manage forum categories.');
-        }
+        ForumAccess::authorize('create_categories');
 
         return view('forum.categories.create');
     }
 
     public function store(Request $request)
     {
-        if (auth()->user()->user_class <= UserClass::MODERATOR) {
-            abort(403, 'You are not allowed to manage forum categories.');
-        }
+        ForumAccess::authorize('create_categories');
 
         $validated = $request->validate([
             'name' => [
@@ -56,9 +53,12 @@ class ForumCategoryController extends Controller
             ],
         ]);
 
-        $slug = Str::slug($validated['name']);
+        $slug = Str::slug($validated['name']) ?: 'category';
+        if (in_array($slug, ['search', 'preview', 'categories', 'my-topics'], true)) {
+            $slug .= '-category';
+        }
 
-        if (ForumCategory::where('slug', $slug)->exists()) {
+        if (ForumCategory::withTrashed()->where('slug', $slug)->exists()) {
             return back()
                 ->withInput()
                 ->withErrors([
@@ -66,14 +66,18 @@ class ForumCategoryController extends Controller
                 ]);
         }
 
-        ForumCategory::create([
-            'name' => $validated['name'],
-            'slug' => $slug,
-            'description' => $validated['description'] ?? null,
-            'icon' => $validated['icon'] ?? null,
-            'position' => $validated['position'] ?? 0,
-            'is_private' => $validated['is_private'] ?? false,
-        ]);
+        try {
+            ForumCategory::create([
+                'name' => $validated['name'],
+                'slug' => $slug,
+                'description' => $validated['description'] ?? null,
+                'icon' => $validated['icon'] ?? null,
+                'position' => $validated['position'] ?? 0,
+                'is_private' => $validated['is_private'] ?? false,
+            ]);
+        } catch (UniqueConstraintViolationException $exception) {
+            return back()->withInput()->withErrors(['name' => 'A category with this name already exists, including deleted categories.']);
+        }
 
         return redirect()
             ->route('forum.index')
@@ -82,18 +86,14 @@ class ForumCategoryController extends Controller
 
     public function edit(ForumCategory $category)
     {
-        if (auth()->user()->user_class <= UserClass::MODERATOR) {
-            abort(403, 'You are not allowed to manage forum categories.');
-        }
+        ForumAccess::authorize('edit_categories');
 
         return view('forum.categories.edit', compact('category'));
     }
 
     public function update(Request $request, ForumCategory $category)
     {
-        if (auth()->user()->user_class <= UserClass::MODERATOR) {
-            abort(403, 'You are not allowed to manage forum categories.');
-        }
+        ForumAccess::authorize('edit_categories');
 
         $validated = $request->validate([
             'name' => [
@@ -127,10 +127,13 @@ class ForumCategoryController extends Controller
             ],
         ]);
 
-        $slug = Str::slug($validated['name']);
+        $slug = Str::slug($validated['name']) ?: 'category';
+        if (in_array($slug, ['search', 'preview', 'categories', 'my-topics'], true)) {
+            $slug .= '-category';
+        }
 
         if (
-            ForumCategory::where('slug', $slug)
+            ForumCategory::withTrashed()->where('slug', $slug)
                 ->where('id', '!=', $category->id)
                 ->exists()
         ) {
@@ -141,25 +144,27 @@ class ForumCategoryController extends Controller
                 ]);
         }
 
-        $category->update([
-            'name' => $validated['name'],
-            'slug' => $slug,
-            'description' => $validated['description'] ?? null,
-            'icon' => $validated['icon'] ?? null,
-            'position' => $validated['position'] ?? 0,
-            'is_private' => $validated['is_private'] ?? false,
-        ]);
+        try {
+            $category->update([
+                'name' => $validated['name'],
+                'slug' => $slug,
+                'description' => $validated['description'] ?? null,
+                'icon' => $validated['icon'] ?? null,
+                'position' => $validated['position'] ?? 0,
+                'is_private' => $validated['is_private'] ?? false,
+            ]);
+        } catch (UniqueConstraintViolationException $exception) {
+            return back()->withInput()->withErrors(['name' => 'A category with this name already exists, including deleted categories.']);
+        }
 
         return redirect()
-            ->route('forum.category', $category->slug)
+            ->route('forum.index')
             ->with('success', 'Category updated successfully.');
     }
 
     public function destroy(ForumCategory $category)
     {
-        if (auth()->user()->user_class <= UserClass::MODERATOR) {
-            abort(403, 'You are not allowed to manage forum categories.');
-        }
+        ForumAccess::authorize('delete_categories');
 
         $category->delete();
 
@@ -170,9 +175,7 @@ class ForumCategoryController extends Controller
 
     public function restore($id)
     {
-        if (auth()->user()->user_class <= UserClass::MODERATOR) {
-            abort(403, 'You are not allowed to manage forum categories.');
-        }
+        ForumAccess::authorize('delete_categories');
 
         $category = ForumCategory::withTrashed()->findOrFail($id);
 
@@ -186,9 +189,7 @@ class ForumCategoryController extends Controller
     public function forceDestroy($id)
     {
 
-        if (auth()->user()->user_class <= UserClass::MODERATOR) {
-            abort(403, 'You are not allowed to manage forum categories.');
-        }
+        ForumAccess::authorize('delete_categories');
 
         $category = ForumCategory::withTrashed()->findOrFail($id);
 

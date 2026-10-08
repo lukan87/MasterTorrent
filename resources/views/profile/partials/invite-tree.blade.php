@@ -52,20 +52,20 @@
 </div>
 <style>
 .invitation-tree-card { width: 100%; text-align: left; font: inherit; cursor: pointer; }
-.invitation-tree-card .invitation-tree-icon { color: #acbaff; background: #acbaff12; }
-.invitation-tree-card:focus-visible, .invitation-tree-modal a:focus-visible { outline: 2px solid #80e0cf; outline-offset: 3px; }
-.invitation-tree-origin { padding: 1.25rem; margin-bottom: 1rem; border: 1px solid #acbaff30; background: #acbaff08; border-radius: 12px; overflow-wrap: anywhere; }
-.invitation-tree-label { display: block; color: #a5b4c7; font-size: .875rem; margin-bottom: .5rem; }
-.invitation-tree-origin a { color: #acbaff; }
-.invitation-tree-deleted { color: #a5b4c7; font-size: .875rem; }
+.invitation-tree-card .invitation-tree-icon { color: var(--theme-blue-text, #acbaff); background: var(--theme-blue-soft, #acbaff12); }
+.invitation-tree-card:focus-visible, .invitation-tree-modal a:focus-visible { outline: 2px solid var(--theme-teal-border, #80e0cf); outline-offset: 3px; }
+.invitation-tree-origin { padding: 1.25rem; margin-bottom: 1rem; border: 1px solid var(--theme-blue-border, #acbaff30); background: var(--theme-blue-soft, #acbaff08); border-radius: 12px; overflow-wrap: anywhere; }
+.invitation-tree-label { display: block; color: var(--theme-muted, #a5b4c7); font-size: var(--site-font-body, 13px); margin-bottom: .5rem; }
+.invitation-tree-origin a { color: var(--theme-blue-text, #acbaff); }
+.invitation-tree-deleted { color: var(--theme-muted, #a5b4c7); font-size: var(--site-font-body, 13px); }
 .invitation-tree-members { list-style: none; margin: 0; padding: 0; display: grid; gap: .65rem; }
-.invitation-tree-members a { display: flex; align-items: center; gap: 1rem; padding: 1rem; background: #0e1822; color: #e9f0f7; border: 1px solid #2b3a4c; border-radius: 12px; text-decoration: none; }
-.invitation-tree-members a:hover { border-color: #80e0cf66; background: #121f2a; }
-.invitation-tree-avatar { display: grid; place-items: center; width: 40px; height: 40px; flex-shrink: 0; background: #80e0cf0d; color: #80e0cf; border-radius: 10px; text-transform: uppercase; }
+.invitation-tree-members a { display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--theme-surface, #0e1822); color: var(--theme-text, #e9f0f7); border: 1px solid var(--theme-border, #2b3a4c); border-radius: 12px; text-decoration: none; }
+.invitation-tree-members a:hover { border-color: var(--theme-teal-border, #80e0cf66); background: var(--theme-surface, #121f2a); }
+.invitation-tree-avatar { display: grid; place-items: center; width: 40px; height: 40px; flex-shrink: 0; background: var(--theme-teal-soft, #80e0cf0d); color: var(--theme-teal-text, #80e0cf); border-radius: 10px; text-transform: uppercase; }
 .invitation-tree-member-name { overflow-wrap: anywhere; min-width: 0; }
 .invitation-tree-member-name small { display: block; }
-.invitation-tree-empty { padding: 2rem 1rem; text-align: center; color: #a5b4c7; }
-.invitation-tree-empty > i { font-size: 2rem; color: #acbaff; }
+.invitation-tree-empty { padding: 2rem 1rem; text-align: center; color: var(--theme-muted, #a5b4c7); }
+.invitation-tree-empty > i { font-size: 2rem; color: var(--theme-blue-text, #acbaff); }
 .invitation-tree-empty p { margin: .75rem 0 0; }
 .invitation-tree-pagination { overflow-x: auto; }
 </style>

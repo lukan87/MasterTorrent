@@ -3,16 +3,19 @@
 namespace App\Notifications;
 
 use App\Models\ForumPost;
+use App\Services\ForumAccess;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 
-class ForumMentionNotification extends Notification
+class ForumMentionNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
     public function __construct(
         public ForumPost $post
     ) {
+        $this->afterCommit();
     }
 
     /**
@@ -26,6 +29,14 @@ class ForumMentionNotification extends Notification
     /**
      * Database notification data.
      */
+    public function shouldSend(object $notifiable, string $channel): bool
+    {
+        $topic = $this->post->topic()->with('category')->first();
+        $this->post->setRelation('topic', $topic);
+
+        return $topic?->category !== null && ForumAccess::canView($notifiable, $topic->category);
+    }
+
     public function toDatabase(object $notifiable): array
     {
         $topic = $this->post->topic;
@@ -45,7 +56,8 @@ class ForumMentionNotification extends Notification
             'url' => route('forum.topic', [
                 'category' => $topic->category->slug,
                 'topic' => $topic->slug,
-            ]) . '#post-' . $this->post->id,
+                'post' => $this->post->id,
+            ]).'#post-'.$this->post->id,
         ];
     }
 }

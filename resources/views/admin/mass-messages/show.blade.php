@@ -1,0 +1,32 @@
+@extends('layouts.admin')
+@section('admin-content')
+<div class="mm-page">
+@include('admin.mass-messages._navigation')
+<header class="mm-header"><div><div class="mm-eyebrow">BROADCAST #{{ $massMessage->id }}</div><h1>{{ $massMessage->subject }}</h1><p>Created {{ $massMessage->created_at->format('d M Y, H:i') }} UTC · <span class="mm-badge mm-{{ $massMessage->status }}">{{ ucfirst($massMessage->status) }}</span></p></div><div class="d-flex flex-wrap gap-2"><a class="btn btn-outline-secondary" href="{{ route('admin.users.mass-messages.index') }}">History</a><a class="btn btn-outline-info" href="{{ request()->fullUrl() }}"><i class="bi bi-arrow-clockwise me-1"></i>Refresh status</a>
+@if(auth()->user()->user_class >= \App\Models\UserClass::ADMIN)<form method="POST" action="{{ route('admin.users.mass-messages.destroy', $massMessage) }}" data-mm-confirm="Delete this broadcast, its log and all recipient messages? Pending deliveries will be stopped.">@csrf @method('DELETE')<button class="btn btn-outline-danger"><i class="bi bi-trash me-1"></i>Delete broadcast</button></form>@endif
+</div></header>
+@if($massMessage->status === 'failed')<div class="alert alert-danger" role="alert">Delivery stopped because the queue encountered an error. Already delivered copies remain visible below. Review the worker logs before retrying the failed job.</div>@endif
+@if($massMessage->status === 'deleting')<div class="alert alert-warning" role="alert">This broadcast is being deleted. Pending deliveries have stopped. If deletion was interrupted, use Delete broadcast to finish removing the remaining copies.</div>@endif
+<div class="mm-stats">
+@foreach([['deliveries_count', 'Selected recipients', 'people'], ['delivered_count', 'Delivered copies', 'send-check'], ['read_count', 'Read copies', 'check2-all'], ['pending_count', 'Pending copies', 'hourglass-split']] as [$key, $label, $icon])<div class="mm-stat"><i class="bi bi-{{ $icon }}"></i><span>{{ $label }}</span><strong>{{ number_format($massMessage->$key) }}</strong></div>@endforeach
+</div>
+<div class="mm-detail-grid mb-4">
+<section class="mm-panel mm-padding"><div class="mm-eyebrow mb-3">MESSAGE CONTENT</div><div class="mm-body">{{ $massMessage->body }}</div></section>
+<aside class="mm-panel mm-padding"><h2>Broadcast details</h2><dl class="mm-details"><dt>Initiated by</dt><dd>{{ $massMessage->actor_name }} <span class="mm-muted">#{{ $massMessage->actor_id }}</span></dd><dt>Members see</dt><dd><i class="bi bi-{{ $massMessage->send_as_system ? 'robot' : 'person' }} me-1"></i>{{ $massMessage->send_as_system ? 'System' : $massMessage->sender_name }} <span class="mm-muted">#{{ $massMessage->sender_id }}</span></dd><dt>Audience</dt><dd><div class="d-flex flex-wrap gap-1">@foreach($massMessage->user_classes as $class)<span class="mm-badge">{{ \App\Models\UserClass::getClasses()[$class] ?? 'Class '.$class }}</span>@endforeach</div></dd><dt>Completed</dt><dd>{{ $massMessage->completed_at ? $massMessage->completed_at->format('d M Y, H:i').' UTC' : '—' }}</dd><dt>Other outcomes</dt><dd>{{ number_format($massMessage->skipped_count) }} skipped · {{ number_format($massMessage->removed_count) }} removed</dd></dl></aside>
+</div>
+<section class="mm-panel">
+<div class="mm-section-heading"><h2>Recipient activity</h2><span class="mm-muted">Read status reflects members’ inboxes. Viewing this page does not mark messages read.</span></div>
+<form method="GET" class="mm-filters"><div class="mm-search"><label for="recipientSearch">Recipient</label><input class="form-control" id="recipientSearch" name="search" value="{{ request('search') }}" placeholder="Search by recipient name"></div><div><label for="receiptFilter">Activity</label><select class="form-select" id="receiptFilter" name="receipt"><option value="">All recipients</option>@foreach(['read', 'unread', 'pending', 'removed', 'skipped'] as $receipt)<option value="{{ $receipt }}" @selected(request('receipt') === $receipt)>{{ ucfirst($receipt) }}</option>@endforeach</select></div><button class="btn btn-outline-success">Filter</button><a class="btn btn-outline-secondary" href="{{ route('admin.users.mass-messages.show', $massMessage) }}">Reset</a></form>
+<div class="table-responsive"><table class="table mm-table align-middle mb-0"><thead><tr><th>Recipient</th><th>Delivered</th><th>Activity</th><th><span class="visually-hidden">Actions</span></th></tr></thead><tbody>
+@forelse($deliveries as $delivery)
+@php
+    $removed = $delivery->status === 'removed' || ($delivery->delivered_at && !$delivery->message);
+    $state = $removed ? 'removed' : ($delivery->message ? ($delivery->message->is_read ? 'read' : 'unread') : $delivery->status);
+@endphp
+<tr><td>@if($delivery->receiver && !$delivery->receiver->trashed())<a class="mm-subject" href="{{ route('admin.users.show', $delivery->receiver->name) }}">{{ $delivery->receiver_name }}</a>@else<strong>{{ $delivery->receiver_name }}</strong><span class="mm-muted"> · deleted account</span>@endif<div class="mm-muted">Account #{{ $delivery->receiver_id }}</div></td><td>{{ $delivery->delivered_at ? $delivery->delivered_at->format('d M Y, H:i').' UTC' : '—' }}</td><td><span class="mm-badge mm-{{ $state }}"><i class="bi bi-{{ $state === 'read' ? 'check2-all' : ($state === 'unread' ? 'envelope' : 'circle') }} me-1"></i>{{ ucfirst($state) }}</span>@if($removed && $delivery->was_read !== null)<div class="mm-muted">{{ $delivery->was_read ? 'Read' : 'Unread' }} when removed</div>@endif</td><td class="text-end">@if(!$removed && $state !== 'skipped' && auth()->user()->user_class >= \App\Models\UserClass::ADMIN)<form method="POST" action="{{ route('admin.users.mass-messages.deliveries.destroy', [$massMessage, $delivery]) }}" data-mm-confirm="Remove this recipient’s message? A pending delivery will be cancelled; the delivery audit will remain.">@csrf @method('DELETE')<button class="btn btn-sm btn-outline-danger">{{ $state === 'pending' ? 'Cancel delivery' : 'Delete copy' }}</button></form>@endif</td></tr>
+@empty<tr><td colspan="4"><div class="mm-empty"><i class="bi bi-people"></i><h2>No recipients match these filters</h2><p>Try a different name or activity filter.</p></div></td></tr>@endforelse
+</tbody></table></div><div class="mm-panel-footer">{{ $deliveries->links('pagination::bootstrap-5') }}</div>
+</section>
+<p class="mm-footnote">Skipped accounts were deleted before delivery. Removed copies retain their recipient and delivery date; read status is unavailable if a copy was deleted elsewhere.</p>
+</div>
+@endsection

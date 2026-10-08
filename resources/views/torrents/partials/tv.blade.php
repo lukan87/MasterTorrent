@@ -185,13 +185,13 @@ function getLanguageName($code) {
 
     border-radius: .45rem;
 
-    background: rgba(255,255,255,0.028);
+    background: var(--theme-surface-alt, rgba(255,255,255,0.028));
 
     border: 1px solid var(--ui-border);
 
-    color: rgba(255, 255, 255, .82);
+    color: var(--theme-muted, rgba(255, 255, 255, .82));
 
-    font-size: 12px;
+    font-size: var(--site-font-small, 13px);
     font-weight: 700;
 
     line-height: 1;
@@ -204,27 +204,27 @@ function getLanguageName($code) {
 .tv-y-rating,
 .tv-y7-rating,
 .tv-g-rating {
-    color: #86efac;
-    border-color: rgba(134, 239, 172, .20);
-    background: rgba(134, 239, 172, .06);
+    color: var(--theme-green-text, #86efac);
+    border-color: var(--theme-green-border, rgba(134, 239, 172, .20));
+    background: var(--theme-green-soft, rgba(134, 239, 172, .06));
 }
 
 .tv-pg-rating {
-    color: #fde68a;
-    border-color: rgba(253, 230, 138, .20);
-    background: rgba(253, 230, 138, .06);
+    color: var(--theme-amber-text, #fde68a);
+    border-color: var(--theme-amber-border, rgba(253, 230, 138, .20));
+    background: var(--theme-amber-soft, rgba(253, 230, 138, .06));
 }
 
 .tv-14-rating {
-    color: #fdba74;
-    border-color: rgba(253, 186, 116, .20);
-    background: rgba(253, 186, 116, .06);
+    color: var(--theme-amber-text, #fdba74);
+    border-color: var(--theme-amber-border, rgba(253, 186, 116, .20));
+    background: var(--theme-amber-soft, rgba(253, 186, 116, .06));
 }
 
 .tv-ma-rating {
-    color: #fca5a5;
-    border-color: rgba(252, 165, 165, .20);
-    background: rgba(252, 165, 165, .06);
+    color: var(--theme-red-text, #fca5a5);
+    border-color: var(--theme-red-border, rgba(252, 165, 165, .20));
+    background: var(--theme-red-soft, rgba(252, 165, 165, .06));
 }
 
 /* =========================================================
@@ -236,11 +236,11 @@ function getLanguageName($code) {
     border-radius: .85rem;
     background: linear-gradient(
         135deg,
-        rgba(14,21,33,.95),
-        rgba(10,15,27,.84)
+        var(--theme-surface, rgba(14,21,33,.95)),
+        var(--theme-surface, rgba(10,15,27,.84))
     );
     border: 1px solid var(--ui-border);
-    box-shadow: 0 14px 36px rgba(0, 0, 0, .28);
+    box-shadow: 0 14px 36px var(--theme-shadow, rgba(0, 0, 0, .28));
     backdrop-filter: blur(14px);
 }
 
@@ -250,7 +250,7 @@ function getLanguageName($code) {
     gap: 12px;
     padding: 14px 16px;
     border-bottom: 1px solid var(--ui-border);
-    background: rgba(45, 212, 191, .045);
+    background: var(--theme-teal-soft, rgba(45, 212, 191, .045));
 }
 
 .episode-icon-box {
@@ -260,29 +260,29 @@ function getLanguageName($code) {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #fff;
+    color: var(--theme-text, #fff);
     font-size: 16px;
 }
 
 .next-icon {
-    background: rgba(45, 212, 191, .16);
+    background: var(--theme-teal-soft, rgba(45, 212, 191, .16));
     color: var(--ui-accent);
 }
 
 .last-icon {
-    background: rgba(148,163,184,0.112);
-    color: #94a3b8;
+    background: var(--theme-surface-alt, rgba(148,163,184,0.112));
+    color: var(--theme-muted, #94a3b8);
 }
 
 .episode-card-title {
-    color: #fff;
-    font-size: 14px;
+    color: var(--theme-text, #fff);
+    font-size: var(--site-font-body, 13px);
     font-weight: 700;
 }
 
 .episode-card-subtitle {
-    color: rgba(255, 255, 255, .42);
-    font-size: 12px;
+    color: var(--theme-muted, rgba(255, 255, 255, .42));
+    font-size: var(--site-font-small, 13px);
 }
 
 .episode-card-body {
@@ -297,7 +297,7 @@ function getLanguageName($code) {
     object-fit: cover;
     border-radius: .55rem;
     flex: 0 0 auto;
-    border: 1px solid rgba(255, 255, 255, .07);
+    border: 1px solid var(--theme-border, rgba(255, 255, 255, .07));
 }
 
 .episode-info {
@@ -306,8 +306,8 @@ function getLanguageName($code) {
 }
 
 .episode-title {
-    color: rgba(255, 255, 255, .92);
-    font-size: 14px;
+    color: var(--theme-text, rgba(255, 255, 255, .92));
+    font-size: var(--site-font-body, 13px);
     font-weight: 700;
 }
 
@@ -324,10 +324,10 @@ function getLanguageName($code) {
     gap: 5px;
     padding: 4px 8px;
     border-radius: .45rem;
-    background: rgba(255,255,255,0.028);
+    background: var(--theme-surface-alt, rgba(255,255,255,0.028));
     border: 1px solid var(--ui-border);
-    color: rgba(255, 255, 255, .68);
-    font-size: 11px;
+    color: var(--theme-muted, rgba(255, 255, 255, .68));
+    font-size: var(--site-font-small, 13px);
     font-weight: 600;
 }
 
@@ -338,8 +338,8 @@ function getLanguageName($code) {
 
 .episode-overview {
     margin-top: 9px;
-    color: rgba(255, 255, 255, .55);
-    font-size: 12px;
+    color: var(--theme-muted, rgba(255, 255, 255, .55));
+    font-size: var(--site-font-small, 13px);
     line-height: 1.55;
 
     display: -webkit-box;
@@ -381,30 +381,30 @@ function getLanguageName($code) {
 }
 
 .tv-seasons-row.seasons-scrollable::-webkit-scrollbar-track {
-    background: rgba(255,255,255,0.028);
+    background: var(--theme-surface-alt, rgba(255,255,255,0.028));
     border-radius: 10px;
 }
 
 .tv-seasons-row.seasons-scrollable::-webkit-scrollbar-thumb {
-    background: rgba(45, 212, 191, 0.45);
+    background: var(--theme-teal-soft, rgba(45, 212, 191, 0.45));
     border-radius: 10px;
 }
 
 .tv-seasons-row.seasons-scrollable::-webkit-scrollbar-thumb:hover {
-    background: rgba(45, 212, 191, 0.7);
+    background: var(--theme-teal-soft, rgba(45, 212, 191, 0.7));
 }
 
 .tv-seasons-row.seasons-scrollable {
     scrollbar-width: thin;
-    scrollbar-color: rgba(45, 212, 191, 0.45)
-                     rgba(255, 255, 255, 0.04);
+    scrollbar-color: var(--theme-teal-border, rgba(45, 212, 191, 0.45))
+                     var(--theme-border, rgba(255, 255, 255, 0.04));
 }
 
 .season-card {
     overflow: hidden;
     border-radius: .7rem;
-    background: rgba(6,10,19,.48);
-    border: 1px solid rgba(255, 255, 255, .055);
+    background: var(--theme-surface, rgba(6,10,19,.48));
+    border: 1px solid var(--theme-border, rgba(255, 255, 255, .055));
     transition:
         transform .18s ease,
         border-color .18s ease;
@@ -412,7 +412,7 @@ function getLanguageName($code) {
 
 .season-card:hover {
     transform: translateY(-3px);
-    border-color: rgba(45, 212, 191, .28);
+    border-color: var(--theme-teal-border, rgba(45, 212, 191, .28));
 }
 
 .season-poster-wrap {
@@ -442,9 +442,9 @@ function getLanguageName($code) {
     gap: 3px;
     padding: 3px 6px;
     border-radius: .4rem;
-    background: rgba(3,6,12,.82);
-    color: #facc15;
-    font-size: 11px;
+    background: var(--theme-surface-alt, rgba(3,6,12,.82));
+    color: var(--theme-amber-text, #facc15);
+    font-size: var(--site-font-small, 13px);
     font-weight: 700;
 }
 
@@ -453,8 +453,8 @@ function getLanguageName($code) {
 }
 
 .season-name {
-    color: rgba(255, 255, 255, .85);
-    font-size: 13px;
+    color: var(--theme-text, rgba(255, 255, 255, .85));
+    font-size: var(--site-font-body, 13px);
     font-weight: 700;
     line-height: 1.35;
 }
@@ -464,8 +464,8 @@ function getLanguageName($code) {
     flex-wrap: wrap;
     gap: 6px;
     margin-top: 6px;
-    color: rgba(255, 255, 255, .48);
-    font-size: 11px;
+    color: var(--theme-muted, rgba(255, 255, 255, .48));
+    font-size: var(--site-font-small, 13px);
     font-weight: 600;
 }
 
@@ -476,8 +476,8 @@ function getLanguageName($code) {
 
 .season-overview {
     margin-top: 7px;
-    color: rgba(255, 255, 255, .52);
-    font-size: 11px;
+    color: var(--theme-muted, rgba(255, 255, 255, .52));
+    font-size: var(--site-font-small, 13px);
     line-height: 1.5;
 
     display: -webkit-box;

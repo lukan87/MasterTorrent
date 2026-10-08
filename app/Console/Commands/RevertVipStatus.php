@@ -18,7 +18,7 @@ class RevertVipStatus extends Command
     {
         $now = Carbon::now();
 
-        User::whereNotNull('vip_until')
+        User::where('user_class', \App\Models\UserClass::VIP)->whereNotNull('vip_until')
             ->where('vip_until','<=',$now)
             ->chunkById(200,function($users){
 

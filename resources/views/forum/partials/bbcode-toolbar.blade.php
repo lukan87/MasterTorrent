@@ -12,7 +12,7 @@
         data-bbcode="b"
         data-bs-toggle="tooltip"
         data-bs-placement="top"
-        title="Bold"
+        title="Bold" aria-label="Bold"
     >
         <strong>B</strong>
     </button>
@@ -23,7 +23,7 @@
         data-bbcode="i"
         data-bs-toggle="tooltip"
         data-bs-placement="top"
-        title="Italic"
+        title="Italic" aria-label="Italic"
     >
         <em>I</em>
     </button>
@@ -34,7 +34,7 @@
         data-bbcode="u"
         data-bs-toggle="tooltip"
         data-bs-placement="top"
-        title="Underline"
+        title="Underline" aria-label="Underline"
     >
         <u>U</u>
     </button>
@@ -45,7 +45,7 @@
         data-bbcode="center"
         data-bs-toggle="tooltip"
         data-bs-placement="top"
-        title="Center text"
+        title="Center text" aria-label="Center text"
     >
         <i class="bi bi-text-center"></i>
     </button>
@@ -58,7 +58,7 @@
         data-bbcode="quote"
         data-bs-toggle="tooltip"
         data-bs-placement="top"
-        title="Quote"
+        title="Quote" aria-label="Quote"
     >
         <i class="bi bi-quote"></i>
     </button>
@@ -69,7 +69,7 @@
         data-bbcode="code"
         data-bs-toggle="tooltip"
         data-bs-placement="top"
-        title="Code"
+        title="Code" aria-label="Code"
     >
         <i class="bi bi-code-slash"></i>
     </button>
@@ -80,7 +80,7 @@
         data-bbcode="spoiler"
         data-bs-toggle="tooltip"
         data-bs-placement="top"
-        title="Spoiler"
+        title="Spoiler" aria-label="Spoiler"
     >
         <i class="bi bi-eye-slash"></i>
     </button>
@@ -93,7 +93,7 @@
         data-bbcode="url"
         data-bs-toggle="tooltip"
         data-bs-placement="top"
-        title="Insert link"
+        title="Insert link" aria-label="Insert link"
     >
         <i class="bi bi-link-45deg"></i>
     </button>
@@ -104,7 +104,7 @@
         data-bbcode="img"
         data-bs-toggle="tooltip"
         data-bs-placement="top"
-        title="Insert image"
+        title="Insert image" aria-label="Insert image"
     >
         <i class="bi bi-image"></i>
     </button>
@@ -115,7 +115,7 @@
         data-bbcode="youtube"
         data-bs-toggle="tooltip"
         data-bs-placement="top"
-        title="Insert YouTube video"
+        title="Insert YouTube video" aria-label="Insert YouTube video"
     >
         <i class="bi bi-youtube"></i>
     </button>
@@ -128,7 +128,7 @@
         data-bbcode="list"
         data-bs-toggle="tooltip"
         data-bs-placement="top"
-        title="Create list"
+        title="Create list" aria-label="Create list"
     >
         <i class="bi bi-list-ul"></i>
     </button>
@@ -139,7 +139,7 @@
         data-bbcode="hr"
         data-bs-toggle="tooltip"
         data-bs-placement="top"
-        title="Horizontal line"
+        title="Horizontal line" aria-label="Horizontal line"
     >
         <i class="bi bi-dash-lg"></i>
     </button>
@@ -153,10 +153,10 @@
         gap: 6px;
         padding: 9px 10px;
         margin-bottom: 0;
-        border: 1px solid rgba(203, 213, 225, 0.12);
+        border: 1px solid var(--theme-border, rgba(203, 213, 225, 0.12));
         border-bottom: 0;
         border-radius: 12px 12px 0 0;
-        background: rgba(10,15,27,0.88);
+        background: var(--theme-surface, rgba(10,15,27,0.88));
     }
 
     .bbcode-btn {
@@ -166,11 +166,11 @@
         align-items: center;
         justify-content: center;
         padding: 0;
-        border: 1px solid rgba(203, 213, 225, 0.10);
+        border: 1px solid var(--theme-border, rgba(203, 213, 225, 0.10));
         border-radius: 7px;
-        background: rgba(255,255,255,0.0315);
-        color: #b8c7d9;
-        font-size: 0.82rem;
+        background: var(--theme-surface-alt, rgba(255,255,255,0.0315));
+        color: var(--theme-text, #b8c7d9);
+        font-size: var(--site-font-body, 13px);
         cursor: pointer;
         transition:
             color 0.18s ease,
@@ -180,9 +180,9 @@
     }
 
     .bbcode-btn:hover {
-        color: #63d2c6;
-        background: rgba(99, 210, 198, 0.10);
-        border-color: rgba(99, 210, 198, 0.30);
+        color: var(--theme-teal-text, #63d2c6);
+        background: var(--theme-teal-soft, rgba(99, 210, 198, 0.10));
+        border-color: var(--theme-teal-border, rgba(99, 210, 198, 0.30));
         transform: translateY(-1px);
     }
 
@@ -191,7 +191,7 @@
     }
 
     .bbcode-btn:focus-visible {
-        outline: 2px solid rgba(99, 210, 198, 0.55);
+        outline: 2px solid var(--theme-teal-border, rgba(99, 210, 198, 0.55));
         outline-offset: 2px;
     }
 
@@ -199,7 +199,7 @@
         width: 1px;
         height: 22px;
         margin: 0 3px;
-        background: rgba(203,213,225,0.084);
+        background: var(--theme-surface-alt, rgba(203,213,225,0.084));
     }
 
     .bbcode-toolbar + textarea {

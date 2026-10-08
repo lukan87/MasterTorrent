@@ -3,7 +3,7 @@
 .torrent-title {
     position: relative;
     display: inline-block;
-    color: #fff;
+    color: var(--theme-text, #fff);
     font-size: 1rem;
     letter-spacing: .3px;
     line-height: 1.15;
@@ -12,7 +12,7 @@
 }
 
 a:hover .torrent-title {
-    color: #aca9a9;
+    color: var(--theme-muted, #aca9a9);
 }
 
 a:hover .torrent-title::after {

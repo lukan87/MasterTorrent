@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container py-4">
-    <h1 class="mb-5 text-center display-5 text-light">Staff Members</h1>
+    <h1 class="mb-5 text-center display-5 theme-text">Staff Members</h1>
 
     @php
         $roles = App\Models\UserClass::getClasses();
@@ -23,7 +23,7 @@
         @endphp
 
         @if ($roleName && $roleMembers->isNotEmpty())
-            <h2 class="my-4 text-light">{{ $roleName }}</h2>
+            <h2 class="my-4 theme-text">{{ $roleName }}</h2>
 
             <div class="row g-4">
                 @foreach ($roleMembers as $member)
@@ -50,7 +50,7 @@
                                     <div class="card-body d-flex flex-column justify-content-center">
                                         <h5 class="card-title mb-2">
                                             <a href="{{ route('profile.show', ['id' => $member->id, 'name' => $member->name ?? 'Unknown']) }}"
-                                               style="color: {{ $classColor }}; text-decoration: none;">
+                                               style="--member-color: {{ $classColor }}; color: var(--member-color); text-decoration: none;">
                                                {{ $member->name }}
                                             </a>
                                         </h5>
@@ -77,29 +77,29 @@
 <!-- Custom CSS -->
 <style>
 body {
-    background: linear-gradient(135deg, #121212, #1d1d1d);
-    color: #fff;
+    background: linear-gradient(135deg, var(--theme-surface, #121212), var(--theme-surface, #1d1d1d));
+    color: var(--theme-text, #fff);
     font-family: 'Segoe UI', sans-serif;
 }
 
 .staff-card {
     border-radius: 12px;
     overflow: hidden;
-    background: rgba(16,16,16,0.85);
+    background: var(--theme-surface-alt, rgba(16,16,16,0.85));
     transition: transform 0.2s, box-shadow 0.3s;
     position: relative;
 }
 
 .staff-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    box-shadow: 0 10px 20px var(--theme-shadow, rgba(0,0,0,0.5));
 }
 
 .staff-avatar {
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    border: 3px solid #444;
+    border: 3px solid var(--theme-border, #444);
     /* Neon glow effect */
     box-shadow: 0 0 8px var(--avatar-glow, #fff55), 0 0 16px var(--avatar-glow, #fff44)33;
     transition: box-shadow 0.3s, transform 0.2s;
@@ -107,7 +107,7 @@ body {
 
 .staff-avatar:hover {
     transform: scale(1.05);
-    box-shadow: 0 0 14px var(--avatar-glow, #fff), 0 0 28px var(--avatar-glow, #fff44);
+    box-shadow: 0 0 14px var(--avatar-glow, var(--theme-shadow, #fff)), 0 0 28px var(--avatar-glow, #fff44);
 }
 
 .staff-btn {
@@ -116,7 +116,7 @@ body {
 
 .staff-btn:hover {
     transform: translateY(-2px);
-    background-color: #28a745cc;
+    background-color: var(--theme-green-action, #28a745cc);
 }
 
 .class-stripe {
@@ -132,7 +132,7 @@ body {
 /* Pulse animation using dynamic color */
 @keyframes pulseGlow {
     0% { box-shadow: 0 0 8px 2px var(--pulse-color, #fff55); }
-    50% { box-shadow: 0 0 14px 6px var(--pulse-color, #fff)66; }
+    50% { box-shadow: 0 0 14px 6px var(--pulse-color, var(--theme-shadow, #fff))66; }
     100% { box-shadow: 0 0 8px 2px var(--pulse-color, #fff55); }
 }
 

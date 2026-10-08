@@ -269,8 +269,8 @@ class TorrentController extends Controller
 
   public function adult(Request $request)
 {
-    $categories = Category::whereIn('id', [27, 34])->get();
-    $allGenres = Genre::all();
+    $categories = Category::whereIn('id', Category::ADULT_IDS)->orderBy('name')->get();
+    $allGenres = Genre::orderBy('name')->get();
 
     $sortColumn = $request->get('sort', 'name');
     $sortDirection = $request->get('direction', 'desc');
@@ -560,13 +560,9 @@ public function bump($id, TorrentBumpService $service)
                 return redirect()->route('torrents.show', ['id' => $torrent->id, 'slug' => $torrent->slug]);
             }
 
-            $torrent->load(['files', 'images', 'genres', 'category', 'uploader:id,name', 'deletedBy:id,name']);
+            $torrent->load(['files', 'images', 'genres', 'category', 'uploader:id,name', 'deletedBy:id,name', 'subtitles.uploader:id,name']);
 
             $comments = Comment::where('torrent_id', $torrent->id)->discussion()->paginate(10, ['*'], 'comments_page')->withQueryString()->fragment('discussion');
-
-            $traffic = History::where('torrent_id', $torrent->id)
-                ->selectRaw('SUM(actual_uploaded) as total_uploaded, SUM(actual_downloaded) as total_downloaded')
-                ->first();
 
             $displayData = app(TorrentDisplayService::class)
                 ->getDisplayData($torrent);
@@ -664,7 +660,6 @@ public function bump($id, TorrentBumpService $service)
                 'reactionCounts',
                 'userReaction',
                 'fileTree',
-                'traffic',
                 'fanartBackground',
                 'userSeedboxes',
                 'isSubscribed',
@@ -985,8 +980,7 @@ public function bulkDelete(Request $request)
         $images = TorrentImage::where('torrent_id', $torrent->id)->get();
         foreach ($images as $image) {
             if ($image instanceof TorrentImage) {
-                $filePath = storage_path('app/public/' . $image->path);
-                if (file_exists($filePath)) unlink($filePath);
+                TorrentImage::deleteLocalFiles([$image->path, $image->fallback]);
                 $image->delete();
             }
         }

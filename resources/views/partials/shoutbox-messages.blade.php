@@ -10,7 +10,7 @@
 
 <div class="message system" data-id="system">
 
-    <img class="avatar"
+    <img class="avatar" width="42" height="42" alt="" loading="lazy" decoding="async"
 
          src="{{ $systemUser->profile_image ?? asset('images/default_avatar/default-avatar.jpg') }}">
 
@@ -22,7 +22,7 @@
 
                 <span class="username"
 
-                      style="color: {{ $classColor }}">
+                      style="--member-color: {{ $classColor }}; color: var(--member-color)">
 
                     {{ $systemUser->name ?? 'System' }}
 
@@ -55,6 +55,10 @@
 @else
 
 {{-- NORMAL CHAT MESSAGES --}}
+@php
+    $chatRenderer = app(\App\Services\ChatMessageRenderer::class);
+    $chatRenderer->prepareMentions($messages);
+@endphp
 
 @php $prevUserId = null; @endphp
 
@@ -69,9 +73,9 @@
 
 
 
-              <div id="shout-{{ $message->id }}" class="message {{ auth()->id() === $message->user_id ? 'own' : '' }}{{ $grouped ? ' grouped' : '' }}" data-id="{{ $message->id }}" data-user="{{ $message->user_id }}" data-sticky="{{ $message->sticky ? 1 : 0 }}">
+              <div id="shout-{{ $message->id }}" class="message {{ auth()->id() === $message->user_id ? 'own' : '' }}{{ $grouped ? ' grouped' : '' }}" data-created="{{ $message->created_at->format('Y-m-d H:i:s') }}" data-id="{{ $message->id }}" data-user="{{ $message->user_id }}" data-sticky="{{ $message->sticky ? 1 : 0 }}">
 
-                <img class="avatar"
+                <img class="avatar" width="42" height="42" alt="" loading="lazy" decoding="async"
 
                      src="{{ $message->user->profile_image ?? asset('images/default_avatar/default-avatar.jpg') }}">
 
@@ -89,7 +93,7 @@
 
            class="username d-inline-flex align-items-center gap-2"
 
-           style="color: {{ $classColor }}"
+           style="--member-color: {{ $classColor }}; color: var(--member-color)"
 
            data-bs-toggle="tooltip"
 
@@ -242,7 +246,7 @@ $isSystem = $message->user_id == 2;
 
                     <div class="content fs-6">
 
-                        {!! convertCustomTagsToHtml($message->message) !!}
+                        {!! $chatRenderer->render($message->message) !!}
 
                     </div>
 
@@ -269,6 +273,7 @@ $isSystem = $message->user_id == 2;
                   rows="3"
 
                   maxlength="1000" required>{{ $message->message }}</textarea>
+    @include('partials.chat-editor-tools')
 
                 <div class="d-flex gap-2 mt-2">
 
@@ -315,6 +320,7 @@ $isSystem = $message->user_id == 2;
               placeholder="Reply..." maxlength="400"
 
               required></textarea>
+    @include('partials.chat-editor-tools')
 
     <div class="reply-actions">
 
@@ -362,7 +368,7 @@ $isSystem = $message->user_id == 2;
 
                                 <div id="shout-{{ $reply->id }}" class="reply-card {{ auth()->id() === $reply->user_id ? 'own' : '' }}" data-user="{{ $reply->user_id }}" role="listitem" style="--reply-accent: {{ $replyColor }}">
 
-                                    <img class="avatar-sm"
+                                    <img class="avatar-sm" width="26" height="26" alt="" loading="lazy" decoding="async"
 
                                          src="{{ $reply->user->profile_image ?? asset('images/default_avatar/default-avatar.jpg') }}">
 
@@ -378,7 +384,7 @@ $isSystem = $message->user_id == 2;
 
        class="d-inline-flex align-items-center gap-2 text-decoration-none"
 
-       style="color: {{ $replyColor }}"
+       style="--member-color: {{ $replyColor }}; color: var(--member-color)"
 
        data-bs-toggle="tooltip"
 
@@ -583,7 +589,7 @@ $isSystem = $message->user_id == 2;
 
     <div class="reply-content">
 
-        {!! convertCustomTagsToHtml($reply->message) !!}
+        {!! $chatRenderer->render($reply->message) !!}
 
     </div>
 
@@ -610,6 +616,7 @@ $isSystem = $message->user_id == 2;
                       rows="3"
 
                       maxlength="1000" required>{{ $reply->message }}</textarea>
+    @include('partials.chat-editor-tools')
 
             <div class="d-flex gap-2 mt-2">
 
@@ -653,7 +660,7 @@ $isSystem = $message->user_id == 2;
 
             <div class="shoutbox-empty">
                 <i class="bi bi-chat-dots" style="font-size:2.5rem;opacity:.35;"></i>
-                <p style="margin:0;opacity:.55;font-size:14px;">No messages yet. Be the first to say hello! &#x1F44B;</p>
+                <p style="margin:0;opacity:.55;font-size:var(--site-font-body, 13px);">No messages yet. Be the first to say hello! &#x1F44B;</p>
             </div>
 
         @endforelse

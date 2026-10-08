@@ -2,450 +2,129 @@
 
 @section('title', 'Collection: ' . $collection['name'])
 
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/collection-details.css') }}?v={{ filemtime(public_path('css/collection-details.css')) }}">
+@endpush
+
 @section('content')
+@php
+    $films = collect($movies);
+    $totalFilms = $films->count();
+    $availableFilms = $films->filter(fn ($film) => collect($film['torrents'] ?? [])->isNotEmpty())->count();
+    $onlineFilms = $films->where('is_online', true)->count();
+    $releaseCount = $films->sum(fn ($film) => collect($film['torrents'] ?? [])->count());
+    $completion = $totalFilms ? (int) round($availableFilms / $totalFilms * 100) : 0;
+    $years = $films->pluck('year')->filter()->sort()->values();
+    $viewer = Auth::user();
+    $canUpload = $viewer && ($viewer->user_class >= \App\Models\UserClass::UPLOADER || $viewer->uploadpos === 'yes');
+    $isModerator = $viewer && $viewer->user_class >= \App\Models\UserClass::MODERATOR;
+@endphp
 
-<div class="container mt-4">
+<div class="collection-page">
+    <a href="{{ route('collections.index') }}" class="cx-back"><i class="bi bi-arrow-left" aria-hidden="true"></i> All collections</a>
 
-    {{-- =========================
-       COLLECTION HEADER
-    ========================== --}}
-    <div class="movie-header-container mb-5">
-        <div class="movie-header-card">
-            <div class="movie-header-content row">
-
-                <div class="col-12 col-md-3 poster-column">
-                    <div class="poster-wrapper">
-                        <img src="{{ $collection['poster'] ?? asset('images/noposter.jpg') }}"
-                             class="movie-poster"
-                             alt="{{ $collection['name'] }}">
-                    </div>
+    <header class="cx-hero">
+        @if(!empty($collection['backdrop_path']))
+            <img src="{{ $collection['backdrop_path'] }}" class="cx-backdrop" alt="" aria-hidden="true" decoding="async">
+        @endif
+        <div class="cx-hero-content">
+            <img class="cx-hero-poster" src="{{ $collection['poster'] ?: asset('images/not-found.jpg') }}" alt="{{ $collection['name'] }} poster" width="200" height="300" decoding="async">
+            <div class="cx-hero-info">
+                <span class="cx-eyebrow"><i class="bi bi-collection-play" aria-hidden="true"></i> The collection</span>
+                <h1>{{ $collection['name'] }}</h1>
+                <div class="cx-hero-meta">
+                    <span>{{ $totalFilms }} {{ $totalFilms === 1 ? 'film' : 'films' }}</span>
+                    @if($years->isNotEmpty())
+                        <span>{{ $years->first() }}@if($years->last() !== $years->first())–{{ $years->last() }}@endif</span>
+                    @endif
+                    <span>In release order</span>
                 </div>
-
-                <div class="col-12 col-md-9 info-column">
-                    <h1 class="movie-title">
-                        {{ $collection['name'] }}
-                    </h1>
-
-                    <p class="text-muted mt-2 collection-overview">
-                        {{ $collection['overview'] }}
-                    </p>
-
-                    <div class="mt-3">
-                        <span class="collection-status-badge">
-                            {{ $collection['uploaded'] }} / {{ $collection['total'] }} Uploaded
-                        </span>
-                    </div>
+                @if(!empty($collection['overview']))
+                    <p class="cx-hero-overview">{{ $collection['overview'] }}</p>
+                @endif
+                <div class="cx-hero-actions">
+                    <a href="#collection-films" class="cx-button cx-button-primary"><i class="bi bi-film" aria-hidden="true"></i> Explore the films <i class="bi bi-arrow-down" aria-hidden="true"></i></a>
+                    <span class="cx-hero-note">{{ number_format($releaseCount) }} torrent {{ $releaseCount === 1 ? 'release' : 'releases' }} available</span>
                 </div>
-
             </div>
         </div>
-    </div>
+    </header>
 
-    {{-- =========================
-       MOVIES IN COLLECTION
-    ========================== --}}
-    @foreach($movies as $movie)
+    <section class="cx-dashboard" aria-label="Collection availability">
+        <div class="cx-completion">
+            <div class="cx-completion-label"><span><i class="bi bi-stack" aria-hidden="true"></i> Collection coverage</span><strong>{{ $completion }}%</strong></div>
+            <progress value="{{ $availableFilms }}" max="{{ max(1, $totalFilms) }}" aria-label="{{ $availableFilms }} of {{ $totalFilms }} films have torrents">{{ $completion }}%</progress>
+            <span class="cx-caption">{{ $availableFilms }} of {{ $totalFilms }} films have torrents</span>
+        </div>
+        <div class="cx-stat cx-stat-available"><i class="bi bi-check-circle" aria-hidden="true"></i><div><strong>{{ $availableFilms }}</strong><span>Available</span></div></div>
+        <div class="cx-stat cx-stat-missing"><i class="bi bi-hourglass-split" aria-hidden="true"></i><div><strong>{{ $totalFilms - $availableFilms }}</strong><span>Awaiting torrents</span></div></div>
+        <div class="cx-stat cx-stat-online"><i class="bi bi-play-circle" aria-hidden="true"></i><div><strong>{{ $onlineFilms }}</strong><span>Online entries</span></div></div>
+    </section>
 
-        @php
-            $torrents = collect($movie['torrents'] ?? []);
-            $hasTorrents = $torrents->isNotEmpty();
-            $primaryTorrent = $torrents->first();
-            $isOnline = $movie['is_online'];
-        @endphp
-
-        <div class="movie-header-container mb-4">
-            <div class="movie-header-card {{ !$hasTorrents ? 'opacity-75' : '' }}">
-                <div class="movie-header-content row">
-
-                    {{-- POSTER --}}
-                    <div class="col-12 col-md-3 poster-column">
-                        <div class="poster-wrapper">
-                            <img src="{{ $movie['poster'] }}"
-                                 class="movie-poster {{ !$hasTorrents ? 'grayscale' : '' }}"
-                                 alt="{{ $movie['title'] }}">
+    <section id="collection-films" class="cx-films" aria-labelledby="collection-films-title">
+        <div class="cx-section-heading"><div><span class="cx-eyebrow">The complete story</span><h2 id="collection-films-title">Films in this collection</h2></div><span class="cx-film-count">{{ $totalFilms }} {{ $totalFilms === 1 ? 'film' : 'films' }}</span></div>
+        @forelse($films as $movie)
+            @php
+                $torrents = collect($movie['torrents'] ?? []);
+                $hasTorrents = $torrents->isNotEmpty();
+                $isOnline = (bool) ($movie['is_online'] ?? false);
+                $libraryUrl = route('library.movies.show', [$movie['tmdb_id'], \Illuminate\Support\Str::slug($movie['title'])]);
+            @endphp
+            <article class="cx-film {{ $hasTorrents ? 'cx-film-available' : 'cx-film-missing' }}">
+                <div class="cx-film-art">
+                    <a href="{{ $libraryUrl }}" aria-label="View {{ $movie['title'] }}">
+                        <img src="{{ $movie['poster'] ?: asset('images/not-found.jpg') }}" alt="{{ $movie['title'] }} poster" width="120" height="180" loading="lazy" decoding="async">
+                    </a>
+                    <span class="cx-film-number" aria-label="Film {{ $loop->iteration }}">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
+                </div>
+                <div class="cx-film-body">
+                    <div class="cx-film-heading">
+                        <div>
+                            <div class="cx-film-kicker">Film {{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }} @if(!empty($movie['year']))<span> / {{ $movie['year'] }}</span>@endif</div>
+                            <h3><a href="{{ $libraryUrl }}">{{ $movie['title'] }}</a></h3>
                         </div>
-
-                        @if($isOnline && !$hasTorrents)
-                            <div class="collection-online-note text-center mt-2">
-                                <i class="bi bi-info-circle"></i>
-                                Online entry exists — upload torrent
-                            </div>
-                        @endif
-
-                        {{-- ACTION --}}
-                        <div class="trailer-section text-center mt-3">
-
-                            @if(
-                                Auth::check() &&
-                                !$hasTorrents &&
-                                (
-                                    Auth::user()->user_class >= \App\Models\UserClass::UPLOADER ||
-                                    Auth::user()->uploadpos === 'yes'
-                                )
-                            )
-                                <a href="{{ route('torrents.create', ['tmdb' => $movie['tmdb_id']]) }}"
-                                   class="btn collection-upload-btn me-1">
-                                    <i class="bi bi-upload"></i> Upload
-                                </a>
-                            @endif
-
-                            @if(Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
-
-                                @if($isOnline)
-                                    <a href="{{ route('movies.show', $movie['movie_id']) }}"
-                                       class="btn collection-online-btn">
-                                        <i class="bi bi-cloud-check"></i> Uploaded Online
-                                    </a>
-                                @else
-                                    <a href="{{ route('movies.create', [
-                                        'tmdb'  => $movie['tmdb_id'],
-                                        'title' => $movie['title']
-                                    ]) }}"
-                                       class="btn collection-add-online-btn">
-                                        <i class="bi bi-cloud-plus"></i> Add Online
-                                    </a>
-                                @endif
-
-                            @endif
-
-                        </div>
+                        <span class="cx-status {{ $hasTorrents ? 'cx-status-available' : 'cx-status-missing' }}"><i class="bi {{ $hasTorrents ? 'bi-check-circle-fill' : 'bi-hourglass' }}" aria-hidden="true"></i>{{ $hasTorrents ? 'Available' : 'Awaiting torrents' }}</span>
                     </div>
-
-                    {{-- INFO --}}
-                    <div class="col-12 col-md-9 info-column">
-
-                        <h2 class="movie-title">
-                            {{ $movie['title'] }}
-                            <span class="release-year">({{ $movie['year'] }})</span>
-                        </h2>
-
-                        <p class="text-muted mt-2 collection-overview">
-                            {{ $movie['overview'] }}
-                        </p>
-
-                        @if($hasTorrents)
-                            <div class="collection-torrents mt-3">
-
-                                <h6 class="collection-section-title">
-                                    Available Torrents
-                                </h6>
-
+                    @if(!empty($movie['overview']))<p class="cx-film-overview">{{ $movie['overview'] }}</p>@endif
+                    <div class="cx-film-actions">
+                        <a href="{{ $libraryUrl }}" class="cx-film-link">Movie details <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
+                        @if($canUpload && ! $hasTorrents)
+                            <a href="{{ route('torrents.create', ['tmdb' => $movie['tmdb_id']]) }}" class="cx-button cx-button-small"><i class="bi bi-upload" aria-hidden="true"></i> Upload torrent</a>
+                        @endif
+                        @if($isModerator)
+                            @if($isOnline)
+                                <a href="{{ route('movies.show', $movie['movie_id']) }}" class="cx-button cx-button-small cx-button-online"><i class="bi bi-cloud-check" aria-hidden="true"></i> Online entry</a>
+                            @else
+                                <a href="{{ route('movies.create', ['tmdb' => $movie['tmdb_id'], 'title' => $movie['title']]) }}" class="cx-button cx-button-small"><i class="bi bi-cloud-plus" aria-hidden="true"></i> Add online</a>
+                            @endif
+                        @elseif($isOnline)
+                            <span class="cx-online-note"><i class="bi bi-cloud-check" aria-hidden="true"></i> Online entry exists</span>
+                        @endif
+                    </div>
+                    @if($hasTorrents)
+                        <details class="cx-releases" @if($loop->first) open @endif>
+                            <summary><span><i class="bi bi-download" aria-hidden="true"></i> Available torrents <span class="cx-release-count">{{ $torrents->count() }}</span></span><i class="bi bi-chevron-down cx-chevron" aria-hidden="true"></i></summary>
+                            <div class="cx-release-list">
                                 @foreach($torrents as $torrent)
-                                    <div class="collection-torrent-row">
-
-                                        <div class="collection-torrent-info">
-                                            <a href="{{ route('torrents.show', $torrent->id) }}"
-                                               class="collection-torrent-name">
-                                                {{ $torrent->name }}
-                                            </a>
-
-                                            <div class="collection-torrent-meta">
-                                                {{ App\Helpers\FormatHelper::formatSize($torrent->size) }}
-                                                • {{ $torrent->created_at->diffForHumans() }}
-                                            </div>
+                                    <div class="cx-release">
+                                        <div class="cx-release-info">
+                                            <a href="{{ route('torrents.show', [$torrent->id, $torrent->slug]) }}" class="cx-release-title">{{ $torrent->name }}</a>
+                                            <div class="cx-release-meta"><span><i class="bi bi-hdd" aria-hidden="true"></i> {{ App\Helpers\FormatHelper::formatSize($torrent->size) }}</span><time datetime="{{ $torrent->created_at->toIso8601String() }}" title="{{ $torrent->created_at->format('j F Y, H:i') }}"><i class="bi bi-clock" aria-hidden="true"></i> {{ $torrent->created_at->diffForHumans() }}</time></div>
                                         </div>
-
-                                        <div class="collection-torrent-seeds">
-                                            <span class="seed-value">{{ $torrent->seeders }}</span>
-                                            <span class="seed-divider">/</span>
-                                            <span class="leech-value">{{ $torrent->leechers }}</span>
-                                        </div>
-
+                                        <div class="cx-peers"><span class="cx-seeders" aria-label="{{ number_format($torrent->seeders) }} seeders" title="Seeders"><i class="bi bi-arrow-up" aria-hidden="true"></i>{{ number_format($torrent->seeders) }}</span><span class="cx-leechers" aria-label="{{ number_format($torrent->leechers) }} leechers" title="Leechers"><i class="bi bi-arrow-down" aria-hidden="true"></i>{{ number_format($torrent->leechers) }}</span></div>
+                                        <a href="{{ route('torrents.show', [$torrent->id, $torrent->slug]) }}" class="cx-release-open" aria-label="View torrent {{ $torrent->name }}"><i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
                                     </div>
                                 @endforeach
-
                             </div>
-                        @else
-                            <p class="collection-no-torrents mt-3">
-                                No Torrents Available Yet!!
-                            </p>
-                        @endif
-
-                    </div>
-
+                        </details>
+                    @else
+                        <div class="cx-no-releases"><i class="bi bi-inbox" aria-hidden="true"></i><span>No torrents yet. @if($canUpload)Help complete the collection with an upload.@else Check back for new releases.@endif</span></div>
+                    @endif
                 </div>
-            </div>
-        </div>
-
-    @endforeach
-
+            </article>
+        @empty
+            <div class="cx-empty"><i class="bi bi-film" aria-hidden="true"></i><h3>No films listed yet</h3><p>This collection does not have any films to display.</p></div>
+        @endforelse
+    </section>
 </div>
-
-<style>
-/* =========================================================
-   FILEIPLAY COLLECTION PAGE
-   Dark glass / teal forum style
-   ========================================================= */
-
-.movie-header-container {
-    position: relative;
-}
-
-.movie-header-card {
-    background: linear-gradient(
-        135deg,
-        rgba(14,21,33,.95),
-        rgba(10,15,27,.84)
-    );
-    border: 1px solid var(--ui-border);
-    border-radius: .85rem;
-    overflow: visible;
-    box-shadow: 0 14px 35px rgba(0,0,0,.28);
-    backdrop-filter: blur(14px);
-}
-
-.movie-header-content {
-    padding: 22px;
-}
-
-.poster-column {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.poster-wrapper {
-    width: 100%;
-    max-width: 230px;
-}
-
-.movie-poster {
-    display: block;
-    width: 100%;
-    height: auto;
-    aspect-ratio: 2 / 3;
-    object-fit: cover;
-    border-radius: .7rem;
-    border: 1px solid var(--ui-border);
-    box-shadow: 0 12px 30px rgba(0,0,0,.35);
-}
-
-.grayscale {
-    filter: grayscale(100%) brightness(.68);
-}
-
-.info-column {
-    padding: 8px 10px;
-}
-
-.movie-title {
-    color: #fff;
-    font-size: 14px;
-    font-weight: 700;
-    line-height: 1.4;
-    margin-bottom: 0;
-}
-
-.release-year {
-    color: var(--ui-accent);
-    font-weight: 600;
-}
-
-.collection-overview {
-    color: rgba(255,255,255,.68) !important;
-    font-size: 14px;
-    line-height: 1.65;
-}
-
-.collection-status-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 6px 10px;
-    border-radius: .5rem;
-    background: rgba(45,212,191,.10);
-    border: 1px solid rgba(45,212,191,.22);
-    color: var(--ui-accent);
-    font-size: 13px;
-    font-weight: 700;
-}
-
-.collection-online-note {
-    color: var(--ui-accent);
-    font-size: 13px;
-    line-height: 1.4;
-}
-
-.trailer-section {
-    width: 100%;
-    max-width: 230px;
-}
-
-.collection-upload-btn,
-.collection-online-btn,
-.collection-add-online-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-    margin-bottom: 5px;
-    border-radius: .55rem;
-    padding: 7px 10px;
-    font-size: 13px;
-    font-weight: 600;
-    transition: background .15s ease, border-color .15s ease, color .15s ease, transform .15s ease;
-}
-
-.collection-upload-btn {
-    color: #0b1720;
-    background: var(--ui-accent);
-    border: 1px solid var(--ui-accent);
-}
-
-.collection-upload-btn:hover {
-    color: #071318;
-    background: var(--ui-accent-strong);
-    border-color: var(--ui-accent-strong);
-    transform: translateY(-1px);
-}
-
-.collection-online-btn {
-    color: #86efac;
-    background: rgba(34,197,94,.08);
-    border: 1px solid rgba(34,197,94,.24);
-}
-
-.collection-online-btn:hover {
-    color: #bbf7d0;
-    background: rgba(34,197,94,.14);
-    border-color: rgba(34,197,94,.35);
-}
-
-.collection-add-online-btn {
-    color: var(--ui-accent);
-    background: rgba(45,212,191,.07);
-    border: 1px solid rgba(45,212,191,.22);
-}
-
-.collection-add-online-btn:hover {
-    color: #fff;
-    background: rgba(45,212,191,.12);
-    border-color: rgba(45,212,191,.35);
-}
-
-.collection-torrents {
-    border-top: 1px solid var(--ui-border);
-    padding-top: 14px;
-}
-
-.collection-section-title {
-    color: rgba(255,255,255,.58);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: .05em;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-}
-
-.collection-torrent-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 10px 12px;
-    margin-bottom: 5px;
-    border: 1px solid transparent;
-    border-bottom-color: rgba(255,255,255,.06);
-    border-radius: .55rem;
-    transition: background .15s ease, border-color .15s ease;
-}
-
-.collection-torrent-row:hover {
-    background: rgba(45,212,191,.045);
-    border-color: rgba(45,212,191,.12);
-}
-
-.collection-torrent-info {
-    min-width: 0;
-    flex: 1;
-}
-
-.collection-torrent-name {
-    display: block;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    color: var(--ui-accent);
-    font-size: 14px;
-    font-weight: 600;
-    text-decoration: none;
-}
-
-.collection-torrent-name:hover {
-    color: var(--ui-accent-strong);
-    text-decoration: none;
-}
-
-.collection-torrent-meta {
-    margin-top: 3px;
-    color: rgba(255,255,255,.48);
-    font-size: 12px;
-}
-
-.collection-torrent-seeds {
-    flex-shrink: 0;
-    min-width: 55px;
-    text-align: right;
-    font-size: 13px;
-    font-weight: 700;
-}
-
-.seed-value {
-    color: #4ade80;
-}
-
-.seed-divider {
-    color: rgba(255,255,255,.35);
-    margin: 0 2px;
-}
-
-.leech-value {
-    color: #f87171;
-}
-
-.collection-no-torrents {
-    color: rgba(255,255,255,.50) !important;
-    font-size: 14px;
-}
-
-@media (max-width: 767.98px) {
-    .movie-header-content {
-        padding: 16px;
-    }
-
-    .poster-wrapper {
-        max-width: 190px;
-    }
-
-    .info-column {
-        padding: 18px 4px 4px;
-    }
-
-    .movie-title {
-        font-size: 14px;
-    }
-
-    .collection-overview {
-        font-size: 14px;
-    }
-
-    .trailer-section {
-        max-width: 100%;
-    }
-
-    .collection-torrent-row {
-        align-items: flex-start;
-        padding: 9px 8px;
-    }
-
-    .collection-torrent-name {
-        font-size: 14px;
-    }
-
-    .collection-torrent-seeds {
-        font-size: 12px;
-        min-width: 48px;
-    }
-}
-</style>
-
 @endsection

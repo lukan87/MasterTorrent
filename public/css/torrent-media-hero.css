@@ -1,0 +1,75 @@
+/* Torrent hero: compact details, image-derived poster tint, and a cast sidebar. */
+.premium-media-card.torrent-media-hero { --premium-image-color: var(--theme-surface-alt); --premium-hero-surface: color-mix(in srgb, var(--theme-surface) 96%, var(--premium-image-color)); isolation: isolate; container-type: inline-size; max-width: 1550px; margin-inline: auto; padding: 24px; border-radius: 18px; background: var(--premium-hero-surface); border-color: var(--theme-border); backdrop-filter: none; box-shadow: 0 10px 32px var(--theme-shadow); }
+.torrent-media-hero .premium-backdrop { width: 100%; height: 100%; object-fit: cover; object-position: center top; opacity: .18; z-index: -1; }
+html[data-bs-theme="light"] .torrent-media-hero { --theme-muted: #425367; --ui-accent: #075e57; }
+html[data-bs-theme="light"] .torrent-media-hero .premium-backdrop { opacity: .14; }
+.torrent-media-hero .premium-hero-layout { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 24px; margin: 0; }
+.torrent-media-hero .premium-hero-layout > * { width: auto; max-width: 100%; min-width: 0; margin: 0; padding: 0; }
+.torrent-media-hero .premium-poster-wrapper { border-radius: 12px; background: color-mix(in srgb, var(--theme-surface-alt) 80%, var(--premium-image-color)); border-color: color-mix(in srgb, var(--theme-border) 60%, var(--premium-image-color)); box-shadow: 0 10px 26px var(--theme-shadow), 0 0 28px rgba(var(--premium-image-rgb, 16, 26, 40), .24); }
+.torrent-media-hero .premium-poster { aspect-ratio: 2 / 3; object-fit: contain; object-position: center top; }
+.torrent-media-hero .premium-poster-wrapper:hover .premium-poster { transform: none; }
+.torrent-media-hero .poster-overlay { opacity: .18; }
+.torrent-media-hero .premium-info { padding: 0; }
+.torrent-media-hero .title-block { border: 0; padding: 0; }
+.torrent-media-hero .premium-title { font-size: clamp(24px, 2.4vw, 36px); line-height: 1.2; letter-spacing: -.025em; }
+.torrent-media-hero .release-year { color: var(--theme-muted); font-size: .65em; font-weight: 500; white-space: nowrap; }
+.torrent-media-hero .premium-tagline { margin: 8px 0 14px; line-height: 1.6; }
+.torrent-media-hero :is(.premium-meta-row, .premium-ratings, .premium-facts) { gap: 8px; }
+.torrent-media-hero .meta-pill { border-radius: 6px; color: var(--theme-text); }
+.torrent-media-hero .premium-meta-row .rating-badge { border-radius: 4px; }
+html[data-bs-theme] .torrent-media-hero .premium-meta-row .meta-pill .rating-badge { color: var(--theme-text) !important; }
+html[data-bs-theme] .torrent-media-hero .premium-meta-row .meta-pill :is(.pg-rating, .pg13-rating, .tv-pg-rating, .tv-14-rating) { color: var(--theme-amber-text) !important; background: var(--theme-amber-soft); border-color: var(--theme-amber-border); }
+html[data-bs-theme] .torrent-media-hero .premium-meta-row .meta-pill :is(.g-rating, .tv-y-rating, .tv-y7-rating, .tv-g-rating) { color: var(--theme-green-text) !important; background: var(--theme-green-soft); border-color: var(--theme-green-border); }
+html[data-bs-theme] .torrent-media-hero .premium-meta-row .meta-pill :is(.r-rating, .nc17-rating, .tv-ma-rating) { color: var(--theme-red-text) !important; background: var(--theme-red-soft); border-color: var(--theme-red-border); }
+html[data-bs-theme] .torrent-media-hero .premium-meta-row .meta-pill .unrated-rating { color: var(--theme-muted) !important; background: var(--theme-surface-alt); border-color: var(--theme-border); }
+.torrent-media-hero .meta-runtime { color: var(--theme-pink-text); background: var(--theme-pink-soft); border-color: var(--theme-pink-border); }
+.torrent-media-hero .meta-seasons { color: var(--theme-purple-text); background: var(--theme-purple-soft); border-color: var(--theme-purple-border); }
+.torrent-media-hero .meta-episodes { color: var(--theme-teal-text); background: var(--theme-teal-soft); border-color: var(--theme-teal-border); }
+.torrent-media-hero :is(.meta-runtime, .meta-seasons, .meta-episodes) i { color: inherit; }
+.torrent-media-hero .premium-ratings .rating-card { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 6px; min-width: 0; max-width: 100%; padding: 7px 11px; border-radius: 999px; text-align: left; color: var(--theme-text); }
+.torrent-media-hero .premium-ratings .rating-source { order: -1; margin: 0; color: inherit; font-weight: 500; }
+.torrent-media-hero .premium-ratings .rating-value { color: inherit; overflow-wrap: anywhere; }
+.torrent-media-hero .rating-scale { font-weight: 400; }
+.torrent-media-hero .premium-ratings .imdb-card { color: var(--theme-amber-text); background: var(--theme-amber-soft); border-color: var(--theme-amber-border); }
+.torrent-media-hero .premium-ratings .imdb-votes-card { color: var(--theme-blue-text); background: var(--theme-blue-soft); border-color: var(--theme-blue-border); }
+.torrent-media-hero .premium-ratings .tmdb-card { color: var(--theme-teal-text); background: var(--theme-teal-soft); border-color: var(--theme-teal-border); }
+.torrent-media-hero .premium-ratings .rt-card { color: var(--theme-red-text); background: var(--theme-red-soft); border-color: var(--theme-red-border); }
+.torrent-media-hero .premium-overview { padding: 0; border: 0; background: transparent; }
+.torrent-media-hero .premium-overview h5 { color: var(--theme-text); line-height: 1.75; }
+.torrent-media-hero .fact-box { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; max-width: 100%; padding: 7px 11px; border-radius: 999px; }
+.torrent-media-hero .fact-label { margin: 0; text-transform: none; letter-spacing: 0; }
+.torrent-media-hero .fact-value { color: var(--theme-text); overflow-wrap: anywhere; }
+.torrent-media-hero .premium-cast-column { grid-column: 2; }
+.torrent-media-hero .media-cast { margin: 0 !important; }
+.torrent-media-hero .media-cast-track { scrollbar-width: none; }
+.torrent-media-hero .media-cast-track::-webkit-scrollbar { display: none; }
+.torrent-media-hero :is(a, button, summary, [tabindex="0"]):focus-visible { outline: 2px solid var(--theme-teal-text); outline-offset: 3px; }
+@container (min-width: 1050px) {
+    .torrent-media-hero .premium-hero-has-cast { grid-template-columns: 210px minmax(0, 1fr) 270px; }
+    .torrent-media-hero .premium-hero-has-cast .premium-cast-column { grid-column: 3; grid-row: 1; padding-left: 18px; border-left: 1px solid var(--theme-border); }
+    .torrent-media-hero .premium-cast-column .media-cast { padding-top: 0; border-top: 0; }
+    .torrent-media-hero .premium-cast-column .media-cast-track { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 8px; overflow: visible; scroll-snap-type: none; }
+    .torrent-media-hero .premium-cast-column .media-cast-person { margin-inline: 0; }
+    .torrent-media-hero .premium-cast-column .media-cast-profile img { width: min(72px, 100%); height: auto; aspect-ratio: 1; }
+    .torrent-media-hero .premium-cast-column .media-cast-name { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; min-height: 2.7em; }
+}
+@media (max-width: 767px) {
+    .premium-media-card.torrent-media-hero { padding: 18px; }
+    .torrent-media-hero .premium-hero-layout { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+    .torrent-media-hero .premium-poster-column { display: grid; gap: 12px; }
+    .torrent-media-hero .premium-poster-wrapper { width: min(210px, 100%); margin-inline: auto; }
+    .torrent-media-hero .premium-trailer-wrapper { margin-top: 0; }
+    .torrent-media-hero :is(.premium-watch-section, .premium-network-section) { width: 100%; margin-top: 0 !important; }
+    .torrent-media-hero .premium-cast-column { grid-column: 1; }
+}
+@media (max-width: 575px) {
+    .premium-media-card.torrent-media-hero { padding: 14px; border-radius: 14px; }
+    .torrent-media-hero .premium-title { font-size: 25px; }
+}
+@media (prefers-reduced-motion: reduce) { .torrent-media-hero * { transition: none !important; } }
+
+.torrent-media-hero .premium-collection { display: inline-flex; align-items: baseline; gap: 7px; max-width: 100%; padding: 7px 12px; margin: 10px 0 0; border: 1px solid var(--theme-purple-border, rgba(167, 139, 250, .25)); border-radius: 999px; background: var(--theme-purple-soft, rgba(167, 139, 250, .1)); color: var(--theme-muted, #94a3b8); font-size: var(--site-font-body, 13px); line-height: 1.5; }
+.torrent-media-hero .premium-collection > span { min-width: 0; overflow-wrap: anywhere; }
+.torrent-media-hero .premium-collection > i { flex-shrink: 0; color: var(--theme-purple-text, #c6b1ff); }
+.torrent-media-hero .premium-collection a { color: var(--theme-purple-text, #c6b1ff); font-weight: 600; text-decoration: none; overflow-wrap: anywhere; }
+.torrent-media-hero .premium-collection a:hover { color: var(--theme-text, #e2e8f0); text-decoration: underline; }

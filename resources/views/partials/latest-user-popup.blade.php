@@ -53,11 +53,11 @@
     max-width: calc(100vw - 24px);
     overflow: hidden;
     border-radius: .75rem;
-    background: linear-gradient(135deg, rgba(14,21,33,.97), rgba(10,15,27,.95));
-    border: 1px solid var(--ui-border, rgba(255,255,255,.09));
+    background: linear-gradient(135deg, var(--theme-surface, rgba(14,21,33,.97)), var(--theme-surface, rgba(10,15,27,.95)));
+    border: 1px solid var(--ui-border, var(--theme-border, rgba(255,255,255,.09)));
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    box-shadow: 0 18px 45px rgba(0,0,0,.48), inset 0 1px 0 rgba(255,255,255,.035);
+    box-shadow: 0 18px 45px var(--theme-shadow, rgba(0,0,0,.48)), inset 0 1px 0 var(--theme-shadow, rgba(255,255,255,.035));
     z-index: 999999;
     animation: luPopupIn .45s cubic-bezier(.22,1,.36,1);
 }
@@ -69,7 +69,7 @@
     width: 180px;
     height: 180px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(34,211,201,.16), transparent 70%);
+    background: radial-gradient(circle, var(--theme-teal-soft, rgba(34,211,201,.16)), transparent 70%);
     pointer-events: none;
 }
 
@@ -93,7 +93,7 @@
     position: absolute;
     inset: -2px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #22d3c5, #14b8a6);
+    background: linear-gradient(135deg, var(--theme-teal-soft, #22d3c5), var(--theme-teal-soft, #14b8a6));
 }
 
 .lu-avatar-img {
@@ -103,7 +103,7 @@
     height: 100%;
     object-fit: cover;
     border-radius: 50%;
-    border: 3px solid rgba(15,23,42,.98);
+    border: 3px solid var(--theme-border, rgba(15,23,42,.98));
     z-index: 2;
 }
 
@@ -114,10 +114,10 @@
     width: 13px;
     height: 13px;
     border-radius: 50%;
-    background: #22c55e;
-    border: 2px solid #0f172a;
+    background: var(--theme-green-soft, #22c55e);
+    border: 2px solid var(--theme-border, #0f172a);
     z-index: 3;
-    box-shadow: 0 0 8px rgba(34,197,94,.45);
+    box-shadow: 0 0 8px var(--theme-shadow, rgba(34,197,94,.45));
 }
 
 .lu-user-info {
@@ -135,12 +135,12 @@
     gap: 5px;
     padding: 4px 8px;
     border-radius: .45rem;
-    font-size: .64rem;
+    font-size: var(--site-font-small, 13px);
     font-weight: 800;
     letter-spacing: .55px;
-    color: #8be7df;
-    background: rgba(34,211,201,.09);
-    border: 1px solid rgba(34,211,201,.18);
+    color: var(--theme-teal-text, #8be7df);
+    background: var(--theme-teal-soft, rgba(34,211,201,.09));
+    border: 1px solid var(--theme-teal-border, rgba(34,211,201,.18));
 }
 
 .lu-badge i {
@@ -148,7 +148,7 @@
 }
 
 .lu-username {
-    font-size: .98rem;
+    font-size: var(--site-font-body, 13px);
     font-weight: 700;
     line-height: 1.25;
     margin-bottom: 3px;
@@ -158,23 +158,23 @@
 }
 
 .lu-user-link {
-    color: #f1f5f9;
+    color: var(--theme-text, #f1f5f9);
     text-decoration: none;
     transition: color .2s ease;
 }
 
 .lu-user-link:hover {
-    color: #67e8df;
+    color: var(--theme-teal-text, #67e8df);
 }
 
 .lu-subtext {
-    color: rgba(226,232,240,.58);
-    font-size: .76rem;
+    color: var(--theme-muted, rgba(226,232,240,.58));
+    font-size: var(--site-font-body, 13px);
     line-height: 1.35;
 }
 
 .lu-subtext i {
-    color: #5eead4;
+    color: var(--theme-teal-text, #5eead4);
 }
 
 .lu-side-icon {
@@ -185,9 +185,9 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    background: rgba(34,211,201,.07);
-    border: 1px solid rgba(34,211,201,.12);
-    color: #5eead4;
+    background: var(--theme-teal-soft, rgba(34,211,201,.07));
+    border: 1px solid var(--theme-teal-border, rgba(34,211,201,.12));
+    color: var(--theme-teal-text, #5eead4);
     font-size: 1rem;
 }
 
@@ -197,13 +197,13 @@
     right: 0;
     bottom: 0;
     height: 3px;
-    background: rgba(255,255,255,0.0245);
+    background: var(--theme-surface-alt, rgba(255,255,255,0.0245));
 }
 
 .lu-progress-bar {
     height: 100%;
     width: 100%;
-    background: linear-gradient(90deg, #14b8a6, #22d3c5);
+    background: linear-gradient(90deg, var(--theme-teal-action, #14b8a6), var(--theme-teal-action, #22d3c5));
     animation: luProgress 5s linear forwards;
 }
 
@@ -232,11 +232,11 @@
     }
 
     .lu-username {
-        font-size: .94rem;
+        font-size: var(--site-font-body, 13px);
     }
 
     .lu-subtext {
-        font-size: .73rem;
+        font-size: var(--site-font-small, 13px);
     }
 }
 

@@ -12,10 +12,7 @@
 
 
 
-@includeWhen(
-    $display['type'] === 'movie',
-    'torrents.partials.collection'
-)
+
 
 
 

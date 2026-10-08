@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid py-4">
+<div class="container-fluid py-4 coder-dashboard">
     <h1 class="mb-4">Coder Dashboard</h1>
 
     <!-- Metrics Row -->
     <div class="row g-4 mb-4">
         <!-- Total Users -->
         <div class="col-12 col-md-6 col-lg-4 d-flex">
-            <div class="card shadow-sm text-center p-3 flex-fill h-100" style="background-color: #2b4183; color: #fff; transition: transform 0.2s;">
+            <div class="card shadow-sm text-center p-3 flex-fill h-100" style="background-color: var(--theme-blue-soft, #2b4183); color: var(--theme-text, #fff); transition: transform 0.2s;">
                 <div class="card-body">
                     <i class="bi bi-people-fill fs-2 mb-2"></i>
                     <h2 class="fw-bold">{{ $usersCount }}</h2>
@@ -27,7 +27,7 @@
 
         <!-- Active Users -->
         <div class="col-12 col-md-6 col-lg-4 d-flex">
-            <div class="card shadow-sm text-center p-3 flex-fill h-100" style="background-color: #fd7e14; color: #fff; transition: transform 0.2s;">
+            <div class="card shadow-sm text-center p-3 flex-fill h-100" style="background-color: var(--theme-amber-soft, #fd7e14); color: var(--theme-text, #fff); transition: transform 0.2s;">
                 <div class="card-body">
                     <i class="bi bi-person-check-fill fs-2 mb-2"></i>
                     <h2 class="fw-bold">{{ $activeUsers }}</h2>
@@ -47,7 +47,7 @@
         <!-- Total Torrents -->
         <div class="col-12 col-md-6 col-lg-4 d-flex">
             <a href="{{ route('coder.torrents') }}" class="text-decoration-none w-100">
-            <div class="card shadow-sm text-center p-3 flex-fill h-100" style="background-color: #147954; color: #fff; transition: transform 0.2s;">
+            <div class="card shadow-sm text-center p-3 flex-fill h-100" style="background-color: var(--theme-teal-soft, #147954); color:  var(--theme-text, #fff); transition: transform 0.2s;">
                 <div class="card-body">
                     <i class="bi bi-hdd-fill fs-2 mb-2"></i>
                     <h2 class="fw-bold">{{ $torrentsCount }}</h2>
@@ -63,7 +63,7 @@
     <div class="row g-4 mb-4">
         <!-- Users Registered Last 30 Days -->
         <div class="col-12 col-md-6 col-lg-4 d-flex">
-            <div class="card shadow-sm text-center p-3 flex-fill h-100" style="background-color: #614e1d; color: #fff;">
+            <div class="card shadow-sm text-center p-3 flex-fill h-100" style="background-color: var(--theme-amber-soft, #614e1d); color: var(--theme-text, #fff);">
                 <div class="card-body">
                     <i class="bi bi-calendar-event-fill fs-2 mb-2"></i>
                     <h2 class="fw-bold">{{ $usersLast30Days }}</h2>
@@ -74,7 +74,7 @@
 
         <!-- Comments -->
         <div class="col-12 col-md-6 col-lg-4 d-flex">
-            <div class="card shadow-sm text-center p-3 flex-fill h-100" style="background-color: #6f42c1; color: #fff;">
+            <div class="card shadow-sm text-center p-3 flex-fill h-100" style="background-color: var(--theme-purple-soft, #6f42c1); color: var(--theme-text, #fff);">
                 <div class="card-body">
                     <i class="bi bi-chat-dots-fill fs-2 mb-2"></i>
                     <h2 class="fw-bold">{{ $commentsCount }}</h2>
@@ -85,7 +85,7 @@
 
         <!-- Thanks -->
         <div class="col-12 col-md-6 col-lg-4 d-flex">
-            <div class="card shadow-sm text-center p-3 flex-fill h-100" style="background-color: #e83e8c; color: #fff;">
+            <div class="card shadow-sm text-center p-3 flex-fill h-100" style="background-color: var(--theme-pink-soft, #e83e8c); color: var(--theme-text, #fff);">
                 <div class="card-body">
                     <i class="bi bi-hand-thumbs-up-fill fs-2 mb-2"></i>
                     <h2 class="fw-bold">{{ $thanksCount }}</h2>
@@ -150,6 +150,8 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => { bar.style.width = target + '%'; }, 200);
     });
 
+    const chartColor = () => getComputedStyle(document.documentElement).getPropertyValue('--ui-text').trim();
+
     // Initialize sparklines
     const usersSparkline = new Chart(document.getElementById('usersSparkline'), {
         type: 'line',
@@ -157,8 +159,8 @@ document.addEventListener("DOMContentLoaded", () => {
             labels: Array.from({length: 7}, (_, i) => `Day ${i+1}`),
             datasets: [{
                 data: [5, 10, 8, 12, 15, 9, 11], // example data, replace with dynamic later
-                borderColor: '#fff',
-                backgroundColor: 'rgba(255,255,255,0.2)',
+                borderColor: chartColor(),
+                backgroundColor: 'transparent',
                 tension: 0.3,
                 fill: true,
                 pointRadius: 0
@@ -178,8 +180,8 @@ document.addEventListener("DOMContentLoaded", () => {
             labels: Array.from({length: 7}, (_, i) => `Day ${i+1}`),
             datasets: [{
                 data: [2,4,3,5,6,3,4],
-                borderColor: '#fff',
-                backgroundColor: 'rgba(255,255,255,0.2)',
+                borderColor: chartColor(),
+                backgroundColor: 'transparent',
                 tension: 0.3,
                 fill: true,
                 pointRadius: 0
@@ -199,8 +201,8 @@ document.addEventListener("DOMContentLoaded", () => {
             labels: Array.from({length: 7}, (_, i) => `Day ${i+1}`),
             datasets: [{
                 data: [10,12,11,13,15,14,16],
-                borderColor: '#fff',
-                backgroundColor: 'rgba(255,255,255,0.2)',
+                borderColor: chartColor(),
+                backgroundColor: 'transparent',
                 tension: 0.3,
                 fill: true,
                 pointRadius: 0
@@ -212,6 +214,12 @@ document.addEventListener("DOMContentLoaded", () => {
             plugins: { legend: { display: false } },
             scales: { x: { display: false }, y: { display: false } }
         }
+    });
+    window.addEventListener('fileiplay:themechange', () => {
+        [usersSparkline, activeUsersSparkline, torrentsSparkline].forEach(chart => {
+            chart.data.datasets[0].borderColor = chartColor();
+            chart.update('none');
+        });
     });
 });
 </script>

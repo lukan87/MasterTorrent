@@ -1,5 +1,5 @@
 <div class="col-6 col-md-4 col-lg-2">
-    <div class="card bg-dark border-0 series-card position-relative">
+    <div class="card theme-surface border-0 series-card position-relative">
 
         <img loading="lazy"
              src="https://image.tmdb.org/t/p/w600_and_h900_bestv2{{ $serie->poster_path }}"
@@ -18,7 +18,7 @@
         </div>
 
         {{-- OVERLAY --}}
-        <div class="overlay p-3 d-flex flex-column justify-content-end text-white">
+        <div class="overlay p-3 d-flex flex-column justify-content-end theme-text">
 
             <h6 class="fw-bold text-truncate">{{ $serie->name }}</h6>
 

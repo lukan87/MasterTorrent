@@ -1,6 +1,7 @@
 @extends('layouts.admin')
 
 @section('admin-content')
+@include('admin.partials.page-header', ['eyebrow' => 'COMMUNITY EMAIL', 'title' => 'Email History', 'subtitle' => 'Review sent messages and manage your email history.'])
 
 <div class="container mt-5">
 
@@ -220,7 +221,7 @@
     transition: all 0.2s ease;
 }
 .hover-row:hover {
-    background: rgba(0, 123, 255, 0.05);
+    background: var(--theme-blue-soft, rgba(0, 123, 255, 0.05));
 }
 </style>
 

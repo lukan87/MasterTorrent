@@ -69,6 +69,8 @@ class InviteService
                     "Your invite code [b]{$invite->invite_code}[/b] has been used.\n\nNew member: [url={$profileUrl}]{$name}[/url]\n\nWelcome them to the site!");
             }
 
+            WelcomeMessageService::sendTo($user);
+
             return $user;
         });
     }

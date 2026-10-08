@@ -23,6 +23,10 @@ class Movie extends Model
         'runtime',
         'vote_average',
         'vote_count',
+        'imdb_rating',
+        'imdb_votes',
+        'recommendation_score',
+        'ratings_updated_at',
         'tagline',
         'status',
         'genres',
@@ -33,6 +37,10 @@ class Movie extends Model
         'genres'       => 'array',
         'release_date' => 'datetime',
         'vote_average' => 'float',
+        'imdb_rating' => 'float',
+        'imdb_votes' => 'integer',
+        'recommendation_score' => 'float',
+        'ratings_updated_at' => 'datetime',
     ];
 
     public function comments()

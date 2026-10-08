@@ -13,7 +13,7 @@
                     <div class="col">
                         <div class="card shadow-lg rounded-3 border-0 hover-outline">
                             <img src="https://image.tmdb.org/t/p/original{{ $collectionDetailsList[$collection->collection_id]['backdrop_path'] ?? 'default-image.jpg' }}" class="card-img-top rounded-top" alt="...">
-                            <div class="card-body text-white bg-dark">
+                            <div class="card-body theme-text theme-surface">
                                 <h5 class="card-title">{{ $collectionDetailsList[$collection->collection_id]['name'] }}</h5><br>
                                 <!-- Ensure movie count is on a new line below the name -->
                                 <p class="card-text">
@@ -42,8 +42,8 @@
 
     .hover-outline:hover {
         transform: translateY(-5px); /* Lift the card */
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Soft shadow */
-        border: 2px solid #ff5722; /* Colored outline on hover (can change color) */
+        box-shadow: 0 4px 20px var(--theme-shadow, rgba(0, 0, 0, 0.1)); /* Soft shadow */
+        border: 2px solid var(--theme-red-border, #ff5722); /* Colored outline on hover (can change color) */
     }
 
     .hover-outline img {
@@ -56,14 +56,14 @@
 
     /* Additional card styling */
     .card-body {
-        background-color: #22262a; /* Dark background */
+        background-color: var(--theme-surface, #22262a); /* Dark background */
     }
 
     .card-body a {
-        color: #fff;
+        color: var(--theme-text, #fff);
     }
 
     .card-body a:hover {
-        color: #ff5722; /* Highlight color on hover */
+        color: var(--theme-red-text, #ff5722); /* Highlight color on hover */
     }
 </style>

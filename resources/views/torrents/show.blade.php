@@ -4,105 +4,84 @@
 
 @section('content')
 
-<div class="container-fluid">
+    <div class="container-fluid">
 
-    {{-- Deleted Info Box --}}
-    @include('torrents.partials.deleted-info')
+        {{-- Deleted Info Box --}}
+        @include('torrents.partials.deleted-info')
 
 
-    {{-- =========================
+        {{-- =========================
         HEADER (Movie/TV/Game)
     ========================== --}}
-    @if($torrent->tmdb_type === 'movie' && $display)
-
-        @include('torrents.partials.movie')
-
-    @elseif($torrent->tmdb_type === 'tv' && $display)
-
-        @include('torrents.partials.tv')
-
-    @elseif($torrent->steamid)
-
-        @include('torrents.partials.game')
-
-    @else
-
-        @include('torrents.partials.default')
-
-    @endif
+        @if ($torrent->tmdb_type === 'movie' && $display)
+            @include('torrents.partials.movie')
+        @elseif($torrent->tmdb_type === 'tv' && $display)
+            @include('torrents.partials.tv')
+        @elseif($torrent->steamid)
+            @include('torrents.partials.game')
+        @else
+            @include('torrents.partials.default')
+        @endif
 
 
-    @if(Auth::user()->user_class < \App\Models\UserClass::VIP)
+        @if (Auth::user()->user_class < \App\Models\UserClass::VIP)
+        @endif
 
-    @endif
 
-
-    {{-- =========================
+        {{-- =========================
         SHOW BAR
         Hidden if deleted
     ========================== --}}
-    @if(!$torrent->trashed())
+        @if (!$torrent->trashed())
+            @include('torrents.partials.showbar')
+            @include('torrents.partials.sticky-toolbar')
+        @endif
 
-        @include('torrents.partials.showbar')
 
-    @endif
-
-
-    {{-- =========================================
+        {{-- =========================================
         DETAILS SECTION
     ========================================= --}}
-    @if(!$torrent->trashed())
+        @if (!$torrent->trashed())
 
-        <div class="modern-tabs-card mb-4">
+            <div class="modern-tabs-card mb-4">
 
 
-            {{-- =====================================
+                {{-- =====================================
                 TABS HEADER
             ====================================== --}}
-            <div class="modern-tabs-header">
+                <div class="modern-tabs-header">
 
-                <ul
-                    class="nav modern-tabs-nav"
-                    role="tablist"
-                >
+                    <ul class="nav modern-tabs-nav" role="tablist">
 
-                    {{-- DESCRIPTION --}}
-                    <li class="nav-item">
+                        {{-- DESCRIPTION --}}
+                        <li class="nav-item">
 
-                        <a
-                            class="nav-link active"
-                            data-bs-toggle="tab"
-                            id="description-tab"
-                            role="tab"
-                            aria-controls="description"
-                            aria-selected="true"
-                            title="Release notes, details and additional information"
-                            href="#description"
-                        >
-                            <i class="bi bi-card-text me-2"></i>
+                            <a class="nav-link active" data-bs-toggle="tab" id="description-tab" role="tab"
+                                aria-controls="description" aria-selected="true"
+                                title="Release notes, details and additional information" href="#description">
+                                <i class="bi bi-card-text me-2"></i>
 
-                            Description
-                        </a>
+                                Description
+                            </a>
 
-                    </li>
+                        </li>
 
 
-                    {{-- =====================================
+                        {{-- =====================================
                         SUBTITLES
-                        TEMPORARILY DISABLED
                     ====================================== --}}
 
-                    {{--
-                    @if(
-                        $torrent->subtitles->isNotEmpty() ||
-                        !empty($externalSubtitles['items'])
-                    )
+                    @if ($torrent->subtitles->isNotEmpty() || !empty($externalSubtitles['items']))
 
                         <li class="nav-item">
 
                             <a
                                 class="nav-link"
                                 data-bs-toggle="tab"
+                                id="subtitles-tab"
+                                role="tab"
+                                aria-controls="subtitles"
+                                aria-selected="false"
                                 href="#subtitles"
                             >
                                 <i class="bi bi-badge-cc-fill me-2"></i>
@@ -113,194 +92,150 @@
                         </li>
 
                     @endif
-                    --}}
 
 
-                    {{-- SNATCHED --}}
-                    @if(
-                        Auth::check() &&
-                        Auth::user()->user_class >= \App\Models\UserClass::MODERATOR
-                    )
+                        {{-- SNATCHED --}}
+                        @if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
+                            <li class="nav-item">
 
-                        <li class="nav-item">
+                                <a class="nav-link" href="{{ route('torrents.snatched', ['id' => $torrent->id]) }}">
+                                    <i class="bi bi-person-check-fill me-2"></i>
 
-                            <a
-                                class="nav-link"
-                                href="{{ route('torrents.snatched', ['id' => $torrent->id]) }}"
-                            >
-                                <i class="bi bi-person-check-fill me-2"></i>
+                                    Snatched
+                                </a>
 
-                                Snatched
-                            </a>
+                            </li>
+                        @endif
 
-                        </li>
+                    </ul>
 
-                    @endif
-
-                </ul>
-
-            </div>
+                </div>
 
 
 
-            {{-- =====================================
+                {{-- =====================================
                 TABS BODY
             ====================================== --}}
-            <div class="modern-tabs-body">
+                <div class="modern-tabs-body">
 
-                <div class="tab-content">
+                    <div class="tab-content">
 
 
-                    {{-- =====================================
+                        {{-- =====================================
                         DESCRIPTION
                     ====================================== --}}
-                    <div
-                        class="tab-pane fade show active"
-                        id="description"
-                        role="tabpanel"
-                        aria-labelledby="description-tab"
-                    >
+                        <div class="tab-pane fade show active" id="description" role="tabpanel"
+                            aria-labelledby="description-tab">
 
 
-                        @php
+                            @php
 
-                            $descriptionHtml =
-                                convertCustomTagsToHtml(
-                                    $torrent->description
-                                );
+                                $descriptionHtml = convertCustomTagsToHtml($torrent->description);
 
-                            /*
-                             * Plain text is only used to
-                             * determine whether the description
-                             * needs expanding.
-                             */
-                            $descriptionText = trim(
-                                preg_replace(
-                                    '/\s+/',
-                                    ' ',
-                                    strip_tags($descriptionHtml)
-                                )
-                            );
+                                /*
+                                 * Plain text is only used to
+                                 * determine whether the description
+                                 * needs expanding.
+                                 */
+                                $descriptionText = trim(preg_replace('/\s+/', ' ', strip_tags($descriptionHtml)));
 
-                            /*
-                             * Long description threshold.
-                             *
-                             * Change 500 to 1000 if you want
-                             * more content visible before the
-                             * expand system is enabled.
-                             */
-                            $hasLongDescription =
-                                mb_strlen($descriptionText) > 500;
+                                /*
+                                 * Long description threshold.
+                                 *
+                                 * Change 500 to 1000 if you want
+                                 * more content visible before the
+                                 * expand system is enabled.
+                                 */
+                                $hasLongDescription = mb_strlen($descriptionText) > 500;
 
-                        @endphp
+                            @endphp
 
 
-                        <div class="modern-description-card">
+                            <div class="modern-description-card">
 
 
-                            {{-- =====================================
+                                {{-- =====================================
                                 DESCRIPTION BODY
                             ====================================== --}}
-                            <div class="modern-description-body">
+                                <div class="modern-description-body">
 
-                                <div
-                                    class="description-expand-wrapper
+                                    <div class="description-expand-wrapper
                                     {{ $hasLongDescription ? 'is-collapsed' : '' }}"
-                                    id="torrentDescriptionWrapper"
-                                >
+                                        id="torrentDescriptionWrapper">
 
 
-                                    {{-- DESCRIPTION CONTENT --}}
-                                    <div
-                                        class="scrollable-content
+                                        {{-- DESCRIPTION CONTENT --}}
+                                        <div class="scrollable-content
                                                modern-scrollable-content
                                                description-expand-content"
-                                        id="torrentDescriptionContent"
-                                    >
+                                            id="torrentDescriptionContent">
 
-                                        {!! $descriptionHtml !!}
+                                            {!! $descriptionHtml !!}
+
+                                        </div>
+
+
+                                        @if ($hasLongDescription)
+                                            {{-- =====================================
+                                            BOTTOM FADE
+                                        ====================================== --}}
+                                            <div class="description-fade" id="torrentDescriptionFade" aria-hidden="true">
+                                            </div>
+
+
+                                            {{-- =====================================
+                                            OPEN BUTTON
+                                        ====================================== --}}
+                                            <button type="button" class="description-open-btn"
+                                                id="torrentDescriptionToggle" aria-expanded="false"
+                                                aria-controls="torrentDescriptionContent" title="Show full description"
+                                                aria-label="Show full description">
+                                                <i class="bi bi-chevron-down"></i>
+                                            </button>
+                                        @endif
 
                                     </div>
 
-
-                                    @if($hasLongDescription)
-
-
-                                        {{-- =====================================
-                                            BOTTOM FADE
-                                        ====================================== --}}
-                                        <div
-                                            class="description-fade"
-                                            id="torrentDescriptionFade"
-                                            aria-hidden="true"
-                                        ></div>
-
-
-                                        {{-- =====================================
-                                            OPEN BUTTON
-                                        ====================================== --}}
-                                        <button
-                                            type="button"
-                                            class="description-open-btn"
-                                            id="torrentDescriptionToggle"
-                                            aria-expanded="false"
-                                            aria-controls="torrentDescriptionContent"
-                                            title="Show full description"
-                                            aria-label="Show full description"
-                                        >
-                                            <i class="bi bi-chevron-down"></i>
+                                    @if ($hasLongDescription)
+                                        <button type="button" class="description-header-close ms-auto mt-2"
+                                            id="torrentDescriptionClose" title="Collapse description"
+                                            aria-label="Collapse description" aria-controls="torrentDescriptionContent">
+                                            <i class="bi bi-chevron-up"></i>
                                         </button>
+                                    @endif
 
+                                    @if ($torrent->images->isNotEmpty())
+                                        <div class="mt-3">
+                                            @include('torrents.partials.screens')
+                                        </div>
+                                    @endif
 
+                                    @if (!empty($torrent->mediainfo) && !empty($mediainfo))
+                                        <div class="mt-3">
+                                            @include('torrents.partials.mediainfo')
+                                        </div>
                                     @endif
 
                                 </div>
-
-                                @if($hasLongDescription)
-                                    <button type="button"
-                                            class="description-header-close ms-auto mt-2"
-                                            id="torrentDescriptionClose"
-                                            title="Collapse description"
-                                            aria-label="Collapse description"
-                                            aria-controls="torrentDescriptionContent">
-                                        <i class="bi bi-chevron-up"></i>
-                                    </button>
-                                @endif
-
-                                @if($torrent->images->isNotEmpty())
-                                    <div class="mt-3">
-                                        @include('torrents.partials.screens')
-                                    </div>
-                                @endif
-
-                                @if(!empty($torrent->mediainfo) && !empty($mediainfo))
-                                    <div class="mt-3">
-                                        @include('torrents.partials.mediainfo')
-                                    </div>
-                                @endif
 
                             </div>
 
                         </div>
 
-                    </div>
 
 
-
-                    {{-- =====================================
+                        {{-- =====================================
                         SUBTITLES
-                        TEMPORARILY DISABLED
                     ====================================== --}}
 
-                    {{--
-                    @if(
-                        $torrent->subtitles->isNotEmpty() ||
-                        !empty($externalSubtitles['items'])
-                    )
+                    @if ($torrent->subtitles->isNotEmpty() || !empty($externalSubtitles['items']))
 
                         <div
                             class="tab-pane fade"
                             id="subtitles"
+                            role="tabpanel"
+                            aria-labelledby="subtitles-tab"
+                            tabindex="0"
                         >
 
                             <div class="modern-subtitles-card mt-3">
@@ -342,7 +277,7 @@
                                 <div class="modern-subtitles-body">
 
 
-                                    @foreach($torrent->subtitles as $sub)
+                                    @foreach ($torrent->subtitles as $sub)
 
                                         @php
 
@@ -432,10 +367,7 @@
                                                 </a>
 
 
-                                                @if(
-                                                    auth()->id() === $sub->uploaded_by ||
-                                                    auth()->user()->user_class >= \App\Models\UserClass::MODERATOR
-                                                )
+                                                @if (auth()->id() === $sub->uploaded_by || auth()->user()->user_class >= \App\Models\UserClass::MODERATOR)
 
                                                     <form
                                                         method="POST"
@@ -469,9 +401,9 @@
 
 
 
-                                    @if(!empty($externalSubtitles['items']))
+                                    @if (!empty($externalSubtitles['items']))
 
-                                        @foreach($externalSubtitles['items'] as $sub)
+                                        @foreach ($externalSubtitles['items'] as $sub)
 
                                             <div class="subtitle-item external-subtitle">
 
@@ -493,7 +425,7 @@
                                                         </strong>
 
 
-                                                        @if(!empty($sub['year']))
+                                                        @if (!empty($sub['year']))
 
                                                             <span class="subtitle-year">
 
@@ -513,7 +445,7 @@
                                                     </div>
 
 
-                                                    @if(!empty($sub['description']))
+                                                    @if (!empty($sub['description']))
 
                                                         <div class="external-description">
 
@@ -526,14 +458,14 @@
 
                                                     <div class="subtitle-meta">
 
-                                                        @if(!empty($sub['translator']))
+                                                        @if (!empty($sub['translator']))
 
                                                             By {{ $sub['translator'] }}
 
                                                         @endif
 
 
-                                                        @if(!empty($sub['type']))
+                                                        @if (!empty($sub['type']))
 
                                                             • {{ ucfirst($sub['type']) }}
 
@@ -546,7 +478,7 @@
 
                                                 <div class="subtitle-actions">
 
-                                                    @if(!empty($sub['downloadPage']))
+                                                    @if (!empty($sub['downloadPage']))
 
                                                         <a
                                                             href="{{ $sub['downloadPage'] }}"
@@ -578,196 +510,189 @@
                         </div>
 
                     @endif
-                    --}}
 
 
 
 
+
+                    </div>
 
                 </div>
 
             </div>
 
-        </div>
-
-    @endif
+        @endif
 
 
 
-    {{-- =========================
+        {{-- =========================
         COMMENTS
     ========================== --}}
-    @if(!$torrent->trashed())
+        @if (!$torrent->trashed())
+            @include('torrents.partials.comments')
+        @endif
 
-        @include('torrents.partials.comments')
 
-    @endif
+
+        {{-- =========================
+        SIMILAR TORRENTS
+    ========================== --}}
+        @if (!$torrent->trashed())
+            @include('torrents.partials.similar')
+        @endif
+
+
+    </div>
 
 
 
     {{-- =========================
-        SIMILAR TORRENTS
-    ========================== --}}
-    @if(!$torrent->trashed())
-
-        @include('torrents.partials.similar')
-
-    @endif
-
-
-</div>
-
-
-
-{{-- =========================
     FILES MODAL
 ========================== --}}
-@include('torrents.partials.modalfilesrender')
+    @include('torrents.partials.modalfilesrender')
 
 
 
-{{-- =========================
+    {{-- =========================
     EXISTING SHOW CSS
 ========================== --}}
-@include('torrents.partials.css.show-css')
+    @include('torrents.partials.css.show-css')
 
 
 
-<script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const descriptionTab = document.getElementById('description-tab');
+            if (descriptionTab) {
+                bootstrap.Tooltip.getOrCreateInstance(descriptionTab, {
+                    container: 'body',
+                    placement: 'top',
+                    trigger: 'hover focus'
+                });
+            }
 
-document.addEventListener('DOMContentLoaded', function () {
-    const descriptionTab = document.getElementById('description-tab');
-    if (descriptionTab) {
-        bootstrap.Tooltip.getOrCreateInstance(descriptionTab, {
-            container: 'body',
-            placement: 'top',
-            trigger: 'hover focus'
+
+
+            const wrapper =
+                document.getElementById(
+                    'torrentDescriptionWrapper'
+                );
+
+
+            const openButton =
+                document.getElementById(
+                    'torrentDescriptionToggle'
+                );
+
+
+            const closeButton =
+                document.getElementById(
+                    'torrentDescriptionClose'
+                );
+
+
+            /*
+             * Short descriptions will not have
+             * expand/collapse buttons.
+             */
+            if (
+                !wrapper ||
+                !openButton ||
+                !closeButton
+            ) {
+                return;
+            }
+
+
+
+            /* =====================================================
+               OPEN DESCRIPTION
+               ===================================================== */
+
+            openButton.addEventListener(
+                'click',
+                function() {
+
+
+                    /*
+                     * Expand the description.
+                     */
+                    wrapper.classList.remove(
+                        'is-collapsed'
+                    );
+
+
+                    /*
+                     * Update accessibility state.
+                     */
+                    openButton.setAttribute(
+                        'aria-expanded',
+                        'true'
+                    );
+
+
+                    /*
+                     * Show UP arrow immediately
+                     * below the expanded description.
+                     */
+                    closeButton.classList.add(
+                        'show'
+                    );
+
+
+                }
+            );
+
+
+
+            /* =====================================================
+               CLOSE DESCRIPTION
+               ===================================================== */
+
+            closeButton.addEventListener(
+                'click',
+                function() {
+
+
+                    /*
+                     * Collapse description.
+                     */
+                    wrapper.classList.add(
+                        'is-collapsed'
+                    );
+
+
+                    /*
+                     * Update accessibility state.
+                     */
+                    openButton.setAttribute(
+                        'aria-expanded',
+                        'false'
+                    );
+
+
+                    /*
+                     * Hide the collapse arrow.
+                     */
+                    closeButton.classList.remove(
+                        'show'
+                    );
+
+
+                    /*
+                     * Bring description back into view.
+                     */
+                    wrapper.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+
+
+                }
+            );
+
+
         });
-    }
-
-
-
-    const wrapper =
-        document.getElementById(
-            'torrentDescriptionWrapper'
-        );
-
-
-    const openButton =
-        document.getElementById(
-            'torrentDescriptionToggle'
-        );
-
-
-    const closeButton =
-        document.getElementById(
-            'torrentDescriptionClose'
-        );
-
-
-    /*
-     * Short descriptions will not have
-     * expand/collapse buttons.
-     */
-    if (
-        !wrapper ||
-        !openButton ||
-        !closeButton
-    ) {
-        return;
-    }
-
-
-
-    /* =====================================================
-       OPEN DESCRIPTION
-       ===================================================== */
-
-    openButton.addEventListener(
-        'click',
-        function () {
-
-
-            /*
-             * Expand the description.
-             */
-            wrapper.classList.remove(
-                'is-collapsed'
-            );
-
-
-            /*
-             * Update accessibility state.
-             */
-            openButton.setAttribute(
-                'aria-expanded',
-                'true'
-            );
-
-
-            /*
-             * Show UP arrow immediately
-             * below the expanded description.
-             */
-            closeButton.classList.add(
-                'show'
-            );
-
-
-        }
-    );
-
-
-
-    /* =====================================================
-       CLOSE DESCRIPTION
-       ===================================================== */
-
-    closeButton.addEventListener(
-        'click',
-        function () {
-
-
-            /*
-             * Collapse description.
-             */
-            wrapper.classList.add(
-                'is-collapsed'
-            );
-
-
-            /*
-             * Update accessibility state.
-             */
-            openButton.setAttribute(
-                'aria-expanded',
-                'false'
-            );
-
-
-            /*
-             * Hide the collapse arrow.
-             */
-            closeButton.classList.remove(
-                'show'
-            );
-
-
-            /*
-             * Bring description back into view.
-             */
-            wrapper.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
-            });
-
-
-        }
-    );
-
-
-});
-
-</script>
+    </script>
 
 @endsection

@@ -70,6 +70,8 @@ if (Torrent::where('info_hash', $infoHash)->exists()) {
         }
     }
 
+    $imagePaths = $this->imageService->prepare($request);
+
     $torrent = Torrent::create([
         'info_hash'   => $infoHash,
         'file_signature' => $fileSignature,
@@ -113,7 +115,7 @@ if (Torrent::where('info_hash', $infoHash)->exists()) {
     // ⚠ FIXED: pass $decoded, NOT $torrentData
     $this->genreService->sync($torrent, $request, $metadata);
     $this->fileService->storeFileList($torrent, $decoded);
-    $this->imageService->upload($torrent, $request);
+    $this->imageService->attach($torrent, $imagePaths);
 
     $user->increment('seedbonus', 10);
     $user->update(['last_upload' => now()]);
@@ -138,9 +140,10 @@ if (Torrent::where('info_hash', $infoHash)->exists()) {
     {
         $name = str_replace(['{', '}'], '.', $name);
         $name = preg_replace('/[^A-Za-z0-9\.\-\s]/', '.', $name);
+        $name = preg_replace('/\s+/', '.', $name);
         $name = preg_replace('/[\.]{2,}/', '.', $name);
-        $name = preg_replace('/\s+/', ' ', $name);
-        return trim($name);
+        $name = trim($name, '.');
+        return preg_replace('/(?:\.(?:torrent|mkv|mp4|avi|mov|m2ts|ts|webm|wmv|mpg|mpeg|m4v|vob))+$/i', '', $name);
     }
 
     private function uniqueSlug(string $name): string
@@ -212,7 +215,7 @@ private function syncTorrentMovie(Torrent $torrent): void
     TorrentMovie::create([
         'tmdbid'        => $torrent->tmdbid,
         'title'         => $title,
-        'slug'          => \Str::slug($title),
+        'slug'          => \Illuminate\Support\Str::slug($title),
         'poster_path'   => $tmdb['poster_path'] ?? null,
         'backdrop_path' => $tmdb['backdrop_path'] ?? null,
         'rating'        => $tmdb['vote_average'] ?? null,
@@ -258,7 +261,7 @@ private function syncTorrentSeries(Torrent $torrent): void
     TorrentSeries::create([
         'tmdbid'        => $torrent->tmdbid,
         'title'         => $title,
-        'slug'          => \Str::slug($title),
+        'slug'          => Str::slug($title),
         'poster_path'   => $tmdb['poster_path'] ?? null,
         'backdrop_path' => $tmdb['backdrop_path'] ?? null,
         'rating'        => $tmdb['vote_average'] ?? null,

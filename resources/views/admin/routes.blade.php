@@ -36,7 +36,7 @@
     <div class="routes-panel">
 
         <!-- HEADER -->
-        <div class="routes-header">
+        <div class="routes-header admin-page-header">
 
             <div class="routes-heading">
                 <div class="routes-icon">
@@ -195,12 +195,12 @@
     overflow: hidden;
     background: linear-gradient(
         135deg,
-        rgba(14,21,33,.95),
-        rgba(10,15,27,.84)
+        var(--theme-surface, rgba(14,21,33,.95)),
+        var(--theme-surface, rgba(10,15,27,.84))
     );
-    border: 1px solid var(--ui-border, rgba(148,163,184,.16));
+    border: 1px solid var(--ui-border, var(--theme-border, rgba(148,163,184,.16)));
     border-radius: .85rem;
-    box-shadow: 0 10px 28px rgba(0,0,0,.22);
+    box-shadow: 0 10px 28px var(--theme-shadow, rgba(0,0,0,.22));
 }
 
 .routes-panel::before {
@@ -210,7 +210,7 @@
     top: 0;
     bottom: 0;
     width: 3px;
-    background: var(--ui-accent, #22d3c5);
+    background: var(--theme-teal-action, var(--ui-accent, #22d3c5));
 }
 
 /* HEADER */
@@ -221,8 +221,8 @@
     justify-content: space-between;
     gap: 1rem;
     padding: .85rem 1rem;
-    background: rgba(10,15,27,.4);
-    border-bottom: 1px solid var(--ui-border, rgba(148,163,184,.16));
+    background: var(--theme-surface, rgba(10,15,27,.4));
+    border-bottom: 1px solid var(--ui-border, var(--theme-border, rgba(148,163,184,.16)));
 }
 
 .routes-heading {
@@ -239,24 +239,24 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--ui-accent, #22d3c5);
-    background: rgba(34,211,197,.07);
-    border: 1px solid rgba(34,211,197,.16);
+    color: var(--ui-accent, var(--theme-on-action, #22d3c5));
+    background: var(--theme-teal-soft, rgba(34,211,197,.07));
+    border: 1px solid var(--theme-teal-border, rgba(34,211,197,.16));
     border-radius: .6rem;
     font-size: 17px;
 }
 
 .routes-heading h2 {
     margin: 0;
-    color: #f1f5f9;
-    font-size: 14px;
+    color: var(--theme-text, #f1f5f9);
+    font-size: var(--site-font-body, 13px);
     font-weight: 700;
 }
 
 .routes-heading p {
     margin: .15rem 0 0;
-    color: #64748b;
-    font-size: 11px;
+    color: var(--theme-muted, #64748b);
+    font-size: var(--site-font-small, 13px);
 }
 
 .routes-count {
@@ -264,11 +264,11 @@
     align-items: center;
     gap: .35rem;
     padding: .35rem .55rem;
-    color: #67e8f9;
-    background: rgba(14,116,144,.18);
-    border: 1px solid rgba(34,211,238,.2);
+    color: var(--theme-teal-text, #67e8f9);
+    background: var(--theme-teal-soft, rgba(14,116,144,.18));
+    border: 1px solid var(--theme-teal-border, rgba(34,211,238,.2));
     border-radius: .4rem;
-    font-size: 11px;
+    font-size: var(--site-font-small, 13px);
     font-weight: 600;
     white-space: nowrap;
 }
@@ -282,8 +282,8 @@
 .route-group {
     margin-bottom: .45rem;
     overflow: hidden;
-    background: rgba(10,15,27,.38);
-    border: 1px solid rgba(148,163,184,.12);
+    background: var(--theme-surface, rgba(10,15,27,.38));
+    border: 1px solid var(--theme-border, rgba(148,163,184,.12));
     border-radius: .6rem;
 }
 
@@ -298,7 +298,7 @@
     justify-content: space-between;
     gap: .75rem;
     padding: .65rem .7rem;
-    color: #cbd5e1;
+    color: var(--theme-text, #cbd5e1);
     background: transparent;
     border: 0;
     text-align: left;
@@ -308,8 +308,8 @@
 
 .route-group-toggle:hover,
 .route-group-toggle[aria-expanded="true"] {
-    color: #f1f5f9;
-    background: rgba(34,211,197,.045);
+    color:  var(--theme-text, #f1f5f9);
+    background: var(--theme-teal-soft, rgba(34,211,197,.045));
 }
 
 .route-group-left {
@@ -326,16 +326,16 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--ui-accent, #22d3c5);
-    background: rgba(34,211,197,.07);
-    border: 1px solid rgba(34,211,197,.14);
+    color: var(--ui-accent, var(--theme-on-action, #22d3c5));
+    background: var(--theme-teal-soft, rgba(34,211,197,.07));
+    border: 1px solid var(--theme-teal-border, rgba(34,211,197,.14));
     border-radius: .45rem;
     font-size: 13px;
 }
 
 .route-group-name {
-    color: #e2e8f0;
-    font-size: 13px;
+    color: var(--theme-text, #e2e8f0);
+    font-size: var(--site-font-body, 13px);
     font-weight: 700;
 }
 
@@ -345,42 +345,42 @@
     justify-content: center;
     min-width: 24px;
     padding: .15rem .35rem;
-    color: #67e8f9;
-    background: rgba(14,116,144,.18);
-    border: 1px solid rgba(34,211,238,.15);
+    color: var(--theme-teal-text, #67e8f9);
+    background: var(--theme-teal-soft, rgba(14,116,144,.18));
+    border: 1px solid var(--theme-teal-border, rgba(34,211,238,.15));
     border-radius: .3rem;
-    font-size: 10px;
+    font-size: var(--site-font-small, 13px);
     font-weight: 700;
 }
 
 .route-chevron {
-    color: #64748b;
+    color: var(--theme-muted, #64748b);
     font-size: 12px;
     transition: transform .18s ease;
 }
 
 .route-group-toggle[aria-expanded="true"] .route-chevron {
     transform: rotate(180deg);
-    color: var(--ui-accent, #22d3c5);
+    color: var(--ui-accent, var(--theme-teal-text, #22d3c5));
 }
 
 .route-group-body {
-    border-top: 1px solid rgba(148,163,184,.1);
+    border-top: 1px solid var(--theme-border, rgba(148,163,184,.1));
 }
 
 /* TABLE */
 
 .routes-table {
-    color: #cbd5e1;
-    font-size: 13px;
+    color: var(--theme-text, #cbd5e1);
+    font-size: var(--site-font-body, 13px);
 }
 
 .routes-table thead th {
     padding: .55rem .6rem;
-    color: #64748b;
-    background: rgba(10,15,27,.3);
-    border-bottom: 1px solid rgba(148,163,184,.1);
-    font-size: 10px;
+    color: var(--theme-muted, #64748b);
+    background: var(--theme-surface, rgba(10,15,27,.3));
+    border-bottom: 1px solid var(--theme-border, rgba(148,163,184,.1));
+    font-size: var(--site-font-small, 13px);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .45px;
@@ -389,9 +389,9 @@
 
 .routes-table tbody td {
     padding: .5rem .6rem;
-    color: #cbd5e1;
+    color: var(--theme-text, #cbd5e1);
     background: transparent;
-    border-bottom: 1px solid rgba(148,163,184,.07);
+    border-bottom: 1px solid var(--theme-border, rgba(148,163,184,.07));
     vertical-align: middle;
 }
 
@@ -404,12 +404,12 @@
 }
 
 .routes-table tbody tr:hover td {
-    background: rgba(34,211,197,.035);
+    background: var(--theme-teal-soft, rgba(34,211,197,.035));
 }
 
 .route-name {
-    color: #e2e8f0;
-    font-size: 12px;
+    color: var(--theme-text, #e2e8f0);
+    font-size: var(--site-font-small, 13px);
     font-weight: 600;
     overflow-wrap: anywhere;
 }
@@ -417,12 +417,12 @@
 .route-uri {
     display: inline-block;
     padding: .18rem .35rem;
-    color: #67e8f9;
-    background: rgba(10,15,27,.5);
-    border: 1px solid rgba(34,211,197,.1);
+    color: var(--theme-teal-text, #67e8f9);
+    background: var(--theme-surface, rgba(10,15,27,.5));
+    border: 1px solid var(--theme-teal-border, rgba(34,211,197,.1));
     border-radius: .3rem;
     font-family: var(--bs-font-monospace);
-    font-size: 11px;
+    font-size: var(--site-font-small, 13px);
     overflow-wrap: anywhere;
 }
 
@@ -438,45 +438,45 @@
     justify-content: center;
     min-width: 38px;
     padding: .2rem .4rem;
-    color: #cbd5e1;
-    background: rgba(33,42,55,.42);
-    border: 1px solid rgba(148,163,184,.14);
+    color: var(--theme-text, #cbd5e1);
+    background: var(--theme-surface, rgba(33,42,55,.42));
+    border: 1px solid var(--theme-border, rgba(148,163,184,.14));
     border-radius: .35rem;
-    font-size: 10px;
+    font-size: var(--site-font-small, 13px);
     font-weight: 700;
     letter-spacing: .25px;
 }
 
 .method-get {
-    color: #67e8f9;
-    background: rgba(14,116,144,.18);
-    border-color: rgba(34,211,238,.18);
+    color: var(--theme-teal-text, #67e8f9);
+    background: var(--theme-teal-soft, rgba(14,116,144,.18));
+    border-color: var(--theme-teal-border, rgba(34,211,238,.18));
 }
 
 .method-post {
-    color: #bbf7d0;
-    background: rgba(20,83,45,.22);
-    border-color: rgba(74,222,128,.18);
+    color: var(--theme-text, #bbf7d0);
+    background: var(--theme-surface-alt, rgba(20,83,45,.22));
+    border-color: var(--theme-green-border, rgba(74,222,128,.18));
 }
 
 .method-put,
 .method-patch {
-    color: #fde68a;
-    background: rgba(120,53,15,.22);
-    border-color: rgba(251,191,36,.18);
+    color: var(--theme-amber-text, #fde68a);
+    background: var(--theme-amber-soft, rgba(120,53,15,.22));
+    border-color: var(--theme-amber-border, rgba(251,191,36,.18));
 }
 
 .method-delete {
-    color: #fecaca;
-    background: rgba(127,29,29,.25);
-    border-color: rgba(248,113,113,.18);
+    color: var(--theme-text, #fecaca);
+    background: var(--theme-red-soft, rgba(127,29,29,.25));
+    border-color: var(--theme-red-border, rgba(248,113,113,.18));
 }
 
 .method-options,
 .method-head {
-    color: #c4b5fd;
-    background: rgba(76,29,149,.18);
-    border-color: rgba(167,139,250,.16);
+    color: var(--theme-blue-text, #c4b5fd);
+    background: var(--theme-purple-soft, rgba(76,29,149,.18));
+    border-color: var(--theme-purple-border, rgba(167,139,250,.16));
 }
 
 /* EMPTY */
@@ -487,12 +487,12 @@
     justify-content: center;
     gap: .5rem;
     padding: 2rem 1rem;
-    color: #64748b;
-    font-size: 13px;
+    color: var(--theme-muted, #64748b);
+    font-size: var(--site-font-body, 13px);
 }
 
 .routes-empty i {
-    color: var(--ui-accent, #22d3c5);
+    color: var(--ui-accent, var(--theme-teal-text, #22d3c5));
     font-size: 20px;
 }
 
@@ -528,7 +528,7 @@
     }
 
     .route-group-name {
-        font-size: 12px;
+        font-size: var(--site-font-small, 13px);
     }
 }
 </style>

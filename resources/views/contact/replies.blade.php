@@ -12,17 +12,17 @@
 }
 
 .conversations-title {
-    color: #f8fafc;
+    color: var(--theme-text, #f8fafc);
     font-size: 1.35rem;
     font-weight: 700;
     margin: 0 0 1.25rem;
 }
 
 .conversation-card {
-    background: linear-gradient(135deg, rgba(14,21,33,.96), rgba(10,15,27,.92));
-    border: 1px solid rgba(148,163,184,.18);
+    background: linear-gradient(135deg, var(--theme-surface, rgba(14,21,33,.96)), var(--theme-surface, rgba(10,15,27,.92)));
+    border: 1px solid var(--theme-border, rgba(148,163,184,.18));
     border-radius: .75rem;
-    box-shadow: 0 12px 30px rgba(0,0,0,.22);
+    box-shadow: 0 12px 30px var(--theme-shadow, rgba(0,0,0,.22));
     overflow: hidden;
     margin-bottom: 1rem;
 }
@@ -33,13 +33,13 @@
     justify-content: space-between;
     gap: .75rem;
     padding: .85rem 1rem;
-    background: rgba(1,4,15,.25);
-    border-bottom: 1px solid rgba(148,163,184,.14);
+    background: var(--theme-surface-alt, rgba(1,4,15,.25));
+    border-bottom: 1px solid var(--theme-border, rgba(148,163,184,.14));
 }
 
 .conversation-subject {
-    color: #f8fafc;
-    font-size: .98rem;
+    color: var(--theme-text, #f8fafc);
+    font-size: var(--site-font-body, 13px);
     font-weight: 700;
     word-break: break-word;
 }
@@ -54,26 +54,26 @@
     justify-content: center;
     padding: .3rem .6rem;
     border-radius: .45rem;
-    font-size: .75rem;
+    font-size: var(--site-font-small, 13px);
     font-weight: 700;
     white-space: nowrap;
 }
 
 .status-resolved {
-    color: #a7f3d0;
-    background: rgba(6,78,59,.42);
-    border: 1px solid rgba(45,212,191,.25);
+    color: var(--theme-green-text, #a7f3d0);
+    background: var(--theme-surface, rgba(6,78,59,.42));
+    border: 1px solid var(--theme-teal-border, rgba(45,212,191,.25));
 }
 
 .status-open {
-    color: #fde68a;
-    background: rgba(120,53,15,.35);
-    border: 1px solid rgba(251,191,36,.25);
+    color: var(--theme-amber-text, #fde68a);
+    background: var(--theme-amber-soft, rgba(120,53,15,.35));
+    border: 1px solid var(--theme-amber-border, rgba(251,191,36,.25));
 }
 
 .message {
-    background: rgba(1,4,15,.34);
-    border: 1px solid rgba(148,163,184,.15);
+    background: var(--theme-surface-alt, rgba(1,4,15,.34));
+    border: 1px solid var(--theme-border, rgba(148,163,184,.15));
     border-radius: .6rem;
     padding: .85rem;
     margin-bottom: .75rem;
@@ -92,61 +92,61 @@
 }
 
 .sender-you {
-    color: #2dd4bf;
+    color: var(--theme-teal-text, #2dd4bf);
     font-weight: 700;
-    font-size: .9rem;
+    font-size: var(--site-font-body, 13px);
 }
 
 .sender-staff {
-    color: #86efac;
+    color: var(--theme-green-text, #86efac);
     font-weight: 700;
-    font-size: .9rem;
+    font-size: var(--site-font-body, 13px);
 }
 
 .message-time {
-    color: #64748b;
-    font-size: .78rem;
+    color: var(--theme-muted, #64748b);
+    font-size: var(--site-font-body, 13px);
     white-space: nowrap;
 }
 
 .message-divider {
     border: 0;
-    border-top: 1px solid rgba(148,163,184,.13);
+    border-top: 1px solid var(--theme-border, rgba(148,163,184,.13));
     margin: .55rem 0 .75rem;
 }
 
 .message-content {
-    color: #cbd5e1;
-    font-size: .92rem;
+    color: var(--theme-text, #cbd5e1);
+    font-size: var(--site-font-body, 13px);
     line-height: 1.6;
     overflow-wrap: anywhere;
 }
 
 .form-label {
-    color: #cbd5e1;
-    font-size: .9rem;
+    color: var(--theme-text, #cbd5e1);
+    font-size: var(--site-font-body, 13px);
     font-weight: 600;
     margin-bottom: .4rem;
 }
 
 .form-control {
-    background: rgba(1,4,15,.48) !important;
-    border: 1px solid rgba(148,163,184,.22) !important;
+    background: var(--theme-control, rgba(1,4,15,.48)) !important;
+    border: 1px solid var(--theme-border, rgba(148,163,184,.22)) !important;
     border-radius: .55rem !important;
-    color: #f8fafc !important;
+    color: var(--theme-text, #f8fafc) !important;
     padding: .7rem .8rem !important;
-    font-size: .92rem;
+    font-size: var(--site-font-body, 13px);
     transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
 }
 
 .form-control::placeholder {
-    color: #64748b;
+    color: var(--theme-muted, #64748b);
 }
 
 .form-control:focus {
-    background: rgba(1,4,15,.62) !important;
-    border-color: rgba(45,212,191,.75) !important;
-    box-shadow: 0 0 0 .18rem rgba(45,212,191,.10) !important;
+    background: var(--theme-control, rgba(1,4,15,.62)) !important;
+    border-color: var(--theme-teal-border, rgba(45,212,191,.75)) !important;
+    box-shadow: 0 0 0 .18rem var(--theme-shadow, rgba(45,212,191,.10)) !important;
     outline: none !important;
 }
 
@@ -158,34 +158,34 @@ textarea.form-control {
 .btn {
     min-height: 41px;
     border-radius: .55rem;
-    font-size: .88rem;
+    font-size: var(--site-font-body, 13px);
     font-weight: 700;
     padding: .6rem .9rem;
     transition: transform .18s ease, background .18s ease, border-color .18s ease, box-shadow .18s ease;
 }
 
 .btn-primary {
-    background: #0f766e !important;
-    border: 1px solid #14b8a6 !important;
-    color: #fff !important;
-    box-shadow: 0 5px 15px rgba(20,184,166,.12);
+    background: var(--theme-teal-action, #0f766e) !important;
+    border: 1px solid var(--theme-teal-border, #14b8a6) !important;
+    color: var(--theme-on-action, #fff) !important;
+    box-shadow: 0 5px 15px var(--theme-shadow, rgba(20,184,166,.12));
 }
 
 .btn-primary:hover,
 .btn-primary:focus {
-    background: #0d9488 !important;
-    border-color: #2dd4bf !important;
-    color: #fff !important;
+    background: var(--theme-teal-action, #0d9488) !important;
+    border-color: var(--theme-teal-border, #2dd4bf) !important;
+    color: var(--theme-on-action, #fff) !important;
     transform: translateY(-1px);
-    box-shadow: 0 7px 18px rgba(20,184,166,.2);
+    box-shadow: 0 7px 18px var(--theme-shadow, rgba(20,184,166,.2));
 }
 
 .resolved-message {
-    background: rgba(6,78,59,.25);
-    border: 1px solid rgba(45,212,191,.2);
+    background: var(--theme-surface, rgba(6,78,59,.25));
+    border: 1px solid var(--theme-teal-border, rgba(45,212,191,.2));
     border-radius: .55rem;
-    color: #a7f3d0;
-    font-size: .88rem;
+    color: var(--theme-green-text, #a7f3d0);
+    font-size: var(--site-font-body, 13px);
     line-height: 1.55;
     padding: .8rem .9rem;
     margin-top: .9rem;

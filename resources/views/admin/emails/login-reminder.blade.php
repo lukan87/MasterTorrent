@@ -1,6 +1,6 @@
 <!-- Body -->
 <tr>
-    <td style="padding:24px;color:#111827;font-size:15px;line-height:1.6;">
+    <td style="padding:24px;color:var(--theme-text, #111827);font-size:15px;line-height:1.6;">
         
         <p style="margin-top:0;">Salut,</p>
 
@@ -28,12 +28,12 @@
         <!-- CTA -->
         <p style="text-align:center;margin:30px 0;">
          <a href="https://last-torrents.org/login"
-   style="background:#2563eb;color:#ffffff;text-decoration:none;padding:12px 22px;border-radius:6px;display:inline-block;font-weight:600;">
+   style="background:var(--theme-blue-soft, #2563eb);color:var(--theme-text, #ffffff);text-decoration:none;padding:12px 22px;border-radius:6px;display:inline-block;font-weight:600;">
     Intră pe LastFiles
 </a>
         </p>
 
-        <p style="font-size:13px;color:#6b7280;">
+        <p style="font-size:var(--site-font-body, 13px);color:var(--theme-muted, #6b7280);">
             Acest mesaj este informativ. Dacă nu dorești să revii, îl poți ignora în siguranță.
         </p>
 
@@ -48,7 +48,7 @@
 
 <!-- Body -->
 <tr>
-    <td style="padding:24px;color:#111827;font-size:15px;line-height:1.6;">
+    <td style="padding:24px;color:var(--theme-text, #111827);font-size:15px;line-height:1.6;">
         
         <p style="margin-top:0;">Hello,</p>
 
@@ -77,12 +77,12 @@
         <!-- CTA -->
         <p style="text-align:center;margin:30px 0;">
             <a href="https://last-torrents.org/login"
-   style="background:#2563eb;color:#ffffff;text-decoration:none;padding:12px 22px;border-radius:6px;display:inline-block;font-weight:600;">
+   style="background:var(--theme-blue-soft, #2563eb);color:var(--theme-text, #ffffff);text-decoration:none;padding:12px 22px;border-radius:6px;display:inline-block;font-weight:600;">
     Visit LastFiles
 </a>
         </p>
 
-        <p style="font-size:13px;color:#6b7280;">
+        <p style="font-size:var(--site-font-body, 13px);color:var(--theme-muted, #6b7280);">
             This is an informational message. If you are not interested, you may safely ignore it.
         </p>
 

@@ -198,6 +198,7 @@
             </div>
 
 
+<input type="hidden" name="is_private" value="0">
             {{-- PRIVATE CATEGORY --}}
 
             <div class="mb-4">
@@ -271,15 +272,15 @@
         padding: 28px;
 
         background:
-            rgba(10,13,23,.96);
+            var(--theme-surface, rgba(10,13,23,.96));
 
         border:
-            1px solid rgba(255,255,255,.07);
+            1px solid var(--theme-border, rgba(255,255,255,.07));
 
         border-radius: 18px;
 
         box-shadow:
-            0 12px 35px rgba(0,0,0,.25);
+            0 12px 35px var(--theme-shadow, rgba(0,0,0,.25));
 
     }
 
@@ -290,9 +291,9 @@
 
         margin-bottom: 8px;
 
-        color: rgba(255,255,255,.85);
+        color: var(--theme-text, rgba(255,255,255,.85));
 
-        font-size: .85rem;
+        font-size: var(--site-font-body, 13px);
 
         font-weight: 700;
 
@@ -302,14 +303,14 @@
     .forum-form-control {
 
         background:
-            rgba(255,255,255,0.028);
+            var(--theme-control, rgba(255,255,255,0.028));
 
         border:
-            1px solid rgba(255,255,255,.10);
+            1px solid var(--theme-border, rgba(255,255,255,.10));
 
         border-radius: 10px;
 
-        color: white;
+        color: var(--theme-text, white);
 
         padding: 11px 13px;
 
@@ -319,15 +320,15 @@
     .forum-form-control:focus {
 
         background:
-            rgba(255,255,255,0.035);
+            var(--theme-control, rgba(255,255,255,0.035));
 
         border-color:
-            rgba(59,130,246,.55);
+            var(--theme-blue-border, rgba(59,130,246,.55));
 
-        color: white;
+        color: var(--theme-text, white);
 
         box-shadow:
-            0 0 0 .2rem rgba(59,130,246,.10);
+            0 0 0 .2rem var(--theme-shadow, rgba(59,130,246,.10));
 
     }
 
@@ -335,7 +336,7 @@
     .forum-form-control::placeholder {
 
         color:
-            rgba(255,255,255,.28);
+            var(--theme-muted, rgba(255,255,255,.28));
 
     }
 
@@ -345,9 +346,9 @@
         margin-top: 6px;
 
         color:
-            rgba(255,255,255,.38);
+            var(--theme-muted, rgba(255,255,255,.38));
 
-        font-size: .72rem;
+        font-size: var(--site-font-small, 13px);
 
     }
 
@@ -355,7 +356,7 @@
     .forum-form-help code {
 
         color:
-            #93c5fd;
+            var(--theme-blue-text, #93c5fd);
 
     }
 
@@ -377,7 +378,7 @@
 
         height: 17px;
 
-        accent-color: #2563eb;
+        accent-color: var(--theme-blue-text, #2563eb);
 
     }
 
@@ -385,9 +386,9 @@
     .forum-checkbox-row label {
 
         color:
-            rgba(255,255,255,.82);
+            var(--theme-muted, rgba(255,255,255,.82));
 
-        font-size: .85rem;
+        font-size: var(--site-font-body, 13px);
 
         font-weight: 700;
 
@@ -423,13 +424,13 @@
 
         border-radius: 10px;
 
-        border: 1px solid rgba(255,255,255,.08);
+        border: 1px solid var(--theme-border, rgba(255,255,255,.08));
 
-        color: rgba(255,255,255,.65);
+        color: var(--theme-muted, rgba(255,255,255,.65));
 
         text-decoration: none;
 
-        font-size: .85rem;
+        font-size: var(--site-font-body, 13px);
 
         font-weight: 700;
 
@@ -438,10 +439,10 @@
 
     .forum-cancel-btn:hover {
 
-        color: white;
+        color: var(--theme-text, white);
 
         background:
-            rgba(255,255,255,0.035);
+            var(--theme-surface-alt, rgba(255,255,255,0.035));
 
     }
 

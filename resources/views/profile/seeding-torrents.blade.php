@@ -59,7 +59,7 @@
     }
 
     .hover-shadow:hover {
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 8px var(--theme-shadow, rgba(0, 0, 0, 0.1));
         transition: box-shadow 0.3s ease-in-out;
     }
 
@@ -70,7 +70,7 @@
     }
 
     .text-primary {
-        color: #007bff !important;
+        color: var(--theme-blue-text, #007bff) !important;
     }
 
     .font-weight-bold {

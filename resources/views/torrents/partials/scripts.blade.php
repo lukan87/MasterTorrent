@@ -112,7 +112,12 @@ function setTorrentName() {
     const nameInput = document.getElementById('name');
     if(fileInput.files.length > 0){
         const fullName = fileInput.files[0].name;
-        nameInput.value = fullName.split('.').slice(0,-1).join('.');
+        nameInput.value = fullName
+            .replace(/\.torrent$/i, '')
+            .replace(/[^A-Za-z0-9.\-]+/g, '.')
+            .replace(/\.{2,}/g, '.')
+            .replace(/^\.+|\.+$/g, '')
+            .replace(/(?:\.(?:torrent|mkv|mp4|avi|mov|m2ts|ts|webm|wmv|mpg|mpeg|m4v|vob))+$/i, '');
     } else nameInput.value = '';
 }
 
@@ -235,12 +240,12 @@ document.addEventListener('click', function (e) {
 </script>
 
 
-<script src="{{ asset('js/torrent-image-previews.js') }}?v=1" defer></script>
+<script src="{{ asset('js/torrent-image-previews.js') }}?v=2" defer></script>
 
 <style>
-.torrent-upload-preview { position: relative; flex: 0 0 150px; width: 150px; height: 110px; overflow: hidden; border: 1px solid var(--ui-border, #334155); border-radius: 8px; background: rgba(10,15,27,.65); }
+.torrent-upload-preview { position: relative; flex: 0 0 150px; width: 150px; height: 110px; overflow: hidden; border: 1px solid var(--ui-border, var(--theme-border, #334155)); border-radius: 8px; background: var(--theme-surface, rgba(10,15,27,.65)); }
 .torrent-upload-preview img { width: 100%; height: 100%; object-fit: contain; }
-.torrent-upload-preview-status { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 10px; color: #94a3b8; font-size: 12px; text-align: center; }
+.torrent-upload-preview-status { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 10px; color: var(--theme-muted, #94a3b8); font-size: var(--site-font-small, 13px); text-align: center; }
 .torrent-upload-preview-status[hidden], .torrent-upload-preview img[hidden] { display: none; }
-.torrent-upload-preview-remove { position: absolute; top: 4px; right: 4px; width: 25px; height: 25px; border: 0; border-radius: 50%; background: #842029; color: #fff; line-height: 1; }
+.torrent-upload-preview-remove { position: absolute; top: 4px; right: 4px; width: 25px; height: 25px; border: 0; border-radius: 50%; background: var(--theme-red-soft, #842029); color: var(--theme-text, #fff); line-height: 1; }
 </style>

@@ -13,7 +13,7 @@
     </div>
 
     {{-- Title --}}
-    <h3 class="mb-4 text-light">
+    <h3 class="mb-4 theme-text">
         Users That Finished ({{ $histories->total() }}) :
         <span class="text-info fw-bold">{{ $torrent->name }}</span>
     </h3>
@@ -154,15 +154,15 @@
     padding: 22px 28px;
     margin-bottom: 18px;
     border-radius: 14px;
-    background: rgba(255,255,255,0.028);
+    background: var(--theme-surface-alt, rgba(255,255,255,0.028));
     backdrop-filter: blur(10px);
     transition: all 0.25s ease;
 }
 
 .history-row:hover {
-    background: rgba(255,255,255,0.056);
+    background: var(--theme-surface-alt, rgba(255,255,255,0.056));
     transform: translateY(-4px);
-    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+    box-shadow: 0 15px 35px var(--theme-shadow, rgba(0,0,0,0.5));
 }
 
 /* USER COLUMN */
@@ -174,23 +174,23 @@
 
 .row-number {
     font-weight: 700;
-    color: #8a8fa3;
+    color: var(--theme-muted, #8a8fa3);
 }
 
 .username {
     font-weight: 600;
-    color: #fff;
+    color: var(--theme-text, #fff);
     text-decoration: none;
 }
 
 .username:hover {
-    color: #0dcaf0;
+    color: var(--theme-teal-text, #0dcaf0);
 }
 
 .meta-info {
     margin-top: 6px;
-    font-size: 0.85rem;
-    color: #aab0c0;
+    font-size: var(--site-font-body, 13px);
+    color: var(--theme-muted, #aab0c0);
     display: flex;
     gap: 15px;
 }
@@ -203,7 +203,7 @@
 }
 
 .transfer-block small {
-    color: #9aa1b5;
+    color: var(--theme-muted, #9aa1b5);
 }
 
 .transfer-block strong {
@@ -211,11 +211,11 @@
 }
 
 .upload strong {
-    color: #28a745;
+    color: var(--theme-green-text, #28a745);
 }
 
 .download strong {
-    color: #0d6efd;
+    color: var(--theme-blue-text, #0d6efd);
 }
 
 /* TIME COLUMN */
@@ -226,11 +226,11 @@
 }
 
 .time-block small {
-    color: #9aa1b5;
+    color: var(--theme-muted, #9aa1b5);
 }
 
 .time-block strong {
-    color: #ffffff;
+    color: var(--theme-text, #ffffff);
 }
 
 /* STATUS COLUMN */
@@ -249,18 +249,18 @@
 }
 
 .status-seeding {
-    background: rgba(40,167,69,0.2);
-    color: #28a745;
+    background: var(--theme-green-soft, rgba(40,167,69,0.2));
+    color: var(--theme-green-text, #28a745);
 }
 
 .status-not {
-    background: rgba(220,53,69,0.2);
-    color: #dc3545;
+    background: var(--theme-red-soft, rgba(220,53,69,0.2));
+    color: var(--theme-red-text, #dc3545);
 }
 
 .last-active {
-    font-size: 0.8rem;
-    color: #aab0c0;
+    font-size: var(--site-font-body, 13px);
+    color: var(--theme-muted, #aab0c0);
 }
 
 /* Responsive */

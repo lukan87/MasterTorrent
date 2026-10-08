@@ -1,6 +1,17 @@
 @extends('layouts.app')
 
 @section('content')
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/shoutbox.css') }}?v={{ filemtime(public_path('css/shoutbox.css')) }}">
+@endpush
+@push('scripts')
+<script src="{{ asset('js/chat-media.js') }}?v={{ filemtime(public_path('js/chat-media.js')) }}" defer></script>
+@endpush
+@php
+    $chatRenderer = app(\App\Services\ChatMessageRenderer::class);
+    $chatRenderer->prepareMentions($messages);
+@endphp
+
 
 @php
 $rules = [
@@ -56,7 +67,7 @@ $rules = [
                         <div class="header">
                             <a href="{{ route('profile.show', $message->user->id) }}"
                                class="username"
-                               style="color: {{ $classColor }}">
+                               style="--member-color: {{ $classColor }}; color: var(--member-color)">
                                 {{ $message->user->name }}
                             </a>
 
@@ -67,7 +78,7 @@ $rules = [
                         </div>
 
                         <div class="content">
-                            {!! convertCustomTagsToHtml($message->message) !!}
+                            {!! $chatRenderer->render($message->message) !!}
                         </div>
 
                         <div class="actions">
@@ -105,7 +116,8 @@ $rules = [
                             @csrf
                             <textarea name="content"
                                       placeholder="Reply..."
-                                      required></textarea>
+                                      maxlength="1000" required></textarea>
+                            @include('partials.chat-editor-tools')
                             <button class="btn btn-primary btn-sm mt-1">Send</button>
                         </form>
 
@@ -124,7 +136,7 @@ $rules = [
                                 <div class="reply-bubble glass" style="--accent: {{ $replyColor }}">
                                     <div class="reply-header d-flex justify-content-between align-items-center">
                                         <strong class="reply-username"
-                                                style="color: {{ $replyColor }}">
+                                                style="--member-color: {{ $replyColor }}; color: var(--member-color)">
                                             {{ $reply->user->name }}
                                         </strong>
 
@@ -157,7 +169,7 @@ $rules = [
                                     </div>
 
                                     <div class="reply-content">
-                                        {!! convertCustomTagsToHtml($reply->message) !!}
+                                        {!! $chatRenderer->render($reply->message) !!}
                                     </div>
                                 </div>
                             </div>
@@ -179,6 +191,7 @@ $rules = [
                   method="POST"
                   class="chat-input glass">
                 @csrf
+                @include('partials.chat-formatting-tools')
                 <textarea id="content"
                           name="content"
                           placeholder="Say something nice… 👋"
@@ -220,15 +233,15 @@ $rules = [
 {{-- Styles --}}
 <style>
 body {
-    background: radial-gradient(circle at top, #1b1b1b, #0c0c0c);
-    color: #eaeaea;
+    background: radial-gradient(circle at top, var(--theme-surface, #1b1b1b), var(--theme-surface-alt, #0c0c0c));
+    color: var(--theme-text, #eaeaea);
 }
 
 .glass {
-    background: rgba(255,255,255,0.042);
+    background: var(--theme-surface-alt, rgba(255,255,255,0.042));
     backdrop-filter: blur(10px);
     border-radius: 14px;
-    border: 1px solid rgba(255,255,255,0.08);
+    border: 1px solid var(--theme-border, rgba(255,255,255,0.08));
 }
 
 .rules-toggle {
@@ -236,26 +249,26 @@ body {
     background: none;
     border: none;
     padding: 14px;
-    color: #fff;
+    color: var(--theme-text, #fff);
     display: flex;
     align-items: center;
     font-weight: 600;
 }
 
 .rules-card {
-    background: rgba(0,0,0,.4);
+    background: var(--theme-surface-alt, rgba(0,0,0,.4));
     border-radius: 12px;
     padding: 14px;
 }
 
 .rules-card ul {
     padding-left: 18px;
-    font-size: .9rem;
+    font-size: var(--site-font-body, 13px);
 }
 
 .rules-warning {
-    font-size: .8rem;
-    color: #ffc107;
+    font-size: var(--site-font-body, 13px);
+    color: var(--theme-amber-text, #ffc107);
     margin-top: 10px;
 }
 
@@ -305,12 +318,12 @@ body {
 .btn-icon {
     background: none;
     border: none;
-    color: #bbb;
+    color: var(--theme-muted, #bbb);
 }
 
-.btn-icon:hover { color: #fff; }
-.btn-icon.warn:hover { color: #ffc107; }
-.btn-icon.danger:hover { color: #dc3545; }
+.btn-icon:hover { color: var(--theme-text, #fff); }
+.btn-icon.warn:hover { color: var(--theme-amber-text, #ffc107); }
+.btn-icon.danger:hover { color: var(--theme-red-text, #dc3545); }
 
 .reply-form {
     display: none;
@@ -319,8 +332,8 @@ body {
 
 .reply-form textarea {
     width: 100%;
-    background: #0b0b0b;
-    color: #fff;
+    background: var(--theme-control, #0b0b0b);
+    color: var(--theme-text, #fff);
     border-radius: 8px;
 }
 
@@ -329,7 +342,7 @@ body {
     flex-direction: column;
     gap: 10px;
     padding-left: 18px;
-    border-left: 2px solid rgba(255,255,255,.08);
+    border-left: 2px solid var(--theme-border, rgba(255,255,255,.08));
 }
 
 .reply-card {
@@ -343,8 +356,8 @@ body {
     padding: 12px;
     border-radius: 14px;
     border-left: 4px solid var(--accent);
-    background: rgba(0,0,0,.45);
-    font-size: .9rem;
+    background: var(--theme-surface-alt, rgba(0,0,0,.45));
+    font-size: var(--site-font-body, 13px);
 }
 
 .reply-header {
@@ -362,7 +375,7 @@ body {
 
 .reply-username {
     font-weight: 600;
-    font-size: .95rem;
+    font-size: var(--site-font-body, 13px);
 }
 
 .reply-content {
@@ -386,8 +399,8 @@ body {
 
 .chat-input textarea {
     width: 100%;
-    background: #0b0b0b;
-    color: #fff;
+    background: var(--theme-control, #0b0b0b);
+    color: var(--theme-text, #fff);
     border-radius: 12px;
     resize: none;
 }
@@ -405,18 +418,18 @@ body {
     display: flex;
     align-items: center;
     gap: 6px;
-    background:#b6a46e;
-    color: #111;
+    background:var(--theme-amber-soft, #b6a46e);
+    color: var(--theme-text, #111);
     border: none;
     border-radius: 999px;
     padding: 10px 14px;
     font-weight: 600;
-    box-shadow: 0 8px 24px rgba(0,0,0,.35);
+    box-shadow: 0 8px 24px var(--theme-shadow, rgba(0,0,0,.35));
     cursor: pointer;
 }
 
 .rules-fab:hover {
-    background: #a39568;
+    background: var(--theme-surface, #a39568);
 }
 
 .rules-fab i {
@@ -424,7 +437,7 @@ body {
 }
 
 .rules-label {
-    font-size: .9rem;
+    font-size: var(--site-font-body, 13px);
 }
 
 /* Floating panel */
@@ -466,7 +479,7 @@ body {
     /* Make button more compact */
     .rules-fab {
         padding: 10px 12px;
-        font-size: .85rem;
+        font-size: var(--site-font-body, 13px);
     }
 
     .rules-label {
@@ -484,7 +497,7 @@ body {
         max-height: 75vh;
         border-radius: 18px 18px 0 0;
         padding-bottom: env(safe-area-inset-bottom);
-        box-shadow: 0 -20px 60px rgba(0,0,0,.6);
+        box-shadow: 0 -20px 60px var(--theme-shadow, rgba(0,0,0,.6));
     }
 
     /* Smooth slide-up animation */
@@ -514,7 +527,7 @@ body {
 
     /* Improve readability */
     .rules-card {
-        font-size: .9rem;
+        font-size: var(--site-font-body, 13px);
     }
 }
 
@@ -527,7 +540,7 @@ body {
 
 .shoutbox-header {
     border-radius: 18px;
-    border-left: 4px solid #ffc107;
+    border-left: 4px solid var(--theme-amber-border, #ffc107);
 }
 
 .shoutbox-icon {
@@ -536,10 +549,10 @@ body {
     border-radius: 14px;
     display: grid;
     place-items: center;
-    background: linear-gradient(135deg, #ffc107, #ffda6a);
-    color: #111;
+    background: linear-gradient(135deg, var(--theme-amber-soft, #ffc107), var(--theme-amber-soft, #ffda6a));
+    color: var(--theme-text, #111);
     font-size: 1.3rem;
-    box-shadow: 0 6px 20px rgba(255,193,7,.35);
+    box-shadow: 0 6px 20px var(--theme-shadow, rgba(255,193,7,.35));
 }
 
 .shoutbox-body {
@@ -555,14 +568,14 @@ body {
 .bubble:hover,
 .reply-bubble:hover {
     transform: translateY(-1px);
-    box-shadow: 0 10px 30px rgba(0,0,0,.35);
+    box-shadow: 0 10px 30px var(--theme-shadow, rgba(0,0,0,.35));
 }
 
 /* Improve input focus */
 .chat-input textarea:focus {
     outline: none;
-    border: 1px solid #ffc107;
-    box-shadow: 0 0 0 2px rgba(255,193,7,.15);
+    border: 1px solid var(--theme-amber-border, #ffc107);
+    box-shadow: 0 0 0 2px var(--theme-shadow, rgba(255,193,7,.15));
 }
 
 /* Modern scrollbar */
@@ -571,16 +584,16 @@ body {
 }
 
 .shoutbox-container::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.105);
+    background: var(--theme-surface-alt, rgba(255,255,255,0.105));
     border-radius: 10px;
 }
 
 .shoutbox-container::-webkit-scrollbar-thumb:hover {
-    background: rgba(255,255,255,.3);
+    background: var(--theme-surface, rgba(255,255,255,.3));
 }
 
 .reply-header {
-    font-size: .85rem;
+    font-size: var(--site-font-body, 13px);
 }
 
 .reply-meta .btn-icon {
@@ -593,7 +606,7 @@ body {
 }
 
 .reply-meta .timestamp {
-    font-size: .75rem;
+    font-size: var(--site-font-small, 13px);
 }
 
 .reply-meta {
@@ -629,9 +642,9 @@ body {
     padding: 1px;
     background: linear-gradient(
         135deg,
-        rgba(75,74,73,0.4),
-        rgba(24, 28, 112, 0.05),
-        rgba(20,19,16,0.113)
+        var(--theme-surface, rgba(75,74,73,0.4)),
+        var(--theme-blue-soft, rgba(24, 28, 112, 0.05)),
+        var(--theme-surface-alt, rgba(20,19,16,0.113))
     );
     -webkit-mask:
         linear-gradient(#fff 0 0) content-box,
@@ -642,7 +655,7 @@ body {
 
 /* header separation */
 .shoutbox-header {
-    background: rgba(26,26,26,0.168);
+    background: var(--theme-surface-alt, rgba(26,26,26,0.168));
     border-radius: 18px;
 }
 
@@ -661,9 +674,9 @@ body {
 /* === TIME BADGES === */
 
 .time-badge {
-    background: rgba(255,255,255,0.056);
-    color: #ddd;
-    font-size: .7rem;
+    background: var(--theme-surface-alt, rgba(255,255,255,0.056));
+    color: var(--theme-text, #ddd);
+    font-size: var(--site-font-small, 13px);
     font-weight: 500;
     padding: 4px 8px;
     border-radius: 999px;
@@ -675,7 +688,7 @@ body {
 }
 
 .time-badge-sm {
-    font-size: .65rem;
+    font-size: var(--site-font-small, 13px);
     padding: 3px 7px;
 }
 
@@ -695,7 +708,7 @@ body {
 
 .actions .btn-icon,
 .reply-meta .btn-icon {
-    background: rgba(255,255,255,0.028);
+    background: var(--theme-surface-alt, rgba(255,255,255,0.028));
     border-radius: 8px;
     padding: 4px;
     transition: background .15s ease, transform .15s ease;
@@ -703,7 +716,7 @@ body {
 
 .actions .btn-icon:hover,
 .reply-meta .btn-icon:hover {
-    background: rgba(255,255,255,0.084);
+    background: var(--theme-surface-alt, rgba(255,255,255,0.084));
     transform: scale(1.05);
 }
 
@@ -722,7 +735,7 @@ body {
     width: 1px;
     background: linear-gradient(
         transparent,
-        rgba(255,255,255,0.042),
+        var(--theme-surface-alt, rgba(255,255,255,0.042)),
         transparent
     );
 }
@@ -741,7 +754,7 @@ body {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: rgba(255,193,7,.6);
+    background: var(--theme-amber-soft, rgba(255,193,7,.6));
 }
 
 /* === INPUT GLOW === */
@@ -749,8 +762,8 @@ body {
 .chat-input {
     background: linear-gradient(
         to top,
-        rgba(0,0,0,.35),
-        rgba(255,255,255,0.014)
+        var(--theme-control, rgba(0,0,0,.35)),
+        var(--theme-control, rgba(255,255,255,0.014))
     );
 }
 
@@ -791,14 +804,14 @@ body {
 .message.own .bubble {
     background: linear-gradient(
         135deg,
-        rgba(76, 98, 123, 0.35),
-        rgba(90, 180, 255, 0.25)
+        var(--theme-surface, rgba(76, 98, 123, 0.35)),
+        var(--theme-blue-soft, rgba(90, 180, 255, 0.25))
     );
     border-radius: 18px 18px 6px 18px; /* iMessage-style tail */
     border-left: none;
     box-shadow:
-        inset 0 0 0 1px rgba(255,255,255,.12),
-        0 10px 30px rgba(0,0,0,.35);
+        inset 0 0 0 1px var(--theme-shadow, rgba(255,255,255,.12)),
+        0 10px 30px var(--theme-shadow, rgba(0,0,0,.35));
     position: relative;
     overflow: hidden;
 }
@@ -812,7 +825,7 @@ body {
     height: 100%;
     background: radial-gradient(
         circle at top right,
-        rgba(255,255,255,.25),
+        var(--theme-surface, rgba(255,255,255,.25)),
         transparent 60%
     );
     pointer-events: none;
@@ -826,14 +839,14 @@ body {
 .message:not(.own) .bubble {
     background: linear-gradient(
         135deg,
-        rgba(10,9,9,0.741),
-        rgba(78,78,78,0.14)
+        var(--theme-surface-alt, rgba(10,9,9,0.741)),
+        var(--theme-surface-alt, rgba(78,78,78,0.14))
     );
     border-radius: 18px 18px 18px 6px; /* opposite tail */
     border-left: 4px solid var(--accent);
     box-shadow:
-        inset 0 0 0 1px rgba(255,255,255,.08),
-        0 8px 26px rgba(0,0,0,.35);
+        inset 0 0 0 1px var(--theme-shadow, rgba(255,255,255,.08)),
+        0 8px 26px var(--theme-shadow, rgba(0,0,0,.35));
     position: relative;
     overflow: hidden;
 }
@@ -843,7 +856,7 @@ body {
     inset: 0;
     background: radial-gradient(
         circle at top left,
-        rgba(255,255,255,0.126),
+        var(--theme-surface-alt, rgba(255,255,255,0.126)),
         transparent 60%
     );
     pointer-events: none;
@@ -884,7 +897,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 @isset($highlightShoutId)
 <style>
-.shout-mentioned { outline: 2px solid var(--ui-accent, #63d2c6); outline-offset: 4px; border-radius: 12px; scroll-margin: 20px; }
+.shout-mentioned { outline: 2px solid var(--ui-accent, var(--theme-teal-border, #63d2c6)); outline-offset: 4px; border-radius: 12px; scroll-margin: 20px; }
 </style>
 <script>
 document.addEventListener('DOMContentLoaded', function () {

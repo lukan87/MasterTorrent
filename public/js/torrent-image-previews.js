@@ -26,7 +26,8 @@
         const files = [...input.files];
         let rejected = false;
         files.forEach(file => {
-            if (!file.type.startsWith('image/') || items.length >= 12) { rejected = true; return; }
+            if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 10 * 1024 * 1024 || items.length >= 10) { rejected = true; return; }
+            if (items.some(item => item.file.name === file.name && item.file.size === file.size && item.file.lastModified === file.lastModified)) return;
             const item = { file, loading: true, failed: false };
             items.push(item);
             const card = document.createElement('div');
@@ -68,6 +69,6 @@
             reader.readAsDataURL(file);
         });
         sync();
-        if (rejected) summary.textContent += ' Select image files only, up to 12 in total.';
+        if (rejected) summary.textContent += ' Select up to 10 JPG, PNG or WebP images, 10 MB each.';
     });
 })();

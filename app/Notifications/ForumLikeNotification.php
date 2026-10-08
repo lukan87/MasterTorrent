@@ -4,10 +4,12 @@ namespace App\Notifications;
 
 use App\Models\ForumPost;
 use App\Models\User;
+use App\Services\ForumAccess;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 
-class ForumLikeNotification extends Notification
+class ForumLikeNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -15,11 +17,20 @@ class ForumLikeNotification extends Notification
         public ForumPost $post,
         public User $reactor
     ) {
+        $this->afterCommit();
     }
 
     public function via(object $notifiable): array
     {
         return ['database'];
+    }
+
+    public function shouldSend(object $notifiable, string $channel): bool
+    {
+        $topic = $this->post->topic()->with('category')->first();
+        $this->post->setRelation('topic', $topic);
+
+        return $topic?->category !== null && ForumAccess::canView($notifiable, $topic->category);
     }
 
     public function toDatabase(object $notifiable): array
@@ -40,7 +51,8 @@ class ForumLikeNotification extends Notification
             'url' => route('forum.topic', [
                 'category' => $topic->category->slug,
                 'topic' => $topic->slug,
-            ]) . '#post-' . $this->post->id,
+                'post' => $this->post->id,
+            ]).'#post-'.$this->post->id,
         ];
     }
 }

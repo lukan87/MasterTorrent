@@ -44,6 +44,14 @@ class AppServiceProvider extends ServiceProvider
             $activityModel::observe(\App\Observers\AchievementActivityObserver::class);
         }
 
+        foreach ([\App\Models\User::class, \App\Models\ForumCategory::class, \App\Models\ForumTopic::class, \App\Models\ForumPost::class, \App\Models\ForumPostLike::class] as $forumModel) {
+            $forumModel::observe(\App\Observers\ForumCacheObserver::class);
+        }
+
+        foreach ([\App\Models\User::class, \App\Models\UserAchievement::class, \App\Models\Comment::class, \App\Models\CommentReaction::class, \App\Models\ForumPost::class, \App\Models\ForumPostLike::class, \App\Models\TorrentThank::class, \App\Models\TorrentReaction::class] as $profileModel) {
+            $profileModel::observe(\App\Observers\ProfileCacheObserver::class);
+        }
+
         Gate::define('manage-admin-system', fn ($user) => (int) $user->user_class === UserClass::WEB_DEVELOPER);
 
         // Add your custom middleware globally
@@ -114,6 +122,7 @@ class AppServiceProvider extends ServiceProvider
                         $q->where('user_one', $user->id)
                             ->orWhere('user_two', $user->id);
                     })
+                        ->whereHas('messages')
                         ->with(['lastMessage', 'userOne', 'userTwo'])
                         ->orderByDesc('last_message_at')
                         ->take(5)

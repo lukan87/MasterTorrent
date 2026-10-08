@@ -2,7 +2,7 @@
 
 @section('content')
 
-<div class="container py-5">
+<div class="container forum-page py-4 py-lg-5">
 
     <div class="mb-4">
 
@@ -130,17 +130,17 @@
 
 .forum-edit-card {
 
-    background: rgba(10,13,23,.96);
+    background: var(--theme-surface, rgba(10,13,23,.96));
 
     border:
-        1px solid rgba(255,255,255,.07);
+        1px solid var(--theme-border, rgba(255,255,255,.07));
 
     border-radius: 18px;
 
     overflow: hidden;
 
     box-shadow:
-        0 15px 40px rgba(0,0,0,.25);
+        0 15px 40px var(--theme-shadow, rgba(0,0,0,.25));
 
 }
 
@@ -150,10 +150,10 @@
     padding: 20px 24px;
 
     border-bottom:
-        1px solid rgba(255,255,255,.06);
+        1px solid var(--theme-border, rgba(255,255,255,.06));
 
     background:
-        rgba(255,255,255,0.0175);
+        var(--theme-surface-alt, rgba(255,255,255,0.0175));
 
 }
 
@@ -162,7 +162,7 @@
 
     margin: 0;
 
-    color: #fff;
+    color: var(--theme-text, #fff);
 
     font-weight: 800;
 
@@ -172,7 +172,7 @@
 .forum-edit-header small {
 
     color:
-        rgba(255,255,255,.45);
+        var(--theme-muted, rgba(255,255,255,.45));
 
 }
 
@@ -180,12 +180,12 @@
 .forum-edit-textarea {
 
     background:
-        rgba(0,0,0,.2);
+        var(--theme-control, rgba(0,0,0,.2));
 
     border:
-        1px solid rgba(255,255,255,.1);
+        1px solid var(--theme-border, rgba(255,255,255,.1));
 
-    color: #fff;
+    color: var(--theme-text, #fff);
 
     resize: vertical;
 
@@ -195,14 +195,14 @@
 .forum-edit-textarea:focus {
 
     background:
-        rgba(0,0,0,.25);
+        var(--theme-control, rgba(0,0,0,.25));
 
-    color: #fff;
+    color: var(--theme-text, #fff);
 
     border-color:
-        rgba(59,130,246,.6);
+        var(--theme-blue-border, rgba(59,130,246,.6));
 
-    box-shadow: 0 0 0 .2rem rgba(99,210,198,.1);
+    box-shadow: 0 0 0 .2rem var(--theme-shadow, rgba(99,210,198,.1));
 
 }
 
@@ -216,9 +216,9 @@
     padding: 11px 18px;
 
     background:
-        linear-gradient(135deg,#2563eb,#7c3aed);
+        linear-gradient(135deg,var(--theme-blue-action, #2563eb),var(--theme-purple-action, #7c3aed));
 
-    color: #fff;
+    color: var(--theme-on-action, #fff);
 
     font-weight: 700;
 
@@ -227,7 +227,7 @@
 
 .forum-save-btn:hover {
 
-    color: #fff;
+    color: var(--theme-text, #fff);
 
     transform: translateY(-1px);
 
@@ -238,7 +238,7 @@
 
     margin-left: auto;
 
-    color: #93c5fd;
+    color: var(--theme-blue-text, #93c5fd);
 
     text-decoration: none;
 
@@ -249,105 +249,12 @@
 
 .forum-post-action:hover {
 
-    color: #fff;
+    color: var(--theme-text, #fff);
 
 }
 </style>
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-
-    /* ============================================================
-       POST PREVIEW (Edit form)
-       ============================================================ */
-    (function () {
-        var previewBtn = document.getElementById('forum-edit-preview-btn');
-        var previewPane = document.getElementById('forum-edit-preview');
-        var textarea = document.getElementById('forum-edit-body');
-        if (!previewBtn || !previewPane || !textarea) return;
-
-        previewBtn.addEventListener('click', function () {
-            var isHidden = previewPane.style.display === 'none';
-            if (isHidden) {
-                var bbcode = textarea.value;
-                if (!bbcode.trim()) {
-                    previewPane.innerHTML = '<em class="text-secondary">Nothing to preview.</em>';
-                } else {
-                    var html = bbcode
-                        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-                        .replace(/\[b\](.*?)\[\/b\]/gi, '<strong>$1</strong>')
-                        .replace(/\[i\](.*?)\[\/i\]/gi, '<em>$1</em>')
-                        .replace(/\[u\](.*?)\[\/u\]/gi, '<u>$1</u>')
-                        .replace(/\[center\](.*?)\[\/center\]/gi, '<div class="text-center">$1</div>')
-                        .replace(/\[quote(?:=(.*?))?\](.*?)\[\/quote\]/gi, '<blockquote>$2</blockquote>')
-                        .replace(/\[code\](.*?)\[\/code\]/gi, '<pre><code>$1</code></pre>')
-                        .replace(/\[spoiler\](.*?)\[\/spoiler\]/gi, '<span style="background:#212121;color:#333">$1</span>')
-                        .replace(/\[url\](.*?)\[\/url\]/gi, '<a href="$1" target="_blank">$1</a>')
-                        .replace(/\[img\](.*?)\[\/img\]/gi, '<img src="$1" style="max-width:100%;">')
-                        .replace(/\[youtube\](.*?)\[\/youtube\]/gi, '<iframe src="https://www.youtube.com/embed/$1" style="width:100%;height:315px" allowfullscreen></iframe>')
-                        .replace(/\[hr\]/gi, '<hr>')
-                        .replace(/\n/g, '<br>');
-                    previewPane.innerHTML = html;
-                }
-                previewPane.style.display = '';
-                previewBtn.innerHTML = '<i class="bi bi-eye-slash me-1"></i>Edit';
-            } else {
-                previewPane.style.display = 'none';
-                previewBtn.innerHTML = '<i class="bi bi-eye me-1"></i>Preview';
-            }
-        });
-    })();
-
-    /* ============================================================
-       AUTO-SAVE DRAFTS (Edit form)
-       ============================================================ */
-    (function () {
-        var textarea = document.getElementById('forum-edit-body');
-        if (!textarea) return;
-
-        var draftKey = 'forum_draft_edit_{{ $topic->id }}_{{ $post->id }}';
-        var debounceTimer = null;
-
-        var saved = localStorage.getItem(draftKey);
-        if (saved && !textarea.value.trim()) {
-            textarea.value = saved;
-            var toast = document.createElement('div');
-            toast.className = 'draft-restore-toast';
-            toast.innerHTML = '<i class="bi bi-journal-text me-1"></i>Draft restored. ' +
-                '<button id="draft-keep">Keep</button>' +
-                '<button id="draft-dismiss" class="draft-dismiss">Dismiss</button>';
-            document.body.appendChild(toast);
-
-            var keepBtn = document.getElementById('draft-keep');
-            var dismissBtn = document.getElementById('draft-dismiss');
-            if (keepBtn) keepBtn.addEventListener('click', function () { toast.remove(); });
-            if (dismissBtn) dismissBtn.addEventListener('click', function () {
-                textarea.value = '';
-                localStorage.removeItem(draftKey);
-                toast.remove();
-            });
-        }
-
-        textarea.addEventListener('input', function () {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(function () {
-                if (textarea.value.trim()) {
-                    localStorage.setItem(draftKey, textarea.value);
-                } else {
-                    localStorage.removeItem(draftKey);
-                }
-            }, 2000);
-        });
-
-        var form = textarea.closest('form');
-        if (form) {
-            form.addEventListener('submit', function () {
-                localStorage.removeItem(draftKey);
-            });
-        }
-    })();
-
-});
-</script>
+@include('forum.partials.common-css')
+@include('forum.partials.scripts', ['draftKind' => 'edit', 'draftId' => $post->id])
 
 @endsection

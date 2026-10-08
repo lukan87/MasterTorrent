@@ -13,7 +13,7 @@
                value="{{ $data['url'] ?? route('notifications.index') }}">
 
         <button type="submit"
-                class="dropdown-item text-light text-start bg-transparent border-0 w-100">
+                class="dropdown-item theme-text text-start bg-transparent border-0 w-100">
 
             {{-- MAIN TEXT --}}
             <div class="fw-semibold">

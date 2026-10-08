@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\User;
+use App\Models\UserClass;
 use App\Services\SystemMessageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -26,7 +27,7 @@ class MessageController extends Controller
             $recipient = User::findOrFail($request->receiver_id);
         } elseif ($request->filled('username')) {
             $recipient = User::where('name', $request->username)->first();
-            if (!$recipient) {
+            if (! $recipient) {
                 $error = "No member found with the name \"{$request->username}\".";
             }
         }
@@ -89,7 +90,7 @@ class MessageController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | AJAX edit / delete single owned messages
+    | AJAX edit own messages / Admin deletion
     |--------------------------------------------------------------------------
     */
 
@@ -97,7 +98,7 @@ class MessageController extends Controller
     {
         $message = Message::find($messageId);
 
-        if (!$message) {
+        if (! $message) {
             return response()->json([
                 'success' => false,
                 'error' => 'This message has been deleted and no longer exists.',
@@ -114,23 +115,22 @@ class MessageController extends Controller
             'body' => $request->body,
         ]);
 
-        return response()->json(['success' => true]);
+        return response()->json(['success' => true, 'html' => convertCustomTagsToHtml($message->body), 'body' => $message->body]);
     }
 
     public function delete(int $messageId)
     {
+        abort_unless(auth()->check() && auth()->user()->user_class >= UserClass::ADMIN, 403);
         $message = Message::find($messageId);
 
-        if (!$message) {
+        if (! $message) {
             return response()->json([
                 'success' => false,
                 'error' => 'This message has been deleted and no longer exists.',
             ], 404);
         }
 
-        abort_if($message->sender_id !== auth()->id(), 403);
-
-        $message->delete();
+        SystemMessageService::deleteMessage($message);
 
         return response()->json(['success' => true]);
     }
@@ -143,7 +143,7 @@ class MessageController extends Controller
 
     public function destroyConversation($conversationId)
     {
-        if (!is_string($conversationId) || !ctype_digit($conversationId) || (int) $conversationId <= 0) {
+        if (! is_string($conversationId) || ! ctype_digit($conversationId) || (int) $conversationId <= 0) {
             return redirect()
                 ->route('messages.index')
                 ->with('error', 'Invalid message id.');
@@ -151,7 +151,7 @@ class MessageController extends Controller
 
         $conversation = Conversation::find((int) $conversationId);
 
-        if (!$conversation) {
+        if (! $conversation) {
             return redirect()
                 ->route('messages.index')
                 ->with('error', 'Conversation or message does not exist.');
@@ -163,11 +163,7 @@ class MessageController extends Controller
             403
         );
 
-        Message::where('conversation_id', $conversation->id)->delete();
-
-        $conversation->delete();
-
-        SystemMessageService::forgetUserCache(auth()->id());
+        SystemMessageService::deleteConversation($conversation);
 
         return redirect()->route('messages.index')
             ->with('success', 'Conversation deleted.');

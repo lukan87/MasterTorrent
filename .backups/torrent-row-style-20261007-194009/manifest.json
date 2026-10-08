@@ -1,0 +1,26 @@
+{
+  "public/css/torrent-browser.css": {
+    "existed": true,
+    "after_sha256": "7f5bde7f501611fde0f45c51fd6619df926494d5e1a9006bb2ccd0c090bca4a3"
+  },
+  "resources/views/torrents/partials/index/namecat.blade.php": {
+    "existed": true,
+    "after_sha256": "162b75909364c86a86e5646675ad67ae0d8e479073a9b8a80a19481965a38935"
+  },
+  "app/Helpers/TorrentReleaseParser.php": {
+    "existed": true,
+    "after_sha256": "b16b8b50b4f4dbb9776e0c24f8a32095466f03088d97cae8dde766d5e72dad8b"
+  },
+  "tests/Unit/TorrentReleaseParserTest.php": {
+    "existed": true,
+    "after_sha256": "8b8ea4777e8942b6ed0e03f15728c473af4c2547b363c1074bc0fdb4ebe97b3b"
+  },
+  "tests/Integration/TorrentBrowseRenderingTest.php": {
+    "existed": true,
+    "after_sha256": "fc73836efd76a60339a9bc805e9c6a3a4bdbfd9683042e8e3aa05f362d13b38a"
+  },
+  "resources/views/torrents/partials/index/release-badges.blade.php": {
+    "existed": false,
+    "after_sha256": "d17db4fb67a6610f7bc86b68d4b80db4e7300a0dfed99d3baa6fb2e8ad26050d"
+  }
+}

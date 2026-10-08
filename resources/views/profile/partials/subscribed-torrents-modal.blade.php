@@ -117,14 +117,14 @@
 </div>
 <style>
 .subscriptions-card { width: 100%; text-align: left; font: inherit; cursor: pointer; }
-.subscriptions-card .community-stat-icon.subscriptions { color: #67e8f9; background: #22d3ee12; }
-.subscriptions-card:focus-visible { outline: 2px solid #80e0cf; outline-offset: 3px; }
-.subscriptions-modal .sub-torrent-row { padding: 1rem; border: 1px solid #2b3a4c; border-radius: 12px; background: #0e1822; }
-.subscriptions-modal .sub-torrent-row:hover { border-color: #80e0cf66; background: #121f2a; }
-.subscriptions-modal .sub-torrent-row:focus-visible { outline: 2px solid #80e0cf; outline-offset: -3px; }
+.subscriptions-card .community-stat-icon.subscriptions { color: var(--theme-teal-text, #67e8f9); background: var(--theme-teal-soft, #22d3ee12); }
+.subscriptions-card:focus-visible { outline: 2px solid var(--theme-teal-border, #80e0cf); outline-offset: 3px; }
+.subscriptions-modal .sub-torrent-row { padding: 1rem; border: 1px solid var(--theme-border, #2b3a4c); border-radius: 12px; background: var(--theme-surface, #0e1822); }
+.subscriptions-modal .sub-torrent-row:hover { border-color: var(--theme-teal-border, #80e0cf66); background: var(--theme-surface, #121f2a); }
+.subscriptions-modal .sub-torrent-row:focus-visible { outline: 2px solid var(--theme-teal-border, #80e0cf); outline-offset: -3px; }
 .subscriptions-modal .subscribed-list { gap: .75rem; }
 .subscriptions-modal .subscribed-name { overflow-wrap: anywhere; line-height: 1.5; }
-.subscriptions-modal .subscribed-meta, .subscriptions-modal .subscribed-empty { color: #a5b4c7; }
+.subscriptions-modal .subscribed-meta, .subscriptions-modal .subscribed-empty { color: var(--theme-muted, #a5b4c7); }
 </style>
 @push('scripts')
 <script>

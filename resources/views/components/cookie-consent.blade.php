@@ -46,14 +46,14 @@
 }
 
 .cookie-modal {
-    background: linear-gradient(145deg, #141414, #0f0f0f);
-    color: #fff;
+    background: linear-gradient(145deg, var(--theme-surface, #141414), var(--theme-surface-alt, #0f0f0f));
+    color: var(--theme-text, #fff);
     max-width: 520px;
     width: 92%;
     padding: 40px;
     border-radius: 18px;
     text-align: center;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    box-shadow: 0 20px 60px var(--theme-shadow, rgba(0,0,0,0.6));
     animation: slideUp 0.4s ease;
 }
 
@@ -63,8 +63,8 @@
 }
 
 .cookie-text {
-    color: #cfcfcf;
-    font-size: 0.95rem;
+    color: var(--theme-text, #cfcfcf);
+    font-size: var(--site-font-body, 13px);
     line-height: 1.6;
     margin-bottom: 25px;
 }
@@ -93,16 +93,16 @@
 
 .cookie-footer {
     margin-top: 20px;
-    font-size: 0.8rem;
+    font-size: var(--site-font-body, 13px);
 }
 
 .cookie-footer a {
-    color: #aaa;
+    color: var(--theme-muted, #aaa);
     text-decoration: none;
 }
 
 .cookie-footer a:hover {
-    color: #fff;
+    color: var(--theme-text, #fff);
     text-decoration: underline;
 }
 

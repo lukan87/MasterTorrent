@@ -98,6 +98,7 @@
                     >
                         <option value="basic" {{ $seedbox->auth_type === 'basic' ? 'selected' : '' }}>Basic</option>
                         <option value="digest" {{ $seedbox->auth_type === 'digest' ? 'selected' : '' }}>Digest</option>
+                        <option value="session" {{ $seedbox->auth_type === 'session' ? 'selected' : '' }}>Session login (VividCobra)</option>
                     </select>
                 </div>
 
@@ -162,10 +163,10 @@
     .seedbox-edit-card {
         position: relative;
         overflow: hidden;
-        background: linear-gradient(135deg, rgba(14,21,33,.95), rgba(10,15,27,.84));
-        border: 1px solid var(--ui-border, rgba(148, 163, 184, .16));
+        background: linear-gradient(135deg, var(--theme-surface, rgba(14,21,33,.95)), var(--theme-surface, rgba(10,15,27,.84)));
+        border: 1px solid var(--ui-border, var(--theme-border, rgba(148, 163, 184, .16)));
         border-radius: .9rem;
-        box-shadow: 0 12px 32px rgba(0, 0, 0, .28);
+        box-shadow: 0 12px 32px var(--theme-shadow, rgba(0, 0, 0, .28));
     }
 
     .seedbox-edit-card::before {
@@ -175,7 +176,7 @@
         top: 0;
         bottom: 0;
         width: 3px;
-        background: var(--ui-accent, #22d3c5);
+        background: var(--theme-teal-action, var(--ui-accent, #22d3c5));
         opacity: .9;
     }
 
@@ -184,8 +185,8 @@
         align-items: center;
         gap: .8rem;
         padding: 1rem 1.15rem;
-        border-bottom: 1px solid var(--ui-border, rgba(148, 163, 184, .16));
-        background: rgba(10,15,27,.34);
+        border-bottom: 1px solid var(--ui-border, var(--theme-border, rgba(148, 163, 184, .16)));
+        background: var(--theme-surface, rgba(10,15,27,.34));
     }
 
     .seedbox-edit-icon {
@@ -196,24 +197,24 @@
         align-items: center;
         justify-content: center;
         border-radius: .65rem;
-        color: var(--ui-accent, #22d3c5);
-        background: rgba(34, 211, 197, .08);
-        border: 1px solid rgba(34, 211, 197, .2);
+        color: var(--ui-accent, var(--theme-on-action, #22d3c5));
+        background: var(--theme-teal-soft, rgba(34, 211, 197, .08));
+        border: 1px solid var(--theme-teal-border, rgba(34, 211, 197, .2));
         font-size: 18px;
     }
 
     .seedbox-edit-title {
         margin: 0;
-        color: #f1f5f9;
-        font-size: 14px;
+        color: var(--theme-text, #f1f5f9);
+        font-size: var(--site-font-body, 13px);
         font-weight: 700;
         line-height: 1.3;
     }
 
     .seedbox-edit-subtitle {
         margin: .18rem 0 0;
-        color: #94a3b8;
-        font-size: 13px;
+        color: var(--theme-muted, #94a3b8);
+        font-size: var(--site-font-body, 13px);
         line-height: 1.45;
     }
 
@@ -230,35 +231,35 @@
         align-items: center;
         gap: .4rem;
         margin-bottom: .4rem;
-        color: #cbd5e1;
-        font-size: 13px;
+        color: var(--theme-text, #cbd5e1);
+        font-size: var(--site-font-body, 13px);
         font-weight: 600;
     }
 
     .seedbox-label i {
-        color: var(--ui-accent, #22d3c5);
+        color: var(--ui-accent, var(--theme-teal-text, #22d3c5));
         font-size: 13px;
     }
 
     .seedbox-input {
         min-height: 40px;
-        color: #e2e8f0 !important;
-        background: rgba(10,15,27,.72) !important;
-        border: 1px solid rgba(148, 163, 184, .2) !important;
+        color: var(--theme-text, #e2e8f0) !important;
+        background: var(--theme-control, rgba(10,15,27,.72)) !important;
+        border: 1px solid var(--theme-border, rgba(148, 163, 184, .2)) !important;
         border-radius: .55rem !important;
         box-shadow: none !important;
-        font-size: 14px !important;
+        font-size: var(--site-font-body, 13px) !important;
     }
 
     .seedbox-input::placeholder {
-        color: #64748b !important;
+        color: var(--theme-muted, #64748b) !important;
     }
 
     .seedbox-input:focus {
-        color: #f8fafc !important;
-        background: rgba(10,15,27,.9) !important;
-        border-color: var(--ui-accent, #22d3c5) !important;
-        box-shadow: 0 0 0 2px rgba(34, 211, 197, .08) !important;
+        color: var(--theme-text, #f8fafc) !important;
+        background: var(--theme-control, rgba(10,15,27,.9)) !important;
+        border-color: var(--ui-accent, var(--theme-teal-border, #22d3c5)) !important;
+        box-shadow: 0 0 0 2px var(--theme-shadow, rgba(34, 211, 197, .08)) !important;
     }
 
     .seedbox-select {
@@ -266,14 +267,14 @@
     }
 
     .seedbox-select option {
-        color: #e2e8f0;
-        background: #0a0f1b;
+        color: var(--theme-text, #e2e8f0);
+        background: var(--theme-control, #0a0f1b);
     }
 
     .seedbox-help {
         margin-top: .4rem;
-        color: #64748b;
-        font-size: 12px;
+        color: var(--theme-muted, #64748b);
+        font-size: var(--site-font-small, 13px);
         line-height: 1.5;
     }
 
@@ -292,34 +293,34 @@
         min-height: 38px;
         padding: .45rem .8rem;
         border-radius: .55rem;
-        font-size: 13px;
+        font-size: var(--site-font-body, 13px);
         font-weight: 600;
         text-decoration: none;
         transition: all .18s ease;
     }
 
     .seedbox-btn-primary {
-        color: #061311;
-        background: var(--ui-accent, #22d3c5);
-        border: 1px solid var(--ui-accent, #22d3c5);
+        color: var(--theme-on-action, #061311);
+        background: var(--theme-teal-action, var(--ui-accent, #22d3c5));
+        border: 1px solid var(--ui-accent, var(--theme-teal-border, #22d3c5));
     }
 
     .seedbox-btn-primary:hover {
-        color: #061311;
+        color: var(--theme-text, #061311);
         filter: brightness(1.06);
         transform: translateY(-1px);
     }
 
     .seedbox-btn-secondary {
-        color: #cbd5e1;
-        background: rgba(33,42,55,.42);
-        border: 1px solid rgba(148, 163, 184, .2);
+        color: var(--theme-text, #cbd5e1);
+        background: var(--theme-surface, rgba(33,42,55,.42));
+        border: 1px solid var(--theme-border, rgba(148, 163, 184, .2));
     }
 
     .seedbox-btn-secondary:hover {
-        color: #fff;
-        background: rgba(46,55,68,.55);
-        border-color: rgba(148, 163, 184, .3);
+        color: var(--theme-text, #fff);
+        background: var(--theme-surface, rgba(46,55,68,.55));
+        border-color: var(--theme-border, rgba(148, 163, 184, .3));
     }
 
     .seedbox-alert {
@@ -329,7 +330,7 @@
         margin-top: 1rem;
         padding: .75rem .85rem;
         border-radius: .6rem;
-        font-size: 13px;
+        font-size: var(--site-font-body, 13px);
         line-height: 1.45;
     }
 
@@ -339,15 +340,15 @@
     }
 
     .seedbox-alert-danger {
-        color: #fecaca;
-        background: rgba(127, 29, 29, .22);
-        border: 1px solid rgba(248, 113, 113, .22);
+        color: var(--theme-text, #fecaca);
+        background: var(--theme-red-soft, rgba(127, 29, 29, .22));
+        border: 1px solid var(--theme-red-border, rgba(248, 113, 113, .22));
     }
 
     .seedbox-alert-success {
-        color: #bbf7d0;
-        background: rgba(20, 83, 45, .2);
-        border: 1px solid rgba(74, 222, 128, .2);
+        color: var(--theme-text, #bbf7d0);
+        background: var(--theme-surface-alt, rgba(20, 83, 45, .2));
+        border: 1px solid var(--theme-green-border, rgba(74, 222, 128, .2));
     }
 
     @media (max-width: 576px) {

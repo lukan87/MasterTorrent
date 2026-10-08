@@ -1,0 +1,55 @@
+/* A compact, normal-flow feature; no backdrop downloads or scroll overlays. */
+.motd-feature {
+    position: relative;
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 22px;
+    margin: 16px 0 20px;
+    padding: 18px 22px;
+    border: 1px solid var(--ui-border);
+    border-radius: 16px;
+    background: linear-gradient(115deg, var(--theme-teal-soft), transparent 65%), var(--ui-surface);
+    color: var(--ui-text);
+    box-shadow: 0 8px 24px var(--theme-shadow);
+}
+.motd-feature-poster {
+    display: grid;
+    place-items: center;
+    width: 96px;
+    height: 144px;
+    overflow: hidden;
+    border: 1px solid var(--ui-border);
+    border-radius: 9px;
+    color: var(--ui-accent);
+    background: var(--ui-control);
+    font-size: 28px;
+}
+.motd-feature-poster img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.motd-feature-info { min-width: 0; }
+.motd-feature-label { display: inline-flex; align-items: center; gap: 7px; color: var(--ui-accent); font-size: var(--site-font-small, 13px); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.motd-feature h2 { margin: 7px 0 9px; font-size: clamp(16px, 1.5vw, 21px); font-weight: 700; line-height: 1.4; overflow-wrap: anywhere; }
+.motd-feature h2 a { color: inherit; text-decoration: none; }
+.motd-feature h2 a:hover { color: var(--ui-accent); }
+.motd-feature-meta { display: flex; flex-wrap: wrap; gap: 6px 16px; color: var(--ui-text-muted); font-size: var(--site-font-small, 13px); }
+.motd-feature-meta > span { display: inline-flex; align-items: center; gap: 6px; }
+.motd-feature-stats { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 12px; color: var(--ui-text-muted); font-size: var(--site-font-small, 13px); }
+.motd-feature-stats > span { display: inline-flex; align-items: center; gap: 5px; }
+.motd-feature-stats strong { color: var(--ui-text); font-weight: 700; }
+.motd-feature-stats .motd-feature-seeders, .motd-feature-seeders strong { color: var(--theme-green-text); }
+.motd-feature-link { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 14px; border: 1px solid var(--theme-teal-border); border-radius: 9px; background: var(--theme-teal-soft); color: var(--ui-accent); font-size: var(--site-font-small, 13px); font-weight: 700; text-decoration: none; white-space: nowrap; }
+.motd-feature-link:hover { color: var(--ui-text); border-color: var(--ui-accent); }
+.motd-feature a:focus-visible { outline: 2px solid var(--ui-accent); outline-offset: 4px; }
+@media (max-width: 991.98px) {
+    .motd-feature { grid-template-columns: 72px minmax(0, 1fr); gap: 10px 15px; padding: 16px; }
+    .motd-feature-poster { grid-row: span 2; width: 72px; height: 108px; align-self: start; }
+    .motd-feature-link { grid-column: 2; justify-self: start; padding: 7px 10px; }
+}
+@media (max-width: 575.98px) {
+    .motd-feature { grid-template-columns: 54px minmax(0, 1fr); gap: 10px 12px; padding: 13px; margin: 12px 0 16px; border-radius: 12px; }
+    .motd-feature-poster { width: 54px; height: 81px; border-radius: 6px; }
+    .motd-feature h2 { font-size: var(--site-font-body, 13px); margin: 5px 0 7px; }
+    .motd-feature-label { font-size: var(--site-font-small, 13px); letter-spacing: .04em; }
+    .motd-feature-meta, .motd-feature-stats { font-size: var(--site-font-small, 13px); }
+    .motd-feature-stats { gap: 6px 12px; margin-top: 9px; }
+}

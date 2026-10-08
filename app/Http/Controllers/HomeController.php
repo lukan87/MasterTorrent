@@ -18,9 +18,14 @@ class HomeController extends Controller
 
     public function index(Request $request)
     {
-        $data = $this->homeService->getDashboardData();
-        if ($request->filled('shout') && !$request->user()->chatblock) {
+        $highlightRequested = $request->filled('shout') && !$request->user()->chatblock;
+        if ($highlightRequested) {
+            // Reject malformed links before doing dashboard work.
             $request->validate(['shout' => ['integer', 'min:1']]);
+        }
+
+        $data = $this->homeService->getDashboardData();
+        if ($highlightRequested) {
             $shout = Shoutbox::find($request->integer('shout'));
             if ($shout) {
                 $thread = $shout;

@@ -8,6 +8,11 @@ use PhpXmlRpc\Client;
 use PhpXmlRpc\Request;
 use PhpXmlRpc\Value;
 use PhpXmlRpc\Encoder;
+use GuzzleHttp\Cookie\CookieJar;
+use GuzzleHttp\Psr7\Uri;
+use GuzzleHttp\Psr7\UriResolver;
+use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Http\Client\Response;
 
 class SeedboxService
 {
@@ -17,6 +22,9 @@ class SeedboxService
     protected string $authType;
     protected ?Client $rpcClient = null;
     protected bool $useRpc = false;
+    protected ?CookieJar $cookies = null;
+    protected bool $sessionAuthenticated = false;
+    protected bool $remoteCommandsUnavailable = false;
 
     public function __construct(string $url, string $username, string $password, string $authType = 'basic', bool $useRpc = false)
     {
@@ -26,10 +34,18 @@ class SeedboxService
         $this->authType = strtolower($authType);
         $this->useRpc = $useRpc;
 
-        if ($useRpc) {
+        if ($useRpc && $this->authType === 'session') {
+            $this->rpcClient = new SessionXmlRpcClient($this->url, function (string $body, int $timeout): Response {
+                $response = $this->http()->timeout($timeout)->withBody($body, 'text/xml')->post($this->url);
+                if ($error = $this->responseError($response)) {
+                    throw new \DomainException($error);
+                }
+                return $response;
+            });
+        } elseif ($useRpc) {
             $this->rpcClient = new Client($this->url);
-            $this->rpcClient->setSSLVerifyPeer(false);
-            $this->rpcClient->setSSLVerifyHost(0);
+            $this->rpcClient->setSSLVerifyPeer(true);
+            $this->rpcClient->setSSLVerifyHost(2);
             $this->rpcClient->setCredentials($this->username, $this->password, $this->authType === 'digest' ? CURLAUTH_DIGEST : CURLAUTH_BASIC);
         }
     }
@@ -56,35 +72,159 @@ class SeedboxService
             Log::error('XML-RPC Error', [
                 'method' => $method,
                 'faultCode' => $response->faultCode(),
-                'faultString' => $response->faultString(),
             ]);
-            return ['error' => $response->faultString()];
+            return ['error' => 'XML-RPC request failed (fault code ' . $response->faultCode() . ').'];
         }
 
         return $encoder->decode($response->value());
     }
 
-    /**
-     * Standard HTTP POST request (existing)
-     */
+    /** HTTPRPC uses form fields, not an XML-RPC body. */
     protected function request(array $params): array
     {
-        $http = Http::withOptions(['verify' => false])->connectTimeout(10)->timeout(30);
-
-        $http = ($this->authType === 'basic') ? $http->withBasicAuth($this->username, $this->password) : $http->withDigestAuth($this->username, $this->password);
-
         try {
-            $response = $http->asForm()->post($this->url, $params);
-        } catch (\Illuminate\Http\Client\ConnectionException $e) {
-            return ['error' => 'Could not reach the seedbox. Check its address and try again.'];
+            $response = $this->http()->asForm()->post($this->url, $params);
+            if ($error = $this->responseError($response)) {
+                return ['error' => $error];
+            }
+            $data = $response->json();
+            if (!is_array($data)) {
+                return ['error' => 'HTTP ' . $response->status() . ': expected JSON data from the HTTPRPC endpoint.'];
+            }
+            // Remote error strings may contain secrets or server diagnostics.
+            if (isset($data['error'])) {
+                return ['error' => 'HTTP ' . $response->status() . ': the seedbox rejected the HTTPRPC request.'];
+            }
+            return $data;
+        } catch (\DomainException $e) {
+            return ['error' => $e->getMessage()];
+        } catch (\Throwable $e) {
+            return ['error' => 'Seedbox transport failed. Check DNS, connectivity, timeouts, and the TLS certificate.'];
         }
+    }
 
-        if ($response->failed()) {
-            return ['error' => 'Request failed: ' . $response->status()];
+    protected function validateUrl(string $url): Uri
+    {
+        $uri = new Uri($url);
+        if (!in_array($uri->getScheme(), ['http', 'https'], true) || $uri->getHost() === '' || $uri->getUserInfo() !== '' || $uri->getFragment() !== '') {
+            throw new \DomainException('Invalid seedbox URL. Use an HTTP(S) address without embedded credentials or fragments.');
         }
+        if ($this->authType === 'session' && $uri->getScheme() !== 'https') {
+            throw new \DomainException('Session authentication requires HTTPS.');
+        }
+        return $uri;
+    }
 
-        $data = $response->json();
-        return is_array($data) ? $data : ['error' => 'Invalid response'];
+    protected function sameOriginUrl(string $base, string $location): string
+    {
+        $target = UriResolver::resolve(new Uri($base), new Uri($location));
+        $origin = $this->validateUrl($this->url);
+        $this->validateUrl((string) $target);
+        if ($target->getScheme() !== $origin->getScheme() || $target->getHost() !== $origin->getHost() || $target->getPort() !== $origin->getPort()) {
+            throw new \DomainException('Seedbox redirect blocked: destination must have the same scheme, host, and port.');
+        }
+        return (string) $target;
+    }
+
+    protected function http(bool $negotiateAuth = false): PendingRequest
+    {
+        $this->validateUrl($this->url);
+        $http = Http::withOptions(['verify' => true])->connectTimeout(10)->timeout(30);
+        if ($this->authType === 'session') {
+            $this->cookies ??= new CookieJar();
+            $http = $http->withOptions(['cookies' => $this->cookies])->withoutRedirecting();
+            if (!$this->sessionAuthenticated) {
+                $this->loginSession($http);
+            }
+            return $http;
+        }
+        if (!in_array($this->authType, ['basic', 'digest'], true)) {
+            throw new \DomainException('Unsupported seedbox authentication type.');
+        }
+        // Keep existing Basic/Digest request behavior, including cURL negotiation
+        // for downloads/uploads, but never forward requests to another origin.
+        $http = $http->withOptions(['allow_redirects' => [
+            'max' => 5,
+            'on_redirect' => function ($request, $response, $target) {
+                $this->sameOriginUrl((string) $request->getUri(), (string) $target);
+            },
+        ]]);
+        if ($negotiateAuth) {
+            return $http->withOptions(['curl' => [
+                CURLOPT_HTTPAUTH => CURLAUTH_ANY,
+                CURLOPT_USERPWD => $this->username . ':' . $this->password,
+            ]])->withoutRedirecting();
+        }
+        return $this->authType === 'basic'
+            ? $http->withBasicAuth($this->username, $this->password)
+            : $http->withDigestAuth($this->username, $this->password);
+    }
+
+    /** Cookies and CSRF values exist only in this service instance's memory. */
+    protected function loginSession(PendingRequest $http): void
+    {
+        $origin = $this->validateUrl($this->url)->withPath('/login')->withQuery('');
+        $loginUrl = (string) $origin;
+        $response = $http->get($loginUrl);
+        if ($response->status() !== 200) {
+            throw new \DomainException('Session login form unavailable (HTTP ' . $response->status() . ').');
+        }
+        $dom = new \DOMDocument();
+        $previous = libxml_use_internal_errors(true);
+        try {
+            $dom->loadHTML($response->body(), LIBXML_NONET);
+        } finally {
+            libxml_clear_errors();
+            libxml_use_internal_errors($previous);
+        }
+        $xpath = new \DOMXPath($dom);
+        $form = $xpath->query('//form[.//input[@name="csrf_token"] and .//input[@name="username"] and .//input[@name="password"]]')->item(0);
+        if (!$form || strtolower($form->getAttribute('method')) !== 'post') {
+            throw new \DomainException('Session login requires a supported CSRF-protected username/password form.');
+        }
+        $csrf = $xpath->query('.//input[@name="csrf_token"]', $form)->item(0)->getAttribute('value');
+        if ($csrf === '') {
+            throw new \DomainException('Session login form is missing its CSRF token.');
+        }
+        $action = $this->sameOriginUrl($loginUrl, $form->getAttribute('action'));
+        $response = (clone $http)->asForm()->post($action, [
+            'username' => $this->username,
+            'password' => $this->password,
+            'csrf_token' => $csrf,
+        ]);
+        $currentUrl = $action;
+        for ($redirects = 0; $response->redirect(); $redirects++) {
+            if ($redirects >= 5 || !in_array($response->status(), [301, 302, 303], true) || !$response->header('Location')) {
+                throw new \DomainException('Session login returned an unsupported or excessive redirect.');
+            }
+            $currentUrl = $this->sameOriginUrl($currentUrl, $response->header('Location'));
+            $response = $http->get($currentUrl);
+        }
+        if ($response->status() !== 200 || str_contains($response->body(), 'name="csrf_token"') || str_contains($response->body(), "name='csrf_token'")) {
+            throw new \DomainException('Session login was not accepted (HTTP ' . $response->status() . '). Check the saved credentials.');
+        }
+        $this->sessionAuthenticated = true;
+    }
+
+    protected function responseError(Response $response): ?string
+    {
+        $status = $response->status();
+        if (in_array($status, [401, 403], true)) {
+            return "HTTP {$status}: authentication rejected or access denied. Check the saved credentials and authentication type.";
+        }
+        if ($response->redirect()) {
+            $this->sessionAuthenticated = false;
+            // Do not return Location: it may contain session tokens.
+            return "HTTP {$status}: seedbox redirected the request; a session login or corrected endpoint may be required.";
+        }
+        if (!$response->successful()) {
+            return "HTTP {$status}: seedbox request failed.";
+        }
+        if ($this->authType === 'session' && preg_match('/<form\b/i', $response->body()) && (str_contains($response->body(), 'name="password"') || str_contains($response->body(), "name='password'"))) {
+            $this->sessionAuthenticated = false;
+            return "HTTP {$status}: seedbox session expired or login was rejected.";
+        }
+        return null;
     }
 
     /**
@@ -194,21 +334,8 @@ public function listTorrents(): array
             return $this->rpcCall('d.get_trackers', [$hash]);
         }
 
-        try {
-            $http = Http::withOptions(['verify' => false])->connectTimeout(10)->timeout(30);
-            $http = $this->authType === 'basic'
-                ? $http->withBasicAuth($this->username, $this->password)
-                : $http->withDigestAuth($this->username, $this->password);
-
-            $response = $http->asForm()->post($this->url, [
-                'mode' => 'trkall',
-                'hash' => $hash,
-            ]);
-
-            return $response->successful() ? ($response->json() ?? []) : [];
-        } catch (\Exception $e) {
-            return [];
-        }
+        $result = $this->request(['mode' => 'trkall', 'hash' => $hash]);
+        return isset($result['error']) ? [] : $result;
     }
 
     public function downloadTorrentFile(string $hash): string
@@ -218,19 +345,12 @@ public function listTorrents(): array
             if (isset($result['error'])) return '';
             return base64_decode((string)$result);
         }
-
-        $url = "{$this->url}?mode=download&id=$hash";
-        $curl = curl_init($url);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 10);
-        curl_setopt($curl, CURLOPT_TIMEOUT, 30);
-        curl_setopt($curl, CURLOPT_USERPWD, "{$this->username}:{$this->password}");
-        curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-        $content = curl_exec($curl);
-        curl_close($curl);
-
-        return is_string($content) ? $content : '';
+        try {
+            $response = $this->http(true)->get($this->url, ['mode' => 'download', 'id' => $hash]);
+            return $this->responseError($response) === null ? $response->body() : '';
+        } catch (\Throwable $e) {
+            return '';
+        }
     }
 
     public function addTorrentFile(string $filePath): array
@@ -251,43 +371,129 @@ public function listTorrents(): array
     }
 
     /**
-     * Curl-based upload
+     * Multipart upload, preserving the installation path and authentication.
      */
     protected function uploadTorrentCurl(string $filePath): array
     {
-        $parsedUrl = parse_url($this->url);
-        $host = $parsedUrl['host'] ?? null;
-        if (!$host) return ['error' => 'Invalid seedbox URL'];
-
-        $uploadUrl = str_contains($this->url, '/rutorrent/')
-            ? "https://{$host}/rutorrent/php/addtorrent.php"
-            : "https://{$host}/php/addtorrent.php";
-
-        $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, $uploadUrl);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 10);
-        curl_setopt($curl, CURLOPT_TIMEOUT, 30);
-        curl_setopt($curl, CURLOPT_POST, true);
-        curl_setopt($curl, CURLOPT_POSTFIELDS, [
-            'torrent_file' => curl_file_create($filePath),
-        ]);
-        curl_setopt($curl, CURLOPT_USERPWD, "{$this->username}:{$this->password}");
-        curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-
-        $response = curl_exec($curl);
-        $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-        $error = curl_error($curl);
-        curl_close($curl);
-
-        if ($error || $status >= 400 || $response === 'false') {
-            return ['error' => $error ?: "Upload failed, response: $response"];
+        $file = null;
+        try {
+            $uri = $this->validateUrl($this->url);
+            $suffix = '/plugins/httprpc/action.php';
+            if (!str_ends_with($uri->getPath(), $suffix)) {
+                return ['error' => 'Upload requires an HTTPRPC endpoint ending in /plugins/httprpc/action.php.'];
+            }
+            $prefix = substr($uri->getPath(), 0, -strlen($suffix));
+            $uploadUrl = (string) $uri->withPath($prefix . '/php/addtorrent.php')->withQuery('');
+            $file = fopen($filePath, 'rb');
+            if ($file === false) return ['error' => 'Unable to read torrent file.'];
+            $response = $this->http(true)->attach('torrent_file', $file, basename($filePath))->post($uploadUrl);
+            if ($result = $this->uploadRedirectResult($response, $uploadUrl)) return $result;
+            if ($error = $this->responseError($response)) return ['error' => $error];
+            if (trim($response->body()) === 'false') {
+                return ['error' => 'HTTP ' . $response->status() . ': seedbox rejected the torrent upload.'];
+            }
+            return ['success' => true];
+        } catch (\DomainException $e) {
+            return ['error' => $e->getMessage()];
+        } catch (\Throwable $e) {
+            return ['error' => 'Torrent upload transport failed. Check connectivity and the TLS certificate.'];
+        } finally {
+            if (is_resource($file)) fclose($file);
         }
-
-        return ['success' => true];
     }
 
+    /** Read ruTorrent's upload result without following or repeating the POST. */
+    protected function uploadRedirectResult(Response $response, string $uploadUrl): ?array
+    {
+        if (!in_array($response->status(), [302, 303], true) || !$response->header('Location')) {
+            return null;
+        }
+        $target = new Uri($this->sameOriginUrl($uploadUrl, $response->header('Location')));
+        if ($target->getPath() !== (new Uri($uploadUrl))->getPath()) {
+            return null;
+        }
+        parse_str($target->getQuery(), $query);
+        $results = $query['result'] ?? null;
+        if (is_string($results)) $results = [$results];
+        if (!is_array($results) || count($results) !== 1) {
+            return null;
+        }
+        $result = reset($results);
+        if ($result === 'Success' || $result === 'Duplicate') {
+            return ['success' => true];
+        }
+        // Never return query strings, filenames, or unknown provider messages.
+        return ['error' => 'HTTP ' . $response->status() . ': ruTorrent rejected the torrent upload.'];
+    }
+
+    /** ruTorrent's authenticated Get source action, without shell execution. */
+    protected function exportTorrentSource(string $hash): array
+    {
+        if (!preg_match('/^[a-f0-9]{40}$/i', $hash)) {
+            return ['error' => 'Invalid torrent hash for source export.'];
+        }
+        try {
+            $uri = $this->validateUrl($this->url);
+            $suffix = '/plugins/httprpc/action.php';
+            if (!str_ends_with($uri->getPath(), $suffix)) {
+                return ['error' => 'Torrent source export requires a ruTorrent HTTPRPC endpoint.'];
+            }
+            $prefix = substr($uri->getPath(), 0, -strlen($suffix));
+            $url = (string) $uri->withPath($prefix . '/plugins/source/action.php')->withQuery('');
+            $response = $this->http()->asForm()->post($url, ['hash' => $hash]);
+            if ($error = $this->responseError($response)) return ['error' => $error];
+            $body = $response->body();
+            if (!$this->validBencode($body)) {
+                return ['error' => 'HTTP ' . $response->status() . ': ruTorrent source export did not return a valid torrent file.'];
+            }
+            $decoded = \App\Helpers\Bencode::bdecode($body);
+            if (!is_array($decoded) || !isset($decoded['info']) || !is_array($decoded['info']) || strtolower(\App\Helpers\Bencode::get_infohash_raw($body)) !== strtolower($hash)) {
+                return ['error' => 'The exported torrent does not match the requested torrent hash.'];
+            }
+            return ['torrentContent' => $body];
+        } catch (\DomainException $e) {
+            return ['error' => $e->getMessage()];
+        } catch (\Throwable $e) {
+            return ['error' => 'Torrent source export failed. Check connectivity and the TLS certificate.'];
+        }
+    }
+
+    /** Check bounds before calling the existing decoder on an external response. */
+    protected function validBencode(string $body): bool
+    {
+        $position = 0;
+        $length = strlen($body);
+        $parse = function (int $depth = 0) use (&$parse, &$position, $length, $body): bool {
+            if ($depth > 64 || $position >= $length) return false;
+            $type = $body[$position];
+            if ($type === 'i') {
+                $end = strpos($body, 'e', ++$position);
+                if ($end === false || !preg_match('/^-?(0|[1-9][0-9]*)$/D', substr($body, $position, $end - $position))) return false;
+                $position = $end + 1;
+                return true;
+            }
+            if ($type === 'l' || $type === 'd') {
+                $position++;
+                while ($position < $length && $body[$position] !== 'e') {
+                    if ($type === 'd' && (!ctype_digit($body[$position]) || !$parse($depth + 1))) return false;
+                    if (!$parse($depth + 1)) return false;
+                }
+                if ($position >= $length) return false;
+                $position++;
+                return true;
+            }
+            if (!ctype_digit($type)) return false;
+            $colon = strpos($body, ':', $position);
+            if ($colon === false) return false;
+            $size = substr($body, $position, $colon - $position);
+            if (!preg_match('/^(0|[1-9][0-9]*)$/D', $size) || strlen($size) > strlen((string) $length)) return false;
+            $position = $colon + 1;
+            if ((int) $size > $length - $position) return false;
+            $position += (int) $size;
+            return true;
+        };
+        return $length > 0 && $body[0] === 'd' && $parse() && $position === $length;
+    }
 
     // In App\Services\SeedboxService.php
 public function testRpcSessionPath(string $hash): array
@@ -305,7 +511,7 @@ public function testRpcSessionPath(string $hash): array
         $dirRes = $this->rpcClient->send($dirReq, 30);
 
         if ($dirRes->faultCode()) {
-            return ['error' => $dirRes->faultString()];
+            return ['error' => $this->rpcClient instanceof SessionXmlRpcClient ? $dirRes->faultString() : 'XML-RPC directory lookup failed.'];
         }
 
         $basePath = rtrim($dirRes->value()->scalarval(), '/');
@@ -350,6 +556,11 @@ public function testRpcSessionPath(string $hash): array
             'cat -- ' . escapeshellarg($torrentFile)
         );
 
+        if (!$torrentContent && $this->authType === 'session') {
+            $export = $this->exportTorrentSource($hash);
+            if (isset($export['error'])) return $export;
+            $torrentContent = $export['torrentContent'];
+        }
         if (!$torrentContent) {
             return ['error' => 'Failed to retrieve torrent file'];
         }
@@ -361,7 +572,7 @@ public function testRpcSessionPath(string $hash): array
         ];
 
     } catch (\Throwable $e) {
-        return ['error' => $e->getMessage()];
+        return ['error' => 'XML-RPC session lookup failed.'];
     }
 }
 
@@ -370,6 +581,7 @@ public function testRpcSessionPath(string $hash): array
  */
 public function executeRemoteCommand(Client $client, string $command): ?string
 {
+    if ($this->remoteCommandsUnavailable) return null;
     $encoder = new Encoder();
     $args = [
         '',
@@ -383,6 +595,7 @@ public function executeRemoteCommand(Client $client, string $command): ?string
     $response = $client->send($req, 30);
 
     if ($response->faultCode() !== 0) {
+        if ($client instanceof SessionXmlRpcClient) $this->remoteCommandsUnavailable = true;
         return null;
     }
 
@@ -393,7 +606,7 @@ public function executeRemoteCommand(Client $client, string $command): ?string
 
    public function getMediaInfo(string $filePath): ?string
 {
-    if (!$this->useRpc || !$this->rpcClient) {
+    if (!$this->useRpc || !$this->rpcClient || $this->remoteCommandsUnavailable) {
         return null;
     }
 
@@ -442,43 +655,39 @@ public function getDuration(string $filePath): ?float
 }
 
 
-public function generateScreenshots(string $filePath): array
+/** Capture one of six evenly spread frames without creating remote files. */
+public function generateScreenshot(string $filePath, int $index): ?string
 {
-    if (!$this->useRpc || !$this->rpcClient) {
-        return [];
+    if (!$this->useRpc || !$this->rpcClient || $index < 0 || $index >= 6) {
+        return null;
     }
 
     $duration = $this->getDuration($filePath);
-    if (!$duration || $duration < 60) {
-        return [];
-    }
+    if (!$duration || $duration < 1) return null;
 
-    $positions = [
-        (int)($duration * 0.10),
-        (int)($duration * 0.30),
-        (int)($duration * 0.50),
-        (int)($duration * 0.70),
-        (int)($duration * 0.80),
-        (int)($duration * 0.90),
-    ];
+    return $this->captureScreenshot($filePath, (float) ($duration * (($index + 1) / 7)));
+}
 
+private function captureScreenshot(string $filePath, float $seconds): ?string
+{
+    $cmd = sprintf(
+        'ffmpeg -nostdin -hide_banner -loglevel error -ss %.3F -i %s -frames:v 1 -vf %s -q:v 2 -f image2pipe pipe:1 | base64',
+        $seconds,
+        escapeshellarg($filePath),
+        escapeshellarg("scale='min(1920,iw)':'min(1080,ih)':force_original_aspect_ratio=decrease")
+    );
+    $base64 = trim($this->executeRemoteCommand($this->rpcClient, $cmd) ?? '');
+
+    return $base64 !== '' ? $base64 : null;
+}
+
+public function generateScreenshots(string $filePath): array
+{
     $shots = [];
-
-    foreach ($positions as $seconds) {
-        // Generate screenshot via ffmpeg and output to stdout, then base64
-        $cmd = sprintf(
-            'ffmpeg -y -ss %d -i %s -frames:v 1 -q:v 2 -f image2pipe pipe:1 | base64',
-            $seconds,
-            escapeshellarg($filePath)
-        );
-
-        $base64 = trim($this->executeRemoteCommand($this->rpcClient, $cmd) ?? '');
-
-        if (!empty($base64)) {
-            $shots[] = $base64; // store base64 string
-        }
+    for ($index = 0; $index < 6; $index++) {
+        $shot = $this->generateScreenshot($filePath, $index);
+        if ($shot !== null) $shots[] = $shot;
     }
-
     return $shots;
 }
 
@@ -488,7 +697,7 @@ public function generateScreenshots(string $filePath): array
  */
 public function downloadRemoteFile(string $remotePath): ?string
 {
-    if (!$this->useRpc || !$this->rpcClient) {
+    if (!$this->useRpc || !$this->rpcClient || $this->remoteCommandsUnavailable) {
         return null;
     }
 
@@ -503,7 +712,7 @@ public function downloadRemoteFile(string $remotePath): ?string
 
 public function findPrimaryVideoFile(string $basePath): ?string
 {
-    if (!$this->useRpc || !$this->rpcClient) {
+    if (!$this->useRpc || !$this->rpcClient || $this->remoteCommandsUnavailable) {
         return null;
     }
 
@@ -519,7 +728,7 @@ public function findPrimaryVideoFile(string $basePath): ?string
 
 public function guessPrimaryVideoFile(string $basePath): ?string
 {
-    if (!$this->useRpc || !$this->rpcClient) {
+    if (!$this->useRpc || !$this->rpcClient || $this->remoteCommandsUnavailable) {
         return null;
     }
 
@@ -562,7 +771,7 @@ public function guessPrimaryVideoFile(string $basePath): ?string
 
 public function findTvEpisodeFile(string $basePath): ?array
 {
-    if (!$this->useRpc || !$this->rpcClient) {
+    if (!$this->useRpc || !$this->rpcClient || $this->remoteCommandsUnavailable) {
         return null;
     }
 
@@ -633,7 +842,7 @@ public function findTvEpisodeFile(string $basePath): ?array
 
 public function findPrimaryVideoRecursive(string $basePath): ?string
 {
-    if (!$this->useRpc || !$this->rpcClient) {
+    if (!$this->useRpc || !$this->rpcClient || $this->remoteCommandsUnavailable) {
         return null;
     }
 

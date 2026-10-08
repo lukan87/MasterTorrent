@@ -206,27 +206,27 @@
 
 <style>
 .deleted-row {
-    background: rgba(255, 0, 0, 0.05);
+    background: var(--theme-red-soft, rgba(255, 0, 0, 0.05));
     transition: background 0.2s ease;
 }
 
 .deleted-row:hover {
-    background: rgba(255, 0, 0, 0.12);
+    background: var(--theme-red-soft, rgba(255, 0, 0, 0.12));
 }
 
 .card {
-    background: #121214;
-    border: 1px solid rgba(255,255,255,0.05);
+    background: var(--theme-surface, #121214);
+    border: 1px solid var(--theme-border, rgba(255,255,255,0.05));
 }
 
 .btn-success {
-    background-color: #28a745;
-    border-color: #28a745;
+    background-color: var(--theme-green-action, #28a745);
+    border-color: var(--theme-green-border, #28a745);
 }
 
 .btn-danger {
-    background-color: #dc3545;
-    border-color: #dc3545;
+    background-color: var(--theme-red-action, #dc3545);
+    border-color: var(--theme-red-border, #dc3545);
 }
 </style>
 

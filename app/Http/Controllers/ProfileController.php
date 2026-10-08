@@ -80,274 +80,45 @@ class ProfileController extends Controller
 
 public function show($id, $name = null)
 {
-   $user = User::withTrashed()
-    ->with(['timeline.staff', 'inviter'])
-    ->withCount('invitees')
-    ->findOrFail($id);
-
+    // Resolve account status and canonical name before any cached display work.
+    $user = User::withTrashed()->findOrFail($id);
     if ($name === null || $name !== $user->name) {
-        return redirect()->route('profile.show', [
-            'id' => $user->id,
-            'name' => $user->name
-        ]);
+        return redirect()->route('profile.show', ['id' => $user->id, 'name' => $user->name]);
+    }
+    if ($user->trashed()) {
+        $user->loadMissing('deletedBy');
+        return view('profile.show', compact('user'));
     }
 
-    $inviteTreeMembers = $user->invitees()->orderBy('id')->paginate(20, ['id', 'name', 'invited_by', 'deleted_at'], 'invitees_page');
-
-    /*
-|--------------------------------------------------------------------------
-| Community Stats
-|--------------------------------------------------------------------------
-*/
-
-
-$commentCount = Comment::where('user_id', $user->id)->count();
-
-$thanksCount = TorrentThank::where('user_id', $user->id)->count();
-
-$forumPostCount = ForumPost::where('user_id', $user->id)->count();
-
-    /*
-    |--------------------------------------------------------------------------
-    | Active Seeds
-    |--------------------------------------------------------------------------
-    */
-
-    $activeSeeds = Peer::where('user_id', $user->id)
-        ->where('seeder', 1)
-        ->count();
-
-    /*
-    |--------------------------------------------------------------------------
-    | Seeding Size
-    |--------------------------------------------------------------------------
-    */
-
-    $totalSeedSize = Peer::where('user_id', $user->id)
-        ->where('seeder', 1)
-        ->join('torrents', 'peers.torrent_id', '=', 'torrents.id')
-        ->sum('torrents.size');
-
-    /*
-    |--------------------------------------------------------------------------
-    | Seedtime
-    |--------------------------------------------------------------------------
-    */
-
-    $totalSeedTime = History::where('user_id', $user->id)
-        // ->where('seeder', 1)
-        ->sum('seedtime');
-
-    $avgSeedTime = $activeSeeds > 0
-        ? $totalSeedTime / $activeSeeds
-        : 0;
-
-    /*
-    |--------------------------------------------------------------------------
-    | Seeding Health (12h per torrent = 100%)
-    |--------------------------------------------------------------------------
-    */
-
-    $requiredSeedTime = 43200;
-
-    $torrentCount = History::where('user_id', $user->id)
-        ->whereNotNull('seedtime')
-        ->count();
-
-    $totalHealth = 0;
-
-    History::where('user_id', $user->id)
-        ->select('seedtime')
-        ->chunk(500, function ($histories) use (&$totalHealth, $requiredSeedTime) {
-
-            foreach ($histories as $history) {
-
-                $seedtime = $history->seedtime ?? 0;
-
-                $health = min(1, $seedtime / $requiredSeedTime);
-
-                $totalHealth += $health;
-            }
-        });
-
-    $seedingHealth = $torrentCount > 0
-        ? round(($totalHealth / $torrentCount) * 100)
-        : 0;
-
-    /*
-    |--------------------------------------------------------------------------
-    | Seeder Reputation (time + size)
-    |--------------------------------------------------------------------------
-    */
-
-$seedingReputation = $user->seeding_reputation;
-
-    /*
-|--------------------------------------------------------------------------
-| Rank Display
-|--------------------------------------------------------------------------
-*/
-
-$rankMap = [
-    0 => ['New Seeder', '🌱'],
-    1 => ['Bronze', '🥉'],
-    2 => ['Silver', '🥈'],
-    3 => ['Gold', '🥇'],
-    4 => ['Elite', '💎'],
-    5 => ['Legend', '👑'],
-];
-
-[$seederRank, $seederIcon] = $rankMap[$user->seeder_rank] ?? $rankMap[0];
-
-$timeline = $user->timeline()->latest()->get();
-
-    /*
-    |--------------------------------------------------------------------------
-    | Subscribed Torrents (owner + staff only)
-    |--------------------------------------------------------------------------
-    */
-
-    $subscribedTorrents = collect();
+    $profileService = app(\App\Services\ProfileService::class);
+    $statistics = $profileService->statistics($user->id);
+    $user->invitees_count = $statistics['invitees_count'];
+    $user->torrents_count = $statistics['torrents_count'];
+    $user->loadMissing('inviter');
+    $inviteTreeMembers = $profileService->inviteTree($user,
+        max(1, \Illuminate\Pagination\Paginator::resolveCurrentPage('invitees_page')));
 
     $viewerIsOwner = Auth::check() && Auth::id() === $user->id;
-
-    $viewerIsStaff = Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR;
-
+    $viewerIsStaff = Auth::check() && Auth::user()->user_class >= UserClass::MODERATOR;
+    $timeline = collect();
+    $subscribedTorrents = collect();
     if ($viewerIsOwner || $viewerIsStaff) {
-
-        $subscribedTorrents = TorrentSubscription::with('sourceTorrent')
-            ->where('user_id', $user->id)
-            ->orderByDesc('id')
-            ->get()
-            ->map(function ($subscription) {
-
-                // Prefer the torrent the subscription was created from while it
-                // still exists; otherwise fall back to the latest live upload
-                // that matches the subscription's IMDb and/or TMDB id.
-                $torrent = $subscription->sourceTorrent;
-
-                if (! $torrent || $torrent->trashed()) {
-
-                    $torrent = Torrent::withTrashed()
-                        ->where('deleted_at', null)
-                        ->where(function ($query) use ($subscription) {
-
-                            $match = false;
-
-                            if (! empty($subscription->imdbid)) {
-                                $query->orWhere('imdbid', $subscription->imdbid);
-                                $match = true;
-                            }
-
-                            if (! empty($subscription->tmdbid)) {
-                                $query->orWhere('tmdbid', $subscription->tmdbid);
-                                $match = true;
-                            }
-
-                            if (! $match) {
-                                $query->whereRaw('1 = 0');
-                            }
-                        })
-                        ->orderByDesc('id')
-                        ->first();
-                }
-
-                // Determine the media type (tv vs movie) from the subscription or
-                // the torrent itself so we route the profile link correctly.
-                $type = 'movie';
-
-                if ($subscription->type === 'tv'
-                    || strtolower((string) $torrent->tmdb_type) === 'tv') {
-                    $type = 'tv';
-                }
-
-                // Display the clean TMDB title (stored at subscribe time) instead
-                // of the raw uploaded torrent filename whenever it is available.
-                if ($torrent && ! empty($subscription->title)) {
-                    $torrent->name = $subscription->title;
-                }
-
-                // Prefer the TMDB poster, and attach the library route data so the
-                // profile link opens the library show page for this TMDB id (where
-                // the user can see every uploaded torrent for the title).
-                if ($torrent && ! empty($torrent->tmdbid)) {
-                    $meta = $type === 'tv'
-                        ? TorrentSeries::where('tmdbid', $torrent->tmdbid)->first()
-                        : TorrentMovie::where('tmdbid', $torrent->tmdbid)->first();
-
-                    $posterPath = $meta->poster_path ?? null;
-
-                    if ($posterPath) {
-                        $torrent->poster = 'https://image.tmdb.org/t/p/w92/' . $posterPath;
-                    }
-
-                    $torrent->library_type = $type === 'tv' ? 'series' : 'movies';
-                    $torrent->library_slug = $meta->slug ?? Str::slug((string) $torrent->name);
-                }
-
-                // Aggregate seeders/leechers/times-completed across every live
-                // torrent sharing the same IMDb/TMDB id (e.g. multiple releases
-                // of the same movie), instead of showing stats for one release.
-                if ($torrent) {
-                    $stats = Torrent::query()
-                        ->where('deleted_at', null)
-                        ->where(function ($query) use ($subscription) {
-                            $match = false;
-
-                            if (! empty($subscription->imdbid)) {
-                                $query->orWhere('imdbid', $subscription->imdbid);
-                                $match = true;
-                            }
-
-                            if (! empty($subscription->tmdbid)) {
-                                $query->orWhere('tmdbid', $subscription->tmdbid);
-                                $match = true;
-                            }
-
-                            if (! $match) {
-                                $query->whereRaw('1 = 0');
-                            }
-                        })
-                        ->selectRaw(
-                            'COALESCE(SUM(seeders), 0) AS seeders,
-                             COALESCE(SUM(leechers), 0) AS leechers,
-                             COALESCE(SUM(times_completed), 0) AS times_completed'
-                        )
-                        ->first();
-
-                    $torrent->seeders         = (int) $stats->seeders;
-                    $torrent->leechers        = (int) $stats->leechers;
-                    $torrent->times_completed = (int) $stats->times_completed;
-                }
-
-                return $torrent;
-            })
-            ->filter()
-            ->unique('id')
-            ->values();
+        $timeline = $user->timeline()->with('staff')->latest()->get();
+        $subscribedTorrents = $profileService->subscribedTorrents($user->id);
     }
+    $user->setRelation('timeline', $timeline);
 
+    $seedingReputation = $user->seeding_reputation;
+    $rankMap = [
+        0 => ['New Seeder', '🌱'], 1 => ['Bronze', '🥉'], 2 => ['Silver', '🥈'],
+        3 => ['Gold', '🥇'], 4 => ['Elite', '💎'], 5 => ['Legend', '👑'],
+    ];
+    [$seederRank, $seederIcon] = $rankMap[$user->seeder_rank] ?? $rankMap[0];
+    $achievementCategories = $profileService->achievementProgress($user);
 
-
-    $achievementCategories = app(\App\Services\AchievementService::class)->progress($user);
-
-    return view('profile.show', compact(
-        'achievementCategories',
-        'inviteTreeMembers',
-        'user',
-        'activeSeeds',
-        'totalSeedSize',
-        'totalSeedTime',
-        'avgSeedTime',
-        'seedingHealth',
-        'seedingReputation',
-        'seederRank',
-        'seederIcon',
-        'timeline',
-        'commentCount',
-        'thanksCount',
-        'forumPostCount',
-        'subscribedTorrents',
+    return view('profile.show', $statistics + compact(
+        'user', 'inviteTreeMembers', 'timeline', 'subscribedTorrents',
+        'seedingReputation', 'seederRank', 'seederIcon', 'achievementCategories'
     ));
 }
     /*
@@ -745,13 +516,7 @@ private function deleteTorrentCompletely(Torrent $torrent): void
 
     $torrent->images()->each(function ($image) {
 
-        if (!empty($image->path)) {
-            Storage::disk('public')->delete($image->path);
-        }
-
-        if (!empty($image->fallback)) {
-            Storage::disk('public')->delete($image->fallback);
-        }
+        \App\Models\TorrentImage::deleteLocalFiles([$image->path, $image->fallback ?? null]);
 
         $image->delete();
     });

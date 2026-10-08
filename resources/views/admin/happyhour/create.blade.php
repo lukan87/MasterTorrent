@@ -4,7 +4,7 @@
 @include('admin.happyhour.partials.styles')
 <div class="happyhour-workspace hh-create">
     <a class="hh-back" href="{{ route('happyhour.index') }}">← All Happy Hours</a>
-    <header class="hh-header"><div><div class="hh-eyebrow">Community rewards</div><h1>Schedule Happy Hour</h1>
+    <header class="hh-header admin-page-header"><div><div class="hh-eyebrow">Community rewards</div><h1>Schedule Happy Hour</h1>
     <p class="text-muted">Choose a preset or customize your rewards. All times use {{ config('app.timezone') }}.</p></div></header>
     <form method="POST" action="{{ route('happyhour.store') }}" class="card"><div class="card-body p-4">
         @csrf

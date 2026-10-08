@@ -187,57 +187,8 @@ class MovieController extends Controller
 
         $movieOm = cache()->remember('movie_' . $movie->imdb_id . '_omdb', now()->addWeek(), fn() => $this->omdb($movie->imdb_id));
 
-      $similarData = cache()->remember(
-    'movie_similar_v3_' . $movie->tmdb_id,
-    now()->addWeek(),
-    function () use ($movie) {
-        $data = $this->tmdb("movie/{$movie->tmdb_id}/similar");
-
-        return collect($data['results'] ?? [])
-            ->map(fn ($item) => [
-                'tmdb_id' => $item['id'] ?? null,
-                'name'    => $item['title'] ?? 'Unknown',
-                'poster'  => !empty($item['poster_path'])
-                    ? 'https://image.tmdb.org/t/p/w500' . $item['poster_path']
-                    : null,
-                'year'    => !empty($item['release_date'])
-                    ? substr($item['release_date'], 0, 4)
-                    : null,
-                'rating'  => number_format($item['vote_average'] ?? 0, 1),
-            ])
-            ->values();
-    }
-);
-
-/*
-|--------------------------------------------------------------------------
-| Filter and randomise AFTER the cached TMDB data
-|--------------------------------------------------------------------------
-*/
-$similar = $similarData
-    ->filter(function ($item) {
-        return !empty($item['poster'])
-            && !empty($item['year'])
-            && (int) $item['year'] >= 1990;
-    })
-    ->shuffle()
-    ->take(10)
-    ->values();
-
-        // Resolve whether each similar movie already exists in the DB (fresh lookup,
-        // not cached, so newly added movies show up as linkable immediately).
-        $existingSim = \App\Models\Movie::whereIn('tmdb_id', $similar->pluck('tmdb_id')->filter())
-            ->get()
-            ->keyBy('tmdb_id');
-
-        $similar = $similar->map(function ($item) use ($existingSim) {
-            $dbMovie = ($item['tmdb_id'] ?? null) ? $existingSim->get($item['tmdb_id']) : null;
-            $item['in_library'] = (bool) $dbMovie;
-            $item['db_url'] = $dbMovie
-                ? route('movies.show', [$dbMovie->id, $dbMovie->slug])
-                : null;
-            return $item;
-        });
+        $similar = app(\App\Services\MediaRecommendationService::class)
+            ->forTitle($movie, $movieDetails['genres'] ?? []);
 
         $torrents = $movie->torrents()->latest()->get();
         $comments = $movie->comments()->with('user')->get();

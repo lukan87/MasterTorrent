@@ -55,6 +55,7 @@ class ShoutboxViewTest extends TestCase
         $this->views = new Factory($resolver, new FileViewFinder($files, [$this->temporary, dirname(__DIR__, 2).'/resources/views']), new Dispatcher($app));
         $this->views->setContainer($app);
         $this->views->share('__env', $this->views);
+        $this->views->share('onlineUsers', collect());
         $app->instance('view', $this->views);
         $app->instance('Illuminate\Contracts\View\Factory', $this->views);
         $router = new Router(new Dispatcher($app), $app);
@@ -62,6 +63,7 @@ class ShoutboxViewTest extends TestCase
         foreach (['store', 'update', 'reply', 'destroy', 'sticky'] as $action) {
             $router->post('shoutbox/'.$action.'/{id?}', fn () => '')->name('shoutbox.'.$action);
         }
+        $router->get('shoutbox/older', fn () => '')->name('shoutbox.older');
         $router->getRoutes()->refreshNameLookups();
         $app->instance('url', new UrlGenerator($router->getRoutes(), Request::create('https://example.test/')));
         $auth = \Mockery::mock(\Illuminate\Contracts\Auth\Factory::class);
@@ -137,6 +139,19 @@ class ShoutboxViewTest extends TestCase
         $request->setUserResolver(fn () => (object) ['chatblock' => true]);
         $this->expectException(HttpException::class);
         $middleware[1]['middleware']($request, fn () => self::fail('Restricted members must not reach chat actions.'));
+    }
+
+    public function test_media_controls_and_previews_render_without_loading_video_iframes(): void
+    {
+        $messages = $this->messages();
+        $messages->first()->message = '[img]https://example.test/image.jpg[/img] [youtube]https://youtu.be/dQw4w9WgXcQ[/youtube]';
+        $html = $this->views->make('partials.shoutbox', ['messages' => $messages])->render();
+        self::assertStringContainsString('data-chat-media="image"', $html);
+        self::assertStringContainsString('data-chat-media="youtube"', $html);
+        self::assertStringContainsString('data-chat-format="spoiler"', $html);
+        self::assertStringContainsString('data-youtube-id="dQw4w9WgXcQ"', $html);
+        self::assertStringContainsString('class="bbcode-image chat-embedded-image"', $html);
+        self::assertStringNotContainsString('<iframe', $html);
     }
 
     public function test_pins_stay_outside_the_chronological_scrolling_timeline(): void

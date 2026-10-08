@@ -21,7 +21,7 @@
     border-radius: 6px;
 
     font-family: 'Poppins', Helvetica, sans-serif;
-    font-size: 9px;
+    font-size: var(--site-font-small, 13px);
     font-weight: 600;
 
     line-height: 1.1;
@@ -31,11 +31,11 @@
     position: relative;
     overflow: hidden;
 
-    color: #f5f5f5;
+    color: var(--theme-text, #f5f5f5);
 
-    border: 1px solid rgba(255,255,255,.08);
+    border: 1px solid var(--theme-border, rgba(255,255,255,.08));
 
-    text-shadow: 0 1px 1px rgba(0,0,0,.2);
+    text-shadow: 0 1px 1px var(--theme-shadow, rgba(0,0,0,.2));
 
     transition:
         transform .15s ease,
@@ -45,8 +45,8 @@
     backdrop-filter: blur(4px);
 
     box-shadow:
-        inset 0 0 10px rgba(255,255,255,.02),
-        0 1px 3px rgba(0,0,0,.15);
+        inset 0 0 10px var(--theme-shadow, rgba(255,255,255,.02)),
+        0 1px 3px var(--theme-shadow, rgba(0,0,0,.15));
 }
 
 /* Icons */
@@ -77,7 +77,7 @@
         linear-gradient(
             120deg,
             transparent 35%,
-            rgba(255,255,255,0.084) 50%,
+            var(--theme-surface-alt, rgba(255,255,255,0.084)) 50%,
             transparent 65%
         );
 
@@ -96,45 +96,92 @@
 /* Variants */
 
 .free-btn {
-    background: linear-gradient(135deg, #1a2b21, #52d68d);
+    background: linear-gradient(135deg, var(--theme-surface, #1a2b21), var(--theme-green-action, #52d68d));
 }
 
 .double-btn {
-    background: linear-gradient(135deg, #2a2232, #9567ff);
+    background: linear-gradient(135deg, var(--theme-surface, #2a2232), var(--theme-purple-action, #9567ff));
 }
 
 .new-btn {
-    background: linear-gradient(135deg, #1d3740, #2496d1);
+    background: linear-gradient(135deg, var(--theme-surface, #1d3740), var(--theme-blue-action, #2496d1));
 }
 
 .recommended-btn {
-    background: linear-gradient(135deg, #c89500, #ffbf00);
-    color: #1b1b1b;
+    background: linear-gradient(135deg, var(--theme-amber-action, #c89500), var(--theme-amber-action, #ffbf00));
+    color: var(--theme-on-action, #1b1b1b);
     text-shadow: none;
 }
 
 .seedbox-btn {
-    background: linear-gradient(135deg, #321f25, #dc0c5c);
+    background: linear-gradient(135deg, var(--theme-surface, #321f25), var(--theme-pink-action, #dc0c5c));
 }
 
 .bump-btn {
-    background: linear-gradient(135deg, #22351b, #28c7d9);
+    background: linear-gradient(135deg, var(--theme-surface, #22351b), var(--theme-teal-action, #28c7d9));
 }
 
 .subtitles-btn {
-    background: linear-gradient(135deg, #241a33, #8a63d2);
+    background: linear-gradient(135deg, var(--theme-surface, #241a33), var(--theme-purple-action, #8a63d2));
 }
 
 .happyhour-btn {
-    background: linear-gradient(135deg, #7a4b00, #ff9800);
+    background: linear-gradient(135deg, var(--theme-amber-action, #7a4b00), var(--theme-amber-action, #ff9800));
 }
 
 .sticky-btn {
-    background: linear-gradient(135deg, #313539, #8f98a1);
+    background: linear-gradient(135deg, var(--theme-surface, #313539), var(--theme-surface, #8f98a1));
 }
+
+/* Light-mode tags use tinted surfaces rather than dark action gradients. */
+html[data-bs-theme="light"] .torrent-tags .badge-btn {
+    background: var(--theme-surface-alt);
+    color: var(--theme-text);
+    border-color: var(--theme-border);
+    text-shadow: none;
+    box-shadow: none;
+    backdrop-filter: none;
+}
+
+html[data-bs-theme="light"] .torrent-tags :is(.free-btn, .bg-success) {
+    background: var(--theme-green-soft) !important;
+    color: var(--theme-green-text);
+    border: 1px solid var(--theme-green-border);
+}
+
+html[data-bs-theme="light"] .torrent-tags :is(.double-btn, .subtitles-btn) {
+    background: var(--theme-purple-soft) !important;
+    color: var(--theme-purple-text);
+    border: 1px solid var(--theme-purple-border);
+}
+
+html[data-bs-theme="light"] .torrent-tags :is(.new-btn) {
+    background: var(--theme-blue-soft) !important;
+    color: var(--theme-blue-text);
+    border: 1px solid var(--theme-blue-border);
+}
+
+html[data-bs-theme="light"] .torrent-tags :is(.recommended-btn, .happyhour-btn) {
+    background: var(--theme-amber-soft) !important;
+    color: var(--theme-amber-text);
+    border: 1px solid var(--theme-amber-border);
+}
+
+html[data-bs-theme="light"] .torrent-tags :is(.seedbox-btn) {
+    background: var(--theme-pink-soft) !important;
+    color: var(--theme-pink-text);
+    border: 1px solid var(--theme-pink-border);
+}
+
+html[data-bs-theme="light"] .torrent-tags :is(.bump-btn) {
+    background: var(--theme-teal-soft) !important;
+    color: var(--theme-teal-text);
+    border: 1px solid var(--theme-teal-border);
+}
+
 </style>
 
-<div class="badge-group">
+<div class="badge-group torrent-tags">
     @if (isset($newTorrents) && $newTorrents->contains($torrent))
         <div class="badge-btn new-btn" data-bs-toggle="tooltip" title="Newly uploaded torrent">
             <i class="bi bi-star-fill"></i> New

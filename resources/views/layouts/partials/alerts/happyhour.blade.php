@@ -10,8 +10,8 @@
     </div>
 </aside>
 <style>
-.hh-notice { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; padding:1.25rem; border:1px solid #2dd4bf; border-radius:.75rem; background:linear-gradient(120deg,#0c2120,#0b1019); color:#f1f5f9; }
-.hh-notice small { color:#cbd5e1; } .hh-notice-time { font-variant-numeric:tabular-nums; }
+.hh-notice { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; padding:1.25rem; border:1px solid var(--theme-teal-border, #2dd4bf); border-radius:.75rem; background:linear-gradient(120deg,var(--theme-surface, #0c2120),var(--theme-surface, #0b1019)); color:var(--theme-text, #f1f5f9); }
+.hh-notice small { color:var(--theme-text, #cbd5e1); } .hh-notice-time { font-variant-numeric:tabular-nums; }
 </style>
 <script>
 (() => {

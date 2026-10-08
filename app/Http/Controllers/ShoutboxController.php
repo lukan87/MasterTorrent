@@ -320,8 +320,42 @@ public function typingUsers()
     return response()->json($active);
 }
 
+public function older(Request $request)
+{
+    $data = $request->validate([
+        'before' => 'sometimes|integer|min:1',
+        'before_time' => 'required_with:before|date_format:Y-m-d H:i:s',
+    ]);
+    $query = Shoutbox::with(['user', 'replies.user'])->whereNull('parent_id')->where('sticky', false);
+    if (isset($data['before'])) {
+        $query->where(function ($query) use ($data) {
+            $query->where('created_at', '<', $data['before_time'])
+                ->orWhere(function ($query) use ($data) {
+                    $query->where('created_at', $data['before_time'])->where('id', '<', $data['before']);
+                });
+        });
+    }
+    $batch = $query->orderByDesc('created_at')->orderByDesc('id')->take(11)->get();
+    $messages = $batch->take(10);
+
+    return response()->json([
+        'html' => $messages->isEmpty() ? '' : view('partials.shoutbox-messages', compact('messages'))->render(),
+        'has_more' => $batch->count() > 10,
+        'count' => $messages->count(),
+    ])->header('Cache-Control', 'no-store');
+}
+
 public function poll(Request $request)
 {
+    if ($request->filled('thread')) {
+        $data = $request->validate(['thread' => 'required|integer|min:1']);
+        $messages = Shoutbox::with(['user', 'replies.user'])->whereNull('parent_id')
+            ->where('sticky', false)->whereKey($data['thread'])->get();
+
+        return response()->json([
+            'html' => $messages->isEmpty() ? '' : view('partials.shoutbox-messages', compact('messages'))->render(),
+        ])->header('Cache-Control', 'no-store');
+    }
     if ($request->boolean('snapshot')) {
         $messages = Shoutbox::with(['user', 'replies.user'])
             ->whereNull('parent_id')->orderByDesc('sticky')->orderByDesc('created_at')->orderByDesc('id')

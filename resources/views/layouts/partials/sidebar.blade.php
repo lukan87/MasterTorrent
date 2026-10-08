@@ -1,408 +1,77 @@
-<aside class="app-sidebar glass shadow" data-bs-theme="dark">
-    <!--begin::Sidebar Brand-->
+@php
+    $canUpload = Auth::user()->user_class >= \App\Models\UserClass::UPLOADER || Auth::user()->uploadpos === 'yes';
+    $sidebarGroups = [
+        ['label' => 'Discover', 'links' => [
+            ['route' => 'home', 'patterns' => ['home'], 'icon' => 'bi-house-door', 'label' => 'Home'],
+            ['route' => 'torrents.index', 'patterns' => ['torrents.index', 'torrents.show', 'torrents.snatched'], 'icon' => 'bi-search', 'label' => 'Browse'],
+            ['route' => 'torrents.adult', 'patterns' => ['torrents.adult'], 'icon' => 'bi-fire', 'label' => 'XXX'],
+            ['route' => $canUpload ? 'torrents.create' : 'uploadapps.create', 'patterns' => $canUpload ? ['torrents.create', 'torrents.upload*'] : ['uploadapps.*'], 'icon' => 'bi-cloud-arrow-up', 'label' => $canUpload ? 'Upload torrent' : 'Uploader application'],
+            ['route' => 'requests.index', 'patterns' => ['requests.*'], 'icon' => 'bi-journal-plus', 'label' => 'Requests'],
+            ['route' => 'seedboxes.index', 'patterns' => ['seedboxes.*'], 'icon' => 'bi-hdd-network', 'label' => 'Seedboxes'],
+        ]],
+        ['label' => 'Community', 'links' => [
+            ['route' => 'forum.index', 'patterns' => ['forum.*'], 'icon' => 'bi-chat-square-text', 'label' => 'Forums'],
+            ['route' => 'rules', 'patterns' => ['rules'], 'icon' => 'bi-shield-check', 'label' => 'Rules'],
+            ['route' => 'team.index', 'patterns' => ['team.*'], 'icon' => 'bi-people', 'label' => 'Team'],
+            ['route' => 'tickets.index', 'patterns' => ['tickets.*'], 'icon' => 'bi-ticket-detailed', 'label' => 'Support tickets'],
+        ]],
+    ];
+    if (Auth::user()->user_class >= \App\Models\UserClass::USER) {
+        $sidebarGroups[] = ['label' => 'Watch online', 'links' => [
+            ['route' => 'movies.index', 'patterns' => ['movies.*'], 'icon' => 'bi-film', 'label' => 'Online movies'],
+            ['route' => 'series.index', 'patterns' => ['series.*'], 'icon' => 'bi-tv', 'label' => 'Online series'],
+        ]];
+    }
+    if (Auth::user()->user_class >= \App\Models\UserClass::MODERATOR) {
+        $adminLinks = [
+            ['route' => 'admin.index', 'patterns' => ['admin.*', 'happyhour.*'], 'icon' => 'bi-gear', 'label' => 'Admin panel'],
+        ];
+        if (Auth::user()->user_class >= \App\Models\UserClass::ADMIN) {
+            $adminLinks[] = ['route' => 'contactstaff.index', 'patterns' => ['contactstaff.*'], 'icon' => 'bi-person-lines-fill', 'label' => 'Contact staff requests'];
+        }
+        $sidebarGroups[] = ['label' => 'Administration', 'links' => $adminLinks];
+    }
+@endphp
+
+<aside class="app-sidebar glass" id="siteSidebar" aria-label="Sidebar">
     <div class="sidebar-brand">
-        <i class="bi bi-globe2 opacity-75 shadow fs-3"></i>
-        <span class="brand-text fw-light fs-3">{{ config('app.name') }}</span>
+        <a class="sidebar-brand-link" href="{{ route('home') }}" aria-label="{{ config('app.name') }} home">
+            <img class="sidebar-brand-logo"
+                 src="{{ asset('images/logo.png') }}"
+                 alt="{{ config('app.name') }}"
+                 width="1983" height="793"
+                 decoding="async">
+        </a>
     </div>
-    <!--end::Sidebar Brand-->
-
-    <!--begin::Sidebar Wrapper-->
     <div class="sidebar-wrapper">
-        <!-- @auth
-        <div class="sidebar-user">
-            <img
-                class="sidebar-user-avatar"
-                src="{{ Auth::user()->profile_image ?? asset('images/default_avatar/default-avatar.jpg') }}"
-                alt="{{ Auth::user()->name }}">
-            <div class="sidebar-user-info min-w-0">
-                <div class="sidebar-user-name" style="color: {{ \App\Models\UserClass::getClassColor(Auth::user()->user_class) }}">
-                    {{ Auth::user()->name }}
-                </div>
-                <div class="sidebar-user-ratio">
-                    <i class="bi bi-arrow-up-short text-success"></i>
-                    {{ \App\Helpers\FormatHelper::formatSize(Auth::user()->uploaded) }}
-                    <span class="text-muted">·</span>
-                    <i class="bi bi-arrow-down-short text-danger"></i>
-                    {{ \App\Helpers\FormatHelper::formatSize(Auth::user()->downloaded) }}
-                </div>
-            </div>
-        </div>
-        @endauth -->
-
-        <nav class="fs-5">
-            <!--begin::Sidebar Menu-->
-            <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu" data-accordion="false">
-            <li class="nav-item">
-                    <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }} nav-link">
-                         <i class="bi bi-house-door-fill"></i>
-                        <p>Home</p>
-                    </a>
-                </li>
-
+        <nav aria-label="Site navigation">
+            <ul class="nav sidebar-menu flex-column">
+                @foreach($sidebarGroups as $group)
+                    <li class="nav-header">{{ $group['label'] }}</li>
+                    @foreach($group['links'] as $link)
+                        @php($active = request()->routeIs(...$link['patterns']))
                         <li class="nav-item">
-                            <a href="{{ route('torrents.index') }}" class="{{ request()->routeIs('torrents.index') ? 'active' : '' }} nav-link">
-                                <i class="bi bi-search"></i>
-                                <p>Browse</p>
+                            <a href="{{ route($link['route']) }}" class="nav-link {{ $active ? 'active' : '' }}" @if($active) aria-current="page" @endif>
+                                <i class="nav-icon bi {{ $link['icon'] }}" aria-hidden="true"></i>
+                                <p>{{ $link['label'] }}</p>
+                                @if($link['route'] === 'tickets.index')
+                                    <span class="ticket-badges ms-auto">
+                                        @if(!empty($newTickets) && $newTickets > 0)
+                                            <span class="badge bg-success" title="New tickets" aria-label="{{ $newTickets }} new tickets">{{ $newTickets }}</span>
+                                        @endif
+                                        @if(!empty($waitingStaffTickets) && $waitingStaffTickets > 0)
+                                            <span class="badge bg-danger" title="Waiting for staff reply" aria-label="{{ $waitingStaffTickets }} waiting for staff reply">{{ $waitingStaffTickets }}</span>
+                                        @endif
+                                        @if(!empty($unassignedTickets) && $unassignedTickets > 0)
+                                            <span class="badge bg-warning text-dark" title="Unassigned tickets" aria-label="{{ $unassignedTickets }} unassigned tickets">{{ $unassignedTickets }}</span>
+                                        @endif
+                                    </span>
+                                @endif
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a href="{{ route('torrents.adult') }}" class="{{ request()->routeIs('torrents.adult') ? 'active' : '' }} nav-link">
-                            <i class="bi bi-fire"></i>
-                                <p>XXX</p>
-                            </a>
-                        </li>
-                        @if (Auth::check() && (Auth::user()->user_class >= \App\Models\UserClass::UPLOADER || Auth::user()->uploadpos === 'yes'))
-                            <li class="nav-item">
-                                <a href="{{ route('torrents.create') }}" class="{{ request()->routeIs('torrents.create') ? 'active' : '' }} nav-link">
-                                    <i class="bi bi-upload"></i>
-                                    <p>Upload</p>
-                                </a>
-                            </li>
-
-                            @else
-
-                            <li class="nav-item">
-                                <a href="{{ route('uploadapps.create') }}" class="{{ request()->routeIs('uploadapps.create') ? 'active' : '' }} nav-link">
-                                    <i class="bi bi-upload"></i>
-                                    <p>Uploader Application</p>
-                                </a>
-                            </li>
-                        @endif
-
-
-                        <li class="nav-item">
-                            <a href="{{ route('requests.index') }}" class="{{ request()->routeIs('requests.index') ? 'active' : '' }} nav-link">
-                                <i class="bi bi-journal-plus"></i>
-                                <p>Requests</p>
-                            </a>
-                        </li>
-                        {{-- <li class="nav-item">
-                            <a href="{{ route('rss.index') }}" class="nav-link">
-                                 <i class="bi bi-rss"></i>
-                                <p>Rss Feed</p>
-                            </a>
-                        </li> --}}
-                        <li class="nav-item">
-                            <a href="{{ route('seedboxes.index') }}" class="{{ request()->routeIs('seedboxes.index') ? 'active' : '' }} nav-link" data-bs-toggle="tooltip" title="Connect and manage your seedboxes on LastFiles">
-                                  <i class="bi bi-hdd-network"></i>
-                                <p>Seedbox</p>
-                            </a>
-                        </li>
-
-                <hr>
-                {{-- <li class="nav-item">
-                    <a href="{{ route('shoutbox.index') }}" class="nav-link">
-                        <i class="bi bi-chat-left-dots"></i>
-                        <p>Chat</p>
-                    </a>
-                </li> --}}
-                <li class="nav-item">
-                    <a href="{{ route('forum.index') }}" class="{{ request()->routeIs('forums.index') ? 'active' : '' }} nav-link">
-                        <i class="bi bi-book-half"></i>
-                        <p>Forums</p>
-                    </a>
-                </li>
-                <!-- <li class="nav-item">
-                    <a href="{{ route('shop') }}" class="{{ request()->routeIs('shop') ? 'active' : '' }} nav-link">
-                        <i class="bi bi-cart-plus"></i>
-                        <p>Shop</p>
-                    </a>
-                </li> -->
-                <!-- <li class="nav-item">
-                    <a href="{{ route('donate') }}" class="{{ request()->routeIs('donate') ? 'active' : '' }} nav-link">
-                        <i class="bi bi-cash-coin"></i>
-                        <p>Donate</p>
-                    </a>
-                </li> -->
-                <li class="nav-item">
-                    <a href="{{ route('rules') }}" class="{{ request()->routeIs('rules') ? 'active' : '' }} nav-link">
-                    <i class="bi bi-info-square-fill"></i>
-                        <p>Rules</p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ route('team.index') }}" class="{{ request()->routeIs('team.index') ? 'active' : '' }} nav-link">
-                    <i class="bi bi-people-fill"></i>
-                        <p>Team</p>
-                    </a>
-                </li>
-<li class="nav-item">
-<a href="{{ route('tickets.index') }}"
-class="{{ request()->routeIs('tickets.index') ? 'active' : '' }} nav-link">
-
-<i class="bi bi-ticket-detailed-fill"></i>
-
-<p>Tickets</p>
-
-<div class="ticket-badges ms-auto">
-
-@if(!empty($newTickets) && $newTickets > 0)
-<span class="badge bg-success"
-data-bs-toggle="tooltip"
-title="New tickets">
-{{ $newTickets }}
-</span>
-@endif
-
-@if(!empty($waitingStaffTickets) && $waitingStaffTickets > 0)
-<span class="badge bg-danger"
-data-bs-toggle="tooltip"
-title="Waiting for staff reply">
-{{ $waitingStaffTickets }}
-</span>
-@endif
-
-@if(!empty($unassignedTickets) && $unassignedTickets > 0)
-<span class="badge bg-warning text-dark"
-data-bs-toggle="tooltip"
-title="Unassigned tickets">
-{{ $unassignedTickets }}
-</span>
-@endif
-
-</div>
-
-</a>
-</li>
-                <hr>
-                 @if(Auth::user()->user_class >= \App\Models\UserClass::USER)
-                 <li class="nav-item">
-                    <a href="{{ !Route::is('movies.index') ? route('movies.index') : '#' }}" class="{{ request()->routeIs('movies.index') ? 'active' : '' }} nav-link">
-                                <i class="nav-icon bi bi-film"></i>
-                                <p>Online Movies</p>
-                            </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ !Route::is('series.index') ? route('series.index') : '#' }}" class="{{ request()->routeIs('series.index') ? 'active' : '' }} nav-link">
-                                <i class="nav-icon bi bi-tv"></i>
-                                <p>Online Series</p>
-                            </a>
-                </li>
-                <!-- <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon bi bi-globe"></i>
-                        <p>
-                            Online
-                            <i class="nav-arrow bi bi-chevron-right"></i>
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item">
-                            <a href="{{ !Route::is('movies.index') ? route('movies.index') : '#' }}" class="{{ request()->routeIs('movies.index') ? 'active' : '' }} nav-link">
-                                <i class="nav-icon bi bi-film"></i>
-                                <p>Online Movies</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ !Route::is('series.index') ? route('series.index') : '#' }}" class="{{ request()->routeIs('series.index') ? 'active' : '' }} nav-link">
-                                <i class="nav-icon bi bi-tv"></i>
-                                <p>Online Series</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('collections.index') }}" class="nav-link">
-                                <i class="nav-icon bi bi-collection-play"></i>
-                                <p>Collections</p>
-                            </a>
-                        </li> 
-                    </ul>
-                </li> -->
-                @endif
-
-                <hr>
-             
-    @if(Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
-        <li class="nav-header">Administration</li>
-        <li class="nav-item">
-            <a href="{{ route('admin.index') }}" class="{{ request()->routeIs('admin.index') ? 'active' : '' }} nav-link">
-                <i class="nav-icon bi bi-gear"></i>
-                <p>Admin Panel</p>
-            </a>
-        </li>
-        @if(Auth::user()->user_class >= \App\Models\UserClass::ADMIN)
-        <li class="nav-item">
-            <a href="{{ route('contactstaff.index') }}" class="{{ request()->routeIs('contactstaff.index') ? 'active' : '' }} nav-link">
-                <i class="bi bi-person-lines-fill"></i>
-                <p>Contact Staff Requests</p>
-            </a>
-        </li>
-        @endif
-    @endif
-
-    
-
-
+                    @endforeach
+                @endforeach
             </ul>
-            <!--end::Sidebar Menu-->
         </nav>
     </div>
-    <!--end::Sidebar Wrapper-->
 </aside>
- <!--end::Sidebar--> <!--begin::App Main-->
-<style>
-
-/* Sidebar container */
-
-.app-sidebar{
-    backdrop-filter: blur(12px);
-    border-right:1px solid #1f2937;
-    box-shadow:
-        4px 0 20px rgba(0,0,0,0.4),
-        inset -1px 0 0 rgba(255,255,255,0.03);
-}
-/* Brand */
-
-.sidebar-brand{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    padding:16px 18px;
-    border-bottom:1px solid #1f2937;
-    font-weight:300;
-    letter-spacing:.3px;
-}
-
-/* Menu spacing */
-
-.sidebar-menu{
-    padding-top:10px;
-}
-
-/* Links */
-
-.sidebar-menu .nav-link{
-    display:flex;
-    align-items:center;
-    gap:3px;
-    color:#cbd5e1;
-    border-radius:8px;
-    margin:1px 1px;
-   
-    font-size:13px;
-    transition:all .2s ease;
-    position:relative;
-}
-
-.sidebar-menu .nav-link.active::before{
-    content:"";
-    position:absolute;
-    left:-4px;
-    top:6px;
-    bottom:6px;
-    width:4px;
-    border-radius:4px;
-    background:#72b3aa;
-}
-
-/* Icon alignment */
-
-.sidebar-menu .nav-link i{
-    width:20px;
-    text-align:center;
-    font-size:16px;
-    opacity:.9;
-}
-
-/* Hover */
-
-.sidebar-menu .nav-link:hover{
-    background:#141b26;
-    color:#fff;
-    transform:translateX(3px);
-}
-
-/* Active */
-
-.sidebar-menu .nav-link.active{
-    background:linear-gradient(135deg,#34394a,#1d2431);
-    color:#fff !important;
-    font-weight:500;
-    box-shadow:0 4px 10px rgba(0,0,0,.35);
-}
-
-/* Active icon */
-
-.sidebar-menu .nav-link.active i{
-    color:#fff;
-}
-
-/* Tree menu */
-
-.nav-treeview{
-    margin-left:8px;
-}
-
-/* Tree item */
-
-.nav-treeview .nav-link{
-    font-size:13px;
-    padding:8px 10px;
-}
-
-/* Active tree */
-
-.nav-treeview .nav-link.active{
-    background:#141b26;
-    border-left:3px solid #4f7cff;
-    padding-left:14px;
-}
-
-/* Section header */
-
-.nav-header{
-    color:#64748b;
-    font-size:11px;
-    text-transform:uppercase;
-    letter-spacing:.08em;
-    padding:14px 18px 6px;
-}
-
-/* Separator */
-
-.sidebar-menu hr{
-    border-color:#1f2937;
-    margin:14px 14px;
-}
-
-/* Scroll */
-
-.sidebar-wrapper{
-    overflow-y:auto;
-    height:calc(100vh - 70px);
-}
-
-/* Scrollbar */
-
-.sidebar-wrapper::-webkit-scrollbar{
-    width:6px;
-}
-
-.sidebar-wrapper::-webkit-scrollbar-thumb{
-    background:#141b26;
-    border-radius:10px;
-}
-
-.ticket-badges{
-display:flex;
-gap:4px;
-margin-left:auto;
-align-items:center;
-}
-
-.ticket-badges .badge{
-font-size:11px;
-padding:4px 6px;
-border-radius:6px;
-}
-
-@keyframes badgePulse{
-0%{opacity:1}
-50%{opacity:.45}
-100%{opacity:1}
-}
-
-.badge.bg-danger{
-animation:badgePulse 1.5s infinite;
-}
-    
-</style>

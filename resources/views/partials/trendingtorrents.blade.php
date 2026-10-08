@@ -260,30 +260,30 @@
 
     overflow: hidden;
 
-    border: 1px solid rgba(148, 163, 184, .12);
+    border: 1px solid var(--theme-border, rgba(148, 163, 184, .12));
 
     border-radius: 18px;
 
     background:
         radial-gradient(
             circle at 0% 0%,
-            rgba(20, 184, 166, .08),
+            var(--theme-teal-soft, rgba(20, 184, 166, .08)),
             transparent 30%
         ),
         radial-gradient(
             circle at 100% 100%,
-            rgba(59, 130, 246, .06),
+            var(--theme-blue-soft, rgba(59, 130, 246, .06)),
             transparent 35%
         ),
         linear-gradient(
             135deg,
-            rgba(10,15,27,.98),
-            rgba(6,10,18,.98)
+            var(--theme-surface, rgba(10,15,27,.98)),
+            var(--theme-surface, rgba(6,10,18,.98))
         );
 
     box-shadow:
-        0 20px 50px rgba(0, 0, 0, .25),
-        inset 0 1px 0 rgba(255, 255, 255, .025);
+        0 20px 50px var(--theme-shadow, rgba(0, 0, 0, .25)),
+        inset 0 1px 0 var(--theme-shadow, rgba(255, 255, 255, .025));
 
 }
 
@@ -308,7 +308,7 @@
         linear-gradient(
             90deg,
             transparent,
-            rgba(20, 184, 166, .7),
+            var(--theme-teal-soft, rgba(20, 184, 166, .7)),
             transparent
         );
 
@@ -334,12 +334,12 @@
     padding: 1rem 1.2rem;
 
     border-bottom:
-        1px solid rgba(148, 163, 184, .09);
+        1px solid var(--theme-border, rgba(148, 163, 184, .09));
 
     background:
         linear-gradient(
             180deg,
-            rgba(255,255,255,0.0175),
+            var(--theme-surface-alt, rgba(255,255,255,0.0175)),
             transparent
         );
 
@@ -383,22 +383,22 @@
 
     border-radius: 12px;
 
-    color: #f97316;
+    color: var(--theme-amber-text, #f97316);
 
     font-size: 18px;
 
     background:
         linear-gradient(
             135deg,
-            rgba(249, 115, 22, .16),
-            rgba(239, 68, 68, .08)
+            var(--theme-amber-soft, rgba(249, 115, 22, .16)),
+            var(--theme-red-soft, rgba(239, 68, 68, .08))
         );
 
     border:
-        1px solid rgba(249, 115, 22, .25);
+        1px solid var(--theme-amber-border, rgba(249, 115, 22, .25));
 
     box-shadow:
-        0 0 25px rgba(249, 115, 22, .08);
+        0 0 25px var(--theme-shadow, rgba(249, 115, 22, .08));
 
 }
 
@@ -416,7 +416,7 @@
     border-radius: 15px;
 
     border:
-        1px solid rgba(249, 115, 22, .08);
+        1px solid var(--theme-amber-border, rgba(249, 115, 22, .08));
 
     animation:
         trendingPulse 2.5s ease-in-out infinite;
@@ -461,9 +461,9 @@
 
     margin: 0;
 
-    color: #f8fafc;
+    color: var(--theme-text, #f8fafc);
 
-    font-size: 15px;
+    font-size: var(--site-font-body, 13px);
 
     font-weight: 800;
 
@@ -478,9 +478,9 @@
 
     margin-top: 4px;
 
-    color: #64748b;
+    color: var(--theme-muted, #64748b);
 
-    font-size: 11px;
+    font-size: var(--site-font-small, 13px);
 
     font-weight: 500;
 
@@ -506,14 +506,14 @@
     justify-content: center;
 
     border:
-        1px solid rgba(148, 163, 184, .12);
+        1px solid var(--theme-border, rgba(148, 163, 184, .12));
 
     border-radius: 10px;
 
     background:
-        rgba(255,255,255,0.0175);
+        var(--theme-surface-alt, rgba(255,255,255,0.0175));
 
-    color: #64748b;
+    color: var(--theme-muted, #64748b);
 
     cursor: pointer;
 
@@ -535,13 +535,13 @@
 
 .modern-trending-toggle:hover {
 
-    color: #5eead4;
+    color: var(--theme-teal-text, #5eead4);
 
     background:
-        rgba(20, 184, 166, .08);
+        var(--theme-teal-soft, rgba(20, 184, 166, .08));
 
     border-color:
-        rgba(20, 184, 166, .25);
+        var(--theme-teal-border, rgba(20, 184, 166, .25));
 
 }
 
@@ -634,7 +634,7 @@
     scrollbar-width: thin;
 
     scrollbar-color:
-        rgba(20, 184, 166, .45)
+        var(--theme-teal-border, rgba(20, 184, 166, .45))
         transparent;
 
 }
@@ -678,15 +678,15 @@
     overflow: hidden;
 
     border:
-        1px solid rgba(148, 163, 184, .11);
+        1px solid var(--theme-border, rgba(148, 163, 184, .11));
 
     border-radius: 10px;
 
     background:
-        rgba(10,15,27,.9);
+        var(--theme-surface, rgba(10,15,27,.9));
 
     box-shadow:
-        0 4px 12px rgba(0, 0, 0, .16);
+        0 4px 12px var(--theme-shadow, rgba(0, 0, 0, .16));
 
     transition:
         transform .28s cubic-bezier(.2, .8, .2, 1),
@@ -702,11 +702,11 @@
         translateY(-5px);
 
     border-color:
-        rgba(20, 184, 166, .38);
+        var(--theme-teal-border, rgba(20, 184, 166, .38));
 
     box-shadow:
-        0 16px 32px rgba(0, 0, 0, .38),
-        0 0 0 1px rgba(20, 184, 166, .05);
+        0 16px 32px var(--theme-shadow, rgba(0, 0, 0, .38)),
+        0 0 0 1px var(--theme-shadow, rgba(20, 184, 166, .05));
 
 }
 
@@ -833,10 +833,10 @@
     border-radius: 7px;
 
     background:
-        rgba(1,4,15,.82);
+        var(--theme-surface-alt, rgba(1,4,15,.82));
 
     border:
-        1px solid rgba(255, 255, 255, .09);
+        1px solid var(--theme-border, rgba(255, 255, 255, .09));
 
     backdrop-filter:
         blur(8px);
@@ -844,16 +844,16 @@
     -webkit-backdrop-filter:
         blur(8px);
 
-    color: #e2e8f0;
+    color: var(--theme-text, #e2e8f0);
 
-    font-size: 9px;
+    font-size: var(--site-font-small, 13px);
 
     font-weight: 800;
 
     line-height: 1;
 
     box-shadow:
-        0 4px 10px rgba(0, 0, 0, .25);
+        0 4px 10px var(--theme-shadow, rgba(0, 0, 0, .25));
 
 }
 
@@ -869,13 +869,13 @@
 
 .modern-tt-rank.rank-gold {
 
-    color: #fbbf24;
+    color: var(--theme-amber-text, #fbbf24);
 
     border-color:
-        rgba(251, 191, 36, .28);
+        var(--theme-amber-border, rgba(251, 191, 36, .28));
 
     background:
-        rgba(120, 70, 0, .72);
+        var(--theme-amber-soft, rgba(120, 70, 0, .72));
 
 }
 
@@ -884,7 +884,7 @@
 
 .modern-tt-rank.rank-silver {
 
-    color: #e2e8f0;
+    color: var(--theme-text, #e2e8f0);
 
 }
 
@@ -893,7 +893,7 @@
 
 .modern-tt-rank.rank-bronze {
 
-    color: #fb923c;
+    color: var(--theme-amber-text, #fb923c);
 
 }
 
@@ -925,7 +925,7 @@
         linear-gradient(
             180deg,
             transparent 0%,
-            rgba(0, 0, 0, .9) 100%
+            var(--theme-surface-alt, rgba(0, 0, 0, .9)) 100%
         );
 
     transition:
@@ -951,9 +951,9 @@
 
 .modern-tt-name {
 
-    color: #ffffff;
+    color: var(--theme-text, #ffffff);
 
-    font-size: 10px;
+    font-size: var(--site-font-small, 13px);
 
     font-weight: 700;
 
@@ -972,7 +972,7 @@
     text-overflow: ellipsis;
 
     text-shadow:
-        0 2px 8px rgba(0, 0, 0, .95);
+        0 2px 8px var(--theme-shadow, rgba(0, 0, 0, .95));
 
 }
 
@@ -989,12 +989,12 @@
     background:
         linear-gradient(
             180deg,
-            rgba(10,15,27,.98),
-            rgba(6,10,18,.98)
+            var(--theme-surface, rgba(10,15,27,.98)),
+            var(--theme-surface, rgba(6,10,18,.98))
         );
 
     border-top:
-        1px solid rgba(148, 163, 184, .07);
+        1px solid var(--theme-border, rgba(148, 163, 184, .07));
 
 }
 
@@ -1024,7 +1024,7 @@
 
     gap: 4px;
 
-    font-size: 9px;
+    font-size: var(--site-font-small, 13px);
 
     font-weight: 800;
 
@@ -1060,7 +1060,7 @@
 
 .modern-tt-seeders {
 
-    color: #4ade80;
+    color: var(--theme-green-text, #4ade80);
 
 }
 
@@ -1068,7 +1068,7 @@
 .modern-tt-seeders .modern-tt-stat-icon {
 
     background:
-        rgba(74, 222, 128, .1);
+        var(--theme-green-soft, rgba(74, 222, 128, .1));
 
 }
 
@@ -1079,7 +1079,7 @@
 
 .modern-tt-leechers {
 
-    color: #fb7185;
+    color: var(--theme-red-text, #fb7185);
 
 }
 
@@ -1087,7 +1087,7 @@
 .modern-tt-leechers .modern-tt-stat-icon {
 
     background:
-        rgba(251, 113, 133, .1);
+        var(--theme-red-soft, rgba(251, 113, 133, .1));
 
 }
 
@@ -1106,7 +1106,7 @@
 .tt-row.tt-scroll::-webkit-scrollbar-track {
 
     background:
-        rgba(255,255,255,0.0175);
+        var(--theme-surface-alt, rgba(255,255,255,0.0175));
 
     border-radius:
         999px;
@@ -1119,8 +1119,8 @@
     background:
         linear-gradient(
             90deg,
-            rgba(20, 184, 166, .25),
-            rgba(20, 184, 166, .55)
+            var(--theme-teal-soft, rgba(20, 184, 166, .25)),
+            var(--theme-teal-soft, rgba(20, 184, 166, .55))
         );
 
     border-radius:
@@ -1132,7 +1132,7 @@
 .tt-row.tt-scroll::-webkit-scrollbar-thumb:hover {
 
     background:
-        rgba(20, 184, 166, .75);
+        var(--theme-teal-soft, rgba(20, 184, 166, .75));
 
 }
 
@@ -1305,14 +1305,14 @@
 
     .modern-trending-title {
 
-        font-size: 14px;
+        font-size: var(--site-font-body, 13px);
 
     }
 
 
     .modern-trending-subtitle {
 
-        font-size: 10px;
+        font-size: var(--site-font-small, 13px);
 
     }
 
@@ -1365,14 +1365,14 @@
 
     .modern-tt-name {
 
-        font-size: 9px;
+        font-size: var(--site-font-small, 13px);
 
     }
 
 
     .modern-tt-stat {
 
-        font-size: 8px;
+        font-size: var(--site-font-small, 13px);
 
     }
 

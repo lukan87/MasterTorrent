@@ -17,15 +17,15 @@
 /* Header */
 
 .cast-title {
-    font-size: 14px;
+    font-size: var(--site-font-body, 13px);
     font-weight: 700;
-    color: #fff;
+    color: var(--theme-text, #fff);
     margin-bottom: 3px;
 }
 
 .cast-subtitle {
-    color: rgba(255,255,255,.52);
-    font-size: 13px;
+    color: var(--theme-muted, rgba(255,255,255,.52));
+    font-size: var(--site-font-body, 13px);
 }
 
 .cast-count-badge {
@@ -35,11 +35,11 @@
     padding: 7px 11px;
     border-radius: .55rem;
 
-    background: rgba(45,212,191,.06);
-    border: 1px solid rgba(45,212,191,.18);
+    background: var(--theme-teal-soft, rgba(45,212,191,.06));
+    border: 1px solid var(--theme-teal-border, rgba(45,212,191,.18));
 
     color: var(--ui-accent);
-    font-size: 13px;
+    font-size: var(--site-font-body, 13px);
     font-weight: 600;
 }
 
@@ -87,13 +87,13 @@
 
     background: linear-gradient(
         135deg,
-        rgba(14,21,33,.95),
-        rgba(10,15,27,.84)
+        var(--theme-surface, rgba(14,21,33,.95)),
+        var(--theme-surface, rgba(10,15,27,.84))
     );
 
     border: 1px solid var(--ui-border);
 
-    box-shadow: 0 8px 22px rgba(0,0,0,.25);
+    box-shadow: 0 8px 22px var(--theme-shadow, rgba(0,0,0,.25));
 
     backdrop-filter: blur(10px);
 
@@ -110,15 +110,15 @@
 .cast-card:hover {
     transform: translateY(-3px);
 
-    border-color: rgba(45,212,191,.30);
+    border-color: var(--theme-teal-border, rgba(45,212,191,.30));
 
     background: linear-gradient(
         135deg,
-        rgba(16,25,38,.97),
-        rgba(10,15,27,.92)
+        var(--theme-surface, rgba(16,25,38,.97)),
+        var(--theme-surface, rgba(10,15,27,.92))
     );
 
-    box-shadow: 0 10px 26px rgba(0,0,0,.34);
+    box-shadow: 0 10px 26px var(--theme-shadow, rgba(0,0,0,.34));
 }
 
 /* Actor image */
@@ -156,7 +156,7 @@
 /* Actor name */
 
 .actor-name {
-    font-size: 13px;
+    font-size: var(--site-font-body, 13px);
     font-weight: 700;
 
     line-height: 1.35;
@@ -165,7 +165,7 @@
 }
 
 .actor-name a {
-    color: rgba(255,255,255,.92);
+    color: var(--theme-text, rgba(255,255,255,.92));
     text-decoration: none;
 
     transition: color .15s ease;
@@ -176,10 +176,10 @@
 }
 
 .actor-character {
-    font-size: 12px;
+    font-size: var(--site-font-small, 13px);
     line-height: 1.4;
 
-    color: rgba(255,255,255,.52);
+    color: var(--theme-muted, rgba(255,255,255,.52));
 
     overflow: hidden;
 
@@ -197,16 +197,16 @@
     }
 
     .cast-title {
-        font-size: 14px;
+        font-size: var(--site-font-body, 13px);
     }
 
     .cast-subtitle {
-        font-size: 13px;
+        font-size: var(--site-font-body, 13px);
     }
 
     .cast-count-badge {
         margin-top: 8px;
-        font-size: 12px;
+        font-size: var(--site-font-small, 13px);
     }
 
     .cast-row {
@@ -228,11 +228,11 @@
     }
 
     .actor-name {
-        font-size: 12px;
+        font-size: var(--site-font-small, 13px);
     }
 
     .actor-character {
-        font-size: 11px;
+        font-size: var(--site-font-small, 13px);
     }
 }
 

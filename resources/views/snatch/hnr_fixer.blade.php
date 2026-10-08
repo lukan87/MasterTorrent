@@ -2,7 +2,7 @@
 
 @section('content')
 
-<div class="container my-5" style="background:#14141f;padding:2rem;border-radius:0.5rem">
+<div class="container my-5" style="background:var(--theme-surface, #14141f);padding:2rem;border-radius:0.5rem">
 
 <h2 class="text-center text-danger mb-4">
 <i class="bi bi-tools"></i> Hit & Run Fixer
@@ -116,14 +116,14 @@ class="btn btn-warning btn-sm">
 <style>
 
 .hnr-card{
-background:linear-gradient(90deg,rgba(220,53,69,0.1)0%,rgba(255,255,255,0)100%);
-border-left:6px solid #dc3545;
+background:linear-gradient(90deg,var(--theme-red-soft, rgba(220,53,69,0.1))0%,rgba(255,255,255,0)100%);
+border-left:6px solid var(--theme-red-border, #dc3545);
 transition:transform .3s,box-shadow .3s;
 }
 
 .hnr-card:hover{
 transform:translateY(-4px);
-box-shadow:0 12px 25px rgba(0,0,0,.5);
+box-shadow:0 12px 25px var(--theme-shadow, rgba(0,0,0,.5));
 }
 
 </style>

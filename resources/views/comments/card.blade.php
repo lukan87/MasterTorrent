@@ -12,7 +12,7 @@
         </div>
         <div class="discussion-identity">
             <div class="discussion-name">
-                @if($author)<a href="{{ route('profile.show', ['id' => $author->id, 'name' => $author->name]) }}" style="color: {{ \App\Models\UserClass::getClassColor($author->user_class) }}">{{ $author->name }}</a>@else<strong>Deleted user</strong>@endif
+                @if($author)<a href="{{ route('profile.show', ['id' => $author->id, 'name' => $author->name]) }}" style="--member-color: {{ \App\Models\UserClass::getClassColor($author->user_class) }}; color: var(--member-color)">{{ $author->name }}</a>@else<strong>Deleted user</strong>@endif
                 @if($author)<span class="discussion-badge">{{ \App\Models\UserClass::getClassName($author->user_class) }}</span>@endif
                 @if($author?->created_at)<span class="discussion-joined">Joined {{ $author->created_at->format('M Y') }}</span>@endif
                 @if($commentType === 'torrent' && $author && (int) $commentTarget->owner === (int) $author->id)<span class="discussion-badge">Uploader</span>@endif

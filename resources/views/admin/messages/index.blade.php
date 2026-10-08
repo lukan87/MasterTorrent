@@ -5,7 +5,7 @@
 <div class="container-fluid py-3 admin-messages-page">
 
     {{-- HEADER --}}
-    <div class="messages-header mb-3">
+    <div class="messages-header mb-3 admin-page-header">
         <div>
             <h1 class="messages-title">
                 <i class="bi bi-envelope-fill me-2"></i>
@@ -21,6 +21,8 @@
             {{ $messages->total() }} messages
         </span>
     </div>
+
+    <a href="{{ route('admin.users.mass-messages.index') }}" class="btn btn-outline-secondary mb-3">Mass message history</a>
 
     {{-- SUCCESS --}}
     @if(session('success'))
@@ -41,7 +43,7 @@
     <div class="messages-filter-card mb-3">
         <form method="GET" class="row g-2 align-items-end">
 
-            <div class="col-lg-6 col-md-5">
+            <div class="col-lg-5 col-md-12">
                 <label for="message-search" class="filter-label">
                     <i class="bi bi-search me-1"></i>
                     Search
@@ -57,7 +59,7 @@
                 >
             </div>
 
-            <div class="col-lg-3 col-md-4">
+            <div class="col-lg-2 col-md-4">
                 <label for="message-status" class="filter-label">
                     <i class="bi bi-filter me-1"></i>
                     Status
@@ -74,7 +76,16 @@
                 </select>
             </div>
 
-            <div class="col-lg-3 col-md-3">
+            <div class="col-lg-2 col-md-4">
+                <label for="message-type" class="filter-label">Message type</label>
+                <select id="message-type" name="type" class="form-select admin-input">
+                    <option value="">All types</option>
+                    <option value="normal" @selected(request('type') === 'normal')>Normal messages</option>
+                    <option value="mass" @selected(request('type') === 'mass')>Mass messages</option>
+                </select>
+            </div>
+
+            <div class="col-lg-3 col-md-4">
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn filter-btn flex-grow-1">
                         <i class="bi bi-funnel me-1"></i>
@@ -123,7 +134,7 @@
                                             <a
                                                 href="{{ route('profile.show', [$message->sender->id, $message->sender->name]) }}"
                                                 class="user-link"
-                                                style="color:{{ \App\Models\UserClass::getClassColor($message->sender->user_class) }};">
+                                                style="--member-color: {{ \App\Models\UserClass::getClassColor($message->sender->user_class) }}; color: var(--member-color);">
                                                 {{ $message->sender->name }}
                                             </a>
 
@@ -145,7 +156,7 @@
                                             <a
                                                 href="{{ route('profile.show', [$message->receiver->id, $message->receiver->name]) }}"
                                                 class="user-link"
-                                                style="color:{{ \App\Models\UserClass::getClassColor($message->receiver->user_class) }};">
+                                                style="--member-color: {{ \App\Models\UserClass::getClassColor($message->receiver->user_class) }}; color: var(--member-color);">
                                                 {{ $message->receiver->name }}
                                             </a>
 
@@ -165,6 +176,8 @@
                                 <a class="subject-button" href="{{ route('admin.messages.show', $message) }}">
                                     {{ $message->subject ?? '(no subject)' }}
                                 </a>
+
+                                @include('messages.mass-pill', ['message' => $message, 'showMassActions' => true, 'showNormal' => true])
 
                                 {{-- MESSAGE MODAL --}}
                                 <div
@@ -259,6 +272,7 @@
 
                             {{-- ACTIONS --}}
                             <td class="text-end">
+                                @if(auth()->user()->user_class >= \App\Models\UserClass::ADMIN)
                                 <form
                                     method="POST"
                                     action="{{ route('admin.messages.destroy', $message) }}">
@@ -274,6 +288,7 @@
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </form>
+                                @endif
                             </td>
 
                         </tr>
@@ -306,8 +321,8 @@
 
 <style>
     .admin-messages-page {
-        color: #dbe7ef;
-        font-size: 14px;
+        color: var(--theme-text, #dbe7ef);
+        font-size: var(--site-font-body, 13px);
     }
 
     .messages-header,
@@ -316,12 +331,12 @@
         position: relative;
         background: linear-gradient(
             135deg,
-            rgba(14,21,33,.96),
-            rgba(10,15,27,.88)
+            var(--theme-surface, rgba(14,21,33,.96)),
+            var(--theme-surface, rgba(10,15,27,.88))
         );
-        border: 1px solid var(--ui-border, rgba(255, 255, 255, .08));
+        border: 1px solid var(--ui-border, var(--theme-border, rgba(255, 255, 255, .08)));
         border-radius: .65rem;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, .16);
+        box-shadow: 0 6px 18px var(--theme-shadow, rgba(0, 0, 0, .16));
         overflow: hidden;
     }
 
@@ -334,7 +349,7 @@
         top: 0;
         bottom: 0;
         width: 2px;
-        background: var(--ui-accent, #20c997);
+        background: var(--theme-teal-action, var(--ui-accent, #20c997));
         opacity: .75;
     }
 
@@ -348,20 +363,20 @@
 
     .messages-title {
         margin: 0;
-        color: #f3f8fb;
+        color: var(--theme-text, #f3f8fb);
         font-size: 18px;
         font-weight: 700;
         line-height: 1.3;
     }
 
     .messages-title i {
-        color: var(--ui-accent, #20c997);
+        color: var(--ui-accent, var(--theme-teal-text, #20c997));
     }
 
     .messages-subtitle {
         margin-top: .15rem;
-        color: #718596;
-        font-size: 11px;
+        color: var(--theme-muted, #718596);
+        font-size: var(--site-font-small, 13px);
     }
 
     .messages-count {
@@ -369,11 +384,11 @@
         align-items: center;
         white-space: nowrap;
         padding: .3rem .55rem;
-        background: rgba(32, 201, 151, .08);
-        border: 1px solid rgba(32, 201, 151, .2);
+        background: var(--theme-teal-soft, rgba(32, 201, 151, .08));
+        border: 1px solid var(--theme-teal-border, rgba(32, 201, 151, .2));
         border-radius: .4rem;
-        color: #72e3bb;
-        font-size: 11px;
+        color: var(--theme-teal-text, #72e3bb);
+        font-size: var(--site-font-small, 13px);
         font-weight: 700;
     }
 
@@ -383,13 +398,13 @@
         gap: .5rem;
         padding: .55rem .7rem;
         border-radius: .5rem;
-        font-size: 12px;
+        font-size: var(--site-font-small, 13px);
     }
 
     .modern-alert-success {
-        background: rgba(32, 201, 151, .08);
-        border: 1px solid rgba(32, 201, 151, .18);
-        color: #72e0a9;
+        background: var(--theme-teal-soft, rgba(32, 201, 151, .08));
+        border: 1px solid var(--theme-teal-border, rgba(32, 201, 151, .18));
+        color: var(--theme-green-text, #72e0a9);
     }
 
     .messages-filter-card {
@@ -399,72 +414,72 @@
     .filter-label {
         display: block;
         margin-bottom: .25rem;
-        color: #8fa2ae;
-        font-size: 11px;
+        color: var(--theme-muted, #8fa2ae);
+        font-size: var(--site-font-small, 13px);
         font-weight: 600;
     }
 
     .filter-label i {
-        color: var(--ui-accent, #20c997);
+        color: var(--ui-accent, var(--theme-teal-text, #20c997));
     }
 
     .admin-input {
         min-height: 34px;
-        background: rgba(5,10,18,.5) !important;
-        border: 1px solid rgba(255, 255, 255, .09) !important;
+        background: var(--theme-control, rgba(5,10,18,.5)) !important;
+        border: 1px solid var(--theme-border, rgba(255, 255, 255, .09)) !important;
         border-radius: .4rem;
-        color: #dbe7ef !important;
-        font-size: 12px;
+        color: var(--theme-text, #dbe7ef) !important;
+        font-size: var(--site-font-small, 13px);
         box-shadow: none !important;
     }
 
     .admin-input::placeholder {
-        color: #647889;
+        color: var(--theme-muted, #647889);
     }
 
     .admin-input:focus {
-        background: rgba(5,10,18,.62) !important;
-        border-color: rgba(32, 201, 151, .38) !important;
-        box-shadow: 0 0 0 .12rem rgba(32, 201, 151, .055) !important;
+        background: var(--theme-control, rgba(5,10,18,.62)) !important;
+        border-color: var(--theme-teal-border, rgba(32, 201, 151, .38)) !important;
+        box-shadow: 0 0 0 .12rem var(--theme-shadow, rgba(32, 201, 151, .055)) !important;
     }
 
     .admin-input option {
-        background: #0f1622;
-        color: #fff;
+        background: var(--theme-control, #0f1622);
+        color: var(--theme-text, #fff);
     }
 
     .filter-btn,
     .reset-btn {
         min-height: 34px;
         border-radius: .4rem;
-        font-size: 12px;
+        font-size: var(--site-font-small, 13px);
         font-weight: 700;
     }
 
     .filter-btn {
-        background: rgba(32, 201, 151, .1);
-        border: 1px solid rgba(32, 201, 151, .25);
-        color: #72e3bb;
+        background: var(--theme-teal-soft, rgba(32, 201, 151, .1));
+        border: 1px solid var(--theme-teal-border, rgba(32, 201, 151, .25));
+        color: var(--theme-teal-text, #72e3bb);
     }
 
     .filter-btn:hover {
-        background: rgba(32, 201, 151, .18);
-        border-color: rgba(32, 201, 151, .4);
-        color: #fff;
+        background: var(--theme-teal-soft, rgba(32, 201, 151, .18));
+        border-color: var(--theme-teal-border, rgba(32, 201, 151, .4));
+        color:  var(--theme-text, #fff);
     }
 
     .reset-btn {
         width: 35px;
         padding: 0;
-        background: rgba(255,255,255,0.0245);
-        border: 1px solid rgba(255, 255, 255, .08);
-        color: #91a2ad;
+        background: var(--theme-surface-alt, rgba(255,255,255,0.0245));
+        border: 1px solid var(--theme-border, rgba(255, 255, 255, .08));
+        color: var(--theme-muted, #91a2ad);
     }
 
     .reset-btn:hover {
-        background: rgba(255,255,255,0.049);
-        color: #fff;
-        border-color: rgba(32, 201, 151, .25);
+        background: var(--theme-surface-alt, rgba(255,255,255,0.049));
+        color: var(--theme-text, #fff);
+        border-color: var(--theme-teal-border, rgba(32, 201, 151, .25));
     }
 
     .messages-card {
@@ -473,19 +488,19 @@
 
     .messages-table {
         min-width: 850px;
-        color: #dbe7ef;
-        font-size: 12px;
+        color: var(--theme-text, #dbe7ef);
+        font-size: var(--site-font-small, 13px);
     }
 
     .messages-table > :not(caption) > * > * {
         padding: .6rem .7rem;
-        border-bottom-color: rgba(255, 255, 255, .055);
+        border-bottom-color: var(--theme-border, rgba(255, 255, 255, .055));
     }
 
     .messages-table thead th {
-        background: rgba(255,255,255,0.0154);
-        color: #718596;
-        font-size: 10px;
+        background: var(--theme-surface-alt, rgba(255,255,255,0.0154));
+        color: var(--theme-muted, #718596);
+        font-size: var(--site-font-small, 13px);
         font-weight: 700;
         letter-spacing: .04em;
         text-transform: uppercase;
@@ -497,15 +512,15 @@
     }
 
     .messages-table tbody tr:hover {
-        background: rgba(32, 201, 151, .025);
+        background: var(--theme-teal-soft, rgba(32, 201, 151, .025));
     }
 
     .messages-table tbody tr.message-unread {
-        background: rgba(32, 201, 151, .035);
+        background: var(--theme-teal-soft, rgba(32, 201, 151, .035));
     }
 
     .messages-table tbody tr.message-unread:hover {
-        background: rgba(32, 201, 151, .06);
+        background: var(--theme-teal-soft, rgba(32, 201, 151, .06));
     }
 
     .message-users {
@@ -520,34 +535,34 @@
     }
 
     .user-link {
-        font-size: 12px;
+        font-size: var(--site-font-small, 13px);
         font-weight: 600;
         text-decoration: none;
     }
 
     .user-link:hover {
-        color: #fff !important;
+        color: var(--theme-text, #fff) !important;
     }
 
     .unknown-user {
-        color: #718596;
-        font-size: 12px;
+        color: var(--theme-muted, #718596);
+        font-size: var(--site-font-small, 13px);
     }
 
     .user-arrow {
-        color: #5d707c;
-        font-size: 11px;
+        color: var(--theme-muted, #5d707c);
+        font-size: var(--site-font-small, 13px);
     }
 
     .deleted-badge {
         display: inline-block;
         margin-left: .25rem;
         padding: .12rem .3rem;
-        background: rgba(220, 53, 69, .09);
-        border: 1px solid rgba(220, 53, 69, .18);
+        background: var(--theme-red-soft, rgba(220, 53, 69, .09));
+        border: 1px solid var(--theme-red-border, rgba(220, 53, 69, .18));
         border-radius: .25rem;
-        color: #ff8e98;
-        font-size: 9px;
+        color: var(--theme-red-text, #ff8e98);
+        font-size: var(--site-font-small, 13px);
         font-weight: 700;
     }
 
@@ -557,8 +572,8 @@
         overflow: hidden;
         border: 0;
         background: transparent;
-        color: #dce8ed;
-        font-size: 12px;
+        color: var(--theme-text, #dce8ed);
+        font-size: var(--site-font-small, 13px);
         font-weight: 600;
         text-align: left;
         text-overflow: ellipsis;
@@ -566,7 +581,7 @@
     }
 
     .subject-button:hover {
-        color: var(--ui-accent, #20c997);
+        color: var(--ui-accent, var(--theme-teal-text, #20c997));
     }
 
     .status-badge {
@@ -575,26 +590,26 @@
         gap: .25rem;
         padding: .2rem .4rem;
         border-radius: .3rem;
-        font-size: 10px;
+        font-size: var(--site-font-small, 13px);
         font-weight: 700;
         white-space: nowrap;
     }
 
     .status-read {
-        background: rgba(32, 201, 151, .08);
-        border: 1px solid rgba(32, 201, 151, .18);
-        color: #72e0a9;
+        background: var(--theme-teal-soft, rgba(32, 201, 151, .08));
+        border: 1px solid var(--theme-teal-border, rgba(32, 201, 151, .18));
+        color: var(--theme-green-text, #72e0a9);
     }
 
     .status-unread {
-        background: rgba(255, 193, 7, .08);
-        border: 1px solid rgba(255, 193, 7, .18);
-        color: #e7c967;
+        background: var(--theme-amber-soft, rgba(255, 193, 7, .08));
+        border: 1px solid var(--theme-amber-border, rgba(255, 193, 7, .18));
+        color: var(--theme-amber-text, #e7c967);
     }
 
     .created-time {
-        color: #8fa2ae;
-        font-size: 11px;
+        color: var(--theme-muted, #8fa2ae);
+        font-size: var(--site-font-small, 13px);
         white-space: nowrap;
     }
 
@@ -602,17 +617,17 @@
         width: 29px;
         height: 29px;
         padding: 0;
-        border: 1px solid rgba(220, 53, 69, .25);
+        border: 1px solid var(--theme-red-border, rgba(220, 53, 69, .25));
         border-radius: .38rem;
-        background: rgba(220, 53, 69, .07);
-        color: #ff8e98;
-        font-size: 11px;
+        background: var(--theme-red-soft, rgba(220, 53, 69, .07));
+        color: var(--theme-red-text, #ff8e98);
+        font-size: var(--site-font-small, 13px);
     }
 
     .delete-btn:hover {
-        background: rgba(220, 53, 69, .14);
-        border-color: rgba(220, 53, 69, .42);
-        color: #fff;
+        background: var(--theme-red-soft, rgba(220, 53, 69, .14));
+        border-color: var(--theme-red-border, rgba(220, 53, 69, .42));
+        color: var(--theme-text, #fff);
     }
 
     .empty-messages {
@@ -622,21 +637,21 @@
         flex-direction: column;
         gap: .25rem;
         min-height: 100px;
-        color: #718596;
+        color: var(--theme-muted, #718596);
     }
 
     .empty-messages i {
-        color: var(--ui-accent, #20c997);
+        color: var(--ui-accent, var(--theme-teal-text, #20c997));
         font-size: 22px;
     }
 
     .empty-messages strong {
-        color: #b9c8d0;
-        font-size: 13px;
+        color: var(--theme-text, #b9c8d0);
+        font-size: var(--site-font-body, 13px);
     }
 
     .empty-messages span {
-        font-size: 11px;
+        font-size: var(--site-font-small, 13px);
     }
 
     .pagination-wrap {
@@ -651,67 +666,67 @@
     }
 
     .pagination .page-link {
-        background: rgba(14,21,33,.9);
-        border-color: rgba(255, 255, 255, .075);
-        color: #aabcc7;
-        font-size: 11px;
+        background: var(--theme-surface, rgba(14,21,33,.9));
+        border-color: var(--theme-border, rgba(255, 255, 255, .075));
+        color: var(--theme-muted, #aabcc7);
+        font-size: var(--site-font-small, 13px);
         padding: .3rem .55rem;
         border-radius: .35rem !important;
     }
 
     .pagination .page-item.active .page-link {
-        background: rgba(32, 201, 151, .13);
-        border-color: rgba(32, 201, 151, .28);
-        color: #73e2bb;
+        background: var(--theme-teal-soft, rgba(32, 201, 151, .13));
+        border-color: var(--theme-teal-border, rgba(32, 201, 151, .28));
+        color: var(--theme-teal-text, #73e2bb);
     }
 
     .pagination .page-link:hover {
-        background: rgba(32, 201, 151, .07);
-        border-color: rgba(32, 201, 151, .22);
-        color: #fff;
+        background: var(--theme-teal-soft, rgba(32, 201, 151, .07));
+        border-color: var(--theme-teal-border, rgba(32, 201, 151, .22));
+        color:  var(--theme-text, #fff);
     }
 
     .message-modal {
         background: linear-gradient(
             135deg,
-            rgba(14,21,33,.99),
-            rgba(10,15,27,.97)
+            var(--theme-surface, rgba(14,21,33,.99)),
+            var(--theme-surface, rgba(10,15,27,.97))
         );
-        border: 1px solid var(--ui-border, rgba(255, 255, 255, .08));
+        border: 1px solid var(--ui-border, var(--theme-border, rgba(255, 255, 255, .08)));
         border-radius: .65rem;
-        color: #dbe7ef;
-        box-shadow: 0 16px 45px rgba(0, 0, 0, .38);
+        color: var(--theme-text, #dbe7ef);
+        box-shadow: 0 16px 45px var(--theme-shadow, rgba(0, 0, 0, .38));
         overflow: hidden;
     }
 
     .message-modal .modal-header,
     .message-modal .modal-footer {
-        border-color: rgba(255, 255, 255, .065);
+        border-color: var(--theme-border, rgba(255, 255, 255, .065));
     }
 
     .message-modal .modal-header {
         padding: .75rem .9rem;
-        background: rgba(255,255,255,0.0126);
+        background: var(--theme-surface-alt, rgba(255,255,255,0.0126));
     }
 
     .modal-kicker {
         margin-bottom: .15rem;
-        color: var(--ui-accent, #20c997);
-        font-size: 10px;
+        color: var(--ui-accent, var(--theme-teal-text, #20c997));
+        font-size: var(--site-font-small, 13px);
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: .04em;
     }
 
     .message-modal .modal-title {
-        color: #f1f5f9;
-        font-size: 15px;
+        color: var(--theme-text, #f1f5f9);
+        font-size: var(--site-font-body, 13px);
         font-weight: 700;
     }
 
     .message-modal .modal-body {
         padding: .85rem .9rem;
-        font-size: 13px;
+        font-size: var(--site-font-body, 13px);
     }
 
     .message-meta {
@@ -719,7 +734,7 @@
         gap: 1.5rem;
         padding-bottom: .65rem;
         margin-bottom: .7rem;
-        border-bottom: 1px solid rgba(255, 255, 255, .065);
+        border-bottom: 1px solid var(--theme-border, rgba(255, 255, 255, .065));
     }
 
     .message-meta div {
@@ -729,31 +744,31 @@
     }
 
     .message-meta span {
-        color: #718596;
-        font-size: 10px;
+        color: var(--theme-muted, #718596);
+        font-size: var(--site-font-small, 13px);
         text-transform: uppercase;
     }
 
     .message-meta strong {
-        color: #dce8ed;
-        font-size: 12px;
+        color: var(--theme-text, #dce8ed);
+        font-size: var(--site-font-small, 13px);
     }
 
     .message-body {
         padding: .7rem;
-        background: rgba(5,10,18,.4);
-        border: 1px solid rgba(255, 255, 255, .065);
+        background: var(--theme-surface, rgba(5,10,18,.4));
+        border: 1px solid var(--theme-border, rgba(255, 255, 255, .065));
         border-radius: .45rem;
-        color: #dbe7ef;
-        font-size: 13px;
+        color: var(--theme-text, #dbe7ef);
+        font-size: var(--site-font-body, 13px);
         line-height: 1.6;
         overflow-wrap: anywhere;
     }
 
     .message-modal .modal-footer {
         padding: .55rem .9rem;
-        color: #718596;
-        font-size: 10px;
+        color: var(--theme-muted, #718596);
+        font-size: var(--site-font-small, 13px);
     }
 
     @media (max-width: 767.98px) {

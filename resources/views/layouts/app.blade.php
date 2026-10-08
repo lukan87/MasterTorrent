@@ -3,8 +3,8 @@
 
 @include('layouts.partials.header')
 
-{{-- <body class="layout-fixed sidebar-expand-lg bg-body-tertiary" data-bs-theme="dark" style="font-family: 'Titillium Web', sans-serif;">  --}}
-    <body class="layout-fixed sidebar-expand-lg bg-body-tertiary" data-bs-theme="dark"> 
+{{-- <body class="layout-fixed sidebar-expand-lg bg-body-tertiary" style="font-family: 'Titillium Web', sans-serif;">  --}}
+    <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper"> 
 
     
@@ -53,7 +53,7 @@
 </div>
 
 <script>
-fetch('/announcements-unread-count')
+fetch('/announcements-unread-count', { headers: { Accept: 'application/json' } })
     .then(res => res.json())
     .then(data => {
         if (data.count > 0) {
@@ -190,11 +190,11 @@ setInterval(fetchLatestTorrent, 5000); // Check every 5 seconds
     margin: 0 !important;
     padding: 10px 0 !important;
 
-    font-size: 0.9rem;
+    font-size: var(--site-font-body, 13px);
 
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid var(--theme-border, rgba(255, 255, 255, 0.08));
 
-    background: rgba(13,16,18,0.65);
+    background: var(--theme-surface, rgba(13,16,18,0.65));
 
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -203,7 +203,7 @@ setInterval(fetchLatestTorrent, 5000); // Check every 5 seconds
 
 /* Site name */
 .footer-brand {
-    color: #e9ecef;
+    color: var(--theme-text, #e9ecef);
     font-size: 1rem;
     font-weight: 600;
 }
@@ -211,40 +211,40 @@ setInterval(fetchLatestTorrent, 5000); // Check every 5 seconds
 
 /* Normal footer text */
 .footer-text {
-    color: #8f969d;
+    color: var(--theme-muted, #8f969d);
 }
 
 
 /* Laravel / GitHub link */
 .footer-link {
-    color: #adb5bd;
+    color: var(--theme-muted, #adb5bd);
     text-decoration: none;
 
     transition: color 0.2s ease;
 }
 
 .footer-link .bi-github {
-    color: #dee2e6;
+    color: var(--theme-text, #dee2e6);
 }
 
 .footer-link:hover {
-    color: #0dcaf0;
+    color: var(--theme-teal-text, #0dcaf0);
 }
 
 .footer-link:hover .bi-github {
-    color: #ffffff;
+    color: var(--theme-text, #ffffff);
 }
 
 
 /* Motto */
 .footer-motto {
-    color: #adb5bd;
+    color: var(--theme-muted, #adb5bd);
 }
 
 
 /* Dividers */
 .footer-divider {
-    color: rgba(255, 255, 255, 0.15);
+    color: var(--theme-muted, rgba(255, 255, 255, 0.15));
 }
 
 
@@ -258,7 +258,7 @@ setInterval(fetchLatestTorrent, 5000); // Check every 5 seconds
     background: linear-gradient(
         90deg,
         transparent,
-        rgba(255,255,255,0.056),
+        var(--theme-surface-alt, rgba(255,255,255,0.056)),
         transparent
     );
 }
@@ -266,8 +266,8 @@ setInterval(fetchLatestTorrent, 5000); // Check every 5 seconds
 
 /* Copyright */
 .footer-copyright {
-    color: #666f78;
-    font-size: 0.78rem;
+    color: var(--theme-muted, #666f78);
+    font-size: var(--site-font-body, 13px);
 }
 
 
@@ -453,22 +453,22 @@ window.showNotification = function(type, message) {
 
         padding: 0;
 
-        color: #ffffff;
+        color: var(--theme-text, #ffffff);
         font-size: 1.65rem;
 
         background:
             linear-gradient(
                 145deg,
-                rgba(31,38,39,0.95),
-                rgba(53,55,58,0.95)
+                var(--theme-surface, rgba(31,38,39,0.95)),
+                var(--theme-surface, rgba(53,55,58,0.95))
             );
 
        
         border-radius: 14px;
 
         box-shadow:
-            0 8px 25px rgba(0, 0, 0, 0.35),
-            0 0 20px rgba(13, 202, 240, 0.12);
+            0 8px 25px var(--theme-shadow, rgba(0, 0, 0, 0.35)),
+            0 0 20px var(--theme-shadow, rgba(13, 202, 240, 0.12));
 
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
@@ -518,13 +518,13 @@ window.showNotification = function(type, message) {
 
     /* Hover */
     #back-to-top:hover {
-        color: #ffffff;
+        color: var(--theme-text, #ffffff);
 
         background:
             linear-gradient(
                 145deg,
-                #919596,
-                #212222
+                var(--theme-surface, #919596),
+                var(--theme-surface, #212222)
             );
 
         transform:
@@ -532,8 +532,8 @@ window.showNotification = function(type, message) {
             scale(1.04);
 
         box-shadow:
-            0 12px 30px rgba(0, 0, 0, 0.4),
-            0 0 25px rgba(13, 202, 240, 0.25);
+            0 12px 30px var(--theme-shadow, rgba(0, 0, 0, 0.4)),
+            0 0 25px var(--theme-shadow, rgba(13, 202, 240, 0.25));
     }
 
 
@@ -552,7 +552,7 @@ window.showNotification = function(type, message) {
 
     /* Keyboard accessibility */
     #back-to-top:focus-visible {
-        outline: 3px solid rgba(13, 202, 240, 0.35);
+        outline: 3px solid var(--theme-teal-border, rgba(13, 202, 240, 0.35));
         outline-offset: 3px;
     }
 
@@ -738,19 +738,18 @@ document.addEventListener('DOMContentLoaded', function () {
     <script>
 document.addEventListener('DOMContentLoaded', function () {
 
-    fetch('/announcements-unread-count')
-        .then(res => res.json())
+    const badge = document.getElementById('announcement-badge');
+    if (!badge) return;
+
+    fetch('/announcements-unread-count', { headers: { Accept: 'application/json' } })
+        .then(res => res.ok ? res.json() : null)
         .then(data => {
-
-            let badge = document.getElementById('announcement-badge');
-
-            if (!badge) return;
-
-            if (data.count > 0) {
+            if (data && (data.count > 0 || data.count === '9+')) {
                 badge.textContent = data.count;
                 badge.classList.remove('d-none');
             }
-        });
+        })
+        .catch(error => console.warn('Announcement count could not be loaded.', error));
 
 });
 </script>

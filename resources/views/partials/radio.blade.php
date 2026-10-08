@@ -21,10 +21,10 @@
     gap: 10px;
     justify-content: center;
     align-items: center;
-    background: #0a0f1b;
+    background: var(--theme-surface, #0a0f1b);
     border-radius: 14px;
     padding: 12px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    box-shadow: 0 10px 25px var(--theme-shadow, rgba(0,0,0,0.3));
 }
 
 /* Link buttons */
@@ -34,14 +34,14 @@
     justify-content: center;
     padding: 10px;
     border-radius: 10px;
-    background: #141b26;
+    background: var(--theme-surface, #141b26);
     transition: all 0.25s ease;
 }
 
 .radio-links a:hover {
-    background: #212a37;
+    background: var(--theme-surface, #212a37);
     transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+    box-shadow: 0 6px 15px var(--theme-shadow, rgba(0,0,0,0.4));
 }
 
 .radio-links img {

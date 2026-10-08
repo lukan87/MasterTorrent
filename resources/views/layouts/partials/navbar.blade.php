@@ -1,306 +1,16 @@
-@php
-    $latestPeer = Auth::user()->peers()->latest('updated_at')->first();
-    $connectable = $latestPeer ? $latestPeer->connectable : false;
-@endphp
-
-<style>
-.nav-badge {
-    position: absolute;
-    top: 4px;
-    right: 2px;
-    font-size: 0.6rem;
-    padding: 2px 5px;
-    border-radius: 10px;
-    line-height: 1;
-}
-
-.app-header .nav-link {
-    padding: 0.4rem 0.6rem;
-}
-
-.user-image{
-    width:36px;
-    height:36px;
-    border-radius:50%;
-    border:2px solid rgba(255,255,255,.15);
-    object-fit:cover;
-}
-
-/* -------- Library offcanvas (mobile) -------- */
-#libraryOffcanvas {
-    background: linear-gradient(160deg, rgba(14,21,33,0.98), rgba(6,9,16,0.98)) !important;
-    border-right: 1px solid var(--ui-border) !important;
-}
-#libraryOffcanvas .offcanvas-header {
-    border-bottom: 1px solid var(--ui-border);
-    padding: 1rem 1.25rem;
-}
-#libraryOffcanvas .offcanvas-body {
-    padding: 0.75rem 0;
-}
-#libraryOffcanvas .offcanvas-title {
-    font-weight: 700;
-    font-size: 0.95rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: #94a3b8;
-}
-#libraryOffcanvas .library-link {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.85rem 1.25rem;
-    color: #e2e8f0;
-    font-weight: 500;
-    border-radius: 0;
-    transition: background-color 120ms ease, color 120ms ease;
-}
-#libraryOffcanvas .library-link:hover,
-#libraryOffcanvas .library-link:focus {
-    background: rgba(99, 210, 198, 0.1);
-    color: #fff;
-}
-#libraryOffcanvas .library-link i {
-    font-size: 1.2rem;
-    width: 1.4rem;
-    text-align: center;
-    color: #63d2c6;
-}
-
-/* -------- Profile dropdown -------- */
-.profile-dropdown {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    left: auto;
-    margin-top: 0.125rem;
-    min-width: 380px !important;
-    max-width: 94vw;
-    padding: 0 !important;
-    border-radius: 1rem !important;
-    border: 1px solid var(--ui-border) !important;
-    background: linear-gradient(160deg, rgba(14,21,33,0.98), rgba(6,9,16,0.98)) !important;
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55) !important;
-    overflow: hidden;
-}
-
-.profile-cover {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1.25rem 1.25rem 1.1rem;
-    border-bottom: 1px solid var(--ui-border);
-    background:
-        radial-gradient(120% 130% at 90% -20%, rgba(99, 210, 198, 0.2), transparent 55%),
-        radial-gradient(120% 150% at -10% 120%, rgba(99, 210, 198, 0.1), transparent 50%);
-}
-
-.profile-cover-avatar {
-    flex: 0 0 auto;
-    width: 4.2rem;
-    height: 4.2rem;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid rgba(99, 210, 198, 0.45);
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
-    background: #141b26;
-}
-
-.profile-cover-name {
-    font-size: 1.05rem;
-    font-weight: 700;
-    line-height: 1.2;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.profile-cover-role {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    margin-top: 0.15rem;
-    font-size: 0.78rem;
-    color: #9fb0c6;
-}
-
-.profile-status-dot {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    padding: 0.15rem 0.55rem;
-    border-radius: 2rem;
-    font-size: 0.68rem;
-    font-weight: 600;
-}
-
-.profile-status-ok {
-    color: #6ee7b7;
-    background: rgba(16, 185, 129, 0.14);
-    border: 1px solid rgba(52, 211, 153, 0.25);
-}
-
-.profile-status-bad {
-    color: #fca5a5;
-    background: rgba(239, 68, 68, 0.14);
-    border: 1px solid rgba(248, 113, 113, 0.25);
-}
-
-.profile-cover-member {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.3rem;
-    margin-top: 0.35rem;
-    font-size: 0.72rem;
-    color: #6b7c93;
-}
-
-/* Stats */
-.profile-stats {
-    padding: 0.9rem 1rem 0.5rem;
-    border-bottom: 1px solid var(--ui-border);
-}
-
-.profile-stat {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    padding: 0.5rem 0.6rem;
-    border: 1px solid var(--ui-border);
-    border-radius: 0.8rem;
-    background: rgba(10,15,27,0.55);
-    min-height: 3.3rem;
-    transition: background-color 120ms ease, border-color 120ms ease, transform 120ms ease;
-}
-
-.profile-stat:hover,
-.profile-stat:focus {
-    background: rgba(99, 210, 198, 0.09);
-    border-color: rgba(99, 210, 198, 0.25);
-    transform: translateY(-1px);
-    text-decoration: none;
-}
-
-.profile-stat-icon {
-    flex: 0 0 auto;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2rem;
-    height: 2rem;
-    border-radius: 0.55rem;
-    font-size: 1.05rem;
-    background: rgba(10,15,27,0.85);
-    border: 1px solid var(--ui-border);
-}
-
-.profile-stat-value {
-    display: block;
-    font-size: 0.82rem;
-    font-weight: 700;
-    line-height: 1.2;
-    color: #e8eef7;
-}
-
-.profile-stat-label {
-    display: block;
-    font-size: 0.64rem;
-    font-weight: 600;
-    line-height: 1.3;
-    color: #8194ab;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-/* Quick links */
-.profile-links {
-    padding: 0.6rem 1rem 0.9rem;
-    border-bottom: 1px solid var(--ui-border);
-}
-
-.profile-link {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.3rem;
-    padding: 0.55rem 0.25rem;
-    border-radius: 0.7rem;
-    color: #cbd5e1;
-    font-size: 0.72rem;
-    font-weight: 500;
-    text-decoration: none !important;
-    transition: background-color 120ms ease, color 120ms ease, transform 120ms ease;
-}
-
-.profile-link i {
-    font-size: 1.05rem;
-}
-
-.profile-link:hover,
-.profile-link:focus {
-    background: rgba(99, 210, 198, 0.1);
-    color: #fff;
-    transform: translateY(-1px);
-}
-
-/* Footer */
-.profile-footer {
-    display: flex;
-    gap: 0.6rem;
-    padding: 0.85rem 1rem;
-    background: rgba(6,9,16,0.6);
-}
-
-.profile-btn {
-    flex: 1;
-    border-radius: 0.65rem;
-    font-weight: 600;
-    text-decoration: none !important;
-}
-
-/* Slide the profile panel in from the side (right) */
-.profile-dropdown {
-    transform-origin: top right;
-}
-
-.profile-dropdown.show {
-    animation: profileDropdownIn 0.28s cubic-bezier(0.22, 0.9, 0.25, 1);
-}
-
-@keyframes profileDropdownIn {
-    from {
-        opacity: 0;
-        transform: translateX(24px) scale(0.96);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0) scale(1);
-    }
-}
-
-@media (max-width: 575.98px) {
-    .profile-dropdown {
-        min-width: 92vw !important;
-        max-width: 92vw;
-    }
-}
-</style>
-
-<nav class="app-header navbar navbar-expand bg-body-info glass sticky-top" data-bs-theme="dark">
+<nav class="app-header navbar navbar-expand bg-body-info glass sticky-top" aria-label="Main navigation">
 <div class="container-fluid">
 
 <ul class="navbar-nav">
     <li class="nav-item">
-        <a class="nav-link" data-lte-toggle="sidebar" href="#">
-            <i class="bi bi-list"></i>
-        </a>
+        <button type="button" class="nav-link navbar-icon-button" data-lte-toggle="sidebar" aria-label="Toggle sidebar" aria-controls="siteSidebar">
+            <i class="bi bi-list" aria-hidden="true"></i>
+        </button>
     </li>
 </ul>
 
 {{-- Live torrent search --}}
-<form class="d-none d-lg-flex ms-lg-3 me-3" action="{{ route('torrents.index') }}" method="GET" role="search">
+<form class="navbar-search-form d-none d-lg-flex ms-lg-3 me-3" action="{{ route('torrents.index') }}" method="GET" role="search">
     <div class="input-group input-group-sm header-search">
         <span class="input-group-text" aria-hidden="true">
             <i class="bi bi-search"></i>
@@ -327,6 +37,11 @@
             <i class="bi bi-tv me-1"></i>Series
         </a>
     </li>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('tv-calendar.*') ? 'active' : '' }}" href="{{ route('tv-calendar.index') }}" @if(request()->routeIs('tv-calendar.*')) aria-current="page" @endif>
+            <i class="bi bi-calendar3 me-1" aria-hidden="true"></i>TV Calendar
+        </a>
+    </li>
 </ul>
 
 {{-- Library (medium md–lg: icons only) --}}
@@ -341,15 +56,35 @@
             <i class="bi bi-tv fs-4"></i>
         </a>
     </li>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('tv-calendar.*') ? 'active' : '' }}" href="{{ route('tv-calendar.index') }}" data-bs-toggle="tooltip" title="TV Calendar" aria-label="TV Calendar" @if(request()->routeIs('tv-calendar.*')) aria-current="page" @endif>
+            <i class="bi bi-calendar3 fs-4" aria-hidden="true"></i>
+        </a>
+    </li>
 </ul>
 
 <ul class="navbar-nav ms-auto">
 
+{{-- Appearance is available on desktop and mobile, beside activity controls. --}}
+<li class="nav-item dropdown theme-menu">
+    <button type="button" id="themeMenuToggle" class="nav-link navbar-icon-button"
+            data-bs-toggle="dropdown" aria-expanded="false" aria-controls="themeMenuPanel"
+            aria-label="Appearance: Dark" title="Appearance: Dark">
+        <i class="bi bi-moon-stars fs-4" data-theme-icon aria-hidden="true"></i>
+    </button>
+    <ul id="themeMenuPanel" class="dropdown-menu dropdown-menu-end theme-dropdown p-2" aria-labelledby="themeMenuToggle">
+        <li><h6 class="dropdown-header">Appearance</h6></li>
+        <li><button type="button" class="dropdown-item theme-choice" data-theme-choice="light" aria-pressed="false"><i class="bi bi-sun" aria-hidden="true"></i><span>Light</span><i class="bi bi-check2 theme-choice-check" aria-hidden="true"></i></button></li>
+        <li><button type="button" class="dropdown-item theme-choice" data-theme-choice="dark" aria-pressed="true"><i class="bi bi-moon-stars" aria-hidden="true"></i><span>Dark</span><i class="bi bi-check2 theme-choice-check" aria-hidden="true"></i></button></li>
+        <li><button type="button" class="dropdown-item theme-choice" data-theme-choice="system" aria-pressed="false"><i class="bi bi-circle-half" aria-hidden="true"></i><span>System / Auto</span><i class="bi bi-check2 theme-choice-check" aria-hidden="true"></i></button></li>
+    </ul>
+</li>
+
 {{-- Library (mobile <md: offcanvas trigger) --}}
 <li class="nav-item d-md-none">
-    <a class="nav-link" href="#" data-bs-toggle="offcanvas" data-bs-target="#libraryOffcanvas">
-        <i class="bi bi-collection-play fs-4" data-bs-toggle="tooltip" title="Library"></i>
-    </a>
+    <button type="button" class="nav-link navbar-icon-button" data-bs-toggle="offcanvas" data-bs-target="#libraryOffcanvas" aria-label="Open library" aria-controls="libraryOffcanvas">
+        <i class="bi bi-collection-play fs-4" aria-hidden="true"></i>
+    </button>
 </li>
 
 {{-- Facebook --}}
@@ -360,34 +95,45 @@
 </li> -->
 
 {{-- RSS --}}
-<li class="nav-item">
-    <a class="nav-link" href="{{ route('rss.index') }}">
+<li class="nav-item d-none d-sm-block">
+    <a class="nav-link" href="{{ route('rss.index') }}" aria-label="RSS feeds">
         <i class="bi bi-rss fs-4" data-bs-toggle="tooltip" title="RSS"></i>
     </a>
 </li>
 
 @auth
 
+@if(auth()->user()->enabled !== 'no')
+<li class="nav-item">
+    <a class="nav-link navbar-icon-button" href="{{ route('torznab.setup') }}"
+       data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-container="body"
+       title="Connect Prowlarr, Radarr and Sonarr"
+       aria-label="Prowlarr, Radarr and Sonarr setup instructions">
+        <i class="bi bi-plug fs-4" aria-hidden="true"></i>
+    </a>
+</li>
+@endif
+
 {{-- Notifications --}}
 <li class="nav-item dropdown position-relative">
-    <a class="nav-link position-relative" data-bs-toggle="dropdown">
-        <i class="bi bi-bell fs-4"></i>
+    <button type="button" class="nav-link navbar-icon-button position-relative" data-bs-toggle="dropdown" aria-label="Notifications" aria-expanded="false">
+        <i class="bi bi-bell fs-4" aria-hidden="true"></i>
 
         @if(auth()->user()->unreadNotifications->count())
             <span class="nav-badge badge bg-danger">
                 {{ auth()->user()->unreadNotifications->count() }}
             </span>
         @endif
-    </a>
+    </button>
 
-    <ul class="dropdown-menu dropdown-menu-end bg-dark text-light p-2 shadow-lg" style="min-width:320px;">
+    <ul class="dropdown-menu dropdown-menu-end navbar-activity-dropdown theme-surface theme-text p-2 shadow-lg">
         @forelse(auth()->user()->unreadNotifications->take(5) as $notification)
             @php $type = $notification->data['type'] ?? null; @endphp
 
             <li>
                 @if($type === 'torrent_deleted')
 
-                    <div class="dropdown-item text-light">
+                    <div class="dropdown-item theme-text">
                         <div class="fw-semibold">
                             <i class="bi bi-trash-fill text-danger me-1"></i>
                             Your torrent <strong>{{ $notification->data['torrent_name'] }}</strong> was deleted
@@ -412,7 +158,7 @@
 
                 @elseif($type === 'torrent_updated')
 
-                    <div class="dropdown-item text-light">
+                    <div class="dropdown-item theme-text">
                         <div class="fw-semibold">
                             <i class="bi bi-pencil-square text-primary me-1"></i>
                             Subscribed torrent <strong>{{ $notification->data['torrent_name'] }}</strong> was updated
@@ -433,7 +179,7 @@
 
                     <form method="POST" action="{{ route('notifications.read', $notification->id) }}">
                         @csrf
-                        <button type="submit" class="dropdown-item text-light text-start bg-transparent border-0 w-100">
+                        <button type="submit" class="dropdown-item theme-text text-start bg-transparent border-0 w-100">
 
                             <div class="fw-semibold">
                                 @if($type === 'achievement_unlocked')
@@ -519,7 +265,7 @@
 
 {{-- Announcements --}}
 <li class="nav-item position-relative">
-    <a class="nav-link position-relative" href="{{ route('announcements.index') }}">
+    <a class="nav-link position-relative" href="{{ route('announcements.index') }}" aria-label="Announcements">
         <i class="bi bi-megaphone fs-4" data-bs-toggle="tooltip" title="Announcements"></i>
 
         <span id="announcement-badge" class="nav-badge badge bg-danger d-none"></span>
@@ -528,15 +274,15 @@
 
 {{-- Messages --}}
 <li class="nav-item dropdown position-relative">
-    <a class="nav-link position-relative" data-bs-toggle="dropdown">
-        <i class="bi bi-envelope fs-4"></i>
+    <button type="button" class="nav-link navbar-icon-button position-relative" data-bs-toggle="dropdown" aria-label="Messages" aria-expanded="false">
+        <i class="bi bi-envelope fs-4" aria-hidden="true"></i>
 
         <span class="nav-badge badge {{ $unreadMessagesCount > 0 ? 'bg-danger' : 'bg-success' }}">
             {{ $unreadMessagesCount }}
         </span>
-    </a>
+    </button>
 
-    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
+    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end navbar-activity-dropdown">
         @foreach ($conversations as $conversation)
             @php
                 $last = $conversation->lastMessage;
@@ -553,7 +299,7 @@
                                  style="width:50px;height:50px;object-fit:cover;">
                         </div>
 
-                        <div class="flex-grow-1" style="max-width:calc(100% - 60px)">
+                        <div class="flex-grow-1 navbar-message-content">
                             <h3 class="dropdown-item-title">
                                 {{ $other->name ?? 'Unknown' }}
 
@@ -589,10 +335,10 @@
 
 {{-- PROFILE DROPDOWN --}}
 <li class="nav-item dropdown user-menu">
-    <a href="#" class="nav-link dropdown-toggle" id="userMenuToggle">
-        <img src="{{ Auth::user()->profile_image ?? asset('images/default_avatar/default-avatar.jpg') }}" class="user-image rounded-circle shadow">
-        <span class="d-none d-md-inline">
-            <span style="color: {{ \App\Models\UserClass::getClassColor(Auth::user()->user_class) }}">
+    <button type="button" class="nav-link dropdown-toggle" id="userMenuToggle" aria-expanded="false" aria-controls="userMenuPanel" aria-label="Account menu for {{ Auth::user()->name }}">
+        <img src="{{ Auth::user()->profile_image ?? asset('images/default_avatar/default-avatar.jpg') }}" class="user-image rounded-circle" alt="">
+        <span class="navbar-account-name d-none d-md-inline">
+            <span style="--member-color: {{ \App\Models\UserClass::getClassColor(Auth::user()->user_class) }}; color: var(--member-color)">
                 {{ Auth::user()->name }} {{ auth()->user()->seeder_icon }}
             </span>
             @if(Auth::user()->warned)
@@ -602,17 +348,18 @@
                 <i class="bi bi-star-fill text-warning" data-bs-toggle="tooltip" title="Donor"></i>
             @endif
         </span>
-    </a>
+        <i class="bi bi-chevron-down account-chevron" aria-hidden="true"></i>
+    </button>
 
-    <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end profile-dropdown">
+    <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end profile-dropdown" id="userMenuPanel" aria-labelledby="userMenuToggle">
         {{-- Cover: avatar, name, role, connection status --}}
         <li class="profile-cover">
             <img
                 class="profile-cover-avatar"
                 src="{{ Auth::user()->profile_image ?? asset('images/default_avatar/default-avatar.jpg') }}"
                 alt="{{ Auth::user()->name }}">
-            <div class="min-w-0">
-                <div class="profile-cover-name" style="color: {{ \App\Models\UserClass::getClassColor(Auth::user()->user_class) }}">
+            <div class="profile-cover-info">
+                <div class="profile-cover-name" style="--member-color: {{ \App\Models\UserClass::getClassColor(Auth::user()->user_class) }}; color: var(--member-color)">
                     {{ Auth::user()->name }}
                     @if(Auth::user()->donor === 'yes')
                         <i class="bi bi-star-fill text-warning" data-bs-toggle="tooltip" title="Donor"></i>
@@ -620,10 +367,6 @@
                 </div>
                 <div class="profile-cover-role">
                     <span>{{ Auth::user()->role_name }}</span>
-                    <!-- <span class="profile-status-dot {{ $connectable ? 'profile-status-ok' : 'profile-status-bad' }}" data-bs-toggle="tooltip" title="{{ $connectable ? 'Port open — you are connectable' : 'Port closed — not connectable' }}">
-                        <i class="bi {{ $connectable ? 'bi-check-circle-fill' : 'bi-x-circle-fill' }}"></i>
-                        {{ $connectable ? 'Connectable' : 'Not Connectable' }}
-                    </span> -->
                 </div>
                 <div class="profile-cover-member">
                     <i class="bi bi-calendar3"></i>
@@ -737,7 +480,7 @@
         </nav> <!--end::Header--> <!--begin::Sidebar-->
 
 {{-- Library offcanvas (mobile) --}}
-<div class="offcanvas offcanvas-start" tabindex="-1" id="libraryOffcanvas" aria-labelledby="libraryOffcanvasLabel" data-bs-theme="dark">
+<div class="offcanvas offcanvas-start" tabindex="-1" id="libraryOffcanvas" aria-labelledby="libraryOffcanvasLabel">
     <div class="offcanvas-header">
         <h5 class="offcanvas-title" id="libraryOffcanvasLabel">
             <i class="bi bi-collection-play me-1"></i>Library
@@ -753,31 +496,15 @@
             <i class="bi bi-tv"></i>
             <span>Online Series</span>
         </a>
+        <a href="{{ route('tv-calendar.index') }}" class="library-link">
+            <i class="bi bi-calendar3"></i>
+            <span>TV Calendar</span>
+        </a>
+        <a href="{{ route('rss.index') }}" class="library-link d-sm-none">
+            <i class="bi bi-rss" aria-hidden="true"></i>
+            <span>RSS feeds</span>
+        </a>
     </div>
 </div>
 
-<script>
-(function () {
-    const toggle = document.getElementById('userMenuToggle');
-    const menu   = toggle?.closest('.user-menu')?.querySelector('.profile-dropdown');
-    if (!toggle || !menu) return;
-
-    let openTimer, closeTimer;
-    const OPEN_DELAY  = 140;
-    const CLOSE_DELAY = 220;
-
-    function open()  { clearTimeout(closeTimer); openTimer  = setTimeout(() => menu.classList.add('show'), OPEN_DELAY); }
-    function close() { clearTimeout(openTimer);  closeTimer = setTimeout(() => menu.classList.remove('show'), CLOSE_DELAY); }
-
-    toggle.addEventListener('mouseenter', open);
-    toggle.addEventListener('mouseleave', close);
-    menu.addEventListener('mouseenter', () => clearTimeout(closeTimer));
-    menu.addEventListener('mouseleave', close);
-
-    toggle.addEventListener('click', e => { e.preventDefault(); menu.classList.toggle('show'); });
-
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') menu.classList.remove('show'); });
-    document.addEventListener('click', e => { if (!toggle.contains(e.target) && !menu.contains(e.target)) menu.classList.remove('show'); });
-})();
-</script>
-
+<script src="{{ asset('js/navigation.js') }}?v={{ filemtime(public_path('js/navigation.js')) }}" defer></script>

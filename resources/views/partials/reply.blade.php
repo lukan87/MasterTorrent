@@ -8,7 +8,7 @@
 
     <div class="reply-bubble glass" style="--accent: {{ $replyColor }}">
         <div class="reply-header">
-            <strong class="reply-username" style="color: {{ $replyColor }}">
+            <strong class="reply-username" style="--member-color: {{ $replyColor }}; color: var(--member-color)">
                 {{ $reply->user->name }}
             </strong>
 

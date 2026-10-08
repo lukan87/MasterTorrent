@@ -84,14 +84,14 @@
 
     background: linear-gradient(
         135deg,
-        rgba(14,21,33,.95),
-        rgba(10,15,27,.84)
+        var(--theme-surface, rgba(14,21,33,.95)),
+        var(--theme-surface, rgba(10,15,27,.84))
     );
 
     border: 1px solid var(--ui-border);
     border-radius: .85rem;
 
-    box-shadow: 0 14px 36px rgba(0, 0, 0, .28);
+    box-shadow: 0 14px 36px var(--theme-shadow, rgba(0, 0, 0, .28));
 
     backdrop-filter: blur(14px);
 }
@@ -104,15 +104,15 @@
 
     padding: 14px 16px;
 
-    background: rgba(45, 212, 191, .045);
+    background: var(--theme-teal-soft, rgba(45, 212, 191, .045));
 
     border-bottom: 1px solid var(--ui-border);
 }
 
 .similar-torrents-title {
-    color: #fff;
+    color: var(--theme-text, #fff);
 
-    font-size: 14px;
+    font-size: var(--site-font-body, 13px);
     font-weight: 700;
 }
 
@@ -123,9 +123,9 @@
 .similar-torrents-subtitle {
     margin-top: 3px;
 
-    color: rgba(255, 255, 255, .42);
+    color: var(--theme-muted, rgba(255, 255, 255, .42));
 
-    font-size: 12px;
+    font-size: var(--site-font-small, 13px);
 }
 
 /* Body */
@@ -154,9 +154,9 @@
 
     padding: 11px 13px;
 
-    background: rgba(6,10,19,.48);
+    background: var(--theme-surface, rgba(6,10,19,.48));
 
-    border: 1px solid rgba(255, 255, 255, .055);
+    border: 1px solid var(--theme-border, rgba(255, 255, 255, .055));
 
     border-radius: .6rem;
 
@@ -167,9 +167,9 @@
 }
 
 .similar-torrent-item:hover {
-    background: rgba(45, 212, 191, .045);
+    background: var(--theme-teal-soft, rgba(45, 212, 191, .045));
 
-    border-color: rgba(45, 212, 191, .22);
+    border-color: var(--theme-teal-border, rgba(45, 212, 191, .22));
 
     transform: translateX(2px);
 }
@@ -189,9 +189,9 @@
 
     overflow: hidden;
 
-    color: rgba(255, 255, 255, .86);
+    color: var(--theme-text, rgba(255, 255, 255, .86));
 
-    font-size: 14px;
+    font-size: var(--site-font-body, 13px);
     font-weight: 600;
 
     line-height: 1.4;
@@ -218,13 +218,13 @@
 
     margin-top: 5px;
 
-    color: rgba(255, 255, 255, .43);
+    color: var(--theme-muted, rgba(255, 255, 255, .43));
 
-    font-size: 12px;
+    font-size: var(--site-font-small, 13px);
 }
 
 .similar-torrent-stats strong {
-    color: rgba(255, 255, 255, .72);
+    color: var(--theme-muted, rgba(255, 255, 255, .72));
 }
 
 .similar-torrent-stats i {
@@ -234,11 +234,11 @@
 }
 
 .similar-seeders {
-    color: #6ee7b7;
+    color: var(--theme-teal-text, #6ee7b7);
 }
 
 .similar-leechers {
-    color: #fca5a5;
+    color: var(--theme-red-text, #fca5a5);
 }
 
 .similar-completed {
@@ -254,13 +254,13 @@
 
     border-radius: .45rem;
 
-    background: rgba(255,255,255,0.0245);
+    background: var(--theme-surface-alt, rgba(255,255,255,0.0245));
 
-    border: 1px solid rgba(255, 255, 255, .07);
+    border: 1px solid var(--theme-border, rgba(255, 255, 255, .07));
 
-    color: rgba(255, 255, 255, .62);
+    color: var(--theme-muted, rgba(255, 255, 255, .62));
 
-    font-size: 12px;
+    font-size: var(--site-font-small, 13px);
     font-weight: 600;
 
     white-space: nowrap;
@@ -293,7 +293,7 @@
     }
 
     .similar-torrent-name {
-        font-size: 13px;
+        font-size: var(--site-font-body, 13px);
 
         white-space: normal;
     }
@@ -301,11 +301,11 @@
     .similar-torrent-stats {
         gap: 8px;
 
-        font-size: 11px;
+        font-size: var(--site-font-small, 13px);
     }
 
     .similar-torrent-size {
-        font-size: 11px;
+        font-size: var(--site-font-small, 13px);
     }
 }
 </style>

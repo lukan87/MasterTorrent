@@ -9,10 +9,10 @@
     </div>
     <div class="torrent-screens-track" id="screenshots-{{ $torrent->id }}" tabindex="0" role="region" aria-label="Screenshot previews">
         @foreach ($torrent->images as $image)
-            <button type="button" data-image-src="{{ asset('storage/' . $image->path) }}" class="torrent-screen" data-image-lightbox
-               @if($image->fallback) data-image-fallback="{{ asset('storage/' . $image->fallback) }}" @endif
+            <button type="button" data-image-src="{{ $image->url }}" class="torrent-screen" data-image-lightbox
+               @if($image->fallback) data-image-fallback="{{ $image->fallback_url }}" @endif
                aria-label="Open screenshot {{ $loop->iteration }} of {{ $loop->count }}">
-                <img src="{{ asset('storage/' . $image->path) }}" loading="lazy" decoding="async" alt="Screenshot {{ $loop->iteration }}" width="160" height="90">
+                <img src="{{ $image->url }}" loading="lazy" decoding="async" alt="Screenshot {{ $loop->iteration }}" width="160" height="90">
                 <span class="torrent-screen-number">{{ $loop->iteration }}</span>
                 <span class="torrent-screen-expand" aria-hidden="true"><i class="bi bi-arrows-fullscreen"></i></span>
             </button>

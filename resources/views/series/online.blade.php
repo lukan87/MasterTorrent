@@ -332,54 +332,54 @@
 
 <style>
 /* FileIplay scoped layout - prevents collisions with parent page CSS */
-.episodes-wrapper{position:relative;z-index:1;width:100%;clear:both;padding:0 0 1rem;color:#dbe4ef;}
+.episodes-wrapper{position:relative;z-index:1;width:100%;clear:both;padding:0 0 1rem;color:var(--theme-text, #dbe4ef);}
 .episodes-wrapper *{box-sizing:border-box;}
-.episodes-wrapper .episodes-glass-panel{width:100%;background:linear-gradient(135deg,rgba(14,21,33,.96),rgba(10,15,27,.9));border:1px solid var(--ui-border,rgba(255,255,255,.08));border-radius:.75rem;padding:1rem;box-shadow:0 10px 28px rgba(0,0,0,.28);}
+.episodes-wrapper .episodes-glass-panel{width:100%;background:linear-gradient(135deg,var(--theme-surface, rgba(14,21,33,.96)),var(--theme-surface, rgba(10,15,27,.9)));border:1px solid var(--ui-border,var(--theme-border, rgba(255,255,255,.08)));border-radius:.75rem;padding:1rem;box-shadow:0 10px 28px var(--theme-shadow, rgba(0,0,0,.28));}
 .episodes-wrapper .row{align-items:stretch;}
-.episodes-wrapper .panel-box,.episodes-wrapper .preview-modern-card{width:100%;background:rgba(6,10,18,.58);border:1px solid rgba(255,255,255,.07);border-radius:.65rem;overflow:hidden;position:relative;}
+.episodes-wrapper .panel-box,.episodes-wrapper .preview-modern-card{width:100%;background:var(--theme-surface, rgba(6,10,18,.58));border:1px solid var(--theme-border, rgba(255,255,255,.07));border-radius:.65rem;overflow:hidden;position:relative;}
 .episodes-wrapper .panel-box{height:100%;}
-.episodes-wrapper .panel-header{display:flex;align-items:center;justify-content:space-between;gap:.65rem;padding:.75rem .85rem;min-height:48px;border-bottom:1px solid rgba(255,255,255,.07);}
-.episodes-wrapper .panel-header h5{margin:0;color:#fff;font-size:.9rem;font-weight:700;line-height:1.2;}
+.episodes-wrapper .panel-header{display:flex;align-items:center;justify-content:space-between;gap:.65rem;padding:.75rem .85rem;min-height:48px;border-bottom:1px solid var(--theme-border, rgba(255,255,255,.07));}
+.episodes-wrapper .panel-header h5{margin:0;color:var(--theme-text, #fff);font-size:var(--site-font-body, 13px);font-weight:700;line-height:1.2;}
 .episodes-wrapper .season-scroll{max-height:700px;overflow-y:auto;overflow-x:hidden;padding:.65rem;}
 .episodes-wrapper .season-card-wrapper{display:block;width:100%;margin:0 0 .45rem;}
-.episodes-wrapper .season-card{display:block;width:100%;height:auto;min-height:50px;margin:0;border:1px solid rgba(255,255,255,.07);border-radius:.5rem;background:rgba(255,255,255,0.0245);color:#dbe4ef;padding:.6rem .7rem;text-align:left;cursor:pointer;transition:background .18s ease,border-color .18s ease;}
-.episodes-wrapper .season-card:hover,.episodes-wrapper .season-card.active{background:rgba(20,184,166,.12);border-color:rgba(45,212,191,.42);color:#fff;}
+.episodes-wrapper .season-card{display:block;width:100%;height:auto;min-height:50px;margin:0;border:1px solid var(--theme-border, rgba(255,255,255,.07));border-radius:.5rem;background:var(--theme-surface-alt, rgba(255,255,255,0.0245));color:var(--theme-text, #dbe4ef);padding:.6rem .7rem;text-align:left;cursor:pointer;transition:background .18s ease,border-color .18s ease;}
+.episodes-wrapper .season-card:hover,.episodes-wrapper .season-card.active{background:var(--theme-teal-soft, rgba(20,184,166,.12));border-color:var(--theme-teal-border, rgba(45,212,191,.42));color: var(--theme-text, #fff);}
 .episodes-wrapper .season-card-content{display:flex;align-items:center;justify-content:space-between;gap:.5rem;width:100%;}
-.episodes-wrapper .season-label{display:block;font-size:.9rem;text-transform:uppercase;letter-spacing:.07em;color:#8fa0b5;line-height:1.2;}
-.episodes-wrapper .season-number{font-size:1.25rem;font-weight:700;color:#fff;line-height:1.2;}
-.episodes-wrapper .season-progress-modern{display:block;width:100%;height:3px;margin-top:.35rem;background:rgba(255,255,255,0.049);overflow:hidden;border-radius:3px;}
-.episodes-wrapper .season-progress-fill{display:block;width:0;height:100%;background:var(--ui-accent,#2dd4bf);transition:width .3s ease;}
-.episodes-wrapper .search-box-modern{display:flex;align-items:center;gap:.4rem;flex:0 1 180px;min-width:120px;height:32px;padding:.3rem .5rem;background:rgba(255,255,255,0.0245);border:1px solid rgba(255,255,255,.07);border-radius:.45rem;}
-.episodes-wrapper .search-box-modern i{flex:0 0 auto;color:var(--ui-accent,#2dd4bf);font-size:.88rem;}
-.episodes-wrapper .search-box-modern input{display:block;width:100%;min-width:0;height:100%;border:0!important;outline:0!important;background:transparent!important;color:#e8eef6!important;font-size:.76rem;line-height:1.2;box-shadow:none!important;}
-.episodes-wrapper .search-box-modern input::placeholder{color:#718096;opacity:1;}
+.episodes-wrapper .season-label{display:block;font-size:var(--site-font-body, 13px);text-transform:uppercase;letter-spacing:.07em;color:var(--theme-muted, #8fa0b5);line-height:1.2;}
+.episodes-wrapper .season-number{font-size:1.25rem;font-weight:700;color:var(--theme-text, #fff);line-height:1.2;}
+.episodes-wrapper .season-progress-modern{display:block;width:100%;height:3px;margin-top:.35rem;background:var(--theme-surface-alt, rgba(255,255,255,0.049));overflow:hidden;border-radius:3px;}
+.episodes-wrapper .season-progress-fill{display:block;width:0;height:100%;background:var(--theme-teal-action, var(--ui-accent,#2dd4bf));transition:width .3s ease;}
+.episodes-wrapper .search-box-modern{display:flex;align-items:center;gap:.4rem;flex:0 1 180px;min-width:120px;height:32px;padding:.3rem .5rem;background:var(--theme-surface-alt, rgba(255,255,255,0.0245));border:1px solid var(--theme-border, rgba(255,255,255,.07));border-radius:.45rem;}
+.episodes-wrapper .search-box-modern i{flex:0 0 auto;color:var(--ui-accent,var(--theme-teal-text, #2dd4bf));font-size:.88rem;}
+.episodes-wrapper .search-box-modern input{display:block;width:100%;min-width:0;height:100%;border:0!important;outline:0!important;background:transparent!important;color:var(--theme-text, #e8eef6)!important;font-size:var(--site-font-body, 13px);line-height:1.2;box-shadow:none!important;}
+.episodes-wrapper .search-box-modern input::placeholder{color:var(--theme-muted, #718096);opacity:1;}
 .episodes-wrapper .episodes-modern-list{max-height:700px;overflow-y:auto;overflow-x:hidden;padding:.65rem;}
-.episodes-wrapper .episode-card{display:flex;align-items:center;gap:.6rem;width:100%;min-height:52px;margin:0 0 .4rem;padding:.5rem;border:1px solid rgba(255,255,255,.06);border-radius:.5rem;background:rgba(255,255,255,0.0175);cursor:pointer;transition:background .18s ease,border-color .18s ease;}
-.episodes-wrapper .episode-card:hover,.episodes-wrapper .episode-card.active-episode{background:rgba(20,184,166,.09);border-color:rgba(45,212,191,.3);}
-.episodes-wrapper .episode-number-box{flex:0 0 38px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:.45rem;background:rgba(45,212,191,.12);border:1px solid rgba(45,212,191,.22);color:#7ee7da;font-weight:700;font-size:.95rem;}
+.episodes-wrapper .episode-card{display:flex;align-items:center;gap:.6rem;width:100%;min-height:52px;margin:0 0 .4rem;padding:.5rem;border:1px solid var(--theme-border, rgba(255,255,255,.06));border-radius:.5rem;background:var(--theme-surface-alt, rgba(255,255,255,0.0175));cursor:pointer;transition:background .18s ease,border-color .18s ease;}
+.episodes-wrapper .episode-card:hover,.episodes-wrapper .episode-card.active-episode{background:var(--theme-teal-soft, rgba(20,184,166,.09));border-color:var(--theme-teal-border, rgba(45,212,191,.3));}
+.episodes-wrapper .episode-number-box{flex:0 0 38px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:.45rem;background:var(--theme-teal-soft, rgba(45,212,191,.12));border:1px solid var(--theme-teal-border, rgba(45,212,191,.22));color:var(--theme-teal-text, #7ee7da);font-weight:700;font-size:var(--site-font-body, 13px);}
 .episodes-wrapper .episode-info{flex:1 1 auto;min-width:0;overflow:hidden;}
-.episodes-wrapper .episode-info h6{display:block;margin:0 0 .15rem!important;padding:0!important;color:#f2f6fb;font-size:.98rem;font-weight:600;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.episodes-wrapper .episode-info small{display:block;margin:0;padding:0;color:#8190a3;font-size:.98rem;line-height:1.25;}
+.episodes-wrapper .episode-info h6{display:block;margin:0 0 .15rem!important;padding:0!important;color:var(--theme-text, #f2f6fb);font-size:var(--site-font-body, 13px);font-weight:600;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.episodes-wrapper .episode-info small{display:block;margin:0;padding:0;color:var(--theme-muted, #8190a3);font-size:var(--site-font-body, 13px);line-height:1.25;}
 .episodes-wrapper .episode-status-modern{flex:0 0 auto;display:flex;align-items:center;}
-.episodes-wrapper .watched-badge{display:inline-flex;align-items:center;color:#34d399;font-size:1rem;line-height:1;}
+.episodes-wrapper .watched-badge{display:inline-flex;align-items:center;color:var(--theme-teal-text, #34d399);font-size:1rem;line-height:1;}
 .episodes-wrapper .preview-modern-card{height:100%;display:flex;flex-direction:column;}
 .episodes-wrapper .preview-image-wrapper{position:relative;width:100%;height:300px;flex:0 0 300px;overflow:hidden;}
 .episodes-wrapper .preview-modern-image{display:block;width:100%;height:100%;object-fit:cover;}
 .episodes-wrapper .preview-image-overlay{position:absolute;inset:0;pointer-events:none;background:linear-gradient(to top,rgba(5,7,13,.95),rgba(5,7,13,.05) 65%);}
 .episodes-wrapper .preview-modern-content{display:flex;flex:1 1 auto;flex-direction:column;padding:1rem;min-width:0;}
 .episodes-wrapper .preview-top{display:block;width:100%;}
-.episodes-wrapper .preview-badge{display:inline-block;padding:.25rem .5rem;border-radius:.35rem;background:rgba(45,212,191,.1);border:1px solid rgba(45,212,191,.18);color:#6ee7d8;font-size:.6rem;letter-spacing:.08em;line-height:1.2;margin-bottom:.5rem;}
-.episodes-wrapper #previewTitle{display:block;width:100%;margin:0 0 .55rem!important;padding:0!important;color:#fff;font-size:1.3rem;font-weight:700;line-height:1.25;overflow-wrap:anywhere;}
-.episodes-wrapper .preview-description{display:block;width:100%;margin:0;color:#aeb9c8;font-size:.95rem;line-height:1.55;min-height:70px;overflow-wrap:anywhere;}
+.episodes-wrapper .preview-badge{display:inline-block;padding:.25rem .5rem;border-radius:.35rem;background:var(--theme-teal-soft, rgba(45,212,191,.1));border:1px solid var(--theme-teal-border, rgba(45,212,191,.18));color:var(--theme-teal-text, #6ee7d8);font-size:var(--site-font-small, 13px);letter-spacing:.08em;line-height:1.2;margin-bottom:.5rem;}
+.episodes-wrapper #previewTitle{display:block;width:100%;margin:0 0 .55rem!important;padding:0!important;color:var(--theme-text, #fff);font-size:1.3rem;font-weight:700;line-height:1.25;overflow-wrap:anywhere;}
+.episodes-wrapper .preview-description{display:block;width:100%;margin:0;color:var(--theme-muted, #aeb9c8);font-size:var(--site-font-body, 13px);line-height:1.55;min-height:70px;overflow-wrap:anywhere;}
 .episodes-wrapper .preview-actions{display:flex;align-items:stretch;gap:.5rem;width:100%;margin-top:auto;padding-top:.85rem;}
-.episodes-wrapper .play-btn-modern{flex:1 1 auto;min-width:0;border:1px solid rgba(45,212,191,.3);border-radius:.5rem;padding:.55rem .75rem;font-size:.78rem;font-weight:600;line-height:1.2;background:rgba(20,184,166,.12);color:#7ee7da;transition:background .18s ease,border-color .18s ease;}
-.episodes-wrapper .play-btn-modern:hover{background:rgba(20,184,166,.2);border-color:rgba(45,212,191,.45);color:#fff;}
-.episodes-wrapper .watched-btn-modern{flex:0 0 44px;width:44px;height:auto;min-height:38px;padding:.45rem;border-radius:.5rem;background:rgba(255,255,255,0.0245);border:1px solid rgba(255,255,255,.08);color:#cbd5e1;}
-.episodes-wrapper .vip-lock{flex:1 1 auto;min-width:0;display:flex;align-items:center;justify-content:center;gap:.4rem;padding:.55rem;border-radius:.5rem;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.18);color:#fbbf24;font-size:.76rem;font-weight:700;line-height:1.2;}
-.modern-modal{position:relative;z-index:1060;background:#070c15;border:1px solid rgba(255,255,255,.09);border-radius:.7rem;overflow:hidden;}
-.modern-modal-header{position:relative;z-index:1062;background:rgba(255,255,255,0.0245);border-bottom:1px solid rgba(255,255,255,.07);color:#fff;}
+.episodes-wrapper .play-btn-modern{flex:1 1 auto;min-width:0;border:1px solid var(--theme-teal-border, rgba(45,212,191,.3));border-radius:.5rem;padding:.55rem .75rem;font-size:var(--site-font-body, 13px);font-weight:600;line-height:1.2;background:var(--theme-teal-soft, rgba(20,184,166,.12));color:var(--theme-teal-text, #7ee7da);transition:background .18s ease,border-color .18s ease;}
+.episodes-wrapper .play-btn-modern:hover{background:var(--theme-teal-soft, rgba(20,184,166,.2));border-color:var(--theme-teal-border, rgba(45,212,191,.45));color: var(--theme-text, #fff);}
+.episodes-wrapper .watched-btn-modern{flex:0 0 44px;width:44px;height:auto;min-height:38px;padding:.45rem;border-radius:.5rem;background:var(--theme-surface-alt, rgba(255,255,255,0.0245));border:1px solid var(--theme-border, rgba(255,255,255,.08));color:var(--theme-text, #cbd5e1);}
+.episodes-wrapper .vip-lock{flex:1 1 auto;min-width:0;display:flex;align-items:center;justify-content:center;gap:.4rem;padding:.55rem;border-radius:.5rem;background:var(--theme-amber-soft, rgba(245,158,11,.08));border:1px solid var(--theme-amber-border, rgba(245,158,11,.18));color:var(--theme-amber-text, #fbbf24);font-size:var(--site-font-body, 13px);font-weight:700;line-height:1.2;}
+.modern-modal{position:relative;z-index:1060;background:var(--theme-surface, #070c15);border:1px solid var(--theme-border, rgba(255,255,255,.09));border-radius:.7rem;overflow:hidden;}
+.modern-modal-header{position:relative;z-index:1062;background:var(--theme-surface-alt, rgba(255,255,255,0.0245));border-bottom:1px solid var(--theme-border, rgba(255,255,255,.07));color:var(--theme-text, #fff);}
 .modern-modal-header .btn-close{position:relative;z-index:1063;pointer-events:auto;}
-.watch-frame{display:block;position:relative;z-index:1;width:100%;height:75vh;border:0;background:#000;pointer-events:auto;}
+.watch-frame{display:block;position:relative;z-index:1;width:100%;height:75vh;border:0;background:var(--theme-surface-alt, #000);pointer-events:auto;}
 .modal-backdrop{z-index:1050;}
 #watchModal{z-index:1060;}
 @media(max-width:1199.98px){

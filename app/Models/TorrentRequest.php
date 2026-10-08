@@ -28,7 +28,7 @@ class TorrentRequest extends Model
 
     public static function canBeCreatedBy(?User $user): bool
     {
-        return $user && $user->user_class >= UserClass::ELITE_USER;
+        return $user && $user->user_class >= UserClass::USER;
     }
 
     public static function canBeFilledBy(?User $user): bool

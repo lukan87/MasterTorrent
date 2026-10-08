@@ -5,92 +5,59 @@ namespace App\Http\Controllers;
 use App\Models\ForumCategory;
 use App\Models\ForumPost;
 use App\Models\ForumTopic;
-use App\Models\ForumTopicView;
 use App\Models\User;
-use App\Models\UserClass;
 use App\Notifications\ForumMentionNotification;
 use App\Notifications\ForumReplyNotification;
+use App\Services\ForumAccess;
+use App\Services\ForumReadService;
+use App\Services\ForumRenderer;
+use App\Services\ForumService;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class ForumController extends Controller
 {
+    public function __construct(private ForumService $forumService) {}
+
+    private function verifyTopic(ForumCategory $category, ForumTopic $topic): void
+    {
+        ForumAccess::authorizeView($category);
+        abort_unless($topic->category_id === $category->id, 404);
+    }
+
+    private function verifyPost(ForumCategory $category, ForumTopic $topic, ForumPost $post): void
+    {
+        $this->verifyTopic($category, $topic);
+        abort_unless($post->topic_id === $topic->id, 404);
+    }
+
     public function index()
     {
-        $categories = ForumCategory::where('is_private', false)
-            ->with('latestTopic.lastPost.user')
-            ->withCount('topics')
-            ->orderBy('position')
-            ->get();
-
-        $deletedCategories = collect();
-
-        if (auth()->check() && auth()->user()->user_class > UserClass::ADMIN) {
-            $deletedCategories = ForumCategory::onlyTrashed()
-                ->withCount('topics')
-                ->orderByDesc('deleted_at')
-                ->get();
-        }
+        $staff = ForumAccess::allows(auth()->user(), 'manage_topics');
+        $categories = $this->forumService->categories(includePrivate: $staff);
+        $deletedCategories = ForumAccess::allows(auth()->user(), 'delete_categories')
+            ? $this->forumService->categories(deleted: true) : collect();
 
         return view('forum.index', compact('categories', 'deletedCategories'));
     }
 
     public function category(Request $request, ForumCategory $category)
     {
-        if ($category->is_private) {
-            abort(403);
-        }
-
+        ForumAccess::authorizeView($category);
         $sort = $request->query('sort', 'latest');
-
-        $allowedSorts = ['latest', 'created', 'views', 'replies'];
-
-        if (! in_array($sort, $allowedSorts, true)) {
+        if (! is_string($sort) || ! in_array($sort, ['latest', 'created', 'views', 'replies'], true)) {
             $sort = 'latest';
         }
-
-        $topics = $category->topics()
-            ->with([
-                'user',
-                'lastPost.user',
-            ])
-            ->withCount('posts')
-            ->orderByDesc('is_pinned');
-
-        switch ($sort) {
-            case 'created':
-                $topics->latest('created_at');
-                break;
-            case 'views':
-                $topics->orderByDesc('views');
-                break;
-            case 'replies':
-                $topics->orderByDesc('posts_count');
-                break;
-            default:
-                $topics->latest('updated_at');
-                break;
-        }
-
-        $topics = $topics->paginate(25);
-
-        // Count unread replies for the whole page in one query.
+        $topics = $this->forumService->categoryTopics($category, $sort, max(1, Paginator::resolveCurrentPage()));
         $unreadCounts = auth()->check()
-            ? DB::table('forum_posts')
-                ->join('forum_topic_views', 'forum_topic_views.topic_id', '=', 'forum_posts.topic_id')
-                ->where('forum_topic_views.user_id', auth()->id())
-                ->whereIn('forum_posts.topic_id', $topics->pluck('id'))
-                ->whereColumn('forum_posts.created_at', '>', 'forum_topic_views.updated_at')
-                ->where('forum_posts.user_id', '!=', auth()->id())
-                ->groupBy('forum_posts.topic_id')
-                ->selectRaw('forum_posts.topic_id, COUNT(*) as unread_count')
-                ->pluck('unread_count', 'topic_id')
+            ? (new ForumReadService)->unread(auth()->id())->whereIn('topic_id', $topics->pluck('id'))
+                ->selectRaw('topic_id, COUNT(*) as unread_count')->groupBy('topic_id')->pluck('unread_count', 'topic_id')
             : collect();
         foreach ($topics as $topic) {
             $topic->new_replies_count = (int) $unreadCounts->get($topic->id, 0);
         }
-
         $topics->appends(['sort' => $sort]);
 
         return view('forum.category', compact('category', 'topics', 'sort'));
@@ -98,719 +65,248 @@ class ForumController extends Controller
 
     public function create(ForumCategory $category)
     {
-        if ($category->is_private) {
-            abort(403);
-        }
-
-        if (auth()->user()->forumblock) {
-            abort(403, 'You are not allowed to post in the forum.');
-        }
+        ForumAccess::authorizeView($category);
+        ForumAccess::authorizeParticipation();
+        ForumAccess::authorize('create_topics');
 
         return view('forum.create', compact('category'));
     }
 
     public function store(Request $request, ForumCategory $category)
     {
-        if ($category->is_private) {
-            abort(403);
-        }
-
-        if (auth()->user()->forumblock) {
-            abort(403, 'You are not allowed to post in the forum.');
-        }
-
+        ForumAccess::authorizeView($category);
+        ForumAccess::authorizeParticipation();
+        ForumAccess::authorize('create_topics');
         $validated = $request->validate([
-            'title' => [
-                'required',
-                'string',
-                'min:3',
-                'max:255',
-            ],
-            'body' => [
-                'required',
-                'string',
-                'min:3',
-                'max:10000',
-            ],
+            'title' => ['required', 'string', 'min:3', 'max:255'],
+            'body' => ['required', 'string', 'min:3', 'max:10000'],
         ]);
+        $topic = DB::transaction(function () use ($category, $validated) {
+            // Serialize topic creation within this category, including slug allocation.
+            $currentCategory = ForumCategory::whereKey($category->id)->lockForUpdate()->firstOrFail();
+            ForumAccess::authorizeView($currentCategory);
+            $base = substr(Str::slug($validated['title']) ?: 'discussion', 0, 230);
+            if ($base === 'create') {
+                $base = 'create-topic';
+            }
+            $slug = $base;
+            for ($counter = 2; ForumTopic::where('category_id', $category->id)->where('slug', $slug)->exists(); $counter++) {
+                $slug = $base.'-'.$counter;
+            }
+            $topic = ForumTopic::create([
+                'category_id' => $category->id, 'user_id' => auth()->id(),
+                'title' => $validated['title'], 'slug' => $slug,
+            ]);
+            $post = $topic->posts()->create(['user_id' => auth()->id(), 'body' => $validated['body']]);
+            $topic->update(['last_post_id' => $post->id]);
+            DB::afterCommit(fn () => $this->notifyParticipants($post, false));
 
-        $baseSlug = Str::slug($validated['title']) ?: 'discussion';
-        $slug = $baseSlug;
-        $counter = 2;
+            return $topic;
+        }, 3);
 
-        while (ForumTopic::where('category_id', $category->id)->where('slug', $slug)->exists()) {
-            $slug = $baseSlug.'-'.$counter;
-            $counter++;
-        }
-
-        $topic = ForumTopic::create([
-            'category_id' => $category->id,
-            'user_id' => auth()->id(),
-            'title' => $validated['title'],
-            'slug' => $slug,
-        ]);
-
-        $post = ForumPost::create([
-            'topic_id' => $topic->id,
-            'user_id' => auth()->id(),
-            'body' => $validated['body'],
-        ]);
-
-        $topic->update([
-            'last_post_id' => $post->id,
-        ]);
-
-        $this->notifyMentionedUsers($post);
-
-        return redirect()
-            ->route('forum.topic', [
-                'category' => $category->slug,
-                'topic' => $topic->slug,
-            ])
-            ->with('success', 'Topic created successfully.');
+        return redirect()->route('forum.topic', ['category' => $category->slug, 'topic' => $topic->slug])
+            ->with('success', 'Topic created successfully.')->with('forum_draft_saved', 'create:'.$category->id);
     }
 
     public function topic(Request $request, ForumCategory $category, ForumTopic $topic)
     {
-        abort_if($category->is_private, 403);
+        $this->verifyTopic($category, $topic);
+        $request->validate(['post' => ['nullable', 'integer', 'min:1'], 'unread' => ['nullable', 'boolean']]);
+        if ($request->boolean('unread')) {
+            abort_unless(auth()->check(), 403);
+            $targetId = (new ForumReadService)->unread(auth()->id())->where('topic_id', $topic->id)
+                ->oldest('created_at')->oldest('id')->value('id');
+            if ($targetId) {
+                return redirect()->route('forum.topic', ['category' => $category->slug, 'topic' => $topic->slug, 'post' => $targetId]);
+            }
 
-        if ($topic->category_id !== $category->id) {
-            abort(404);
+            return redirect()->route('forum.topic', ['category' => $category->slug, 'topic' => $topic->slug])
+                ->with('success', 'You are up to date with this topic.');
         }
+        if ($request->filled('post')) {
+            $firstPostId = $topic->posts()->oldest('id')->value('id');
+            $target = $topic->posts()->findOrFail($request->query('post'));
+            $page = 1;
+            if ($target->id !== $firstPostId) {
+                $newer = $topic->posts()->where('id', '!=', $firstPostId)->where(function ($query) use ($target) {
+                    $query->where('created_at', '>', $target->created_at)->orWhere(function ($query) use ($target) {
+                        $query->where('created_at', $target->created_at)->where('id', '>', $target->id);
+                    });
+                })->count();
+                $page = intdiv($newer, 15) + 1;
+            }
+            session()->reflash();
 
+            return redirect()->route('forum.topic', ['category' => $category->slug, 'topic' => $topic->slug, 'page' => $page])
+                ->withFragment('post-'.$target->id);
+        }
         $viewKey = 'forum_topic_view_'.$topic->id;
-        $lastView = (int) session($viewKey, 0);
-        if (now()->timestamp - $lastView > 86400) {
+        if (now()->timestamp - (int) session($viewKey, 0) > 86400) {
             ForumTopic::withoutTimestamps(fn () => $topic->increment('views'));
             session([$viewKey => now()->timestamp]);
         }
-
-        $topic->load('user');
-
-        if (auth()->check()) {
-
-            $topicView = ForumTopicView::firstOrNew([
-                'user_id' => auth()->id(),
-                'topic_id' => $topic->id,
-            ]);
-
-            $topicView->touch();
-
-        }
-        $firstPost = $topic->posts()
-            ->with(['user' => fn ($q) => $q->withCount('forumPosts'), 'likes'])
-            ->oldest('id')
-            ->first();
-
-        // Resolve a post permalink to its page in the newest-first reply list.
-        if ($request->filled('post')) {
-            $request->validate(['post' => ['required', 'integer', 'min:1']]);
-            $target = $topic->posts()->findOrFail($request->query('post'));
-            $page = 1;
-            if ($target->id !== $firstPost?->id) {
-                $newer = $topic->posts()->where('id', '!=', $firstPost?->id)
-                    ->where(function ($q) use ($target) {
-                        $q->where('created_at', '>', $target->created_at)
-                            ->orWhere(function ($q) use ($target) {
-                                $q->where('created_at', $target->created_at)->where('id', '>', $target->id);
-                            });
-                    })->count();
-                $page = intdiv($newer, 15) + 1;
-            }
-
-            return redirect()->route('forum.topic', [
-                'category' => $category->slug, 'topic' => $topic->slug, 'page' => $page,
-            ])->withFragment('post-'.$target->id);
-        }
-
-        $replies = $topic->posts()
-            ->with(['user' => fn ($q) => $q->withCount('forumPosts'), 'likes'])
-            ->when($firstPost, function ($query) use ($firstPost) {
-                $query->where('id', '!=', $firstPost->id);
-            })
-            ->orderByDesc('created_at')
-            ->orderByDesc('id')
-            ->paginate(15);
-
-        // With newest-first replies, the latest post is always on page 1.
+        $postData = $this->forumService->topicPosts($topic, max(1, Paginator::resolveCurrentPage()));
+        $firstPost = $postData['firstPost'];
+        $topic->setRelation('user', $postData['author']);
+        $replies = $postData['replies'];
         $latestReplyPage = $replies->total() > 0 ? 1 : 0;
-
-        $isFollowing = false;
-
+        $displayed = collect([$firstPost])->concat($replies->getCollection())->filter();
+        $renderer = new ForumRenderer;
+        $renderer->prepareMentions($displayed);
+        $isFollowing = auth()->check() && $topic->subscriptions()->where('user_id', auth()->id())->exists();
+        // Render before marking posts read: a failed response must not consume unread posts.
+        $html = view('forum.topic', compact('category', 'topic', 'firstPost', 'replies', 'isFollowing', 'latestReplyPage', 'renderer'))->render();
         if (auth()->check()) {
-            $isFollowing = $topic->subscriptions()
-                ->where('user_id', auth()->id())
-                ->exists();
+            (new ForumReadService)->markDisplayed(auth()->id(), $displayed);
         }
 
-        return view('forum.topic', compact(
-            'category',
-            'topic',
-            'firstPost',
-            'replies',
-            'isFollowing',
-            'latestReplyPage'
-        ));
+        return response($html);
     }
 
-    public function reply(
-        Request $request,
-        ForumCategory $category,
-        ForumTopic $topic
-    ) {
-        abort_if($category->is_private, 403);
+    public function preview(Request $request)
+    {
+        ForumAccess::authorizeParticipation();
+        $validated = $request->validate(['body' => ['nullable', 'string', 'max:10000']]);
+        $renderer = new ForumRenderer;
+        $renderer->prepareMentions(collect([(object) ['body' => $validated['body'] ?? '']]));
 
-        if ($topic->category_id !== $category->id) {
-            abort(404);
-        }
+        return response()->json(['html' => $renderer->render($validated['body'] ?? '')]);
+    }
 
-        if ($topic->is_locked) {
-            return back()->with('error', 'This topic is locked.');
-        }
+    public function reply(Request $request, ForumCategory $category, ForumTopic $topic)
+    {
+        $this->verifyTopic($category, $topic);
+        ForumAccess::authorizeParticipation();
+        ForumAccess::authorize('reply');
+        $validated = $request->validate(['body' => ['required', 'string', 'min:3', 'max:10000']]);
+        $post = DB::transaction(function () use ($topic, $validated) {
+            $locked = ForumTopic::whereKey($topic->id)->lockForUpdate()->firstOrFail();
+            abort_if($locked->is_locked, 403, 'This topic is locked.');
+            $post = $locked->posts()->create(['user_id' => auth()->id(), 'body' => $validated['body']]);
+            $locked->update(['last_post_id' => $post->id]);
+            DB::afterCommit(fn () => $this->notifyParticipants($post, true));
 
-        if (auth()->user()->forumblock) {
-            abort(403, 'You are not allowed to post in the forum.');
-        }
+            return $post;
+        }, 3);
 
-        $validated = $request->validate([
-            'body' => [
-                'required',
-                'string',
-                'min:3',
-                'max:10000',
-            ],
-        ]);
+        return redirect()->route('forum.topic', ['category' => $category->slug, 'topic' => $topic->slug, 'post' => $post->id])
+            ->with('success', 'Reply posted successfully.')->with('forum_draft_saved', 'reply:'.$topic->id);
+    }
 
-        $post = ForumPost::create([
-            'topic_id' => $topic->id,
-            'user_id' => auth()->id(),
-            'body' => $validated['body'],
-        ]);
+    public function toggleLock(ForumCategory $category, ForumTopic $topic)
+    {
+        return $this->toggle($category, $topic, 'is_locked', 'Topic lock updated.');
+    }
 
-        $topic->update([
-            'last_post_id' => $post->id,
-        ]);
+    public function togglePin(ForumCategory $category, ForumTopic $topic)
+    {
+        return $this->toggle($category, $topic, 'is_pinned', 'Topic pin updated.');
+    }
 
-        $this->notifyMentionedUsers($post);
+    private function toggle(ForumCategory $category, ForumTopic $topic, string $field, string $message)
+    {
+        $this->verifyTopic($category, $topic);
+        ForumAccess::authorize('manage_topics');
+        DB::transaction(function () use ($topic, $field) {
+            $current = ForumTopic::whereKey($topic->id)->lockForUpdate()->firstOrFail();
+            $current->update([$field => ! $current->{$field}]);
+        }, 3);
 
-        /*
-        |--------------------------------------------------------------------------
-        | Notify topic owner
-        |--------------------------------------------------------------------------
-        |
-        | Do not notify the user if they are replying to their own topic.
-        |
-        */
+        return back()->with('success', $message);
+    }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Notify topic owner and followers
-        |--------------------------------------------------------------------------
-        |
-        | The person who made the reply is never notified.
-        | The topic owner is notified automatically.
-        | Followers are also notified.
-        | Duplicate notifications are prevented.
-        |
-        */
+    public function deleteTopic(ForumCategory $category, ForumTopic $topic)
+    {
+        $this->verifyTopic($category, $topic);
+        ForumAccess::authorize('delete_topics');
+        DB::transaction(fn () => ForumTopic::whereKey($topic->id)->lockForUpdate()->firstOrFail()->delete(), 3);
 
-        $topic->loadMissing([
-            'user',
-            'subscriptions.user',
-        ]);
+        return redirect()->route('forum.category', $category->slug)->with('success', 'Topic deleted successfully.');
+    }
 
-        $notifiedUserIds = [];
+    private function authorizeEdit(ForumPost $post): void
+    {
+        ForumAccess::authorizeParticipation();
+        abort_unless($post->user_id === auth()->id() || ForumAccess::allows(auth()->user(), 'edit_posts'), 403);
+    }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Notify topic owner
-        |--------------------------------------------------------------------------
-        */
+    public function editPost(ForumCategory $category, ForumTopic $topic, ForumPost $post)
+    {
+        $this->verifyPost($category, $topic, $post);
+        $this->authorizeEdit($post);
 
-        if (
-            $topic->user &&
-            $topic->user_id !== auth()->id()
-        ) {
+        return view('forum.edit-post', compact('category', 'topic', 'post'));
+    }
 
-            $topic->user->notify(
-                new ForumReplyNotification($post)
-            );
+    public function updatePost(Request $request, ForumCategory $category, ForumTopic $topic, ForumPost $post)
+    {
+        $this->verifyPost($category, $topic, $post);
+        $this->authorizeEdit($post);
+        $validated = $request->validate(['body' => ['required', 'string', 'min:3', 'max:10000']]);
+        $post->update(['body' => $validated['body'], 'edited_at' => now()]);
 
-            $notifiedUserIds[] = $topic->user_id;
-        }
+        return redirect()->route('forum.topic', ['category' => $category->slug, 'topic' => $topic->slug, 'post' => $post->id])
+            ->with('success', 'Post updated successfully.')->with('forum_draft_saved', 'edit:'.$post->id);
+    }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Notify topic followers
-        |--------------------------------------------------------------------------
-        */
-
-        foreach ($topic->subscriptions as $subscription) {
-
-            $subscriber = $subscription->user;
-
-            if (! $subscriber) {
-                continue;
+    public function deletePost(ForumCategory $category, ForumTopic $topic, ForumPost $post)
+    {
+        $this->verifyPost($category, $topic, $post);
+        ForumAccess::authorize('delete_posts');
+        $deleted = DB::transaction(function () use ($post, $topic) {
+            $current = ForumTopic::whereKey($topic->id)->lockForUpdate()->firstOrFail();
+            if ($post->id === $current->posts()->oldest('id')->value('id')) {
+                return false;
             }
-
-            /*
-             * Don't notify the person who made the reply.
-             */
-            if ($subscriber->id === auth()->id()) {
-                continue;
-            }
-
-            /*
-             * Don't notify the topic owner twice.
-             */
-            if (in_array($subscriber->id, $notifiedUserIds)) {
-                continue;
-            }
-
-            $subscriber->notify(
-                new ForumReplyNotification($post)
-            );
-
-            $notifiedUserIds[] = $subscriber->id;
-        }
-
-        return redirect()
-            ->route('forum.topic', [
-                'category' => $category->slug,
-                'topic' => $topic->slug,
-            ])
-            ->with('success', 'Reply posted successfully.');
-    }
-
-    public function toggleLock(
-        ForumCategory $category,
-        ForumTopic $topic
-    ) {
-        /*
-        |--------------------------------------------------------------------------
-        | STAFF ONLY
-        |--------------------------------------------------------------------------
-        */
-
-        if (auth()->user()->user_class <= UserClass::MODERATOR) {
-            abort(403, 'You are not allowed to lock or unlock topics.');
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | VERIFY TOPIC BELONGS TO CATEGORY
-        |--------------------------------------------------------------------------
-        */
-
-        abort_if($category->is_private, 403);
-
-        if ($topic->category_id !== $category->id) {
-            abort(404);
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | TOGGLE LOCK
-        |--------------------------------------------------------------------------
-        */
-
-        $topic->update([
-            'is_locked' => ! $topic->is_locked,
-        ]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | MESSAGE
-        |--------------------------------------------------------------------------
-        */
-
-        return back()->with(
-            'success',
-            $topic->is_locked
-                ? 'Topic locked successfully.'
-                : 'Topic unlocked successfully.'
-        );
-    }
-
-    public function togglePin(
-        ForumCategory $category,
-        ForumTopic $topic
-    ) {
-        /*
-        |--------------------------------------------------------------------------
-        | STAFF ONLY
-        |--------------------------------------------------------------------------
-        */
-
-        if (auth()->user()->user_class <= UserClass::MODERATOR) {
-            abort(403, 'You are not allowed to pin or unpin topics.');
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | VERIFY TOPIC BELONGS TO CATEGORY
-        |--------------------------------------------------------------------------
-        */
-
-        abort_if($category->is_private, 403);
-
-        if ($topic->category_id !== $category->id) {
-            abort(404);
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | TOGGLE PIN
-        |--------------------------------------------------------------------------
-        */
-
-        $topic->update([
-            'is_pinned' => ! $topic->is_pinned,
-        ]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | MESSAGE
-        |--------------------------------------------------------------------------
-        */
-
-        return back()->with(
-            'success',
-            $topic->is_pinned
-                ? 'Topic pinned successfully.'
-                : 'Topic unpinned successfully.'
-        );
-    }
-
-    public function deleteTopic(
-        ForumCategory $category,
-        ForumTopic $topic
-    ) {
-        /*
-        |--------------------------------------------------------------------------
-        | STAFF ONLY
-        |--------------------------------------------------------------------------
-        */
-
-        if (auth()->user()->user_class <= UserClass::MODERATOR) {
-            abort(403, 'You are not allowed to delete topics.');
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | VERIFY TOPIC BELONGS TO CATEGORY
-        |--------------------------------------------------------------------------
-        */
-
-        abort_if($category->is_private, 403);
-
-        if ($topic->category_id !== $category->id) {
-            abort(404);
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | DELETE TOPIC
-        |--------------------------------------------------------------------------
-        */
-
-        $topic->delete();
-
-        /*
-        |--------------------------------------------------------------------------
-        | REDIRECT
-        |--------------------------------------------------------------------------
-        */
-
-        return redirect()
-            ->route('forum.category', [
-                'category' => $category->slug,
-            ])
-            ->with('success', 'Topic deleted successfully.');
-    }
-
-    public function editPost(
-        ForumCategory $category,
-        ForumTopic $topic,
-        ForumPost $post
-    ) {
-        // Make sure the topic belongs to this category
-        abort_if($category->is_private, 403);
-
-        if ($topic->category_id !== $category->id) {
-            abort(404);
-        }
-
-        // Make sure the post belongs to this topic
-        if ($post->topic_id !== $topic->id) {
-            abort(404);
-        }
-
-        $user = auth()->user();
-
-        // Author can edit their own post.
-        // Staff above Moderator can edit any post.
-        $canEdit = (
-            $post->user_id === $user->id
-            || $user->user_class > UserClass::MODERATOR
-        );
-
-        if (! $canEdit) {
-            abort(403, 'You are not allowed to edit this post.');
-        }
-
-        return view('forum.edit-post', compact(
-            'category',
-            'topic',
-            'post'
-        ));
-    }
-
-    public function updatePost(
-        Request $request,
-        ForumCategory $category,
-        ForumTopic $topic,
-        ForumPost $post
-    ) {
-        // Make sure the topic belongs to this category
-        abort_if($category->is_private, 403);
-
-        if ($topic->category_id !== $category->id) {
-            abort(404);
-        }
-
-        // Make sure the post belongs to this topic
-        if ($post->topic_id !== $topic->id) {
-            abort(404);
-        }
-
-        $user = auth()->user();
-
-        // Author can edit their own post.
-        // Staff above Moderator can edit any post.
-        $canEdit = (
-            $post->user_id === $user->id
-            || $user->user_class > UserClass::MODERATOR
-        );
-
-        if (! $canEdit) {
-            abort(403, 'You are not allowed to edit this post.');
-        }
-
-        $validated = $request->validate([
-            'body' => [
-                'required',
-                'string',
-                'min:1',
-                'max:10000',
-            ],
-        ]);
-
-        $post->update([
-            'body' => $validated['body'],
-            'edited_at' => now(),
-        ]);
-
-        return redirect()
-            ->route('forum.topic', [
-                'category' => $category->slug,
-                'topic' => $topic->slug,
-                'post' => $post->id,
-            ])
-            ->with('success', 'Post updated successfully.');
-    }
-
-    public function deletePost(
-        ForumCategory $category,
-        ForumTopic $topic,
-        ForumPost $post
-    ) {
-        $user = auth()->user();
-
-        /*
-        |--------------------------------------------------------------------------
-        | STAFF ONLY
-        |--------------------------------------------------------------------------
-        */
-
-        if ($user->user_class <= UserClass::MODERATOR) {
-            abort(403, 'You are not allowed to delete forum posts.');
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | VERIFY CATEGORY
-        |--------------------------------------------------------------------------
-        */
-
-        abort_if($category->is_private, 403);
-
-        if ($topic->category_id !== $category->id) {
-            abort(404);
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | VERIFY POST BELONGS TO TOPIC
-        |--------------------------------------------------------------------------
-        */
-
-        if ($post->topic_id !== $topic->id) {
-            abort(404);
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | NEVER DELETE ORIGINAL POST
-        |--------------------------------------------------------------------------
-        */
-
-        $originalPostId = $topic->posts()
-            ->orderBy('id')
-            ->value('id');
-
-        if ($post->id === $originalPostId) {
-            return back()->with(
-                'error',
-                'The main post cannot be deleted. Delete the topic instead.'
-            );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | DELETE POST + UPDATE TOPIC
-        |--------------------------------------------------------------------------
-        */
-
-        DB::transaction(function () use ($post, $topic) {
-
-            $wasLastPost = $topic->last_post_id === $post->id;
-
             $post->delete();
+            $current->update(['last_post_id' => $current->posts()->latest('id')->value('id')]);
 
-            if ($wasLastPost) {
+            return true;
+        }, 3);
+        if (! $deleted) {
+            return back()->with('error', 'The main post cannot be deleted. Delete the topic instead.');
+        }
 
-                $newLastPost = $topic->posts()
-                    ->latest('id')
-                    ->first();
-
-                $topic->update([
-                    'last_post_id' => $newLastPost?->id,
-                ]);
-            }
-        });
-
-        return redirect()
-            ->route('forum.topic', [
-                'category' => $category->slug,
-                'topic' => $topic->slug,
-            ])
+        return redirect()->route('forum.topic', ['category' => $category->slug, 'topic' => $topic->slug])
             ->with('success', 'Forum post deleted successfully.');
     }
 
-    private function notifyMentionedUsers(ForumPost $post): void
+    private function notifyParticipants(ForumPost $post, bool $reply): void
     {
-        /*
-        |--------------------------------------------------------------------------
-        | Find @username mentions
-        |--------------------------------------------------------------------------
-        */
-
-        preg_match_all(
-            '/@([A-Za-z0-9_]+)/',
-            $post->body,
-            $matches
-        );
-
-        if (empty($matches[1])) {
-            return;
+        $text = preg_replace('/\[code(?:=\w+)?\].*?\[\/code\]/is', '', $post->body);
+        preg_match_all('/(?<![\pL\pN_@])@(?:"([^"\r\n]{1,100})"|([\pL\pN_][\pL\pN_.-]{0,99}))/u', $text, $matches, PREG_SET_ORDER);
+        $names = array_unique(array_map(fn ($match) => $match[1] !== '' ? $match[1] : rtrim($match[2], '.'), $matches));
+        $mentions = $names ? User::whereIn('name', $names)->get()->keyBy('id') : collect();
+        $post->loadMissing(['user', 'topic.category']);
+        $recipients = $mentions;
+        if ($reply) {
+            $post->topic->loadMissing(['user', 'subscriptions.user']);
+            $recipients = $recipients->union($post->topic->subscriptions->pluck('user')->filter()->keyBy('id'));
+            if ($post->topic->user) {
+                $recipients->put($post->topic->user_id, $post->topic->user);
+            }
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Remove duplicate usernames
-        |--------------------------------------------------------------------------
-        */
-
-        $usernames = array_unique($matches[1]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | Load the users
-        |--------------------------------------------------------------------------
-        */
-
-        $users = User::whereIn('name', $usernames)->get();
-
-        /*
-        |--------------------------------------------------------------------------
-        | Notify each mentioned user
-        |--------------------------------------------------------------------------
-        */
-
-        foreach ($users as $user) {
-
-            /*
-             * Never notify the person who wrote the post.
-             */
-            if ($user->id === $post->user_id) {
+        foreach ($recipients as $user) {
+            if ($user->id === $post->user_id || ! ForumAccess::canView($user, $post->topic->category)) {
                 continue;
             }
-
-            $user->notify(
-                new ForumMentionNotification($post)
-            );
+            $user->notify($mentions->has($user->id) ? new ForumMentionNotification($post) : new ForumReplyNotification($post));
         }
     }
 
-    /**
-     * Search forum topics and posts.
-     */
     public function search(Request $request)
     {
         $request->validate(['q' => ['nullable', 'string', 'max:200']]);
         $query = trim($request->query('q') ?? '');
-        $results = collect();
-
-        if (mb_strlen($query) >= 2) {
-            $searchTerm = '%'.$query.'%';
-
-            $topics = ForumTopic::visible()->with(['user', 'category'])
-                ->withCount('posts')
-                ->where('title', 'LIKE', $searchTerm)
-                ->latest()
-                ->limit(50)
-                ->get();
-
-            $posts = ForumPost::whereHas('topic', fn ($q) => $q->visible())
-                ->with(['user', 'topic.category'])
-                ->where('body', 'LIKE', $searchTerm)
-                ->latest()
-                ->limit(50)
-                ->get();
-
-            $results = $topics->toBase()->concat($posts)->sortByDesc('created_at')->take(50);
-        }
+        $results = $this->forumService->search($query, max(1, Paginator::resolveCurrentPage()), ForumAccess::allows(auth()->user(), 'manage_topics'));
+        $results->appends(['q' => $query]);
 
         return view('forum.search', compact('query', 'results'));
     }
 
-    /**
-     * Show topics that the current user has participated in.
-     */
     public function myTopics()
     {
-        $user = auth()->user();
-
-        $topicIds = ForumPost::where('user_id', $user->id)
-            ->distinct()
-            ->pluck('topic_id');
-
-        $topics = ForumTopic::visible()->whereIn('id', $topicIds)
-            ->with(['user', 'lastPost.user', 'category'])
-            ->withCount('posts')
-            ->latest('updated_at')
-            ->paginate(25);
+        $topics = $this->forumService->participatedTopics(auth()->id(), max(1, Paginator::resolveCurrentPage()), ForumAccess::allows(auth()->user(), 'manage_topics'));
 
         return view('forum.my-topics', compact('topics'));
     }

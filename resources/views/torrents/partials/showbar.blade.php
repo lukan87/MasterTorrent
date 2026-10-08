@@ -1,5 +1,5 @@
 
-<div class="showbar-card modern-showbar mb-4 mt-4">
+<div class="showbar-card modern-showbar mb-4 mt-4" data-torrent-showbar>
 
     {{-- HEADER --}}
     <div class="card-header modern-showbar-header">
@@ -19,15 +19,44 @@
 
                 <div class="modern-subinfo">
 
-                    <span>
-                        <i class="bi bi-calendar3"></i>
+                    <span class="modern-badge torrent-release-badge torrent-created-badge"
+                          data-bs-toggle="tooltip"
+                          title="Created: {{ $torrent->created_at->format('M d, Y') }}"
+                          aria-label="Created: {{ $torrent->created_at->format('M d, Y') }}">
+                        <i class="bi bi-calendar3" aria-hidden="true"></i>
                         {{ $torrent->created_at->format('M d, Y') }}
                     </span>
 
-                    <span>
-                        <i class="bi bi-person-circle"></i>
+                    <span class="modern-badge torrent-release-badge torrent-uploader-badge"
+                          data-bs-toggle="tooltip"
+                          title="Uploader: {{ $torrent->uploader->name ?? 'Unknown' }}"
+                          aria-label="Uploader: {{ $torrent->uploader->name ?? 'Unknown' }}">
+                        <i class="bi bi-person-circle" aria-hidden="true"></i>
                         {{ $torrent->uploader->name ?? 'Unknown' }}
                     </span>
+
+                    @php
+                        $releaseDetails = \App\Helpers\TorrentReleaseParser::parse($torrent->name);
+                        $releaseLabels = [
+                            'resolution' => ['Resolution', 'bi-display'],
+                            'source' => ['Source', 'bi-film'],
+                            'audio' => ['Audio', 'bi-volume-up'],
+                            'service' => ['Streaming service', 'bi-tv'],
+                            'group' => ['Release group', 'bi-people'],
+                        ];
+                    @endphp
+
+                    @foreach ($releaseLabels as $key => [$label, $icon])
+                        @if ($releaseDetails[$key] !== null)
+                            <span class="modern-badge torrent-release-badge torrent-release-{{ $key }}"
+                                  data-bs-toggle="tooltip"
+                                  title="{{ $label }}: {{ $releaseDetails[$key] }}"
+                                  aria-label="{{ $label }}: {{ $releaseDetails[$key] }}">
+                                <i class="bi {{ $icon }}" aria-hidden="true"></i>
+                                {{ $releaseDetails[$key] }}
+                            </span>
+                        @endif
+                    @endforeach
 
                 </div>
 
@@ -37,20 +66,6 @@
 
         {{-- TAGS --}}
         <div class="modern-tags-wrap ms-md-auto">
-
-            <span class="modern-badge"
-                  data-bs-toggle="tooltip"
-                  title="Total Uploaded Traffic made by this torrent">
-                <i class="bi bi-cloud-arrow-up"></i>
-                {{ \App\Helpers\FormatHelper::formatSize($traffic->total_uploaded ?? 0) }}
-            </span>
-
-            <span class="modern-badge"
-                  data-bs-toggle="tooltip"
-                  title="Total Downloaded Traffic made by this torrent">
-                <i class="bi bi-cloud-arrow-down"></i>
-                {{ \App\Helpers\FormatHelper::formatSize($traffic->total_downloaded ?? 0) }}
-            </span>
 
             @if($torrent->free)
                 <span class="modern-badge free-badge"
@@ -874,30 +889,41 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 <style>
-.modern-showbar{position:relative;width:100%;max-width:100%;background:linear-gradient(135deg,rgba(14,21,33,.95),rgba(10,15,27,.84));border:1px solid var(--ui-border);border-left:3px solid var(--ui-accent);border-radius:.9rem;overflow:visible;backdrop-filter:blur(14px);box-shadow:0 10px 30px rgba(0,0,0,.22);color:#e6edf3;z-index:1}
+.modern-showbar{position:relative;width:100%;max-width:100%;background:linear-gradient(135deg,var(--theme-surface, rgba(14,21,33,.95)),var(--theme-surface, rgba(10,15,27,.84)));border:1px solid var(--ui-border);border-left:3px solid var(--ui-accent);border-radius:.9rem;overflow:visible;backdrop-filter:blur(14px);box-shadow:0 10px 30px var(--theme-shadow, rgba(0,0,0,.22));color:var(--theme-text, #e6edf3);z-index:1}
 .modern-showbar::before{display:none}
 .modern-showbar-header{padding:16px 18px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;background:transparent;border-bottom:1px solid var(--ui-border)}
-.torrent-icon-box{width:48px;height:48px;border-radius:.7rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(45,212,191,.10);border:1px solid rgba(45,212,191,.22);color:var(--ui-accent);font-size:1.2rem;box-shadow:none}
-.modern-torrent-title{margin:0;font-size:14px;line-height:1.4;font-weight:700;color:#f1f5f9;overflow-wrap:anywhere;word-break:break-word}
-.modern-subinfo{display:flex;gap:12px;flex-wrap:wrap;margin-top:5px;color:rgba(255,255,255,.58);font-size:13px}
+.torrent-icon-box{width:48px;height:48px;border-radius:.7rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--theme-teal-soft, rgba(45,212,191,.10));border:1px solid var(--theme-teal-border, rgba(45,212,191,.22));color:var(--ui-accent);font-size:1.2rem;box-shadow:none}
+.modern-torrent-title{margin:0;font-size:var(--site-font-body, 13px);line-height:1.4;font-weight:700;color:var(--theme-text, #f1f5f9);overflow-wrap:anywhere;word-break:break-word}
+.modern-subinfo{display:flex;gap:12px;flex-wrap:wrap;margin-top:5px;color:var(--theme-muted, rgba(255,255,255,.58));font-size:var(--site-font-body, 13px)}
 .modern-subinfo span{display:inline-flex;align-items:center;gap:5px}.modern-subinfo i{color:var(--ui-accent)}
 .modern-tags-wrap,.modern-stats-wrap{display:flex;flex-wrap:wrap;gap:7px;justify-content:flex-end;align-items:center;margin-left:auto}
-.modern-badge,.modern-stat-badge{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:6px 9px;border-radius:.55rem;font-size:12px;line-height:1.2;font-weight:600;border:1px solid var(--ui-border);white-space:nowrap;transition:background .15s ease,border-color .15s ease,transform .15s ease}
+.modern-badge,.modern-stat-badge{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:6px 9px;border-radius:.55rem;font-size:var(--site-font-small, 13px);line-height:1.2;font-weight:600;border:1px solid var(--ui-border);white-space:nowrap;transition:background .15s ease,border-color .15s ease,transform .15s ease}
 .modern-badge:hover,.modern-stat-badge:hover{transform:translateY(-1px)}
-.free-badge{background:rgba(34,197,94,.10);color:#70e0a1}.double-badge{background:rgba(250,204,21,.10);color:#f3d46a}.seedbox-badge{background:rgba(6,182,212,.10);color:#67dce9}.sticky-badge{background:rgba(239,68,68,.10);color:#f58b8b}
-.report-badge-modern{background:rgba(239,68,68,.08);color:#f58b8b;text-decoration:none}.report-badge-modern:hover{background:rgba(239,68,68,.14);color:#ffaaaa;box-shadow:none}
+/* Release badges use a distinct colour for each field. */
+.modern-subinfo{align-items:center;column-gap:9px;row-gap:7px}
+.modern-subinfo .torrent-release-badge{padding:5px 8px;font-size:var(--site-font-small, 13px);max-width:100%;white-space:normal;overflow-wrap:anywhere}
+.modern-subinfo .torrent-release-badge i{color:inherit;flex-shrink:0}
+.torrent-created-badge{color:var(--theme-text, #c6d0da);background:var(--theme-surface-alt, rgba(148,163,184,.10));border-color:var(--theme-border, rgba(148,163,184,.25))}
+.torrent-uploader-badge{color:var(--ui-accent);background:var(--theme-teal-soft, rgba(45,212,191,.10));border-color:var(--theme-teal-border, rgba(45,212,191,.25))}
+.torrent-release-resolution{color:var(--theme-blue-text, #8fc8f5);background:var(--theme-blue-soft, rgba(59,130,246,.10));border-color:var(--theme-blue-border, rgba(59,130,246,.25))}
+.torrent-release-source{color:var(--theme-green-text, #70e0a1);background:var(--theme-green-soft, rgba(34,197,94,.10));border-color:var(--theme-green-border, rgba(34,197,94,.25))}
+.torrent-release-audio{color:var(--theme-blue-text, #c4b5fd);background:var(--theme-purple-soft, rgba(139,92,246,.10));border-color:var(--theme-purple-border, rgba(139,92,246,.25))}
+.torrent-release-service{color:var(--theme-amber-text, #f3d46a);background:var(--theme-amber-soft, rgba(250,204,21,.10));border-color:var(--theme-amber-border, rgba(250,204,21,.25))}
+.torrent-release-group{color:var(--theme-teal-text, #67dce9);background:var(--theme-teal-soft, rgba(6,182,212,.10));border-color:var(--theme-teal-border, rgba(6,182,212,.25))}
+.free-badge{background:var(--theme-green-soft, rgba(34,197,94,.10));color:var(--theme-green-text, #70e0a1)}.double-badge{background:var(--theme-amber-soft, rgba(250,204,21,.10));color:var(--theme-amber-text, #f3d46a)}.seedbox-badge{background:var(--theme-teal-soft, rgba(6,182,212,.10));color:var(--theme-teal-text, #67dce9)}.sticky-badge{background:var(--theme-red-soft, rgba(239,68,68,.10));color:var(--theme-red-text, #f58b8b)}
+.report-badge-modern{background:var(--theme-red-soft, rgba(239,68,68,.08));color:var(--theme-red-text, #f58b8b);text-decoration:none}.report-badge-modern:hover{background:var(--theme-red-soft, rgba(239,68,68,.14));color:var(--theme-red-text, #ffaaaa);box-shadow:none}
 .modern-showbar-body{padding:16px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px}
-.modern-download-btn,.modern-action-btn{border:1px solid var(--ui-border);color:#dce7ef;background:rgba(255,255,255,0.0315);padding:8px 12px;border-radius:.55rem;font-size:13px;font-weight:600;transition:background .15s ease,border-color .15s ease,color .15s ease,transform .15s ease}
-.modern-download-btn{background:rgba(45,212,191,.12);border-color:rgba(45,212,191,.28);color:var(--ui-accent)}
-.modern-download-btn:hover{background:rgba(45,212,191,.18);border-color:rgba(45,212,191,.42);color:#b8fff5;transform:translateY(-1px)}
-.watch-online-btn{display:inline-flex;align-items:center;gap:4px;background:rgba(34,197,94,.10);border:1px solid rgba(34,197,94,.28);color:#4ade80;padding:8px 12px;border-radius:.55rem;font-size:13px;font-weight:700;text-decoration:none;transition:background .15s ease,border-color .15s ease,color .15s ease,transform .15s ease}.watch-online-btn:hover{background:rgba(34,197,94,.18);border-color:rgba(34,197,94,.42);color:#bbf7d0;transform:translateY(-1px)}.watch-online-btn i{font-size:14px}
-.modern-action-btn:hover{background:rgba(45,212,191,.09);border-color:rgba(45,212,191,.25);color:var(--ui-accent);transform:translateY(-1px)}
-.info-btn{color:#8fd5ff;background:rgba(59,130,246,.08)}.success-btn{color:#70e0a1;background:rgba(34,197,94,.08)}.thank-btn{color:#8fd5ff;background:rgba(59,130,246,.08)}.thanked-btn{color:#70e0a1;background:rgba(34,197,94,.10)}.subscribe-btn{color:#8fd5ff;background:rgba(59,130,246,.08)}.unsubscribe-btn{color:#ff8f8f;background:rgba(239,68,68,.10)}
+.modern-download-btn,.modern-action-btn{border:1px solid var(--ui-border);color:var(--theme-text, #dce7ef);background:var(--theme-surface-alt, rgba(255,255,255,0.0315));padding:8px 12px;border-radius:.55rem;font-size:var(--site-font-body, 13px);font-weight:600;transition:background .15s ease,border-color .15s ease,color .15s ease,transform .15s ease}
+.modern-download-btn{background:var(--theme-teal-soft, rgba(45,212,191,.12));border-color:var(--theme-teal-border, rgba(45,212,191,.28));color:var(--ui-accent)}
+.modern-download-btn:hover{background:var(--theme-teal-soft, rgba(45,212,191,.18));border-color:var(--theme-teal-border, rgba(45,212,191,.42));color:var(--theme-teal-text, #b8fff5);transform:translateY(-1px)}
+.watch-online-btn{display:inline-flex;align-items:center;gap:4px;background:var(--theme-green-soft, rgba(34,197,94,.10));border:1px solid var(--theme-green-border, rgba(34,197,94,.28));color:var(--theme-green-text, #4ade80);padding:8px 12px;border-radius:.55rem;font-size:var(--site-font-body, 13px);font-weight:700;text-decoration:none;transition:background .15s ease,border-color .15s ease,color .15s ease,transform .15s ease}.watch-online-btn:hover{background:var(--theme-green-soft, rgba(34,197,94,.18));border-color:var(--theme-green-border, rgba(34,197,94,.42));color:var(--theme-text, #bbf7d0);transform:translateY(-1px)}.watch-online-btn i{font-size:14px}
+.modern-action-btn:hover{background:var(--theme-teal-soft, rgba(45,212,191,.09));border-color:var(--theme-teal-border, rgba(45,212,191,.25));color:var(--ui-accent);transform:translateY(-1px)}
+.info-btn{color:var(--theme-blue-text, #8fd5ff);background:var(--theme-blue-soft, rgba(59,130,246,.08))}.success-btn{color:var(--theme-green-text, #70e0a1);background:var(--theme-green-soft, rgba(34,197,94,.08))}.thank-btn{color:var(--theme-blue-text, #8fd5ff);background:var(--theme-blue-soft, rgba(59,130,246,.08))}.thanked-btn{color:var(--theme-green-text, #70e0a1);background:var(--theme-green-soft, rgba(34,197,94,.10))}.subscribe-btn{color:var(--theme-blue-text, #8fd5ff);background:var(--theme-blue-soft, rgba(59,130,246,.08))}.unsubscribe-btn{color:var(--theme-red-text, #ff8f8f);background:var(--theme-red-soft, rgba(239,68,68,.10))}
 .modern-action-btn.disabled,.modern-action-btn:disabled{opacity:.55!important;cursor:not-allowed;transform:none!important}
-.modern-dropdown-menu{min-width:250px;padding:7px;background:rgba(10,15,27,.98);border:1px solid var(--ui-border);border-radius:.7rem;box-shadow:0 14px 35px rgba(0,0,0,.35)!important}
-.modern-dropdown-item{padding:8px 10px;border-radius:.45rem;font-size:13px;color:#d8e2eb;transition:background .15s ease,color .15s ease}
-.modern-dropdown-item:hover{background:rgba(45,212,191,.09);color:var(--ui-accent);transform:none}
-.modern-dropdown-menu .dropdown-header{font-size:12px;color:var(--ui-accent)!important}.modern-dropdown-menu .dropdown-divider{border-color:var(--ui-border)}
+.modern-dropdown-menu{min-width:250px;padding:7px;background:var(--theme-surface, rgba(10,15,27,.98));border:1px solid var(--ui-border);border-radius:.7rem;box-shadow:0 14px 35px var(--theme-shadow, rgba(0,0,0,.35))!important}
+.modern-dropdown-item{padding:8px 10px;border-radius:.45rem;font-size:var(--site-font-body, 13px);color:var(--theme-text, #d8e2eb);transition:background .15s ease,color .15s ease}
+.modern-dropdown-item:hover{background:var(--theme-teal-soft, rgba(45,212,191,.09));color:var(--ui-accent);transform:none}
+.modern-dropdown-menu .dropdown-header{font-size:var(--site-font-small, 13px);color:var(--ui-accent)!important}.modern-dropdown-menu .dropdown-divider{border-color:var(--ui-border)}
 .btn-reaction {
     font-size: 1.4rem;
     padding: 4px 8px;
@@ -906,28 +932,28 @@ document.addEventListener('DOMContentLoaded', function () {
 }
 .btn-reaction:hover {
     transform: scale(1.2);
-    background: rgba(255,255,255,0.07);
+    background: var(--theme-surface-alt, rgba(255,255,255,0.07));
 }
 .btn-reaction.active {
-    background: rgba(45, 212, 191, 0.2);
-    border: 1px solid rgba(45, 212, 191, 0.5);
+    background: var(--theme-teal-soft, rgba(45, 212, 191, 0.2));
+    border: 1px solid var(--theme-teal-border, rgba(45, 212, 191, 0.5));
 }
-.modern-alert-danger{background:rgba(220,38,38,.09);border:1px solid rgba(220,38,38,.22);color:#f4a0a0;padding:9px 12px;border-radius:.6rem;font-size:13px;font-weight:600}
-.category-badge{background:rgba(148,163,184,0.056);color:#c6d0da}.files-badge{background:rgba(250,204,21,.08);color:#e8cf6d}.seeders-badge{background:rgba(34,197,94,.08);color:#70e0a1}.leechers-badge{background:rgba(239,68,68,.08);color:#f58b8b}.completed-badge{background:rgba(59,130,246,.08);color:#8fc8f5}.size-badge{background:rgba(6,182,212,.08);color:#67dce9}
-.modern-stat-badge.text-decoration-none:hover{text-decoration:none!important;border-color:rgba(45,212,191,.25)}
+.modern-alert-danger{background:var(--theme-red-soft, rgba(220,38,38,.09));border:1px solid var(--theme-red-border, rgba(220,38,38,.22));color:var(--theme-red-text, #f4a0a0);padding:9px 12px;border-radius:.6rem;font-size:var(--site-font-body, 13px);font-weight:600}
+.category-badge{background:var(--theme-surface-alt, rgba(148,163,184,0.056));color:var(--theme-text, #c6d0da)}.files-badge{background:var(--theme-amber-soft, rgba(250,204,21,.08));color:var(--theme-amber-text, #e8cf6d)}.seeders-badge{background:var(--theme-green-soft, rgba(34,197,94,.08));color:var(--theme-green-text, #70e0a1)}.leechers-badge{background:var(--theme-red-soft, rgba(239,68,68,.08));color:var(--theme-red-text, #f58b8b)}.completed-badge{background:var(--theme-blue-soft, rgba(59,130,246,.08));color:var(--theme-blue-text, #8fc8f5)}.size-badge{background:var(--theme-teal-soft, rgba(6,182,212,.08));color:var(--theme-teal-text, #67dce9)}
+.modern-stat-badge.text-decoration-none:hover{text-decoration:none!important;border-color:var(--theme-teal-border, rgba(45,212,191,.25))}
 .btn-group{position:relative}.btn-group .dropdown-menu,.dropdown-menu{z-index:999999!important}
 @media(max-width:768px){
 html,body{overflow-x:hidden!important}.modern-showbar{border-radius:.75rem}.modern-showbar-header{padding:13px 14px;gap:12px}.modern-showbar-body{padding:13px 14px;gap:12px}
-.torrent-icon-box{width:40px;height:40px;font-size:1rem}.modern-torrent-title{font-size:14px;line-height:1.4;max-width:100%}.modern-subinfo{font-size:12px;gap:8px}
+.torrent-icon-box{width:40px;height:40px;font-size:1rem}.modern-torrent-title{font-size:var(--site-font-body, 13px);line-height:1.4;max-width:100%}.modern-subinfo{font-size:var(--site-font-small, 13px);gap:8px}
 .modern-tags-wrap,.modern-stats-wrap{width:100%;margin-left:0;justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;padding-bottom:3px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
-.modern-tags-wrap::-webkit-scrollbar,.modern-stats-wrap::-webkit-scrollbar{display:none}.modern-badge,.modern-stat-badge{flex:0 0 auto;font-size:12px}
-.modern-showbar-body>div:first-child{width:100%;min-width:0;display:flex;flex-wrap:wrap;gap:7px}.modern-download-btn,.modern-action-btn{font-size:12px;padding:8px 10px}
+.modern-tags-wrap::-webkit-scrollbar,.modern-stats-wrap::-webkit-scrollbar{display:none}.modern-badge,.modern-stat-badge{flex:0 0 auto;font-size:var(--site-font-small, 13px)}
+.modern-showbar-body>div:first-child{width:100%;min-width:0;display:flex;flex-wrap:wrap;gap:7px}.modern-download-btn,.modern-action-btn{font-size:var(--site-font-small, 13px);padding:8px 10px}
 .modern-dropdown-menu{max-width:calc(100vw - 28px)}
 }
 /* Subscriber count + names next to subscribe button */
-.subscribers-label{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12.5px;color:var(--ui-text-muted);line-height:1.3;padding:2px 0}
+.subscribers-label{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:var(--site-font-body, 13px);color:var(--ui-text-muted);line-height:1.3;padding:2px 0}
 .subscribers-label i{color:var(--ui-accent)}
-.subscribers-label .subscribers-count{font-weight:700;color:#f1f5f9;white-space:nowrap}
+.subscribers-label .subscribers-count{font-weight:700;color:var(--theme-text, #f1f5f9);white-space:nowrap}
 .subscribers-label .subscribers-names{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:260px}
 .subscribers-label .subscribers-more{color:var(--ui-accent);font-weight:700}
 
@@ -947,12 +973,12 @@ html,body{overflow-x:hidden!important}.modern-showbar{border-radius:.75rem}.mode
 
     padding: 14px 16px;
 
-    background: #15181b;
-    color: #fff;
+    background: var(--theme-surface, #15181b);
+    color: var(--theme-text, #fff);
 
     border-radius: 12px;
 
-    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 10px 35px var(--theme-shadow, rgba(0, 0, 0, 0.35));
 
     opacity: 0;
     transform: translateY(-15px) translateX(20px);
@@ -968,11 +994,11 @@ html,body{overflow-x:hidden!important}.modern-showbar{border-radius:.75rem}.mode
 }
 
 .reaction-toast-success {
-    border-left: 4px solid #20c997;
+    border-left: 4px solid var(--theme-teal-border, #20c997);
 }
 
 .reaction-toast-error {
-    border-left: 4px solid #dc3545;
+    border-left: 4px solid var(--theme-red-border, #dc3545);
 }
 
 .reaction-toast-icon {
@@ -990,21 +1016,21 @@ html,body{overflow-x:hidden!important}.modern-showbar{border-radius:.75rem}.mode
     font-size: 16px;
     font-weight: bold;
 
-    background: rgba(255,255,255,0.07);
+    background: var(--theme-surface-alt, rgba(255,255,255,0.07));
 }
 
 .reaction-toast-success .reaction-toast-icon {
-    color: #20c997;
+    color: var(--theme-teal-text, #20c997);
 }
 
 .reaction-toast-error .reaction-toast-icon {
-    color: #dc3545;
+    color: var(--theme-red-text, #dc3545);
 }
 
 .reaction-toast-message {
     flex: 1;
 
-    font-size: 14px;
+    font-size: var(--site-font-body, 13px);
     font-weight: 500;
 }
 
@@ -1012,7 +1038,7 @@ html,body{overflow-x:hidden!important}.modern-showbar{border-radius:.75rem}.mode
     border: 0;
     background: transparent;
 
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--theme-muted, rgba(255, 255, 255, 0.6));
 
     font-size: 22px;
     line-height: 1;
@@ -1023,7 +1049,7 @@ html,body{overflow-x:hidden!important}.modern-showbar{border-radius:.75rem}.mode
 }
 
 .reaction-toast-close:hover {
-    color: #fff;
+    color: var(--theme-text, #fff);
 }
 
 @media (max-width: 576px) {
@@ -1051,12 +1077,12 @@ html,body{overflow-x:hidden!important}.modern-showbar{border-radius:.75rem}.mode
 }
 
 .reaction-tooltip-row strong {
-    font-size: 12px;
+    font-size: var(--site-font-small, 13px);
     opacity: 0.8;
 }
 
 .reaction-tooltip-users {
-    font-size: 12px;
+    font-size: var(--site-font-small, 13px);
     opacity: 0.9;
 }
 </style>

@@ -25,9 +25,9 @@ class ForumTopic extends Model
         'is_locked' => 'boolean',
     ];
 
-    public function scopeVisible($query)
+    public function scopeVisible($query, bool $includePrivate = false)
     {
-        return $query->whereHas('category', fn ($category) => $category->where('is_private', false));
+        return $query->whereHas('category', fn ($category) => $category->when(! $includePrivate, fn ($query) => $query->where('is_private', false)));
     }
 
     public function category()

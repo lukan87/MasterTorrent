@@ -12,7 +12,7 @@
                 <i class="bi bi-chat-dots-fill"></i>
             </span>
             <div>
-                <div class="fw-bold fs-5 text-white">New Message</div>
+                <div class="fw-bold fs-5 theme-text">New Message</div>
                 <small class="text-muted">
                     @if($recipient)
                         to {{ $recipient->name }}
@@ -52,7 +52,7 @@
                             <span class="input-group-text mc-input-icon"><i class="bi bi-person-fill"></i></span>
                             <input type="text"
                                    name="username"
-                                   class="form-control bg-dark text-light border-secondary"
+                                   class="form-control theme-surface theme-text border-secondary"
                                    placeholder="Type a member's name..."
                                    value="{{ old('username') }}">
                             <button class="btn btn-ghost-accent px-4 fw-bold" type="submit">
@@ -80,7 +80,7 @@
                     <input type="text"
                            name="subject"
                            id="subject"
-                           class="form-control bg-dark text-light border-secondary @error('subject') is-invalid @enderror"
+                           class="form-control theme-surface theme-text border-secondary @error('subject') is-invalid @enderror"
                            placeholder="Subject"
                            value="{{ old('subject') }}">
                     <label for="subject">Subject</label>
@@ -103,7 +103,7 @@
 
                     <textarea name="body"
                               id="body"
-                              class="form-control bg-dark text-light border-secondary @error('body') is-invalid @enderror message-box"
+                              class="form-control theme-surface theme-text border-secondary @error('body') is-invalid @enderror message-box"
                               placeholder="Write your message..."
                               required
                               rows="5">{{ old('body') }}</textarea>
@@ -144,24 +144,24 @@
 
 <style>
 .mc-card{ background:var(--ui-surface-raised); }
-.mc-header{ background:linear-gradient(135deg, rgba(99,210,198,.16), rgba(45,110,126,.10)); border-bottom:1px solid var(--ui-border); }
-.mc-header-icon{ width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--ui-accent),var(--ui-accent-strong));color:#0b1120;display:flex;align-items:center;justify-content:center;font-size:1.25rem;box-shadow:0 6px 16px rgba(99,210,198,.35); }
-.mc-back{ text-decoration:none;color:var(--ui-text-muted);font-size:.85rem;padding:6px 12px;border-radius:8px;transition:.15s; }
-.mc-back:hover{ color:var(--ui-accent);background:rgba(99,210,198,.1); }
-.mc-recipient-picker .mc-input-icon{ background:rgba(255,255,255,0.028);border-color:var(--ui-border);color:var(--ui-accent); }
-.btn-ghost-accent{ background:rgba(99,210,198,.12);color:var(--ui-accent);border:1px solid rgba(99,210,198,.3);transition:.15s; }
-.btn-ghost-accent:hover{ background:var(--ui-accent);color:#0b1120; }
+.mc-header{ background:linear-gradient(135deg, var(--theme-teal-soft, rgba(99,210,198,.16)), var(--theme-teal-soft, rgba(45,110,126,.10))); border-bottom:1px solid var(--ui-border); }
+.mc-header-icon{ width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--theme-teal-action, var(--ui-accent)),var(--theme-teal-action, var(--ui-accent-strong)));color:var(--theme-on-action, #0b1120);display:flex;align-items:center;justify-content:center;font-size:1.25rem;box-shadow:0 6px 16px var(--theme-shadow, rgba(99,210,198,.35)); }
+.mc-back{ text-decoration:none;color:var(--ui-text-muted);font-size:var(--site-font-body, 13px);padding:6px 12px;border-radius:8px;transition:.15s; }
+.mc-back:hover{ color:var(--ui-accent);background:var(--theme-teal-soft, rgba(99,210,198,.1)); }
+.mc-recipient-picker .mc-input-icon{ background:var(--theme-control, rgba(255,255,255,0.028));border-color:var(--ui-border);color:var(--ui-accent); }
+.btn-ghost-accent{ background:var(--theme-teal-soft, rgba(99,210,198,.12));color:var(--ui-accent);border:1px solid var(--theme-teal-border, rgba(99,210,198,.3));transition:.15s; }
+.btn-ghost-accent:hover{ background:var(--theme-teal-action, var(--ui-accent));color:var(--theme-on-action, #0b1120); }
 .form-control{ border-radius:.6rem; transition:all .25s; }
-.form-control:focus{ border-color:var(--ui-accent); box-shadow:0 0 0 .2rem rgba(99,210,198,.22); }
+.form-control:focus{ border-color:var(--ui-accent); box-shadow:0 0 0 .2rem var(--theme-shadow, rgba(99,210,198,.22)); }
 .message-box{ min-height:120px; resize:none; }
 .bbcode-toolbar{ display:flex; flex-wrap:wrap; gap:6px; }
-.bbcode-toolbar button{ background:rgba(255,255,255,0.042);border:1px solid var(--ui-border);color:#fff;padding:6px 10px;border-radius:6px;cursor:pointer;transition:.2s;font-size:14px; }
-.bbcode-toolbar button:hover{ background:var(--ui-accent);color:#0b1120; }
+.bbcode-toolbar button{ background:var(--theme-surface-alt, rgba(255,255,255,0.042));border:1px solid var(--ui-border);color:var(--theme-text, #fff);padding:6px 10px;border-radius:6px;cursor:pointer;transition:.2s;font-size:var(--site-font-body, 13px); }
+.bbcode-toolbar button:hover{ background:var(--theme-teal-action, var(--ui-accent));color:var(--theme-on-action, #0b1120); }
 .smilies span{ cursor:pointer; font-size:20px; margin-right:8px; transition:.2s; }
 .smilies span:hover{ transform:scale(1.25); }
-.mc-send{ background:linear-gradient(135deg,var(--ui-accent),var(--ui-accent-strong));border:none;color:#0b1120;border-radius:10px;transition:.2s;padding:.6rem 2rem; }
-.mc-send:hover{ transform:translateY(-2px); box-shadow:0 8px 24px rgba(99,210,198,.35); }
-.mc-hint{ color:var(--ui-text-muted);font-size:.9rem;text-align:center;padding:12px;border:1px dashed var(--ui-border);border-radius:10px; }
+.mc-send{ background:linear-gradient(135deg,var(--theme-teal-action, var(--ui-accent)),var(--theme-teal-action, var(--ui-accent-strong)));border:none;color:var(--theme-on-action, #0b1120);border-radius:10px;transition:.2s;padding:.6rem 2rem; }
+.mc-send:hover{ transform:translateY(-2px); box-shadow:0 8px 24px var(--theme-shadow, rgba(99,210,198,.35)); }
+.mc-hint{ color:var(--ui-text-muted);font-size:var(--site-font-body, 13px);text-align:center;padding:12px;border:1px dashed var(--ui-border);border-radius:10px; }
 @media(max-width:768px){ .card-body{ padding:1.25rem; } }
 </style>
 

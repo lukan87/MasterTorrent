@@ -208,8 +208,8 @@ class TorrentSubscriptionService
 
     /**
      * Notify every subscriber whose saved imdbid/tmdbid matches the newly
-     * uploaded torrent. Returns the number of messages sent. The uploader is
-     * skipped so they don't get a notice about their own upload.
+     * uploaded torrent, excluding the uploader. Returns the number of
+     * messages sent, with one message per active subscriber.
      */
     public function notifyUpload(Torrent $torrent): int
     {
@@ -230,7 +230,30 @@ class TorrentSubscriptionService
                 }
             })
             ->where('user_id', '!=', (int) $torrent->owner)
-            ->get();
+            ->whereHas('user')
+            ->pluck('user_id')
+            ->unique();
+
+        // Calendar alerts join the existing recipient list, so following in both
+        // places still produces one message. Guard supports rolling deployment.
+        if (\Illuminate\Support\Facades\Schema::hasTable('tv_show_follows')
+            && in_array(strtolower((string) $torrent->tmdb_type), ['tv', ''], true)
+            && ($imdbid || ($tmdbid && $torrent->tmdb_type === 'tv'))) {
+            $calendarUsers = \App\Models\TvShowFollow::query()
+                ->where('notify_upload', true)
+                ->where('user_id', '!=', (int) $torrent->owner)
+                ->whereHas('user')
+                ->where(function ($q) use ($imdbid, $tmdbid, $torrent) {
+                    if ($imdbid) {
+                        $q->orWhere('imdbid', $imdbid);
+                    }
+                    // Numeric TMDB IDs overlap between films and television.
+                    if ($tmdbid && $torrent->tmdb_type === 'tv') {
+                        $q->orWhere('tmdbid', $tmdbid);
+                    }
+                })->pluck('user_id');
+            $subscriptions = $subscriptions->merge($calendarUsers)->unique();
+        }
 
         if ($subscriptions->isEmpty()) {
             return 0;
@@ -241,12 +264,14 @@ class TorrentSubscriptionService
 
         $viewUrl = route('torrents.show', ['id' => $torrent->id, 'slug' => $torrent->slug]);
 
-        foreach ($subscriptions as $sub) {
+        $body = $this->buildMessageBody($torrent, $viewUrl);
+
+        foreach ($subscriptions as $userId) {
             SystemMessageService::send(
                 $systemId,
-                (int) $sub->user_id,
+                (int) $userId,
                 $subject,
-                $this->buildMessageBody($torrent, $viewUrl)
+                $body
             );
         }
 
@@ -321,7 +346,7 @@ class TorrentSubscriptionService
             $lines[] = 'IMDb   : https://www.imdb.com/title/' . $torrent->imdbid;
         }
         if ($torrent->tmdbid) {
-            $lines[] = 'TMDB   : https://www.themoviedb.org/movie/' . $torrent->tmdbid;
+            $lines[] = 'TMDB   : https://www.themoviedb.org/' . ($torrent->tmdb_type === 'tv' ? 'tv' : 'movie') . '/' . $torrent->tmdbid;
         }
         $lines[] = '';
         $lines[] = 'View it here: ' . $viewUrl;

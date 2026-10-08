@@ -3,6 +3,7 @@
 @section('content')
     <div class="container">
         <h1 class="my-5 text-center text-primary">Generate RSS Feed</h1>
+        <p class="text-center"><a href="{{ route('torznab.setup') }}">Connect FileIplay to Prowlarr, Radarr, or Sonarr</a></p>
 
         <!-- Form to select categories and enter passkey -->
         <form action="{{ url('/rss/feed') }}" method="get" id="rssForm">

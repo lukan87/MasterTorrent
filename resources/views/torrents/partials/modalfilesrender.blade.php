@@ -696,27 +696,27 @@ document.addEventListener('click', function (e) {
     overflow: hidden;
     background: linear-gradient(
         135deg,
-        rgba(14,21,33,.98),
-        rgba(10,15,27,.96)
+        var(--theme-surface, rgba(14,21,33,.98)),
+        var(--theme-surface, rgba(10,15,27,.96))
     );
     border: 1px solid var(--ui-border);
     border-radius: .85rem;
-    box-shadow: 0 20px 50px rgba(0,0,0,.45);
-    color: #e5e7eb;
+    box-shadow: 0 20px 50px var(--theme-shadow, rgba(0,0,0,.45));
+    color: var(--theme-text, #e5e7eb);
 }
 
 .torrent-files-header {
     padding: 16px 20px;
     border-bottom: 1px solid var(--ui-border);
-    background: rgba(255,255,255,0.014);
+    background: var(--theme-surface-alt, rgba(255,255,255,0.014));
 }
 
 .torrent-files-header .modal-title {
     display: flex;
     align-items: center;
     gap: 10px;
-    color: #fff;
-    font-size: 14px;
+    color: var(--theme-text, #fff);
+    font-size: var(--site-font-body, 13px);
     font-weight: 700;
 }
 
@@ -728,8 +728,8 @@ document.addEventListener('click', function (e) {
     justify-content: center;
     border-radius: .65rem;
     color: var(--ui-accent);
-    background: rgba(45,212,191,.10);
-    border: 1px solid rgba(45,212,191,.20);
+    background: var(--theme-teal-soft, rgba(45,212,191,.10));
+    border: 1px solid var(--theme-teal-border, rgba(45,212,191,.20));
     font-size: 16px;
 }
 
@@ -737,24 +737,24 @@ document.addEventListener('click', function (e) {
     display: block;
     margin-top: 3px;
     margin-left: 44px;
-    color: rgba(255,255,255,.58);
-    font-size: 12px;
+    color: var(--theme-muted, rgba(255,255,255,.58));
+    font-size: var(--site-font-small, 13px);
 }
 
 .files-column-header {
     grid-template-columns: minmax(0, 1fr) 100px 90px 90px;
     gap: 10px;
     padding: 9px 14px;
-    color: rgba(255,255,255,.48);
-    font-size: 10px;
+    color: var(--theme-muted, rgba(255,255,255,.48));
+    font-size: var(--site-font-small, 13px);
     font-weight: 700;
     letter-spacing: .5px;
-    border-bottom: 1px solid rgba(255,255,255,.06);
+    border-bottom: 1px solid var(--theme-border, rgba(255,255,255,.06));
 }
 
 .torrent-files-body {
     padding: 10px 12px;
-    background: rgba(0,0,0,.08);
+    background: var(--theme-surface-alt, rgba(0,0,0,.08));
 }
 
 .file-tree {
@@ -766,7 +766,7 @@ document.addEventListener('click', function (e) {
 .nested-tree {
     margin-left: 20px;
     padding-left: 10px;
-    border-left: 1px solid rgba(45,212,191,.14);
+    border-left: 1px solid var(--theme-teal-border, rgba(45,212,191,.14));
 }
 
 .file-tree-item {
@@ -782,20 +782,20 @@ document.addEventListener('click', function (e) {
     padding: 5px 8px;
     border-radius: .55rem;
     cursor: pointer;
-    color: #dbe4e8;
+    color: var(--theme-text, #dbe4e8);
     transition: background .15s ease, color .15s ease;
 }
 
 .folder-row:hover {
-    background: rgba(45,212,191,.07);
-    color: #fff;
+    background: var(--theme-teal-soft, rgba(45,212,191,.07));
+    color:  var(--theme-text, #fff);
 }
 
 .folder-chevron {
     width: 16px;
     display: inline-flex;
     justify-content: center;
-    color: rgba(255,255,255,.42);
+    color: var(--theme-muted, rgba(255,255,255,.42));
     font-size: 9px;
     transition: transform .18s ease, color .18s ease;
 }
@@ -813,7 +813,7 @@ document.addEventListener('click', function (e) {
     justify-content: center;
     border-radius: .5rem;
     color: var(--ui-accent);
-    background: rgba(45,212,191,.10);
+    background: var(--theme-teal-soft, rgba(45,212,191,.10));
     font-size: 13px;
 }
 
@@ -822,7 +822,7 @@ document.addEventListener('click', function (e) {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: 14px;
+    font-size: var(--site-font-body, 13px);
     font-weight: 600;
 }
 
@@ -838,7 +838,7 @@ document.addEventListener('click', function (e) {
 }
 
 .file-row:hover {
-    background: rgba(45,212,191,.045);
+    background: var(--theme-teal-soft, rgba(45,212,191,.045));
 }
 
 .file-main {
@@ -857,7 +857,7 @@ document.addEventListener('click', function (e) {
     justify-content: center;
     border-radius: .5rem;
     color: var(--ui-accent);
-    background: rgba(255,255,255,0.0315);
+    background: var(--theme-surface-alt, rgba(255,255,255,0.0315));
     font-size: 13px;
 }
 
@@ -866,13 +866,13 @@ document.addEventListener('click', function (e) {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    color: #d8e0e4;
-    font-size: 14px;
+    color: var(--theme-text, #d8e0e4);
+    font-size: var(--site-font-body, 13px);
     font-weight: 500;
 }
 
 .file-row:hover .file-name {
-    color: #fff;
+    color: var(--theme-text, #fff);
 }
 
 .file-badges {
@@ -889,7 +889,7 @@ document.addEventListener('click', function (e) {
     min-height: 18px;
     padding: 2px 6px;
     border-radius: .35rem;
-    font-size: 10px;
+    font-size: var(--site-font-small, 13px);
     line-height: 1;
     font-weight: 700;
     letter-spacing: .15px;
@@ -897,44 +897,44 @@ document.addEventListener('click', function (e) {
 
 .badge-res {
     color: var(--ui-accent);
-    background: rgba(45,212,191,.10);
-    border: 1px solid rgba(45,212,191,.18);
+    background: var(--theme-teal-soft, rgba(45,212,191,.10));
+    border: 1px solid var(--theme-teal-border, rgba(45,212,191,.18));
 }
 
 .badge-codec {
-    color: #86efac;
-    background: rgba(34,197,94,.09);
-    border: 1px solid rgba(34,197,94,.15);
+    color: var(--theme-green-text, #86efac);
+    background: var(--theme-green-soft, rgba(34,197,94,.09));
+    border: 1px solid var(--theme-green-border, rgba(34,197,94,.15));
 }
 
 .badge-hdr {
-    color: #fbbf24;
-    background: rgba(245,158,11,.09);
-    border: 1px solid rgba(245,158,11,.15);
+    color: var(--theme-amber-text, #fbbf24);
+    background: var(--theme-amber-soft, rgba(245,158,11,.09));
+    border: 1px solid var(--theme-amber-border, rgba(245,158,11,.15));
 }
 
 .badge-audio {
-    color: #fdba74;
-    background: rgba(249,115,22,.09);
-    border: 1px solid rgba(249,115,22,.15);
+    color: var(--theme-amber-text, #fdba74);
+    background: var(--theme-amber-soft, rgba(249,115,22,.09));
+    border: 1px solid var(--theme-amber-border, rgba(249,115,22,.15));
 }
 
 .badge-audio-ch {
-    color: #67e8f9;
-    background: rgba(34,211,238,.08);
-    border: 1px solid rgba(34,211,238,.14);
+    color: var(--theme-teal-text, #67e8f9);
+    background: var(--theme-teal-soft, rgba(34,211,238,.08));
+    border: 1px solid var(--theme-teal-border, rgba(34,211,238,.14));
 }
 
 .file-size,
 .file-type,
 .file-kind {
-    color: rgba(255,255,255,.55);
-    font-size: 12px;
+    color: var(--theme-muted, rgba(255,255,255,.55));
+    font-size: var(--site-font-small, 13px);
     text-align: center;
 }
 
 .file-size {
-    color: #9bd8d1;
+    color: var(--theme-text, #9bd8d1);
     font-weight: 600;
 }
 
@@ -959,7 +959,7 @@ document.addEventListener('click', function (e) {
 .torrent-files-footer {
     padding: 10px 16px;
     border-top: 1px solid var(--ui-border);
-    background: rgba(255,255,255,0.014);
+    background: var(--theme-surface-alt, rgba(255,255,255,0.014));
 }
 
 .files-close-btn {
@@ -967,17 +967,17 @@ document.addEventListener('click', function (e) {
     align-items: center;
     padding: 7px 13px;
     border-radius: .55rem;
-    color: rgba(255,255,255,.72);
-    background: rgba(255,255,255,0.0315);
+    color: var(--theme-muted, rgba(255,255,255,.72));
+    background: var(--theme-surface-alt, rgba(255,255,255,0.0315));
     border: 1px solid var(--ui-border);
-    font-size: 13px;
+    font-size: var(--site-font-body, 13px);
     transition: background .15s ease, color .15s ease, border-color .15s ease;
 }
 
 .files-close-btn:hover {
-    color: #fff;
-    background: rgba(45,212,191,.08);
-    border-color: rgba(45,212,191,.28);
+    color:  var(--theme-text, #fff);
+    background: var(--theme-teal-soft, rgba(45,212,191,.08));
+    border-color: var(--theme-teal-border, rgba(45,212,191,.28));
 }
 
 .torrent-files-modal .btn-close {
@@ -1009,7 +1009,7 @@ document.addEventListener('click', function (e) {
     }
 
     .folder-name {
-        font-size: 14px;
+        font-size: var(--site-font-body, 13px);
     }
 
     .file-row {
@@ -1024,7 +1024,7 @@ document.addEventListener('click', function (e) {
     }
 
     .file-name {
-        font-size: 13px;
+        font-size: var(--site-font-body, 13px);
     }
 
     .file-badges,
@@ -1036,7 +1036,7 @@ document.addEventListener('click', function (e) {
     .file-kind {
         width: 45px;
         flex-shrink: 0;
-        font-size: 9px;
+        font-size: var(--site-font-small, 13px);
     }
 
     .file-kind span {
@@ -1054,7 +1054,7 @@ document.addEventListener('click', function (e) {
     }
 
     .files-subtitle {
-        font-size: 11px;
+        font-size: var(--site-font-small, 13px);
     }
 }
 </style>

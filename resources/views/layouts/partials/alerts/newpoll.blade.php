@@ -78,17 +78,17 @@
     background:
         linear-gradient(
             135deg,
-            rgba(59,130,246,.16),
-            rgba(139,92,246,.12)
+            var(--theme-blue-soft, rgba(59,130,246,.16)),
+            var(--theme-purple-soft, rgba(139,92,246,.12))
         );
 
     border:
-        1px solid rgba(255,255,255,.08);
+        1px solid var(--theme-border, rgba(255,255,255,.08));
 
     backdrop-filter:blur(12px);
 
     box-shadow:
-        0 12px 30px rgba(0,0,0,.18);
+        0 12px 30px var(--theme-shadow, rgba(0,0,0,.18));
 
     transition:
         all .3s ease;
@@ -113,7 +113,7 @@
     background:
         radial-gradient(
             circle,
-            rgba(96,165,250,.18),
+            var(--theme-blue-soft, rgba(96,165,250,.18)),
             transparent 70%
         );
 
@@ -137,14 +137,14 @@
 
 .poll-notice.compact .poll-title{
 
-    font-size:.9rem;
+    font-size:var(--site-font-body, 13px);
 }
 
 .poll-notice.compact .poll-btn{
 
     padding:.4rem .8rem;
 
-    font-size:.76rem;
+    font-size:var(--site-font-body, 13px);
 }
 
 /* =========================================
@@ -205,10 +205,10 @@
     justify-content:center;
 
     background:
-        rgba(255,255,255,0.056);
+        var(--theme-surface-alt, rgba(255,255,255,0.056));
 
     box-shadow:
-        inset 0 0 10px rgba(255,255,255,.1);
+        inset 0 0 10px var(--theme-shadow, rgba(255,255,255,.1));
 }
 
 .poll-icon{
@@ -245,9 +245,9 @@
 
 .poll-label{
 
-    color:rgba(255,255,255,.6);
+    color:var(--theme-muted, rgba(255,255,255,.6));
 
-    font-size:.72rem;
+    font-size:var(--site-font-small, 13px);
 
     text-transform:uppercase;
 
@@ -258,7 +258,7 @@
 
 .poll-title{
 
-    color:#fff;
+    color:var(--theme-text, #fff);
 
     font-size:1rem;
 
@@ -286,11 +286,11 @@
     border-radius:999px;
 
     background:
-        rgba(255,255,255,0.056);
+        var(--theme-surface-alt, rgba(255,255,255,0.056));
 
-    color:#dbeafe;
+    color:var(--theme-text, #dbeafe);
 
-    font-size:.82rem;
+    font-size:var(--site-font-body, 13px);
 
     font-weight:600;
 
@@ -318,13 +318,13 @@
     background:
         linear-gradient(
             135deg,
-            #2563eb,
-            #7c3aed
+            var(--theme-blue-action, #2563eb),
+            var(--theme-purple-action, #7c3aed)
         );
 
-    color:#fff;
+    color:var(--theme-on-action, #fff);
 
-    font-size:.82rem;
+    font-size:var(--site-font-body, 13px);
 
     font-weight:700;
 
@@ -336,10 +336,10 @@
 
     transform:translateY(-2px);
 
-    color:#fff;
+    color:var(--theme-text, #fff);
 
     box-shadow:
-        0 8px 20px rgba(59,130,246,.3);
+        0 8px 20px var(--theme-shadow, rgba(59,130,246,.3));
 }
 
 /* =========================================

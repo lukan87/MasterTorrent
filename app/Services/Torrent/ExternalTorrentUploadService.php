@@ -57,6 +57,8 @@ class ExternalTorrentUploadService
 
         $metadata = $this->metadataService->resolve($request);
 
+        $imagePaths = $this->imageService->prepare($request);
+
         $torrent = Torrent::create([
             'info_hash'   => $infoHash,
             'file_signature' => $this->buildFileSignature($decoded),
@@ -71,10 +73,14 @@ class ExternalTorrentUploadService
             'num_files'   => $meta['count'],
             'announce'    => $announceUrl,
             'external'    => true,
+            'imdbid'      => $metadata['imdbid'],
+            'tmdbid'      => $metadata['tmdbid'],
+            'tmdb_type'   => $metadata['tmdb_type'],
+            'imdb_url'    => $request->imdb_url,
             'seeders'     => 1, // External torrents have seeders
         ]);
 
-        $this->imageService->upload($torrent, $request);
+        $this->imageService->attach($torrent, $imagePaths);
 
         TorrentLog::create([
             'user_id'    => $user->id,
@@ -83,6 +89,8 @@ class ExternalTorrentUploadService
             'description' => 'Uploaded external torrent "' . $torrent->name . '" (ID: ' . $torrent->id . ')',
         ]);
 
+        app(\App\Services\TorrentSubscriptionService::class)->notifyUpload($torrent);
+
         return ['torrent' => $torrent, 'created' => true];
     }
 
@@ -90,9 +98,10 @@ class ExternalTorrentUploadService
     {
         $name = str_replace(['{', '}'], '.', $name);
         $name = preg_replace('/[^A-Za-z0-9\.\-\s]/', '.', $name);
+        $name = preg_replace('/\s+/', '.', $name);
         $name = preg_replace('/[\.]{2,}/', '.', $name);
-        $name = preg_replace('/\s+/', ' ', $name);
-        return trim($name);
+        $name = trim($name, '.');
+        return preg_replace('/(?:\.(?:torrent|mkv|mp4|avi|mov|m2ts|ts|webm|wmv|mpg|mpeg|m4v|vob))+$/i', '', $name);
     }
 
     private function uniqueSlug(string $name): string

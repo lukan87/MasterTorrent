@@ -5,6 +5,7 @@
 /public/storage
 /storage/*.key
 /vendor
+/docs
 .env
 .env.backup
 .env.production
@@ -19,7 +20,7 @@ yarn-error.log
 /.idea
 /.vscode
 /.zed
-/tests
+/tests/Unit
 # Generated torrent files
 /public/files/torrents/
 

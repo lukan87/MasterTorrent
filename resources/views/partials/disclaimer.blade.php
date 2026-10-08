@@ -76,8 +76,8 @@
     background:
         linear-gradient(
             135deg,
-            rgba(14,21,33,.95),
-            rgba(10,15,27,.84)
+            var(--theme-surface, rgba(14,21,33,.95)),
+            var(--theme-surface, rgba(10,15,27,.84))
         );
 
     border: 1px solid var(--ui-border);
@@ -85,7 +85,7 @@
     border-radius: .9rem;
 
     box-shadow:
-        0 10px 28px rgba(0, 0, 0, .24);
+        0 10px 28px var(--theme-shadow, rgba(0, 0, 0, .24));
 }
 
 .disclaimer-card::before {
@@ -103,8 +103,8 @@
     background:
         linear-gradient(
             180deg,
-            var(--ui-accent),
-            var(--ui-accent-strong)
+            var(--theme-teal-action, var(--ui-accent)),
+            var(--theme-teal-action, var(--ui-accent-strong))
         );
 
     opacity: .9;
@@ -144,19 +144,19 @@
     color: var(--ui-accent);
 
     background:
-        rgba(45, 212, 191, .08);
+        var(--theme-teal-soft, rgba(45, 212, 191, .08));
 
     border:
-        1px solid rgba(45, 212, 191, .18);
+        1px solid var(--theme-teal-border, rgba(45, 212, 191, .18));
 
     font-size: 15px;
 }
 
 .disclaimer-title {
 
-    color: #fff;
+    color: var(--theme-text, #fff);
 
-    font-size: 14px;
+    font-size: var(--site-font-body, 13px);
 
     font-weight: 700;
 
@@ -166,9 +166,9 @@
 .disclaimer-subtitle {
 
     color:
-        rgba(255, 255, 255, .55);
+        var(--theme-muted, rgba(255, 255, 255, .55));
 
-    font-size: 13px;
+    font-size: var(--site-font-body, 13px);
 
     margin-top: .15rem;
 }
@@ -186,9 +186,9 @@
 .disclaimer-text {
 
     color:
-        rgba(255, 255, 255, .72);
+        var(--theme-muted, rgba(255, 255, 255, .72));
 
-    font-size: 14px;
+    font-size: var(--site-font-body, 13px);
 
     line-height: 1.7;
 }
@@ -234,12 +234,12 @@
 
     text-decoration: none;
 
-    font-size: 13px;
+    font-size: var(--site-font-body, 13px);
 
     font-weight: 600;
 
     background:
-        rgba(45, 212, 191, .05);
+        var(--theme-teal-soft, rgba(45, 212, 191, .05));
 
     border:
         1px solid var(--ui-border);
@@ -258,10 +258,10 @@
     color: var(--ui-accent-strong);
 
     background:
-        rgba(45, 212, 191, .09);
+        var(--theme-teal-soft, rgba(45, 212, 191, .09));
 
     border-color:
-        rgba(45, 212, 191, .25);
+        var(--theme-teal-border, rgba(45, 212, 191, .25));
 
     transform:
         translateY(-1px);
@@ -294,17 +294,17 @@
 
     .disclaimer-title {
 
-        font-size: 14px;
+        font-size: var(--site-font-body, 13px);
     }
 
     .disclaimer-subtitle {
 
-        font-size: 13px;
+        font-size: var(--site-font-body, 13px);
     }
 
     .disclaimer-text {
 
-        font-size: 14px;
+        font-size: var(--site-font-body, 13px);
 
         line-height: 1.65;
     }

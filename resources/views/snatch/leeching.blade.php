@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container my-5" style="background-color: #14141f; padding: 2rem; border-radius: 0.5rem;">
+<div class="container my-5" style="background-color: var(--theme-surface, #14141f); padding: 2rem; border-radius: 0.5rem;">
 
     
     <div class="mb-4 text-center">
@@ -24,7 +24,7 @@
     </div>
 
     
-    <h2 class="text-center text-white mb-4">
+    <h2 class="text-center theme-text mb-4">
         <i class="bi bi-arrow-down-circle"></i> Leeching Torrents
     </h2>
 
@@ -36,8 +36,8 @@
         @else
             @foreach($leeching as $peer)
                 <div class="card mb-3 w-100 border-0 position-relative leech-card"
-                     style="border-left: 6px solid #ffc107;
-                            background: linear-gradient(90deg, rgba(255,193,7,0.1) 0%, rgba(255,255,255,0) 100%);
+                     style="border-left: 6px solid var(--theme-amber-border, #ffc107);
+                            background: linear-gradient(90deg, var(--theme-amber-soft, rgba(255,193,7,0.1)) 0%, rgba(255,255,255,0) 100%);
                             transition: transform 0.3s, box-shadow 0.3s;">
                     <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-center text-center text-md-start">
 
@@ -79,7 +79,7 @@
 
     .leech-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 12px 25px rgba(0,0,0,0.5);
+        box-shadow: 0 12px 25px var(--theme-shadow, rgba(0,0,0,0.5));
     }
 
     .leech-card a {
@@ -97,7 +97,7 @@
         left: -75%;
         width: 50%;
         height: 100%;
-        background: linear-gradient(120deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.105) 50%, rgba(255,255,255,0) 100%);
+        background: linear-gradient(120deg, rgba(255,255,255,0) 0%, var(--theme-surface-alt, rgba(255,255,255,0.105)) 50%, rgba(255,255,255,0) 100%);
         transform: skewX(-20deg);
         transition: all 0.3s ease-in-out;
     }

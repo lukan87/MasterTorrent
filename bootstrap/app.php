@@ -1,12 +1,16 @@
 <?php
 
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Validation\ValidationException;
 use Monicahq\Cloudflare\Http\Middleware\TrustProxies;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 return Application::configure(basePath: dirname(__DIR__))
+
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',
@@ -15,14 +19,28 @@ return Application::configure(basePath: dirname(__DIR__))
 
     ->withMiddleware(function (Middleware $middleware) {
 
-        // 1) Middleware global – blocheaza contul admin pana la cod
-// $middleware->appendToGroup('web', [
-//     \App\Http\Middleware\InvalidateSessionIfSecurityVersionChanged::class,
-//     \App\Http\Middleware\SecurityGateForAdmins::class,
-// ]);
+        /*
+        |--------------------------------------------------------------------------
+        | Global Web Middleware
+        |--------------------------------------------------------------------------
+        |
+        | Uncomment these when you want to enable the admin security gate.
+        |
+        */
 
+        // $middleware->appendToGroup('web', [
+        //     \App\Http\Middleware\InvalidateSessionIfSecurityVersionChanged::class,
+        //     \App\Http\Middleware\SecurityGateForAdmins::class,
+        // ]);
 
-        // 2) Alias-uri (ce aveai deja)
+        /*
+        |--------------------------------------------------------------------------
+        | Middleware Aliases
+        |--------------------------------------------------------------------------
+        */
+
+        $middleware->appendToGroup('web', \App\Http\Middleware\RecordAchievementVisit::class);
+
         $middleware->alias([
             'last_activity' => \App\Http\Middleware\CheckOnlineUsers::class,
             'save_ip'       => \App\Http\Middleware\SaveUserIP::class,
@@ -31,7 +49,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'staff'         => \App\Http\Middleware\StaffMiddleware::class,
         ]);
 
-        // 3) Inlocuire TrustProxies (Cloudflare)
+        /*
+        |--------------------------------------------------------------------------
+        | Cloudflare Trust Proxies
+        |--------------------------------------------------------------------------
+        */
+
         $middleware->replace(
             \Illuminate\Http\Middleware\TrustProxies::class,
             TrustProxies::class
@@ -39,50 +62,157 @@ return Application::configure(basePath: dirname(__DIR__))
     })
 
     ->withExceptions(function (Exceptions $exceptions) {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Custom Response Handling
+        |--------------------------------------------------------------------------
+        |
+        | Display the custom 404 page.
+        |
+        */
+
         $exceptions->respond(function (Response $response) {
-            if ($response->getStatusCode() === 404) {
+
+            if ($response->getStatusCode() === 404 && request()->route()?->getName() !== 'torznab.api') {
                 return response()->view('errors.404', [
-                    'message' => 'The page expired, please try again.'
+                    'message' => 'The page could not be found.',
                 ], 404);
             }
 
             return $response;
         });
 
-$exceptions->render(function (\Exception $exception, \Illuminate\Http\Request $request) {
+        /*
+        |--------------------------------------------------------------------------
+        | Custom Exception Handling
+        |--------------------------------------------------------------------------
+        |
+        | APP_DEBUG must remain FALSE in production.
+        |
+        | Only authenticated users whose IDs are listed in $debugUsers
+        | can see the detailed errors.debug page.
+        |
+        | Everyone else receives errors.general without any sensitive
+        | exception information.
+        |
+        */
 
-    // Preserve form validation and HTTP responses (including rate limiting).
-    if ($exception instanceof \Illuminate\Validation\ValidationException ||
-        $exception instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface) {
-        return null;
-    }
+        $exceptions->render(function (
+            \Throwable $exception,
+            \Illuminate\Http\Request $request
+        ) {
 
+            // Torznab clients need XML errors, including throttling and middleware failures.
+            if ($request->route()?->getName() === 'torznab.api') {
+                $status = $exception instanceof HttpExceptionInterface ? $exception->getStatusCode() : 500;
+                $description = $status === 429 ? 'Too many requests. Please retry later.' : 'API request failed.';
+                $headers = $exception instanceof HttpExceptionInterface ? $exception->getHeaders() : [];
 
-    // IDs allowed to see debug errors
-    $debugUsers = [1, 2, 3]; // add whatever user IDs you want
+                return response('<?xml version="1.0" encoding="UTF-8"?><error code="900" description="'.$description.'" />', $status, $headers)
+                    ->header('Content-Type', 'application/xml; charset=UTF-8')
+                    ->header('Cache-Control', 'private, no-store');
+            }
 
-    if (!auth()->check()) {
-        return redirect()->route('login');
-    }
+            /*
+            |--------------------------------------------------------------------------
+            | BitTorrent Announce Endpoint
+            |--------------------------------------------------------------------------
+            |
+            | Never replace the BitTorrent tracker announce response with
+            | an HTML error page.
+            |
+            | Route:
+            |
+            | GET /announce/{passkey}
+            | Name: announce
+            |
+            */
 
-    // Allow selected users to see Laravel debug page
-    if (auth()->check() && in_array(auth()->id(), $debugUsers)) {
+            if ($request->route()?->getName() === 'announce') {
+                return null;
+            }
 
-        if (config('app.debug')) {
+            // Old tabs may poll without an Accept header. Never save a count endpoint
+            // as the intended destination when their session has expired.
+            if ($exception instanceof AuthenticationException && $request->is('announcements-unread-count')) {
+                return response()->json(['message' => 'Unauthenticated.'], 401)
+                    ->header('Cache-Control', 'private, no-store');
+            }
 
-            return (new Illuminate\Foundation\Exceptions\Handler(app()))
-                ->render($request, $exception);
+            /*
+            |--------------------------------------------------------------------------
+            | Authentication / Validation / HTTP Exceptions
+            |--------------------------------------------------------------------------
+            |
+            | Let Laravel redirect guests to login (or return JSON 401) and
+            | handle normal framework responses such as:
+            |
+            | 403 - Forbidden
+            | 404 - Not Found
+            | 419 - Page Expired
+            | 429 - Too Many Requests
+            |
+            */
 
-        }
+            if (
+                $exception instanceof AuthenticationException ||
+                $exception instanceof ValidationException ||
+                $exception instanceof HttpExceptionInterface
+            ) {
+                return null;
+            }
 
-    }
+            /*
+            |--------------------------------------------------------------------------
+            | Users Allowed To See Debug Information
+            |--------------------------------------------------------------------------
+            */
 
-    // Everyone else sees custom error page
-    return response()->view('errors.general', [], 500);
+            $debugUsers = [
+                1,
+                2,
+                //3,
+            ];
 
-});
+            /*
+            |--------------------------------------------------------------------------
+            | Detailed Debug Page
+            |--------------------------------------------------------------------------
+            |
+            | The user must be authenticated AND their user ID must appear
+            | in the $debugUsers array above.
+            |
+            */
 
+            if (
+                auth()->check() &&
+                in_array((int) auth()->id(), $debugUsers, true)
+            ) {
+                return response()->view('errors.debug', [
+                    'exception' => $exception,
+                ], 500);
+            }
 
+            /*
+            |--------------------------------------------------------------------------
+            | Everyone Else
+            |--------------------------------------------------------------------------
+            |
+            | Normal users and guests receive no:
+            |
+            | - exception messages
+            | - stack traces
+            | - source code
+            | - file paths
+            | - line numbers
+            | - database errors
+            | - internal application information
+            |
+            */
+
+            return response()->view('errors.general', [], 500);
+        });
     })
 
     ->create();

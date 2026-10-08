@@ -1,54 +1,48 @@
-     
-     <!-- Actions browse -->
-     
-     <div class="d-flex justify-content-end align-items-center gap-1 flex-wrap">
+@php
+    $viewer = Auth::user();
+    $canDownload = $viewer && $viewer->downloadpos !== 'no' && $viewer->hit_and_run_count <= 20;
+    $canEdit = $viewer && ($viewer->user_class >= \App\Models\UserClass::MODERATOR || (int) $viewer->id === (int) $torrent->owner);
+    $canDelete = $viewer && $viewer->user_class >= \App\Models\UserClass::MODERATOR;
+    $downloadReason = ! $viewer ? 'Sign in to download' : ($viewer->downloadpos === 'no' ? 'Download permission disabled' : 'Download restricted: more than 20 hit and runs');
+@endphp
 
-            {{-- DOWNLOAD / SEEDBOX --}}
-            @if(Auth::check() && Auth::user()->hit_and_run_count <= 20)
-                <div class="btn-group btn-group-xl">
-                    <a href="{{ route('torrents.download', [$torrent->id, $torrent->slug]) }}"
-                       class="btn btn-secondary tx-btn-download"
-                       aria-label="Download"
-                       data-bs-toggle="tooltip" title="Download">
-                        <i class="bi bi-cloud-arrow-down-fill"></i>
-                    </a>
-
-                    @if(Auth::user()->slots > 0 || $seedboxes->isNotEmpty())
-                        <button type="button"
-                                class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
-                                data-bs-toggle="dropdown"
-                                aria-expanded="false"
-                                aria-label="Download options"
-                                title="Download options">
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            @include('torrents.partials.download-menu-items')
-                        </ul>
-                    @endif
-                </div>
+<div class="tx-actions" role="group" aria-label="Actions for {{ $torrent->name }}">
+    @if($canDownload)
+        <div class="btn-group tx-download-group">
+            <a href="{{ route('torrents.download', [$torrent->id, $torrent->slug]) }}"
+               class="btn tx-action tx-action-download"
+               aria-label="Download {{ $torrent->name }}" data-bs-toggle="tooltip" title="Download torrent">
+                <i class="bi bi-cloud-arrow-down-fill" aria-hidden="true"></i>
+            </a>
+            @if($viewer->slots > 0 || ($seedboxes ?? collect())->isNotEmpty())
+                <button type="button" class="btn tx-action tx-action-options dropdown-toggle dropdown-toggle-split"
+                        data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download options for {{ $torrent->name }}" title="Slots and seedbox options">
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    @include('torrents.partials.download-menu-items', ['seedboxes' => $seedboxes ?? collect()])
+                </ul>
             @endif
-
-            {{-- MODERATOR --}}
-            @if(Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::MODERATOR)
-                <a href="{{ route('torrents.edit', [$torrent->id, $torrent->slug]) }}"
-                   class="btn btn-warning btn-xl"
-                   aria-label="Edit torrent"
-                   data-bs-toggle="tooltip" title="Edit">
-                    <i class="bi bi-pencil-square"></i>
-                </a>
-            @endif
-
-            {{-- ADMIN --}}
-            @if(Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::ADMIN)
-                <form method="POST" action="{{ route('torrents.destroy', $torrent->slug) }}">
-                    @csrf
-                    @method('DELETE')
-                    <button class="btn btn-danger btn-sm"
-                            aria-label="Delete torrent"
-                            data-bs-toggle="tooltip" title="Delete">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </form>
-            @endif
-
         </div>
+    @else
+        <span class="tx-action tx-action-locked" tabindex="0" role="img" aria-label="{{ $downloadReason }}" data-bs-toggle="tooltip" title="{{ $downloadReason }}">
+            <i class="bi bi-lock" aria-hidden="true"></i>
+        </span>
+    @endif
+
+    @if($canEdit)
+        <a href="{{ route('torrents.edit', [$torrent->id, $torrent->slug]) }}" class="btn tx-action tx-action-edit"
+           aria-label="Edit {{ $torrent->name }}" data-bs-toggle="tooltip" title="Edit torrent">
+            <i class="bi bi-pencil-square" aria-hidden="true"></i>
+        </a>
+    @endif
+
+    @if($canDelete)
+        <form method="POST" action="{{ route('torrents.destroy', $torrent->slug) }}" class="tx-delete-form">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="btn tx-action tx-action-delete" aria-label="Delete {{ $torrent->name }}" data-bs-toggle="tooltip" title="Delete torrent">
+                <i class="bi bi-trash" aria-hidden="true"></i>
+            </button>
+        </form>
+    @endif
+</div>

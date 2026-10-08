@@ -10,7 +10,7 @@
 
         @method('PUT')
 
-        <div class="page-header d-flex align-items-center justify-content-between mb-4">
+        <div class="page-header d-flex align-items-center justify-content-between mb-4 admin-page-header">
 
             <div>
 
@@ -538,14 +538,14 @@
     pointer-events: none;
     z-index: -1;
     background:
-        radial-gradient(circle at 12% 8%, rgba(45,212,191,.055), transparent 28%),
-        radial-gradient(circle at 88% 20%, rgba(20,184,166,.035), transparent 25%);
+        radial-gradient(circle at 12% 8%, var(--theme-teal-soft, rgba(45,212,191,.055)), transparent 28%),
+        radial-gradient(circle at 88% 20%, var(--theme-teal-soft, rgba(20,184,166,.035)), transparent 25%);
 }
 
 .page-header {
     position: relative;
     padding: .2rem 0 1rem;
-    border-bottom: 1px solid rgba(148,163,184,.12);
+    border-bottom: 1px solid var(--theme-border, rgba(148,163,184,.12));
 }
 
 .page-title {
@@ -553,7 +553,7 @@
     align-items: center;
     gap: .55rem;
     margin: 0;
-    color: #f8fafc;
+    color: var(--theme-text, #f8fafc);
     font-size: 1.55rem;
     font-weight: 750;
     letter-spacing: -.2px;
@@ -564,45 +564,45 @@
     width: 4px;
     height: 27px;
     border-radius: 4px;
-    background: #2dd4bf;
-    box-shadow: 0 0 12px rgba(45,212,191,.25);
+    background: var(--theme-teal-soft, #2dd4bf);
+    box-shadow: 0 0 12px var(--theme-shadow, rgba(45,212,191,.25));
 }
 
 .page-subtitle {
     margin-left: .6rem;
-    color: #8291a7;
-    font-size: .8rem;
+    color: var(--theme-muted, #8291a7);
+    font-size: var(--site-font-body, 13px);
 }
 
 .user-id-badge {
-    border-color: rgba(45,212,191,.30);
-    background: linear-gradient(135deg, rgba(45,212,191,.10), rgba(10,15,27,.35));
-    box-shadow: inset 0 0 14px rgba(45,212,191,.025);
+    border-color: var(--theme-teal-border, rgba(45,212,191,.30));
+    background: linear-gradient(135deg, var(--theme-teal-soft, rgba(45,212,191,.10)), var(--theme-surface, rgba(10,15,27,.35)));
+    box-shadow: inset 0 0 14px var(--theme-shadow, rgba(45,212,191,.025));
 }
 
 .admin-card {
     position: relative;
-    border-color: rgba(148,163,184,.15);
+    border-color: var(--theme-border, rgba(148,163,184,.15));
     background:
-        linear-gradient(145deg, rgba(16,23,36,.97), rgba(8,13,23,.96));
+        linear-gradient(145deg, var(--theme-surface, rgba(16,23,36,.97)), var(--theme-surface, rgba(8,13,23,.96)));
     box-shadow:
-        0 10px 28px rgba(0,0,0,.18),
-        inset 0 1px 0 rgba(255,255,255,.018);
+        0 10px 28px var(--theme-shadow, rgba(0,0,0,.18)),
+        inset 0 1px 0 var(--theme-shadow, rgba(255,255,255,.018));
     transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
 }
 
 .admin-card:hover {
-    border-color: rgba(45,212,191,.22);
+    border-color: var(--theme-teal-border, rgba(45,212,191,.22));
     box-shadow:
-        0 12px 30px rgba(0,0,0,.22),
-        inset 0 1px 0 rgba(255,255,255,.025);
+        0 12px 30px var(--theme-shadow, rgba(0,0,0,.22)),
+        inset 0 1px 0 var(--theme-shadow, rgba(255,255,255,.025));
 }
 
 .admin-card-header {
     position: relative;
     min-height: 44px;
     padding: .7rem .9rem .7rem 1rem;
-    background: rgba(1,4,15,.30);
+    background: var(--theme-surface-alt, rgba(1,4,15,.30));
 }
 
 .admin-card-header::after {
@@ -613,8 +613,8 @@
     bottom: 9px;
     width: 3px;
     border-radius: 0 3px 3px 0;
-    background: #2dd4bf;
-    box-shadow: 0 0 9px rgba(45,212,191,.18);
+    background: var(--theme-teal-soft, #2dd4bf);
+    box-shadow: 0 0 9px var(--theme-shadow, rgba(45,212,191,.18));
 }
 
 .admin-card-header i {
@@ -633,20 +633,20 @@
 .elite-input,
 .form-select {
     min-height: 40px;
-    border-color: rgba(148,163,184,.20);
-    background: rgba(5,10,19,.82);
+    border-color: var(--theme-border, rgba(148,163,184,.20));
+    background: var(--theme-control, rgba(5,10,19,.82));
     transition: border-color .16s ease, background .16s ease, box-shadow .16s ease;
 }
 
 .elite-input:hover,
 .form-select:hover {
-    border-color: rgba(148,163,184,.30);
+    border-color: var(--theme-border, rgba(148,163,184,.30));
 }
 
 .elite-input:focus,
 .form-select:focus {
-    border-color: rgba(45,212,191,.62);
-    box-shadow: 0 0 0 .18rem rgba(45,212,191,.075), 0 0 18px rgba(45,212,191,.035);
+    border-color: var(--theme-teal-border, rgba(45,212,191,.62));
+    box-shadow: 0 0 0 .18rem var(--theme-shadow, rgba(45,212,191,.075)), 0 0 18px var(--theme-shadow, rgba(45,212,191,.035));
 }
 
 input[type="date"].elite-input {
@@ -654,12 +654,12 @@ input[type="date"].elite-input {
 }
 
 .btn-group {
-    box-shadow: 0 3px 10px rgba(0,0,0,.10);
+    box-shadow: 0 3px 10px var(--theme-shadow, rgba(0,0,0,.10));
 }
 
 .btn-group .btn {
     min-height: 40px;
-    border-color: rgba(148,163,184,.22);
+    border-color: var(--theme-border, rgba(148,163,184,.22));
     transition: all .15s ease;
 }
 
@@ -669,12 +669,12 @@ input[type="date"].elite-input {
 
 .btn-check:checked + .btn-outline-success,
 .btn-check:checked + .btn-outline-danger {
-    box-shadow: inset 0 0 12px rgba(255,255,255,.025);
+    box-shadow: inset 0 0 12px var(--theme-shadow, rgba(255,255,255,.025));
 }
 
 .current-value {
-    border-color: rgba(45,212,191,.22);
-    background: linear-gradient(135deg, rgba(20,184,166,.08), rgba(10,15,27,.25));
+    border-color: var(--theme-teal-border, rgba(45,212,191,.22));
+    background: linear-gradient(135deg, var(--theme-teal-soft, rgba(20,184,166,.08)), var(--theme-surface, rgba(10,15,27,.25)));
 }
 
 .form-actions {
@@ -684,11 +684,11 @@ input[type="date"].elite-input {
     margin-left: -.75rem;
     margin-right: -.75rem;
     padding: .75rem;
-    border: 1px solid rgba(148,163,184,.12);
+    border: 1px solid var(--theme-border, rgba(148,163,184,.12));
     border-radius: .7rem;
-    background: rgba(5,10,19,.88);
+    background: var(--theme-surface, rgba(5,10,19,.88));
     backdrop-filter: blur(12px);
-    box-shadow: 0 -8px 25px rgba(0,0,0,.16);
+    box-shadow: 0 -8px 25px var(--theme-shadow, rgba(0,0,0,.16));
 }
 
 .action-btn {
@@ -703,7 +703,7 @@ input[type="date"].elite-input {
 }
 
 .form-actions .btn-success {
-    box-shadow: 0 5px 14px rgba(34,197,94,.10);
+    box-shadow: 0 5px 14px var(--theme-shadow, rgba(34,197,94,.10));
 }
 
 @media (max-width: 767.98px) {
@@ -716,7 +716,7 @@ input[type="date"].elite-input {
     }
 
     .user-id-badge {
-        font-size: .7rem;
+        font-size: var(--site-font-small, 13px);
     }
 
     .admin-card-body {

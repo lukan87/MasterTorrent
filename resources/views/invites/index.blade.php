@@ -568,8 +568,8 @@
 
     /* Invite Row */
     .invite-row {
-        background: #262424;
-        border: 1px solid #1c202472;
+        background: var(--theme-surface, #262424);
+        border: 1px solid var(--theme-border, #1c202472);
         border-radius: 8px;
         transition:
             background .15s ease,
@@ -578,8 +578,8 @@
     }
 
     .invite-row:hover {
-        background: #202223;
-        border-color: #437db8;
+        background: var(--theme-surface, #202223);
+        border-color: var(--theme-blue-border, #437db8);
     }
 
 
@@ -591,14 +591,14 @@
 
     /* Invite Code */
     .invite-code code {
-        font-size: 14px;
+        font-size: var(--site-font-body, 13px);
         word-break: break-all;
     }
 
 
     /* Registration Link */
     .registration-link-input {
-        font-size: 12px;
+        font-size: var(--site-font-small, 13px);
         min-width: 0;
     }
 
@@ -610,7 +610,7 @@
 
     /* User Information */
     .invite-user-info {
-        font-size: 13px;
+        font-size: var(--site-font-body, 13px);
     }
 
 
