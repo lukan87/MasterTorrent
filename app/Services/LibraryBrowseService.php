@@ -19,7 +19,7 @@ class LibraryBrowseService
         $request->validate([
             'q' => ['nullable', 'string', 'max:200'],
             'year' => ['nullable', 'integer', 'between:1800,2200'],
-            'availability' => ['nullable', 'in:all,seeded'],
+            'availability' => ['nullable', 'in:all,seeded,online,torrents'],
             'sort' => ['nullable', 'in:latest,title,rating,year'],
         ]);
 
@@ -35,6 +35,20 @@ class LibraryBrowseService
                 ->whereColumn('torrents.tmdbid', $table.'.tmdbid')
                 ->where('tmdb_type', $type)
                 ->where('seeders', '>', 0)->toBase());
+        }
+
+        if (in_array($request->input('availability'), ['online', 'torrents'], true)) {
+            if ($request->input('availability') === 'online') {
+                $onlineTable = $type === 'movie' ? 'movies' : 'series';
+                $titles->whereExists(function ($query) use ($onlineTable, $table) {
+                    $query->selectRaw('1')->from($onlineTable)
+                        ->whereColumn($onlineTable.'.tmdb_id', $table.'.tmdbid')
+                        ->where('online_enabled', true)->whereNotNull('imdb_id')->where('imdb_id', '!=', '');
+                });
+            } else {
+                $titles->whereExists(Torrent::query()->selectRaw('1')
+                    ->whereColumn('torrents.tmdbid', $table.'.tmdbid')->where('tmdb_type', $type)->toBase());
+            }
         }
 
         [$column, $direction] = match ($request->input('sort', 'latest')) {

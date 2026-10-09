@@ -37,10 +37,14 @@ class ForumController extends Controller
     {
         $staff = ForumAccess::allows(auth()->user(), 'manage_topics');
         $categories = $this->forumService->categories(includePrivate: $staff);
+        request()->validate(['category_q' => ['nullable', 'string', 'max:100']]);
+        if ($filter = request('category_q')) {
+            $categories = $categories->filter(fn ($category) => mb_stripos($category->name.' '.$category->description, $filter) !== false);
+        }
         $deletedCategories = ForumAccess::allows(auth()->user(), 'delete_categories')
             ? $this->forumService->categories(deleted: true) : collect();
 
-        return view('forum.index', compact('categories', 'deletedCategories'));
+        return \App\Services\PageBrowse::view('forum.index', compact('categories', 'deletedCategories'));
     }
 
     public function category(Request $request, ForumCategory $category)
@@ -60,7 +64,7 @@ class ForumController extends Controller
         }
         $topics->appends(['sort' => $sort]);
 
-        return view('forum.category', compact('category', 'topics', 'sort'));
+        return \App\Services\PageBrowse::view('forum.category', compact('category', 'topics', 'sort'));
     }
 
     public function create(ForumCategory $category)
@@ -117,7 +121,9 @@ class ForumController extends Controller
             $targetId = (new ForumReadService)->unread(auth()->id())->where('topic_id', $topic->id)
                 ->oldest('created_at')->oldest('id')->value('id');
             if ($targetId) {
-                return redirect()->route('forum.topic', ['category' => $category->slug, 'topic' => $topic->slug, 'post' => $targetId]);
+                $url = route('forum.topic', ['category' => $category->slug, 'topic' => $topic->slug, 'post' => $targetId]);
+                if (\App\Services\PageBrowse::partial()) return \App\Services\PageBrowse::json(['redirect' => $url]);
+                return redirect($url);
             }
 
             return redirect()->route('forum.topic', ['category' => $category->slug, 'topic' => $topic->slug])
@@ -135,6 +141,7 @@ class ForumController extends Controller
                 })->count();
                 $page = intdiv($newer, 15) + 1;
             }
+            if (\App\Services\PageBrowse::partial()) return \App\Services\PageBrowse::json(['redirect' => route('forum.topic', ['category' => $category->slug, 'topic' => $topic->slug, 'page' => $page]).'#post-'.$target->id]);
             session()->reflash();
 
             return redirect()->route('forum.topic', ['category' => $category->slug, 'topic' => $topic->slug, 'page' => $page])
@@ -155,12 +162,12 @@ class ForumController extends Controller
         $renderer->prepareMentions($displayed);
         $isFollowing = auth()->check() && $topic->subscriptions()->where('user_id', auth()->id())->exists();
         // Render before marking posts read: a failed response must not consume unread posts.
-        $html = view('forum.topic', compact('category', 'topic', 'firstPost', 'replies', 'isFollowing', 'latestReplyPage', 'renderer'))->render();
+        $html = view(\App\Services\PageBrowse::partial() ? 'forum.topic-results' : 'forum.topic', compact('category', 'topic', 'firstPost', 'replies', 'isFollowing', 'latestReplyPage', 'renderer'))->render();
         if (auth()->check()) {
             (new ForumReadService)->markDisplayed(auth()->id(), $displayed);
         }
 
-        return response($html);
+        return \App\Services\PageBrowse::partial() ? \App\Services\PageBrowse::json(['html' => $html, 'replyCount' => $replies->total()]) : response($html);
     }
 
     public function preview(Request $request)
@@ -188,6 +195,8 @@ class ForumController extends Controller
 
             return $post;
         }, 3);
+
+        if ($request->expectsJson()) return \App\Services\PageBrowse::json(['url' => route('forum.topic', ['category' => $category->slug, 'topic' => $topic->slug, 'page' => 1]).'#post-'.$post->id, 'message' => 'Reply posted successfully.']);
 
         return redirect()->route('forum.topic', ['category' => $category->slug, 'topic' => $topic->slug, 'post' => $post->id])
             ->with('success', 'Reply posted successfully.')->with('forum_draft_saved', 'reply:'.$topic->id);
@@ -235,6 +244,7 @@ class ForumController extends Controller
         $this->verifyPost($category, $topic, $post);
         $this->authorizeEdit($post);
 
+        if (request()->expectsJson()) return \App\Services\PageBrowse::json(['body' => $post->body, 'update_url' => route('forum.post.update', ['category' => $category->slug, 'topic' => $topic->slug, 'post' => $post->id])]);
         return view('forum.edit-post', compact('category', 'topic', 'post'));
     }
 
@@ -244,6 +254,14 @@ class ForumController extends Controller
         $this->authorizeEdit($post);
         $validated = $request->validate(['body' => ['required', 'string', 'min:3', 'max:10000']]);
         $post->update(['body' => $validated['body'], 'edited_at' => now()]);
+
+        if ($request->expectsJson()) {
+            $post->load(['user', 'likes.user']);
+            $renderer = new ForumRenderer;
+            $renderer->prepareMentions(collect([$post]));
+            $original = $post->id === $topic->posts()->oldest('id')->value('id');
+            return \App\Services\PageBrowse::json(['html' => view('forum.partials.post', compact('category', 'topic', 'post', 'renderer', 'original'))->render()]);
+        }
 
         return redirect()->route('forum.topic', ['category' => $category->slug, 'topic' => $topic->slug, 'post' => $post->id])
             ->with('success', 'Post updated successfully.')->with('forum_draft_saved', 'edit:'.$post->id);
@@ -301,13 +319,13 @@ class ForumController extends Controller
         $results = $this->forumService->search($query, max(1, Paginator::resolveCurrentPage()), ForumAccess::allows(auth()->user(), 'manage_topics'));
         $results->appends(['q' => $query]);
 
-        return view('forum.search', compact('query', 'results'));
+        return \App\Services\PageBrowse::view('forum.search', compact('query', 'results'));
     }
 
     public function myTopics()
     {
         $topics = $this->forumService->participatedTopics(auth()->id(), max(1, Paginator::resolveCurrentPage()), ForumAccess::allows(auth()->user(), 'manage_topics'));
 
-        return view('forum.my-topics', compact('topics'));
+        return \App\Services\PageBrowse::view('forum.my-topics', compact('topics'));
     }
 }

@@ -19,11 +19,11 @@
             <div class="modern-trending-heading-text">
 
                 <h4 class="modern-trending-title">
-                    Trending Torrents
+                    Hot Torrents
                 </h4>
 
                 <div class="modern-trending-subtitle">
-                    Most active torrents right now
+                    Ranked by recent activity · refreshed every 15 minutes
                 </div>
 
             </div>
@@ -38,7 +38,7 @@
             data-bs-target="#ttTrending"
             aria-expanded="true"
             aria-controls="ttTrending"
-            aria-label="Toggle trending torrents"
+            aria-label="Toggle hot torrents"
         >
             <i class="bi bi-chevron-down"></i>
         </button>

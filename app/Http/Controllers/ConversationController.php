@@ -25,6 +25,19 @@ class ConversationController extends Controller
 
         $conversations = $this->conversationList($userId, $request);
 
+        if ($request->header('X-Messenger-Pane') === '1' && $request->expectsJson()) {
+            return \App\Services\PageBrowse::json([
+                'pane' => view('messages.pane', ['activeConversation' => null, 'messages' => collect(), 'hasOlder' => false])->render(),
+                'sidebar' => view('messages.sidebar', ['conversations' => $conversations, 'activeConversation' => null])->render(),
+                'unreadCount' => $this->unreadCount($userId),
+            ]);
+        }
+
+        if ($request->header('X-Messenger-Sidebar') === '1' && $request->expectsJson()) {
+            return \App\Services\PageBrowse::json(['unreadCount' => $this->unreadCount($userId),
+                'sidebar' => view('messages.sidebar', ['conversations' => $conversations, 'activeConversation' => null])->render()]);
+        }
+
         return view('messages.index', [
             'conversations' => $conversations,
             'activeConversation' => null,
@@ -73,6 +86,8 @@ class ConversationController extends Controller
 
         $limit = 200;
         $before = $request->integer('before');
+        $after = $request->header('X-Messenger-Thread') === '1' && $request->expectsJson()
+            ? (int) ($request->validate(['after' => 'nullable|integer|min:0'])['after'] ?? 0) : 0;
 
         $query = $conversation->messages()->with(['sender', 'massDelivery.massMessage']);
 
@@ -80,7 +95,11 @@ class ConversationController extends Controller
             $query->where('id', '<', $before);
         }
 
-        $messages = $query->orderByDesc('id')->limit($limit)->get()->reverse()->values();
+        if ($after > 0 && $before <= 0) {
+            $messages = $query->where('id', '>', $after)->orderBy('id')->limit($limit)->get();
+        } else {
+            $messages = $query->orderByDesc('id')->limit($limit)->get()->reverse()->values();
+        }
 
         $incomingIds = $messages->where('receiver_id', $userId)->where('is_read', false)->pluck('id');
         if ($incomingIds->isNotEmpty()) {
@@ -102,6 +121,24 @@ class ConversationController extends Controller
         }
 
         $conversations = $this->conversationList($userId, $request);
+        if ($request->header('X-Messenger-Pane') === '1' && $request->expectsJson()) {
+            $activeConversation = $conversation->loadMissing(['userOne', 'userTwo']);
+            return \App\Services\PageBrowse::json([
+                'pane' => view('messages.pane', compact('activeConversation', 'messages', 'hasOlder'))->render(),
+                'sidebar' => view('messages.sidebar', compact('conversations', 'activeConversation'))->render(),
+                'unreadCount' => $this->unreadCount($userId),
+            ]);
+        }
+
+        if ($request->header('X-Messenger-Thread') === '1' && $request->expectsJson()) {
+            $activeConversation = $conversation;
+            return \App\Services\PageBrowse::json([
+                'html' => view('messages.thread', compact('messages', 'hasOlder', 'activeConversation'))->render(),
+                'unreadCount' => $this->unreadCount($userId),
+                'sidebar' => view('messages.sidebar', compact('conversations', 'activeConversation'))->render(),
+                'hasOlder' => $hasOlder,
+            ]);
+        }
 
         return view('messages.index', compact('conversations', 'conversation', 'messages', 'hasOlder'))
             ->with('activeConversation', $conversation);
@@ -130,6 +167,12 @@ class ConversationController extends Controller
     | Shared query builder
     |--------------------------------------------------------------------------
     */
+
+    private function unreadCount(int $userId): int
+    {
+        return \Illuminate\Support\Facades\Cache::remember("user_unread_count_{$userId}", 30,
+            fn () => \App\Models\Message::where('receiver_id', $userId)->where('is_read', false)->count());
+    }
 
     private function conversationList(int $userId, Request $request)
     {

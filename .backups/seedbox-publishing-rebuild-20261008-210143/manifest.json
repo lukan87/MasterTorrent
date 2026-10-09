@@ -1,0 +1,6 @@
+{
+  "app/Jobs/PublishSeedboxTorrent.php": {
+    "before_sha256": "1dfce9fcb85d4ded64db00c284b8f22817542cb6048b6db225d6fecc264b5dce",
+    "installed_sha256": "a1ce3c513ec2db4c88de9faf678929c81e1ad9138812dda152569922afe28763"
+  }
+}

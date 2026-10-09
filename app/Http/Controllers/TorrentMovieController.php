@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use App\Models\TorrentMovie;
 use App\Services\TorrentSubscriptionService;
-use App\Services\MediaDisplayService;
 use Illuminate\Support\Facades\Auth;
 
 class TorrentMovieController extends Controller
@@ -22,7 +21,7 @@ class TorrentMovieController extends Controller
         $query = request('q');
 
         $browser = app(\App\Services\LibraryBrowseService::class);
-        $movies = $browser->paginate(TorrentMovie::query(), 'movie');
+        $movies = $browser->paginate(app(\App\Services\LibraryCatalogueService::class)->query('movies'), 'movie');
         if ($browser->isPartial()) {
             return $browser->response('library.movies.results', compact('movies', 'query'));
         }
@@ -30,7 +29,7 @@ class TorrentMovieController extends Controller
         $health = $browser->seederHealth();
 
         // ── Featured row (hero + cards) ──
-        $featured = TorrentMovie::query()
+        $featured = app(\App\Services\LibraryCatalogueService::class)->query('movies')
     ->whereNotNull('backdrop_path')
     ->orderByDesc('created_at')
     
@@ -52,83 +51,91 @@ class TorrentMovieController extends Controller
      */
     public function show($tmdbid, $slug = null)
     {
+        if (request()->header('X-Library-Detail') === 'subscription' && request()->expectsJson()) {
+            $libraryEntry = TorrentMovie::where('tmdbid', $tmdbid)->first();
+            $torrents = Torrent::where('tmdbid', $tmdbid)->where('tmdb_type', 'movie')->limit(1)->get(['id', 'imdbid']);
+            abort_unless($libraryEntry || $torrents->isNotEmpty() || \App\Models\Movie::where('tmdb_id', $tmdbid)->exists(), 404);
+            $service = app(TorrentSubscriptionService::class);
+            $isSubscribed = Auth::check() && $service->isSubscribedByTmdb(Auth::user(), (string) $tmdbid);
+            $subscribers = $service->subscribers($torrents->first()?->imdbid, (string) $tmdbid);
+            return \App\Services\PageBrowse::json(['html' => view('library.movies.subscription', compact('tmdbid', 'isSubscribed', 'subscribers', 'libraryEntry', 'torrents'))->render()]);
+        }
+
         $torrents = Torrent::where('tmdbid', $tmdbid)
+            ->where('tmdb_type', 'movie')
             ->orderByDesc('seeders')
             ->get();
 
         // Build the rich premium header payload (same as the torrent detail page).
         $firstTorrent = $torrents->first();
-        $display = $firstTorrent
-            ? app(MediaDisplayService::class)->getDisplayPayload(
-                (int) $tmdbid,
-                'movie',
-                $firstTorrent->imdbid
-            )
-            : null;
-
-        // Try the local library record first; fall back to TMDB API.
+        $onlineMedia = \App\Models\Movie::where('tmdb_id', $tmdbid)->first();
+        $canWatchOnline = app(\App\Services\LibraryCatalogueService::class)->playable($onlineMedia)
+            && (Auth::user()?->user_class ?? 0) >= \App\Models\UserClass::USER;
         $libraryEntry = TorrentMovie::where('tmdbid', $tmdbid)->first();
-
-        $movie = cache()->remember("tmdb_movie_v2_{$tmdbid}", 86400, function () use ($tmdbid) {
-            return Http::get("https://api.themoviedb.org/3/movie/{$tmdbid}", [
-               'api_key' => config('services.tmdb.key'),
-               'append_to_response' => 'recommendations,credits,videos',
-               'language' => 'en-US',
-            ])->json();
-        });
+        [$movie, $display] = app(\App\Services\LibraryCatalogueService::class)->metadata(
+            'movies', (int) $tmdbid, $libraryEntry, $onlineMedia, $firstTorrent
+        );
 
         // Build "You Might Like" recommendations from TMDB,
 // then check which recommendations exist in our online database.
-$recommendationIds = collect($movie['recommendations']['results'] ?? [])
-    ->take(8)
-    ->pluck('id')
-    ->filter()
-    ->values();
+        $recommendations = [];
+        if (request()->header('X-Library-Detail') === 'recommendations' || request()->boolean('full_details')) {
+            $recommendationIds = collect($movie['recommendations']['results'] ?? [])
+                ->take(8)
+                ->pluck('id')
+                ->filter()
+                ->values();
 
-// Find matching movies already available in our database.
-$databaseMovies = \App\Models\Movie::whereIn('tmdb_id', $recommendationIds)
-    ->get()
-    ->keyBy(fn ($movie) => (int) $movie->tmdb_id);
+            // Find matching movies already available in our database.
+            $databaseMovies = \App\Models\Movie::whereIn('tmdb_id', $recommendationIds)
+                ->get()
+                ->keyBy(fn ($movie) => (int) $movie->tmdb_id);
 
-$recommendations = collect($movie['recommendations']['results'] ?? [])
-    ->take(8)
-    ->map(function ($r) use ($databaseMovies) {
+            $recommendations = collect($movie['recommendations']['results'] ?? [])
+                ->take(8)
+                ->map(function ($r) use ($databaseMovies) {
 
-        $databaseMovie = $databaseMovies->get((int) $r['id']);
+                    $databaseMovie = $databaseMovies->get((int) $r['id']);
 
-        return [
-            'id'    => $r['id'],
+                    return [
+                        'id'    => $r['id'],
 
-            'title' => $r['title'] ?? $r['name'] ?? null,
+                        'title' => $r['title'] ?? $r['name'] ?? null,
 
-            'poster' => isset($r['poster_path'])
-                ? "https://image.tmdb.org/t/p/w342{$r['poster_path']}"
-                : null,
+                        'poster' => isset($r['poster_path'])
+                            ? "https://image.tmdb.org/t/p/w342{$r['poster_path']}"
+                            : null,
 
-            'rating' => $r['vote_average'] ?? null,
+                        'rating' => $r['vote_average'] ?? null,
 
-            'year' => substr(
-                $r['release_date'] ?? $r['first_air_date'] ?? '',
-                0,
-                4
-            ),
+                        'year' => substr(
+                            $r['release_date'] ?? $r['first_air_date'] ?? '',
+                            0,
+                            4
+                        ),
 
-            // Is this movie available on our website?
-            'in_database' => $databaseMovie !== null,
+                        // Is this movie available on our website?
+                        'in_database' => app(\App\Services\LibraryCatalogueService::class)->playable($databaseMovie),
 
-            // Our internal movie page
-            'url' => $databaseMovie
-                ? route('movies.show', [
-                    $databaseMovie->id,
-                    $databaseMovie->slug
-                ])
-                : null,
-        ];
-    })
-    ->all();
+                        // Our internal movie page
+                        'url' => route('library.movies.show', [$r['id'], Str::slug($r['title'] ?? $r['name'] ?? '')]),
+                    ];
+                })
+                ->all();
+
+        }
+
+        if (request()->header('X-Library-Detail') === 'recommendations' && request()->expectsJson()) {
+            return \App\Services\PageBrowse::json(['html' => view('library.partials.recommendations', compact('recommendations'))->render()]);
+        }
+
+        if ($onlineMedia && !session()->has('catalogue_viewed_movies_'.$onlineMedia->id)) {
+            session(['catalogue_viewed_movies_'.$onlineMedia->id => true]);
+            $onlineMedia->recordView();
+        }
 
         // Generate correct slug
-        $correctSlug = Str::slug($movie['title'] ?? 'movie');
+        $correctSlug = Str::slug($display['title'] ?? 'movie');
 
         // Optional: redirect if slug is wrong
         if ($slug !== $correctSlug) {
@@ -149,16 +156,9 @@ $recommendations = collect($movie['recommendations']['results'] ?? [])
         $subscribers = app(TorrentSubscriptionService::class)
             ->subscribers($firstTorrent?->imdbid, (string) $tmdbid);
 
-        // "Watch online" link — only when the movie exists in the online catalogue
-        // (movies table). The movies.show route is keyed on the DB primary id + slug.
-        $watchMovie = \App\Models\Movie::where('tmdb_id', $tmdbid)->first();
-        $watchUrl = $watchMovie
-            ? route('movies.show', [$watchMovie->id, $watchMovie->slug])
-            : null;
-
         return view('library.movies.show', compact(
             'movie', 'torrents', 'tmdbid', 'isSubscribed',
-            'subscribers', 'recommendations', 'display', 'libraryEntry', 'watchUrl'
+            'subscribers', 'recommendations', 'display', 'libraryEntry', 'onlineMedia', 'canWatchOnline'
         ));
     }
 
@@ -186,6 +186,10 @@ public function subscribe($tmdbid, TorrentSubscriptionService $service)
         $source ? $source->imdbid : null
     );
 
+    if (request()->expectsJson()) {
+        return \App\Services\PageBrowse::json(['message' => $ok ? 'Subscribed.' : 'Already subscribed.']);
+    }
+
     if (! $ok) {
         return redirect()->route('library.movies.show', [$tmdbid, $tmdb->slug])
             ->with('info', 'You are already subscribed to this movie.');
@@ -203,6 +207,10 @@ public function unsubscribe($tmdbid, TorrentSubscriptionService $service)
     }
 
     $service->unsubscribeByTmdb(Auth::user(), (string) $tmdbid);
+
+    if (request()->expectsJson()) {
+        return \App\Services\PageBrowse::json(['message' => 'Subscription removed.']);
+    }
 
     return redirect()->route('library.movies.show', [$tmdbid, $tmdb->slug])
         ->with('success', 'Subscription removed. You will no longer receive notifications for this movie.');

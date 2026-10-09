@@ -18,6 +18,19 @@ class HomeController extends Controller
 
     public function index(Request $request)
     {
+        if ($request->hasHeader('X-Torrent-Featured')) {
+            $card = app(\App\Services\Torrent\TorrentFeaturedService::class)
+                ->card($request->header('X-Torrent-Featured'), $request);
+            return \App\Services\PageBrowse::json([
+                'html' => view('torrents.partials.featured-card', $card)->render(),
+            ]);
+        }
+        if ($request->header('X-Home-Widget') && $request->expectsJson()) {
+            $widget = $request->header('X-Home-Widget');
+            abort_unless(in_array($widget, ['trending', 'polls', 'online'], true), 422);
+            return \App\Services\PageBrowse::json(['html' => view('home-widgets.'.$widget, $this->homeService->getWidgetData($widget))->render()]);
+        }
+
         $highlightRequested = $request->filled('shout') && !$request->user()->chatblock;
         if ($highlightRequested) {
             // Reject malformed links before doing dashboard work.
@@ -25,6 +38,10 @@ class HomeController extends Controller
         }
 
         $data = $this->homeService->getDashboardData();
+        $featured = app(\App\Services\Torrent\TorrentFeaturedService::class);
+        $data['featuredCards'] = [
+            $featured->card('sticky', $request), $featured->card('hot', $request),
+        ];
         if ($highlightRequested) {
             $shout = Shoutbox::find($request->integer('shout'));
             if ($shout) {

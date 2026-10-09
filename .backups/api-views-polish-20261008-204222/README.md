@@ -1,0 +1,1 @@
+API view presentation restore point. Only four views, two shared view partials and a scoped stylesheet changed. No database, configuration, authentication or upload processing changes. Restore originals only after checking subsequent edits; refresh Blade views afterward.

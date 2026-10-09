@@ -146,7 +146,7 @@ class SeedboxController extends Controller
    public function showTorrents(Seedbox $seedbox, Request $request)
 {
     $service = $this->seedboxService($seedbox);
-    $request->validate(['search' => 'nullable|string|max:255']);
+    $request->validate(['search' => 'nullable|string|max:255', 'status' => 'nullable|in:all,seeding,downloading,paused']);
     $result = $service->getTorrents();
     $connectionError = $result['error'] ?? null;
     $isConnected = $connectionError === null;
@@ -159,6 +159,11 @@ class SeedboxController extends Controller
     if ($request->filled('search')) {
         $search = strtolower($request->search);
         $allTorrents = array_filter($allTorrents, fn($torrent) => str_contains(strtolower($torrent[4] ?? ''), $search));
+    }
+
+    if ($request->filled('status') && $request->status !== 'all') {
+        $state = ['seeding' => 1, 'downloading' => 2, 'paused' => 0][$request->status];
+        $allTorrents = array_filter($allTorrents, fn ($torrent) => (int) ($torrent[28] ?? 0) === $state);
     }
 
     // Pagination
@@ -186,7 +191,7 @@ class SeedboxController extends Controller
         'paused' => count(array_filter($allTorrents, fn($t) => ($t[28] ?? 0) == 0)),
     ];
 
-    return view('seedboxes.torrents', compact('seedbox', 'torrents', 'stats', 'isConnected', 'connectionError'));
+    return \App\Services\PageBrowse::view('seedboxes.torrents', compact('seedbox', 'torrents', 'stats', 'isConnected', 'connectionError'));
 }
 
 
@@ -392,11 +397,11 @@ if ($type === 'tv' && isset($tvData)) {
         $description .= "\n\n{$imdbDescription}";
     }
 
-    if ($mediainfo) {
-        $parsedMedia = MediaInfoParser::parse($mediainfo);
-        $description .= "\n\n" .
-            MediaInfoParser::toDescription($parsedMedia);
-    }
+    // if ($mediainfo) {
+    //     $parsedMedia = MediaInfoParser::parse($mediainfo);
+    //     $description .= "\n\n" .
+    //         MediaInfoParser::toDescription($parsedMedia);
+    // }
 
     /* =========================================================
        6️⃣ UPLOAD TO TRACKER

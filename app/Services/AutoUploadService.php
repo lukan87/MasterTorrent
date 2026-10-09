@@ -21,7 +21,7 @@ class AutoUploadService
     // 2️⃣ Proper torrent filename
     $safeName = Str::slug($torrentName) ?: 'torrent';
     $fileName = $safeName . '.torrent';
-    $tempPath = $tempDir . '/' . $fileName;
+    $tempPath = $tempDir . '/' . Str::uuid() . '.torrent';
 
     file_put_contents($tempPath, $torrentContent);
 
@@ -41,10 +41,11 @@ class AutoUploadService
     // 4️⃣ Call TorrentUploadService DIRECTLY
     $uploadService = app(\App\Services\Torrent\TorrentUploadService::class);
 
-    $result = $uploadService->handle($request, Auth::user());
-
-    // 5️⃣ Cleanup temp file
-    @unlink($tempPath);
+    try {
+        $result = $uploadService->handle($request, Auth::user());
+    } finally {
+        @unlink($tempPath);
+    }
 
     return $result; // ← return array with ['torrent', 'created']
 }

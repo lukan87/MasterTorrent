@@ -55,9 +55,11 @@
         </div>
     </div>
 </div>
+@if(empty($lazyAchievements) || request()->boolean('full_details'))
 @foreach($achievementCategories as $category)
     @include('profile.partials.achievement-modal', ['category' => $category])
 @endforeach
+@endif
 @include('profile.partials.achievements-css')
 @push('scripts')
 <script>

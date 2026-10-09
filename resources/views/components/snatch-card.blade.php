@@ -1,411 +1,106 @@
-
-
 @php
-
-$isSeeding = $history->seeder ?? false;
-
-$statusClass = $isSeeding ? 'is-seeding' : 'not-seeding';
-
-$ratio = $history->actual_downloaded > 0
-? $history->uploaded / $history->actual_downloaded
-: ($history->uploaded > 0 ? INF : 0);
-
-$ratioDisplay = $history->actual_downloaded > 0
-? number_format($ratio,2)
-: '∞';
-
-$ratioPercent = min(100,$ratio*100);
-
-$remainingSeed = max(0,$requiredSeed - ($history->seedtime ?? 0));
-
-$progress = min(100,(($history->seedtime ?? 0) / $requiredSeed) * 100);
-
-/* DOWNLOAD PROGRESS */
-
-$size = $history->torrent->size ?? 0;
-
-$actualDownloaded = $history->actual_downloaded ?? $history->downloaded;
-
-$seedtime = ($history->seedtime ?? 0) > 0
-    ? $history->seedtime
-    : ($history->total_seedtime ?? 0);
-
-    $ratioMet = $ratio >= 1;
-    $seedMet = $seedtime >= 43200;
-
-// Detect completion properly (DB OR fallback)
-$isCompleted = !empty($history->completed_at)
-    || ($size > 0 && $actualDownloaded >= $size);
-
-// Avoid 0B / not started torrents
-$hasStarted = $actualDownloaded > 0;
-
-// Final rule
-$hasMetRequirements = $ratio >= 1 || $seedtime >= 43200;
-
-$shouldWarn = !$isCompleted
-    && $hasStarted
-    && !$hasMetRequirements;
-
-$downloadPercent = $size > 0
-? ($actualDownloaded / $size) * 100
-: 0;
-
-$remainingDownload = max(0,$size - $actualDownloaded);
-
-/* CATEGORY */
-
-$cat = $history->torrent->category_id ?? 0;
-
-$movieCategories=[1,2,5,6,9,10,11,12,16,17,18,19,24,25,31,32,54,55,81,82];
-$tvCategories=[13,14,20,21];
-$musicCategories=[28];
-$gameCategories=[30,33];
-$xxxCategories=[27,34];
-$softwareCategories=[26];
-$docCategories=[56,57];
-
-$categoryIcon='bi-file-earmark';
-
-if(in_array($cat,$movieCategories)) $categoryIcon='bi-film';
-elseif(in_array($cat,$tvCategories)) $categoryIcon='bi-tv';
-elseif(in_array($cat,$musicCategories)) $categoryIcon='bi-music-note';
-elseif(in_array($cat,$gameCategories)) $categoryIcon='bi-controller';
-elseif(in_array($cat,$xxxCategories)) $categoryIcon='bi-heart-fill';
-elseif(in_array($cat,$softwareCategories)) $categoryIcon='bi-cpu';
-elseif(in_array($cat,$docCategories)) $categoryIcon='bi-camera-reels';
-
-$hnrDeadline = !empty($history->completed_at)
-? $history->completed_at->copy()->addDays(7)
-: null;
-
-$isOwner = $history->torrent && $history->torrent->owner == $history->user_id;
-
+    $isPeer = $history instanceof \App\Models\Peer;
+    $record = $isPeer ? ($history->relationLoaded('snatchHistory') ? $history->getRelation('snatchHistory') : null) : $history;
+    $torrent = $history->torrent;
+    $isOwner = $torrent && auth()->check() && (int) $torrent->owner === (int) auth()->id();
+    $ownsHistory = auth()->check() && (int) auth()->id() === (int) $history->user_id;
+    $uploaded = (int) ($isPeer && $type === 'leeching' ? ($record->uploaded ?? $history->uploaded) : $history->uploaded);
+    $downloaded = (int) ($isPeer && $type === 'leeching' ? ($record->downloaded ?? $history->downloaded) : $history->downloaded);
+    $actualDownloaded = (int) ($isPeer && $type === 'leeching' ? ($record->actual_downloaded ?? $history->downloaded) : ($history->actual_downloaded ?? $downloaded));
+    $actualUploaded = (int) ($isPeer && $type === 'leeching' ? ($record->actual_uploaded ?? $history->uploaded) : ($history->actual_uploaded ?? $uploaded));
+    $seedtime = (int) ($isPeer ? ($history->total_seedtime ?? $record->seedtime ?? 0) : $history->seedtime);
+    $seedTarget = max(1, (int) $requiredSeed);
+    $remainingSeed = max(0, $seedTarget - $seedtime);
+    $seedProgress = max(0, min(100, $seedtime / $seedTarget * 100));
+    $ratio = $actualDownloaded > 0 ? $uploaded / $actualDownloaded : ($uploaded > 0 ? INF : 0);
+    $ratioDisplay = is_infinite($ratio) ? '∞' : number_format($ratio, 2);
+    $size = (int) ($torrent->size ?? 0);
+    $downloadProgress = $size > 0 ? max(0, min(100, $actualDownloaded / $size * 100)) : 0;
+    $completedAt = $record->completed_at ?? null;
+    $complete = $completedAt || ($size > 0 && $actualDownloaded >= $size);
+    $active = (bool) $history->active;
+    $seeding = $active && (bool) $history->seeder;
+    $hitrun = (bool) ($record->hitrun ?? false);
+    $requirementsMet = $ratio >= 1 || $remainingSeed === 0;
+    $canDownload = $ownsHistory && $torrent && !$requirementsMet && !$isOwner;
+    $canBuySeedtime = $ownsHistory && $torrent && $record && !$isOwner && !$requirementsMet
+        && ($actualDownloaded > 0 || $downloaded > 0) && !in_array($type, ['hnr', 'fixer']);
+    $canClearHitrun = $ownsHistory && $torrent && $record && !$isOwner && $hitrun;
+    $hasDownloaded = $actualDownloaded > 0 || $downloaded > 0;
+    $status = $hitrun ? 'Hit & Run' : ($seeding ? 'Seeding' : ($active ? 'Downloading' : 'Offline'));
+    $tone = $hitrun ? 'danger' : ($seeding ? 'success' : ($active ? 'info' : 'muted'));
+    $addedAt = $record->created_at ?? $history->created_at;
+    $deadline = $completedAt && !$requirementsMet && !$hitrun ? $completedAt->copy()->addDays(config('hitrun.enforce_days', 7)) : null;
 @endphp
-
-
-<div class="glass-card snatch-card mb-4 {{ $type=='hnr' ? 'not-seeding' : ($type=='seeding' ? 'is-seeding':'') }} {{ $statusClass }}">
-
-<div class="row align-items-center">
-
-
-{{-- CATEGORY --}}
-@if($type=='snatchlist')
-<div class="col-md-1 text-center category-icon">
-<i class="bi {{ $categoryIcon }}"></i>
-</div>
-@endif
-
-
-
-{{-- TORRENT INFO --}}
-<div class="col-md-5">
-
-<strong class="torrent-title">
-
-@if($history->torrent)
-
-<a href="{{ route('torrents.show',['id'=>$history->torrent->id]) }}">
-<i class="bi bi-file-earmark-arrow-down"></i>
-{{ $history->torrent->name }}
-</a>
-
-<div class="small text-muted mt-1">
-
-<i class="bi bi-calendar3"></i>
-Snatched: {{ $history->created_at->format('Y-m-d H:i') }}
-
-<br>
-
-@if(!empty($history->completed_at))
-
-<i class="bi bi-check-circle"></i>
-Completed: {{ $history->completed_at->format('Y-m-d H:i') }}
-
-<br>
-
-@endif
-
-{{-- TORRENT STATUS MESSAGE --}}
-
-@if($history->hitrun)
-
-<div class="text-danger mt-1">
-<i class="bi bi-exclamation-triangle-fill"></i>
-
-<span data-bs-toggle="tooltip"
-title="Continue seeding to cancel this Hit & Run">
-<strong>Hit & Run</strong>
-</span>
-</div>
-
-
-@elseif($isOwner)
-
-<div class="text-info mt-1">
-
-<i class="bi bi-person-check"></i>
-
-<strong>Owner of this torrent</strong>
-
-<div class="small text-muted">
-You uploaded this torrent.
-</div>
-
-</div>
-
-
-@elseif($history->completed_at && $history->hnr_satisfied)
-
-<div class="text-success mt-1">
-
-<i class="bi bi-check-circle-fill"></i>
-
-<strong>Torrent completed.</strong>
-
-
-
-@if($ratioMet && $seedMet)
-    ✔ Ratio ≥ 1.00 and seedtime ≥ 12 hours completed
-@elseif($ratioMet)
-    ✔ Ratio ≥ 1.00 completed
-@elseif($seedMet)
-    ✔ Seedtime ≥ 12 hours completed
-@endif
-
-<br>
-
-<div class="small text-muted">
-You can delete it from your client or continue seeding to help the community.
-</div>
-
-
-
-</div>
-
-@elseif($isCompleted && $hasMetRequirements)
-
-<div class="text-success mt-1">
-
-<i class="bi bi-check-circle-fill"></i>
-
-<strong>Torrent requirement completed</strong>
-
-<div class="small text-muted">
-
-
-
-
-@if($ratioMet && $seedMet)
-    ✔ Ratio ≥ 1.00 and seedtime ≥ 12 hours completed
-@elseif($ratioMet)
-    ✔ Ratio ≥ 1.00 completed
-@elseif($seedMet)
-    ✔ Seedtime ≥ 12 hours completed
-@endif
-
-<br>
-
-Thank you for supporting the community ❤️
-
-</div>
-
-</div>
-
-@elseif($shouldWarn)
-
-<div class="text-warning mt-1">
-
-<i class="bi bi-arrow-down-circle"></i>
-
-<strong>This torrent must be completed and seeded to avoid Hit & Run</strong>
-
-<div class="small">
-
-Downloaded:
-<strong>{{ \App\Helpers\FormatHelper::formatSize($history->downloaded) }}</strong>
-
-{{ $history->completed_at 
-    ? '| Completed at: '.$history->completed_at->format('Y-m-d H:i') 
-    : '| Not completed yet' }}
-
-@if(($history->actual_downloaded ?? 0) != $history->downloaded)
-<br>
-<span class="small text-muted">
-Actual: {{ \App\Helpers\FormatHelper::formatSize($history->actual_downloaded) }}
-</span>
-@endif
-
-<br>
-
-Left to download:
-<strong>{{ \App\Helpers\FormatHelper::formatSize($remainingDownload) }}</strong>
-
-</div>
-
-</div>
-
-
-@elseif($hnrDeadline && !$hasMetRequirements)
-
-<div class="text-warning mt-1">
-
-<i class="bi bi-hourglass-split"></i>
-
-You have until
-<strong>{{ $hnrDeadline->format('Y-m-d H:i') }}</strong>
-
-<div class="small">
-{{ $hnrDeadline->diffForHumans() }} left to meet the seeding requirement
-</div>
-
-</div>
-
-@endif
-
-
-</div>
-
-@else
-<span class="text-danger">Torrent Deleted</span>
-@endif
-
-</strong>
-
-@if(
-    $type=='snatchlist' 
-    && !$isSeeding 
-    && $remainingSeed > 0 
-    && !empty($history->completed_at)
-    && $ratio < 1
-)
-
-<div class="seed-warning {{ $remainingSeed < 7200 ? 'urgent-hnr' : '' }}">
-⚠ This torrent must be seeded to avoid Hit & Run
-</div>
-
-@endif
-
-@if($type=='snatchlist' && !$hasMetRequirements)
-<div class="mt-2">
-    <form action="{{ route('bonus.buySeedtime') }}" method="POST" class="d-inline">
-        @csrf
-        <input type="hidden" name="torrent_id" value="{{ $history->torrent_id }}">
-        <button type="submit"
-            class="btn btn-primary btn-sm"
-            data-bs-toggle="tooltip"
-            title="Buy seedtime ({{ config('seedbonus.shop.seedtime', 1000) }} seedbonus)">
-            <i class="bi bi-coin"></i> Buy seedtime
-        </button>
-    </form>
-</div>
-@endif
-
-
-
-{{-- SEED PROGRESS --}}
-@if($type=='snatchlist' || $type=='need')
-
-<div class="mt-3">
-
-<div class="d-flex justify-content-between small mb-1">
-
-<span>Seed Progress</span>
-
-<span class="{{ $remainingSeed>0?'text-warning':'text-success' }}">
-
-{{ $remainingSeed>0
-? 'Left to seed: '.\App\Helpers\FormatHelper::formatTime($remainingSeed)
-: 'Completed' }}
-
-</span>
-
-</div>
-
-<div class="progress glass-progress">
-<div class="progress-bar progress-glow"
-style="width: {{ $progress }}%">
-</div>
-</div>
-
-</div>
-
-@endif
-
-</div>
-
-
-
-{{-- RATIO --}}
-<div class="col-md-2 text-center">
-
-<div class="ratio-circle">
-
-<svg viewBox="0 0 36 36">
-
-<path
-d="M18 2.0845
-a 15.9155 15.9155 0 0 1 0 31.831
-a 15.9155 15.9155 0 0 1 0 -31.831"
-fill="none"
-stroke="#1f2937"
-stroke-width="3"
-/>
-
-<path
-stroke-dasharray="{{ $ratioPercent }},100"
-d="M18 2.0845
-a 15.9155 15.9155 0 0 1 0 31.831
-a 15.9155 15.9155 0 0 1 0 -31.831"
-fill="none"
-stroke="{{ $type=='hnr' ? '#ef4444':'#22c55e' }}"
-stroke-width="3"
-/>
-
-</svg>
-
-<div class="ratio-text">
-{{ $ratioDisplay }}
-</div>
-
-</div>
-
-</div>
-
-
-
-{{-- STATS --}}
-<div class="col-md-4 text-md-end stats">
-
-<span class="stat-pill upload"
-data-bs-toggle="tooltip"
-title="Actual Uploaded: {{ \App\Helpers\FormatHelper::formatSize($history->actual_uploaded ?? 0) }}">
-
-<i class="bi bi-arrow-up"></i>
-{{ \App\Helpers\FormatHelper::formatSize($history->uploaded) }}
-
-</span>
-
-
-<span class="stat-pill download"
-data-bs-toggle="tooltip"
-title="Actual Downloaded: {{ \App\Helpers\FormatHelper::formatSize($history->actual_downloaded ?? 0) }}">
-
-<i class="bi bi-arrow-down"></i>
-{{ \App\Helpers\FormatHelper::formatSize($history->downloaded) }}
-
-</span>
-
-
-<span class="stat-pill seed">
-
-<i class="bi bi-clock"></i>
-{{ \App\Helpers\FormatHelper::formatTime($history->seedtime ?? $history->total_seedtime ?? 0) }}
-
-</span>
-
-</div>
-
-</div>
-
-</div>
+<article class="snatch-entry snatch-entry-{{ $tone }}">
+    <div class="snatch-entry-top">
+        <div class="snatch-torrent">
+            <div class="snatch-file-icon"><i class="bi bi-file-earmark-arrow-down" aria-hidden="true"></i></div>
+            <div>
+                <div class="snatch-entry-label">{{ $isPeer ? 'Active session' : 'Torrent history' }} @if($torrent) · {{ \App\Helpers\FormatHelper::formatSize($size) }} @endif</div>
+                <h2>@if($torrent)<a href="{{ route('torrents.show', ['id' => $torrent->id]) }}">{{ $torrent->name }}</a>@else Torrent unavailable @endif</h2>
+                <div class="snatch-dates">
+                    @if($addedAt)<span>{{ $record ? 'Snatched' : 'Session started' }} <time datetime="{{ $addedAt->toIso8601String() }}">{{ $addedAt->format('Y-m-d H:i') }}</time></span>@endif
+                    @if($completedAt && !$isOwner)<span>Completed <time datetime="{{ $completedAt->toIso8601String() }}">{{ $completedAt->format('Y-m-d H:i') }}</time></span>@endif
+                </div>
+            </div>
+        </div>
+        <div class="snatch-entry-controls">
+            @if($isOwner)<span class="snatch-owner"><i class="bi bi-person-check" aria-hidden="true"></i> Owner</span>@endif
+        <span class="snatch-status snatch-status-{{ $tone }}"><i class="bi {{ $hitrun ? 'bi-exclamation-triangle' : ($seeding ? 'bi-cloud-upload' : ($active ? 'bi-arrow-down-circle' : 'bi-pause-circle')) }}" aria-hidden="true"></i> {{ $status }}</span>
+            @if($record) @include('snatch.partials.delete-history', ['history' => $record, 'torrent' => $torrent]) @endif
+        </div>
+    </div>
+
+    <dl class="snatch-metrics">
+        <div><dt><i class="bi bi-arrow-up" aria-hidden="true"></i> Uploaded</dt><dd>{{ \App\Helpers\FormatHelper::formatSize($uploaded) }}</dd><small>Actual: {{ \App\Helpers\FormatHelper::formatSize($actualUploaded) }}</small></div>
+        <div><dt><i class="bi bi-arrow-down" aria-hidden="true"></i> Downloaded</dt><dd>{{ \App\Helpers\FormatHelper::formatSize($downloaded) }}</dd><small>Actual: {{ \App\Helpers\FormatHelper::formatSize($actualDownloaded) }}</small></div>
+        <div><dt><i class="bi bi-arrow-left-right" aria-hidden="true"></i> Ratio</dt><dd>{{ $ratioDisplay }}</dd><small>{{ $ratio >= 1 ? 'Ratio target reached' : 'Target: 1.00' }}</small></div>
+        <div><dt><i class="bi bi-clock" aria-hidden="true"></i> Seed time</dt><dd>{{ \App\Helpers\FormatHelper::formatTime($seedtime) }}</dd><small>{{ $remainingSeed ? \App\Helpers\FormatHelper::formatTime($remainingSeed).' remaining' : 'Seed target reached' }}</small></div>
+    </dl>
+
+    <div class="snatch-progress-grid">
+        <div>
+            <div class="snatch-progress-label"><span>Seeding requirement</span><strong>{{ number_format($seedProgress) }}%</strong></div>
+            <div class="snatch-progress" role="progressbar" aria-label="Seeding requirement" aria-valuenow="{{ round($seedProgress) }}" aria-valuemin="0" aria-valuemax="100"><span style="width: {{ $seedProgress }}%"></span></div>
+        </div>
+        <div>
+            <div class="snatch-progress-label"><span>Download progress</span><strong>{{ $complete ? 'Completed' : ($size > 0 ? number_format($downloadProgress).'% transferred' : 'Size unknown') }}</strong></div>
+            <div class="snatch-progress snatch-progress-download" role="progressbar" aria-label="Download progress" aria-valuenow="{{ $complete ? 100 : round($downloadProgress) }}" aria-valuemin="0" aria-valuemax="100"><span style="width: {{ $complete ? 100 : $downloadProgress }}%"></span></div>
+        </div>
+    </div>
+
+    <div class="snatch-guidance {{ $hitrun || (!$requirementsMet && $hasDownloaded) ? 'snatch-guidance-warning' : '' }}">
+        <i class="bi {{ $requirementsMet && !$hitrun ? 'bi-check-circle' : 'bi-info-circle' }}" aria-hidden="true"></i>
+        <span>@if($isOwner)You uploaded this torrent. Continuing to seed helps other members.
+        @elseif($hitrun)This torrent has an H&R flag. Resume seeding to resolve it or clear it using bonus points.
+        @elseif($requirementsMet)Seeding requirements met. Continuing to seed helps other members.
+        @elseif($hasDownloaded){{ $complete ? 'Keep seeding' : 'Complete the download and seed' }} to meet the seed time or 1.00 ratio target.
+        @else No downloaded data recorded for this torrent.
+        @endif
+        @if($deadline && !$isOwner) <span class="snatch-deadline">H&R review: {{ $deadline->format('Y-m-d H:i') }}</span>@endif</span>
+    </div>
+
+    @include('snatch.partials.announce', ['history' => $record])
+
+    @if($canDownload || $canBuySeedtime || $canClearHitrun)
+    <div class="snatch-actions">
+        @if($canDownload)
+            <a href="{{ route('torrents.download', ['id' => $torrent->id, 'slug' => $torrent->slug]) }}" class="btn btn-outline-primary btn-sm"><i class="bi bi-download" aria-hidden="true"></i> {{ $seeding ? 'Download torrent' : 'Resume in client' }}</a>
+        @endif
+            @if($canBuySeedtime)
+                <form action="{{ route('bonus.buySeedtime') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="torrent_id" value="{{ $history->torrent_id }}">
+                    <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-coin" aria-hidden="true"></i> Buy seedtime <span>· {{ number_format(config('seedbonus.shop.seedtime', 1000)) }} points</span></button>
+                </form>
+            @elseif($canClearHitrun)
+                <form action="{{ route('bonus.removeHNR') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="torrent_id" value="{{ $history->torrent_id }}">
+                    <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-coin" aria-hidden="true"></i> Clear H&R · {{ number_format(config('seedbonus.shop.remove_hnr', 5000)) }} points</button>
+                </form>
+            @endif
+    </div>
+    @endif
+</article>

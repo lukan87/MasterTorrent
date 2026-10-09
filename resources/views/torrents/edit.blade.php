@@ -10,7 +10,7 @@
             </a>
         </div>
         <div class="card-body">
-            <form action="{{ route('torrents.update', $torrent->slug) }}" method="POST" enctype="multipart/form-data" onsubmit="return confirm('Are you sure you want to update this torrent?');">
+            <form data-torrent-form data-metadata-type="{{ $torrent->tmdb_type === 'tv' ? 'tv' : 'movie' }}" data-metadata-url="{{ route('torrents.form-metadata') }}" action="{{ route('torrents.update', $torrent->slug) }}" method="POST" enctype="multipart/form-data" onsubmit="return confirm('Are you sure you want to update this torrent?');">
                 @csrf
                 @method('PUT')
 
@@ -58,20 +58,17 @@
                 <div class="mb-3">
                     <label for="imdb_url" class="form-label"><i class="bi bi-film me-1"></i>IMDB URL</label>
                     <input type="url" name="imdb_url" id="imdb_url" class="form-control" value="{{ old('imdb_url', $torrent->imdb_url) }}">
-                    <button type="button" class="btn btn-outline-primary mt-2" onclick="fetchIMDBInfo()">
-                        <i class="bi bi-cloud-download me-1"></i>Fetch Info
-                    </button>
                 </div>
 
                 <div class="mb-3">
                     <label for="description" class="form-label"><i class="bi bi-info-square me-1"></i>Description</label>
                     @include('torrents.partials.description_editor')
-                    <textarea name="description" id="description" class="form-control" rows="6" oninput="adjustTextareaHeight(this)">{{ old('description', $torrent->description) }}</textarea>
+                    <textarea name="description" id="description" class="form-control" rows="6" oninput="resizeTextarea('description')">{{ old('description', $torrent->description) }}</textarea>
                 </div>
 
                 <div class="mb-3">
                     <label for="mediainfo" class="form-label"><i class="bi bi-music-note-list me-1"></i>Media Info</label>
-                    <textarea name="mediainfo" id="mediainfo" class="form-control" rows="6" oninput="adjustTextareaHeight(this)">{{ old('mediainfo', $torrent->mediainfo) }}</textarea>
+                    <textarea name="mediainfo" id="mediainfo" class="form-control" rows="6" oninput="resizeTextarea('mediainfo')">{{ old('mediainfo', $torrent->mediainfo) }}</textarea>
                 </div>
 
                 <div class="row mb-3">
@@ -185,4 +182,5 @@
 </div>
 
 @include('torrents.partials.scripts')
+@vite('resources/js/torrent-form.js')
 @endsection

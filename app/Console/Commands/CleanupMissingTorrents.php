@@ -43,7 +43,7 @@ class CleanupMissingTorrents extends Command
                     continue;
                 }
 
-                $fullPath = public_path('files/torrents/' . $torrent->file_name);
+                $fullPath = app(\App\Services\Torrent\TorrentFileService::class)->path($torrent->file_name);
 
                 // ✅ File exists → keep it
                 if (file_exists($fullPath)) {

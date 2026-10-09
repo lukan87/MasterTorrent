@@ -83,6 +83,10 @@ class MessageController extends Controller
             $request->body
         );
 
+        if ($request->expectsJson()) {
+            return \App\Services\PageBrowse::json(['url' => route('conversations.show', $message->conversation_id), 'message' => 'Reply sent.']);
+        }
+
         return redirect()
             ->route('conversations.show', $message->conversation_id)
             ->with('success', 'Reply sent.');

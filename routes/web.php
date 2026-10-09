@@ -274,6 +274,7 @@ Route::post('/notifications/{id}/read', function ($id) {
 
     // Mark as read
     $notification->markAsRead();
+    if (request()->expectsJson()) return \App\Services\PageBrowse::json(['message' => 'Notification marked as read.', 'unreadCount' => auth()->user()->unreadNotifications()->count()]);
 
     // Reconstruct achievement destinations so older notifications also open the earned tier.
     if (($notification->data['type'] ?? null) === 'achievement_unlocked') {
@@ -314,6 +315,7 @@ Route::post('/notifications/{id}/read', function ($id) {
 
 Route::post('/notifications/read-all', function () {
     auth()->user()->unreadNotifications->markAsRead();
+    if (request()->expectsJson()) return \App\Services\PageBrowse::json(['message' => 'All notifications marked as read.', 'unreadCount' => auth()->user()->unreadNotifications()->count()]);
 
     return back()->with('success', 'All notifications marked as read.');
 })->middleware('auth')->name('notifications.readAll');
@@ -325,12 +327,14 @@ Route::delete('/notifications/{notification}', function ($id) {
         ->firstOrFail()
         ->delete();
 
+    if (request()->expectsJson()) return \App\Services\PageBrowse::json(['message' => 'Notification deleted.', 'unreadCount' => auth()->user()->unreadNotifications()->count()]);
     return back()->with('success', 'Notification deleted.');
 })->middleware('auth')->name('notifications.delete');
 
 Route::delete('/notifications', function () {
     auth()->user()->notifications()->delete();
 
+    if (request()->expectsJson()) return \App\Services\PageBrowse::json(['message' => 'All notifications deleted.', 'unreadCount' => 0]);
     return back()->with('success', 'All notifications deleted.');
 })->middleware('auth')->name('notifications.deleteAll');
 
@@ -401,6 +405,10 @@ Route::prefix('snatch')->group(function () {
     Route::get('/need-to-seed/{userId?}', [SnatchController::class, 'needToSeed'])->name('snatch.needToSeed')->middleware('auth');
 
     Route::get('/hnr-fixer/{userId?}', [SnatchController::class, 'hitRunFixer'])->name('snatch.hnrFixer')->middleware('auth');
+
+    Route::delete('/history/{historyId}', [SnatchController::class, 'deleteHistory'])
+        ->name('snatch.deleteHistory')
+        ->middleware('auth');
 
     Route::delete('/delete-need-to-seed/{userId}/{torrentId}', [SnatchController::class, 'deleteNeedToSeed'])
         ->name('snatch.deleteNeedToSeed')
@@ -517,7 +525,7 @@ Route::get('/profile/{id}/{name}/thanks', [ProfileController::class, 'thanks'])-
 // Movies
 Route::resource('movies', MovieController::class)
     ->middleware('auth')
-    ->except(['show']); // prevent duplicate movies.show
+    ->except(['show', 'edit', 'update']); // legacy detail URLs redirect to the library
 
 // Additional custom routes
 Route::post('/movies/search', [MovieController::class, 'search'])
@@ -547,7 +555,7 @@ Route::delete('/movies/{id}/delete', [MovieController::class, 'destroy'])
 // Series
 Route::resource('series', SeriesController::class)
     ->middleware('auth')
-    ->except(['show']); // exclude show so your SEO-friendly route takes over
+    ->except(['show', 'edit', 'update']); // legacy detail URLs redirect to the library
 
 // Additional custom routes
 Route::post('/series/search', [SeriesController::class, 'search'])
@@ -615,6 +623,14 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
 
         });
 
+        Route::prefix('library/{kind}')->where(['kind' => 'movies|series'])->name('library.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\LibraryController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Admin\LibraryController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Admin\LibraryController::class, 'store'])->name('store');
+            Route::get('/{tmdbid}/edit', [\App\Http\Controllers\Admin\LibraryController::class, 'edit'])->whereNumber('tmdbid')->name('edit');
+            Route::put('/{tmdbid}', [\App\Http\Controllers\Admin\LibraryController::class, 'update'])->whereNumber('tmdbid')->name('update');
+        });
+
         // Movies Management
         Route::group(['prefix' => 'movies'], function () {
             Route::get('/', [AdminMovieController::class, 'index'])->name('movies.index');
@@ -674,7 +690,7 @@ Route::middleware('auth')->group(function () {
     // ---------------------------------
     Route::get('torrents', [TorrentController::class, 'index'])->name('torrents.index');
     Route::get('torrents/create', [TorrentController::class, 'create'])->name('torrents.create');
-    Route::post('torrents', [TorrentController::class, 'store'])->name('torrents.store');
+    Route::post('torrents', [TorrentController::class, 'store'])->middleware('throttle:6,1')->name('torrents.store');
 
     Route::get('torrents/{id}/{slug}/edit', [TorrentController::class, 'edit'])->name('torrents.edit');
     Route::put('torrents/{torrent}', [TorrentController::class, 'update'])->name('torrents.update');
@@ -756,6 +772,9 @@ Route::get('/torrents/download/{id}/{slug}', [TorrentController::class, 'downloa
     ->name('torrents.download');
 
 Route::get('/torrents/check-imdb', [TorrentController::class, 'checkImdbUrl']);
+
+Route::get('/torrents/form-metadata', \App\Http\Controllers\TorrentMetadataSearchController::class)
+    ->middleware(['auth', 'throttle:30,1'])->name('torrents.form-metadata');
 
 Route::get('/torrents/{id}/snatched', [TorrentHistoryController::class, 'snatched'])
     ->whereNumber('id')
@@ -1051,6 +1070,7 @@ Route::get('/contact', [ContactController::class, 'create'])->name('contact.crea
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 
 Route::get('/contact/check', [ContactController::class, 'check'])->name('contact.check');
+Route::get('/contact/replies', [ContactController::class, 'conversations'])->name('contact.conversations');
 Route::post('/contact/replies', [ContactController::class, 'viewReply'])->name('contact.replies');
 Route::post('/contact/reply/{id}', [ContactController::class, 'guestReply'])->name('contact.reply');
 
@@ -1197,3 +1217,22 @@ Route::middleware(['auth'])->prefix('tv-calendar')->name('tv-calendar.')->group(
     Route::post('/shows/{show}', [\App\Http\Controllers\TvCalendarController::class, 'follow'])->whereNumber('show')->middleware('throttle:20,1')->name('follow');
     Route::delete('/shows/{show}', [\App\Http\Controllers\TvCalendarController::class, 'unfollow'])->whereNumber('show')->name('unfollow');
 });
+
+// Personal upload automation settings; separate from media-app integration keys.
+Route::middleware(['auth'])->prefix('settings/api')->name('profile.api.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\ApiSettingsController::class, 'index'])->name('index');
+    Route::get('/documentation', [\App\Http\Controllers\ApiSettingsController::class, 'documentation'])->name('documentation');
+    Route::post('/tokens', [\App\Http\Controllers\ApiSettingsController::class, 'store'])->middleware('throttle:6,1')->name('store');
+    Route::delete('/tokens', [\App\Http\Controllers\ApiSettingsController::class, 'destroyAll'])->middleware('throttle:10,1')->name('destroy-all');
+    Route::post('/tokens/{token}/reveal', [\App\Http\Controllers\ApiSettingsController::class, 'reveal'])->whereNumber('token')->middleware('throttle:6,1')->name('reveal');
+    Route::delete('/tokens/{token}', [\App\Http\Controllers\ApiSettingsController::class, 'destroy'])->whereNumber('token')->middleware('throttle:20,1')->name('destroy');
+});
+
+Route::middleware(['auth'])->prefix('settings/api/publishing')->name('profile.api.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\SeedboxPublicationController::class,'index'])->middleware('throttle:20,1')->name('publishing');
+    Route::post('/', [\App\Http\Controllers\SeedboxPublicationController::class,'store'])->middleware('throttle:6,1')->name('publish');
+    Route::post('/{publication}/retry', [\App\Http\Controllers\SeedboxPublicationController::class,'retry'])->whereNumber('publication')->middleware('throttle:6,1')->name('publish-retry');
+});
+
+Route::get('/settings/api/history',[\App\Http\Controllers\UploadHistoryController::class,'index'])->middleware('auth')->name('profile.api.history');
+Route::get('/admin/upload-history',[\App\Http\Controllers\UploadHistoryController::class,'admin'])->middleware(['auth'])->name('admin.upload-history');

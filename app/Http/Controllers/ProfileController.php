@@ -91,9 +91,16 @@ public function show($id, $name = null)
     }
 
     $profileService = app(\App\Services\ProfileService::class);
+    if (request()->header('X-Profile-Achievement') && request()->expectsJson()) {
+        $key = request()->header('X-Profile-Achievement');
+        abort_unless(array_key_exists($key, config('achievements.categories', [])), 404);
+        $category = collect($profileService->achievementProgress($user))->firstWhere('key', $key);
+        abort_unless($category, 404);
+        return \App\Services\PageBrowse::json(['html' => view('profile.partials.achievement-modal', compact('category'))->render()]);
+    }
     $statistics = $profileService->statistics($user->id);
     $user->invitees_count = $statistics['invitees_count'];
-    $user->torrents_count = $statistics['torrents_count'];
+    $user->torrents_count = Torrent::where('owner', $user->id)->uploaderVisibleTo()->count();
     $user->loadMissing('inviter');
     $inviteTreeMembers = $profileService->inviteTree($user,
         max(1, \Illuminate\Pagination\Paginator::resolveCurrentPage('invitees_page')));
@@ -161,6 +168,7 @@ public function show($id, $name = null)
         'background'        => 'nullable|url|starts_with:https://|max:255',
         'info'              => 'nullable|string',
         'timezone'          => 'nullable|timezone',
+        'anonymous'         => 'sometimes|boolean',
         'recovery_code'     => 'nullable|string|min:6',
         'current_password'  => 'required_with:new_password|nullable|string',
         'new_password'      => 'nullable|string|min:8|confirmed',
@@ -178,6 +186,8 @@ public function show($id, $name = null)
         $rules['name'] = 'required|string|max:255|unique:users,name,' . $user->id;
         $rules['user_class'] = 'sometimes|integer';
     }
+
+    abort_if($request->has('anonymous') && (int) $authUser->id !== (int) $user->id, 403, 'Only the account owner can change anonymous publishing preferences.');
 
     $validated = $request->validate($rules);
 
@@ -240,6 +250,10 @@ public function show($id, $name = null)
 
         if ($request->has('info')) {
             $user->info = $validated['info'];
+        }
+
+        if (array_key_exists('anonymous', $validated)) {
+            $user->anonymous = (bool) $validated['anonymous'];
         }
 
         if ($request->has('timezone')) {
@@ -336,14 +350,14 @@ public function show($id, $name = null)
             ->get()
             ->keyBy('torrent_id');
 
-        return view('profile.seeding-torrents', compact('user', 'peers', 'histories'));
+        return \App\Services\PageBrowse::view('profile.seeding-torrents', compact('user', 'peers', 'histories'));
     }
 
 public function userTorrents($id, $name)
 {
     $user = $this->resolveUserOrFail($id, $name);
 
-    $query = Torrent::where('owner', $user->id);
+    $query = Torrent::where('owner', $user->id)->uploaderVisibleTo();
 
     if (auth()->check() && auth()->user()->user_class >= UserClass::MODERATOR) {
         $query->withTrashed();
@@ -351,7 +365,7 @@ public function userTorrents($id, $name)
 
     $torrents = $query->orderByDesc('created_at')->paginate(50);
 
-    return view('profile.torrents', compact('user', 'torrents'));
+    return \App\Services\PageBrowse::view('profile.torrents', compact('user', 'torrents'));
 }
 
     public function downloadHistory($id, $name)
@@ -363,7 +377,7 @@ public function userTorrents($id, $name)
             ->latest('completed_at')
             ->paginate(25);
 
-        return view('profile.download-history', compact('user', 'history'));
+        return \App\Services\PageBrowse::view('profile.download-history', compact('user', 'history'));
     }
 
     public function activeTokens($id, $name)
@@ -372,7 +386,7 @@ public function userTorrents($id, $name)
 
         $slots = $user->slots()->with('torrent')->get();
 
-        return view('profile.active-tokens', compact('user', 'slots'));
+        return \App\Services\PageBrowse::view('profile.active-tokens', compact('user', 'slots'));
     }
 
     /*
@@ -543,7 +557,7 @@ private function deleteTorrentCompletely(Torrent $torrent): void
     */
 
     if (!empty($torrent->file_name)) {
-        Storage::disk('public')->delete('files/torrents/' . $torrent->file_name);
+        app(\App\Services\Torrent\TorrentFileService::class)->delete($torrent->file_name);
     }
 
     /*
@@ -602,7 +616,7 @@ public function comments($id, $name)
         ->whereIn('commentable_type', [\App\Models\Movie::class, \App\Models\Series::class, \App\Models\TorrentRequest::class])
         ->load('commentable');
 
-    return view('profile.comments', compact('user', 'comments'));
+    return \App\Services\PageBrowse::view('profile.comments', compact('user', 'comments'));
 }
 
 
@@ -617,7 +631,7 @@ public function thanks($id, $name)
         ->latest()
         ->paginate(25);
 
-    return view('profile.thanks', compact('user', 'thanks'));
+    return \App\Services\PageBrowse::view('profile.thanks', compact('user', 'thanks'));
 }
 
 public function forumPosts($id, $name)
@@ -631,7 +645,7 @@ public function forumPosts($id, $name)
         ->latest()
         ->paginate(25);
 
-    return view('profile.posts', compact('user', 'posts'));
+    return \App\Services\PageBrowse::view('profile.posts', compact('user', 'posts'));
 }
 
 }

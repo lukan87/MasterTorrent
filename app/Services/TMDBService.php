@@ -12,7 +12,7 @@ class TMDBService
 
     public function __construct()
     {
-        $this->apiKey = env('TMDB_API_KEY', '325f0b42fccd356be82ede4d2be6312c');
+        $this->apiKey = (string) config('services.tmdb.key', '');
     }
 
     /**
@@ -20,23 +20,27 @@ class TMDBService
      */
     public function getTMDBIdAndTypeByIMDbId(string $imdbId): ?array
     {
-        $response = Http::get("https://api.themoviedb.org/3/find/{$imdbId}", [
-            'external_source' => 'imdb_id',
-            'api_key' => $this->apiKey,
-        ]);
+        if (!preg_match('/^tt[0-9]+$/D', $imdbId)) return null;
+        return $this->findExternalId($imdbId, 'imdb_id');
+    }
 
-        if ($response->successful()) {
-            $data = $response->json();
+    public function getTMDBIdByTVDBId(int $tvdbId): ?array
+    {
+        return $tvdbId > 0 ? $this->findExternalId((string) $tvdbId, 'tvdb_id') : null;
+    }
 
-            if (! empty($data['movie_results'])) {
-                return ['tmdb_id' => $data['movie_results'][0]['id'], 'type' => 'movie'];
-            }
-
-            if (! empty($data['tv_results'])) {
-                return ['tmdb_id' => $data['tv_results'][0]['id'], 'type' => 'tv'];
-            }
+    private function findExternalId(string $id, string $source): ?array
+    {
+        if ($this->apiKey === '') return null;
+        $data = app(MetadataHttpCache::class)->get(
+            "tmdb:find:{$source}:{$id}", "https://api.themoviedb.org/3/find/{$id}",
+            ['external_source' => $source, 'api_key' => $this->apiKey],
+            fn (array $data) => isset($data['movie_results']) || isset($data['tv_results'])
+        );
+        foreach (['movie_results' => 'movie', 'tv_results' => 'tv'] as $key => $type) {
+            $value = $data[$key][0]['id'] ?? null;
+            if (is_int($value) && $value > 0) return ['tmdb_id' => $value, 'type' => $type];
         }
-
         return null;
     }
 
@@ -84,7 +88,7 @@ class TMDBService
      */
     public function fetchTMDBData(int $tmdbId, string $type): ?array
     {
-        if (! in_array($type, ['movie', 'tv'], true)) {
+        if ($this->apiKey === '' || $tmdbId < 1 || ! in_array($type, ['movie', 'tv'], true)) {
             return null;
         }
 
@@ -97,7 +101,7 @@ class TMDBService
                 'include_image_language' => 'en,null',
                 'append_to_response' => 'credits,videos,images,keywords,similar,recommendations,watch/providers,external_ids,release_dates,content_ratings',
             ],
-            fn (array $data) => ! empty($data['id']) && ! empty($data[$type === 'movie' ? 'title' : 'name'])
+            fn (array $data) => ($data['id'] ?? null) === $tmdbId && is_string($data[$type === 'movie' ? 'title' : 'name'] ?? null) && trim($data[$type === 'movie' ? 'title' : 'name']) !== ''
         );
     }
 

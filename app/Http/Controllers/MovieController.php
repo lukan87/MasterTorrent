@@ -12,13 +12,11 @@ use Illuminate\Support\Facades\Log;
 class MovieController extends Controller
 {
     private $apiKey;
-    private $omdbKey;
 
     public function __construct()
     {
         // Config-driven keys (never hardcoded credentials in source).
         $this->apiKey  = config('services.tmdb.key') ?: config('app.tmdb_api_key');
-        $this->omdbKey = config('services.omdb.key') ?: env('OMDB_API_KEY');
     }
 
     /**
@@ -36,51 +34,14 @@ class MovieController extends Controller
         }
     }
 
-    /**
-     * Safe OMDB GET helper for extra scores.
-     */
-    private function omdb(?string $imdb)
-    {
-        if (!$imdb) return [];
-        try {
-            $response = Http::timeout(10)->get("http://www.omdbapi.com", [
-                'apikey' => $this->omdbKey,
-                'i'      => $imdb,
-                'plot'   => 'full',
-            ]);
-            return $response->successful() ? ($response->json() ?: []) : [];
-        } catch (\Exception $e) {
-            Log::error("OMDB request failed: " . $e->getMessage());
-            return [];
-        }
-    }
-
     public function index(Request $request)
     {
-        $sort = $request->get('sort', 'latest');
-
-        $query = Movie::query();
-        switch ($sort) {
-            case 'rating': $query->orderByDesc('vote_average'); break;
-            case 'views':  $query->orderByDesc('views'); break;
-            default:       $query->latest();
-        }
-
-        $movies  = $query->paginate(12)->withQueryString();
-        $featured = Movie::whereNotNull('backdrop_path')
-    ->where('views', '>', 0)
-    ->orderByRaw('RAND() * views DESC')
-    ->first()
-    ?? Movie::whereNotNull('backdrop_path')
-        ->inRandomOrder()
-        ->first();
-
-        return view('movies.index', compact('movies', 'featured', 'sort'))
-            ->with('links', 'vendor.pagination.bootstrap-5');
+        return redirect()->route('library.movies.index', $request->only(['q', 'year', 'availability', 'sort']));
     }
 
     public function search(Request $request)
     {
+        abort_unless((Auth::user()?->user_class ?? 0) >= \App\Models\UserClass::ADMIN, 403);
         $request->validate(['movie_name' => 'required|string|max:255']);
 
         $query = trim($request->movie_name);
@@ -135,13 +96,14 @@ class MovieController extends Controller
             $recommendedMovies = $recommendedMovies->map(fn($m) => ['movie' => $m, 'exists' => isset($relatedDb[$m['id']])]);
         }
 
-        return view('movies.search_results', compact(
+        return view('admin.library.import.movies.search_results', compact(
             'query', 'movies', 'existingMovies', 'newMovies', 'similarMovies', 'recommendedMovies', 'noImdbCount'
         ));
     }
 
     public function selectMovie($tmdb_id)
     {
+        abort_unless((Auth::user()?->user_class ?? 0) >= \App\Models\UserClass::ADMIN, 403);
         if (Movie::where('tmdb_id', $tmdb_id)->exists()) {
             return redirect()->route('movies.create')->with('error', 'Movie already exists in the database.');
         }
@@ -153,59 +115,27 @@ class MovieController extends Controller
 
         $this->createMovie($data);
 
-        return redirect()->route('movies.show', $data['id'])->with('status', 'Movie added successfully!');
+        return redirect()->route('library.movies.show', $data['id'])->with('status', 'Movie added successfully!');
     }
 
     public function show($id, $slug = null)
     {
-        $movie = Movie::findOrFail($id);
-
-        if ($slug === null || $slug !== $movie->slug) {
-            return redirect()->route('movies.show', ['id' => $id, 'slug' => $movie->slug]);
-        }
-
-        // Track a view once per session so refreshes don't inflate the counter.
-        $viewKey = "movie_viewed_{$movie->id}";
-        if (!session()->has($viewKey)) {
-            session([$viewKey => true]);
-            $movie->recordView();
-        }
-
-        $detailsCacheKey = 'movie_' . $movie->tmdb_id . '_details';
-        $movieDetails = cache()->remember($detailsCacheKey, now()->addWeek(), function () use ($movie) {
-            $data = $this->tmdb("movie/{$movie->tmdb_id}", [
-                'language'            => 'en-US',
-                'append_to_response' => 'credits,videos,images,external_ids',
-            ]) ?: [];
-
-            $data['title']              = $data['title'] ?? $movie->name ?? 'Unknown Movie';
-            $data['genres']             = $data['genres'] ?? [];
-            $data['videos']['results']  = $data['videos']['results'] ?? [];
-            $data['credits']['cast']    = $data['credits']['cast'] ?? [];
-            return $data;
-        });
-
-        $movieOm = cache()->remember('movie_' . $movie->imdb_id . '_omdb', now()->addWeek(), fn() => $this->omdb($movie->imdb_id));
-
-        $similar = app(\App\Services\MediaRecommendationService::class)
-            ->forTitle($movie, $movieDetails['genres'] ?? []);
-
-        $torrents = $movie->torrents()->latest()->get();
-        $comments = $movie->comments()->with('user')->get();
-
-        return view('movies.show', compact('movieDetails', 'movieOm', 'movie', 'comments', 'similar', 'torrents'));
+        $media = Movie::findOrFail($id);
+        return redirect()->route('library.movies.show', [$media->tmdb_id, $media->slug]);
     }
 
     public function create()
     {
+        abort_unless((Auth::user()?->user_class ?? 0) >= \App\Models\UserClass::ADMIN, 403);
         if (Auth::check() && Auth::user()->user_class >= \App\Models\UserClass::ADMIN) {
-            return view('movies.create');
+            return view('admin.library.import.movies.create');
         }
-        return redirect()->route('movies.index')->with('error', 'Unauthorized access.');
+        return redirect()->route('library.movies.index')->with('error', 'Unauthorized access.');
     }
 
     public function store(Request $request)
     {
+        abort_unless((Auth::user()?->user_class ?? 0) >= \App\Models\UserClass::ADMIN, 403);
         $request->validate(['tmdb_id' => 'required|string|max:255']);
 
         if (Movie::where('tmdb_id', $request->tmdb_id)->exists()) {
@@ -223,11 +153,12 @@ class MovieController extends Controller
 
         $this->createMovie($data);
 
-        return redirect()->route('movies.index')->with('status', 'Movie created successfully!');
+        return redirect()->route('library.movies.index')->with('status', 'Movie created successfully!');
     }
 
     public function bulkSelect(Request $request)
     {
+        abort_unless((Auth::user()?->user_class ?? 0) >= \App\Models\UserClass::ADMIN, 403);
         $request->validate(['movies' => 'required|array', 'movies.*' => 'integer|distinct']);
 
         $added = 0;
@@ -248,7 +179,7 @@ class MovieController extends Controller
             $added++;
         }
 
-        return redirect()->route('movies.index')->with(
+        return redirect()->route('library.movies.index')->with(
             'status',
             $added > 0 ? "{$added} movie(s) added successfully!" : 'No movies were added (titles missing an IMDb ID were skipped).'
         );
@@ -259,34 +190,14 @@ class MovieController extends Controller
      */
     public function destroy($id)
     {
-        if (!Auth::check() || Auth::user()->user_class < \App\Models\UserClass::ADMIN) {
-            return redirect()->route('movies.index')->with('error', 'Unauthorized.');
-        }
-
-        $movie = Movie::findOrFail($id);
-
-        // Clear dependent records so nothing is orphaned.
-        $movie->comments()->delete();
-        $movie->torrents()->delete();
-        \App\Models\TorrentMovie::where('tmdbid', $movie->tmdb_id)->delete();
-
-        $movie->delete();
-
-        return redirect()->route('movies.index')->with('status', "Movie \"{$movie->name}\" deleted successfully.");
+        abort_unless((Auth::user()?->user_class ?? 0) >= \App\Models\UserClass::ADMIN, 403);
+        Movie::findOrFail($id)->update(['online_enabled' => false]);
+        return redirect()->route('admin.library.index', 'movies')->with('status', 'Online playback disabled.');
     }
 
     public function searchMovie(Request $request)
     {
-        $searchTerm = $request->input('name');
-        if (empty($searchTerm)) {
-            return redirect()->route('movies.index');
-        }
-
-        $movies = Movie::where('name', 'LIKE', "%{$searchTerm}%")->paginate(12)->withQueryString();
-        $featured = $movies->first();
-        $sort = 'latest';
-
-        return view('movies.index', compact('movies', 'featured', 'sort'));
+        return redirect()->route('library.movies.index', ['q' => $request->input('name')]);
     }
 
     private function createMovie(array $data)

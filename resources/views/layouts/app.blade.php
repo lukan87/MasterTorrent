@@ -5,20 +5,20 @@
 
 {{-- <body class="layout-fixed sidebar-expand-lg bg-body-tertiary" style="font-family: 'Titillium Web', sans-serif;">  --}}
     <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
-    <div class="app-wrapper"> 
+    <div class="app-wrapper">
 
-    
+
      @auth
 
       @include('layouts.partials.navbar')
       @include('layouts.partials.sidebar')
      @endauth
 
-        <main class="app-main"> 
-             
+        <main class="app-main">
 
-            <div class="app-content"> 
-                <div class="container-fluid"> 
+
+            <div class="app-content">
+                <div class="container-fluid">
                      {{-- @if(Auth::check() && Auth::user()->id == 3) --}}
                       {{-- Poll alert--}}
                         @include('layouts.partials.alerts.newpoll')
@@ -40,17 +40,17 @@
 @endif
 
 @if(auth()->check())
-<div id="announcement-alert" class="container alert alert-info d-none mt-5 mb-3 text-center">
+<div id="announcement-alert" class="container-fluid alert alert-info d-none mt-3 mb-3 text-center">
     <a href="{{ route('announcements.index') }}">
         🔔 You have new announcements
     </a>
 </div>
 
-<!-- <div id="latest-torrent-alert" class="container alert alert-success d-none mt-5 mb-3 text-center">
+ {{-- <div id="latest-torrent-alert" class="container alert alert-success d-none mt-5 mb-3 text-center">
     <a href="#" id="latest-torrent-link">
         🚀 New Upload: <span id="latest-torrent-name"></span>
     </a>
-</div>
+</div> --}}
 
 <script>
 fetch('/announcements-unread-count', { headers: { Accept: 'application/json' } })
@@ -61,32 +61,32 @@ fetch('/announcements-unread-count', { headers: { Accept: 'application/json' } }
         }
     });
 
-const fetchLatestTorrent = () => {
-    fetch('{{ route('api.latest-torrent') }}')
-        .then(res => res.json())
-        .then(data => {
-            if (data && data.name) {
-                const alert = document.getElementById('latest-torrent-alert');
-                const link = document.getElementById('latest-torrent-link');
-                const name = document.getElementById('latest-torrent-name');
-                
-                // Only update if it's new
-                if (name.textContent !== data.name) {
-                    link.href = data.url;
-                    name.textContent = data.name;
-                    alert.classList.remove('d-none');
-                }
-            }
-        });
-};
+// const fetchLatestTorrent = () => {
+//     fetch('{{ route('api.latest-torrent') }}')
+//         .then(res => res.json())
+//         .then(data => {
+//             if (data && data.name) {
+//                 const alert = document.getElementById('latest-torrent-alert');
+//                 const link = document.getElementById('latest-torrent-link');
+//                 const name = document.getElementById('latest-torrent-name');
 
-fetchLatestTorrent();
-setInterval(fetchLatestTorrent, 5000); // Check every 5 seconds
-</script> -->
+//                 // Only update if it's new
+//                 if (name.textContent !== data.name) {
+//                     link.href = data.url;
+//                     name.textContent = data.name;
+//                     alert.classList.remove('d-none');
+//                 }
+//             }
+//         });
+// };
+
+// fetchLatestTorrent();
+// setInterval(fetchLatestTorrent, 5000); // Check every 5 seconds
+</script>
 @endif
                         {{-- Happy Hour alert --}}
                          @include('layouts.partials.alerts.happyhour')
-                   
+
                      {{-- @endif --}}
 
 
@@ -102,10 +102,10 @@ setInterval(fetchLatestTorrent, 5000); // Check every 5 seconds
            </div>
 
 
-        </div> 
-        </main> 
+        </div>
+        </main>
         @auth
-        
+
 <footer class="app-footer glass py-2">
     <div class="container-fluid">
 
@@ -309,13 +309,13 @@ setInterval(fetchLatestTorrent, 5000); // Check every 5 seconds
 }
 </style>
         @endauth
-    </div> 
+    </div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.3.0/browser/overlayscrollbars.browser.es6.min.js" integrity="sha256-H2VM7BKda+v2Z4+DRy69uknwxjyDRhszjXFhsL4gD3w=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha256-whL0tQWoY1Ku1iskqPFvmZ+CHsvmRWx/PIoEvIeWh4I=" crossorigin="anonymous"></script> 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha256-YMa+wAM6QkVyz999odX7lPRxkoYAan8suedu4k2Zur8=" crossorigin="anonymous"></script> 
-    <script src="{{ asset('dist/js/adminlte.js') }}"></script> 
- 
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha256-whL0tQWoY1Ku1iskqPFvmZ+CHsvmRWx/PIoEvIeWh4I=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha256-YMa+wAM6QkVyz999odX7lPRxkoYAan8suedu4k2Zur8=" crossorigin="anonymous"></script>
+    <script src="{{ asset('dist/js/adminlte.js') }}"></script>
+
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
 
@@ -364,7 +364,7 @@ window.showNotification = function(type, message) {
 
         html: `
             <div class="fileiplay-notification">
-                
+
                 <div class="fileiplay-notification-icon">
                     ${config.icon}
                 </div>
@@ -463,7 +463,7 @@ window.showNotification = function(type, message) {
                 var(--theme-surface, rgba(53,55,58,0.95))
             );
 
-       
+
         border-radius: 14px;
 
         box-shadow:

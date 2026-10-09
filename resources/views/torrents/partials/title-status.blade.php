@@ -4,14 +4,25 @@
         <a href="{{ route('torrents.show', [$torrent->id, urlencode($torrent->slug)]) }}"
            class="torrent-name-link text-decoration-none overflow-hidden {{ $torrent->is_seeding ? 'torrent-name-link--seeding' : '' }}"
            data-bs-toggle="tooltip"
-           data-bs-html="true"
-           data-bs-title="<img src='{{ $torrent->poster }}' class='img-fluid rounded' style='max-width:180px'>">
+           @if($richTorrentPreview ?? false)
+               data-bs-placement="top" data-bs-container="body"
+               data-bs-custom-class="torrent-featured-tooltip"
+               data-torrent-preview="browse-{{ $torrent->id }}"
+               data-bs-title="{{ $torrent->name }}"
+           @else
+               data-bs-html="true"
+               data-bs-title="<img src='{{ $torrent->poster }}' class='img-fluid rounded' style='max-width:180px'>"
+           @endif>
 
             <small class="torrent-title text-truncate d-block fw-bold">
                 {{ $torrent->name }}
             </small>
 
         </a>
+
+        @if($richTorrentPreview ?? false)
+            <template data-preview-content="browse-{{ $torrent->id }}">@include('torrents.partials.featured-preview', ['browsePreview' => true])</template>
+        @endif
 
         {{-- Downloaded --}}
         @if($torrent->has_downloaded)

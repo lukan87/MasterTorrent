@@ -135,6 +135,8 @@ class TorrentController extends Controller
 
     $timezone = $user?->timezone ?? 'UTC';
 
+    app(\App\Services\Torrent\TorrentPreviewService::class)->decorate($torrents->getCollection());
+
 
     /*
     |--------------------------------------------------------------------------
@@ -365,7 +367,7 @@ public function deleted(Request $request)
 
     // Filter by uploader
     if ($request->filled('uploader')) {
-        $query->whereHas('user', function ($q) use ($request) {
+        $query->uploaderVisibleTo()->whereHas('user', function ($q) use ($request) {
             $q->where('name', 'like', '%' . $request->uploader . '%');
         });
     }
@@ -401,6 +403,10 @@ public function deleted(Request $request)
     $result = $service->handle($request, $request->user());
 
     $torrent = $result['torrent'];
+
+    if ($request->expectsJson()) {
+        return \App\Services\PageBrowse::json(['url' => route('torrents.show', [$torrent->id, $torrent->slug]), 'message' => $result['created'] ? 'Torrent uploaded.' : 'This torrent already exists.']);
+    }
 
     if (!$result['created']) {
         return redirect()
@@ -447,7 +453,7 @@ public function sendToSeedbox(Request $request, Torrent $torrent)
             'seedbox_id' => 'required|exists:seedboxes,id',
         ]);
 
-        $path = public_path('files/torrents/' . $torrent->file_name);
+        $path = app(\App\Services\Torrent\TorrentFileService::class)->path($torrent->file_name);
 
         if (!file_exists($path) || !is_readable($path)) {
             return $respond('Torrent file not found.');
@@ -687,13 +693,13 @@ public function bump($id, TorrentBumpService $service)
             $watchUrl = null;
             if ($torrent->tmdb_type === 'movie' && $torrent->tmdbid) {
                 $watchMovie = Movie::where('tmdb_id', $torrent->tmdbid)->first();
-                $watchUrl = $watchMovie
-                    ? route('movies.show', [$watchMovie->id, $watchMovie->slug])
+                $watchUrl = app(\App\Services\LibraryCatalogueService::class)->playable($watchMovie)
+                    ? route('library.movies.show', [$watchMovie->tmdb_id, $watchMovie->slug])
                     : null;
             } elseif ($torrent->tmdb_type === 'tv' && $torrent->tmdbid) {
                 $watchSeries = Series::where('tmdb_id', $torrent->tmdbid)->first();
-                $watchUrl = $watchSeries
-                    ? route('series.show', [$watchSeries->id, $watchSeries->slug])
+                $watchUrl = app(\App\Services\LibraryCatalogueService::class)->playable($watchSeries)
+                    ? route('library.series.show', [$watchSeries->tmdb_id, $watchSeries->slug])
                     : null;
             }
 
@@ -880,7 +886,14 @@ if ((int) $torrent->owner === (int) Auth::id()) {
         $torrent = Torrent::findOrFail($id);
         $user = Auth::user();
 
-        if (!$service->subscribe($user, $torrent)) {
+        $changed = $service->subscribe($user, $torrent);
+        if (request()->expectsJson()) {
+            return $this->subscriptionResponse($torrent, $service, $changed ? 'success' : 'info', $changed
+                ? 'Subscribed! You will be notified when a new version of this title is uploaded.'
+                : 'You are already subscribed to this title, or there is no IMDb/TMDB id to subscribe to.');
+        }
+
+        if (!$changed) {
             return redirect()->route('torrents.show', ['id' => $torrent->id, 'slug' => $torrent->slug])
                 ->with('info', 'You are already subscribed to this title, or there is no IMDb/TMDB id to subscribe to.');
         }
@@ -894,7 +907,14 @@ if ((int) $torrent->owner === (int) Auth::id()) {
         $torrent = Torrent::findOrFail($id);
         $user = Auth::user();
 
-        if (!$service->unsubscribe($user, $torrent)) {
+        $changed = $service->unsubscribe($user, $torrent);
+        if (request()->expectsJson()) {
+            return $this->subscriptionResponse($torrent, $service, $changed ? 'success' : 'info', $changed
+                ? 'Subscription removed. You will no longer receive notifications for this title.'
+                : 'You were not subscribed to this title.');
+        }
+
+        if (!$changed) {
             return redirect()->route('torrents.show', ['id' => $torrent->id, 'slug' => $torrent->slug])
                 ->with('info', 'You were not subscribed to this title.');
         }
@@ -904,7 +924,20 @@ if ((int) $torrent->owner === (int) Auth::id()) {
     }
 
 
-   
+    private function subscriptionResponse(Torrent $torrent, TorrentSubscriptionService $service, string $status, string $message)
+    {
+        $subscribeAvailable = $service->canSubscribe($torrent);
+        $isSubscribed = $subscribeAvailable && $service->isSubscribed(Auth::user(), $torrent);
+        $subscribers = $service->subscribers($torrent->imdbid, $torrent->tmdbid);
+
+        return \App\Services\PageBrowse::json([
+            'status' => $status,
+            'message' => $message,
+            'subscribed' => $isSubscribed,
+            'html' => view('torrents.partials.subscription', compact('torrent', 'subscribeAvailable', 'isSubscribed', 'subscribers'))->render(),
+        ]);
+    }
+
     public function edit($id, $slug)
     {
       
@@ -927,6 +960,10 @@ public function update(
 ) {
 
      $torrent = $service->handle($request, $slug);
+
+    if ($request->expectsJson()) {
+        return \App\Services\PageBrowse::json(['url' => route('torrents.show', [$torrent->id, $torrent->slug]), 'message' => 'Torrent updated.']);
+    }
 
     return redirect()
         ->route('torrents.show', [$torrent->id, $torrent->slug])
@@ -1041,7 +1078,7 @@ public function bulkDelete(Request $request)
             }
         }
 
-        $filePath = public_path('files/torrents/' . $torrent->file_name);
+        $filePath = app(\App\Services\Torrent\TorrentFileService::class)->path($torrent->file_name);
         if (file_exists($filePath)) unlink($filePath);
 
         $torrent->delete();
@@ -1066,7 +1103,7 @@ if ($request->has('seeders')) {
     $seeders = Peer::with('user:id,name')->where('torrent_id', $torrentId)
         ->where('seeder', 1)
         ->orderByRaw('user_id = ? DESC', [$request->user()->id]) // logged in user first
-        ->orderByRaw('user_id = ? DESC', [$torrent->owner])   // then torrent owner
+        ->when($torrent->canRevealUploader(), fn ($query) => $query->orderByRaw('user_id = ? DESC', [$torrent->owner]))   // then torrent owner
         ->paginate(50);
 
     

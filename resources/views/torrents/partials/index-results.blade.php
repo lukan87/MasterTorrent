@@ -49,7 +49,7 @@
 
 
 
-{{ $torrents->onEachSide(1)->links('torrents.partials.pagination', ['position' => 'top']) }}
+{{-- {{ $torrents->onEachSide(1)->links('torrents.partials.pagination', ['position' => 'top']) }} --}}
 
 <section class="tx-library" aria-label="Torrent library">
     <table class="tx-table">
@@ -81,24 +81,22 @@
                 $browseYesterday = $browseToday->copy()->subDay();
             @endphp
             @forelse($torrents as $torrent)
-                @if(! $torrent->sticky)
-                    @php
-                        $uploadDate = $torrent->created_at->copy()->timezone($browseTimezone);
-                        $uploadDay = $uploadDate->toDateString();
-                        $uploadDayLabel = match ($uploadDay) {
-                            $browseToday->toDateString() => 'Today',
-                            $browseYesterday->toDateString() => 'Yesterday',
-                            default => $uploadDate->format('j F Y'),
-                        };
-                    @endphp
-                    @if($uploadDay !== $lastUploadDay)
-                        @include('torrents.partials.index.date-separator')
-                    @endif
-                    @php($lastUploadDay = $uploadDay)
+                @php
+                    $uploadDate = $torrent->created_at->copy()->timezone($browseTimezone);
+                    $uploadDay = $uploadDate->toDateString();
+                    $uploadDayLabel = match ($uploadDay) {
+                        $browseToday->toDateString() => 'Today',
+                        $browseYesterday->toDateString() => 'Yesterday',
+                        default => $uploadDate->format('j F Y'),
+                    };
+                @endphp
+                @if($uploadDay !== $lastUploadDay)
+                    @include('torrents.partials.index.date-separator')
                 @endif
-                <tr class="tx-list-row {{ $torrent->sticky ? 'torrent-sticky' : '' }}">
+                @php($lastUploadDay = $uploadDay)
+                <tr class="tx-list-row">
                     <td class="tx-info-cell">
-                        <div class="tx-info">@include('torrents.partials.index.namecat')</div>
+                        <div class="tx-info">@include('torrents.partials.index.namecat', ['richTorrentPreview' => true])</div>
                     </td>
                     <td class="tx-size-cell" data-label="Size" tabindex="0" data-bs-toggle="tooltip" data-bs-trigger="hover focus click" title="Total file size: {{ App\Helpers\FormatHelper::formatSize($torrent->size) }}">{{ App\Helpers\FormatHelper::formatSize($torrent->size) }}</td>
                     <td class="tx-peers-cell" data-label="Peers">
@@ -110,7 +108,7 @@
                     <td class="tx-completed-cell" data-label="Completed">
                         <span tabindex="0" data-bs-toggle="tooltip" data-bs-trigger="hover focus click" title="Completed: {{ number_format($torrent->times_completed) }} finished downloads" aria-label="{{ number_format($torrent->times_completed) }} completed downloads"><i class="bi bi-check2-circle" aria-hidden="true"></i> {{ number_format($torrent->times_completed) }}</span>
                     </td>
-                    <td class="tx-uploader-cell" data-label="Uploader" tabindex="0" data-bs-toggle="tooltip" data-bs-trigger="hover focus click" title="Uploaded by {{ $torrent->uploader->name ?? 'an unknown user' }}">
+                    <td class="tx-uploader-cell" data-label="Uploader" tabindex="0" data-bs-toggle="tooltip" data-bs-trigger="hover focus click" title="Uploaded by {{ $torrent->uploaderLabel() }}">
                         <span class="tx-meta-icon" aria-hidden="true"><i class="bi bi-person"></i></span>
                         @include('torrents.partials.index.uploaders')
                     </td>

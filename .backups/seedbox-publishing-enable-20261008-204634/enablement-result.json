@@ -1,0 +1,24 @@
+{
+  "enabled_at_utc": "2026-10-08T20:48:23.476298+00:00",
+  "queue": "seedbox-publishing",
+  "retry_after": 360,
+  "worker_timeout": 240,
+  "supervisor_program": "fileiplay-publishing",
+  "read_only_provider_checks": [
+    {
+      "seedbox_id": 1,
+      "eligible_count": 150,
+      "source_export_verified": true
+    },
+    {
+      "seedbox_id": 5,
+      "eligible_count": 184,
+      "source_export_verified": true
+    }
+  ],
+  "worker_probe": "passed before and after enablement",
+  "existing_workers": "unchanged; original PIDs remained running",
+  "tests": "85 isolated feature/unit tests, 775 assertions passed",
+  "production_content_operations": "none; no publications, registrations, rechecks or torrent starts performed",
+  "remaining_check": "First explicitly authorized publication is required to validate actual registration, content recheck and seeding. Existing torrents must remain untouched."
+}

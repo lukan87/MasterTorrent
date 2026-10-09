@@ -28,6 +28,8 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->scoped(\App\Services\Torrent\MetadataHttpCache::class);
+        $this->app->scoped(\App\Services\Torrent\HotTorrentRankingService::class);
+        $this->app->scoped(\App\Services\Torrent\TorrentPreviewService::class);
         //
 
         $this->app->bind(
@@ -41,6 +43,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        app(\App\Services\Torrent\UploadTelemetryRedactor::class)->register();
+        \Illuminate\Support\Facades\RateLimiter::for('upload-api-auth', fn ($request) =>
+            \Illuminate\Cache\RateLimiting\Limit::perMinute(120)->by('api-ip:'.$request->ip()));
+        foreach (['upload-api-write' => 'uploads_per_minute', 'upload-api-read' => 'reads_per_minute'] as $name => $setting) {
+            \Illuminate\Support\Facades\RateLimiter::for($name, fn ($request) => [
+                \Illuminate\Cache\RateLimiting\Limit::perMinute(config('upload-api.'.$setting))->by($name.':user:'.$request->user()->id),
+                \Illuminate\Cache\RateLimiting\Limit::perMinute(config('upload-api.'.$setting))->by($name.':token:'.$request->user()->currentAccessToken()->id),
+            ]);
+        }
         foreach ([\App\Models\User::class, \App\Models\Torrent::class, \App\Models\Comment::class, \App\Models\CommentReaction::class, \App\Models\ForumPost::class, \App\Models\ForumPostLike::class, \App\Models\TorrentReaction::class] as $activityModel) {
             $activityModel::observe(\App\Observers\AchievementActivityObserver::class);
         }

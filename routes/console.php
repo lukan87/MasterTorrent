@@ -108,3 +108,6 @@ Schedule::command('achievements:award')->everyFiveMinutes()->withoutOverlapping(
 
 // Reconcile direct SQL deletions without deleting any remaining messages.
 Schedule::command('messages:prune-empty')->everyFiveMinutes()->withoutOverlapping(5);
+
+// Refresh download activity and rotate hot tags.
+Schedule::command('torrents:refresh-hot')->everyFifteenMinutes()->withoutOverlapping(60);

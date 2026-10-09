@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@push('scripts') @vite(['resources/js/page-browser.js', 'resources/js/forum-topic.js']) @endpush
 @section('content')
 <div class="container forum-page py-4 py-lg-5">
     <nav class="forum-breadcrumb mb-4" aria-label="Breadcrumb"><a class="forum-breadcrumb-link" href="{{ route('forum.index') }}">Forum</a><span aria-hidden="true">/</span><a class="forum-breadcrumb-link" href="{{ route('forum.category', $category->slug) }}">{{ $category->name }}</a></nav>
@@ -7,7 +8,7 @@
         <h1 class="forum-topic-title">{{ $topic->title }}</h1>
         <div class="forum-topic-meta">
             <span>{{ $topic->user?->name ?? 'Former member' }} · {{ $topic->created_at->diffForHumans() }}</span>
-            <span>{{ number_format($replies->total()) }} replies · {{ number_format($topic->views) }} views</span>
+            <span><span data-reply-count>{{ number_format($replies->total()) }}</span> replies · {{ number_format($topic->views) }} views</span>
             @if($topic->is_pinned)<span class="forum-topic-badge pinned">Pinned</span>@endif
             @if($topic->is_locked)<span class="forum-topic-badge locked">Locked</span>@endif
             @if($category->is_private)<span class="forum-topic-badge locked">Staff only</span>@endif
@@ -36,18 +37,13 @@
             @endif
         </div>
     </header>
-    @if($firstPost) @include('forum.partials.post', ['post' => $firstPost, 'original' => true]) @endif
-    <div class="forum-replies-heading"><h2>Replies</h2><span>Newest replies first</span></div>
-    @forelse($replies as $post)
-        @include('forum.partials.post', ['original' => false])
-    @empty
-        <p class="forum-empty-state">No replies yet.</p>
-    @endforelse
-    @if($replies->hasPages())<div class="forum-pagination my-4">{{ $replies->links('pagination::bootstrap-5') }}</div>@endif
+    <div data-page-browser data-browse-url="{{ route('forum.topic', ['category' => $category->slug, 'topic' => $topic->slug]) }}">
+        @include('forum.topic-results')
+    </div>
     @if(\App\Services\ForumAccess::canParticipate(auth()->user()) && !$topic->is_locked)
         <section class="forum-reply-form mt-4" aria-labelledby="forum-reply-heading">
             <h2 id="forum-reply-heading">Join the conversation</h2>
-            <form method="POST" action="{{ route('forum.topic.reply', ['category' => $category->slug, 'topic' => $topic->slug]) }}">
+            <form data-forum-reply method="POST" action="{{ route('forum.topic.reply', ['category' => $category->slug, 'topic' => $topic->slug]) }}">
                 @csrf
                 <label for="forum-reply-body" class="form-label">Your reply</label>
                 @include('forum.partials.bbcode-toolbar')

@@ -14,6 +14,12 @@ class MediaDisplayService
             return null;
         }
 
+        return $this->buildDisplayPayload($tmdbId, $type, $tmdb, $imdbId, $includeCollection);
+    }
+
+    /** Build the same hero payload from already available library metadata. */
+    public function buildDisplayPayload(int $tmdbId, string $type, array $tmdb, ?string $imdbId = null, bool $includeCollection = false): array
+    {
         $omdb = $imdbId ? app(OMDBService::class)->fetchOMDBData($imdbId) : null;
         $isMovie = $type === 'movie';
 
@@ -273,7 +279,7 @@ class MediaDisplayService
                         'air_date' => $s['air_date'] ?? null,
                         'episode_count' => $s['episode_count'] ?? 0,
                         'vote_average' => $s['vote_average'] ?? null,
-                        'poster' => $s['poster_path']
+                        'poster' => !empty($s['poster_path'])
                             ? "https://image.tmdb.org/t/p/w300{$s['poster_path']}"
                             : null,
                     ])

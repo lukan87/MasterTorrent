@@ -88,9 +88,22 @@ class TicketController extends Controller
     {
         $ticket = Ticket::with(['user', 'category', 'assignedStaff', 'claimedBy', 'events.user'])->findOrFail($id);
         abort_unless($ticket->canBeViewedBy(Auth::user()), 403);
-        $ticket->load(['responses' => fn ($query) => $query->visibleTo(Auth::user())->with(['user', 'attachments'])->orderBy('id')]);
+        $partial = request()->header('X-Ticket-Content') === '1' && request()->expectsJson();
+        $after = $partial ? (int) (request()->validate(['after' => 'nullable|integer|min:0'])['after'] ?? 0) : 0;
+        $ticket->load(['responses' => fn ($query) => $query->visibleTo(Auth::user())->with(['user', 'attachments'])
+            ->when($after > 0, fn ($query) => $query->where('id', '>', $after))->orderBy('id')]);
         $staffMembers = Auth::user()->user_class > 5
             ? User::where('user_class', '>', 5)->orderBy('name')->get(['id', 'name']) : collect();
+
+        if ($partial) {
+            return \App\Services\PageBrowse::json([
+                'html' => view('tickets.replies', compact('ticket'))->render(),
+                'status' => $ticket->status,
+                'locked' => (bool) $ticket->is_locked,
+                'composer' => view('tickets.composer', compact('ticket'))->render(),
+                'details' => view('tickets.details', compact('ticket', 'staffMembers'))->render(),
+            ]);
+        }
 
         return view('tickets.show', compact('ticket', 'staffMembers'));
     }
@@ -205,6 +218,10 @@ class TicketController extends Controller
                 'event' => $locked ? 'locked the conversation' : 'unlocked the conversation',
             ]);
         });
+
+        if (request()->expectsJson()) {
+            return \App\Services\PageBrowse::json(['message' => $locked ? 'Conversation locked.' : 'Conversation unlocked.']);
+        }
 
         return back()->with('success', $locked ? 'Conversation locked.' : 'Conversation unlocked.');
     }

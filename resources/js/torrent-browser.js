@@ -1,5 +1,6 @@
 import { createApp, h, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { setTorrentLoading } from './torrent-loading';
+import { disposeTorrentTooltips as dispose, initTorrentTooltips as enhance } from './torrent-tooltips';
 
 const root = document.querySelector('[data-torrent-browser]');
 const filters = document.querySelector('[data-torrent-filters]');
@@ -7,12 +8,6 @@ const filters = document.querySelector('[data-torrent-filters]');
 if (root && filters) {
     const initialHtml = root.innerHTML;
     const browseUrl = new URL(root.dataset.browseUrl, window.location.origin);
-    const dispose = element => element.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(node => {
-        window.bootstrap?.Tooltip.getInstance(node)?.dispose();
-    });
-    const enhance = element => element.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(node => {
-        window.bootstrap?.Tooltip.getOrCreateInstance(node);
-    });
     dispose(root);
 
     createApp({

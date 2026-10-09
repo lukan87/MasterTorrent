@@ -233,7 +233,7 @@
             } else {
                 render(data);
             }
-            status.textContent = 'Live · updates every 8s';
+            status.textContent = 'Live · updates every 5s';
             showJump();
         } catch (error) {
             if (!stopped) status.textContent = 'Reconnecting…';
@@ -442,7 +442,7 @@
             } catch (_) { /* Message polling reports connection status. */ }
         }
         clearTimeout(timer);
-        timer = setTimeout(cycle, 8000);
+        timer = setTimeout(cycle, 5000);
     }
     document.addEventListener('visibilitychange', () => {
         clearTimeout(timer);

@@ -1,0 +1,188 @@
+
+<div class="container py-5">
+
+    {{-- Page header --}}
+    <div class="mb-4 text-center">
+        <h1 class="fw-bold mb-1">
+            <i class="bi bi-bell me-2"></i> Notifications
+        </h1>
+        <div class="text-muted small">
+            All your recent activity updates
+        </div>
+    </div>
+    
+@if($notifications->count())
+    <div class="d-flex justify-content-end gap-2 mb-3">
+
+        @if(auth()->user()->unreadNotifications->count())
+            <form data-page-action method="POST" action="{{ route('notifications.readAll') }}">
+                @csrf
+                <button class="btn btn-outline-success btn-sm" data-bs-toggle="tooltip" title="Mark all as read">
+                    <i class="bi bi-check2-all me-1 fs-5"></i> Mark all as read
+                </button>
+            </form>
+        @endif
+
+        <form data-page-action method="POST"
+              action="{{ route('notifications.deleteAll') }}"
+              onsubmit="return confirm('Delete ALL notifications?')">
+            @csrf
+            @method('DELETE')
+
+            <button class="btn btn-outline-danger btn-sm">
+                <i class="bi bi-trash me-1 fs-5"></i> Delete all
+            </button>
+        </form>
+
+    </div>
+@endif
+
+
+    {{-- Notifications card --}}
+    <div class="card theme-surface bg-opacity-50 border-0 shadow-lg rounded-4 overflow-hidden">
+        <div class="card-body p-0">
+
+            @forelse($notifications as $notification)
+                <div class="notification-item p-3 border-bottom border-secondary
+                    {{ is_null($notification->read_at) ? 'unread' : '' }}">
+
+                    <div class="d-flex justify-content-between align-items-start gap-3">
+
+                        @if(is_null($notification->read_at))
+                        <form data-page-action method="POST" action="{{ route('notifications.read', $notification->id) }}">@csrf<button type="submit" class="btn btn-outline-success btn-sm" aria-label="Mark notification as read">Mark read</button></form>
+                        @endif
+                        {{-- Notification content --}}
+                        <form method="POST"
+                              action="{{ route('notifications.read', $notification->id) }}"
+                              class="flex-grow-1">
+                            @csrf
+
+                            <button type="submit"
+                                    class="w-100 text-start bg-transparent border-0 theme-text">
+
+                                @php
+    $data = $notification->data ?? [];
+    $type = $data['type'] ?? null;
+@endphp
+
+<div class="fw-semibold">
+
+    {{-- Torrent Deleted --}}
+    @if($type === 'achievement_unlocked')
+                    @include('notifications.achievement', ['data' => $data])
+                @elseif($type === 'shout_mention')
+                    @include('notifications.shout-mention', ['data' => $data])
+                @elseif($type === 'request_filled')
+                    @include('notifications.request-filled', ['data' => $data])
+                @elseif(in_array($type, ['torrent_comment', 'torrent_reaction'], true))
+                    @include('notifications.torrent-activity', ['data' => $data])
+                @elseif($type === 'torrent_deleted')
+        <i class="bi bi-trash-fill text-danger me-1"></i>
+        Your torrent
+        <strong>{{ $data['torrent_name'] ?? 'Unknown' }}</strong>
+        was deleted
+
+        @if(!empty($data['reason']))
+            <div class="small text-danger mt-1">
+                Reason: {{ $data['reason'] }}
+            </div>
+        @endif
+
+    {{-- Forum Reply (new system) --}}
+    @elseif($type === 'forum_reply')
+        <i class="bi bi-chat-dots-fill text-info me-1"></i>
+        <strong>{{ $data['author'] ?? 'Someone' }}</strong>
+        replied to your post
+
+        @if(!empty($data['topic_title']))
+            <em class="d-block mt-1">{{ $data['topic_title'] }}</em>
+        @endif
+
+        {{-- Forum Like --}}
+@elseif($type === 'forum_like')
+
+    <i class="bi bi-heart-fill text-danger me-1"></i>
+
+    <strong>{{ $data['author'] ?? 'Someone' }}</strong>
+    liked your post
+
+    @if(!empty($data['topic_title']))
+        <em class="d-block mt-1">
+            {{ $data['topic_title'] }}
+        </em>
+    @endif
+
+    {{-- Subscribed torrent updated --}}
+    @elseif($type === 'torrent_updated')
+        <i class="bi bi-pencil-square text-primary me-1"></i>
+        Subscribed torrent
+        <strong>{{ $data['torrent_name'] ?? 'Unknown' }}</strong>
+        was updated
+
+        @if(!empty($data['updated_by']))
+            <div class="small text-muted mt-1">
+                Updated by {{ $data['updated_by'] }}
+            </div>
+        @endif
+
+    {{-- Forum Reply (old structure without type) --}}
+    @elseif(isset($data['author']) && isset($data['topic_title']))
+        <i class="bi bi-chat-dots-fill text-info me-1"></i>
+        <strong>{{ $data['author'] }}</strong>
+        replied to
+        <em>{{ $data['topic_title'] }}</em>
+
+    {{-- Fallback --}}
+    @else
+        <i class="bi bi-bell-fill text-warning me-1"></i>
+        You have a new activity
+    @endif
+
+</div>
+
+                                <div class="small text-muted mt-1">
+                                    <i class="bi bi-clock me-1"></i>
+                                    {{ $notification->created_at->diffForHumans() }}
+                                    <span class="ms-2">
+                                        {{ $notification->created_at->format('d M Y, H:i') }}
+                                    </span>
+                                </div>
+
+                            </button>
+                        </form>
+
+                        {{-- Delete (single) --}}
+                        <form data-page-action method="POST"
+                              action="{{ route('notifications.delete', $notification->id) }}"
+                              onsubmit="return confirm('Delete this notification?')">
+                            @csrf
+                            @method('DELETE')
+
+                            <button class="btn" data-bs-toggle="tooltip" title="Delete Notification" >
+                                <i class="bi bi-trash fs-5 text-danger"></i>
+                            </button>
+                        </form>
+
+                    </div>
+                </div>
+            @empty
+                <div class="p-5 text-center text-muted">
+                    <i class="bi bi-inbox fs-2 d-block mb-3"></i>
+                    <div class="fw-semibold">You’re all caught up</div>
+                    <div class="small">No notifications to show</div>
+                </div>
+            @endforelse
+
+        </div>
+    </div>
+
+    {{-- Pagination --}}
+    @if($notifications->hasPages())
+        <div class="mt-4 d-flex justify-content-center">
+            {{ $notifications->links('pagination::bootstrap-5') }}
+        </div>
+    @endif
+
+</div>
+
+{{-- Modern polish --}}

@@ -1,0 +1,83 @@
+/* Scoped to the upload automation pages; follows the existing appearance switch. */
+.api-settings-page {
+    --api-text: var(--theme-text, #e5edf7);
+    --api-muted: var(--ui-text-muted, #9caec4);
+    --api-link: var(--ui-accent, #63d2c6);
+    --api-surface: var(--ui-surface-raised, #0e1521);
+    --api-control: var(--theme-control, #111c2c);
+    --api-border: var(--ui-border, rgba(203, 213, 225, .2));
+    --api-danger: #ff9ba8;
+    --api-on-action: #052622;
+    max-width: 1080px;
+    margin: 1.5rem auto;
+    color: var(--api-text);
+}
+html[data-bs-theme="light"] .api-settings-page {
+    --api-danger: #b42339;
+    --api-on-action: #fff;
+}
+.api-settings-page .card { background: var(--api-surface); color: var(--api-text); border-color: var(--api-border); }
+.api-settings-page :is(h1, h2, h3, h4, h5, h6, legend, .form-label, .form-check-label) { color: var(--api-text); }
+.api-settings-page :is(.text-muted, .form-text) { color: var(--api-muted) !important; }
+.api-settings-page .text-info { color: var(--api-link) !important; }
+.api-settings-page .text-danger { color: var(--api-danger) !important; }
+.api-settings-page a:not(.btn):not(.page-link) {
+    color: var(--api-link);
+    text-decoration: underline;
+    text-underline-offset: .2em;
+    text-decoration-thickness: 1px;
+}
+.api-settings-page a:not(.btn):not(.page-link):hover { color: var(--api-text); text-decoration-thickness: 2px; }
+.api-settings-page :is(a, button, summary, input, select, textarea):focus-visible {
+    outline: 2px solid var(--api-link);
+    outline-offset: 3px;
+}
+.api-settings-page .btn { font-weight: 600; }
+.api-settings-page :is(.btn-outline-info, .btn-outline-secondary, .btn-outline-success) {
+    --bs-btn-color: var(--api-link);
+    --bs-btn-border-color: var(--api-link);
+    --bs-btn-hover-bg: var(--api-link);
+    --bs-btn-hover-color: var(--api-on-action);
+    --bs-btn-hover-border-color: var(--api-link);
+    --bs-btn-active-bg: var(--api-link);
+    --bs-btn-active-color: var(--api-on-action);
+    --bs-btn-active-border-color: var(--api-link);
+    color: var(--api-link) !important;
+    border-color: var(--api-link);
+}
+.api-settings-page :is(.btn-outline-info, .btn-outline-secondary, .btn-outline-success):is(:hover, :active, .active) {
+    color: var(--api-on-action) !important;
+    background-color: var(--api-link);
+}
+.api-settings-page .btn-info { color: var(--api-on-action) !important; background: var(--api-link); border-color: var(--api-link); }
+.api-settings-page .btn-info:hover { filter: brightness(.95); }
+.api-settings-page .btn-outline-danger { color: var(--api-danger) !important; border-color: var(--api-danger); }
+.api-settings-page .btn-outline-danger:is(:hover, :active) { color: var(--api-surface) !important; background: var(--api-danger); }
+.api-settings-page .btn:disabled { opacity: .65; }
+.api-settings-nav { display: flex; flex-wrap: wrap; gap: .6rem; padding: 1rem; border: 1px solid var(--api-border); border-radius: 1rem; background: var(--api-surface); }
+.api-settings-page .api-header-label { letter-spacing: .08em; font-weight: 700; }
+.api-settings-page summary { cursor: pointer; padding: .4rem 0; font-weight: 600; text-decoration: underline; text-underline-offset: .2em; }
+.api-settings-page details[open] { padding-bottom: .5rem; }
+.api-settings-page :is(.form-control, .form-select) { color: var(--api-text); background-color: var(--api-control); border-color: var(--api-border); }
+.api-settings-page .form-control::placeholder { color: var(--api-muted); opacity: 1; }
+.api-settings-page .table { --bs-table-color: var(--api-text); --bs-table-bg: transparent; --bs-table-border-color: var(--api-border); margin-bottom: 0; }
+.api-settings-page .table th { color: var(--api-muted); font-weight: 700; white-space: nowrap; }
+.api-settings-page .table :is(td, th) { padding: .9rem .75rem; }
+.api-settings-page .table td:first-child { overflow-wrap: anywhere; min-width: 150px; }
+.api-settings-page .page-link { color: var(--api-link); background: var(--api-surface); border-color: var(--api-border); }
+.api-settings-page .page-item.active .page-link { color: var(--api-on-action); background: var(--api-link); }
+.api-settings-page .page-item.disabled .page-link { color: var(--api-muted); }
+.api-settings-page code { color: var(--api-link); }
+.upload-api-guide { line-height: 1.75; overflow-wrap: anywhere; }
+.upload-api-guide h1 { font-size: 1.8rem; margin-bottom: 1rem; }
+.upload-api-guide h2 { font-size: 1.3rem; margin: 2rem 0 1rem; padding-bottom: .5rem; border-bottom: 1px solid var(--api-border); }
+.upload-api-guide pre { padding: 1.25rem; background: var(--api-control); border: 1px solid var(--api-border); border-radius: .75rem; overflow: auto; }
+.upload-api-guide pre code { color: var(--api-text); white-space: pre; }
+.upload-api-guide table { display: block; max-width: 100%; overflow: auto; border-collapse: collapse; margin: 1.25rem 0; }
+.upload-api-guide :is(th, td) { padding: .8rem; border: 1px solid var(--api-border); vertical-align: top; }
+.upload-api-guide th { background: var(--api-control); color: var(--api-text); }
+.upload-api-guide code { font-size: .95em; }
+@media (max-width: 575.98px) {
+    .api-settings-nav .btn { flex: 1 1 calc(50% - .6rem); padding: .7rem .5rem; }
+    .api-settings-page .card-body { padding: 1.25rem !important; }
+}

@@ -182,6 +182,9 @@ html[data-bs-theme="light"] .torrent-tags :is(.bump-btn) {
 </style>
 
 <div class="badge-group torrent-tags">
+    @if($torrent->isHot())
+        <span class="badge-btn recommended-btn" title="Hot: recent download activity"><i class="bi bi-fire" aria-hidden="true"></i> Hot</span>
+    @endif
     @if (isset($newTorrents) && $newTorrents->contains($torrent))
         <div class="badge-btn new-btn" data-bs-toggle="tooltip" title="Newly uploaded torrent">
             <i class="bi bi-star-fill"></i> New

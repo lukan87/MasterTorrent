@@ -1,0 +1,1 @@
+Anonymous-only source restore point. No secrets or database dump included. To restore code deliberately, run python3 /var/www/fileiplay.org/.backups/anonymous-publishing-20261008-171100/restore.py and php artisan view:clear. Database column, preferences and migration record must be retained. Never restore the old database automatically. Manifest checks protect later file edits.

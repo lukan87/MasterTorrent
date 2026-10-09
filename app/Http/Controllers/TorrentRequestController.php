@@ -50,7 +50,7 @@ class TorrentRequestController extends Controller
         $categories = Category::orderBy('name')->get();
         $counts = TorrentRequest::selectRaw('filled, COUNT(*) AS aggregate')->groupBy('filled')->pluck('aggregate', 'filled');
 
-        return view('requests.index', compact('requests', 'categories', 'filters', 'counts'));
+        return \App\Services\PageBrowse::view('requests.index', compact('requests', 'categories', 'filters', 'counts'));
     }
 
     public function create(Request $request)

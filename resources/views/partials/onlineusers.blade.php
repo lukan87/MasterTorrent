@@ -34,7 +34,7 @@
                            data-bs-container="body"
                            data-bs-html="true"
                            data-bs-custom-class="chat-member-tooltip"
-                           title="{{ '<strong>Class:</strong> ' . e(\App\Models\UserClass::getClassName($user->user_class)) . (filled($user->title) ? '<br><strong>Title:</strong> ' . e($user->title) : '') . '<br><strong>Uploaded:</strong> ' . e(\App\Helpers\FormatHelper::formatSize($user->uploaded)) . '<br><strong>Downloaded:</strong> ' . e(\App\Helpers\FormatHelper::formatSize($user->downloaded)) }}">
+                           data-bs-title="{{ '<strong>Class:</strong> ' . e(\App\Models\UserClass::getClassName($user->user_class)) . (filled($user->title) ? '<br><strong>Title:</strong> ' . e($user->title) : '') . '<br><strong>Uploaded:</strong> ' . e(\App\Helpers\FormatHelper::formatSize($user->uploaded)) . '<br><strong>Downloaded:</strong> ' . e(\App\Helpers\FormatHelper::formatSize($user->downloaded)) }}">
                             <span class="chat-member-initial" aria-hidden="true">{{ mb_substr($user->name, 0, 1) }}</span>
                             <span class="chat-member-name">{{ $user->name }}</span>
                             @if(auth()->id() === $user->id)

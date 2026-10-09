@@ -143,7 +143,7 @@ class TorrentDownloadService
     protected function prepareTorrentResponse(Torrent $torrent, User $user)
     {
         // Get the path of the torrent file
-        $path = public_path('files/torrents/' . $torrent->file_name);
+        $path = app(\App\Services\Torrent\TorrentFileService::class)->path($torrent->file_name);
 
         // Check if the file exists
         if (!file_exists($path)) {

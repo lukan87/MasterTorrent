@@ -88,7 +88,7 @@
 
             </div>
 
-            <form action="{{ route('torrents.store') }}"
+            <form data-torrent-form data-metadata-url="{{ route('torrents.form-metadata') }}" action="{{ route('torrents.store') }}"
 
                   method="POST"
 
@@ -275,18 +275,6 @@
                                            name="imdb_url"
 
                                            value="{{ old('imdb_url') }}">
-
-                                    <button class="btn imdb-fetch-btn mt-3"
-
-                                            type="button"
-
-                                            onclick="fetchIMDBInfo()">
-
-                                        <i class="bi bi-film me-1"></i>
-
-                                        Fetch Info
-
-                                    </button>
 
                                 </div>
 
@@ -523,6 +511,13 @@
 
                     </div>
 
+                </div>
+
+                <div class="form-check form-switch mt-4">
+                    <input type="hidden" name="anon" value="0">
+                    <input class="form-check-input" type="checkbox" role="switch" id="anonymous-upload" name="anon" value="1" @checked(old('anon', auth()->user()->anonymous ?? false)) aria-describedby="anonymous-upload-help">
+                    <label class="form-check-label" for="anonymous-upload">Publish anonymously</label>
+                    <p id="anonymous-upload-help" class="form-text">Your uploader name and profile link are hidden from other members. You and moderators can still see the owner. This does not hide names you include in torrent content, descriptions or comments.</p>
                 </div>
 
                 {{-- SUBMIT --}}
@@ -1104,4 +1099,5 @@ textarea.upload-input {
 
 @endif
 
+@vite('resources/js/torrent-form.js')
 @endsection

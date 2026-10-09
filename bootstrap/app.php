@@ -13,6 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
+        api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
@@ -42,6 +43,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->appendToGroup('web', \App\Http\Middleware\RecordAchievementVisit::class);
 
         $middleware->alias([
+            'upload-api-access' => \App\Http\Middleware\UploadApiAccess::class,
+            'upload-api-size' => \App\Http\Middleware\UploadApiRequestSize::class,
             'last_activity' => \App\Http\Middleware\CheckOnlineUsers::class,
             'save_ip'       => \App\Http\Middleware\SaveUserIP::class,
             'admin'         => \App\Http\Middleware\AdminMiddleware::class,
@@ -73,6 +76,7 @@ return Application::configure(basePath: dirname(__DIR__))
         */
 
         $exceptions->respond(function (Response $response) {
+            if (request()->is('api/v1', 'api/v1/*')) return $response;
 
             if ($response->getStatusCode() === 404 && request()->route()?->getName() !== 'torznab.api') {
                 return response()->view('errors.404', [
@@ -98,10 +102,43 @@ return Application::configure(basePath: dirname(__DIR__))
         |
         */
 
+        $exceptions->report(function (\Throwable $exception) {
+            if (request()->is('api/v1', 'api/v1/*')) {
+                \Illuminate\Support\Facades\Log::error('Upload API request failed', ['exception_type' => get_class($exception)]);
+                return false;
+            }
+        });
+
         $exceptions->render(function (
             \Throwable $exception,
             \Illuminate\Http\Request $request
         ) {
+
+            // The versioned API always returns safe JSON, even without an Accept header.
+            if ($request->is('api/v1', 'api/v1/*')) {
+                $status = match (true) {
+                    $exception instanceof \App\Exceptions\DuplicateTorrentException => 409,
+                    $exception instanceof AuthenticationException => 401,
+                    $exception instanceof ValidationException => 422,
+                    $exception instanceof HttpExceptionInterface => $exception->getStatusCode(),
+                    default => 500,
+                };
+                $code = match ($status) {
+                    401 => 'unauthenticated', 403 => 'forbidden', 404 => 'not_found',
+                    409 => 'duplicate_torrent', 413 => 'request_too_large', 422 => 'validation_failed',
+                    429 => 'rate_limited', default => 'request_failed',
+                };
+                $message = match ($status) {
+                    401 => 'A valid personal bearer token is required.', 403 => 'This action is not permitted.',
+                    404 => 'The resource was not found.', 409 => 'This torrent already exists on the tracker.',
+                    413 => 'The request exceeds the upload limit.', 422 => 'The supplied fields are invalid.',
+                    429 => 'Too many requests. Please retry later.', default => 'The request could not be completed.',
+                };
+                $error = ['code' => $code, 'message' => $message];
+                if ($status === 422) $error['fields'] = $exception->errors();
+                $headers = $exception instanceof HttpExceptionInterface ? $exception->getHeaders() : [];
+                return response()->json(['error' => $error], $status, $headers)->header('Cache-Control', 'private, no-store');
+            }
 
             // Torznab clients need XML errors, including throttling and middleware failures.
             if ($request->route()?->getName() === 'torznab.api') {

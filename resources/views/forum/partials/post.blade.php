@@ -34,7 +34,7 @@
                             <button type="button" class="forum-post-action quote-post-btn" data-post-id="{{ $post->id }}" data-username="{{ $post->user?->name ?? 'Former member' }}" data-body="{{ json_encode($post->body) }}"><i class="bi bi-quote" aria-hidden="true"></i> Quote</button>
                         @endif
                         @if($post->user_id === auth()->id() || \App\Services\ForumAccess::allows(auth()->user(), 'edit_posts'))
-                            <a class="forum-post-action" href="{{ route('forum.post.edit', ['category' => $category->slug, 'topic' => $topic->slug, 'post' => $post->id]) }}">Edit</a>
+                            <a data-post-edit class="forum-post-action" href="{{ route('forum.post.edit', ['category' => $category->slug, 'topic' => $topic->slug, 'post' => $post->id]) }}">Edit</a>
                         @endif
                     @endif
                     @if(!$original && \App\Services\ForumAccess::allows(auth()->user(), 'delete_posts'))

@@ -1,0 +1,41 @@
+{
+  "app/Http/Controllers/ApiSettingsController.php": {
+    "existed": true,
+    "before_sha256": "db22516f5651e8468d4c895373981c9f01e2c2dc43965075340f401077e1155e",
+    "installed_sha256": "3f0cc6fd8441e02c4f6da6d32c81f2c3c9580bb18a46800746a38da593927a37"
+  },
+  "app/Services/Torrent/UploadTelemetryRedactor.php": {
+    "existed": true,
+    "before_sha256": "5ba4ad4a8333d5babdea9a18131e6098fb1e109124878608ea5834d56bafd4f1",
+    "installed_sha256": "4ba7f5da1815e4cbc189fa874f9321bb459a3f881f646b8067e9a67fd8304e9e"
+  },
+  "app/Console/Commands/UploadApiPreflight.php": {
+    "existed": true,
+    "before_sha256": "ccf208d29d96bca5379a77c3725e26ed86ffd60b08d8a828bcd630b31b820a5c",
+    "installed_sha256": "af2fb243be50b193962e2b3c4d402df1be3d9ac32ef81eff5e34d94bfb312925"
+  },
+  "resources/views/profile/api/index.blade.php": {
+    "existed": true,
+    "before_sha256": "d94936241074ddbec9730988fa47502698ea92bd237e31da3c7dcacf8f29db0c",
+    "installed_sha256": "31a8c432f95755ef11709c2e785f9e79345cf65542a4ea52aab8241244d9c176"
+  },
+  "routes/web.php": {
+    "existed": true,
+    "before_sha256": "0cd76b017dd763e5bd0edd0197b496e89ff8dfff0d059b542ee49fed19acb64b",
+    "installed_sha256": "4e3d8bf266e8aa7bb96d405493cf01dc0ceb68e4a7daa196b6ac3814158af52d"
+  },
+  "database/migrations/2026_10_08_100500_create_api_token_secrets_table.php": {
+    "existed": false,
+    "installed_sha256": "3c69aeea7145b57155b7ece2a1fac12af0509480178eaa516dc09faf0f0a64a5"
+  },
+  "docs/upload-api.md": {
+    "existed": true,
+    "before_sha256": "67078c79b4c8493658a78df3a1669f7affac0e07b406cde5ebdd30dbf36e58a9",
+    "installed_sha256": "5fbfa359eb9852b91040a7cdbf0818da1b4490f6d95c8c22189c4dbec3c45c6f"
+  },
+  "docs/upload-api-deployment.md": {
+    "existed": true,
+    "before_sha256": "9cadf6f29959894acbbe0014e115f4b54622fc29f0f29e4a8f168504f0bd95b2",
+    "installed_sha256": "903bea0295e3b2b1403dbcd5d49db30fc56c056dbae92c4e3fef2ebc4aa2b0ef"
+  }
+}

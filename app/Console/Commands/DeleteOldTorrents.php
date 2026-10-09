@@ -12,8 +12,6 @@ class DeleteOldTorrents extends Command
     protected $signature = 'torrents:cleanup';
     protected $description = 'Delete torrents older than 3 years with 0 seeders, including related data and torrent files.';
 
-    // Base folder where torrent files are stored
-    private string $torrentFolder = '/var/www/html/lastfiles/public/files/torrents';
 
     public function handle(): int
     {
@@ -46,7 +44,7 @@ class DeleteOldTorrents extends Command
 
             // Delete the torrent file
             if (!empty($torrent->file_name)) {
-                $filePath = $this->torrentFolder . '/' . $torrent->file_name;
+                $filePath = app(\App\Services\Torrent\TorrentFileService::class)->path($torrent->file_name);
                 if (file_exists($filePath)) {
                     try {
                         unlink($filePath);

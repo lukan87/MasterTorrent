@@ -36,6 +36,10 @@ class StaffTicketController extends Controller
             $this->record($ticket, 'claimed the ticket');
         });
 
+        if (request()->expectsJson()) {
+            return \App\Services\PageBrowse::json(['message' => 'Ticket claimed.']);
+        }
+
         return back()->with('success', 'Ticket claimed.');
     }
 
@@ -50,6 +54,10 @@ class StaffTicketController extends Controller
             SystemMessageService::send(Auth::id(), $staff->id, 'Ticket assigned to you',
                 'A support ticket has been assigned to you: '.$ticket->notificationLink());
         });
+
+        if (request()->expectsJson()) {
+            return \App\Services\PageBrowse::json(['message' => 'Ticket assigned.']);
+        }
 
         return back()->with('success', 'Ticket assigned.');
     }
@@ -66,6 +74,10 @@ class StaffTicketController extends Controller
             $ticket->update(['status' => $request->status]);
             $this->record($ticket, 'changed status from '.$previous.' to '.$ticket->status);
         });
+
+        if (request()->expectsJson()) {
+            return \App\Services\PageBrowse::json(['message' => 'Ticket status updated.']);
+        }
 
         return back()->with('success', 'Ticket status updated.');
     }

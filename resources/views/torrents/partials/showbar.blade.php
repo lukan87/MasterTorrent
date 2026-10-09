@@ -29,10 +29,10 @@
 
                     <span class="modern-badge torrent-release-badge torrent-uploader-badge"
                           data-bs-toggle="tooltip"
-                          title="Uploader: {{ $torrent->uploader->name ?? 'Unknown' }}"
-                          aria-label="Uploader: {{ $torrent->uploader->name ?? 'Unknown' }}">
+                          title="Uploader: {{ $torrent->uploaderLabel() }}"
+                          aria-label="Uploader: {{ $torrent->uploaderLabel() }}">
                         <i class="bi bi-person-circle" aria-hidden="true"></i>
-                        {{ $torrent->uploader->name ?? 'Unknown' }}
+                        {{ $torrent->uploaderLabel() }}
                     </span>
 
                     @php
@@ -720,58 +720,9 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-            {{-- SUBSCRIBE --}}
-            @if($subscribeAvailable)
-
-                @if($isSubscribed)
-
-                    <form action="{{ route('torrents.unsubscribe', $torrent->id) }}"
-                          method="POST">
-
-                        @csrf
-
-                        <button type="submit"
-                                class="btn modern-action-btn unsubscribe-btn"
-                                data-bs-toggle="tooltip"
-                                title="Stop receiving notifications when a new version of this title is uploaded">
-
-                            <i class="bi bi-bell-fill me-1"></i>
-
-                            Subscribed
-
-                        </button>
-
-                    </form>
-
-                @else
-
-                    <form action="{{ route('torrents.subscribe', $torrent->id) }}"
-                          method="POST">
-
-                        @csrf
-
-                        <button type="submit"
-                                class="btn modern-action-btn subscribe-btn"
-                                data-bs-toggle="tooltip"
-                                title="Get notified whenever a new version of this title is uploaded">
-
-                            <i class="bi bi-bell me-1"></i>
-
-                            Subscribe
-
-                        </button>
-
-                    </form>
-
-                @endif
-
-            @endif
-
-            {{-- SUBSCRIBERS (count + names beside the subscribe button).
-                 Only shown when the torrent carries a TMDB id. --}}
-            @if(!empty($torrent->tmdbid))
-                @include('torrents.partials._subscribers-label', ['subscribers' => $subscribers ?? collect()])
-            @endif
+            <div data-torrent-subscription class="d-flex align-items-center gap-2 flex-wrap" aria-live="polite" aria-busy="false">
+                @include('torrents.partials.subscription')
+            </div>
 
         </div>
         <div class="modern-stats-wrap ms-md-auto">

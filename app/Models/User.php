@@ -20,7 +20,7 @@ use App\Models\Announcement;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, SoftDeletes;
+    use HasFactory, Notifiable, SoftDeletes, \Laravel\Sanctum\HasApiTokens;
     
 
     /**
@@ -97,6 +97,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'activation_pending' => 'boolean',
+            'anonymous' => 'boolean',
             'password' => 'hashed',
             'banned_until' => 'datetime',
             'last_activity' => 'datetime',

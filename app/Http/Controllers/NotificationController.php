@@ -13,6 +13,6 @@ class NotificationController extends Controller
             ->latest()
             ->paginate(20);
 
-        return view('notifications.index', compact('notifications'));
+        return \App\Services\PageBrowse::view('notifications.index', compact('notifications'));
     }
 }

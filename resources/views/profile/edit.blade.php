@@ -57,6 +57,14 @@
 
 
 
+    @if((int) auth()->id() === (int) $user->id)
+    <div class="card my-3"><div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div><h2 class="h5 mb-1"><i class="bi bi-key" aria-hidden="true"></i> API &amp; upload automation</h2>
+        <p class="text-muted mb-0">Manage personal tokens and learn how to upload from your scripts.</p></div>
+        <a class="btn btn-outline-info" href="{{ route('profile.api.index') }}">Manage API access</a>
+    </div></div>
+    @endif
+
     {{-- =====================================================
          FORM
     ====================================================== --}}
@@ -540,7 +548,7 @@
                             </div>
 
                         </div>
-                        
+
                         @if(auth()->id() === $user->id)
                         <div class="sidebar-settings-field" id="tracker-passkey">
                             <label><i class="bi bi-key"></i> Tracker Passkey</label>
@@ -571,6 +579,18 @@
 
                         @endif
 
+                                @if((int) auth()->id() === (int) $user->id)
+            <section class="settings-panel mb-4 p-3">
+                <h2 class="h5">Anonymous publishing</h2>
+                <div class="form-check form-switch">
+                    <input type="hidden" name="anonymous" value="0">
+                    <input class="form-check-input" type="checkbox" role="switch" id="anonymous-default" name="anonymous" value="1" @checked(old('anonymous', $user->anonymous)) aria-describedby="anonymous-default-help">
+                    <label class="form-check-label" for="anonymous-default">Publish anonymously by default</label>
+                </div>
+                <p id="anonymous-default-help" class="form-text mb-0">Applies to future uploads. You can change the choice on each upload. Other members see Anonymous; you and moderators retain ownership access. Existing uploads are unchanged.</p>
+            </section>
+        @endif
+
                     </div>
 
                 @endif
@@ -585,6 +605,8 @@
         {{-- =================================================
              SAVE BAR
         ================================================== --}}
+
+
         <div class="settings-save-bar">
 
             <div class="save-bar-text">
@@ -750,7 +772,7 @@ function submitPasswordChange() {
 document.querySelector('form.profile-settings-form').addEventListener('submit', function(e) {
     const currentPass = this.elements.namedItem('current_password')?.value;
     const newPass = this.elements.namedItem('new_password')?.value;
-    
+
     if (!@json((bool) config('auth.email_registration')) && currentPass && newPass) {
         e.preventDefault();
         var myModal = new bootstrap.Modal(document.getElementById('recoveryModal'));

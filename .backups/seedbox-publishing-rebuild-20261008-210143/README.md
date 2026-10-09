@@ -1,0 +1,1 @@
+Source-marker compatibility fix: automated publication now reuses the existing TorrentRebuildService used by normal seedbox upload. Only new publications rebuild before shared upload; existing published records and original seedbox torrents were not modified or retried. 86 tests / 793 assertions passed in isolation.

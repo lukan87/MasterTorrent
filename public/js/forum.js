@@ -138,21 +138,34 @@
                 button.setAttribute('aria-pressed', String(active));
             });
         }
+        function initializeQuotes() {
         document.querySelectorAll('.quote-post-btn').forEach(button => {
-            button.addEventListener('click', () => { try { insert(quote(button)); } catch (_) { message(status, 'This post could not be quoted.'); } });
+            if (button.dataset.quoteInitialized) return;
+            button.dataset.quoteInitialized = '1';
             if (!bar) return;
             const multi = document.createElement('button');
             multi.type = 'button'; multi.className = 'forum-post-action'; multi.textContent = '+ Quote';
             multi.dataset.multiQuote = ''; multi.dataset.postId = button.dataset.postId;
             multi.setAttribute('aria-label', `Add post ${button.dataset.postId} to multi-quote`);
             multi.setAttribute('aria-pressed', 'false');
-            multi.addEventListener('click', () => {
-                if (selected.has(button.dataset.postId)) selected.delete(button.dataset.postId);
-                else selected.set(button.dataset.postId, button);
-                updateQuotes();
-            });
             button.insertAdjacentElement('afterend', multi);
         });
+        }
+        document.addEventListener('click', event => {
+            const button = event.target.closest('.quote-post-btn, [data-multi-quote]');
+            if (!button) return;
+            if (button.matches('[data-multi-quote]')) {
+                const source = button.previousElementSibling;
+                if (selected.has(button.dataset.postId)) selected.delete(button.dataset.postId);
+                else selected.set(button.dataset.postId, source);
+                updateQuotes();
+            } else {
+                try { insert(quote(button)); } catch (_) { message(status, 'This post could not be quoted.'); }
+            }
+        });
+        initializeQuotes();
+        document.addEventListener('page:updated', initializeQuotes);
+        document.addEventListener('forum:reply-saved', () => { clearTimeout(timer); dirty = false; try { localStorage.removeItem(key); } catch (_) {} selected.clear(); updateQuotes(); message(status, 'Reply posted.'); });
         document.getElementById('mq-insert-btn')?.addEventListener('click', () => {
             try { if (insert([...selected.values()].map(quote).join(''))) { selected.clear(); updateQuotes(); } }
             catch (_) { message(status, 'A selected post could not be quoted.'); }

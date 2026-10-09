@@ -37,6 +37,7 @@ class Torrent extends Model
         'leechers',
         'seeders',
         'owner',
+        'anon',
         'nfo',
         'poster',
         'request',
@@ -53,6 +54,9 @@ class Torrent extends Model
         'genre',
         'imdbid',
         'tmdbid',
+        'tvdbid',
+        'season',
+        'episode',
         'background',
         'tmdb_type',
         'trailer',
@@ -67,6 +71,11 @@ class Torrent extends Model
     ];
 
     protected $casts = [
+        'anon' => 'boolean',
+        'hot' => 'boolean',
+        'hot_activity_at' => 'datetime',
+        'hot_until' => 'datetime',
+        'hot_cooldown_until' => 'datetime',
         'bumped_at' => 'datetime',
         'deleted_at' => 'datetime',
     ];
@@ -127,9 +136,63 @@ class Torrent extends Model
     |--------------------------------------------------------------------------
     */
 
+    public function isHot(): bool
+    {
+        return $this->approved && ! $this->trashed()
+            && ! in_array((int) $this->category_id, Category::ADULT_IDS, true)
+            && app(\App\Services\Torrent\HotTorrentRankingService::class)->contains((int) $this->id);
+    }
+
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    /** Real ownership remains available for authorization and staff auditing. */
+    public function canRevealUploader(?User $viewer = null): bool
+    {
+        $viewer ??= auth()->user();
+
+        return ! $this->anon || ($viewer && (
+            (int) $viewer->id === (int) $this->owner
+            || $viewer->user_class >= \App\Models\UserClass::MODERATOR
+        ));
+    }
+
+    public function uploaderLabel(): string
+    {
+        return $this->canRevealUploader() ? ($this->uploader?->name ?? 'Unknown') : 'Anonymous';
+    }
+
+    public function hidesParticipantIdentity(?int $userId): bool
+    {
+        return ! $this->canRevealUploader() && $userId !== null
+            && (int) $userId === (int) $this->owner;
+    }
+
+    public function scopeUploaderVisibleTo($query, ?User $viewer = null)
+    {
+        $viewer ??= auth()->user();
+        if ($viewer && $viewer->user_class >= \App\Models\UserClass::MODERATOR) {
+            return $query;
+        }
+
+        return $query->where(function ($query) use ($viewer) {
+            $query->where('anon', false)->orWhereNull('anon');
+            if ($viewer) {
+                $query->orWhere('owner', $viewer->id);
+            }
+        });
+    }
+
+    public function toArray(): array
+    {
+        $data = parent::toArray();
+        if (! $this->canRevealUploader()) {
+            unset($data['owner'], $data['uploader'], $data['user']);
+        }
+
+        return $data;
     }
 
     public function uploader()
@@ -383,7 +446,7 @@ public function purge(): void
         */
 
         if (!empty($torrentFile)) {
-            Storage::disk('public')->delete('files/torrents/' . $torrentFile);
+            app(\App\Services\Torrent\TorrentFileService::class)->delete($torrentFile);
         }
 
         /*

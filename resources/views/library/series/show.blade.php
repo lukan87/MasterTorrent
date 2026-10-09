@@ -4,76 +4,21 @@
 
 @include('library.series.partials.hero-styles')
 
-{{-- =========================================================
-    PREMIUM HEADER — reuses the exact torrent detail header
-========================================================= --}}
-@if(!empty($display))
+@include('library.partials.detail-hero')
 
-    @php
-        // Prepare data for media-header, handling both torrent-db items and library-only items
-        $posterUrl = !empty($display['poster_path']) ? 'https://image.tmdb.org/t/p/w500' . $display['poster_path'] : null;
+<div data-library-subscription>
+@include('library.series.subscription')
+</div>
 
-        $torrent = $torrents->isNotEmpty() ? $torrents->first() : new class($posterUrl, $tmdbid, null) {
-            public $poster;
-            public $tmdbid;
-            public $trailer;
-            public $genres;
-            public function __construct($p, $t, $tr) {
-                $this->poster = $p;
-                $this->tmdbid = $t;
-                $this->trailer = $tr;
-                $this->genres = collect();
-            }
-            public function trashed() { return false; }
-        };
-    @endphp
-
-
-    @include('torrents.partials.media-header', [
-        'torrent' => $torrent,
-        'display' => $display,
-    ])
-
-    {{-- Subscribe control --}}
-    <div class="container px-xl-5 px-lg-4 px-3">
-        <div class="library-subscribe-row">
-            @if(Auth::check())
-                @if($isSubscribed)
-                    <form action="{{ route('library.series.unsubscribe', $tmdbid) }}" method="POST">
-                        @csrf
-                        <button type="submit" class="btn subscribe-btn">
-                            <i class="bi bi-bell-fill me-1"></i> Unsubscribe
-                        </button>
-                    </form>
-                @else
-                    <form action="{{ route('library.series.subscribe', $tmdbid) }}" method="POST">
-                        @csrf
-                        <button type="submit" class="btn subscribe-btn">
-                            <i class="bi bi-bell me-1"></i> Subscribe
-                        </button>
-                    </form>
-                @endif
-            @endif
-
-            {{-- Subscribers (count + names) beside the subscribe button --}}
-            @include('torrents.partials._subscribers-label', ['subscribers' => $subscribers ?? collect()])
-        </div>
-    </div>
-
-@else
-
-    <div class="container px-xl-5 px-lg-4 px-3">
-        @include('library.series.partials.hero')
-    </div>
-
-@endif
 
 {{-- 📦 TORRENTS SECTION --}}
 <div class="container py-5">
 
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
         <h4 class="theme-text mb-0">📥 Available Torrents</h4>
-        @include('partials._watch-online-btn', ['watchUrl' => $watchUrl ?? null])
+        @if($canWatchOnline)
+            <a class="watch-online-btn" href="#library-seasons"><i class="bi bi-play-circle"></i> Watch Online</a>
+        @endif
     </div>
 
         @if($torrents->isNotEmpty())
@@ -250,9 +195,9 @@
             ->all();
     @endphp
 
-    @if(!empty($seasonDetails) && $watchSeries)
+    @if(!empty($seasonDetails))
 
-        <div class="tv-seasons-section tv-episode-card mt-5">
+        <div id="library-seasons" class="tv-seasons-section tv-episode-card mt-5">
 
             <div class="episode-card-header">
 
@@ -263,7 +208,7 @@
                 <div>
                     <h3 class="episode-card-title mb-0">Seasons</h3>
                     <div class="episode-card-subtitle">
-                     Online seasons available for this series
+                     Seasons and episodes for this series
                     </div>
                 </div>
 
@@ -346,123 +291,10 @@
 {{-- =========================
          YOU MIGHT ALSO LIKE
     ========================== --}}
-    @if(!empty($recommendations))
-
-        <div class="tmdb-recs mt-5">
-
-            <div class="tmdb-recs-header">
-
-                <div>
-                    <h5 class="tmdb-recs-title mb-0">
-                        <i class="bi bi-stars me-2"></i>
-                        You Might Also Like
-                    </h5>
-
-                    <div class="tmdb-recs-subtitle">
-                        Recommendations from The Movie Database
-                    </div>
-                </div>
-
-                <a href="https://www.themoviedb.org/tv/{{ $tmdbid }}/recommendations"
-                   target="_blank"
-                   rel="noreferrer"
-                   class="tmdb-recs-link">
-
-                    <i class="bi bi-box-arrow-up-right me-1"></i>
-                    View All
-
-                </a>
-
-            </div>
-
-            <div class="tmdb-recs-body">
-
-                <div class="tmdb-recs-row">
-
-                   @foreach($recommendations as $rec)
-
-    @if($rec['in_database'])
-
-        {{-- Available on our website --}}
-        <a
-            href="{{ $rec['url'] }}"
-            class="tmdb-recs-card tmdb-recs-card-available text-decoration-none"
-            data-bs-toggle="tooltip"
-            data-bs-placement="top"
-            title="View online"
-        >
-
+    @if(request()->boolean('full_details'))
+        @include('library.partials.recommendations')
     @else
-
-        {{-- Not available in our database --}}
-        <div
-            class="tmdb-recs-card tmdb-recs-card-unavailable"
-            data-bs-toggle="tooltip"
-            data-bs-placement="top"
-            title="Not in database yet"
-        >
-
-    @endif
-
-            <div class="tmdb-recs-poster-wrap">
-
-                <img
-                    src="{{ $rec['poster'] ?? '/images/not-found.jpg' }}"
-                    loading="lazy"
-                    class="tmdb-recs-poster {{ !$rec['in_database'] ? 'tmdb-recs-poster-unavailable' : '' }}"
-                    alt="{{ $rec['title'] }}"
-                >
-
-                {{-- Database status --}}
-                <span class="tmdb-recs-status {{ $rec['in_database'] ? 'tmdb-recs-status-online' : 'tmdb-recs-status-missing' }}">
-                    @if($rec['in_database'])
-                        <i class="bi bi-play-circle-fill"></i>
-                    @else
-                        <i class="bi bi-database-x"></i>
-                    @endif
-                </span>
-
-                @if(!empty($rec['rating']))
-                    <span class="tmdb-recs-rating">
-                        <i class="bi bi-star-fill"></i>
-                        {{ number_format($rec['rating'], 1) }}
-                    </span>
-                @endif
-
-            </div>
-
-            <div class="tmdb-recs-info">
-
-                <div class="tmdb-recs-name">
-                    {{ $rec['title'] }}
-                </div>
-
-                @if(!empty($rec['year']))
-                    <div class="tmdb-recs-year">
-                        {{ $rec['year'] }}
-                    </div>
-                @endif
-
-            </div>
-
-    @if($rec['in_database'])
-
-        </a>
-
-    @else
-
-        </div>
-
-    @endif
-
-@endforeach
-
-                </div>
-
-            </div>
-
-        </div>
-
+        <div data-library-recommendations><p class="text-muted">Recommendations load as you scroll.</p><noscript><a href="{{ request()->fullUrlWithQuery(['full_details' => 1]) }}">View recommendations</a></noscript></div>
     @endif
 </div>
 
@@ -1520,37 +1352,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const modal = new bootstrap.Modal(modalEl);
 
-    document.querySelectorAll('[data-season-url]').forEach(function (card) {
-        card.addEventListener('click', function () {
-            openSeason(card.getAttribute('data-season-url'));
-        });
-    });
-
-    async function openSeason(url) {
-        document.getElementById('seasonModalLoading').classList.remove('d-none');
-        document.getElementById('seasonModalContent').classList.add('d-none');
-        document.getElementById('seasonModalTitle').textContent = 'Season';
-        document.getElementById('seasonModalMeta').textContent = '';
-        document.getElementById('seasonModalPoster').src = '/images/noposter.jpg';
+    document.addEventListener('library:season', event => {
         modal.show();
-
-        try {
-            const res = await fetch(url, {
-                headers: {
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            });
-            if (!res.ok) throw new Error('request failed');
-            renderSeason(await res.json());
-        } catch (e) {
-            document.getElementById('seasonModalLoading').classList.add('d-none');
-            document.getElementById('seasonModalContent').classList.remove('d-none');
-            document.getElementById('seasonModalTitle').textContent = 'Unable to load season';
-            document.getElementById('seasonModalOverview').textContent =
-                'There was a problem loading this season. Please try again.';
-        }
-    }
+        renderSeason(event.detail);
+    });
 
     function renderSeason(data) {
         document.getElementById('seasonModalLoading').classList.add('d-none');
@@ -1606,6 +1411,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 '</div>' +
                 (e.overview ? '<div class="season-episode-overview">' + esc(e.overview) + '</div>' : '') +
             '</div>';
+        if (e.play_url) {
+            const play = document.createElement('a');
+            play.className = 'watch-online-btn ms-auto';
+            play.href = e.play_url;
+            play.dataset.libraryPlay = '';
+            play.dataset.playTitle = e.name || ('Episode ' + e.episode_number);
+            play.textContent = 'Play episode';
+            play.setAttribute('aria-haspopup', 'dialog');
+            row.appendChild(play);
+        }
         return row;
     }
 
@@ -1641,10 +1456,10 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 @endpush
 
-@if($libraryEntry)
-<div class="container px-xl-5 px-lg-4 px-3 mb-4">
-    @include('comments.discussion', ['commentTarget' => $libraryEntry, 'commentType' => \App\Models\TorrentSeries::class])
-</div>
+@include('library.partials.discussion')
+@if($canWatchOnline)
+    @include('library.partials.player')
 @endif
 
+@vite('resources/js/library-detail.js')
 @endsection

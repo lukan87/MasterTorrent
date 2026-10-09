@@ -12,18 +12,18 @@
     <nav class="admin-navigation mb-3" aria-label="Administration">
         @php
             $adminLinks = [
-                ['admin.index', 'Dashboard', 'admin.index', 'grid-1x2'],
-                ['admin.users.index', 'Users', 'admin.users.*', 'people'],
-                ['admin.torrents.index', 'Torrents', 'admin.torrents.*', 'download'],
-                ['admin.movies.index', 'Movies', 'admin.movies.*', 'film'],
-                ['admin.series.index', 'Series', 'admin.series.*', 'collection-play'],
-                ['admin.messages.index', 'Messages', 'admin.messages.*', 'envelope'],
-                ['admin.torrent_logs.index', 'Torrent logs', 'admin.torrent_logs.*', 'clock-history'],
-                ['happyhour.index', 'Happy hour', 'happyhour.*', 'gift'],
+                ['admin.index', 'Dashboard', 'admin.index', 'grid-1x2', null],
+                ['admin.users.index', 'Users', 'admin.users.*', 'people', null],
+                ['admin.torrents.index', 'Torrents', 'admin.torrents.*', 'download', null],
+                ['admin.library.index', 'Movies', 'admin.library.*', 'film', 'movies'],
+                ['admin.library.index', 'Series', 'admin.library.*', 'collection-play', 'series'],
+                ['admin.messages.index', 'Messages', 'admin.messages.*', 'envelope', null],
+                ['admin.torrent_logs.index', 'Torrent logs', 'admin.torrent_logs.*', 'clock-history', null],
+                ['happyhour.index', 'Happy hour', 'happyhour.*', 'gift', null],
             ];
         @endphp
-        @foreach($adminLinks as [$destination, $label, $pattern, $icon])
-            <a href="{{ route($destination) }}" @if(request()->routeIs($pattern)) aria-current="page" @endif><i class="bi bi-{{ $icon }}" aria-hidden="true"></i>{{ $label }}</a>
+        @foreach($adminLinks as [$destination, $label, $pattern, $icon, $kind])
+            <a href="{{ route($destination, $kind ? [$kind] : []) }}" @if(request()->routeIs($pattern) && (!$kind || request()->route('kind') === $kind)) aria-current="page" @endif><i class="bi bi-{{ $icon }}" aria-hidden="true"></i>{{ $label }}</a>
         @endforeach
         {{-- Email administration: WEB_DEVELOPER only --}}
         @if(auth()->user()?->user_class === \App\Models\UserClass::WEB_DEVELOPER)

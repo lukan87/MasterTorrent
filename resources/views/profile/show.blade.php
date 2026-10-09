@@ -3,6 +3,19 @@
 @section('content')
 
 <div class="member-profile">
+@if(!$user->trashed())
+<div class="container-fluid mt-3" data-profile-activity>
+    <nav class="d-flex flex-wrap gap-2" aria-label="Member activity">
+        @foreach(['profile.comments' => 'Comments', 'profile.thanks' => 'Thanks', 'profile.posts' => 'Forum posts', 'profile.seedingTorrents' => 'Seeding', 'profile.download-history' => 'Download history', 'profile.tokens' => 'Active tokens'] as $activityRoute => $activityLabel)
+            @if(Route::has($activityRoute) && (!in_array($activityRoute, ['profile.seedingTorrents', 'profile.download-history', 'profile.tokens'], true) || auth()->id() === $user->id || (auth()->user()?->user_class ?? 0) >= \App\Models\UserClass::MODERATOR))
+                <a class="btn btn-outline-secondary btn-sm" data-activity-tab href="{{ route($activityRoute, [$user->id, $user->name]) }}">{{ $activityLabel }}</a>
+            @endif
+        @endforeach
+    </nav>
+    <div data-activity-content class="mt-3" hidden></div>
+</div>
+@endif
+
 
 @if($user->trashed())
 
@@ -1123,7 +1136,7 @@
 
     <div class="profile-dialogs">
 
-        @include('profile.partials.achievements')
+        @include('profile.partials.achievements', ['lazyAchievements' => true])
         @include('profile.partials.seeder-rank-modal')
 
         @if($isOwner || $isModerator)
@@ -1472,4 +1485,5 @@ document.addEventListener(
 
 </div>
 
+@vite('resources/js/profile-activity.js')
 @endsection

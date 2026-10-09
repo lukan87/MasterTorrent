@@ -3,14 +3,11 @@
 namespace App\Services;
 
 use App\Models\HappyHour;
-use App\Models\Movie;
 use App\Models\News;
 use App\Models\Poll;
-use App\Models\Series;
 use App\Models\Shoutbox;
 use App\Models\Torrent;
 use App\Models\User;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
@@ -23,9 +20,9 @@ class HomeService
         $this->cacheDuration = config('cache.dashboard_duration', 10);
     }
 
-    private function cacheQuery(string $key, \Closure $callback)
+    private function cacheQuery(string $key, \Closure $callback, ?int $duration = null)
     {
-        return Cache::remember($key, $this->cacheDuration, $callback);
+        return Cache::remember($key, $duration ?? $this->cacheDuration, $callback);
     }
 
     public function getLatestUsers(int $limit = 1)
@@ -87,7 +84,7 @@ class HomeService
                 'users' => $users,
                 'count' => $users->count(),
             ];
-        });
+        }, 5);
     }
 
     public function getCurrentHappyHour(): ?HappyHour
@@ -96,19 +93,9 @@ class HomeService
             ->first();
     }
 
-    public function getTrendingTorrents(int $limit = 12)
+    public function getTrendingTorrents(int $limit = 30)
     {
-        $days = rand(2, 5);
-
-        return Torrent::query()
-            ->whereNotIn('category_id', [27, 34])
-            ->where('seeders', '>', 0)
-            ->where('created_at', '>=', now()->subDays($days))
-            ->orderByDesc('seeders')
-            ->orderByDesc('leechers')
-            ->inRandomOrder()
-            ->limit($limit)
-            ->get();
+        return app(\App\Services\Torrent\HotTorrentRankingService::class)->torrents($limit);
     }
 
     private function getTopDownloaders24h(int $limit = 7)
@@ -148,28 +135,13 @@ class HomeService
             ->get();
     }
 
-    /**
-     * Returns up to $limit random titles from the movies or series table,
-     * mapped to the poster/URL format the view needs.
-     */
-    private function getRandomOnlineTitles(string $type, int $limit = 10): Collection
+    public function getWidgetData(string $widget): array
     {
-        $model = $type === 'series' ? new Series : new Movie;
-
-        return $model->inRandomOrder()
-            ->take($limit)
-            ->get()
-            ->map(function ($item) use ($type) {
-                $routeName = $type === 'series' ? 'series.show' : 'movies.show';
-
-                return [
-                    'title' => $item->name,
-                    'poster' => $item->poster_url,
-                    'year' => $item->year,
-                    'rating' => number_format($item->vote_average ?? 0, 1),
-                    'url' => route($routeName, [$item->id, $item->slug]),
-                ];
-            });
+        return match ($widget) {
+            'trending' => ['trendingTorrents' => $this->getTrendingTorrents(30)],
+            'polls' => ['polls' => $this->cacheQuery('polls', fn () => Poll::with(['options.votes', 'votes'])->latest()->take(1)->get())],
+            'online' => ['onlineUsers' => $this->getOnlineUsers()['users']],
+        };
     }
 
     public function getDashboardData(): array
@@ -205,9 +177,7 @@ class HomeService
                 ->value('total')),
 
             'currentHappyHour' => $this->getCurrentHappyHour(),
-            'trendingTorrents' => $this->cacheQuery('trending_torrents', fn () => $this->getTrendingTorrents(12)),
-            'randomOnlineMovies' => $this->cacheQuery('home_random_movies_10', fn () => $this->getRandomOnlineTitles('movie')),
-            'randomOnlineSeries' => $this->cacheQuery('home_random_series_10', fn () => $this->getRandomOnlineTitles('series')),
+            'trendingTorrents' => $this->getTrendingTorrents(30),
             'messages' => $this->cacheQuery('home_shoutbox_messages', fn () => $this->getShoutboxMessages(30)),
 
             'topUploaders24h' => $this->cacheQuery('top_uploaders_24h', fn () => $this->getTopUploaders24h()),

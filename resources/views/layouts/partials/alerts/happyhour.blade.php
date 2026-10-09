@@ -3,7 +3,6 @@
     <div><span class="badge bg-success mb-2">Happy Hour · Live</span>
         <h2 class="h5 mb-1">{{ $currentHappyHour->theme }}</h2>
         <p class="mb-1"><strong>{{ $currentHappyHour->upload_multiplier }}× upload credit</strong>{{ $currentHappyHour->free_download ? ' · Freeleech enabled' : '' }}</p>
-        <small>Bonuses stack with double upload. External torrents keep standard rewards. Seeding rules still apply.</small>
     </div>
     <div class="hh-notice-time"><strong data-countdown>Ends {{ $currentHappyHour->end_at->format('H:i') }} {{ config('app.timezone') }}</strong>
         <small class="d-block">Until {{ $currentHappyHour->end_at->format('M j, H:i') }} {{ config('app.timezone') }}</small>

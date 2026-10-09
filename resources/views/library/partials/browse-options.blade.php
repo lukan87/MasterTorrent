@@ -8,6 +8,8 @@
         <label class="lib-filter-label" for="library-availability">Availability</label>
         <select class="form-select form-select-sm" id="library-availability" name="availability">
             <option value="all" @selected(request('availability', 'all') === 'all')>All titles</option>
+            <option value="online" @selected(request('availability') === 'online')>Watch online</option>
+            <option value="torrents" @selected(request('availability') === 'torrents')>With torrents</option>
             <option value="seeded" @selected(request('availability') === 'seeded')>With seeders</option>
         </select>
     </div>

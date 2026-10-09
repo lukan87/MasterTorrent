@@ -1,0 +1,28 @@
+{
+  "release": "3dd6b33",
+  "installed_at_utc": "2026-10-08T19:17:44.751931+00:00",
+  "restore_point": "/var/www/fileiplay.org/.backups/upload-api-install-20261008-191526",
+  "migrations_applied": [
+    "2026_10_08_100000",
+    "2026_10_08_100100",
+    "2026_10_08_100200",
+    "2026_10_08_100300"
+  ],
+  "seedbox_publishing_enabled": false,
+  "checks": [
+    "exact installed file hashes",
+    "unique database indexes and schema preflight",
+    "preflight as www-data",
+    "Blade compilation",
+    "package discovery",
+    "origin /up 200",
+    "settings pages require login 302",
+    "bearer-free API 401 JSON",
+    "announce/Torznab/base seedbox files unchanged"
+  ],
+  "external_check": "Cloudflare rejected Python test user-agent with error 1010; origin HTTP checks passed. Cloudflare configuration unchanged.",
+  "tests": "89 tests / 787 assertions previously passed in isolated environments; tests not run against production.",
+  "worker_action": "Graceful queue restart signal sent; real seedbox/worker workflow remains unverified and disabled.",
+  "configuration": "No .env or production server configuration changes.",
+  "rollback": "Preserve anonymous display and private torrent reader compatibility after new uploads. No automatic table drops, database restore or deletion of uploaded content."
+}

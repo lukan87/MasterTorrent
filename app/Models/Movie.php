@@ -11,6 +11,7 @@ class Movie extends Model
     use HasFactory;
 
     protected $fillable = [
+        'online_enabled',
         'name',
         'tmdb_id',
         'imdb_id',
@@ -34,6 +35,7 @@ class Movie extends Model
     ];
 
     protected $casts = [
+        'online_enabled' => 'boolean',
         'genres'       => 'array',
         'release_date' => 'datetime',
         'vote_average' => 'float',

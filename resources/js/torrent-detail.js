@@ -1,9 +1,70 @@
 import { createApp, h, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import { setTorrentLoading } from './torrent-loading';
+import { jsonRequest } from './progressive-ui';
 import '../../public/js/torrent-media-hero.js';
 import '../../public/js/media-cast-slider.js';
 import '../../public/js/torrent-game.js';
 import '../../public/js/torrent-backdrops.js';
+
+const subscription = document.querySelector('[data-torrent-subscription]');
+if (subscription) {
+    let busy = false;
+    const source = Symbol('torrent-subscription');
+    function notify(icon, title, text) {
+        if (window.Swal?.fire) {
+            window.Swal.fire({ icon, title, text, confirmButtonText: 'OK', returnFocus: false });
+        } else {
+            const message = document.createElement('span');
+            message.dataset.subscriptionFeedback = '';
+            message.setAttribute('role', icon === 'error' ? 'alert' : 'status');
+            message.textContent = text;
+            subscription.append(message);
+        }
+    }
+    subscription.addEventListener('submit', async event => {
+        const form = event.target;
+        if (!form.matches('[data-torrent-subscription-action]')) return;
+        event.preventDefault();
+        if (busy || !form.reportValidity()) return;
+        const button = form.querySelector('button[type="submit"]');
+        const original = button.innerHTML;
+        const removing = new URL(form.action).pathname.endsWith('/unsubscribe');
+        const body = new FormData(form);
+        subscription.querySelectorAll('[data-subscription-feedback]').forEach(node => node.remove());
+        busy = true;
+        button.disabled = true;
+        button.innerHTML = `<span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>${removing ? 'Unsubscribing…' : 'Subscribing…'}`;
+        subscription.setAttribute('aria-busy', 'true');
+        setTorrentLoading(source, true);
+        let saved = false;
+        try {
+            const data = await jsonRequest(form.action, { method: 'POST', body });
+            saved = true;
+            if (typeof data.html !== 'string' || typeof data.subscribed !== 'boolean') throw new Error('Invalid subscription response.');
+            subscription.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(node => {
+                window.bootstrap?.Tooltip.getInstance(node)?.dispose();
+            });
+            // Refresh only the button and subscribers; players and comment drafts stay intact.
+            subscription.innerHTML = data.html;
+            subscription.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(node => {
+                window.bootstrap?.Tooltip.getOrCreateInstance(node);
+            });
+            subscription.querySelector('button[type="submit"]')?.focus({ preventScroll: true });
+            notify(data.status === 'info' ? 'info' : 'success', data.subscribed ? 'Subscribed' : 'Unsubscribed', data.message || 'Subscription updated.');
+        } catch (error) {
+            notify(saved ? 'warning' : 'error', saved ? 'Subscription updated' : 'Could not update subscription', saved
+                ? 'Your subscription was saved, but the controls could not refresh. Reload the page to see the update.'
+                : error.message);
+        } finally {
+            button.innerHTML = original;
+            button.disabled = false;
+            busy = false;
+            subscription.setAttribute('aria-busy', 'false');
+            setTorrentLoading(source, false);
+        }
+    });
+    window.addEventListener('pagehide', () => setTorrentLoading(source, false));
+}
 
 async function content(url, section, signal) {
     const response = await fetch(url, {

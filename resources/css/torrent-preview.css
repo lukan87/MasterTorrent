@@ -1,0 +1,22 @@
+.torrent-featured-tooltip { pointer-events: none; --featured-accent: var(--theme-blue-text, #9fcaff); --bs-tooltip-max-width: 360px; --bs-tooltip-bg: var(--theme-control, #080d16); --bs-tooltip-color: var(--theme-text, #e5edf7); --bs-tooltip-opacity: 1; }
+.torrent-featured-tooltip--hot { --featured-accent: var(--theme-amber-text, #efca83); }
+.torrent-featured-tooltip .tooltip-inner { padding: 12px 14px; border: 1px solid var(--theme-border, #283445); border-top: 2px solid var(--featured-accent); border-radius: 10px; box-shadow: 0 8px 24px var(--theme-shadow, rgba(0,0,0,.25)); font-size: 12px; line-height: 1.65; text-align: left; white-space: pre-line; overflow-wrap: anywhere; }
+
+.torrent-featured-tooltip:has(.torrent-hover-preview) { --bs-tooltip-max-width: min(480px, calc(100vw - 24px)); }
+.tooltip.torrent-featured-tooltip .tooltip-inner:has(.torrent-hover-preview) { width: min(480px, calc(100vw - 24px)); max-width: var(--bs-tooltip-max-width); padding: 14px; white-space: normal; }
+.torrent-hover-preview { display: flex; gap: 14px; width: min(450px, calc(100vw - 56px)); align-items: flex-start; }
+.torrent-hover-poster { flex: 0 0 96px; width: 96px; height: 144px; object-fit: cover; border-radius: 8px; background: var(--theme-surface-alt, #101a28); }
+.torrent-hover-info { flex: 1; min-width: 0; }
+.torrent-hover-title { display: block; color: var(--theme-text, #e5edf7); font-size: 14px; line-height: 1.35; }
+.torrent-hover-meta { margin-top: 4px; color: var(--theme-muted, #a4b5ca); font-size: 10px; }
+.torrent-hover-ratings { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.torrent-hover-ratings span { padding: 2px 6px; border-radius: 5px; background: color-mix(in srgb, var(--featured-accent) 12%, transparent); color: var(--featured-accent); font-size: 10px; }
+.torrent-hover-overview { margin: 8px 0 0; font-size: 11px; line-height: 1.55; }
+.torrent-hover-cast { margin: 8px 0 0; font-size: 10px; color: var(--theme-muted, #a4b5ca); }
+.torrent-hover-cast b { color: var(--featured-accent); }
+.torrent-hover-release { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--theme-border, #283445); color: var(--theme-muted, #a4b5ca); font-size: 10px; line-height: 1.4; overflow-wrap: anywhere; }
+.torrent-hover-stats { margin-top: 4px; color: var(--featured-accent); font-size: 10px; }
+@media(max-width: 420px) { .torrent-hover-poster { flex-basis: 72px; width: 72px; height: 108px; } .torrent-hover-preview { gap: 10px; } }
+
+.torrent-hover-preview--browse .torrent-hover-poster { flex-basis: 140px; width: 140px; height: 210px; }
+@media(max-width: 420px) { .torrent-hover-preview--browse .torrent-hover-poster { flex-basis: 96px; width: 96px; height: 144px; } }

@@ -114,7 +114,7 @@ public function buySeedtime(Request $request)
         return redirect()->route('login')->with('error', 'You must be logged in to buy seedtime.');
     }
 
-    $torrentId = $request->input('torrent_id');
+    $torrentId = $request->validate(['torrent_id' => ['required', 'integer', 'min:1']])['torrent_id'];
     $seedtimeCost = config("seedbonus.shop.seedtime", 1000); 
     $additionalSeedtime = config("seedbonus.shop.seedtime_added", 86400); 
 
@@ -129,8 +129,8 @@ public function buySeedtime(Request $request)
         ->where('torrent_id', $torrentId)
         ->first();
 
-    if (!$history) {
-        return redirect()->back()->with('error', 'Torrent history record not found.');
+    if (!$history || !($history->actual_downloaded > 0 || $history->downloaded > 0)) {
+        return redirect()->back()->with('error', 'You can only buy seedtime for a torrent you downloaded.');
     }
 
     // Remember whether this purchase is clearing an already-flagged Hit & Run

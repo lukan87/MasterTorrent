@@ -7,6 +7,7 @@ use App\Models\History;
 use App\Models\User;
 use App\Models\UserClass;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class SnatchController extends Controller
@@ -21,40 +22,46 @@ public function snatchlist($userId = null)
 
     $userId ??= Auth::id();
 
-    $oneMonthAgo = Carbon::now()->subMonths(2);
+    $validated = request()->validate(['q' => ['nullable', 'string', 'max:200']]);
+    $search = trim($validated['q'] ?? '');
+    $requiredSeedtime = (int) config('hitrun.seedtime', 43200);
 
-    $snatchlist = History::where('user_id', $userId)
-        ->where(function ($query) use ($oneMonthAgo) {
+    $query = History::where('user_id', $userId);
 
-            $query->where('created_at', '>=', $oneMonthAgo)
-
-                  ->orWhere(function ($q) {
-                      $q->where('seedtime', '<', 43200);
-                  });
-
-        })
-        ->whereHas('torrent', function ($query) {
-            $query->whereNull('deleted_at');
-        })
-        ->orderBy('created_at', 'desc')
-        ->paginate(20);
-
-    // Calculate HnR satisfaction
-    foreach ($snatchlist as $history) {
-
-        $ratio = $history->actual_downloaded > 0
-            ? $history->uploaded / $history->actual_downloaded
-            : ($history->uploaded > 0 ? INF : 0);
-
-        $seedMet = $history->seedtime >= 43200;
-        $ratioMet = $ratio >= 1;
-        $infiniteRatio = ($history->actual_downloaded == 0 && $history->uploaded > 0);
-
-        $history->hnr_satisfied = $seedMet || $ratioMet || $infiniteRatio;
+    if ($search !== '') {
+        // Search the full retained history, including soft-deleted torrents.
+        $pattern = '%'.str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $search).'%';
+        $query->whereHas('torrent', function ($torrentQuery) use ($pattern) {
+            $torrentQuery->whereRaw("name LIKE ? ESCAPE '!'", [$pattern]);
+        });
+    } else {
+        // Recent entries remain visible; older entries remain only while both targets are unmet.
+        $query->where(function ($historyQuery) use ($requiredSeedtime) {
+            $historyQuery->where('created_at', '>=', now()->subDays(10))
+                ->orWhere(function ($unmetQuery) use ($requiredSeedtime) {
+                    $unmetQuery->whereRaw('COALESCE(seedtime, 0) < ?', [$requiredSeedtime])
+                        ->whereRaw('(
+                            (COALESCE(actual_downloaded, downloaded, 0) > 0
+                                AND COALESCE(uploaded, 0) < COALESCE(actual_downloaded, downloaded, 0))
+                            OR (COALESCE(actual_downloaded, downloaded, 0) <= 0
+                                AND COALESCE(uploaded, 0) <= 0)
+                        )');
+                });
+        })->whereHas('torrent', function ($torrentQuery) {
+            $torrentQuery->whereNull('deleted_at');
+        });
     }
 
-    return view('snatch.snatchlist', [
+    $snatchlist = $query->with('torrent')
+        ->orderByDesc('created_at')
+        ->orderByDesc('id')
+        ->tap(fn ($query) => $this->filterActivity($query, false))
+        ->paginate(20)->withQueryString()
+        ->appends($search !== '' ? ['q' => $search] : []);
+
+    return \App\Services\PageBrowse::view('snatch.snatchlist', [
         'snatchlist' => $snatchlist,
+        'search' => $search,
         'user' => User::find($userId),
         'userId' => $userId,
     ]);
@@ -75,7 +82,8 @@ public function seeding($userId = null)
         ->where('active', 1)
         ->with('torrent')
         ->orderBy('created_at', 'desc')
-        ->paginate(30);
+        ->tap(fn ($query) => $this->filterActivity($query))
+        ->paginate(30)->withQueryString();
 
     // Get all history totals in one query for current page peers
     $torrentIds = $seeding->pluck('torrent_id')->toArray();
@@ -93,6 +101,8 @@ $historyTotals = History::where('user_id', $userId)
     ->get()
     ->keyBy('torrent_id');
 
+    $this->attachSnatchHistory($seeding, $userId);
+
     // Attach totals to each peer
     $seeding->getCollection()->transform(function ($peer) use ($historyTotals) {
         $totals = $historyTotals->get($peer->torrent_id);
@@ -106,10 +116,10 @@ $historyTotals = History::where('user_id', $userId)
     });
 
     // Sort the current page collection by torrent added date
-    $sorted = $seeding->getCollection()->sortByDesc(fn($peer) => $peer->torrent->created_at ?? now());
+    $sorted = request()->filled('sort') ? $seeding->getCollection() : $seeding->getCollection()->sortByDesc(fn($peer) => $peer->torrent->created_at ?? now());
     $seeding->setCollection($sorted->values());
 
-    return view('snatch.seeding', [
+    return \App\Services\PageBrowse::view('snatch.seeding', [
         'seeding' => $seeding,
         'user' => User::find($userId),
         'userId' => $userId,
@@ -134,10 +144,14 @@ $historyTotals = History::where('user_id', $userId)
         $userId = $userId ?? Auth::id();
         $leeching = Peer::where('user_id', $userId)
             ->where('seeder', 0)
-            ->with('history')
-            ->paginate(10);
+            ->where('active', 1)
+            ->with('torrent')
+            ->tap(fn ($query) => $this->filterActivity($query))
+            ->paginate(10)->withQueryString();
 
-        return view('snatch.leeching', [
+        $this->attachSnatchHistory($leeching, $userId);
+
+        return \App\Services\PageBrowse::view('snatch.leeching', [
             'leeching' => $leeching,
             'user' => User::find($userId),
             'userId' => $userId, // Pass the user ID to the view
@@ -162,9 +176,10 @@ $historyTotals = History::where('user_id', $userId)
                 $query->whereNull('deleted_at');
                 })
             ->with('torrent')
-            ->paginate(20);
+            ->tap(fn ($query) => $this->filterActivity($query))
+            ->paginate(20)->withQueryString();
 
-        return view('snatch.hit_and_run', [
+        return \App\Services\PageBrowse::view('snatch.hit_and_run', [
             'hitAndRun' => $hitAndRun,
             'user' => User::find($userId),
             'userId' => $userId, // Pass the user ID to the view
@@ -208,10 +223,12 @@ $historyTotals = History::where('user_id', $userId)
         ->where('hitrun', false)
         ->where('active', false)
 
+        ->with('torrent')
         ->orderBy('created_at', 'desc')
-        ->paginate(20);
+        ->tap(fn ($query) => $this->filterActivity($query))
+        ->paginate(20)->withQueryString();
 
-    return view('snatch.need_to_seed', [
+    return \App\Services\PageBrowse::view('snatch.need_to_seed', [
         'needToSeed' => $needToSeed,
         'user' => User::find($userId),
         'userId' => $userId,
@@ -219,58 +236,61 @@ $historyTotals = History::where('user_id', $userId)
 }
 
 
+/** Attach only this user's latest history; torrent IDs alone do not identify a user. */
+private function attachSnatchHistory($peers, $userId): void
+{
+    $histories = History::where('user_id', $userId)
+        ->whereIn('torrent_id', $peers->pluck('torrent_id'))
+        ->orderByDesc('last_event_at')
+        ->orderByDesc('id')
+        ->get()
+        ->unique('torrent_id')
+        ->keyBy('torrent_id');
+
+    foreach ($peers as $peer) {
+        $peer->setRelation('snatchHistory', $histories->get($peer->torrent_id));
+    }
+}
+
+public function deleteHistory($historyId)
+{
+    abort_unless(Auth::user()->user_class >= UserClass::ADMIN, 403, 'Unauthorized action.');
+
+    DB::transaction(function () use ($historyId) {
+        $history = History::whereKey($historyId)->lockForUpdate()->firstOrFail();
+
+        if ((int) $history->user_id === (int) Auth::id()) {
+            abort_if(
+                $history->torrent && (int) $history->torrent->owner === (int) Auth::id(),
+                403,
+                'Torrent owners cannot delete their own snatch.'
+            );
+        }
+
+        if ($history->hitrun) {
+            User::whereKey($history->user_id)
+                ->where('hit_and_run_count', '>', 0)
+                ->decrement('hit_and_run_count');
+        }
+
+        $history->delete();
+    });
+
+    return redirect()->back()->with('success', 'Snatch removed from history.');
+}
+
 public function deleteNeedToSeed($userId, $torrentId)
 {
-    
-    if (Auth::user()->user_class < 5) {
-        return redirect()->back()->with('error', 'Unauthorized action.');
-    }
+    abort_unless(Auth::user()->user_class >= UserClass::ADMIN, 403, 'Unauthorized action.');
 
-    
-    $history = History::where('torrent_id', $torrentId)
-                      ->where('user_id', $userId)
-                      ->first();
+    $history = History::where('user_id', $userId)->where('torrent_id', $torrentId)->firstOrFail();
 
-    if (!$history) {
-        return redirect()->back()->with('error', 'No history record found for this torrent.');
-    }
-
-   
-    $history->delete();
-
-    return redirect()->back()->with('success', 'Torrent history removed for this user.');
+    return $this->deleteHistory($history->id);
 }
 
 public function deleteHNR($userId, $torrentId)
 {
-    // Check if the logged-in user is staff
-    if (Auth::user()->user_class < 5) {
-        return redirect()->back()->with('error', 'Unauthorized action.');
-    }
-
-    // Find the user's specific history for the torrent
-    $history = History::where('torrent_id', $torrentId)
-                      ->where('user_id', $userId)
-                      ->first();
-
-    if (!$history) {
-        return redirect()->back()->with('error', 'No history record found for this torrent.');
-    }
-
-    // Get the user
-    $user = User::find($userId);
-    
-    if ($user) {
-        // Decrement hit_and_run_count if it's greater than 0
-        if ($user->hit_and_run_count > 0) {
-            $user->decrement('hit_and_run_count');
-        }
-    }
-
-    // Delete the specific history record
-    $history->delete();
-
-    return redirect()->back()->with('success', 'Torrent history removed and H&R count decreased for this user.');
+    return $this->deleteNeedToSeed($userId, $torrentId);
 }
 
 public function hitRunFixer($userId = null)
@@ -292,14 +312,26 @@ public function hitRunFixer($userId = null)
         })
         ->with('torrent')
         ->orderBy('created_at','desc')
-        ->paginate(20);
+        ->tap(fn ($query) => $this->filterActivity($query))
+        ->paginate(20)->withQueryString();
 
-    return view('snatch.hnr_fixer', [
+    return \App\Services\PageBrowse::view('snatch.hnr_fixer', [
         'hnrFixer' => $hnrFixer,
         'user' => User::find($userId),
         'userId' => $userId,
         'requiredSeedtime' => $requiredSeedtime
     ]);
+}
+
+
+private function filterActivity($query, bool $applySearch = true): void
+{
+    $validated = request()->validate(['q' => ['nullable', 'string', 'max:200'], 'sort' => ['nullable', 'in:latest,oldest']]);
+    if ($applySearch && ($search = trim($validated['q'] ?? '')) !== '') {
+        $pattern = '%'.str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $search).'%';
+        $query->whereHas('torrent', fn ($torrent) => $torrent->whereRaw("name LIKE ? ESCAPE '!'", [$pattern]));
+    }
+    if (!empty($validated['sort'])) $query->reorder('created_at', $validated['sort'] === 'oldest' ? 'asc' : 'desc')->orderBy('id', $validated['sort'] === 'oldest' ? 'asc' : 'desc');
 }
 
 }

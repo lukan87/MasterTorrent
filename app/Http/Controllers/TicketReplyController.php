@@ -75,6 +75,10 @@ class TicketReplyController extends Controller
             throw $exception;
         }
 
+        if (request()->expectsJson()) {
+            return \App\Services\PageBrowse::json(['message' => $isNote ? 'Internal note added. Only staff can see it.' : 'Your reply has been sent.']);
+        }
+
         return back()->with('success', $isNote ? 'Internal note added. Only staff can see it.' : 'Your reply has been sent.');
     }
 

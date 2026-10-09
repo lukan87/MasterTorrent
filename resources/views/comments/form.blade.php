@@ -1,7 +1,7 @@
 <form action="{{ route('comments.store') }}" method="POST" class="discussion-composer">
     @csrf
-    <input type="hidden" name="commentable_id" value="{{ $commentTarget->id }}">
-    <input type="hidden" name="commentable_type" value="{{ $commentType }}">
+    <input type="hidden" name="commentable_id" value="{{ $parentId && isset($comment) ? $comment->commentable_id : $commentTarget->id }}">
+    <input type="hidden" name="commentable_type" value="{{ $parentId && isset($comment) ? $comment->commentable_type : $commentType }}">
     @if($parentId)<input type="hidden" name="parent_id" value="{{ $parentId }}">@endif
     <label class="visually-hidden" for="{{ $formId }}">{{ $parentId ? 'Your reply' : 'Your comment' }}</label>
     @include('comments.toolbar')

@@ -14,12 +14,10 @@ use Illuminate\Support\Facades\Auth;
 class SeriesController extends Controller
 {
     private $apiKey;
-    private $omdbKey;
 
     public function __construct()
     {
         $this->apiKey  = config('services.tmdb.key') ?: config('app.tmdb_api_key');
-        $this->omdbKey = config('services.omdb.key') ?: env('OMDB_API_KEY');
     }
 
     private function tmdb(string $endpoint, array $params = [])
@@ -34,47 +32,14 @@ class SeriesController extends Controller
         }
     }
 
-    private function omdb(?string $imdb)
-    {
-        if (!$imdb) return [];
-        try {
-            $response = Http::timeout(10)->get("http://www.omdbapi.com", [
-                'apikey' => $this->omdbKey,
-                'i'      => $imdb,
-                'plot'   => 'full',
-            ]);
-            return $response->successful() ? ($response->json() ?: []) : [];
-        } catch (\Exception $e) {
-            Log::error("OMDB request failed: " . $e->getMessage());
-            return [];
-        }
-    }
-
     public function index(Request $request)
     {
-        $sort = $request->get('sort', 'latest');
-
-        $query = Series::query();
-        switch ($sort) {
-            case 'rating': $query->orderByDesc('vote_average'); break;
-            case 'views':  $query->orderByDesc('views'); break;
-            default:       $query->latest();
-        }
-
-        $series = $query->paginate(12)->withQueryString();
-        $featured = Series::whereNotNull('backdrop_path')
-    ->where('views', '>', 0)
-    ->orderByRaw('RAND() * views DESC')
-    ->first()
-    ?? Series::whereNotNull('backdrop_path')
-        ->inRandomOrder()
-        ->first();
-
-        return view('series.index', compact('series', 'featured', 'sort'))->with('links', 'vendor.pagination.bootstrap-5');
+        return redirect()->route('library.series.index', $request->only(['q', 'year', 'availability', 'sort']));
     }
 
     public function search(Request $request)
     {
+        abort_unless((Auth::user()?->user_class ?? 0) >= \App\Models\UserClass::ADMIN, 403);
         $request->validate(['series_name' => 'required|string|max:255']);
 
         $query = trim($request->series_name);
@@ -129,13 +94,14 @@ class SeriesController extends Controller
             $recommendedSeries = $recommendedSeries->map(fn($s) => ['series' => $s, 'exists' => isset($relatedDb[$s['id']])]);
         }
 
-        return view('series.search_results', compact(
+        return view('admin.library.import.series.search_results', compact(
             'query', 'series', 'existingSeries', 'newSeries', 'similarSeries', 'recommendedSeries', 'noImdbCount'
         ));
     }
 
     public function selectSeries($tmdb_id)
     {
+        abort_unless((Auth::user()?->user_class ?? 0) >= \App\Models\UserClass::ADMIN, 403);
         if (Series::where('tmdb_id', $tmdb_id)->exists()) {
             return redirect()->route('series.create')->with('error', 'Series already exists in the database.');
         }
@@ -147,85 +113,25 @@ class SeriesController extends Controller
 
         $this->createSeries($data);
 
-        return redirect()->route('series.show', $data['id'])->with('status', 'Series added successfully!');
+        return redirect()->route('library.series.show', $data['id'])->with('status', 'Series added successfully!');
     }
 
     public function show($id, $slug = null)
     {
-        if (!$slug) {
-            $routeSeries = Series::findOrFail($id);
-            return redirect()->route('series.show', ['id' => $id, 'slug' => $routeSeries->slug]);
-        }
-
-        $series = Cache::remember("series_model_{$slug}", now()->addMinutes(30), fn() => Series::where('slug', $slug)->firstOrFail());
-
-        $comments = Cache::remember("series_comments_{$series->id}", now()->addMinutes(5), fn() => $series->comments()->with('user')->get());
-
-        $seriesDetails = Cache::remember("series_{$series->tmdb_id}_details", now()->addMonth(), function () use ($series) {
-            return $this->tmdb("tv/{$series->tmdb_id}", [
-                'language'            => 'en-US',
-                'append_to_response' => 'credits,videos,images,keywords,external_ids',
-            ]) ?: [];
-        });
-
-        $seriesOm = Cache::remember("series_{$series->imdb_id}_omdb", now()->addMonth(), fn() => $this->omdb($series->imdb_id));
-
-        // TvMaze data (kept for episode availability).
-        $TvMaze = Cache::remember("series_{$series->imdb_id}_tvmaze", now()->addMonth(), function () use ($series) {
-            try {
-                return Http::timeout(10)->get('http://api.tvmaze.com/lookup/shows', ['imdb' => $series->imdb_id])->json() ?: [];
-            } catch (\Exception $e) {
-                Log::error("TvMaze lookup failed: " . $e->getMessage());
-                return [];
-            }
-        });
-
-        $tvMazeSeasons = $tvMazeEpisodes = null;
-        if (!empty($TvMaze['id'])) {
-            $tvMazeSeasons  = Cache::remember("series_{$series->imdb_id}_tvmaze_seasons", now()->addMonth(), fn() => Http::timeout(10)->get("https://api.tvmaze.com/shows/{$TvMaze['id']}/seasons")->json());
-            $tvMazeEpisodes = Cache::remember("series_{$series->imdb_id}_tvmaze_episodes", now()->addMonth(), fn() => Http::timeout(10)->get("https://api.tvmaze.com/shows/{$TvMaze['id']}/episodes")->json());
-        }
-
-        $groupedTorrents = Cache::remember("series_torrents_{$series->tmdb_id}", now()->addMinutes(10), function () use ($series) {
-            $torrents = Torrent::where('tmdbid', $series->tmdb_id)->latest()->get();
-            return $torrents->groupBy(function ($torrent) {
-                $name = $torrent->name;
-                $season = 'Unknown';
-                if (preg_match('/S(\d{1,2})E\d{1,2}/i', $name, $m)) {
-                    $season = (int) $m[1];
-                } elseif (preg_match('/(\d{1,2})x\d{1,2}/i', $name, $m)) {
-                    $season = (int) $m[1];
-                } elseif (preg_match('/S(\d{1,2})(?!E)/i', $name, $m)) {
-                    $season = (int) $m[1];
-                }
-                return "Season {$season}";
-            });
-        });
-
-        $similar = app(\App\Services\MediaRecommendationService::class)
-            ->forTitle($series, $seriesDetails['genres'] ?? []);
-
-        // Track a view once per session.
-        $viewKey = "series_viewed_{$series->id}";
-        if (!session()->has($viewKey)) {
-            session([$viewKey => true]);
-            $series->recordView();
-        }
-
-        return view('series.show', compact(
-            'seriesDetails', 'seriesOm', 'series', 'TvMaze', 'tvMazeSeasons',
-            'tvMazeEpisodes', 'comments', 'groupedTorrents', 'similar'
-        ));
+        $media = Series::findOrFail($id);
+        return redirect()->route('library.series.show', [$media->tmdb_id, $media->slug]);
     }
 
     public function create()
     {
+        abort_unless((Auth::user()?->user_class ?? 0) >= \App\Models\UserClass::ADMIN, 403);
         $featured = Series::whereNotNull('backdrop_path')->inRandomOrder()->first();
-        return view('series.create', compact('featured'));
+        return view('admin.library.import.series.create', compact('featured'));
     }
 
     public function store(Request $request)
     {
+        abort_unless((Auth::user()?->user_class ?? 0) >= \App\Models\UserClass::ADMIN, 403);
         $request->validate(['tmdb_id' => 'required|string|max:255']);
 
         if (Series::where('tmdb_id', $request->tmdb_id)->exists()) {
@@ -243,11 +149,12 @@ class SeriesController extends Controller
 
         $this->createSeries($data);
 
-        return redirect()->route('series.index')->with('status', 'Series created successfully!');
+        return redirect()->route('library.series.index')->with('status', 'Series created successfully!');
     }
 
     public function bulkSelect(Request $request)
     {
+        abort_unless((Auth::user()?->user_class ?? 0) >= \App\Models\UserClass::ADMIN, 403);
         $request->validate(['series' => 'required|array', 'series.*' => 'integer|distinct']);
 
         $added = 0;
@@ -268,7 +175,7 @@ class SeriesController extends Controller
             $added++;
         }
 
-        return redirect()->route('series.index')->with(
+        return redirect()->route('library.series.index')->with(
             'status',
             $added > 0 ? "{$added} series added successfully!" : 'No series were added (titles missing an IMDb ID were skipped).'
         );
@@ -276,16 +183,7 @@ class SeriesController extends Controller
 
     public function searchSeries(Request $request)
     {
-        $searchTerm = $request->input('name');
-        if (empty($searchTerm)) {
-            return redirect()->route('series.index');
-        }
-
-        $series = Series::where('name', 'LIKE', "%{$searchTerm}%")->paginate(12)->withQueryString();
-        $featured = $series->first();
-        $sort = 'latest';
-
-        return view('series.index', compact('series', 'featured', 'sort'));
+        return redirect()->route('library.series.index', ['q' => $request->input('name')]);
     }
 
     /**
@@ -293,25 +191,9 @@ class SeriesController extends Controller
      */
     public function destroy($id)
     {
-        if (!Auth::check() || Auth::user()->user_class < \App\Models\UserClass::ADMIN) {
-            return redirect()->route('series.index')->with('error', 'Unauthorized.');
-        }
-
-        try {
-            $series = Series::findOrFail($id);
-
-            // Clear dependent records so nothing is orphaned.
-            $series->comments()->delete();
-            $series->torrents()->delete();
-            \App\Models\TorrentSeries::where('tmdbid', $series->tmdb_id)->delete();
-
-            $series->delete();
-
-            return redirect()->route('series.index')->with('status', "Series \"{$series->name}\" deleted successfully.");
-        } catch (\Exception $e) {
-            Log::error("Error deleting series: " . $e->getMessage());
-            return redirect()->route('series.index')->with('error', 'Error deleting series!');
-        }
+        abort_unless((Auth::user()?->user_class ?? 0) >= \App\Models\UserClass::ADMIN, 403);
+        Series::findOrFail($id)->update(['online_enabled' => false]);
+        return redirect()->route('admin.library.index', 'series')->with('status', 'Online playback disabled.');
     }
 
     public function syncTrailer($id)

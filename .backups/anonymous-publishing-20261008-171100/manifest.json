@@ -1,0 +1,130 @@
+{
+  "baseline": "750cac3",
+  "files": [
+    {
+      "path": "app/Helpers/TorrentHelper.php",
+      "original_sha256": "b11f5233ae5d05a4194ac3e2e8fc976965b50eb0d42dedb4525ba43e52816220",
+      "deployed_sha256": "88e84b684a23f6bb8c057245f2d011d516fb8c5b307d05576689c824d1a77dff"
+    },
+    {
+      "path": "app/Http/Controllers/ProfileController.php",
+      "original_sha256": "dc4bbd660caac6258d2f175e5789a0e8fd28140e12c869711605dec98a161867",
+      "deployed_sha256": "77dcb9dd593be82e8ff0f9f055c1bd80eb4e3f526e24c5d037556692384801c2"
+    },
+    {
+      "path": "app/Http/Controllers/TorrentController.php",
+      "original_sha256": "0f00e25de779a3bbed1de1c4a072d0518cb6a7d84ada4b72854551fffb7d5df1",
+      "deployed_sha256": "cfd29e64a85ded095c56851f4142f70c04aa4bab7d6d5be0abbb0586536cf1c2"
+    },
+    {
+      "path": "app/Models/Torrent.php",
+      "original_sha256": "10b0051c3599f7d600746d61c34613dee9234e44434e6782089b8fcb16ae3e8f",
+      "deployed_sha256": "725e2ee6f35fa329d83bfa20ca205113134b1e36bf978158c55c77c11bdb8e87"
+    },
+    {
+      "path": "app/Models/User.php",
+      "original_sha256": "5e2390886321f8da8db3ec22ed4f7d4b7c9fe39f0044c246bedbc8f7974d5a26",
+      "deployed_sha256": "32f33e6de3ff004143ee25851305589f0b060fa15903fad47fcce74d878fcf8f"
+    },
+    {
+      "path": "app/Services/Torrent/ExternalTorrentUploadService.php",
+      "original_sha256": "4e8aedb7b8a0bd05007f991563b60afaac1253a490ee5c3cbb9772bebf6cff18",
+      "deployed_sha256": "286910f30d835a34534a0165037485dfb1d4b851539da97473fa5fd7900802e4"
+    },
+    {
+      "path": "app/Services/Torrent/TorrentAnonymity.php",
+      "original_sha256": null,
+      "deployed_sha256": "0b0276446136ba70d7b1d7b929b9d7a4c361b1d1eef5709a6086447dcd6789c1"
+    },
+    {
+      "path": "app/Services/Torrent/TorrentUploadService.php",
+      "original_sha256": "5aa4e203b93be1ec2fd24063bd006fd25cbbe79c2c203c0a7f5a8c459d4438df",
+      "deployed_sha256": "2f22a2ded1d173a569e209fc327f07a99c4fc00469293da29649e1d29b551795"
+    },
+    {
+      "path": "database/migrations/2026_10_08_100400_add_anonymous_to_users_table.php",
+      "original_sha256": null,
+      "deployed_sha256": "c1856d0448385218b517de36bbdda9031fc8989192965b2a88dfb93841752702"
+    },
+    {
+      "path": "docs/anonymous-publishing.md",
+      "original_sha256": null,
+      "deployed_sha256": "1b4b3a27b2b190cba83bc0c3eb409958e4c0e1f16a39ee83465b15bfae02b934"
+    },
+    {
+      "path": "resources/views/components/snatch-card.blade.php",
+      "original_sha256": "1d956ba3fd4c0394c017dd7b837038633f6ce51be7fe94c56ff594eeefe71d88",
+      "deployed_sha256": "3261b539c8d1eb879d40541798d9b9f506648c4267c93d92a2fd3d03e6517abc"
+    },
+    {
+      "path": "resources/views/profile/edit.blade.php",
+      "original_sha256": "61d7811bdbeda6e30edd96dc9f011432007951d0c1f585fbe7fea9c4e1377e78",
+      "deployed_sha256": "07ab8142b44122802f37b177e2c3cc87ecf73f32310b16d40ad3a85b9d9dfe62"
+    },
+    {
+      "path": "resources/views/torrents/deleted.blade.php",
+      "original_sha256": "55e0b5dcbf4a8dd386ce6a463768a0870e2691bf0c68b1ac0ed44a5bcde68b88",
+      "deployed_sha256": "57f614bb4d3476296e9a6cfdfc2fe387cea02299001de6dfee4f9ca3d90992df"
+    },
+    {
+      "path": "resources/views/torrents/external_upload.blade.php",
+      "original_sha256": "4cdad43c8734f10b6eb44c95264eccd9bee9b3bdc458808fdce34ed6983f3a33",
+      "deployed_sha256": "11c22ee2e7d1e63da284a568ed7baff7ceac3133f56782924a2b94327a2ea824"
+    },
+    {
+      "path": "resources/views/torrents/history.blade.php",
+      "original_sha256": "17376d1977b2eb1aed45d94d18588496d05b4aebb3c45b83c2786622218586b5",
+      "deployed_sha256": "6f51ffc516d5cceec8a17c66e98e34fb84a7346eaa354cb59c7ab39a3f7c534f"
+    },
+    {
+      "path": "resources/views/torrents/partials/adult-results.blade.php",
+      "original_sha256": "a75fdcff3404e8559d348d5d58b2545a15e9c8d269a42560413853849e5c337e",
+      "deployed_sha256": "75fe757959c52e390cd4b3ceca73506a3da6e94c332f86f6119e908a4676ee08"
+    },
+    {
+      "path": "resources/views/torrents/partials/index-results.blade.php",
+      "original_sha256": "6c1f4621167cde366f0f31ee140a2364a77a41d926b6768e61019262882e324c",
+      "deployed_sha256": "f63afca4f7f5487ac67110438efa151c528d9109578186e59709925e9d8c7e7a"
+    },
+    {
+      "path": "resources/views/torrents/partials/index/uploaders.blade.php",
+      "original_sha256": "602f33e4b5e71dbc543cb53b8c3d7e82ff57538eb55906fef1e0fc9487e9ca4e",
+      "deployed_sha256": "30c281a085f06b8e41f3bd436a94a020969e6b752f15286947a240a5b34e52a8"
+    },
+    {
+      "path": "resources/views/torrents/partials/showbar.blade.php",
+      "original_sha256": "349297a583f62b89e4ec257b5e781bd0d8d67e4fcb055d643b475f3282d7a20e",
+      "deployed_sha256": "0b5845fc45c298f72356bb08f6dfdb0f0e2af613eae1c6db0c9d4b79d75b1566"
+    },
+    {
+      "path": "resources/views/torrents/partials/snatched-table.blade.php",
+      "original_sha256": "103324db6d21efdceab1a2657ce2671cedee2b1b85d5dce397179f743ae5475d",
+      "deployed_sha256": "9995dda75b643433bbc41f5d08ff6726c8acd77f864539ea3230c4b0f9fa9f32"
+    },
+    {
+      "path": "resources/views/torrents/peers.blade.php",
+      "original_sha256": "fa4af6145755f0ee56283d743ef86c78a247a8fb313f62777a92c7369398fb85",
+      "deployed_sha256": "2d8fbc8fe63849324be6a10491a2dd86398e4b37a696208d62f40518f758fce1"
+    },
+    {
+      "path": "resources/views/torrents/search-results.blade.php",
+      "original_sha256": "77750e567e044caa2ad05cac700c249a619f05ec8d8f4b766278ae6fc063d40d",
+      "deployed_sha256": "1bfe40008e533290b3474cc7a15148d368d3b9f16270b7bcaea3fff0be7cf836"
+    },
+    {
+      "path": "resources/views/torrents/upload.blade.php",
+      "original_sha256": "53b1c507e2fb727e3fbbacf9d493e949a7ee79287c8b4b8b8791ee70d0be7e59",
+      "deployed_sha256": "ea50b75ddd9762e44e272868f673719530ed83eb48d47c697952aeb719991706"
+    },
+    {
+      "path": "tests/Feature/AnonymousPublishingTest.php",
+      "original_sha256": null,
+      "deployed_sha256": "4b4765e63d38af48fd5fcb2b6e6896af47f6b871adf926d349d1d8dd66284680"
+    },
+    {
+      "path": "tests/Fixtures/views/layouts/app.blade.php",
+      "original_sha256": null,
+      "deployed_sha256": "c54231cc7b374f7370c8e36186df594a699b110b5ea287398963fa1130a4b9cf"
+    }
+  ]
+}

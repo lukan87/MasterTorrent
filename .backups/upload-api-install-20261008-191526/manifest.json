@@ -1,0 +1,457 @@
+{
+  "release": "3dd6b33",
+  "files": {
+    "app/Console/Commands/CleanupMissingTorrents.php": {
+      "existed": true,
+      "installed_sha256": "7eac7105df1db764f52a3a1240c2a30e2df6402f096f0660d2557710c4224c46",
+      "sha256": "fb20fb4e77d36c28553482603802fa9119bfe503a77301f7759e25e1385be2c2",
+      "mode": 436,
+      "uid": 1000,
+      "gid": 33
+    },
+    "app/Console/Commands/DeleteOldTorrents.php": {
+      "existed": true,
+      "installed_sha256": "bd3e22f3a2169f0cc368ca092663b433111dcbfdc62268049eebd3249feb790d",
+      "sha256": "c6f654e8e7b0491dff67d2cf2948baf7e5107bc5bb0ab5830904d6f99b3fbc98",
+      "mode": 436,
+      "uid": 1000,
+      "gid": 33
+    },
+    "app/Console/Commands/UploadApiPreflight.php": {
+      "existed": false,
+      "installed_sha256": "ccf208d29d96bca5379a77c3725e26ed86ffd60b08d8a828bcd630b31b820a5c"
+    },
+    "app/Exceptions/DuplicateTorrentException.php": {
+      "existed": false,
+      "installed_sha256": "4d1bd5b3d20797da866e60b151a44bbf0309c915e7a38d82c6bc23b7f3543af8"
+    },
+    "app/Helpers/TorrentHelper.php": {
+      "existed": true,
+      "installed_sha256": "88e84b684a23f6bb8c057245f2d011d516fb8c5b307d05576689c824d1a77dff",
+      "sha256": "88e84b684a23f6bb8c057245f2d011d516fb8c5b307d05576689c824d1a77dff",
+      "mode": 436,
+      "uid": 1000,
+      "gid": 33
+    },
+    "app/Http/Controllers/Api/V1/TorrentController.php": {
+      "existed": false,
+      "installed_sha256": "34045e2e013812cb2fce6710a4e998d92657d818a7d02d07214b9849541f7fc9"
+    },
+    "app/Http/Controllers/ApiSettingsController.php": {
+      "existed": false,
+      "installed_sha256": "db22516f5651e8468d4c895373981c9f01e2c2dc43965075340f401077e1155e"
+    },
+    "app/Http/Controllers/ProfileController.php": {
+      "existed": true,
+      "installed_sha256": "8f809f2d8118c5dba30130978f1e78433bcda8c6a3330f4b3e2504d72335eb62",
+      "sha256": "77dcb9dd593be82e8ff0f9f055c1bd80eb4e3f526e24c5d037556692384801c2",
+      "mode": 436,
+      "uid": 1000,
+      "gid": 1000
+    },
+    "app/Http/Controllers/RssFeedController.php": {
+      "existed": true,
+      "installed_sha256": "6edc794f028af57573288dd5ee91a6f0f1ab001d2a5679b6356a8e679cb221de",
+      "sha256": "522464fd8a7a29fecdade700e9f49d5e270b3acf6c1532b14c57601d78fc8eac",
+      "mode": 436,
+      "uid": 1000,
+      "gid": 33
+    },
+    "app/Http/Controllers/SeedboxPublicationController.php": {
+      "existed": false,
+      "installed_sha256": "27e4b182d70e5ff246129e0d025012a2999429e35e17cbb39c16e3d5fccca288"
+    },
+    "app/Http/Controllers/TorrentController.php": {
+      "existed": true,
+      "installed_sha256": "01af7109d6c74f1faa87b5adef5e26d11babcf619df14c4349eaff1758c0bc63",
+      "sha256": "cfd29e64a85ded095c56851f4142f70c04aa4bab7d6d5be0abbb0586536cf1c2",
+      "mode": 436,
+      "uid": 1000,
+      "gid": 33
+    },
+    "app/Http/Controllers/UploadHistoryController.php": {
+      "existed": false,
+      "installed_sha256": "33beb94e32bbdce3973584345e91a47d3576623fd7a410c548e9c33cdf96e209"
+    },
+    "app/Http/Middleware/UploadApiAccess.php": {
+      "existed": false,
+      "installed_sha256": "fa602d2208000c52503e6cb5bbaf5e97860e541c8d206426d69e92dc08444b23"
+    },
+    "app/Http/Middleware/UploadApiRequestSize.php": {
+      "existed": false,
+      "installed_sha256": "da23e3207e1f830c426997903e33923a2276db7a458f1e658c3757cfc914120b"
+    },
+    "app/Jobs/CheckSeedboxPublication.php": {
+      "existed": false,
+      "installed_sha256": "84caa70df46f70ae28a1ac4e2cda264fca6895c992c6e2f794f2e956f20a0a3c"
+    },
+    "app/Jobs/NotifyTorrentUpload.php": {
+      "existed": false,
+      "installed_sha256": "5e5af9044f26e406f3a749066055ee93079af2daee944c7faa01a0e6ac2d5aa8"
+    },
+    "app/Jobs/ProcessUploadScreenshot.php": {
+      "existed": false,
+      "installed_sha256": "9718ed796a9ca2932865b3f0e9a69492ecce94a00e15834bd8fa7fbc1ee2078d"
+    },
+    "app/Jobs/PublishSeedboxTorrent.php": {
+      "existed": false,
+      "installed_sha256": "cb0ff1d757a99234d60ba14eb6f74c3c39c5c25b27691746db1909cbdcc20912"
+    },
+    "app/Models/SeedboxPublication.php": {
+      "existed": false,
+      "installed_sha256": "6254bd53fcbb3b8bbd678c7e3fa66da1eec9077702a824839d1b88d8bcba68d8"
+    },
+    "app/Models/Torrent.php": {
+      "existed": true,
+      "installed_sha256": "8f466e59b1cad2db4e5fff0a50044957d80b693f89d7a9492a9c438592b35d5e",
+      "sha256": "725e2ee6f35fa329d83bfa20ca205113134b1e36bf978158c55c77c11bdb8e87",
+      "mode": 436,
+      "uid": 1000,
+      "gid": 33
+    },
+    "app/Models/UploadAttempt.php": {
+      "existed": false,
+      "installed_sha256": "58b4e9c1c0f0d78e35b931fec13b02e2ba2cad5d77f0f589f0155405f1c1edc3"
+    },
+    "app/Models/User.php": {
+      "existed": true,
+      "installed_sha256": "1c37b77581ef75690eac099ed2640b97be57fe12bdafe19b8528c557924bef88",
+      "sha256": "32f33e6de3ff004143ee25851305589f0b060fa15903fad47fcce74d878fcf8f",
+      "mode": 436,
+      "uid": 1000,
+      "gid": 1000
+    },
+    "app/Providers/AppServiceProvider.php": {
+      "existed": true,
+      "installed_sha256": "a30ec9274eceb2fe3a732f3effac12b6f18ec84a26483be7a243f151ff78e221",
+      "sha256": "be22958ac7aadf989deb82a4123b23756adfe34b6149c1018ecc7419a66554f7",
+      "mode": 436,
+      "uid": 1000,
+      "gid": 33
+    },
+    "app/Services/AutoUploadService.php": {
+      "existed": true,
+      "installed_sha256": "96c3f9352d01df1165ff9c6905406a21a9af8420f9e83a3aa6ad63a8acc2bfb9",
+      "sha256": "c11b19100403e399607600e79f2e635abeb7d83c128b2887b40485c4ddcb0743",
+      "mode": 436,
+      "uid": 1000,
+      "gid": 33
+    },
+    "app/Services/SeedboxPublishingClient.php": {
+      "existed": false,
+      "installed_sha256": "694cd10e19beb8fc61a69a38d7395e18a6781b6e8c3f8b7adbbeda2d49bdc121"
+    },
+    "app/Services/SeedboxPublishingClients.php": {
+      "existed": false,
+      "installed_sha256": "480734c0424121f454a1456310473b3a0e4076c62de432fa01b70f0197c6786e"
+    },
+    "app/Services/SeedboxPublishingReadiness.php": {
+      "existed": false,
+      "installed_sha256": "b8da74c220d7b30d14a51a5337d2372704f4aa9cf62880882072c97bd73bcac8"
+    },
+    "app/Services/TMDBService.php": {
+      "existed": true,
+      "installed_sha256": "e1f29169adfc41d3c253acf0a63efee9cc84409dace623a179ed6bede5ac2db5",
+      "sha256": "548ce60c4225af61558c635241654c2558020b1b559d70da0b23a4ee4d2e2498",
+      "mode": 436,
+      "uid": 1000,
+      "gid": 33
+    },
+    "app/Services/Torrent/ExternalTorrentUploadService.php": {
+      "existed": true,
+      "installed_sha256": "486f79fd9fde4db8da8d048855d40f9fde374744d1351b62e28e98630bf6ef84",
+      "sha256": "286910f30d835a34534a0165037485dfb1d4b851539da97473fa5fd7900802e4",
+      "mode": 436,
+      "uid": 1000,
+      "gid": 1000
+    },
+    "app/Services/Torrent/TorrentAnonymity.php": {
+      "existed": true,
+      "installed_sha256": "0b0276446136ba70d7b1d7b929b9d7a4c361b1d1eef5709a6086447dcd6789c1",
+      "sha256": "0b0276446136ba70d7b1d7b929b9d7a4c361b1d1eef5709a6086447dcd6789c1",
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000
+    },
+    "app/Services/Torrent/TorrentFileService.php": {
+      "existed": true,
+      "installed_sha256": "90b602cf8437f8759efffb584e8fccb2e76953ccd0af8dd43a2c8f08ffc41618",
+      "sha256": "2077f37a9d1490df4dd195b62b4bbee9c2b51821549e738f525caa3d90d7f27b",
+      "mode": 436,
+      "uid": 1000,
+      "gid": 33
+    },
+    "app/Services/Torrent/TorrentImageService.php": {
+      "existed": true,
+      "installed_sha256": "a438d0a290910f21306b55b39590814542ea4a4619e0737b1311962572562a37",
+      "sha256": "19b522e2ce5ad227371e7e6d8121d48dd237ff0e5b4ed6d45c5cd32ec0ef86ff",
+      "mode": 436,
+      "uid": 1000,
+      "gid": 33
+    },
+    "app/Services/Torrent/TorrentMetadataService.php": {
+      "existed": true,
+      "installed_sha256": "e3afd19b27c925f6cc291d880cad9166d555d854b6a47ffc4d3f85798f892202",
+      "sha256": "5d304a84f7c15ffa188e57c2c4cac67c89a7f9ef0b6e06dfe90ba76af77269d6",
+      "mode": 436,
+      "uid": 1000,
+      "gid": 33
+    },
+    "app/Services/Torrent/TorrentParser.php": {
+      "existed": false,
+      "installed_sha256": "423a18617ee1980f4e8ea4c1612670b7df46753a0d3d496c2a03b1089f1bf3af"
+    },
+    "app/Services/Torrent/TorrentSlugService.php": {
+      "existed": false,
+      "installed_sha256": "d4c8e226d7d2c5cc04e4d986027ef34fc9dd2d8522d10f4398b3db74505fe9a4"
+    },
+    "app/Services/Torrent/TorrentUploadService.php": {
+      "existed": true,
+      "installed_sha256": "44ba3382ad69052334336fcdfb7feff0ee91def350972ef4d9d992b40c24304e",
+      "sha256": "2f22a2ded1d173a569e209fc327f07a99c4fc00469293da29649e1d29b551795",
+      "mode": 436,
+      "uid": 1000,
+      "gid": 33
+    },
+    "app/Services/Torrent/UploadPermission.php": {
+      "existed": false,
+      "installed_sha256": "ebb9a91ce9255746d9233611bd4e390ec29f406c81818e53485e19253e67d910"
+    },
+    "app/Services/Torrent/UploadTelemetryRedactor.php": {
+      "existed": false,
+      "installed_sha256": "5ba4ad4a8333d5babdea9a18131e6098fb1e109124878608ea5834d56bafd4f1"
+    },
+    "app/Services/Torrent/UploadValidator.php": {
+      "existed": false,
+      "installed_sha256": "e514b02729f1e4db5dcd71b8a1b7b400df5ef085227b64e1f64ae7f7998261d1"
+    },
+    "app/Services/TorrentDownloadService.php": {
+      "existed": true,
+      "installed_sha256": "6a4b33cfd520023a06ef5fc9da6843f089e095a90c888fbfce62e24d9a3b7cf4",
+      "sha256": "c6e65d97956522ef2e03d0ae1d4514a83b7b66690892b08f8c386371fa11ad28",
+      "mode": 436,
+      "uid": 1000,
+      "gid": 33
+    },
+    "bootstrap/app.php": {
+      "existed": true,
+      "installed_sha256": "de1ceaacd5b284e09ae006ee6c465ae485468698d5ccb3c0eaee5f4c904ba024",
+      "sha256": "4268dd6ffeb0a9dfb593d0c603f112c1c90f5d90fae27f8d2a1214dd03699ef2",
+      "mode": 436,
+      "uid": 1000,
+      "gid": 33
+    },
+    "composer.json": {
+      "existed": true,
+      "installed_sha256": "b9d0d4655ee2267c08cafe79fb92176494673ecaa9c256cc4716c427ba3ae5f0",
+      "sha256": "07efb49b13c188d9bc0ad68cd6cd2be116b9f2cf7bf21b03b3267b890a5f1d22",
+      "mode": 436,
+      "uid": 1000,
+      "gid": 33
+    },
+    "composer.lock": {
+      "existed": true,
+      "installed_sha256": "6ecfdcd832258c976735a115da648b53b078e0c4fb3305557d8ecb282645641e",
+      "sha256": "b542f006efa526f0971594eaeb7f6b1cc57d90559ffc399d0a1deadb673ffec1",
+      "mode": 436,
+      "uid": 1000,
+      "gid": 33
+    },
+    "config/sanctum.php": {
+      "existed": false,
+      "installed_sha256": "f896b0e22f05066459c9fe12f88df9203bbcf7936851bc2269f5fbd423d6848c"
+    },
+    "config/upload-api.php": {
+      "existed": false,
+      "installed_sha256": "b1d05e568c3b5d86ef9280490ec173235a4ead59c65c7a275e6c4ed227493178"
+    },
+    "database/migrations/2026_10_08_100000_create_personal_access_tokens_table.php": {
+      "existed": false,
+      "installed_sha256": "c81ecde85ea5072188c468dcaf79776728b6eb8f684d63fc0d88a4908484ca75"
+    },
+    "database/migrations/2026_10_08_100100_add_upload_metadata_to_torrents.php": {
+      "existed": false,
+      "installed_sha256": "f0f5773299b669c59fac713a746bd9eaa6dde997b2fe42ba7ececb6d67231029"
+    },
+    "database/migrations/2026_10_08_100200_create_seedbox_publications_table.php": {
+      "existed": false,
+      "installed_sha256": "d8f41ef00f7df379118cb5a91ed1c1ae7e9aa4d8a8186ab68303352a8b870296"
+    },
+    "database/migrations/2026_10_08_100300_create_upload_attempts_table.php": {
+      "existed": false,
+      "installed_sha256": "11b49f64b436e88f9ea7284769d6d655b27cd746efb545d9d9624c9a20300cfb"
+    },
+    "database/migrations/2026_10_08_100400_add_anonymous_to_users_table.php": {
+      "existed": true,
+      "installed_sha256": "c1856d0448385218b517de36bbdda9031fc8989192965b2a88dfb93841752702",
+      "sha256": "c1856d0448385218b517de36bbdda9031fc8989192965b2a88dfb93841752702",
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000
+    },
+    "docs/anonymous-publishing.md": {
+      "existed": true,
+      "installed_sha256": "1b4b3a27b2b190cba83bc0c3eb409958e4c0e1f16a39ee83465b15bfae02b934",
+      "sha256": "1b4b3a27b2b190cba83bc0c3eb409958e4c0e1f16a39ee83465b15bfae02b934",
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000
+    },
+    "docs/upload-api-deployment.md": {
+      "existed": false,
+      "installed_sha256": "9cadf6f29959894acbbe0014e115f4b54622fc29f0f29e4a8f168504f0bd95b2"
+    },
+    "docs/upload-api-review.md": {
+      "existed": false,
+      "installed_sha256": "adaedbe660b4c87c6c5a396ecd983fc54c1f31bfc1cb2f4f1bd4952a1a751737"
+    },
+    "docs/upload-api.md": {
+      "existed": false,
+      "installed_sha256": "67078c79b4c8493658a78df3a1669f7affac0e07b406cde5ebdd30dbf36e58a9"
+    },
+    "public/js/upload-api-settings.js": {
+      "existed": false,
+      "installed_sha256": "e5d73807abdaed4b88b563c941431322e22b33626d6fd77e5290b7c370fa1546"
+    },
+    "resources/views/components/snatch-card.blade.php": {
+      "existed": true,
+      "installed_sha256": "3261b539c8d1eb879d40541798d9b9f506648c4267c93d92a2fd3d03e6517abc",
+      "sha256": "3261b539c8d1eb879d40541798d9b9f506648c4267c93d92a2fd3d03e6517abc",
+      "mode": 436,
+      "uid": 1000,
+      "gid": 33
+    },
+    "resources/views/profile/api/documentation.blade.php": {
+      "existed": false,
+      "installed_sha256": "ccc15139cb7811b5014bf9e9043ce14b3c0e7677c65e36b7df220a6516eb631d"
+    },
+    "resources/views/profile/api/history.blade.php": {
+      "existed": false,
+      "installed_sha256": "5b5dac6f3079420c757b9e59ae959c0879b17887a96570663bd53e0b0d22b7e3"
+    },
+    "resources/views/profile/api/index.blade.php": {
+      "existed": false,
+      "installed_sha256": "86f2e5670f2a9c67fe2c1c7b23bd63d7f701888ca1f571437772a6a5e59662bb"
+    },
+    "resources/views/profile/api/publishing.blade.php": {
+      "existed": false,
+      "installed_sha256": "7f02a9e7e44cd4f91519eff457444b9954213badc7d568428605a7ee78d018c2"
+    },
+    "resources/views/profile/edit.blade.php": {
+      "existed": true,
+      "installed_sha256": "1cd6680323ebaa361f4a05547a47f58ea07df6f2eafba8d7c94d5439f52b3727",
+      "sha256": "759c6f30cb4dd3a13bff080462bba0ab0be95c6301be16fa254afd09ff942bf0",
+      "mode": 436,
+      "uid": 1000,
+      "gid": 1000
+    },
+    "resources/views/seedboxes/torrents.blade.php": {
+      "existed": true,
+      "installed_sha256": "fe0b053522968a795614862d2a480bbd68c1258b2df4fdcd618c837a82466aa4",
+      "sha256": "859e82b9412473b75ba0276d534fb7a1e1cb8d3a8dafb4914c58f4eacedb283f",
+      "mode": 436,
+      "uid": 1000,
+      "gid": 1000
+    },
+    "resources/views/torrents/deleted.blade.php": {
+      "existed": true,
+      "installed_sha256": "57f614bb4d3476296e9a6cfdfc2fe387cea02299001de6dfee4f9ca3d90992df",
+      "sha256": "57f614bb4d3476296e9a6cfdfc2fe387cea02299001de6dfee4f9ca3d90992df",
+      "mode": 436,
+      "uid": 1000,
+      "gid": 1000
+    },
+    "resources/views/torrents/external_upload.blade.php": {
+      "existed": true,
+      "installed_sha256": "11c22ee2e7d1e63da284a568ed7baff7ceac3133f56782924a2b94327a2ea824",
+      "sha256": "11c22ee2e7d1e63da284a568ed7baff7ceac3133f56782924a2b94327a2ea824",
+      "mode": 436,
+      "uid": 1000,
+      "gid": 1000
+    },
+    "resources/views/torrents/history.blade.php": {
+      "existed": true,
+      "installed_sha256": "6f51ffc516d5cceec8a17c66e98e34fb84a7346eaa354cb59c7ab39a3f7c534f",
+      "sha256": "6f51ffc516d5cceec8a17c66e98e34fb84a7346eaa354cb59c7ab39a3f7c534f",
+      "mode": 436,
+      "uid": 1000,
+      "gid": 1000
+    },
+    "resources/views/torrents/partials/adult-results.blade.php": {
+      "existed": true,
+      "installed_sha256": "75fe757959c52e390cd4b3ceca73506a3da6e94c332f86f6119e908a4676ee08",
+      "sha256": "75fe757959c52e390cd4b3ceca73506a3da6e94c332f86f6119e908a4676ee08",
+      "mode": 436,
+      "uid": 1000,
+      "gid": 1000
+    },
+    "resources/views/torrents/partials/index-results.blade.php": {
+      "existed": true,
+      "installed_sha256": "5be40196d75011665dd1af6f6695b5f605550f33fcb64c27c1869c105e7dc385",
+      "sha256": "5be40196d75011665dd1af6f6695b5f605550f33fcb64c27c1869c105e7dc385",
+      "mode": 436,
+      "uid": 1000,
+      "gid": 1000
+    },
+    "resources/views/torrents/partials/index/uploaders.blade.php": {
+      "existed": true,
+      "installed_sha256": "30c281a085f06b8e41f3bd436a94a020969e6b752f15286947a240a5b34e52a8",
+      "sha256": "30c281a085f06b8e41f3bd436a94a020969e6b752f15286947a240a5b34e52a8",
+      "mode": 436,
+      "uid": 1000,
+      "gid": 33
+    },
+    "resources/views/torrents/partials/showbar.blade.php": {
+      "existed": true,
+      "installed_sha256": "0b5845fc45c298f72356bb08f6dfdb0f0e2af613eae1c6db0c9d4b79d75b1566",
+      "sha256": "0b5845fc45c298f72356bb08f6dfdb0f0e2af613eae1c6db0c9d4b79d75b1566",
+      "mode": 436,
+      "uid": 1000,
+      "gid": 1000
+    },
+    "resources/views/torrents/partials/snatched-table.blade.php": {
+      "existed": true,
+      "installed_sha256": "9995dda75b643433bbc41f5d08ff6726c8acd77f864539ea3230c4b0f9fa9f32",
+      "sha256": "9995dda75b643433bbc41f5d08ff6726c8acd77f864539ea3230c4b0f9fa9f32",
+      "mode": 436,
+      "uid": 1000,
+      "gid": 1000
+    },
+    "resources/views/torrents/peers.blade.php": {
+      "existed": true,
+      "installed_sha256": "2d8fbc8fe63849324be6a10491a2dd86398e4b37a696208d62f40518f758fce1",
+      "sha256": "2d8fbc8fe63849324be6a10491a2dd86398e4b37a696208d62f40518f758fce1",
+      "mode": 436,
+      "uid": 1000,
+      "gid": 1000
+    },
+    "resources/views/torrents/search-results.blade.php": {
+      "existed": true,
+      "installed_sha256": "1bfe40008e533290b3474cc7a15148d368d3b9f16270b7bcaea3fff0be7cf836",
+      "sha256": "1bfe40008e533290b3474cc7a15148d368d3b9f16270b7bcaea3fff0be7cf836",
+      "mode": 436,
+      "uid": 1000,
+      "gid": 33
+    },
+    "resources/views/torrents/upload.blade.php": {
+      "existed": true,
+      "installed_sha256": "ea50b75ddd9762e44e272868f673719530ed83eb48d47c697952aeb719991706",
+      "sha256": "ea50b75ddd9762e44e272868f673719530ed83eb48d47c697952aeb719991706",
+      "mode": 436,
+      "uid": 1000,
+      "gid": 1000
+    },
+    "routes/api.php": {
+      "existed": false,
+      "installed_sha256": "e920653ff7d90f58cb39d8c6d482669998d81e414b2bbd8f36a9dec9d2006749"
+    },
+    "routes/web.php": {
+      "existed": true,
+      "installed_sha256": "0cd76b017dd763e5bd0edd0197b496e89ff8dfff0d059b542ee49fed19acb64b",
+      "sha256": "d2ca09bbdd6eff5164aace4f331b7bfe155391e4357ea85bb64f0d75d052acdc",
+      "mode": 436,
+      "uid": 1000,
+      "gid": 1000
+    }
+  }
+}

@@ -11,6 +11,7 @@ class Series extends Model
     use HasFactory;
 
     protected $fillable = [
+        'online_enabled',
         'name',
         'tmdb_id',
         'imdb_id',
@@ -34,6 +35,7 @@ class Series extends Model
     ];
 
     protected $casts = [
+        'online_enabled' => 'boolean',
         'genres'         => 'array',
         'first_air_date' => 'datetime',
         'vote_average'   => 'float',

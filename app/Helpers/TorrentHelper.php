@@ -64,9 +64,9 @@ class TorrentHelper
         $query
             ->select([
                 'torrents.id', 'torrents.name', 'torrents.slug', 'torrents.poster',
-                'torrents.category_id', 'torrents.owner', 'torrents.bumped_by',
+                'torrents.category_id', 'torrents.owner', 'torrents.anon', 'torrents.bumped_by',
                 'torrents.size', 'torrents.seeders', 'torrents.leechers', 'torrents.times_completed',
-                'torrents.sticky', 'torrents.created_at', 'torrents.bumped_at', 'torrents.deleted_at',
+                'torrents.sticky', 'torrents.approved', 'torrents.created_at', 'torrents.bumped_at', 'torrents.deleted_at',
                 'torrents.free', 'torrents.double', 'torrents.recommended', 'torrents.seedbox', 'torrents.external',
             ])
             ->with([
@@ -98,6 +98,7 @@ class TorrentHelper
             );
 
         self::applyBrowseRelations($query);
+        $query->addSelect(['torrents.tmdbid', 'torrents.tmdb_type', 'torrents.imdbid']);
 
         self::applyKeywordFilter(
             $query,
@@ -367,9 +368,11 @@ class TorrentHelper
         string $sortDirection
     ): void {
         /*
-         * Sticky torrents always appear first.
+         * Adult browse retains its pinned rows; the main index uses featured cards.
          */
-        $query->orderByDesc('sticky');
+        if ($request->routeIs('torrents.adult')) {
+            $query->orderByDesc('sticky');
+        }
 
         /*
          * User-selected sorting.

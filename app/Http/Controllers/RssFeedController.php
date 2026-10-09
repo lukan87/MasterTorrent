@@ -100,7 +100,7 @@ public function downloadrss(Request $request, $fileName, $passkey)
     // Find the torrent by file_name
     $torrent = Torrent::where('file_name', $fileName)->firstOrFail();
 
-    $path = public_path('files/torrents/' . $torrent->file_name);
+    $path = app(\App\Services\Torrent\TorrentFileService::class)->path($torrent->file_name);
 
     if (!file_exists($path)) {
         return response('Torrent file not found', 404)

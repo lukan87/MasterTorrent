@@ -422,7 +422,7 @@
                     {{-- GENRES --}}
                     <div class="premium-genres">
 
-                        @foreach($torrent->genres as $genre)
+                        @forelse($torrent->genres as $genre)
 
                             <a href="{{ route('torrents.index', ['genre' => $genre->id]) }}"
                                class="premium-genre-tag">
@@ -431,7 +431,11 @@
 
                             </a>
 
-                        @endforeach
+                        @empty
+                            @foreach($display['genres'] ?? [] as $genreName)
+                                <span class="premium-genre-tag">{{ $genreName }}</span>
+                            @endforeach
+                        @endforelse
 
                     </div>
 

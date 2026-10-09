@@ -1,0 +1,1 @@
+Restore point before Upload API installation. Release 3dd6b33. Original live files and vendor are preserved. Do not drop API tables or restore old database automatically. After any new upload retain private torrent reader compatibility and anonymous identity masking; prefer a forward fix. Coordinate workers before rollback. .env and existing content were not changed.

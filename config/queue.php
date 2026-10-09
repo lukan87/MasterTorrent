@@ -63,6 +63,16 @@ return [
             'after_commit' => false,
         ],
 
+        // Isolate long-running publishing from existing tracker/email workers.
+        'seedbox-publishing' => [
+            'driver' => 'redis',
+            'connection' => env('REDIS_QUEUE_CONNECTION', 'default'),
+            'queue' => 'seedbox-publishing',
+            'retry_after' => 360,
+            'block_for' => 5,
+            'after_commit' => true,
+        ],
+
         'redis' => [
             'driver' => 'redis',
             'connection' => env('REDIS_QUEUE_CONNECTION', 'default'),

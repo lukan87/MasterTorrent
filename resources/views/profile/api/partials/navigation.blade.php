@@ -1,0 +1,8 @@
+<nav class="api-settings-nav mb-4" aria-label="API settings navigation">
+    <a class="btn btn-outline-info {{ request()->routeIs('profile.api.index', 'profile.api.store', 'profile.api.reveal') ? 'active' : '' }}" href="{{ route('profile.api.index') }}" @if(request()->routeIs('profile.api.index', 'profile.api.store', 'profile.api.reveal')) aria-current="page" @endif><i class="bi bi-key me-1" aria-hidden="true"></i> Tokens &amp; settings</a>
+    <a class="btn btn-outline-info {{ request()->routeIs('profile.api.documentation') ? 'active' : '' }}" href="{{ route('profile.api.documentation') }}" @if(request()->routeIs('profile.api.documentation')) aria-current="page" @endif><i class="bi bi-book me-1" aria-hidden="true"></i> How it works</a>
+    <a class="btn btn-outline-info {{ request()->routeIs('profile.api.history', 'admin.upload-history') ? 'active' : '' }}" href="{{ route('profile.api.history') }}" @if(request()->routeIs('profile.api.history', 'admin.upload-history')) aria-current="page" @endif><i class="bi bi-clock-history me-1" aria-hidden="true"></i> Upload history</a>
+    @if(app(\App\Services\Torrent\UploadPermission::class)->canUpload(auth()->user()))
+    <a class="btn btn-outline-info {{ request()->routeIs('profile.api.publishing', 'profile.api.publish', 'profile.api.publish-retry') ? 'active' : '' }}" href="{{ route('profile.api.publishing') }}" @if(request()->routeIs('profile.api.publishing', 'profile.api.publish', 'profile.api.publish-retry')) aria-current="page" @endif><i class="bi bi-hdd-network me-1" aria-hidden="true"></i> Publish from seedbox</a>
+    @endif
+</nav>

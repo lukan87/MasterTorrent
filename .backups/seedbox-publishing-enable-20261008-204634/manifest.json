@@ -1,0 +1,34 @@
+{
+  "config/upload-api.php": {
+    "before_sha256": "b1d05e568c3b5d86ef9280490ec173235a4ead59c65c7a275e6c4ed227493178",
+    "installed_sha256": "76d16ae70505879b483d202738e45ccec49355a91e1259bf77ad2b1484289597"
+  },
+  "config/queue.php": {
+    "before_sha256": "6a3bb16ad77a8fcadc4f07f9ffeb07c8ce022b368dce3f8feec43278b3757c3b",
+    "installed_sha256": "c484ee3c5cf549b8b41570eb4af1778bf96d10cb04a3525c18580f95ee3f5710"
+  },
+  "app/Services/SeedboxPublishingReadiness.php": {
+    "before_sha256": "b8da74c220d7b30d14a51a5337d2372704f4aa9cf62880882072c97bd73bcac8",
+    "installed_sha256": "1c89bdc6f356ea80a376e196820e64e142dab8ce809744e5198318c40ebf9601"
+  },
+  "app/Jobs/PublishSeedboxTorrent.php": {
+    "before_sha256": "cb0ff1d757a99234d60ba14eb6f74c3c39c5c25b27691746db1909cbdcc20912",
+    "installed_sha256": "1dfce9fcb85d4ded64db00c284b8f22817542cb6048b6db225d6fecc264b5dce"
+  },
+  "app/Jobs/CheckSeedboxPublication.php": {
+    "before_sha256": "84caa70df46f70ae28a1ac4e2cda264fca6895c992c6e2f794f2e956f20a0a3c",
+    "installed_sha256": "824296fc5c04569b372a6bb256d02d3d2bbb19cf238f0e2805c844159a153b12"
+  },
+  ".env": {
+    "before_sha256": "776bc9c0bb2ed70d792bd2e406238332e22ad5f70875cd31492a3b20756d20ab",
+    "installed_sha256": "9536d0c234c81a52a0f98fb4527a5ca7681e8890c3a699320939cde3d58c0308"
+  },
+  "docs/upload-api.md": {
+    "before_sha256": "5fbfa359eb9852b91040a7cdbf0818da1b4490f6d95c8c22189c4dbec3c45c6f",
+    "installed_sha256": "2b07415806dea2b979951b9e183d87d8d5a03ca8af02941a1aba8f59ef316975"
+  },
+  "docs/upload-api-deployment.md": {
+    "before_sha256": "903bea0295e3b2b1403dbcd5d49db30fc56c056dbae92c4e3fef2ebc4aa2b0ef",
+    "installed_sha256": "7877f08b897f859495bf9bd180267bf684c82c19de57f29c4f72b3f895d9de56"
+  }
+}

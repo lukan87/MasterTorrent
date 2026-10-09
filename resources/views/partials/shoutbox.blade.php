@@ -30,7 +30,9 @@
 
     </div>
 
-    @include('partials.onlineusers')
+    <div data-home-widget="online" data-widget-url="{{ route('home') }}">
+        @include('partials.onlineusers')
+    </div>
 
     @if(!auth()->user()->chatblock)
     <div class="shoutbox-tools mb-3">

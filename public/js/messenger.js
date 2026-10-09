@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const chat = document.getElementById('chatBody');
-    if (!chat) return;
+    const root = document.querySelector('[data-messenger]');
+    if (!root) return;
     const dialog = document.getElementById('messageDialog');
     const form = document.getElementById('messageActionForm');
     const editor = document.getElementById('messageEditBody');
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
         clearTimeout(noticeTimer);
         noticeTimer = setTimeout(() => { notice.hidden = true; }, 4500);
     };
-    chat.addEventListener('click', event => {
+    root.addEventListener('click', event => {
         const button = event.target.closest('.edit-msg, .delete-msg');
         if (!button) return;
         const bubble = button.closest('.ms-msg-bubble');
@@ -62,8 +62,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     let polling = false;
     async function refreshReceipts() {
-        if (polling || document.hidden || dialog.open) return;
-        const bubbles = [...chat.querySelectorAll('.ms-msg-bubble[data-id]')];
+        const chat = document.getElementById('chatBody');
+        if (!chat || polling || document.hidden || dialog.open) return;
+        const bubbles = [...chat.querySelectorAll('.ms-msg-bubble[data-id]')].slice(-200);
         if (!bubbles.length) return;
         const url = new URL(chat.dataset.receiptsUrl, window.location.origin);
         bubbles.forEach(bubble => url.searchParams.append('ids[]', bubble.dataset.id));
@@ -72,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(url, { headers: { Accept: 'application/json' }, cache: 'no-store' });
             if (!response.ok) return;
             const data = await response.json();
+            if (chat !== document.getElementById('chatBody')) return;
             const statuses = new Map(data.messages.map(message => [String(message.id), message.is_read]));
             bubbles.forEach(bubble => {
                 if (!statuses.has(bubble.dataset.id)) { bubble.closest('.ms-msg-row').remove(); return; }
@@ -88,5 +90,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     setInterval(refreshReceipts, 10000);
     document.addEventListener('visibilitychange', refreshReceipts);
+    document.addEventListener('messenger:updated', refreshReceipts);
     refreshReceipts();
 });

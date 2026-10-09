@@ -9,22 +9,6 @@
     </li>
 </ul>
 
-{{-- Live torrent search --}}
-<form class="navbar-search-form d-none d-lg-flex ms-lg-3 me-3" action="{{ route('torrents.index') }}" method="GET" role="search">
-    <div class="input-group input-group-sm header-search">
-        <span class="input-group-text" aria-hidden="true">
-            <i class="bi bi-search"></i>
-        </span>
-        <input
-            type="text"
-            name="keyword"
-            class="form-control"
-            placeholder="Search torrents…"
-            value="{{ request('keyword') }}"
-            aria-label="Search torrents">
-    </div>
-</form>
-
 {{-- Library (desktop lg+: icon + text) --}}
 <ul class="navbar-nav d-none d-lg-flex flex-row ms-2">
     <li class="nav-item">
@@ -126,11 +110,7 @@
     <button type="button" class="nav-link navbar-icon-button position-relative" data-bs-toggle="dropdown" aria-label="Notifications" aria-expanded="false">
         <i class="bi bi-bell fs-4" aria-hidden="true"></i>
 
-        @if(auth()->user()->unreadNotifications->count())
-            <span class="nav-badge badge bg-danger">
-                {{ auth()->user()->unreadNotifications->count() }}
-            </span>
-        @endif
+        <span data-notification-count class="nav-badge badge bg-danger" @if(!auth()->user()->unreadNotifications->count()) hidden @endif>{{ auth()->user()->unreadNotifications->count() }}</span>
     </button>
 
     <ul class="dropdown-menu dropdown-menu-end navbar-activity-dropdown theme-surface theme-text p-2 shadow-lg">
@@ -284,7 +264,7 @@
     <button type="button" class="nav-link navbar-icon-button position-relative" data-bs-toggle="dropdown" aria-label="Messages" aria-expanded="false">
         <i class="bi bi-envelope fs-4" aria-hidden="true"></i>
 
-        <span class="nav-badge badge {{ $unreadMessagesCount > 0 ? 'bg-danger' : 'bg-success' }}">
+        <span data-message-count class="nav-badge badge {{ $unreadMessagesCount > 0 ? 'bg-danger' : 'bg-success' }}">
             {{ $unreadMessagesCount }}
         </span>
     </button>
@@ -497,11 +477,11 @@
     <div class="offcanvas-body p-0">
         <a href="{{ route('library.movies.index') }}" class="library-link">
             <i class="bi bi-film"></i>
-            <span>Online Movies</span>
+            <span>Movies</span>
         </a>
         <a href="{{ route('library.series.index') }}" class="library-link">
             <i class="bi bi-tv"></i>
-            <span>Online Series</span>
+            <span>Series</span>
         </a>
         <a href="{{ route('tv-calendar.index') }}" class="library-link">
             <i class="bi bi-calendar3"></i>

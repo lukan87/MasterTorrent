@@ -1,0 +1,1 @@
+Restore point before password-protected API token viewing. The additive api_token_secrets table stores Laravel-encrypted reveal copies only. Preserve the existing application encryption key. No existing token is modified or recoverable. Source rollback can leave this table intact; do not drop it automatically.

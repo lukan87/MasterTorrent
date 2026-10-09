@@ -8,8 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\ImageManager;
 
 class TorrentImageService
 {
@@ -17,7 +17,7 @@ class TorrentImageService
 
     public function __construct()
     {
-        $this->images = new ImageManager(new Driver());
+        $this->images = new ImageManager(new Driver);
     }
 
     public function upload(Torrent $torrent, Request $request): void
@@ -28,7 +28,9 @@ class TorrentImageService
     /** Upload before creating the torrent, so storage failures can be retried safely. */
     public function prepare(Request $request): array
     {
-        if (! $request->hasFile('images')) return [];
+        if (! $request->hasFile('images')) {
+            return [];
+        }
 
         $request->validate([
             'images' => 'array|max:10',
@@ -41,6 +43,33 @@ class TorrentImageService
             }
         } catch (\Throwable $exception) {
             TorrentImage::deleteLocalFiles($paths);
+            throw $exception;
+        }
+
+        return $paths;
+    }
+
+    /** Stage API screenshots privately so encoding does not block the upload response. */
+    public function stageForBackground(Request $request): array
+    {
+        if (! $request->hasFile('images')) {
+            return [];
+        }
+        $request->validate([
+            'images' => 'array|max:10',
+            'images.*' => 'required|image|mimes:jpg,jpeg,png,webp|max:10240|dimensions:max_width=4096,max_height=2160',
+        ]);
+        $paths = [];
+        try {
+            foreach ($request->file('images') as $image) {
+                $path = 'upload_images/'.Str::uuid().'.'.$image->extension();
+                $paths[] = $path;
+                if (! Storage::disk('local')->putFileAs('upload_images', $image, basename($path))) {
+                    throw new \RuntimeException('Screenshot staging failed.');
+                }
+            }
+        } catch (\Throwable $exception) {
+            Storage::disk('local')->delete($paths);
             throw $exception;
         }
 
@@ -93,7 +122,9 @@ class TorrentImageService
     {
         foreach ($imageIds as $id) {
             $image = $torrent->images()->where('id', $id)->first();
-            if (! $image) continue;
+            if (! $image) {
+                continue;
+            }
             TorrentImage::deleteLocalFiles([$image->path, $image->fallback]);
             $image->delete();
         }
